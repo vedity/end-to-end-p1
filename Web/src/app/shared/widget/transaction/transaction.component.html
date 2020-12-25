@@ -1,0 +1,23 @@
+
+
+<div class="table-responsive">
+  <table id="basic-datatable" class="table table-bordered dt-responsive nowrap datatables no-footer dtr-inline" >
+    <thead class="thead-light">
+      <tr>
+        <th *ngFor="let key of finaldisplaykey">{{key}}</th>
+      </tr>
+    </thead>
+    <tbody class="tbody">
+      <tr *ngFor="let data of finaldisplayvalue">
+        <td *ngFor="let i of data">
+          {{i}}
+        </td>
+        
+      </tr>
+    </tbody>
+  </table>
+
+  
+</div>
+<!-- end table -->
+

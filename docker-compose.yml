@@ -1,0 +1,48 @@
+version: '3'
+services:
+  web:
+    build: ./MS
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes: 
+      - "./MS/mlaas:/mlaas" 
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgresql
+
+  angular:
+    build: ./Web
+    ports:
+      - "4200:4200"
+    volumes: 
+      - "/app/node_modules"
+      - "./Web:/app"
+    depends_on:
+      - web
+     
+  postgresql:
+    build: ./DB
+    hostname: postgresql
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+volumes:
+  postgres_data:
+  app:
+  
+
+
+networks:
+  backend:
+    driver: "bridge"
+  
+    
+ 
+
+
+  
+    
