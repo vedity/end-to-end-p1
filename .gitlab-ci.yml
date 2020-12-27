@@ -1,22 +1,22 @@
 stages:
-  - automation_tests
+#  - automation_tests
   - build
 
-Automation Testing:
-  image: tmaier/docker-compose:latest
-  stage: automation_tests
-  services:
-    - docker:dind
-  before_script:
-    - docker-compose build
-    - docker-compose up &
-    - sleep 20s
-  script:
-    #- docker ps
-    #- docker exec mlaas-phase-1_web_1 sh -c "python -m unittest tests"
-    - echo "Testing Yet to Be Done"
-  only:
-    - development
+# Automation Testing:
+#   image: tmaier/docker-compose:latest
+#   stage: automation_tests
+#   services:
+#     - docker:dind
+#   before_script:
+#     - docker-compose build
+#     - docker-compose up &
+#     - sleep 20s
+#   script:
+#     #- docker ps
+#     #- docker exec mlaas-phase-1_web_1 sh -c "python -m unittest tests"
+#     - echo "Testing Yet to Be Done"
+#   only:
+#     - development
 
 Building & Pushing Docker Images:
   image: docker:latest
