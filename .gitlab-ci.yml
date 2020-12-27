@@ -64,4 +64,4 @@ Building & Pushing Docker Images:
     - cd ..
 
   only:
-    - development
+    - uat
