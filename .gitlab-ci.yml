@@ -13,7 +13,8 @@ Automation Testing:
     - sleep 20s
   script:
     #- docker ps
-    - docker exec mlaas-phase-1_web_1 sh -c "python -m unittest tests"
+    #- docker exec mlaas-phase-1_web_1 sh -c "python -m unittest tests"
+    - echo "Testing Yet to Be Done"
   only:
     - development
 
@@ -38,28 +39,40 @@ Building & Pushing Docker Images:
     # Building DB Image
     - echo "Building Database Image"
     - cd DB
-    - docker pull $DB_RELEASE_IMAGE || true
-    - docker build --cache-from $DB_RELEASE_IMAGE --tag $DB_IMAGE --tag $DB_RELEASE_IMAGE .
-    - docker push $DB_IMAGE
-    - docker push $DB_RELEASE_IMAGE
+    - string_one = $DB_RELEASE_IMAGE
+    - string_two = $DB_IMAGE
+    - string_one = ${string_one,,}
+    - string_two = ${string_two,,}
+    - docker pull $string_one || true
+    - docker build --cache-from $string_one --tag $string_two --tag $string_one .
+    - docker push $string_two
+    - docker push $string_one
     - cd ..
     
     # Building Micro-Service Image 
     - echo "Building Micro-Service Image"
     - cd MS
-    - docker pull $MS_RELEASE_IMAGE || true
-    - docker build --cache-from $MS_RELEASE_IMAGE --tag $MS_IMAGE --tag $MS_RELEASE_IMAGE .
-    - docker push $MS_IMAGE
-    - docker push $MS_RELEASE_IMAGE
+    - string_one = $MS_RELEASE_IMAGE
+    - string_two = $MS_IMAGE
+    - string_one = ${string_one,,}
+    - string_two = ${string_two,,}
+    - docker pull $string_one || true
+    - docker build --cache-from $string_one --tag $string_two --tag $string_one .
+    - docker push $string_two
+    - docker push $string_one
     - cd ..
-    
+
     # Building Web Image
     - echo "Building Web Image"
     - cd Web
-    - docker pull $WEB_RELEASE_IMAGE || true
-    - docker build --cache-from $WEB_RELEASE_IMAGE --tag $WEB_IMAGE --tag $WEB_RELEASE_IMAGE .
-    - docker push $WEB_IMAGE
-    - docker push $WEB_RELEASE_IMAGE
+    - string_one = $WEB_RELEASE_IMAGE
+    - string_two = $WEB_IMAGE
+    - string_one = ${string_one,,}
+    - string_two = ${string_two,,}
+    - docker pull $string_one || true
+    - docker build --cache-from $string_one --tag $string_two --tag $string_one .
+    - docker push $string_two
+    - docker push $string_one
     - cd ..
 
   only:
