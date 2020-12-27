@@ -26,11 +26,11 @@ Building & Pushing Docker Images:
 
   variables:
     #? Naming the Image:  Image_name:modulename-time_of_commit-commit_hash
-    DB_IMAGE: $CI_REGISTRY_IMAGE:db-$CI_COMMIT_TIMESTAMP-$CI_COMMIT_SHORT_SHA
+    DB_IMAGE: $CI_REGISTRY_IMAGE:db-$CI_COMMIT_SHORT_SHA
     DB_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:db-latest
-    MS_IMAGE: $CI_REGISTRY_IMAGE:ms-$CI_COMMIT_TIMESTAMP-$CI_COMMIT_SHORT_SHA
+    MS_IMAGE: $CI_REGISTRY_IMAGE:ms-$CI_COMMIT_SHORT_SHA
     MS_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:ms-latest
-    WEB_IMAGE: $CI_REGISTRY_IMAGE:web-$CI_COMMIT_TIMESTAMP-$CI_COMMIT_SHORT_SHA
+    WEB_IMAGE: $CI_REGISTRY_IMAGE:web-$CI_COMMIT_SHORT_SHA
     WEB_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:web-latest
 
   before_script:
@@ -39,41 +39,29 @@ Building & Pushing Docker Images:
     # Building DB Image
     - echo "Building Database Image"
     - cd DB
-    - string_one = $DB_RELEASE_IMAGE
-    - string_two = $DB_IMAGE
-    - string_one = ${string_one,,}
-    - string_two = ${string_two,,}
-    - docker pull $string_one || true
-    - docker build --cache-from $string_one --tag $string_two --tag $string_one .
-    - docker push $string_two
-    - docker push $string_one
+    - docker pull $DB_RELEASE_IMAGE || true
+    - docker build --cache-from $DB_RELEASE_IMAGE --tag $DB_IMAGE --tag $DB_RELEASE_IMAGE .
+    - docker push $DB_IMAGE
+    - docker push $DB_RELEASE_IMAGE
     - cd ..
     
     # Building Micro-Service Image 
     - echo "Building Micro-Service Image"
     - cd MS
-    - string_one = $MS_RELEASE_IMAGE
-    - string_two = $MS_IMAGE
-    - string_one = ${string_one,,}
-    - string_two = ${string_two,,}
-    - docker pull $string_one || true
-    - docker build --cache-from $string_one --tag $string_two --tag $string_one .
-    - docker push $string_two
-    - docker push $string_one
+    - docker pull $MS_RELEASE_IMAGE || true
+    - docker build --cache-from $MS_RELEASE_IMAGE --tag $MS_IMAGE --tag $MS_RELEASE_IMAGE .
+    - docker push $MS_IMAGE
+    - docker push $MS_RELEASE_IMAGE
     - cd ..
-
+    
     # Building Web Image
     - echo "Building Web Image"
     - cd Web
-    - string_one = $WEB_RELEASE_IMAGE
-    - string_two = $WEB_IMAGE
-    - string_one = ${string_one,,}
-    - string_two = ${string_two,,}
-    - docker pull $string_one || true
-    - docker build --cache-from $string_one --tag $string_two --tag $string_one .
-    - docker push $string_two
-    - docker push $string_one
+    - docker pull $WEB_RELEASE_IMAGE || true
+    - docker build --cache-from $WEB_RELEASE_IMAGE --tag $WEB_IMAGE --tag $WEB_RELEASE_IMAGE .
+    - docker push $WEB_IMAGE
+    - docker push $WEB_RELEASE_IMAGE
     - cd ..
 
   only:
-    - master
+    - development
