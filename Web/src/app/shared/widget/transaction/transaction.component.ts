@@ -1,6 +1,10 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ViewChild } from '@angular/core';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+
+import { Subject } from 'rxjs';
+import { DataTableDirective } from 'angular-datatables';
+
 
 @Component({
   selector: 'app-transaction',
@@ -9,15 +13,12 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 })
 export class TransactionComponent implements OnInit {
 
-  // @Input() transactions: Array<{
-  // id?: string;
-  // index?: number,
-  // name?: string,
-  // date?: string,
-  // total?: string,
-  // status?: string,
-  // payment?: string[],
-  // }>;
+  @ViewChild(DataTableDirective, {static: false})
+  datatableElement: DataTableDirective;
+  dtOptions: DataTables.Settings = {};
+  filter:boolean=true;
+  
+  dtTrigger: Subject<any> = new Subject<any>();
   @Input() transactions: any;
   keys: any;
   values: any;
@@ -26,8 +27,6 @@ export class TransactionComponent implements OnInit {
   constructor(private modalService: NgbModal) { }
 
   ngOnInit() {
-    console.log(this.transactions);
-    
     this.keys = [];
     this.keys = Object.keys(this.transactions[0]);
     this.finaldisplaykey = [];
@@ -48,6 +47,9 @@ export class TransactionComponent implements OnInit {
         }
       }
     });
+    setTimeout(() => {
+    this.dtTrigger.next();
+    }, 10);
   }
 
   /**
@@ -56,6 +58,31 @@ export class TransactionComponent implements OnInit {
   */
   openModal(content: any) {
     this.modalService.open(content, { centered: true });
+  }
+
+  displayfilter(){
+    this.filter=!this.filter;
+    console.log(this.filter);
+    $('.filter').val('').trigger('change');
+   // elem.value += ' NEW';
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
+        dtInstance.columns().every(function () {
+          const that = this;
+          $('input',this.header()).on('keyup change', function () {
+            if (that.search() !== this['value']) {
+              that
+                .search(this['value'])
+                .draw();
+            }
+          });
+        });
+      });
+    }, 100);
+   
   }
 
 }
