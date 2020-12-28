@@ -214,9 +214,39 @@ class DBClass:
             
         return status
 
-    
+    def get_column_names(self, connection, table_name):
+        '''
+            Returns name of the columns from the given csv table.
+            
+            input: Database object, connection object, name of the csv table
+            output: List of the Column names (List of strings)
+        '''
+        
+        col_cursor = connection.cursor()
 
+        # concatenate string for query to get column names
+        # SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = 'some_table';
+        sql_command = "SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE "
+        sql_command += "table_name = '{}';".format( table_name )
+        
+        # execute the SQL string to get list with col names in a tuple
+        col_cursor.execute(sql_command)
 
+        # get the tuple element from the list
+        col_names = ( col_cursor.fetchall() )
+
+        columns = []
+
+        # iterate list of tuples and grab first element
+        for tup in col_names:
+
+            # append the col name string to the list
+            columns += [ tup[0] ]
+        
+        # close the cursor object to prevent memory leaks
+        col_cursor.close()
+
+        return columns
 
 
 
