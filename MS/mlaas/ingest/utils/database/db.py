@@ -12,6 +12,7 @@ import psycopg2
 import psycopg2.extras as extras
 import pandas as pd 
 from sqlalchemy import create_engine
+from ..custom_exception.exception_handler import *
 
 class DBClass:
 

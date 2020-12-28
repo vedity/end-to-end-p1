@@ -173,7 +173,17 @@ class CreateDatasetClass(APIView):
                         Status=IngestionObj.create_dataset(dataset_name,file_name,dataset_visibility,user_name) #call create_dataset method to create dataset and insert csv data into table
                         return Response({"Status":Status})   #return Status 
                 except Exception as e:
-                        return Response({"Exception":str(e)})                  
+                        return Response({"Exception":str(e)})   
+
+import json
+
+class DatasetSchemaClass(APIView):
+        def get(self,request,format=None):
+                return Response({"Schema":""})    
+
+        def put(self,request,format=None):
+                value = json.loads(request.body)
+                return Response({"Status":value})           
                 
 
 class ProjectDetailClass(APIView):
@@ -292,6 +302,4 @@ class DeleteDataDetailClass(APIView):
                         return Response({"Exception":str(e)}) 
 
 
-class TestingClass(APIView):
-        def post(self,request,format=None):
-                return Response({"msg":"Hello"})
+
