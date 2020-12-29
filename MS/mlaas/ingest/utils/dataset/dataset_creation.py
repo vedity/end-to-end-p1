@@ -131,8 +131,12 @@ class DatasetClass:
         """
         schema_status = DBObject.create_schema(connection)
         table_name,schema,cols = self.make_dataset_schema() # Get table name,schema and columns from dataset class.
-         #? Checking if the same dataset is there for the same user in the dataset table? If yes, then it will not insert a new row in the table
-        if self.dataset_exists(DBObject,connection,table_name,dataset_visibility,dataset_name,user_name): return 2,1
+        
+        #? Checking if the same dataset is there for the same user in the dataset table? If yes, then it will not insert a new row in the table
+        dataset_exist = self.dataset_exists(DBObject,connection,table_name,dataset_visibility,dataset_name,user_name)
+        
+        if dataset_exist == False: pass #? No dataset with same name exists so creating the new one
+        else: return 2,dataset_exist #? dataset_exists() function returns id of the dataset if dataset with same name exists
 
         create_status = DBObject.create_table(connection,table_name,schema) # Get status about dataset tableis created or not.if created then 0 else 1.
 
@@ -298,8 +302,14 @@ class DatasetClass:
         This function is used to delete the whole table which was created from 
         user input file.
         
-        Input: Database class Object, Connection Object, table_name
-        Output: status of deletion
+        Args:
+            DBObject ([object]): [object of the database class.]
+            connection ([object]): [object of the database connection.]
+            table_name ([string]): [Name of the table that you want to delete.]
+            user_name ([string]): [Name of the user.]
+
+        Returns:
+            [integer]: [it will return status of the dataset deletion. if successfully then 0 else 1.]
         """
         
         #? Creating Sql Query
@@ -319,7 +329,8 @@ class DatasetClass:
             user_name ([string]): [name of the user.]
 
         Returns:
-            [boolean]: [it will return true or false. if existed then true else false.]
+            [boolean | integer]: [it will return False if no dataset with same name does not exists,
+                                    or else it will return the id of the existing dataset]
         """
         
         #? Checking if the same dataset is there for the same user in the dataset table? If yes, then it will not insert a new row in the table

@@ -194,7 +194,53 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         
         return project_df
     
- 
-
+    def delete_project_details(self, project_id, user_name):
+        '''
+        This function is used to delete an entry in the project_tbl
+        
+        Args:
+            project_id ([integer]): [id of the entry which you want to delete.],
+            user_name ([string]): [Name of the user.]
+            
+        Returns:
+            status ([boolean]): [status of the project deletion. if successfully then 0 else 1.]
+        '''
+        
+        try:
+            DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
+            if connection == None:
+                raise DatabaseConnectionFailed
+            
+            deletion_status = super(IngestClass, self).delete_project_details(DBObject,connection,project_id,user_name)
+            
+            return deletion_status
+        
+        except (DatabaseConnectionFailed) as exc:
+            return exc.msg
+        
+    def delete_dataset_details(self, dataset_id, user_name):
+        '''
+        This function is used to delete an entry in the project_tbl
+        
+        Args:
+            dataset_id ([integer]): [id of the dataset entry which you want to delete.],
+            user_name ([string]): [Name of the user.]
+            
+        Returns:
+            status ([boolean]): [status of the project deletion. if successfully then 0 else 1.]
+        '''
+        
+        try:
+            DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
+            if connection == None:
+                raise DatabaseConnectionFailed
+            
+            deletion_status = super(IngestClass, self).delete_dataset_details(DBObject,connection,dataset_id,user_name)
+            
+            return deletion_status
+        
+        except (DatabaseConnectionFailed) as exc:
+            return exc.msg
+        
 
     

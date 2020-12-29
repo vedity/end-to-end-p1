@@ -168,8 +168,14 @@ class ProjectClass:
         This function is used to delete the project entry from the project table.
         It also deletes the dataset if no other project is using it.
         
-        Input: Database class object, connection object, project id
-        Output: status
+        Args: 
+            DBObject ([object]): [object of database class.]
+            connection ([object]): [connection object of database class.]
+            project_id ([number]): [id of the project_tbl entry that you want to delete.]
+            user_name ([string]): [name of the user.]
+
+        Returns:
+            status ([boolean]): [status of the project deletion. if successfully then 0 else 1.]
         """
         
         try:
@@ -187,23 +193,6 @@ class ProjectClass:
                 sql_command = "DELETE FROM "+ table_name + " WHERE PROJECT_ID ='"+ project_id +"'"
                 project_status = DBObject.delete_records(connection,sql_command)
                 
-                #* Note: Code for Chain-reaction deletion of associated datasets
-                #* This feature isn't used currently but I have kept it just incase we need it in future 
-                #? Used lated in function to delete dataset_entry
-                #DatasetObject = dataset_creation.DatasetClass() # Get dataset class object
-                
-                #? Getting Dataset_id for current project
-                # sql_command = f"SELECT DATASET_ID FROM {table_name} WHERE PROJECT_ID = '{project_id}'"
-                # dataset_id_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
-                # dataset_id = dataset_id_df['dataset_id'][0] 
-
-                #? All the projects with same dataset_id
-                # sql_command = f"SELECT PROJECT_ID FROM {table_name} WHERE DATASET_ID = '{dataset_id}'"
-                # use_count_df = DBObject.select_records(connection,sql_command) #? Number of projects that use the same dataset
-                
-                # if len(use_count_df) == 1:
-                #     dataset_status = DatasetObject.delete_dataset_details(DBObject,connection,dataset_id,skip_check = True)
-                #     if dataset_status == 1: project_status == 1
             else:
                 project_status = 1
                 
