@@ -15,7 +15,7 @@ Automation Testing:
     - cd MS
     - docker build -f "TestingDockerFile" -t $CI_REGISTRY_IMAGE:latest .
   script:
-    - docker run -p 8000:8000 --name=web_container1 $CI_REGISTRY_IMAGE:latest
+    - docker run -p 8000:8000 --name web_container1 -i $CI_REGISTRY_IMAGE:latest
     - docker ps
     #- docker exec mlaas-phase-1_web_1 sh -c "cd MS/mlaas && python -m unittest tests"
   only:
