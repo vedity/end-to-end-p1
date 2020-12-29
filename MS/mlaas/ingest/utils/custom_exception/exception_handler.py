@@ -183,3 +183,20 @@ class DataDeletionFailed(Exception):
     def __str__(self):
         return (self.msg)
 
+class UserAuthenticationFailed(Exception):
+    """ User Authentication Failed Exception """
+    def __init__(self):
+        self.msg = "User Authentication Failed: You can only delete the entry created by yourself!"
+
+    def __str__(self):
+        return (self.msg)
+
+class DatasetInUse(Exception):
+    """ Dataset in Use Exception """
+    def __init__(self):
+        self.msg = "DatasetInUse Exception: Dataset is being used by some project, can't delete!"
+
+    def __str__(self):
+        return (self.msg)
+
+

@@ -222,10 +222,12 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             deletion_status = super(IngestClass, self).delete_project_details(DBObject,connection,project_id,user_name)
             if deletion_status == 1:
                 raise ProjectDeletionFailed
+            elif deletion_status == 2:
+                raise UserAuthenticationFailed
             
             return deletion_status
         
-        except (DatabaseConnectionFailed,ProjectDeletionFailed) as exc:
+        except (DatabaseConnectionFailed,ProjectDeletionFailed,UserAuthenticationFailed) as exc:
             return exc.msg
         
     def delete_dataset_details(self, dataset_id, user_name):
@@ -248,10 +250,16 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             deletion_status = super(IngestClass, self).delete_dataset_details(DBObject,connection,dataset_id,user_name)
             if deletion_status == 1:
                 raise DatasetDeletionFailed
+            elif deletion_status == 2:
+                raise DataDeletionFailed
+            elif deletion_status == 3:
+                raise DatasetInUse
+            elif deletion_status == 4:
+                raise UserAuthenticationFailed
             
             return deletion_status
         
-        except (DatabaseConnectionFailed,DatasetDeletionFailed) as exc:
+        except (DatabaseConnectionFailed,DatasetDeletionFailed,DataDeletionFailed,UserAuthenticationFailed,DatasetInUse) as exc:
             return exc.msg
         
     def delete_data_details(self,table_name,user_name):

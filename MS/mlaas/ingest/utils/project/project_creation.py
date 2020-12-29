@@ -195,7 +195,7 @@ class ProjectClass:
                 project_status = DBObject.delete_records(connection,sql_command)
                 
             else:
-                project_status = 1
+                project_status = 2
                 
             return project_status
         
