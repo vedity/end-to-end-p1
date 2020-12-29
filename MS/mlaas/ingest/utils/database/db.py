@@ -8,12 +8,10 @@
  Vipul Prajapati          18-DEC-2020           1.3           Added functionality for create schema.
 */
 '''
-from MS.mlaas.ingest.utils.custom_exception.exception_handler import GetColumnNamesFailed
 import psycopg2
 import psycopg2.extras as extras
 import pandas as pd 
 from sqlalchemy import create_engine
-from ..custom_exception.exception_handler import *
 
 class DBClass:
 
@@ -141,7 +139,7 @@ class DBClass:
         try :
             data = pd.read_sql(sql_command, connection) # Read data from database table.
             return data   
-        except :
+        except(Exception, psycopg2.DatabaseError) as error:
             return None
         
        
