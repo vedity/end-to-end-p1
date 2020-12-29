@@ -28,16 +28,14 @@ class TestAPostDataset(unittest.TestCase):
         #self.assertEqual(response.json(),{"key":"value"})
         self.assertEqual(response.status_code, 200)
     
-    
-    
-    
+
     """ def testA_insert_invalidfile_dataset(self):
         files = b'./unhappyface.png'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"invalid_auto_user","dataset_name":"ivalid_auto_dataset_name","visibility":"private"}
         response = requests.post("http://localhost:8000/mlaas/ingest/create_dataset/",data = info,files = file)
         self.assertEqual(response.status_code, 200)
-     """    
+    """    
 
 class TestBGetDataset(unittest.TestCase):
     def testB_get_dataset(self):
@@ -53,15 +51,14 @@ class TestBGetDataset(unittest.TestCase):
         self.assertEqual(len(response.json()), 1)
         json_response=response.json()
         self.assertEqual(len(json_response["Data"]), 0)
- """
+    """
   
 class TestCPostProject(unittest.TestCase):
     def testC_insert_project(self):
         responsedataset = requests.get("http://localhost:8000/mlaas/ingest/create_dataset/",data = {"user_name":"autouser"})
         json_responsedataset=responsedataset.json()
         #json_databaseid =json_responsedataset["Data"][0]["dataset_id"]["values"]
-        
-        self.assertEqual(json_responsedataset,1)
+        self.assertEqual(len(json_responsedataset),1)
         files = './ingest/dataset/pima_indians_diabetes.csv'
         #files = 'mlaas\pima_indians_diabetes.csv'
         file = {'inputfile': open(files, 'rb')}
@@ -96,3 +93,10 @@ class TestEAllProject(unittest.TestCase):
         #self.assertNotEqual(len(json_response["Data"]), 0)
         
     
+class TestDeletion(unittest.TestCase):
+    def test_delete_project(self):
+        responseproject = requests.get("http://localhost:8000/mlaas/ingest/project_detail/",data ={"user_name":"autouser"})
+        json_responseproject = responseproject.json()
+        json_project_id = json_responseproject["Data"][0]["project_id"]["values"]
+        response = requests.delete("http://localhost:8000/mlaas/ingest/delete/project_detail/",data ={"user_name":"autouser","project_id":json_project_id})
+        self.assertEqual(response.status_code,200)

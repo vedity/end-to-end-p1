@@ -25,7 +25,7 @@ class DatasetClass:
         # Dataset table name
         table_name = 'mlaas.dataset_tbl' 
         # Columns for dataset table.
-        cols = 'dataset_id,dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name' 
+        cols = 'dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name' 
         # Schema for dataset table.
         schema = "dataset_id bigserial,"\
                  "dataset_name  text,"\
@@ -211,11 +211,13 @@ class DatasetClass:
         Returns:
             [dataframe]: [it will return dataset details in the form of dataframe.]
         """
+        
         table_name,_,cols = self.make_dataset_schema() # Get table name,schema and columns from dataset class.
         # This command is used to get dataset details from dataset table of database.
-        sql_command = "SELECT "+ cols +" FROM "+ table_name + " WHERE USER_NAME ='"+ user_name +"'"
-        dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
-        return dataset_df
+        sql_command = "SELECT * FROM "+ table_name + " WHERE USER_NAME ='"+ user_name +"'"
+        data=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+        
+        return data
 
     def show_data_details(self,DBObject,connection,table_name,user_name):
         """This function is used to show details about loaded dataset.

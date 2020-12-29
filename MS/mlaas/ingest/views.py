@@ -14,10 +14,9 @@ import os
 import datetime
 import json
 import pandas as pd
+from .utils.schema_creation import *
 from database import *
-from .utils.dataset import dataset_creation
-from .utils.ingestion import *
-from .utils.project import project_creation
+
 from .utils import ingestion
 from django.core.files.storage import FileSystemStorage
 from rest_framework.decorators import api_view ,permission_classes
@@ -179,11 +178,36 @@ import json
 
 class DatasetSchemaClass(APIView):
         def get(self,request,format=None):
-                return Response({"Schema":""})    
+                dataset_id=request.POST.get('dataset_id')
+                schema_obj=SchemaClass(database,user,password,host,port)
+                schema_data=schema_obj.get_dataset_schema(str(dataset_id))
+                return Response({"Schema":str(schema_data)})    
 
         def put(self,request,format=None):
-                value = json.loads(request.body)
-                return Response({"Status":value})           
+                update_schema_data=json.loads(request.body)
+
+                # user_name=request.POST.get('user_name')
+                # dataset_id=request.POST.get('dataset_id')
+
+                # column_list=[]
+                # col_attribute_list=[]
+                # col_datatype_list=[]
+                # column_list.append(request.POST.get('id'))
+                # column_list.append(request.POST.get('name'))
+                # column_list.append(request.POST.get('sal'))
+
+                # col_attribute_list.append(request.POST.get('datatype_id'))
+                # col_attribute_list.append(request.POST.get('datatype_name'))
+                # col_attribute_list.append(request.POST.get('datatype_sal'))
+
+                # col_datatype_list.append(request.POST.get('col_id'))
+                # col_datatype_list.append(request.POST.get('col_name'))
+                # col_datatype_list.append(request.POST.get('col_sal'))
+
+                # schema_obj=SchemaClass(database,user,password,host,port)
+                # schema_status=schema_obj.update_dataset_schema(column_list,col_datatype_list,col_attribute_list,dataset_id,user_name)
+
+                return Response({"Status":update_schema_data})           
                 
 
 class ProjectDetailClass(APIView):
