@@ -41,9 +41,9 @@ class DatasetClass:
            E.g. column_name_1,column_name_2 .......,column_name_n.
 
         Args:
-            dataset_name ([string]): [name of the dataset.]
-            file_name ([string]): [name of the file.]
-            dataset_visibility ([string]): [visibility of the dataset.]
+            dataset_name ([string]): [name of the dataset.],
+            file_name ([string]): [name of the file.],
+            dataset_visibility ([string]): [visibility of the dataset.],
             user_name ([string]): [name of the user.]
 
         Returns:
@@ -60,8 +60,8 @@ class DatasetClass:
         """This function is used to get server file path.
 
         Args:
-            file_name ([string]): [name of the file.]
-            dataset_visibility ([string]): [visibility of the dataset.]
+            file_name ([string]): [name of the file.],
+            dataset_visibility ([string]): [visibility of the dataset.],
             user_name ([string]): [name of the user.]
 
         Returns:
@@ -118,11 +118,11 @@ class DatasetClass:
            E.g. dataset details : dataset_name,file_name,file_size,dataset_table_name,user_name.
 
         Args:
-            DBObject ([object]): [object of the database class.]
-            connection ([object]): [object of the database connection.]
-            dataset_name ([string]): [name of the dataset.]
-            file_name ([string]): [name of the file.]
-            dataset_visibility ([string]): [visibility of the dataset.]
+            DBObject ([object]): [object of the database class.],
+            connection ([object]): [object of the database connection.],
+            dataset_name ([string]): [name of the dataset.],
+            file_name ([string]): [name of the file.],
+            dataset_visibility ([string]): [visibility of the dataset.],
             user_name ([string]): [name of the user.]
 
         Returns:
@@ -157,11 +157,11 @@ class DatasetClass:
         """This function is used to load csv file data into database table.
 
         Args:
-            DBObject ([object]): [object of the database class.]
-            connection ([object]): [object of the database connection.]
-            connection_string ([string]): [connection string of the database.]
-            file_name ([string]): [name of the file.]
-            dataset_visibility ([string]): [visibility of the dataset.]
+            DBObject ([object]): [object of the database class.],
+            connection ([object]): [object of the database connection.],
+            connection_string ([string]): [connection string of the database.],
+            file_name ([string]): [name of the file.],
+            dataset_visibility ([string]): [visibility of the dataset.],
             user_name ([string]): [name of the user.]
 
         Returns:
@@ -183,9 +183,9 @@ class DatasetClass:
         """This function is used to get dataset id of the created dataset.
 
         Args:
-            DBObject ([object]): [object of the database class.]
-            connection ([object]): [object of the database connection.]
-            row_tuples ([list]): [list of the tuple of dataset record.]
+            DBObject ([object]): [object of the database class.],
+            connection ([object]): [object of the database connection.],
+            row_tuples ([list]): [list of the tuple of dataset record.],
             user_name ([string]): [name of the user.]
 
         Returns:
@@ -207,8 +207,8 @@ class DatasetClass:
         """This function is used to show details about all created datasets by user.
 
         Args:
-            DBObject ([object]): [object of the database class.]
-            connection ([object]): [object of the database connection.]
+            DBObject ([object]): [object of the database class.],
+            connection ([object]): [object of the database connection.],
             user_name ([string]): [name of the user.]
 
         Returns:
@@ -224,8 +224,8 @@ class DatasetClass:
         """This function is used to show details about loaded dataset.
 
         Args:
-            DBObject ([object]): [object of the database class.]
-            connection ([object]): [object of the database connection.]
+            DBObject ([object]): [object of the database class.],
+            connection ([object]): [object of the database connection.],
             table_name ([string]): [name of the table.]
 
         Returns:
@@ -242,9 +242,11 @@ class DatasetClass:
         """This function is used to delete dataset entry from the dataset table.
 
         Args:
-            DBObject ([object]): [object of the database class.]
-            connection ([object]): [object of the database connection.]
-            dataset_id ([integer]): [dataset id for the delete dataset record.]
+            DBObject ([object]): [object of the database class.],
+            connection ([object]): [object of the database connection.],
+            dataset_id ([integer]): [dataset id for the delete dataset record.],
+            user_name ([string]): [name of the user.],
+            skip_check ([boolean]): [Make this true if you don't want to check how many projects are using this dataset.], Defaults to False.
 
         Returns:
             [integer]: [it will return status of the dataset deletion. if successfully then 0 else 1.]
@@ -303,9 +305,9 @@ class DatasetClass:
         user input file.
         
         Args:
-            DBObject ([object]): [object of the database class.]
-            connection ([object]): [object of the database connection.]
-            table_name ([string]): [Name of the table that you want to delete.]
+            DBObject ([object]): [object of the database class.],
+            connection ([object]): [object of the database connection.],
+            table_name ([string]): [Name of the table that you want to delete.],
             user_name ([string]): [Name of the user.]
 
         Returns:
@@ -322,10 +324,10 @@ class DatasetClass:
         """This function is used to check existing dataset name.
 
         Args:
-            DBObject ([object]): [object of the database class.]
-            connection ([object]): [object of the database connection.]
-            table_name ([string]): [name of the table.]
-            dataset_name ([string]): [name of the dataset.]
+            DBObject ([object]): [object of the database class.],
+            connection ([object]): [object of the database connection.],
+            table_name ([string]): [name of the table.],
+            dataset_name ([string]): [name of the dataset.],
             user_name ([string]): [name of the user.]
 
         Returns:

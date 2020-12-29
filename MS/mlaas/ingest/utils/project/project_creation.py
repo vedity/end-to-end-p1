@@ -44,9 +44,9 @@ class ProjectClass:
            E.g. column_name_1,column_name_2 .......,column_name_n.
 
         Args:
-            project_name ([string]): [name of the project.]
-            project_desc ([string]): [descriptions of the project.]
-            user_name ([string]): [name of the user.]
+            project_name ([string]): [name of the project.],
+            project_desc ([string]): [descriptions of the project.],
+            user_name ([string]): [name of the user.],
             dataset_id ([integer]): [dataset id of the created dataset.]
 
         Returns:
@@ -64,14 +64,14 @@ class ProjectClass:
            E.g. project details : project_name,project_desc,file_name,user_name,dataset_table_name.
 
         Args:
-            DBObject ([object]): [object of database class.]
-            connection ([object]): [connection object of database class.]
-            project_name ([string]): [name of the project.]
-            project_desc ([string]): [descriptions of the project.]
-            dataset_name ([string]): [name of the dataset.]
-            dataset_visibility ([string]): [visibility of the dataset.]
-            file_name ([string]): [name of the file.]
-            dataset_id ([integer]): [dataset id of the selected dataset.]
+            DBObject ([object]): [object of database class.],
+            connection ([object]): [connection object of database class.],
+            project_name ([string]): [name of the project.],
+            project_desc ([string]): [descriptions of the project.],
+            dataset_name ([string]): [name of the dataset.],
+            dataset_visibility ([string]): [visibility of the dataset.],
+            file_name ([string]): [name of the file.],
+            dataset_id ([integer]): [dataset id of the selected dataset.],
             user_name ([string]): [name of the user.]
 
         Returns:
@@ -111,9 +111,9 @@ class ProjectClass:
         """This function is used to get project id of created project.
 
         Args:
-            DBObject ([object]): [object of database class.]
-            connection ([object]): [connection object of database class.]
-            row_tuples ([list]): [list of tuple of record.]
+            DBObject ([object]): [object of database class.],
+            connection ([object]): [connection object of database class.],
+            row_tuples ([list]): [list of tuple of record.],
             user_name ([string]): [name of the user.]
 
         Returns:
@@ -131,9 +131,9 @@ class ProjectClass:
         """This function is used to update dataset status field in project table.
 
         Args:
-            DBObject ([object]): [object of database class.]
-            connection ([object]): [connection object of database class.]
-            project_id ([integer]): [project id for update dataset status field in project.]
+            DBObject ([object]): [object of database class.],
+            connection ([object]): [connection object of database class.],
+            project_id ([integer]): [project id for update dataset status field in project.],
             load_data_status ([integer]): [description]
 
         Returns:
@@ -148,8 +148,8 @@ class ProjectClass:
         """This function is used to show details about all created projects.
 
         Args:
-            DBObject ([object]): [object of database class.]
-            connection ([object]): [connection object of database class.]
+            DBObject ([object]): [object of database class.],
+            connection ([object]): [connection object of database class.],
             user_name ([string]): [name of the user.]
 
         Returns:
@@ -169,9 +169,9 @@ class ProjectClass:
         It also deletes the dataset if no other project is using it.
         
         Args: 
-            DBObject ([object]): [object of database class.]
-            connection ([object]): [connection object of database class.]
-            project_id ([number]): [id of the project_tbl entry that you want to delete.]
+            DBObject ([object]): [object of database class.],
+            connection ([object]): [connection object of database class.],
+            project_id ([number]): [id of the project_tbl entry that you want to delete.],
             user_name ([string]): [name of the user.]
 
         Returns:
@@ -205,8 +205,8 @@ class ProjectClass:
         """Show all the existing datasets created by user.
 
         Args:
-            DBObject ([object]): [object of database class.]
-            connection ([object]): [connection object of database class.]
+            DBObject ([object]): [object of database class.],
+            connection ([object]): [connection object of database class.],
             user_name ([string]): [name of the user.]
 
         Returns:
@@ -226,10 +226,10 @@ class ProjectClass:
         """This function is used to check if same name project exist or not .
 
         Args:
-            DBObject ([object]): [object of database class.]
-            connection ([object]): [connection object of database class.]
-            table_name ([string]): [name of the table.]
-            project_name ([string]): [name of the project.]
+            DBObject ([object]): [object of database class.],
+            connection ([object]): [connection object of database class.],
+            table_name ([string]): [name of the table.],
+            project_name ([string]): [name of the project.],
             user_name ([string]): [name of the user.]
 
         Returns:

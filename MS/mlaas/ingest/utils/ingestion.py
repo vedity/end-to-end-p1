@@ -21,10 +21,10 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
            It will initialize when object of this class is created with below parameter.
            
         Args:
-            database ([string]): [name of the database.]
-            user ([string]): [user of the database.]
-            password ([string]): [password of the database.]
-            host ([string]): [host ip or name where database is running.]
+            database ([string]): [name of the database.],
+            user ([string]): [user of the database.],
+            password ([string]): [password of the database.],
+            host ([string]): [host ip or name where database is running.],
             port ([string]): [port number in which database is running.]
         """
         self.database = database # Database Name
@@ -48,8 +48,8 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
            E.g. sales forecast , travel time predictions etc.
            
         Args:
-            project_name ([string]): [name of the project]
-            project_desc ([string]): [descriptions of the project]
+            project_name ([string]): [name of the project],
+            project_desc ([string]): [descriptions of the project],
             dataset_name ([string], optional): [name of the dataset]. Defaults to None.
             dataset_visibility ([string], optional): [visibility of the dataset]. Defaults to None.
             file_name ([string], optional): [name of the csv file]. Defaults to None.
@@ -94,9 +94,9 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
            E.g. sales , traveltime etc.
            
         Args:
-            dataset_name ([string]): [name of the dataset.]
-            file_name ([string]): [name of the name.]
-            dataset_visibility ([string]): [visibility of the dataset.]
+            dataset_name ([string]): [name of the dataset.],
+            file_name ([string]): [name of the name.],
+            dataset_visibility ([string]): [visibility of the dataset.],
             user_name ([string]): [name of the user.]
 
         Returns:
