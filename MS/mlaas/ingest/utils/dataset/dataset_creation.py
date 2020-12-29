@@ -24,7 +24,7 @@ class DatasetClass:
         # Dataset table name
         table_name = 'mlaas.dataset_tbl' 
         # Columns for dataset table.
-        cols = 'dataset_id,dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name' 
+        cols = 'dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name' 
         # Schema for dataset table.
         schema = "dataset_id bigserial,"\
                  "dataset_name  text,"\
@@ -169,6 +169,10 @@ class DatasetClass:
         file_data_df = DBObject.read_data(file_path)
         # Get table name.
         table_name = self.get_dataset_table_name(file_name)
+        if dataset_visibility.lower() == "public" :
+            user_name = "public"
+        else:
+            user_name = user_name
         # Get schema status.if successfully then 0 else 1.
         schema_status = DBObject.create_schema(connection,user_name)
         # Get load dataset status. if successfully then 0 else 1.
