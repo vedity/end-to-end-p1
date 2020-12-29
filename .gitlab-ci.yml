@@ -2,24 +2,20 @@ stages:
   - automation_tests
   - build
 
-Automation Testing:
-  image: docker:latest
-  stage: automation_tests
-  services:
-    - docker:dind
-  before_script:
-    # - docker-compose build
-    # - docker-compose up &
-    # - sleep 20s
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-    - cd MS
-    - docker build -f "TestingDockerFile" -t $CI_REGISTRY_IMAGE:latest .
-  script:
-    - docker run -p 8000:8000 --name web_container1 -i $CI_REGISTRY_IMAGE:latest
-    - docker ps
-    #- docker exec mlaas-phase-1_web_1 sh -c "cd MS/mlaas && python -m unittest tests"
-  only:
-    - development
+# Automation Testing:
+#   image: tmaier/docker-compose:latest
+#   stage: automation_tests
+#   services:
+#     - docker:dind
+#   before_script:
+#     - docker-compose build
+#     - docker-compose up &
+#     - sleep 20s
+#   script:
+#     #- docker ps
+#     - docker exec mlaas-phase-1_web_1 sh -c "cd MS/mlaas && python -m unittest tests"
+#   only:
+#     - development
 
 Building & Pushing Docker Images:
   image: docker:latest
