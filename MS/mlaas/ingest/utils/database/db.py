@@ -139,10 +139,11 @@ class DBClass:
         sql_command = sql_command # Get sql command.
         try :
             data = pd.read_sql(sql_command, connection) # Read data from database table.
+            return data   
         except :
             return None
         
-        return data
+       
 
     
 

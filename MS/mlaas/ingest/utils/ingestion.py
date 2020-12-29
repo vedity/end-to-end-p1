@@ -139,12 +139,15 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise DatabaseConnectionFailed
             
             dataset_df = super(IngestClass,self).show_dataset_details(DBObject,connection,user_name) # Get dataframe of dataset created.
-            if dataset_df == None :
-                raise DatasetDataNotFound  
-              
+            dataset_df = dataset_df.to_json(orient='records')
+            
+            if len(dataset_df) == 0 :
+                raise DatasetDataNotFound 
+                 
         except (DatabaseConnectionFailed,DatasetDataNotFound) as exc:
             return exc.msg
-            
+         
+        
         return dataset_df
 
     def show_data_details(self,table_name,user_name):
@@ -163,8 +166,11 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise DatabaseConnectionFailed 
             
             data_details_df = super(IngestClass,self).show_data_details(DBObject,connection,table_name,user_name) # Get dataframe of loaded csv.
-            if data_details_df == None:
+            if data_details_df == None :
                 return DataNotFound
+            data_details_df=data_details_df.to_json(orient='records')
+            
+            
             
         except (DatabaseConnectionFailed,DataNotFound) as exc:
             return exc.msg
@@ -186,7 +192,8 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise DatabaseConnectionFailed
             
             project_df = super(IngestClass,self).show_project_details(DBObject,connection,user_name) # Get dataframe of project created.
-            if project_df == None:
+            project_df = project_df.to_json(orient='records')
+            if project_df == None or len(project_df) == 0:
                 raise ProjectDataNotFound
             
         except (DatabaseConnectionFailed,ProjectDataNotFound) as exc:
