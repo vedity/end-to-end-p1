@@ -216,10 +216,14 @@ class DBClass:
 
     def get_column_names(self, connection, table_name):
         '''
-            Returns name of the columns from the given csv table.
-            
-            input: Database object, connection object, name of the csv table
-            output: List of the Column names (List of strings)
+        Returns name of the columns from the given csv table.
+        
+        Args:
+            connection_string ([object]): [connection string of the database connection.]
+            table_name ([string]): [name of the table.]
+        
+        Returns:
+            columns ([List of Strings]): [List of Column names]
         '''
         
         col_cursor = connection.cursor()
