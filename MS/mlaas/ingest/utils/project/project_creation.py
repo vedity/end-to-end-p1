@@ -127,7 +127,7 @@ class ProjectClass:
         project_id = int(project_df['project_id'][0])
         return project_id
     
-    def update_dataset_status(self,DBObject,connection,project_id,load_data_status):
+    def update_dataset_status(self,DBObject,connection,project_id,load_data_status = 0):
         """This function is used to update dataset status field in project table.
 
         Args:

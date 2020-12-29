@@ -8,6 +8,7 @@
  Vipul Prajapati          18-DEC-2020           1.3           Added functionality for create schema.
 */
 '''
+from MS.mlaas.ingest.utils.custom_exception.exception_handler import GetColumnNamesFailed
 import psycopg2
 import psycopg2.extras as extras
 import pandas as pd 
@@ -233,23 +234,26 @@ class DBClass:
         sql_command = "SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE "
         sql_command += "table_name = '{}';".format( table_name )
         
-        # execute the SQL string to get list with col names in a tuple
-        col_cursor.execute(sql_command)
+        try:
+            # execute the SQL string to get list with col names in a tuple
+            col_cursor.execute(sql_command)
 
-        # get the tuple element from the list
-        col_names = ( col_cursor.fetchall() )
+            # get the tuple element from the list
+            col_names = ( col_cursor.fetchall() )
 
-        columns = []
+            columns = []
 
-        # iterate list of tuples and grab first element
-        for tup in col_names:
+            # iterate list of tuples and grab first element
+            for tup in col_names:
 
-            # append the col name string to the list
-            columns += [ tup[0] ]
+                # append the col name string to the list
+                columns += [ tup[0] ]
+            
+            # close the cursor object to prevent memory leaks
+            col_cursor.close()
+        except:
+            raise GetColumnNamesFailed
         
-        # close the cursor object to prevent memory leaks
-        col_cursor.close()
-
         return columns
 
 

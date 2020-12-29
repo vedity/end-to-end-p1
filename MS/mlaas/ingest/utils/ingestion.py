@@ -80,7 +80,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 status = super(IngestClass,self).update_dataset_status(DBObject,connection,project_id,load_data_status)
                      
             elif project_status == 0:
-                status = super(IngestClass,self).update_dataset_status(DBObject,connection,project_id,load_data_status)
+                status = super(IngestClass,self).update_dataset_status(DBObject,connection,project_id)
                 
                 
         except (DatabaseConnectionFailed,ProjectAlreadyExist,LoadCSVDataFailed,ProjectCreationFailed) as exc:
@@ -212,10 +212,12 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise DatabaseConnectionFailed
             
             deletion_status = super(IngestClass, self).delete_project_details(DBObject,connection,project_id,user_name)
+            if deletion_status == 1:
+                raise ProjectDeletionFailed
             
             return deletion_status
         
-        except (DatabaseConnectionFailed) as exc:
+        except (DatabaseConnectionFailed,ProjectDeletionFailed) as exc:
             return exc.msg
         
     def delete_dataset_details(self, dataset_id, user_name):
@@ -236,10 +238,39 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise DatabaseConnectionFailed
             
             deletion_status = super(IngestClass, self).delete_dataset_details(DBObject,connection,dataset_id,user_name)
+            if deletion_status == 1:
+                raise DatasetDeletionFailed
             
             return deletion_status
         
-        except (DatabaseConnectionFailed) as exc:
+        except (DatabaseConnectionFailed,DatasetDeletionFailed) as exc:
+            return exc.msg
+        
+    def delete_data_details(self,table_name,user_name):
+        """
+        This function is used to delete the whole table which was created from 
+        user input file.
+        
+        Args:
+            table_name ([string]): [Name of the table that you want to delete.],
+            user_name ([string]): [Name of the user.]
+
+        Returns:
+            [integer]: [it will return status of the dataset deletion. if successfully then 0 else 1.]
+        """
+        
+        try:
+            DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
+            if connection == None:
+                raise DatabaseConnectionFailed
+            
+            deletion_status = super(IngestClass, self).delete_data_details(DBObject,connection,table_name,user_name)
+            if deletion_status == 1:
+                raise DataDeletionFailed
+            
+            return deletion_status
+        
+        except (DatabaseConnectionFailed,DataDeletionFailed) as exc:
             return exc.msg
         
 
