@@ -14,14 +14,16 @@ import os
 import datetime
 import json
 import pandas as pd
+from .utils.schema_creation import *
 from database import *
-from .utils.dataset import dataset_creation
-from .utils.ingestion import *
-from .utils.project import project_creation
+
 from .utils import ingestion
 from django.core.files.storage import FileSystemStorage
 from rest_framework.decorators import api_view ,permission_classes
 from rest_framework.permissions import IsAuthenticated
+from .utils.dataset import dataset_creation
+from .utils.ingestion import *
+from .utils.project import project_creation
 from ingest.testing import get_json_format
 from rest_framework import views
 from rest_framework.views import APIView
@@ -31,7 +33,7 @@ from .serializer import InputSerializer
 
 DBObject=db.DBClass()     #Get DBClass object
 connection,connection_string=DBObject.database_connection(database,user,password,host,port)      #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
-
+IngestionObj=ingestion.IngestClass(database,user,password,host,port)
 
 class CreateProjectClass(APIView):
         """
@@ -48,7 +50,6 @@ class CreateProjectClass(APIView):
                 try:
                         # user_name=request.user.get_username()
                         user_name=request.POST.get('user_name')  #get Username
-                        IngestionObj=ingestion.IngestClass(database,user,password,host,port)
                         project_df=IngestionObj.show_project_details(user_name) # call show_project_details to retrive project detail data and it will return dataframe
                         project_df = json.loads(project_df)
                         return Response({"Data":project_df})  #return Data
@@ -100,7 +101,7 @@ class CreateProjectClass(APIView):
                                 else:
                                         dataset_id = int(dataset_id)
                                                 
-                                IngestionObj=ingestion.IngestClass(database,user,password,host,port) #get ingestion.IngestClass Object
+                                
                                 Status=IngestionObj.create_project(project_name,project_desc,dataset_name,dataset_visibility,file_name,dataset_id,user_name)    #call create_project method to create project and insert csv data into table
                                 return Response({"Status":Status}) 
                         except Exception as e:
@@ -121,7 +122,7 @@ class CreateDatasetClass(APIView):
         def get(self, request, format=None):
                 try:
                         user_name=request.POST.get('user_name')  #get Username
-                        IngestionObj=ingestion.IngestClass(database,user,password,host,port)  #create ingestion.IngestClass Object
+                       
                         dataset_df=IngestionObj.show_dataset_details(user_name) #Call show_dataset_details method it will return dataset detail for sepecific user_name
                         dataset_df = json.loads(dataset_df)
                         return Response({"Data":dataset_df}) #return Data                
@@ -164,38 +165,47 @@ class CreateDatasetClass(APIView):
                                 return Response({"message":"Dataset Name already Exists"})
 
 
-                        IngestionObj=ingestion.IngestClass(database,user,password,host,port)  #create ingestion.IngestClass Object
+                        
                         Status=IngestionObj.create_dataset(dataset_name,file_name,dataset_visibility,user_name) #call create_dataset method to create dataset and insert csv data into table
                         return Response({"Status":Status})   #return Status 
                 except Exception as e:
-                        return Response({"Exception":str(e)})                  
+                        return Response({"Exception":str(e)})   
+
+import json
+
+class DatasetSchemaClass(APIView):
+        def get(self,request,format=None):
+                dataset_id=request.POST.get('dataset_id')
+                schema_obj=SchemaClass(database,user,password,host,port)
+                schema_data=schema_obj.get_dataset_schema(str(dataset_id))
+                return Response({"Schema":str(schema_data)})    
+
+        def put(self,request,format=None):
+                update_schema_data=json.loads(request.body)
+
+                # user_name=request.POST.get('user_name')
+                # dataset_id=request.POST.get('dataset_id')
+
+                # column_list=[]
+                # col_attribute_list=[]
+                # col_datatype_list=[]
+                # column_list.append(request.POST.get('id'))
+                # column_list.append(request.POST.get('name'))
+                # column_list.append(request.POST.get('sal'))
+
+                # col_attribute_list.append(request.POST.get('datatype_id'))
+                # col_attribute_list.append(request.POST.get('datatype_name'))
+                # col_attribute_list.append(request.POST.get('datatype_sal'))
+
+                # col_datatype_list.append(request.POST.get('col_id'))
+                # col_datatype_list.append(request.POST.get('col_name'))
+                # col_datatype_list.append(request.POST.get('col_sal'))
+
+                # schema_obj=SchemaClass(database,user,password,host,port)
+                # schema_status=schema_obj.update_dataset_schema(column_list,col_datatype_list,col_attribute_list,dataset_id,user_name)
+
+                return Response({"Status":update_schema_data})           
                 
-
-class ProjectDetailClass(APIView):
-        """
-        This class is used to Retrive project Data.
-        It will take url string as mlaas/ingest/project_details/.
-        It will take input parameters as Username.
-        And it will return Project Data in Json Format.
-
-        Input  : username
-        Output : json
-        """
-        # permission_classes = [IsAuthenticated]
-        def get(self, request, format=None):
-                try:
-                        # user_name=request.user.get_username()
-                        user_name=request.POST.get('user_name')
-                        # user_id=request.user.id
-                        # user_name=str(request.POST.get('user_name'))  #get Username
-                        project_obj=project_creation.ProjectClass() #create roject_creation.ProjectClass object
-                        project_df=project_obj.show_project_details(DBObject,connection,user_name) #call show_project_details and it will return project detail dataframe
-                        project_json=json.loads(project_df.to_json(orient='records')) # convert datafreame into json
-                        column_data=['dataset_id','index']
-                        json_data=get_json_format(project_json,column_data) #calling function to get pre-define json format
-                        return Response({"Data":json_data}) #return Data 
-                except Exception as e:
-                        return Response({"Exception":str(e)}) 
 
 class DataDetailClass(APIView):
         """
@@ -212,7 +222,6 @@ class DataDetailClass(APIView):
                 try:
                         user_name = request.POST.get('user_name')
                         table_name=request.POST.get('table_name')  #get tablename
-                        IngestionObj=ingestion.IngestClass(database,user,password,host,port)  #create ingestion.IngestClass Object
                         dataset_df=IngestionObj.show_data_details(table_name,user_name) #call show_data_details and it will return dataset detail data in dataframe
                         dataset_json=json.loads(dataset_df)  # convert datafreame into json
                         json_data=get_json_format(dataset_json,['dataset_id','index']) #calling function to get pre-define json format
@@ -237,7 +246,7 @@ class DeleteProjectDetailClass(APIView):
                         user_name=request.POST.get('user_name')
                         project_id=request.POST.get('project_id')  #get tablename
                         #project_obj=project_creation.ProjectClass()  
-                        project_status= IngestClass.delete_project_details(DBObject,connection,project_id,user_name) 
+                        project_status= IngestionObj.delete_project_details(project_id,user_name) 
                         return Response({"Status":project_status})  #return status 
                 except Exception as e:
                         return Response({"Exception":str(e)}) 
@@ -258,7 +267,7 @@ class DeleteDatasetDetailClass(APIView):
                         user_name=request.POST.get('user_name')
                         dataset_id=request.POST.get('dataset_id')  #get dataset name
                         #dataset_obj=dataset_creation.DatasetClass()
-                        dataset_status=IngestClass.delete_dataset_details(DBObject,connection,dataset_id,user_name) 
+                        dataset_status=IngestionObj.delete_dataset_details(dataset_id,user_name) 
                         return Response({"Status":dataset_status})  #return status 
                 except Exception as e:
                         return Response({"Exception":str(e)}) 
@@ -277,16 +286,13 @@ class DeleteDataDetailClass(APIView):
 
                 try:
                         # user_name=request.user.get_username()
-
                         user_name=request.POST.get('user_name')
                         table_name=request.POST.get('table_name')  #get tablename
                         #dataset_obj=dataset_creation.DatasetClass()
-                        status=IngestClass.delete_data_details(DBObject,connection,table_name,user_name) 
+                        status=IngestionObj.delete_data_details(table_name,user_name) 
                         return Response({"Status":status})  #return status 
                 except Exception as e:
                         return Response({"Exception":str(e)}) 
 
 
-class TestingClass(APIView):
-        def post(self,request,format=None):
-                return Response({"msg":"Hello"})
+

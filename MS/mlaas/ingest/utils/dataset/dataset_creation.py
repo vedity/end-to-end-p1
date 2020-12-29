@@ -12,6 +12,7 @@
 import os
 import pandas as pd
 from ..project import project_creation
+from ..custom_exception.exception_handler import *
 
 class DatasetClass:
    
@@ -218,11 +219,13 @@ class DatasetClass:
         Returns:
             [dataframe]: [it will return dataset details in the form of dataframe.]
         """
+        
         table_name,_,cols = self.make_dataset_schema() # Get table name,schema and columns from dataset class.
         # This command is used to get dataset details from dataset table of database.
-        sql_command = "SELECT "+ cols +" FROM "+ table_name + " WHERE USER_NAME ='"+ user_name +"'"
-        dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
-        return dataset_df
+        sql_command = "SELECT * FROM "+ table_name + " WHERE USER_NAME ='"+ user_name +"'"
+        data=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+        
+        return data
 
     def show_data_details(self,DBObject,connection,table_name,user_name):
         """This function is used to show details about loaded dataset.

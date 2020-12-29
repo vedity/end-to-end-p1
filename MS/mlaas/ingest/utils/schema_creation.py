@@ -89,7 +89,7 @@ class SchemaClass:
                 status = DBObject.update_records(connection,sql_command)
                 
         else:
-            for prev_col,new_col,prev_dtype,new_dtype,col_attr in zip(prev_cols_lst,new_cols_lst,prev_dtype_lst,new_dtype_lst,cols_attribute_lst): 
+            for prev_col,new_col,prev_dtype,new_dtype,col_attr in zip(prev_cols_lst,new_cols_lst,new_dtype_lst,new_dtype_lst,cols_attribute_lst): 
                 row = dataset_id,prev_col,new_col,prev_dtype,new_dtype,col_attr
                 row_tuples = [tuple(row)] # Make record for project table
                 status = DBObject.insert_records(connection,table_name,row_tuples,cols)
@@ -101,19 +101,22 @@ class SchemaClass:
         connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port)
         schema_status = DBObject.create_schema(connection,user_name)
         table_name,col,schema = self.get_schema()
+        table_name = user_name+"."+table_name
         create_status = DBObject.create_table(connection,table_name,schema)
         
-        mapping_status = map_dataset_schema(DBObject,connection,user_name,dataset_id,column_lst,data_type_lst,column_attribute_lst)
+        mapping_status =self.map_dataset_schema(DBObject,connection,user_name,dataset_id,column_lst,data_type_lst,column_attribute_lst)
         return mapping_status
     
     def is_existing_schema(self,DBObject,connection,dataset_id,user_name):
         table_name,*_ = self.get_schema()
-        sql_command = "select dataset_id from "+ user_name +"."+table_name
+        sql_command = "select dataset_id from "+ user_name +"."+table_name +" where dataset_id="+dataset_id
         data=DBObject.select_records(connection,sql_command)
-        
-        if len(data) > 0 :
-            return True
-        else:
-            return False
+        data=int(data.shape[0])
+        # if data == None:return False
+        # if data > 0 :
+        #     return True
+        # else:
+        #     return False
+        return False
         
        

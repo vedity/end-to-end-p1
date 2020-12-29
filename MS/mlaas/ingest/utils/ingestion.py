@@ -166,10 +166,11 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise DatabaseConnectionFailed 
             
             data_details_df = super(IngestClass,self).show_data_details(DBObject,connection,table_name,user_name) # Get dataframe of loaded csv.
-            if data_details_df == None :
-                return DataNotFound
+            if type(data_details_df) == type(None) :
+                raise DataNotFound
             data_details_df=data_details_df.to_json(orient='records')
-            
+            if len(data_details_df) == 0 :
+                raise DataNotFound
             
             
         except (DatabaseConnectionFailed,DataNotFound) as exc:

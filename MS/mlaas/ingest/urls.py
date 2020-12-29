@@ -19,7 +19,7 @@ urlpatterns = [
 
     #URL For Project Detail
     # path('mlaas/ingest/project_detail/',views.project_details,name='project_details'),
-    path('mlaas/ingest/project_detail/',ProjectDetailClass.as_view()),
+    # path('mlaas/ingest/project_detail/',ProjectDetailClass.as_view()),
 
     #URL For delete Project Detail
     path('mlaas/ingest/delete/project_detail/',DeleteProjectDetailClass.as_view()),
@@ -30,6 +30,6 @@ urlpatterns = [
     #URL For delete data Detail
     path('mlaas/ingest/delete/data_detail/',DeleteDataDetailClass.as_view()),
 
-    path('mlaas/testing/',TestingClass.as_view())
+    path('mlaas/ingest/dataset_schema/', DatasetSchemaClass.as_view())
   
 ]
