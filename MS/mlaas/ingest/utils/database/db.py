@@ -8,6 +8,7 @@
  Vipul Prajapati          18-DEC-2020           1.3           Added functionality for create schema.
 */
 '''
+from MS.mlaas.ingest.utils.custom_exception.exception_handler import GetColumnNamesFailed
 import psycopg2
 import psycopg2.extras as extras
 import pandas as pd 
@@ -32,10 +33,10 @@ class DBClass:
         """This function is used to make connection with database.
 
         Args:
-            database ([string]): [name of the database.]
-            user ([string]): [user of the database.]
-            password ([string]): [password of the database.]
-            host ([string]): [host ip or name where database is running.]
+            database ([string]): [name of the database.],
+            user ([string]): [user of the database.],
+            password ([string]): [password of the database.],
+            host ([string]): [host ip or name where database is running.],
             port ([string]): [port number in which database is running.]
 
         Returns:
@@ -53,7 +54,7 @@ class DBClass:
         """This function is used to create schema.
 
         Args:
-            connection ([object]): [connection for database]
+            connection ([object]): [connection for database],
             user_name ([string]): [user name]
 
         Returns:
@@ -78,8 +79,8 @@ class DBClass:
         """This function is used to  create table into database.
 
         Args:
-            connection ([object]): [object of the connection to the database.]
-            table_name ([string]): [name of the table.]
+            connection ([object]): [object of the connection to the database.],
+            table_name ([string]): [name of the table.],
             schema ([string]): [structure of the table.]
 
         Returns:
@@ -101,10 +102,10 @@ class DBClass:
         """This function is used to insert data into database table.
 
         Args:
-            connection ([object]): [object of the database connection.]
-            table_name ([string]): [name of the table.]
-            row_tuples ([list]): [list of the tuple of record.]
-            cols ([string]): [column names in the form of string.s]
+            connection ([object]): [object of the database connection.],
+            table_name ([string]): [name of the table.],
+            row_tuples ([list]): [list of the tuple of record.],
+            cols ([string]): [column names in the form of strings.]
 
         Returns:
             [integer]: [it will return status of the data insertion. if successfully then 0 else 1.]
@@ -128,7 +129,7 @@ class DBClass:
         """This function is used to retrieve data from database table into dataframe.
 
         Args:
-            connection ([object]): [object of the database connection.]
+            connection ([object]): [object of the database connection.],
             sql_command ([string]): [select sql command.]
 
         Returns:
@@ -150,7 +151,7 @@ class DBClass:
         """This function is used to delete data from database table.
 
         Args:
-            connection ([object]): [connection object of the database class.]
+            connection ([object]): [connection object of the database class.],
             sql_command ([string]): [delete sql command]
 
         Returns:
@@ -173,7 +174,7 @@ class DBClass:
         """This function is used to update records into database.
 
         Args:
-            connection ([object]): [connection for database]
+            connection ([object]): [connection for database],
             sql_command ([string]): [query string for update command]
 
         Returns:
@@ -197,9 +198,9 @@ class DBClass:
         """This function is used to load csv data  into database table.
 
         Args:
-            connection_string ([object]): [connection string of the database connection.]
-            table_name ([string]): [name of the table.]
-            file_data_df ([dataframe]): [dataframe of the file data.]
+            connection_string ([object]): [connection string of the database connection.],
+            table_name ([string]): [name of the table.],
+            file_data_df ([dataframe]): [dataframe of the file data.],
             user_name ([string]): [name of the user.]
 
         Returns:
@@ -215,9 +216,46 @@ class DBClass:
             
         return status
 
-    
+    def get_column_names(self, connection, table_name):
+        '''
+        Returns name of the columns from the given csv table.
+        
+        Args:
+            connection_string ([object]): [connection string of the database connection.],
+            table_name ([string]): [name of the table.]
+        
+        Returns:
+            columns ([List of Strings]): [List of Column names]
+        '''
+        
+        col_cursor = connection.cursor()
 
+        # concatenate string for query to get column names
+        # SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = 'some_table';
+        sql_command = "SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE "
+        sql_command += "table_name = '{}';".format( table_name )
+        
+        try:
+            # execute the SQL string to get list with col names in a tuple
+            col_cursor.execute(sql_command)
 
+            # get the tuple element from the list
+            col_names = ( col_cursor.fetchall() )
+
+            columns = []
+
+            # iterate list of tuples and grab first element
+            for tup in col_names:
+
+                # append the col name string to the list
+                columns += [ tup[0] ]
+            
+            # close the cursor object to prevent memory leaks
+            col_cursor.close()
+        except:
+            raise GetColumnNamesFailed
+        
+        return columns
 
 
 

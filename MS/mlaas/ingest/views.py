@@ -236,8 +236,8 @@ class DeleteProjectDetailClass(APIView):
                         # user_name=request.user.get_username()
                         user_name=request.POST.get('user_name')
                         project_id=request.POST.get('project_id')  #get tablename
-                        project_obj=project_creation.ProjectClass()  
-                        project_status=project_obj.delete_project_details(DBObject,connection,project_id,user_name) 
+                        #project_obj=project_creation.ProjectClass()  
+                        project_status= IngestClass.delete_project_details(DBObject,connection,project_id,user_name) 
                         return Response({"Status":project_status})  #return status 
                 except Exception as e:
                         return Response({"Exception":str(e)}) 
@@ -257,8 +257,8 @@ class DeleteDatasetDetailClass(APIView):
                         # user_name=request.user.get_username()
                         user_name=request.POST.get('user_name')
                         dataset_id=request.POST.get('dataset_id')  #get dataset name
-                        dataset_obj=dataset_creation.DatasetClass()
-                        dataset_status=dataset_obj.delete_dataset_details(DBObject,connection,dataset_id,user_name) 
+                        #dataset_obj=dataset_creation.DatasetClass()
+                        dataset_status=IngestClass.delete_dataset_details(DBObject,connection,dataset_id,user_name) 
                         return Response({"Status":dataset_status})  #return status 
                 except Exception as e:
                         return Response({"Exception":str(e)}) 
@@ -280,8 +280,8 @@ class DeleteDataDetailClass(APIView):
 
                         user_name=request.POST.get('user_name')
                         table_name=request.POST.get('table_name')  #get tablename
-                        dataset_obj=dataset_creation.DatasetClass()
-                        status=dataset_obj.delete_data_details(DBObject,connection,table_name,user_name) 
+                        #dataset_obj=dataset_creation.DatasetClass()
+                        status=IngestClass.delete_data_details(DBObject,connection,table_name,user_name) 
                         return Response({"Status":status})  #return status 
                 except Exception as e:
                         return Response({"Exception":str(e)}) 

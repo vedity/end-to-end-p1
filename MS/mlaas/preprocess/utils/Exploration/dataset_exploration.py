@@ -8,11 +8,11 @@
 '''
 
 import pandas as pd
-from ..database import db
+from MS.mlaas.ingest.utils.database import db
 import numpy as np
 
 class ExploreClass:
-  
+
     def get_dataset_statistics(self,DBObject,connection,table_name):
         """
             This class returns all the statistics for the given table.
@@ -24,19 +24,35 @@ class ExploreClass:
         sql_command = f"SELECT * FROM {table_name}"
         data_df = DBObject.select_records(connection,sql_command)
         
-        unique_list= []
-        null_list = []
-        
-        for cols in data_df.columns:
-            unique_list.append(len(data_df[cols].unique()))
-            null_list.append(len(data_df[data_df[cols] == np.NaN]))
-        
-        stats_df = data_df.describe()
-        
-        stats_df["Unique Values"] = unique_list
-        stats_df["Null Values"] = null_list
-        
-        return stats_df
+        try:
+            stats_df = data_df.describe(include = 'all')
+
+            stats_df = stats_df.T
+            stats_df.rename(columns = {'unique':'Unique Values'}, inplace = True)    
+            stats_df["Null Values"] = len(data_df) - stats_df['count']
+            stats_df.rename(columns = {'count':'Non-Null Values'}, inplace = True)    
+            stats_df.rename(columns = {'mean':'Mean'}, inplace = True)    
+            stats_df.rename(columns = {'std':'Std'}, inplace = True)    
+            stats_df.rename(columns = {'min':'Min Value'}, inplace = True)    
+            stats_df.rename(columns = {'max':'Max Value'}, inplace = True)    
+            stats_df.rename(columns = {'top':'Most Frequent'}, inplace = True)    
+            stats_df.rename(columns = {'freq':'Frequency'}, inplace = True)    
+
+            try:
+                stats_df = stats_df[['Mean','Std','Min Value','25%','50%','75%','Max Value','Most Frequent','Frequency','Unique Values','Null Values','Non-Null Values']]
+            except KeyError:
+                try:
+                    stats_df = stats_df[['Mean','Std','Min Value','25%','50%','75%','Max Value','Null Values','Non-Null Values']]
+                except KeyError:
+                    stats_df = stats_df[['Most Frequent','Frequency','Unique Values','Null Values','Non-Null Values']]
+        except AttributeError:
+            stats_df = data_df.describe(include = 'all')
+            return stats_df
+        except TypeError:
+            stats_df = data_df.describe(include = 'all')
+            return stats_df
+    
+        return stats_df.T
     
     def return_columns(self,DBObject, connection, table_name,*args):
         '''
@@ -58,3 +74,5 @@ class ExploreClass:
         data_df = DBObject.select_records(connection,sql_command)
         
         return data_df
+    
+    
