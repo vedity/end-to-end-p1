@@ -21,10 +21,10 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
            It will initialize when object of this class is created with below parameter.
            
         Args:
-            database ([string]): [name of the database.]
-            user ([string]): [user of the database.]
-            password ([string]): [password of the database.]
-            host ([string]): [host ip or name where database is running.]
+            database ([string]): [name of the database.],
+            user ([string]): [user of the database.],
+            password ([string]): [password of the database.],
+            host ([string]): [host ip or name where database is running.],
             port ([string]): [port number in which database is running.]
         """
         self.database = database # Database Name
@@ -48,8 +48,8 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
            E.g. sales forecast , travel time predictions etc.
            
         Args:
-            project_name ([string]): [name of the project]
-            project_desc ([string]): [descriptions of the project]
+            project_name ([string]): [name of the project],
+            project_desc ([string]): [descriptions of the project],
             dataset_name ([string], optional): [name of the dataset]. Defaults to None.
             dataset_visibility ([string], optional): [visibility of the dataset]. Defaults to None.
             file_name ([string], optional): [name of the csv file]. Defaults to None.
@@ -80,7 +80,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 status = super(IngestClass,self).update_dataset_status(DBObject,connection,project_id,load_data_status)
                      
             elif project_status == 0:
-                status = super(IngestClass,self).update_dataset_status(DBObject,connection,project_id,load_data_status)
+                status = super(IngestClass,self).update_dataset_status(DBObject,connection,project_id)
                 
                 
         except (DatabaseConnectionFailed,ProjectAlreadyExist,LoadCSVDataFailed,ProjectCreationFailed) as exc:
@@ -94,9 +94,9 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
            E.g. sales , traveltime etc.
            
         Args:
-            dataset_name ([string]): [name of the dataset.]
-            file_name ([string]): [name of the name.]
-            dataset_visibility ([string]): [visibility of the dataset.]
+            dataset_name ([string]): [name of the dataset.],
+            file_name ([string]): [name of the name.],
+            dataset_visibility ([string]): [visibility of the dataset.],
             user_name ([string]): [name of the user.]
 
         Returns:
@@ -139,12 +139,15 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise DatabaseConnectionFailed
             
             dataset_df = super(IngestClass,self).show_dataset_details(DBObject,connection,user_name) # Get dataframe of dataset created.
-            if dataset_df == None :
-                raise DatasetDataNotFound  
-              
+            dataset_df = dataset_df.to_json(orient='records')
+            
+            if len(dataset_df) == 0 :
+                raise DatasetDataNotFound 
+                 
         except (DatabaseConnectionFailed,DatasetDataNotFound) as exc:
             return exc.msg
-            
+         
+        
         return dataset_df
 
     def show_data_details(self,table_name,user_name):
@@ -163,8 +166,11 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise DatabaseConnectionFailed 
             
             data_details_df = super(IngestClass,self).show_data_details(DBObject,connection,table_name,user_name) # Get dataframe of loaded csv.
-            if data_details_df == None:
+            if data_details_df == None :
                 return DataNotFound
+            data_details_df=data_details_df.to_json(orient='records')
+            
+            
             
         except (DatabaseConnectionFailed,DataNotFound) as exc:
             return exc.msg
@@ -186,7 +192,8 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise DatabaseConnectionFailed
             
             project_df = super(IngestClass,self).show_project_details(DBObject,connection,user_name) # Get dataframe of project created.
-            if project_df == None:
+            project_df = project_df.to_json(orient='records')
+            if project_df == None or len(project_df) == 0:
                 raise ProjectDataNotFound
             
         except (DatabaseConnectionFailed,ProjectDataNotFound) as exc:
@@ -194,7 +201,84 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         
         return project_df
     
- 
+    def delete_project_details(self, project_id, user_name):
+        '''
+        This function is used to delete an entry in the project_tbl
+        
+        Args:
+            project_id ([integer]): [id of the entry which you want to delete.],
+            user_name ([string]): [Name of the user.]
+            
+        Returns:
+            status ([boolean]): [status of the project deletion. if successfully then 0 else 1.]
+        '''
+        
+        try:
+            DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
+            if connection == None:
+                raise DatabaseConnectionFailed
+            
+            deletion_status = super(IngestClass, self).delete_project_details(DBObject,connection,project_id,user_name)
+            if deletion_status == 1:
+                raise ProjectDeletionFailed
+            
+            return deletion_status
+        
+        except (DatabaseConnectionFailed,ProjectDeletionFailed) as exc:
+            return exc.msg
+        
+    def delete_dataset_details(self, dataset_id, user_name):
+        '''
+        This function is used to delete an entry in the project_tbl
+        
+        Args:
+            dataset_id ([integer]): [id of the dataset entry which you want to delete.],
+            user_name ([string]): [Name of the user.]
+            
+        Returns:
+            status ([boolean]): [status of the project deletion. if successfully then 0 else 1.]
+        '''
+        
+        try:
+            DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
+            if connection == None:
+                raise DatabaseConnectionFailed
+            
+            deletion_status = super(IngestClass, self).delete_dataset_details(DBObject,connection,dataset_id,user_name)
+            if deletion_status == 1:
+                raise DatasetDeletionFailed
+            
+            return deletion_status
+        
+        except (DatabaseConnectionFailed,DatasetDeletionFailed) as exc:
+            return exc.msg
+        
+    def delete_data_details(self,table_name,user_name):
+        """
+        This function is used to delete the whole table which was created from 
+        user input file.
+        
+        Args:
+            table_name ([string]): [Name of the table that you want to delete.],
+            user_name ([string]): [Name of the user.]
 
+        Returns:
+            [integer]: [it will return status of the dataset deletion. if successfully then 0 else 1.]
+        """
+        
+        try:
+            DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
+            if connection == None:
+                raise DatabaseConnectionFailed
+            
+            deletion_status = super(IngestClass, self).delete_data_details(DBObject,connection,table_name,user_name)
+            if deletion_status == 1:
+                raise DataDeletionFailed
+            
+            return deletion_status
+        
+        except (DatabaseConnectionFailed,DataDeletionFailed) as exc:
+            return exc.msg
+        
 
     

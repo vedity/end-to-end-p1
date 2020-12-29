@@ -42,9 +42,9 @@ class DatasetClass:
            E.g. column_name_1,column_name_2 .......,column_name_n.
 
         Args:
-            dataset_name ([string]): [name of the dataset.]
-            file_name ([string]): [name of the file.]
-            dataset_visibility ([string]): [visibility of the dataset.]
+            dataset_name ([string]): [name of the dataset.],
+            file_name ([string]): [name of the file.],
+            dataset_visibility ([string]): [visibility of the dataset.],
             user_name ([string]): [name of the user.]
 
         Returns:
@@ -61,8 +61,8 @@ class DatasetClass:
         """This function is used to get server file path.
 
         Args:
-            file_name ([string]): [name of the file.]
-            dataset_visibility ([string]): [visibility of the dataset.]
+            file_name ([string]): [name of the file.],
+            dataset_visibility ([string]): [visibility of the dataset.],
             user_name ([string]): [name of the user.]
 
         Returns:
@@ -119,11 +119,11 @@ class DatasetClass:
            E.g. dataset details : dataset_name,file_name,file_size,dataset_table_name,user_name.
 
         Args:
-            DBObject ([object]): [object of the database class.]
-            connection ([object]): [object of the database connection.]
-            dataset_name ([string]): [name of the dataset.]
-            file_name ([string]): [name of the file.]
-            dataset_visibility ([string]): [visibility of the dataset.]
+            DBObject ([object]): [object of the database class.],
+            connection ([object]): [object of the database connection.],
+            dataset_name ([string]): [name of the dataset.],
+            file_name ([string]): [name of the file.],
+            dataset_visibility ([string]): [visibility of the dataset.],
             user_name ([string]): [name of the user.]
 
         Returns:
@@ -132,8 +132,12 @@ class DatasetClass:
         """
         schema_status = DBObject.create_schema(connection)
         table_name,schema,cols = self.make_dataset_schema() # Get table name,schema and columns from dataset class.
-         #? Checking if the same dataset is there for the same user in the dataset table? If yes, then it will not insert a new row in the table
-        if self.dataset_exists(DBObject,connection,table_name,dataset_visibility,dataset_name,user_name): return 2,1
+        
+        #? Checking if the same dataset is there for the same user in the dataset table? If yes, then it will not insert a new row in the table
+        dataset_exist = self.dataset_exists(DBObject,connection,table_name,dataset_visibility,dataset_name,user_name)
+        
+        if dataset_exist == False: pass #? No dataset with same name exists so creating the new one
+        else: return 2,dataset_exist #? dataset_exists() function returns id of the dataset if dataset with same name exists
 
         create_status = DBObject.create_table(connection,table_name,schema) # Get status about dataset tableis created or not.if created then 0 else 1.
 
@@ -154,11 +158,11 @@ class DatasetClass:
         """This function is used to load csv file data into database table.
 
         Args:
-            DBObject ([object]): [object of the database class.]
-            connection ([object]): [object of the database connection.]
-            connection_string ([string]): [connection string of the database.]
-            file_name ([string]): [name of the file.]
-            dataset_visibility ([string]): [visibility of the dataset.]
+            DBObject ([object]): [object of the database class.],
+            connection ([object]): [object of the database connection.],
+            connection_string ([string]): [connection string of the database.],
+            file_name ([string]): [name of the file.],
+            dataset_visibility ([string]): [visibility of the dataset.],
             user_name ([string]): [name of the user.]
 
         Returns:
@@ -170,6 +174,10 @@ class DatasetClass:
         file_data_df = DBObject.read_data(file_path)
         # Get table name.
         table_name = self.get_dataset_table_name(file_name)
+        if dataset_visibility.lower() == "public" :
+            user_name = "public"
+        else:
+            user_name = user_name
         # Get schema status.if successfully then 0 else 1.
         schema_status = DBObject.create_schema(connection,user_name)
         # Get load dataset status. if successfully then 0 else 1.
@@ -180,9 +188,9 @@ class DatasetClass:
         """This function is used to get dataset id of the created dataset.
 
         Args:
-            DBObject ([object]): [object of the database class.]
-            connection ([object]): [object of the database connection.]
-            row_tuples ([list]): [list of the tuple of dataset record.]
+            DBObject ([object]): [object of the database class.],
+            connection ([object]): [object of the database connection.],
+            row_tuples ([list]): [list of the tuple of dataset record.],
             user_name ([string]): [name of the user.]
 
         Returns:
@@ -204,8 +212,8 @@ class DatasetClass:
         """This function is used to show details about all created datasets by user.
 
         Args:
-            DBObject ([object]): [object of the database class.]
-            connection ([object]): [object of the database connection.]
+            DBObject ([object]): [object of the database class.],
+            connection ([object]): [object of the database connection.],
             user_name ([string]): [name of the user.]
 
         Returns:
@@ -223,8 +231,8 @@ class DatasetClass:
         """This function is used to show details about loaded dataset.
 
         Args:
-            DBObject ([object]): [object of the database class.]
-            connection ([object]): [object of the database connection.]
+            DBObject ([object]): [object of the database class.],
+            connection ([object]): [object of the database connection.],
             table_name ([string]): [name of the table.]
 
         Returns:
@@ -241,9 +249,11 @@ class DatasetClass:
         """This function is used to delete dataset entry from the dataset table.
 
         Args:
-            DBObject ([object]): [object of the database class.]
-            connection ([object]): [object of the database connection.]
-            dataset_id ([integer]): [dataset id for the delete dataset record.]
+            DBObject ([object]): [object of the database class.],
+            connection ([object]): [object of the database connection.],
+            dataset_id ([integer]): [dataset id for the delete dataset record.],
+            user_name ([string]): [name of the user.],
+            skip_check ([boolean]): [Make this true if you don't want to check how many projects are using this dataset.], Defaults to False.
 
         Returns:
             [integer]: [it will return status of the dataset deletion. if successfully then 0 else 1.]
@@ -301,8 +311,14 @@ class DatasetClass:
         This function is used to delete the whole table which was created from 
         user input file.
         
-        Input: Database class Object, Connection Object, table_name
-        Output: status of deletion
+        Args:
+            DBObject ([object]): [object of the database class.],
+            connection ([object]): [object of the database connection.],
+            table_name ([string]): [Name of the table that you want to delete.],
+            user_name ([string]): [Name of the user.]
+
+        Returns:
+            [integer]: [it will return status of the dataset deletion. if successfully then 0 else 1.]
         """
         
         #? Creating Sql Query
@@ -315,14 +331,15 @@ class DatasetClass:
         """This function is used to check existing dataset name.
 
         Args:
-            DBObject ([object]): [object of the database class.]
-            connection ([object]): [object of the database connection.]
-            table_name ([string]): [name of the table.]
-            dataset_name ([string]): [name of the dataset.]
+            DBObject ([object]): [object of the database class.],
+            connection ([object]): [object of the database connection.],
+            table_name ([string]): [name of the table.],
+            dataset_name ([string]): [name of the dataset.],
             user_name ([string]): [name of the user.]
 
         Returns:
-            [boolean]: [it will return true or false. if existed then true else false.]
+            [boolean | integer]: [it will return False if no dataset with same name does not exists,
+                                    or else it will return the id of the existing dataset]
         """
         
         #? Checking if the same dataset is there for the same user in the dataset table? If yes, then it will not insert a new row in the table

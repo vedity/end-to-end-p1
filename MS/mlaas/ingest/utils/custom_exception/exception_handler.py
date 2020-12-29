@@ -78,14 +78,6 @@ class TableNotFound(Exception):
     def __str__(self):
         return (self.msg)
 
-class DataDeletionFailed(Exception):
-    """ Data Deletion Failed Exception """
-    def __init__(self):
-        self.msg = "DataDeletionFailed"
-
-    def __str__(self):
-        return (self.msg)
-
 class DatasetCreationFailed(Exception):
     """Dataset Creation Failed Exception"""
     def __init__(self):
@@ -156,6 +148,38 @@ class LoadCSVDataFailed(Exception):
     def __init__(self):
         self.msg = "LoadCSVDataFailed"
      
+    def __str__(self):
+        return (self.msg)
+
+class GetColumnNamesFailed(Exception):
+    """  Can't get column names """
+    def __init__(self):
+        self.msg = "Can't get column names"
+     
+    def __str__(self):
+        return (self.msg)
+
+class ProjectDeletionFailed(Exception):
+    """ Project Deletion Failed Exception """
+    def __init__(self):
+        self.msg = "ProjectDeletionFailed"
+
+    def __str__(self):
+        return (self.msg)
+
+class DatasetDeletionFailed(Exception):
+    """ Dataset Deletion Failed Exception """
+    def __init__(self):
+        self.msg = "DatasetDeletionFailed"
+
+    def __str__(self):
+        return (self.msg)
+
+class DataDeletionFailed(Exception):
+    """ Data Deletion Failed Exception """
+    def __init__(self):
+        self.msg = "DataDeletionFailed"
+
     def __str__(self):
         return (self.msg)
 
