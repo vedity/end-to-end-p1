@@ -52,21 +52,21 @@ class CreateProjectClass(APIView):
         def get(self, request, format=None):
                 try:
                         logger.info(" Call GET method in CreateProjectClass")
-                        # user_name=request.user.get_username()
-                        user_name=request.POST.get('user_name')  #get Username
-                        project_df=IngestionObj.show_project_details(user_name) # call show_project_details to retrive project detail data and it will return dataframe
+                        #user_name = request.user.get_username()
+                        user_name  = request.POST.get('user_name') #get Username
+                        project_df = IngestionObj.show_project_details(user_name) #call show_project_details to retrive project detail data and it will return dataframe
                         project_df = json.loads(project_df)
                         logger.info("project detail retrival successfull")
                         return Response({"Data":project_df})  #return Data
 
                 except Exception as e:
-                        logger.error("Error in CreateProjectClass GET method "+str(e))
+                        logger.error("Error in CreateProjectClass GET method "+str(e), exc_info=True)
                         return Response({"Exception":str(e)}) 
         
         def post(self, request, format=None):
                         try:
                         # user_name=request.user.get_username()  #get Username
-                                logger.info("Entered In CreateProjectClass")
+                                logger.info("call POST method in CreateProjectClass")
                                 user_name=request.POST.get('user_name')  #get Username
                                 project_name=request.POST.get('project_name') #get project_name
                                 project_desc=request.POST.get('description') #get description
@@ -81,6 +81,7 @@ class CreateProjectClass(APIView):
                                 if dataset_id == None :
                                         project_obj=project_creation.ProjectClass()
                                         table_name,_,_=project_obj.make_project_schema()
+                                        logger.info("Calling project_exist function to check project Name")
                                         exists_project_status=project_obj.project_exists(DBObject,connection,table_name,project_name,user_name)
                                         if exists_project_status == False:
                                                 my_file=request.FILES['inputfile'] #get inputfile Name
@@ -99,9 +100,11 @@ class CreateProjectClass(APIView):
                                                                 filename = fs.save(file_name, my_file)
                                                                 file_url = private_path + fs.url(filename)
                                                         else:
+        
                                                                 return Response({"visibility":"Not appropriate Value"})
 
                                                 except Exception as e:
+                                                        logger.error("Error while uploading file to server"+str(e))
                                                         return Response({"Exception":str(e)}) 
                                         else:
                                                 return Response({"message":"Project Name already Exists"})
@@ -109,10 +112,14 @@ class CreateProjectClass(APIView):
                                         dataset_id = int(dataset_id)
                                                 
                                 
-                                Status=IngestionObj.create_project(project_name,project_desc,dataset_name,dataset_visibility,file_name,dataset_id,user_name)    #call create_project method to create project and insert csv data into table
-                                status_code,error_msg=get_Status_code(Status)
-                                logger.info("Exit From Createprojectclass")
-                                return Response({"status_code":status_code,"error_msg":error_msg}) 
+                                project_Status=IngestionObj.create_project(project_name,project_desc,dataset_name,dataset_visibility,file_name,dataset_id,user_name)    #call create_project method to create project and insert csv data into table
+                                if project_Status != 0:
+                                        status_code,error_msg=get_Status_code(project_Status)
+                                        logger.info("Exit From Createprojectclass")
+                                        return Response({"status_code":status_code,"error_msg":error_msg}) 
+                                else:
+                                        return Response({"status_code":200,"status_msg":"Successfully Inserted"}) 
+
                         except Exception as e:
                                         logging.error("Exception occurred In Creatprojectclas", exc_info=True)
                                         return Response({"Exception":str(e)})      
@@ -131,17 +138,18 @@ class CreateDatasetClass(APIView):
         # permission_classes = [IsAuthenticated]
         def get(self, request, format=None):
                 try:
+                        logger.info(" Call GET method in CreateDatasetClass")
                         user_name=request.POST.get('user_name')  #get Username
-                       
                         dataset_df=IngestionObj.show_dataset_details(user_name) #Call show_dataset_details method it will return dataset detail for sepecific user_name
                         dataset_df = json.loads(dataset_df)
                         return Response({"Data":dataset_df}) #return Data                
                 except Exception as e:
+                        logger.error("Error in CreateDatasetClass GET method "+str(e), exc_info=True)
                         return Response({"Exception":str(e)}) 
         
         def post(self, request, format=None):
                 try: 
-
+                        logger.info(" Call POST method in CreateDatasetClass")
                         # user_name=request.user.get_username()
                         user_name=str(request.POST.get('user_name'))  #get Username
                         dataset_name=request.POST.get('dataset_name') #get dataset name
@@ -174,11 +182,14 @@ class CreateDatasetClass(APIView):
                         else:
                                 return Response({"message":"Dataset Name already Exists"})
 
-
-                        
-                        Status=IngestionObj.create_dataset(dataset_name,file_name,dataset_visibility,user_name) #call create_dataset method to create dataset and insert csv data into table
-                        return Response({"Status":Status})   #return Status 
+                        dataset_Status=IngestionObj.create_dataset(dataset_name,file_name,dataset_visibility,user_name) #call create_dataset method to create dataset and insert csv data into table
+                        if dataset_Status != 0:
+                                status_code,error_msg=get_Status_code(dataset_Status)
+                                return Response({"status_code":status_code,"error_msg":error_msg}) 
+                        else:
+                                return Response({"status_code":200,"error_msg":"Successfully Inserted"})
                 except Exception as e:
+                        logger.error("Error in CreateDatasetClass POST method "+str(e), exc_info=True)
                         return Response({"Exception":str(e)})   
 
 import json
@@ -230,6 +241,7 @@ class DataDetailClass(APIView):
         # permission_classes = [IsAuthenticated]
         def get(self, request, format=None):
                 try:
+                        logger.info(" Call GET method in DataDetailClass")
                         user_name = request.POST.get('user_name')
                         table_name=request.POST.get('table_name')  #get tablename
                         dataset_visibility = request.POST.get('dataset_visibility')
@@ -238,6 +250,7 @@ class DataDetailClass(APIView):
                         json_data=get_json_format(dataset_json,['dataset_id','index']) #calling function to get pre-define json format
                         return Response({"Dataset":json_data})  #return Data 
                 except Exception as e:
+                        logger.error("Error in DataDetailClass GET method "+str(e), exc_info=True)
                         return Response({"Exception":str(e)}) 
 
 
@@ -253,13 +266,19 @@ class DeleteProjectDetailClass(APIView):
         """  
         def delete(self, request, format=None):
                 try:
+                        logger.info(" Call DELETE method in DeleteProjectDetailClass")
                         # user_name=request.user.get_username()
                         user_name=request.POST.get('user_name')
                         project_id=request.POST.get('project_id')  #get tablename
                         #project_obj=project_creation.ProjectClass()  
                         project_status= IngestionObj.delete_project_details(project_id,user_name) 
-                        return Response({"Status":project_status})  #return status 
+                        if project_status != 0:
+                                status_code,error_msg=get_Status_code(project_status)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
+                        else:
+                                return Response({"status_code":200,"error_msg":"Successfully Delete","response":"true"})
                 except Exception as e:
+                        logger.error("Error in DeleteProjectDetailClass DELETE method "+str(e), exc_info=True)
                         return Response({"Exception":str(e)}) 
 
 class DeleteDatasetDetailClass(APIView):
@@ -274,13 +293,20 @@ class DeleteDatasetDetailClass(APIView):
         """
         def delete(self, request, format=None):
                 try:
+                        logger.info(" Call DELETE method in DeleteDatasetDetailClass")
                         # user_name=request.user.get_username()
                         user_name=request.POST.get('user_name')
                         dataset_id=request.POST.get('dataset_id')  #get dataset name
                         #dataset_obj=dataset_creation.DatasetClass()
                         dataset_status=IngestionObj.delete_dataset_details(dataset_id,user_name) 
-                        return Response({"Status":dataset_status})  #return status 
+                        if dataset_status != 0:
+                                status_code,error_msg=get_Status_code(dataset_status)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
+                        else:
+                                return Response({"status_code":200,"error_msg":"Successfully Deleted","response":"true"})
+
                 except Exception as e:
+                        logger.error("Error in DeleteDatasetDetailClass DELETE method "+str(e), exc_info=True)
                         return Response({"Exception":str(e)}) 
 
 class DeleteDataDetailClass(APIView):
@@ -296,13 +322,20 @@ class DeleteDataDetailClass(APIView):
         def delete(self, request, format=None):
 
                 try:
+                        logger.info(" Call DELETE method in DeleteDataDetailClass")
                         # user_name=request.user.get_username()
                         user_name=request.POST.get('user_name')
                         table_name=request.POST.get('table_name')  #get tablename
                         #dataset_obj=dataset_creation.DatasetClass()
-                        status=IngestionObj.delete_data_details(table_name,user_name) 
-                        return Response({"Status":status})  #return status 
+                        data_detail_status=IngestionObj.delete_data_details(table_name,user_name) 
+                        if data_detail_status != 0 :
+                                status_code,error_msg=get_Status_code(data_detail_status)
+                                logger.info("Exit From Createprojectclass")
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
+                        else:
+                                return Response({"status_code":200,"error_msg":"Successfully Deleted","response":"true"})
                 except Exception as e:
+                        logger.error("Error in DeleteDataDetailClass DELETE method "+str(e), exc_info=True)
                         return Response({"Exception":str(e)}) 
 
 

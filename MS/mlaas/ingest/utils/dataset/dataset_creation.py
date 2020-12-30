@@ -12,7 +12,7 @@
 import os
 import pandas as pd
 from ..project import project_creation
-from ..custom_exception.exception_handler import *
+from common.utils.exception_handler.python_exception import *
 
 class DatasetClass:
    
