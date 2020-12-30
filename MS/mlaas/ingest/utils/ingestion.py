@@ -221,13 +221,13 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         try:
             DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
             if connection == None:
-                raise DatabaseConnectionFailed
+                raise DatabaseConnectionFailed(500)
             
             deletion_status = super(IngestClass, self).delete_project_details(DBObject,connection,project_id,user_name)
             if deletion_status == 1:
-                raise ProjectDeletionFailed
+                raise ProjectDeletionFailed(500)
             elif deletion_status == 2:
-                raise UserAuthenticationFailed
+                raise UserAuthenticationFailed(500)
             
             return deletion_status
         
@@ -249,17 +249,17 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         try:
             DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
             if connection == None:
-                raise DatabaseConnectionFailed
+                raise DatabaseConnectionFailed(500)
             
             deletion_status = super(IngestClass, self).delete_dataset_details(DBObject,connection,dataset_id,user_name)
             if deletion_status == 1:
-                raise DatasetDeletionFailed
+                raise DatasetDeletionFailed(500)
             elif deletion_status == 2:
-                raise DataDeletionFailed
+                raise DataDeletionFailed(500)
             elif deletion_status == 3:
-                raise DatasetInUse
+                raise DatasetInUse(500)
             elif deletion_status == 4:
-                raise UserAuthenticationFailed
+                raise UserAuthenticationFailed(500)
             
             return deletion_status
         
@@ -282,11 +282,11 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         try:
             DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
             if connection == None:
-                raise DatabaseConnectionFailed
+                raise DatabaseConnectionFailed(500)
             
             deletion_status = super(IngestClass, self).delete_data_details(DBObject,connection,table_name,user_name)
             if deletion_status == 1:
-                raise DataDeletionFailed
+                raise DataDeletionFailed(500)
             
             return deletion_status
         
