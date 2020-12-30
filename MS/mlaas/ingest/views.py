@@ -30,7 +30,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from .serializer import InputSerializer
-
+import logging
+logger = logging.getLogger('django')
 DBObject=db.DBClass()     #Get DBClass object
 connection,connection_string=DBObject.database_connection(database,user,password,host,port)      #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 IngestionObj=ingestion.IngestClass(database,user,password,host,port)
@@ -60,6 +61,7 @@ class CreateProjectClass(APIView):
         def post(self, request, format=None):
                         try:
                         # user_name=request.user.get_username()  #get Username
+                                logger.info("Entered In CreateProjectClass")
                                 user_name=request.POST.get('user_name')  #get Username
                                 project_name=request.POST.get('project_name') #get project_name
                                 project_desc=request.POST.get('description') #get description
@@ -103,8 +105,10 @@ class CreateProjectClass(APIView):
                                                 
                                 
                                 Status=IngestionObj.create_project(project_name,project_desc,dataset_name,dataset_visibility,file_name,dataset_id,user_name)    #call create_project method to create project and insert csv data into table
+                                logger.info("Exit From Createprojectclass")
                                 return Response({"Status":Status}) 
                         except Exception as e:
+                                        logging.error("Exception occurred In Creatprojectclas", exc_info=True)
                                         return Response({"Exception":str(e)})      
 
         
@@ -222,7 +226,8 @@ class DataDetailClass(APIView):
                 try:
                         user_name = request.POST.get('user_name')
                         table_name=request.POST.get('table_name')  #get tablename
-                        dataset_df=IngestionObj.show_data_details(table_name,user_name) #call show_data_details and it will return dataset detail data in dataframe
+                        dataset_visibility = request.POST.get('dataset_visibility')
+                        dataset_df=IngestionObj.show_data_details(table_name,user_name,dataset_visibility) #call show_data_details and it will return dataset detail data in dataframe
                         dataset_json=json.loads(dataset_df)  # convert datafreame into json
                         json_data=get_json_format(dataset_json,['dataset_id','index']) #calling function to get pre-define json format
                         return Response({"Dataset":json_data})  #return Data 

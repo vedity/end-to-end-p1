@@ -12,7 +12,7 @@
 import os
 import pandas as pd
 from ..project import project_creation
-from ..custom_exception.exception_handler import *
+from common.utils.exception_handler.python_exception import *
 
 class DatasetClass:
    
@@ -296,8 +296,9 @@ class DatasetClass:
                     user_name = 'public'
                 
                 dataset_table_name = dataset_table_name.lower()
+                table_name = dataset_table_name
                 user_name = user_name.lower()
-                data_status = self.delete_data_details(DBObject,connection,dataset_table_name,user_name)
+                data_status = self.delete_data_details(DBObject,connection,table_name,user_name)
                     
                 if dataset_status == 0 and data_status == 0: return 0
                 elif data_status == 1: return 2

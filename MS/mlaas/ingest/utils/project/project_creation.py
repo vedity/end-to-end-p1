@@ -12,8 +12,8 @@
 '''
 import pandas as pd
 from ..dataset import dataset_creation 
-from ..database import db
-from ..custom_exception.exception_handler import *
+from common.utils.database import db
+from common.utils.exception_handler.python_exception import *
 class ProjectClass:
 
     def make_project_schema(self):
