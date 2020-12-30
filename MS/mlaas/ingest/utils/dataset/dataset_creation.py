@@ -14,6 +14,9 @@ import pandas as pd
 from ..project import project_creation
 from common.utils.exception_handler.python_exception import *
 
+import logging
+logger = logging.getLogger('django')
+
 class DatasetClass:
    
     def make_dataset_schema(self):
@@ -259,51 +262,64 @@ class DatasetClass:
             [integer]: [it will return status of the dataset deletion. if successfully then 0 else 1.]
         """
 
-        try:
-            table_name,_,_ = self.make_dataset_schema() # Get table name,schema and columns from dataset class.
+        logger.info("Entered delete_dataset_details function from the dataset_creation.py file.")
+
+        table_name,_,_ = self.make_dataset_schema() # Get table name,schema and columns from dataset class.
 
             sql_command = f"SELECT USER_NAME FROM {table_name} WHERE DATASET_ID = '{dataset_id}'"
             user_name_df = DBObject.select_records(connection,sql_command) 
             user_name_from_table = user_name_df['user_name'][0]
             
-            if user_name == user_name_from_table:
+            #? This condition will be false when called form delete_project_details function,
+            #? because that function has already checked that this dataset is used nowhere
+            if not skip_check:   
+                ProjectObject = project_creation.ProjectClass() # Get dataset class object
 
-                #? This condition will be false when called form delete_project_details function,
-                #? because that function has already checked that this dataset is used nowhere
-                if not skip_check:   
-                    ProjectObject = project_creation.ProjectClass() # Get dataset class object
-
-                    project_table_name,_,_ = ProjectObject.make_project_schema()
-                    
-                    sql_command = f"SELECT PROJECT_ID FROM {project_table_name} WHERE DATASET_ID = '{dataset_id}'"
-                    dataset_ids_df = DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
-                    id_count = len(dataset_ids_df)
-                else:
-                    id_count = 0
-                    
-                if id_count == 0: #? Number of projects that use this dataset
-                    
-                    #? Getting csv table name
-                    sql_command = "SELECT DATASET_TABLE_NAME FROM "+ table_name + " WHERE DATASET_ID ='"+ dataset_id +"'"
-                    dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
-                    dataset_table_name = dataset_df['dataset_table_name'][0] 
-
-                    sql_command = f"DELETE FROM {table_name} WHERE DATASET_ID = '{dataset_id}'"
-                    dataset_status = DBObject.delete_records(connection,sql_command)
-
-                    #? Deleting the CSV Table
-                    dataset_table_name = dataset_table_name.lower()
-                    data_status = self.delete_data_details(DBObject,connection,dataset_table_name,user_name)
-                        
-                    if dataset_status == 0 and data_status == 0: return 0
-                    else: return 1
-                else:
-                    #? More than 1 project is using this dataset, can't delete it.
-                    return 1
+                project_table_name,_,_ = ProjectObject.make_project_schema()
+                
+                sql_command = f"SELECT PROJECT_ID FROM {project_table_name} WHERE DATASET_ID = '{dataset_id}'"
+                dataset_ids_df = DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+                id_count = len(dataset_ids_df)
             else:
-                return 1
-        except:
-            return 1
+                id_count = 0
+                
+            if id_count == 0: #? Number of projects that use this dataset
+                
+                #? Getting csv table name
+                sql_command = "SELECT DATASET_TABLE_NAME FROM "+ table_name + " WHERE DATASET_ID ='"+ dataset_id +"'"
+                dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+                dataset_table_name = dataset_df['dataset_table_name'][0] 
+
+                sql_command = f"DELETE FROM {table_name} WHERE DATASET_ID = '{dataset_id}'"
+                dataset_status = DBObject.delete_records(connection,sql_command)
+
+                #? Deleting the CSV Table
+                if dataset_visibility == 'public':
+                    user_name = 'public'
+                
+                dataset_table_name = dataset_table_name.lower()
+                table_name = dataset_table_name
+                user_name = user_name.lower()
+                data_status = self.delete_data_details(DBObject,connection,table_name,user_name)
+                
+                logger.info("Exiting delete_dataset_details function from the dataset_creation.py file.")
+                
+                if dataset_status == 0 and data_status == 0: 
+                    return 0
+                elif data_status == 1: 
+                    logger.error("delete_data_details function from the dataset_creation.py file is failed in delete_dataset_details function.")
+                    return 2
+                else: 
+                    logger.error("delete_dataset_details function from the dataset_creation.py file is failed.")
+                    return 1
+                
+            else:
+                #? Some project is using this dataset, can't delete it.
+                logger.error("delete_dataset_details function from the dataset_creation.py file is failed because one or more projects are using this dataset.")
+                return 3
+        # else:
+        #     logger.error("delete_dataset_details function from the dataset_creation.py file is failed because the user is not allowed to delete this dataset.")
+        #     return 4
         
     #* Version 1.2
     def delete_data_details(self,DBObject,connection,table_name,user_name):
@@ -320,10 +336,13 @@ class DatasetClass:
         Returns:
             [integer]: [it will return status of the dataset deletion. if successfully then 0 else 1.]
         """
+        logger.info("Entered delete_data_details function from the dataset_creation.py file.")
         
         #? Creating Sql Query
         sql_command = 'DROP TABLE '+ user_name +'.'+table_name
         status = DBObject.delete_records(connection,sql_command)
+        
+        logger.info("Exiting delete_data_details function from the dataset_creation.py file.")
         
         return status
 
@@ -341,6 +360,8 @@ class DatasetClass:
             [boolean | integer]: [it will return False if no dataset with same name does not exists,
                                     or else it will return the id of the existing dataset]
         """
+        
+        logger.info("Entered dataset_exists function from the dataset_creation.py file.")
         
         #? Checking if the same dataset is there for the same user in the dataset table? If yes, then it will not insert a new row in the table
         try:
@@ -367,10 +388,13 @@ class DatasetClass:
             data_df=DBObject.select_records(connection,sql_command)
             data=len(data_df)
             
+            logger.info("Exiting dataset_exists function from the dataset_creation.py file.")
+        
             if data == 0: return False
             else: return int(data_df['dataset_id'][0])
             #else: return True
         except:
+            logger.error("dataset_exists function in the dataset_creation.py file failed.")
             return False
 
 
