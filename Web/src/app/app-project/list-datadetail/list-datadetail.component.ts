@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { ApiService } from '../api.service';
 
 @Component({
@@ -9,7 +10,7 @@ import { ApiService } from '../api.service';
 export class ListDatadetailComponent implements OnInit {
 
 
-    constructor(public apiService:ApiService) { }
+    constructor(public apiService:ApiService,public router:Router) { }
     transactions: any;
     ngOnInit() {
         this.apiService.getDataDetails().subscribe(
@@ -18,5 +19,8 @@ export class ListDatadetailComponent implements OnInit {
           );
     }
 
+    mapping(){
+        this.router.navigate(['schema/create']);
+    }
     
 }

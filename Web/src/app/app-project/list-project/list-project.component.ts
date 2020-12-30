@@ -14,9 +14,7 @@ export class ListProjectComponent implements OnInit {
 
   @ViewChild(DataTableDirective, { static: false })
   datatableElement: DataTableDirective;
-  dtOptions: DataTables.Settings = {
-    
-  };
+  dtOptions: DataTables.Settings = {};
   filter: boolean = true;
   constructor(public router: Router, public http: HttpClient, public apiService: ApiService) { }
   transactions: any;

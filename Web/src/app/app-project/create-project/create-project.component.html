@@ -12,47 +12,57 @@
             </div>
         </div>
     </div>
-    <div class="row justify-content-md-center">
-        <div class="col-lg-6">
-            <div class="form-group">
-                <label for="example-project-name" class="col-form-label">Project Name</label>
-                <input class="form-control" type="text" id="example-project-name">
-            </div>
-            <div class="form-group">
-                <label for="example-description" class="col-form-label">Description</label>
-                <textarea class="form-control" id="example-description"></textarea>
-            </div>
-            <div class="form-group row">
-                <div class="col-md-6">
-                    <label for="example-dataset-name" class="col-form-label">Dataset Name</label>
-                    <input class="form-control" type="text" id="example-dataset-name">
+    <form #f="ngForm" (ngSubmit)="f.form.valid?save():errorStatus=!errorStatus">
+        <div class="row justify-content-md-center">
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label for="example-project-name" class="col-form-label"><span class="required-label">*&nbsp;</span>Project Name</label>
+                    <input class="form-control" required type="text" [(ngModel)]="data.projectname" name="projectname"
+                        #projectname="ngModel" id="example-project-name">
                 </div>
-                <div class="col-md-6">
-                    <label for="example-upload-dataset" class="col-form-label">Upload Dataset</label>
-                    <div class="custom-file">
-                        <label class="custom-file-label" for="customFile">Choose file</label>
-                        <input type="file" class="custom-file-input" id="customFile">
+                <div class="form-group">
+                    <label for="example-description" class="col-form-label">Description<span class="required-label">&nbsp;*</span></label>
+                    <textarea class="form-control" [(ngModel)]="data.description" name="description"
+                        #description="ngModel" id="example-description"></textarea>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-6">
+                        <label for="example-dataset-name" class="col-form-label">Dataset Name</label>
+                        <input class="form-control" [(ngModel)]="data.datasetname" name="datasetname"
+                            #datasetname="ngModel" required type="text" id="example-dataset-name">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="example-upload-dataset" class="col-form-label">Upload Dataset</label>
+                        <div class="custom-file">
+                            <label class="custom-file-label" for="customFile">Choose file</label>
+                            <input type="file" required [(ngModel)]="data.file" accept=".csv" name="file"
+                                #file="ngModel" class="custom-file-input" id="customFile">
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <div class="custom-control custom-checkbox mb-3">
-                    <input type="checkbox" class="custom-control-input" id="customCheck1" checked>
-                    <label class="custom-control-label" for="customCheck1">Keep Dataset private</label>
+                <div class="form-group">
+                    <div class="custom-control custom-checkbox mb-3">
+                        <input type="checkbox" class="custom-control-input" id="customCheck1" checked>
+                        <label class="custom-control-label" for="customCheck1">Keep Dataset private</label>
+                    </div>
+                </div>
+                <label class="txt-center">OR</label>
+                <div class="form-group">
+                    <label class="col-form-label">Select Dataset</label>
+                    <select class="form-control" [(ngModel)]="data.datsetid" name="datsetid" #datsetid="ngModel"
+                        required>
+                        <option>Select Dataset</option>
+                        <option>Large select</option>
+                        <option>Small select</option>
+                    </select>
+                </div>
+                <div [hidden]="errorStatus" style="color: red;">
+                    All required fields are compulsory to fill.
+                </div>
+                <div class="button-items txt-center">
+                    <button type="submit" class="btn btn-success">Create Project</button>
                 </div>
             </div>
-            <label class="txt-center">OR</label>
-            <div class="form-group">
-                <label class="col-form-label">Select Dataset</label>
-                <select class="form-control">
-                    <option>Select Dataset</option>
-                    <option>Large select</option>
-                    <option>Small select</option>
-                </select>
-            </div>
-            <div class="button-items txt-center">
-                <button type="button" class="btn btn-success">Create Project</button>
-            </div>
         </div>
-    </div>
+    </form>
 </div>

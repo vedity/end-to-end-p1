@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import {createproject} from './project.model'
 
 @Component({
   selector: 'app-create-project',
@@ -9,10 +10,14 @@ import { Router } from '@angular/router';
 export class CreateProjectComponent implements OnInit {
 
   constructor(public router:Router) { }
-
+ public data:createproject =  new createproject();
+ errorStatus:boolean=true;
   ngOnInit() {
+
   }
 
-  
+  save(){
+
+  }
 
 }

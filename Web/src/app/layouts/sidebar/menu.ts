@@ -11,10 +11,6 @@ export const MENU: MenuItem[] =
         id: 2,
         label: 'Data Ingestion',
         icon: 'bx-home-circle',
-        badge: {
-            variant: 'info',
-            text: '3',
-        },
         subItems: [
             {
                 id: 3,
@@ -42,7 +38,12 @@ export const MENU: MenuItem[] =
             },
         ]
     },
-
+    {
+        id: 7,
+        label: 'Schema Mapping',
+        icon: 'bx-home-circle',
+        link: 'schema/create',
+    },
 
 ];
 
