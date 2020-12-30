@@ -30,6 +30,9 @@ urlpatterns = [
     #URL For delete data Detail
     path('mlaas/ingest/delete/data_detail/',DeleteDataDetailClass.as_view()),
 
-    path('mlaas/ingest/dataset_schema/', DatasetSchemaClass.as_view())
+    path('mlaas/ingest/dataset_schema/', DatasetSchemaClass.as_view()),
+
+    path('mlaas/logging/',ToggleLogs.as_view() )
+
   
 ]

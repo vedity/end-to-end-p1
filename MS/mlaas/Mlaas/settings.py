@@ -148,41 +148,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
-LOGGING = {
-    'version':1,
-    'disable_existing_loggers': True,
-    'loggers':{
-        'django':{
-            'handlers':['file1','file2','file3'],
-            'level' : 'DEBUG',
-        }
-    },
-    'handlers':{
-        'file1':{
-            #'level':'DEBUG',  debug file 1
-            'level' : 'ERROR',
-            'class':'logging.FileHandler',
-            'filename':'logs/error.log',
-            'formatter':'simple',
-        },
-        'file2':{
-            'level' : 'INFO',
-            'class':'logging.FileHandler',
-            'filename':'logs/info.log',
-            'formatter':'simple',
-        },
-        'file3':{
-            'level' : 'DEBUG',
-            'class':'logging.FileHandler',
-            'filename':'logs/debug.log',
-            'formatter':'simple',
-        }
-    },
-    'formatters':{
-        'simple':{
-            #'format': '{levelname} {message}', debug file1
-            'format' : '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style' : '{',
-        }
-    }
-}
+from .logsetting import *
+
+log_object = LoggingClass()
+LOGGING = log_object.check_logconfig(True)
