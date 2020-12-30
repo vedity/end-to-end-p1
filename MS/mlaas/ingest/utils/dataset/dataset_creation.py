@@ -266,13 +266,10 @@ class DatasetClass:
 
         table_name,_,_ = self.make_dataset_schema() # Get table name,schema and columns from dataset class.
 
-        sql_command = f"SELECT USER_NAME,DATASET_VISIBILITY FROM {table_name} WHERE DATASET_ID = '{dataset_id}'"
+        sql_command = f"SELECT USER_NAME FROM {table_name} WHERE DATASET_ID = '{dataset_id}'"
         user_name_df = DBObject.select_records(connection,sql_command) 
         user_name_from_table = user_name_df['user_name'][0]
-        dataset_visibility = user_name_df['dataset_visibility'][0]
-        
-        if user_name == user_name_from_table:
-            
+        if user_name == user_name_from_table:    
             #? This condition will be false when called form delete_project_details function,
             #? because that function has already checked that this dataset is used nowhere
             if not skip_check:   

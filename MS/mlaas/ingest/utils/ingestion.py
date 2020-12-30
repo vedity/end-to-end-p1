@@ -62,20 +62,20 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         try:
             DBObject,connection,connection_string = self.get_db_connection()
             if connection == None :
-                raise DatabaseConnectionFailed  
+                raise DatabaseConnectionFailed(500)
             
             project_status,project_id = super(IngestClass,self).make_project(DBObject,connection,project_name,project_desc,dataset_name,dataset_visibility,file_name ,dataset_id,user_name)
 
             if project_status == 2:
-                raise ProjectAlreadyExist
+                raise ProjectAlreadyExist(500)
                 
             elif project_status == 1:
-                raise ProjectCreationFailed # If Failed.
+                raise ProjectCreationFailed(500) # If Failed.
                 
             elif project_status == 0 and dataset_id == None:
                 load_data_status = super(IngestClass,self).load_dataset(DBObject,connection,connection_string,file_name,dataset_visibility,user_name)
                 if load_data_status == 1:
-                    raise LoadCSVDataFailed
+                    raise LoadCSVDataFailed(500)
                 
                 status = super(IngestClass,self).update_dataset_status(DBObject,connection,project_id,load_data_status)
                      
@@ -105,19 +105,19 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         try:
             DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
             if connection == None:
-                raise DatabaseConnectionFailed
+                raise DatabaseConnectionFailed(500)
             dataset_status,_ = super(IngestClass,self).make_dataset(DBObject,connection,dataset_name,file_name,dataset_visibility,user_name) # Get Status about dataset creation,if successfully then 0 else 1.
             
             if dataset_status == 2:
-                raise DatasetAlreadyExist
+                raise DatasetAlreadyExist(500)
             
             elif dataset_status == 1 :
-                raise DatasetCreationFailed
+                raise DatasetCreationFailed(500)
             # Condition will check dataset successfully created or not. if successfully then 0 else 1.
             elif dataset_status == 0 :
                 load_data_status = super(IngestClass,self).load_dataset(DBObject,connection,connection_string,file_name,dataset_visibility,user_name)
                 if load_data_status == 1:
-                    raise LoadCSVDataFailed
+                    raise LoadCSVDataFailed(500)
 
         except (DatabaseConnectionFailed,DatasetAlreadyExist,DatasetCreationFailed,LoadCSVDataFailed) as exc:
             return exc.msg
@@ -136,13 +136,13 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         try:
             DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
             if connection == None :
-                raise DatabaseConnectionFailed
+                raise DatabaseConnectionFailed(500)
             
             dataset_df = super(IngestClass,self).show_dataset_details(DBObject,connection,user_name) # Get dataframe of dataset created.
             dataset_df = dataset_df.to_json(orient='records')
             
             if len(dataset_df) == 0 :
-                raise DatasetDataNotFound 
+                raise DatasetDataNotFound (500)
                  
         except (DatabaseConnectionFailed,DatasetDataNotFound) as exc:
             return exc.msg
@@ -167,14 +167,14 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 user_name = 'public'
             
             if connection == None :
-                raise DatabaseConnectionFailed 
+                raise DatabaseConnectionFailed(500)
             
             data_details_df = super(IngestClass,self).show_data_details(DBObject,connection,table_name,user_name) # Get dataframe of loaded csv.
             if type(data_details_df) == type(None) :
-                raise DataNotFound
+                raise DataNotFound(23)
             data_details_df=data_details_df.to_json(orient='records')
             if len(data_details_df) == 0 :
-                raise DataNotFound
+                raise DataNotFound(500)
             
             
         except (DatabaseConnectionFailed,DataNotFound) as exc:
@@ -194,12 +194,12 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         try:
             DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
             if connection == None:
-                raise DatabaseConnectionFailed
+                raise DatabaseConnectionFailed(500)
             
             project_df = super(IngestClass,self).show_project_details(DBObject,connection,user_name) # Get dataframe of project created.
             project_df = project_df.to_json(orient='records')
             if project_df == None or len(project_df) == 0:
-                raise ProjectDataNotFound
+                raise ProjectDataNotFound(500)
             
         except (DatabaseConnectionFailed,ProjectDataNotFound) as exc:
             return exc.msg
