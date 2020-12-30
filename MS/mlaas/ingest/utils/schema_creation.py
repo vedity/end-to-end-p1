@@ -7,7 +7,7 @@
 */
 '''
 import pandas as pd 
-from .database import db
+from common.utils.database import db
 
 class SchemaClass:
     

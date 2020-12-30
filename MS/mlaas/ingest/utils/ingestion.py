@@ -8,11 +8,11 @@
 */
 '''
 import pandas as pd 
-from .database import db
+from common.utils.database import db
 from .project.project_creation import *
 from .dataset import dataset_creation as dt
 from .project import project_creation as pj
-from .custom_exception.exception_handler import *
+from common.utils.exception_handler.python_exception import *
 
 class IngestClass(pj.ProjectClass,dt.DatasetClass):
 
@@ -150,7 +150,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         
         return dataset_df
 
-    def show_data_details(self,table_name,user_name):
+    def show_data_details(self,table_name,user_name,dataset_visibility):
         """This function is used to show data details.
            It will show all the columns and rows from uploaded csv files.
 
@@ -162,6 +162,10 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         """
         try:
             DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
+            
+            if dataset_visibility.lower() == 'public':
+                user_name = 'public'
+            
             if connection == None :
                 raise DatabaseConnectionFailed 
             
