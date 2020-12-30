@@ -14,6 +14,10 @@ import pandas as pd
 from ..dataset import dataset_creation 
 from common.utils.database import db
 from common.utils.exception_handler.python_exception import *
+
+import logging
+logger = logging.getLogger('django')
+
 class ProjectClass:
 
     def make_project_schema(self):
@@ -187,6 +191,8 @@ class ProjectClass:
             user_name_df = DBObject.select_records(connection,sql_command) 
             user_name_from_table = user_name_df['user_name'][0]
             
+            logger.info("Entered delete_project_details function from the project_creation file.")
+            
             #? Authenticating the user    
             if user_name == user_name_from_table:
 
@@ -195,11 +201,16 @@ class ProjectClass:
                 project_status = DBObject.delete_records(connection,sql_command)
                 
             else:
+                logger.error("delete_project_details function in the project_creation.py file has failed because the user isn't permitted to delete this project.")
                 project_status = 2
-                
+            
+            
+            logger.info("Exiting delete_project_details function from the project_creation file.")
+            
             return project_status
         
         except:
+            logger.error("delete_project_details function in the project_creation.py file failed.")
             return 1
         
     def show_dataset_names(self,DBObject,connection,user_name):
@@ -236,15 +247,22 @@ class ProjectClass:
         Returns:
             [boolean]: [it will return true or false. if exists true else false.]
         """
+        
+        logger.info("Entered project_exists function from the project_creation file.")    
+        
         try:
             #? Checking if Same project_name exists for the same user
             sql_command = f"SELECT PROJECT_ID FROM {table_name} WHERE PROJECT_NAME = '{project_name}' AND USER_NAME = '{user_name}'"
             data=DBObject.select_records(connection,sql_command)
             data=len(data)
+            
+            logger.info("Exiting project_exists function from the project_creation file.")
+            
             #! Same project_name exists for the same user, then return status True
             if data == 0: return False
             else: return True
         except:
+            logger.info("project_exists function from the project_creation file has failed.")
             return False
         
         

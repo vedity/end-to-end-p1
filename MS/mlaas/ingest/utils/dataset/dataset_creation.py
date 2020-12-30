@@ -14,6 +14,9 @@ import pandas as pd
 from ..project import project_creation
 from common.utils.exception_handler.python_exception import *
 
+import logging
+logger = logging.getLogger('django')
+
 class DatasetClass:
    
     def make_dataset_schema(self):
@@ -259,6 +262,8 @@ class DatasetClass:
             [integer]: [it will return status of the dataset deletion. if successfully then 0 else 1.]
         """
 
+        logger.info("Entered delete_dataset_details function from the dataset_creation.py file.")
+
         table_name,_,_ = self.make_dataset_schema() # Get table name,schema and columns from dataset class.
 
         sql_command = f"SELECT USER_NAME,DATASET_VISIBILITY FROM {table_name} WHERE DATASET_ID = '{dataset_id}'"
@@ -299,15 +304,24 @@ class DatasetClass:
                 table_name = dataset_table_name
                 user_name = user_name.lower()
                 data_status = self.delete_data_details(DBObject,connection,table_name,user_name)
-                    
-                if dataset_status == 0 and data_status == 0: return 0
-                elif data_status == 1: return 2
-                else: return 1
+                
+                logger.info("Exiting delete_dataset_details function from the dataset_creation.py file.")
+                
+                if dataset_status == 0 and data_status == 0: 
+                    return 0
+                elif data_status == 1: 
+                    logger.error("delete_data_details function from the dataset_creation.py file is failed in delete_dataset_details function.")
+                    return 2
+                else: 
+                    logger.error("delete_dataset_details function from the dataset_creation.py file is failed.")
+                    return 1
                 
             else:
                 #? Some project is using this dataset, can't delete it.
+                logger.error("delete_dataset_details function from the dataset_creation.py file is failed because one or more projects are using this dataset.")
                 return 3
         else:
+            logger.error("delete_dataset_details function from the dataset_creation.py file is failed because the user is not allowed to delete this dataset.")
             return 4
         
     #* Version 1.2
@@ -325,10 +339,13 @@ class DatasetClass:
         Returns:
             [integer]: [it will return status of the dataset deletion. if successfully then 0 else 1.]
         """
+        logger.info("Entered delete_data_details function from the dataset_creation.py file.")
         
         #? Creating Sql Query
         sql_command = 'DROP TABLE '+ user_name +'.'+table_name
         status = DBObject.delete_records(connection,sql_command)
+        
+        logger.info("Exiting delete_data_details function from the dataset_creation.py file.")
         
         return status
 
@@ -346,6 +363,8 @@ class DatasetClass:
             [boolean | integer]: [it will return False if no dataset with same name does not exists,
                                     or else it will return the id of the existing dataset]
         """
+        
+        logger.info("Entered dataset_exists function from the dataset_creation.py file.")
         
         #? Checking if the same dataset is there for the same user in the dataset table? If yes, then it will not insert a new row in the table
         try:
@@ -372,10 +391,13 @@ class DatasetClass:
             data_df=DBObject.select_records(connection,sql_command)
             data=len(data_df)
             
+            logger.info("Exiting dataset_exists function from the dataset_creation.py file.")
+        
             if data == 0: return False
             else: return int(data_df['dataset_id'][0])
             #else: return True
         except:
+            logger.error("dataset_exists function in the dataset_creation.py file failed.")
             return False
 
 
