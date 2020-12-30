@@ -46,3 +46,11 @@ def get_json_format(project_dataset_json,column_data):
                         outer_dict.update(inner_dict)
             final_json_data.append(outer_dict)
     return final_json_data
+
+
+def get_Status_code(Status):
+    status=Status
+    status_code=status.split(",")[0].split(":")[1]
+    status_msg=status.split(",")[1].split(":")[1]
+    return status_code,status_msg
+    

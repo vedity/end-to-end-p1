@@ -30,9 +30,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from .serializer import InputSerializer
+from .testing import *
 import logging
 logger = logging.getLogger('django')
 DBObject=db.DBClass()     #Get DBClass object
+#user=None
 connection,connection_string=DBObject.database_connection(database,user,password,host,port)      #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 IngestionObj=ingestion.IngestClass(database,user,password,host,port)
 
@@ -49,13 +51,16 @@ class CreateProjectClass(APIView):
         # permission_classes = [IsAuthenticated]
         def get(self, request, format=None):
                 try:
+                        logger.info(" Call GET method in CreateProjectClass")
                         # user_name=request.user.get_username()
                         user_name=request.POST.get('user_name')  #get Username
                         project_df=IngestionObj.show_project_details(user_name) # call show_project_details to retrive project detail data and it will return dataframe
                         project_df = json.loads(project_df)
+                        logger.info("project detail retrival successfull")
                         return Response({"Data":project_df})  #return Data
 
                 except Exception as e:
+                        logger.error("Error in CreateProjectClass GET method "+str(e))
                         return Response({"Exception":str(e)}) 
         
         def post(self, request, format=None):
@@ -105,8 +110,9 @@ class CreateProjectClass(APIView):
                                                 
                                 
                                 Status=IngestionObj.create_project(project_name,project_desc,dataset_name,dataset_visibility,file_name,dataset_id,user_name)    #call create_project method to create project and insert csv data into table
+                                status_code,error_msg=get_Status_code(Status)
                                 logger.info("Exit From Createprojectclass")
-                                return Response({"Status":Status}) 
+                                return Response({"status_code":status_code,"error_msg":error_msg}) 
                         except Exception as e:
                                         logging.error("Exception occurred In Creatprojectclas", exc_info=True)
                                         return Response({"Exception":str(e)})      
