@@ -1,0 +1,3 @@
+This file is here so that the logs folder don't get excluded while pushing the code.
+
+All the .logs files will still be excluded.

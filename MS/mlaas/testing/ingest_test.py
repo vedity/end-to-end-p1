@@ -4,12 +4,12 @@ import json
 unittest.TestLoader.sortTestMethodsUsing = None
 
       
-class TestAPostDataset(unittest.TestCase):
+class TestIngestPostDataset(unittest.TestCase):
     
-    def testA_insert_dataset(self):
+    def scenario1_insert_dataset(self):
         
         #? Changed the path so that the file can be detected in Gitlab CI/CD -Jay
-        files = './ingest/dataset/pima_indians_diabetes.csv'
+        files = '../ingest/dataset/pima_indians_diabetes.csv'
         #files = 'mlaas\pima_indians_diabetes.csv'
         file = {'inputfile': open(files, 'rb')}
         #r = requests.post(endpoint, params=args, json=data, files=file)
@@ -18,8 +18,8 @@ class TestAPostDataset(unittest.TestCase):
         #self.assertEqual(response.json(),{"key":"value"})
         self.assertEqual(response.status_code, 200)
     
-    def testA_insert_repeat_dataset(self):
-        files = './ingest/dataset/pima_indians_diabetes.csv'
+    def scenario2_insert_repeat_dataset(self):
+        files = '../ingest/dataset/pima_indians_diabetes.csv'
         #files = 'mlaas\pima_indians_diabetes.csv'
         file = {'inputfile': open(files, 'rb')}
         #r = requests.post(endpoint, params=args, json=data, files=file)
@@ -37,8 +37,8 @@ class TestAPostDataset(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
     """    
 
-class TestBGetDataset(unittest.TestCase):
-    def testB_get_dataset(self):
+class TestIngestGetDataset(unittest.TestCase):
+    def scenario1_get_dataset(self):
         response = requests.get("http://localhost:8000/mlaas/ingest/create_dataset/",data = {"user_name":"autouser","dataset_name":"auto_dataset_name"})
         self.assertEqual(response.status_code,200)
         self.assertEqual(len(response.json()), 1)
@@ -53,21 +53,21 @@ class TestBGetDataset(unittest.TestCase):
         self.assertEqual(len(json_response["Data"]), 0)
     """
   
-class TestCPostProject(unittest.TestCase):
-    def testC_insert_project(self):
+class TestIngestPostProject(unittest.TestCase):
+    def scenario1_insert_project(self):
         responsedataset = requests.get("http://localhost:8000/mlaas/ingest/create_dataset/",data = {"user_name":"autouser"})
         json_responsedataset=responsedataset.json()
         #json_databaseid =json_responsedataset["Data"][0]["dataset_id"]["values"]
         self.assertEqual(len(json_responsedataset),1)
-        files = './ingest/dataset/pima_indians_diabetes.csv'
+        files = '../ingest/dataset/pima_indians_diabetes.csv'
         #files = 'mlaas\pima_indians_diabetes.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_dataset_name","visibility":"public"}
         response = requests.post("http://localhost:8000/mlaas/ingest/create_project/",data = info,files = file)
         self.assertEqual(response.status_code, 200)
         
-    def testC_insert__repeat_project(self):
-        files = './ingest/dataset/pima_indians_diabetes.csv'
+    def scenario2_insert__repeat_project(self):
+        files = '../ingest/dataset/pima_indians_diabetes.csv'
         #files = 'mlaas\pima_indians_diabetes.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_dataset_name","visibility":"public"}
@@ -75,8 +75,8 @@ class TestCPostProject(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-class TestDGetProject(unittest.TestCase):
-    def testD_get_project_detail(self):
+class TestIngestGetProject(unittest.TestCase):
+    def scenario1_get_project_detail(self):
         response = requests.get("http://localhost:8000/mlaas/ingest/project_detail/",data ={"user_name":"autouser"})
         self.assertEqual(response.status_code,200)
         json_response=response.json()
@@ -84,19 +84,19 @@ class TestDGetProject(unittest.TestCase):
         #self.assertEqual(len(json_response["Data"]), 1)
 
         
-class TestEAllProject(unittest.TestCase):
-    def testE_get_all_project(self):
+class TestIngestAllProject(unittest.TestCase):
+    def scenario1_get_all_project(self):
         response = requests.get("http://localhost:8000/mlaas/ingest/project_detail/",data ={"user_name":"autouser"})
         self.assertEqual(response.status_code,200)
         json_response=response.json()
         self.assertTrue(response)
         #self.assertNotEqual(len(json_response["Data"]), 0)
         
-    
-class TestDeletion(unittest.TestCase):
-    def test_delete_project(self):
-        responseproject = requests.get("http://localhost:8000/mlaas/ingest/project_detail/",data ={"user_name":"autouser"})
+  
+class TestIngestProjectDeletion(unittest.TestCase):
+    def scenario1_delete_project(self):
+        responseproject = requests.get("http://localhost:8000/mlaas/ingest/create_project/",data ={"user_name":"autouser"})
         json_responseproject = responseproject.json()
-        json_project_id = json_responseproject["Data"][0]["project_id"]["values"]
+        json_project_id = json_responseproject["Data"][0]["project_id"]
         response = requests.delete("http://localhost:8000/mlaas/ingest/delete/project_detail/",data ={"user_name":"autouser","project_id":json_project_id})
         self.assertEqual(response.status_code,200)
