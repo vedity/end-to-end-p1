@@ -266,10 +266,10 @@ class DatasetClass:
 
         table_name,_,_ = self.make_dataset_schema() # Get table name,schema and columns from dataset class.
 
-            sql_command = f"SELECT USER_NAME FROM {table_name} WHERE DATASET_ID = '{dataset_id}'"
-            user_name_df = DBObject.select_records(connection,sql_command) 
-            user_name_from_table = user_name_df['user_name'][0]
-            
+        sql_command = f"SELECT USER_NAME FROM {table_name} WHERE DATASET_ID = '{dataset_id}'"
+        user_name_df = DBObject.select_records(connection,sql_command) 
+        user_name_from_table = user_name_df['user_name'][0]
+        if user_name == user_name_from_table:    
             #? This condition will be false when called form delete_project_details function,
             #? because that function has already checked that this dataset is used nowhere
             if not skip_check:   
@@ -317,9 +317,9 @@ class DatasetClass:
                 #? Some project is using this dataset, can't delete it.
                 logger.error("delete_dataset_details function from the dataset_creation.py file is failed because one or more projects are using this dataset.")
                 return 3
-        # else:
-        #     logger.error("delete_dataset_details function from the dataset_creation.py file is failed because the user is not allowed to delete this dataset.")
-        #     return 4
+        else:
+            logger.error("delete_dataset_details function from the dataset_creation.py file is failed because the user is not allowed to delete this dataset.")
+            return 4
         
     #* Version 1.2
     def delete_data_details(self,DBObject,connection,table_name,user_name):

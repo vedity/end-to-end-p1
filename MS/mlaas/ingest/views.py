@@ -363,3 +363,32 @@ class ToggleLogs(APIView):
                 
                 return Response({"msg":f"Logging Status changed to {logging_status}"})
 
+class ProjectExistClass(APIView):
+        def get(self,request,format=None):
+                user_name = request.POST.get('user_name')
+                project_name = request.POST.get('project_name')
+                projectexist_status=IngestionObj.project_exists(project_name,user_name) 
+                if projectexist_status != False:
+                        status_code,error_msg=get_Status_code(projectexist_status)
+                        return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                else:
+                        return Response({"status_code":200,"error_msg":"you can proceed","response":"true"})  
+class DatasetExistClass(APIView):
+        def get(self,request,format=None):
+                user_name = request.POST.get('user_name')
+                dataset_name = request.POST.get('project_name')
+                datasetexist_status=IngestionObj.dataset_exists(dataset_name,user_name) 
+                if datasetexist_status != False:
+                        status_code,error_msg=get_Status_code(datasetexist_status)
+                        return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                else:
+                        return Response({"status_code":200,"error_msg":"you can proceed","response":"true"})  
+class DatasetNameClass(APIView):
+        def get(self,request,format=None):
+                user_name = request.POST.get('user_name')
+                datasetname_status=IngestionObj.show_dataset_names(user_name)
+                if datasetname_status != False:
+                        status_code,error_msg=get_Status_code(datasetname_status)
+                        return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                else:
+                        return Response({"status_code":200,"error_msg":"you can proceed","response":"true"})  
