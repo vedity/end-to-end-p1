@@ -13,6 +13,10 @@ from .project.project_creation import *
 from .dataset import dataset_creation as dt
 from .project import project_creation as pj
 from common.utils.exception_handler.python_exception import *
+import logging
+
+logger = logging.getLogger('django')
+
 
 class IngestClass(pj.ProjectClass,dt.DatasetClass):
 
@@ -42,7 +46,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         DBObject = db.DBClass() # Get database object from database class
         connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port) # Initialize connection with database and get connection string , connection object.
         return DBObject,connection,connection_string
- 
+    
     def create_project(self,project_name,project_desc,dataset_name = None,dataset_visibility = None,file_name = None,dataset_id = None,user_name = None):
         """This function is used to create project.
            E.g. sales forecast , travel time predictions etc.
@@ -59,23 +63,26 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         Returns:
             [integer]: [status of the project creation. if successfully then 0 else 1.]
         """
+        logger.info(" Create Project Execution Start")
         try:
+            
             DBObject,connection,connection_string = self.get_db_connection()
             if connection == None :
-                raise DatabaseConnectionFailed  
+                raise DatabaseConnectionFailed(500)  
+            
             
             project_status,project_id = super(IngestClass,self).make_project(DBObject,connection,project_name,project_desc,dataset_name,dataset_visibility,file_name ,dataset_id,user_name)
-
+            
             if project_status == 2:
-                raise ProjectAlreadyExist
+                raise ProjectAlreadyExist(500)
                 
             elif project_status == 1:
-                raise ProjectCreationFailed # If Failed.
+                raise ProjectCreationFailed(500) # If Failed.
                 
             elif project_status == 0 and dataset_id == None:
                 load_data_status = super(IngestClass,self).load_dataset(DBObject,connection,connection_string,file_name,dataset_visibility,user_name)
                 if load_data_status == 1:
-                    raise LoadCSVDataFailed
+                    raise LoadCSVDataFailed(500)
                 
                 status = super(IngestClass,self).update_dataset_status(DBObject,connection,project_id,load_data_status)
                      
@@ -84,8 +91,9 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 
                 
         except (DatabaseConnectionFailed,ProjectAlreadyExist,LoadCSVDataFailed,ProjectCreationFailed) as exc:
+            logger.error("Exception Occurred : "+ exc.msg)
             return exc.msg
-        
+        logger.info(" Create Project Execution End")
         return project_status
 
         
@@ -102,26 +110,29 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         Returns:
             [status]: [status of the dataset creation. if successfully then 0 else 1.]
         """
+        logger.info(" Create Dataset Execution Start")
         try:
             DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
             if connection == None:
-                raise DatabaseConnectionFailed
+                raise DatabaseConnectionFailed(500)
             dataset_status,_ = super(IngestClass,self).make_dataset(DBObject,connection,dataset_name,file_name,dataset_visibility,user_name) # Get Status about dataset creation,if successfully then 0 else 1.
             
             if dataset_status == 2:
-                raise DatasetAlreadyExist
+                raise DatasetAlreadyExist(500)
             
             elif dataset_status == 1 :
-                raise DatasetCreationFailed
+                raise DatasetCreationFailed(500)
             # Condition will check dataset successfully created or not. if successfully then 0 else 1.
             elif dataset_status == 0 :
                 load_data_status = super(IngestClass,self).load_dataset(DBObject,connection,connection_string,file_name,dataset_visibility,user_name)
                 if load_data_status == 1:
-                    raise LoadCSVDataFailed
+                    raise LoadCSVDataFailed(500)
 
         except (DatabaseConnectionFailed,DatasetAlreadyExist,DatasetCreationFailed,LoadCSVDataFailed) as exc:
+            logger.error("Exception Occurred : "+ exc.msg)
             return exc.msg
-
+        
+        logger.info(" Create Dataset Execution End")
         return dataset_status
         
     def show_dataset_details(self,user_name):
@@ -133,21 +144,27 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         Returns:
             [dataframe]: [it will return dataframe of the dataset details.]
         """
+        logger.info(" Show Dataset Details Execution Start")
         try:
             DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
             if connection == None :
-                raise DatabaseConnectionFailed
+                raise DatabaseConnectionFailed(500)
             
             dataset_df = super(IngestClass,self).show_dataset_details(DBObject,connection,user_name) # Get dataframe of dataset created.
+            
+            if type(dataset_df) == None:
+                raise DatasetDataNotFound(500)
+            
             dataset_df = dataset_df.to_json(orient='records')
             
-            if len(dataset_df) == 0 :
-                raise DatasetDataNotFound 
+            if len(dataset_df) <= 2 :
+                raise DatasetDataNotFound(500) 
                  
         except (DatabaseConnectionFailed,DatasetDataNotFound) as exc:
+            logger.error("Exception Occurred : "+ exc.msg)
             return exc.msg
          
-        
+        logger.info(" Show Dataset Details Execution End")
         return dataset_df
 
     def show_data_details(self,table_name,user_name,dataset_visibility):
@@ -160,6 +177,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         Returns:
             [dataframe]: [it will return dataframe of the loaded csv's data.]
         """
+        logger.info(" Show Data Details Execution Start")
         try:
             DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
             
@@ -167,19 +185,23 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 user_name = 'public'
             
             if connection == None :
-                raise DatabaseConnectionFailed 
+                raise DatabaseConnectionFailed(500) 
             
             data_details_df = super(IngestClass,self).show_data_details(DBObject,connection,table_name,user_name) # Get dataframe of loaded csv.
-            if type(data_details_df) == type(None) :
-                raise DataNotFound
+            
+            if type(data_details_df) == None:
+                raise DataNotFound(500)
+            
             data_details_df=data_details_df.to_json(orient='records')
-            if len(data_details_df) == 0 :
-                raise DataNotFound
+            if len(data_details_df) <= 2 :
+                raise DataNotFound(500)
             
             
         except (DatabaseConnectionFailed,DataNotFound) as exc:
+            logger.error("Exception Occurred : "+ exc.msg)
             return exc.msg
         
+        logger.info(" Show Data Details Execution End")
         return data_details_df
 
     def show_project_details(self,user_name):
@@ -191,19 +213,25 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         Returns:
             [dataframe]: [dataframe of project details data]
         """
+        logger.info(" Show Project Details Execution Start")
         try:
             DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
             if connection == None:
-                raise DatabaseConnectionFailed
+                raise DatabaseConnectionFailed(500)
             
             project_df = super(IngestClass,self).show_project_details(DBObject,connection,user_name) # Get dataframe of project created.
+            
+            if type(project_df) == None:
+                raise ProjectDataNotFound(500)
+            
             project_df = project_df.to_json(orient='records')
-            if project_df == None or len(project_df) == 0:
-                raise ProjectDataNotFound
+            if len(project_df) <=2:
+                raise ProjectDataNotFound(500)
             
         except (DatabaseConnectionFailed,ProjectDataNotFound) as exc:
+            logger.error("Exception Occurred : "+ exc.msg)
             return exc.msg
-        
+        logger.info(" Show Project Details Execution End")
         return project_df
     
     def delete_project_details(self, project_id, user_name):
@@ -292,6 +320,29 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         
         except (DatabaseConnectionFailed,DataDeletionFailed) as exc:
             return exc.msg
+        
+    def show_dataset_names(self,user_name):
+        """Show all the existing datasets created by user.
+
+        Args:
+            DBObject ([object]): [object of database class.],
+            connection ([object]): [connection object of database class.],
+            user_name ([string]): [name of the user.]
+
+        Returns:
+            [dataframe]: [it will return dataframe of the selected columns from dataset details.]
+        """
+        try:
+            DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
+            if connection == None:
+                raise DatabaseConnectionFailed(500)
+            
+            dataset_df=super(IngestClass, self).show_dataset_names(DBObject,connection,user_name) 
+            
+        except(DatabaseConnectionFailed) as exc:
+            return exc.msg
+            
+        return dataset_df
         
 
     

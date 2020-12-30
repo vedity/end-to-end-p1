@@ -14,6 +14,10 @@ import pandas as pd
 from ..dataset import dataset_creation 
 from common.utils.database import db
 from common.utils.exception_handler.python_exception import *
+import logging
+
+logger = logging.getLogger('django')
+
 class ProjectClass:
 
     def make_project_schema(self):
@@ -23,6 +27,7 @@ class ProjectClass:
         Returns:
             [string]: [it will return name of the table, structure of the table and columns of the table.]
         """
+        
         # Project table name
         table_name = 'mlaas.project_tbl'
         # Columns for project table
@@ -37,7 +42,7 @@ class ProjectClass:
                 "user_name  text,"\
                 "dataset_id  bigint,"\
                 "created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()" 
-                
+        
         return table_name,schema,cols
 
     def  make_project_records(self,project_name,project_desc,user_name,dataset_id):
@@ -53,8 +58,10 @@ class ProjectClass:
         Returns:
             [tuple]: [it will return records in the form of tuple.]
         """
+        
         row = project_name,project_desc,user_name,dataset_id
         row_tuples = [tuple(row)] # Make record for project table.
+        
         return row_tuples
         
 
@@ -79,6 +86,7 @@ class ProjectClass:
             [string,integer]: [it will return status of the project creation and 
             also return project id of the created project.]
         """
+        logger.info(" Inside Create_Project, make_project Execution Start")
         schema_status = DBObject.create_schema(connection)
         # Get table name,schema and columns from dataset class.
         table_name,schema,cols = self.make_project_schema() 
@@ -105,7 +113,8 @@ class ProjectClass:
         else :
             status = 1 # Failed
             project_id = None
-
+            
+        logger.info(" Inside Create_Project, make_project Execution End")
         return status,project_id
 
     def get_project_id(self,DBObject,connection,row_tuples,user_name):
@@ -121,11 +130,14 @@ class ProjectClass:
             [integer]: [it will return the project id of the created project.]
         """
         
+        
         table_name,*_ = self.make_project_schema()
         project_name,*_ = row_tuples[0]
         sql_command = "SELECT project_id from "+ table_name + " Where project_name ='"+ project_name + "' and user_name = '"+ user_name + "'"
         project_df = DBObject.select_records(connection,sql_command)
         project_id = int(project_df['project_id'][0])
+        
+        
         return project_id
     
     def update_dataset_status(self,DBObject,connection,project_id,load_data_status = 0):
@@ -202,25 +214,7 @@ class ProjectClass:
         except:
             return 1
         
-    def show_dataset_names(self,DBObject,connection,user_name):
-        """Show all the existing datasets created by user.
-
-        Args:
-            DBObject ([object]): [object of database class.],
-            connection ([object]): [connection object of database class.],
-            user_name ([string]): [name of the user.]
-
-        Returns:
-            [dataframe]: [it will return dataframe of the selected columns from dataset details.]
-        """
-        
-        DatasetObject = dataset_creation.DatasetClass() # Get dataset class object
-        table_name,_,_ = DatasetObject.make_dataset_schema() # Get table name,schema and columns from dataset class.
-        # This command is used to get dataset id and names from dataset table of database.
-        sql_command = "SELECT dataset_id,dataset_name FROM "+ table_name + " WHERE USER_NAME ='"+ user_name +"' or dataset_visibility='public'"
-        dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
-        
-        return dataset_df
+    
 
     #? Check if project with same name 
     def project_exists(self,DBObject,connection,table_name,project_name,user_name):

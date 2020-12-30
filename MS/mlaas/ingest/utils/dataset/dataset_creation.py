@@ -13,6 +13,10 @@ import os
 import pandas as pd
 from ..project import project_creation
 from common.utils.exception_handler.python_exception import *
+import logging
+
+logger = logging.getLogger('django')
+
 
 class DatasetClass:
    
@@ -130,6 +134,8 @@ class DatasetClass:
             [string,integer]: [it will return status of dataset creation. if successfully created then 1 else 0.
                                 and also return dataset id of created dataset.]
         """
+        logger.info(" Inside create_dataset , make_dataset Execution Start")
+        
         schema_status = DBObject.create_schema(connection)
         table_name,schema,cols = self.make_dataset_schema() # Get table name,schema and columns from dataset class.
         
@@ -151,7 +157,8 @@ class DatasetClass:
         else :
             status = 1 # If Failed.
             dataset_id = None
-
+            
+        logger.info(" Inside create_dataset , make_dataset Execution End")
         return status,dataset_id
     
     def load_dataset(self,DBObject,connection,connection_string,file_name,dataset_visibility,user_name):
@@ -377,6 +384,23 @@ class DatasetClass:
             #else: return True
         except:
             return False
+        
+    def show_dataset_names(self,DBObject,connection,user_name):
+        """Show all the existing datasets created by user.
+
+        Args:
+            DBObject ([object]): [object of database class.],
+            connection ([object]): [connection object of database class.],
+            user_name ([string]): [name of the user.]
+
+        Returns:
+            [dataframe]: [it will return dataframe of the selected columns from dataset details.]
+        """
+        table_name,_,_ = self.make_dataset_schema() # Get table name,schema and columns from dataset class.
+        # This command is used to get dataset id and names from dataset table of database.
+        sql_command = "SELECT dataset_id,dataset_name FROM "+ table_name + " WHERE USER_NAME ='"+ user_name +"' or dataset_visibility='public'"
+        dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+        return dataset_df
 
 
 

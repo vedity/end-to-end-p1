@@ -126,7 +126,7 @@ class CreateDatasetClass(APIView):
         def get(self, request, format=None):
                 try:
                         user_name=request.POST.get('user_name')  #get Username
-                       
+                        #user_name=str(request.POST.get('user_name'))
                         dataset_df=IngestionObj.show_dataset_details(user_name) #Call show_dataset_details method it will return dataset detail for sepecific user_name
                         dataset_df = json.loads(dataset_df)
                         return Response({"Data":dataset_df}) #return Data                
