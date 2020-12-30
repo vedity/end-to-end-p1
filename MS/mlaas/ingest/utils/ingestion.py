@@ -294,4 +294,67 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             return exc.msg
         
 
-    
+    #? Check if project with same name 
+    def project_exists(self,project_name,user_name):
+        """This function is used to check if same name project exist or not .
+
+        Args:
+            project_name ([string]): [name of the project.],
+            user_name ([string]): [name of the user.]
+
+        Returns:
+            [boolean]: [it will return true or false. if exists true else false.]
+        """
+        
+        try:
+            DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
+            if connection == None:
+                raise DatabaseConnectionFailed(500)
+            
+            table_name,schema,cols = super(IngestClass, self).make_project_schema() 
+        
+            exist_status = super(IngestClass, self).project_exists(DBObject,connection,table_name,project_name,user_name)
+            
+            if exist_status:
+                raise ProjectAlreadyExist(500)
+            
+            return exist_status
+        
+        except (DatabaseConnectionFailed,ProjectAlreadyExist) as exc:
+            return exc.msg
+        
+    #? Check if project with same name 
+    def dataset_exists(self,dataset_name,user_name):
+        """This function is used to check existing dataset name.
+
+        Args:
+            dataset_name ([string]): [name of the dataset.],
+            user_name ([string]): [name of the user.]
+
+        Returns:
+            [boolean | integer]: [it will return False if no dataset with same name does not exists,
+                                    or else it will return the id of the existing dataset]
+        """
+        
+        try:
+            DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
+            if connection == None:
+                raise DatabaseConnectionFailed(500)
+            
+            table_name,schema,cols = super(IngestClass, self).make_dataset_schema()
+        
+            sql_command = f"SELECT DATASET_VISIBILITY FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND USER_NAME = '{user_name}'"
+            visibility_df = DBObject.select_records(connection,sql_command) 
+            dataset_visibility = str(visibility_df['dataset_visibility'][0])
+        
+            exist_status = super(IngestClass, self).dataset_exists(DBObject,connection,table_name,dataset_visibility,dataset_name,user_name)
+        
+            if exist_status != False:
+                raise DatasetAlreadyExist(500)
+            
+            return exist_status
+        
+        except (DatabaseConnectionFailed,DatasetAlreadyExist) as exc:
+            return exc.msg
+        
+        
