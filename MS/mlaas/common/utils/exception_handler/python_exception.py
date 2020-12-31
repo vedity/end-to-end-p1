@@ -116,6 +116,36 @@ class DatasetCreationFailed(Exception):
     def __str__(self):
         return (self.msg)
 
+class DatasetDeletionFailed(Exception):
+    """Dataset Deletion Failed Exception"""
+    def __init__(self,status_code):
+        self.msg = "DatasetDeletionFailed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+
+    def __str__(self):
+        return (self.msg)
+
+class UserAuthenticationFailed(Exception):
+    """User Authentication Failed Exception"""
+    def __init__(self,status_code):
+        self.msg = "UserAuthenticationFailed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+
+    def __str__(self):
+        return (self.msg)
+
+class DatasetInUse(Exception):
+    """Dataset InUse Failed Exception"""
+    def __init__(self,status_code):
+        self.msg = "DatasetInUse"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+
+    def __str__(self):
+        return (self.msg)
+
 class ProjectCreationFailed(Exception):
     """ Project Creation Failed Exception """
     def __init__(self,status_code):

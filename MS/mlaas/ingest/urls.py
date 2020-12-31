@@ -34,11 +34,11 @@ urlpatterns = [
 
     path('mlaas/logging/',ToggleLogs.as_view()),
 
-    path('mlaas/ingest/project_exist/', ProjectExistClass.as_view()),
+    path('mlaas/ingest/project_exist/',ProjectExistClass.as_view()),
 
-    path('mlaas/ingest/dataset_exist/', DatasetExistClass.as_view()),
+    path('mlaas/ingest/dataset_exist/',DatasetExistClass.as_view()),
 
-    path('mlaas/ingest/datasetname_exist/', DatasetNameClass.as_view()),
+    path('mlaas/ingest/datasetname_exist/',DatasetNameClass.as_view()),
 
 
 ]
