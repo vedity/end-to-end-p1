@@ -151,15 +151,13 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise DatabaseConnectionFailed(500)
             
             dataset_df = super(IngestClass,self).show_dataset_details(DBObject,connection,user_name) # Get dataframe of dataset created.
-            
-            if type(dataset_df) == None:
+            if type(dataset_df) ==None:
                 raise DatasetDataNotFound(500)
-            
             dataset_df = dataset_df.to_json(orient='records')
-            
-            if len(dataset_df) <= 2 :
-                raise DatasetDataNotFound(500) 
-                 
+            dataset_df = json.loads(dataset_df)
+            if len(dataset_df) == 0:
+                raise DatasetDataNotFound(500)
+
         except (DatabaseConnectionFailed,DatasetDataNotFound) as exc:
             logger.error("Exception Occurred : "+ exc.msg)
             return exc.msg
@@ -188,15 +186,13 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise DatabaseConnectionFailed(500) 
             
             data_details_df = super(IngestClass,self).show_data_details(DBObject,connection,table_name,user_name) # Get dataframe of loaded csv.
-            
-            if type(data_details_df) == None:
+            if type(data_details_df) == type(None) :
                 raise DataNotFound(500)
-            
             data_details_df=data_details_df.to_json(orient='records')
             if len(data_details_df) <= 2 :
                 raise DataNotFound(500)
             
-            
+            data_details_df=json.loads(data_details_df)  # convert datafreame into json
         except (DatabaseConnectionFailed,DataNotFound) as exc:
             logger.error("Exception Occurred : "+ exc.msg)
             return exc.msg
@@ -220,12 +216,12 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise DatabaseConnectionFailed(500)
             
             project_df = super(IngestClass,self).show_project_details(DBObject,connection,user_name) # Get dataframe of project created.
-            
             if type(project_df) == None:
                 raise ProjectDataNotFound(500)
-            
             project_df = project_df.to_json(orient='records')
-            if len(project_df) <=2:
+            
+            project_df = json.loads(project_df)
+            if len(project_df) == 0:
                 raise ProjectDataNotFound(500)
             
         except (DatabaseConnectionFailed,ProjectDataNotFound) as exc:
