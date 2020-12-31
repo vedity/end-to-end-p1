@@ -40,5 +40,4 @@ urlpatterns = [
 
     path('mlaas/ingest/datasetname_exist/', DatasetNameClass.as_view()),
 
-
 ]
