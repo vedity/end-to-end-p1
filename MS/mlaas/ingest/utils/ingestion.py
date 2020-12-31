@@ -15,7 +15,7 @@ from .dataset import dataset_creation as dt
 from .project import project_creation as pj
 from common.utils.exception_handler.python_exception import *
 import logging
-
+import json
 logger = logging.getLogger('django')
 
 
@@ -285,10 +285,12 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise DatasetInUse(500)
             elif deletion_status == 4:
                 raise UserAuthenticationFailed(500)
+            elif deletion_status == 5:
+                raise DatasetEntryNotFound(500)
             
             return deletion_status
         
-        except (DatabaseConnectionFailed,DatasetDeletionFailed,DataDeletionFailed,UserAuthenticationFailed,DatasetInUse) as exc:
+        except (DatabaseConnectionFailed,DatasetDeletionFailed,DataDeletionFailed,UserAuthenticationFailed,DatasetInUse,DatasetEntryNotFound) as exc:
             return exc.msg
         
     def delete_data_details(self,table_name,user_name):

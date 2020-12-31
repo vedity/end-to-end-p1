@@ -1,0 +1,40 @@
+#This compose file is specifically built for the Automation testing purpose. 
+# To reduce the running time of the automation testing pipeline, We have removed the anguler image, which isn't needed in the testing script.
+
+version: '3'
+services:
+  web:
+    build: ./MS
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes: 
+      - "./MS/mlaas:/mlaas" 
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgresql
+
+  postgresql:
+    build: ./DB
+    hostname: postgresql
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+volumes:
+  postgres_data:
+  app:
+  
+
+networks:
+  backend:
+    driver: "bridge"
+  
+    
+ 
+
+
+  
+    

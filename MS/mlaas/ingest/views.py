@@ -20,6 +20,7 @@ from .utils import ingestion
 from django.core.files.storage import FileSystemStorage
 from .utils.dataset import dataset_creation
 from .utils.ingestion import *
+from common.utils.exception_handler.python_exception import *
 from .utils.project import project_creation
 from ingest.testing import get_json_format
 from rest_framework import views
@@ -61,11 +62,11 @@ class CreateProjectClass(APIView):
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
                                 logger.info("CreateProjectClass retrival successfull")
-                                return Response({"status_code":200,"error_msg":"successfull retrival","response":project_df})  #return Data
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":project_df})  #return Data
 
                 except Exception as e:
                         logger.error("Exception in CreateProjectClass GET method "+str(e), exc_info=True)
-                        return Response({"Exception":str(e)}) 
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
         
         def post(self, request, format=None):
                         try:
@@ -89,6 +90,10 @@ class CreateProjectClass(APIView):
                                         exists_project_status=project_obj.project_exists(DBObject,connection,table_name,project_name,user_name)
                                         if exists_project_status == False:
                                                 my_file=request.FILES['inputfile'] #get inputfile Name
+                                                
+                                                if str(my_file).split(".")[1]!='csv':
+                                                        raise FileNotFound(500)
+                                                        
                                                 path='static/server/'
                                                 try:
                                                         if dataset_visibility == 'public':
@@ -123,11 +128,11 @@ class CreateProjectClass(APIView):
                                         return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                                 else:
                                         logger.info("Exit From POST method of Createprojectclass with successfull insertion")
-                                        return Response({"status_code":200,"status_msg":"Successfully Inserted","response":"true"}) 
+                                        return Response({"status_code":"200","status_msg":"Successfully Inserted","response":"true"}) 
 
                         except Exception as e:
                                 logging.error("Exception occurred In POST method of Creatprojectclas", exc_info=True)
-                                return Response({"Exception":str(e)})      
+                                return Response({"status_code":"500","error_msg":str(e),"response":"false"})      
 
         
 class CreateDatasetClass(APIView):
@@ -154,10 +159,10 @@ class CreateDatasetClass(APIView):
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
                                 logger.info("Exit From Createprojectclass with successfull Retrival")
-                                return Response({"status_code":200,"error_msg":"successfull retrival","response":dataset_df})  #return Data             
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":dataset_df})  #return Data             
                 except Exception as e:
                         logger.error("Exception in CreateDatasetClass GET method "+str(e), exc_info=True)
-                        return Response({"Exception":str(e)}) 
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
         
         def post(self, request, format=None):
                 try: 
@@ -166,11 +171,14 @@ class CreateDatasetClass(APIView):
                         user_name=str(request.POST.get('user_name'))  #get Username
                         dataset_name=request.POST.get('dataset_name') #get dataset name
                         my_file=request.FILES['inputfile'] #get inputfile Name
+                        if str(my_file).split(".")[1]!='csv':
+                                raise FileNotFound(500)
                         dataset_visibility= request.POST.get('visibility')
                         
                         dataset_obj=dataset_creation.DatasetClass()
-                        table_name,_,_=dataset_obj.make_dataset_schema()
+                        table_name,_,_= dataset_obj.make_dataset_schema()
                         exists_dataset_status=dataset_obj.dataset_exists(DBObject,connection,table_name,dataset_name,user_name,dataset_visibility)
+                        
                         if exists_dataset_status == False:
                                 path='static/server/'
                                 try:
@@ -188,14 +196,15 @@ class CreateDatasetClass(APIView):
                                                 file_url = private_path + fs.url(filename)
                                         else:
                                                 #warning
-                                                return Response({"visibility":"Not appropriate Value"})
+                                                return Response({"status_code":"500","error_msg":"Not appropriate Value","response":"false"}) 
+                                                
 
                                 except Exception as e:
                                         logger.error(" call POST method in CreateDatasetClass while uploading file to server"+str(e))
                                         return Response({"Exception":str(e)})
                         else:
                                 #warning
-                                return Response({"message":"Dataset Name already Exists"})
+                                return Response({"status_code":"500","Dataset Name already Exists":str(e),"response":"false"})
 
                         dataset_Status=IngestionObj.create_dataset(dataset_name,file_name,dataset_visibility,user_name) #call create_dataset method to create dataset and insert csv data into table
                         if dataset_Status != 0:
@@ -204,13 +213,10 @@ class CreateDatasetClass(APIView):
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                         else:
                                 logger.info("Exit From POST method of CreateDatasetclass with successfull insertion")
-                                return Response({"status_code":200,"error_msg":"Successfully Inserted","response":"true"})
+                                return Response({"status_code":"200","error_msg":"Successfully Inserted","response":"true"})
                 except Exception as e:
                         logger.error("Exception in CreateDatasetClass POST method "+str(e), exc_info=True)
-                        return Response({"Exception":str(e)})   
-
-import json
-
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})   
 class DatasetSchemaClass(APIView):
         def get(self,request,format=None):
                 dataset_id=request.POST.get('dataset_id')
@@ -272,10 +278,10 @@ class DataDetailClass(APIView):
                         else:
                                 logger.info("DataDetailClass retrival successfull")
                                 json_data=get_json_format(dataset_df,['dataset_id','index'])
-                                return Response({"status_code":200,"error_msg":"successfull retrival","response":json_data})  #return Data             
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":json_data})  #return Data             
                 except Exception as e:
                         logger.error("Exception in DataDetailClass GET method "+str(e), exc_info=True)
-                        return Response({"Exception":str(e)}) 
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
 
 
 class DeleteProjectDetailClass(APIView):
@@ -303,10 +309,10 @@ class DeleteProjectDetailClass(APIView):
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                         else:
                                 logger.info("DeleteProjectDetailClass Deletion successfull")
-                                return Response({"status_code":200,"error_msg":"Successfully Delete","response":"true"})
+                                return Response({"status_code":"200","error_msg":"Successfully Delete","response":"true"})
                 except Exception as e:
                         logger.error("Exception in DeleteProjectDetailClass DELETE method "+str(e), exc_info=True)
-                        return Response({"Exception":str(e)}) 
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
 
 class DeleteDatasetDetailClass(APIView):
         """
@@ -334,11 +340,11 @@ class DeleteDatasetDetailClass(APIView):
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                         else:
                                 logger.info("DeleteDatasetDetailClass Deletion successfull")
-                                return Response({"status_code":200,"error_msg":"Successfully Deleted","response":"true"})
+                                return Response({"status_code":"200","error_msg":"Successfully Deleted","response":"true"})
 
                 except Exception as e:
                         logger.error("Exception in DeleteDatasetDetailClass DELETE method "+str(e), exc_info=True)
-                        return Response({"Exception":str(e)}) 
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
 
 class DeleteDataDetailClass(APIView):
         """
@@ -367,10 +373,10 @@ class DeleteDataDetailClass(APIView):
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                         else:
                                 logger.info("DeleteDataDetailClass Deletion successfull")
-                                return Response({"status_code":200,"error_msg":"Successfully Deleted","response":"true"})
+                                return Response({"status_code":"200","error_msg":"Successfully Deleted","response":"true"})
                 except Exception as e:
                         logger.error("Exception in DeleteDataDetailClass DELETE method "+str(e), exc_info=True)
-                        return Response({"Exception":str(e)}) 
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
 
 
 class ToggleLogs(APIView):
@@ -407,7 +413,7 @@ class ProjectExistClass(APIView):
                         logger.info("ProjectExistClass for method ")
                         return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                 else:
-                        return Response({"status_code":200,"error_msg":"you can proceed","response":"true"})  
+                        return Response({"status_code":"200","error_msg":"you can proceed","response":"true"})  
 class DatasetExistClass(APIView):
         def get(self,request,format=None):
                 user_name = request.POST.get('user_name')
@@ -417,7 +423,7 @@ class DatasetExistClass(APIView):
                         status_code,error_msg=get_Status_code(datasetexist_status)
                         return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                 else:
-                        return Response({"status_code":200,"error_msg":"you can proceed","response":"true"})  
+                        return Response({"status_code":"200","error_msg":"you can proceed","response":"true"})  
 class DatasetNameClass(APIView):
         def get(self,request,format=None):
                 user_name = request.POST.get('user_name')
