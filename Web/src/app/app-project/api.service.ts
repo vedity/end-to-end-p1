@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import {HttpClient,HttpHeaders } from '@angular/common/http';
+import {HttpClient,HttpHeaders, HttpParams } from '@angular/common/http';
 import  { Observable } from 'rxjs';
+import { request } from 'https';
 
 @Injectable({
   providedIn: 'root'
@@ -15,13 +16,16 @@ export class ApiService {
   constructor( private httpClient : HttpClient) { }
   
   getproject():Observable<any>{
-    return this.httpClient.get(this.baseUrl+"create_project/",{headers:this.headers});
+    var params=new HttpParams().set("user_name","admin");
+    return this.httpClient.post(this.baseUrl+"create_project/",JSON.stringify({user_name:"admin"}),{headers:this.headers});
   }
 
   getDataset():Observable<any>{
+    
     return this.httpClient.get(this.baseUrl+"create_dataset/",{headers:this.headers});
   }
 
+   
   
   // deleteDataset(id: number):Observable<any>{
   //   return this.httpClient.delete(`${this.baseUrl}${id}/`,{headers:this.headers});
