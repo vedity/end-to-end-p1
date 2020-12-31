@@ -10,11 +10,12 @@ Automation Testing:
   before_script:
     - docker-compose build web 
     - docker-compose build postgresql 
-    #- docker-compose -f testing_docker-compose.yml up -d &
-    - docker-compose up &
+    - docker-compose -f testing_docker-compose.yml up -d &
+    #- docker-compose up &
     - sleep 20s
   script:
     - docker ps
+    - docker images
     #- docker exec mlaas-phase-1_web_1 sh -c "cd testing && python -m unittest ingest_test"
   only:
     - development
