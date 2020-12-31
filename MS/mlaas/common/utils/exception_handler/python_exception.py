@@ -136,6 +136,16 @@ class UserAuthenticationFailed(Exception):
     def __str__(self):
         return (self.msg)
 
+class ProjectDeletionFailed(Exception):
+    """Project Deletion Failed Exception"""
+    def __init__(self,status_code):
+        self.msg = "ProjectDeletionFailed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+
+    def __str__(self):
+        return (self.msg)
+
 class DatasetInUse(Exception):
     """Dataset InUse Failed Exception"""
     def __init__(self,status_code):
