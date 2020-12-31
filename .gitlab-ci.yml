@@ -8,8 +8,10 @@ Automation Testing:
   services:
     - docker:dind
   before_script:
-    - docker-compose -f testing_docker-compose.yml build -d 
-    - docker-compose -f testing_docker-compose.yml up -d &
+    - docker-compose build web 
+    - docker-compose build postgresql 
+    #- docker-compose -f testing_docker-compose.yml up -d &
+    - docker-compose up &
     - sleep 20s
   script:
     - docker ps
