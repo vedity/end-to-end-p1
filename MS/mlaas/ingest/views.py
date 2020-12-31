@@ -14,24 +14,29 @@ import os
 import datetime
 import json
 import pandas as pd
+from .utils.schema_creation import *
 from database import *
-from .utils.dataset import dataset_creation
-from .utils.ingestion import *
-from .utils.project import project_creation
+
 from .utils import ingestion
 from django.core.files.storage import FileSystemStorage
 from rest_framework.decorators import api_view ,permission_classes
 from rest_framework.permissions import IsAuthenticated
+from .utils.dataset import dataset_creation
+from .utils.ingestion import *
+from .utils.project import project_creation
 from ingest.testing import get_json_format
 from rest_framework import views
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from .serializer import InputSerializer
-
+from .testing import *
+import logging
+logger = logging.getLogger('django')
 DBObject=db.DBClass()     #Get DBClass object
+#user=None
 connection,connection_string=DBObject.database_connection(database,user,password,host,port)      #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
-
+IngestionObj=ingestion.IngestClass(database,user,password,host,port)
 
 class CreateProjectClass(APIView):
         """
@@ -46,22 +51,22 @@ class CreateProjectClass(APIView):
         # permission_classes = [IsAuthenticated]
         def get(self, request, format=None):
                 try:
-                        # user_name=request.user.get_username()
-                        user_name='vipul'
-                        #user_name=str(request.POST.get('user_name'))  #get Username
-                        project_obj=project_creation.ProjectClass() #get project_creation.ProjectClass Object
-                        project_df=project_obj.show_project_details(DBObject,connection,user_name) # call show_project_details to retrive project detail data and it will return dataframe
-                        project_json=json.loads(project_df.to_json(orient='records')) # convert datafreame into json
-                
-                        #json_data=get_json_format(project_json,['project_id','index']) #calling function to get pre-define json format
-                        return Response({"Data":project_json})  #return Data
+                        logger.info(" Call GET method in CreateProjectClass")
+                        #user_name = request.user.get_username()
+                        user_name  = request.POST.get('user_name') #get Username
+                        project_df = IngestionObj.show_project_details(user_name) #call show_project_details to retrive project detail data and it will return dataframe
+                        project_df = json.loads(project_df)
+                        logger.info("project detail retrival successfull")
+                        return Response({"Data":project_df})  #return Data
 
                 except Exception as e:
+                        logger.error("Error in CreateProjectClass GET method "+str(e), exc_info=True)
                         return Response({"Exception":str(e)}) 
         
         def post(self, request, format=None):
                         try:
                         # user_name=request.user.get_username()  #get Username
+                                logger.info("call POST method in CreateProjectClass")
                                 user_name=request.POST.get('user_name')  #get Username
                                 project_name=request.POST.get('project_name') #get project_name
                                 project_desc=request.POST.get('description') #get description
@@ -76,6 +81,7 @@ class CreateProjectClass(APIView):
                                 if dataset_id == None :
                                         project_obj=project_creation.ProjectClass()
                                         table_name,_,_=project_obj.make_project_schema()
+                                        logger.info("Calling project_exist function to check project Name")
                                         exists_project_status=project_obj.project_exists(DBObject,connection,table_name,project_name,user_name)
                                         if exists_project_status == False:
                                                 my_file=request.FILES['inputfile'] #get inputfile Name
@@ -94,19 +100,28 @@ class CreateProjectClass(APIView):
                                                                 filename = fs.save(file_name, my_file)
                                                                 file_url = private_path + fs.url(filename)
                                                         else:
+        
                                                                 return Response({"visibility":"Not appropriate Value"})
 
                                                 except Exception as e:
+                                                        logger.error("Error while uploading file to server"+str(e))
                                                         return Response({"Exception":str(e)}) 
                                         else:
-                                                return Response({"message":"Project Name alredy Exists"})
+                                                return Response({"message":"Project Name already Exists"})
                                 else:
                                         dataset_id = int(dataset_id)
                                                 
-                                IngestionObj=ingestion.IngestClass(database,user,password,host,port) #get ingestion.IngestClass Object
-                                Status=IngestionObj.create_project(project_name,project_desc,dataset_name,dataset_visibility,file_name,dataset_id,user_name)    #call create_project method to create project and insert csv data into table
-                                return Response({"Status":Status}) 
+                                
+                                project_Status=IngestionObj.create_project(project_name,project_desc,dataset_name,dataset_visibility,file_name,dataset_id,user_name)    #call create_project method to create project and insert csv data into table
+                                if project_Status != 0:
+                                        status_code,error_msg=get_Status_code(project_Status)
+                                        logger.info("Exit From Createprojectclass")
+                                        return Response({"status_code":status_code,"error_msg":error_msg}) 
+                                else:
+                                        return Response({"status_code":200,"status_msg":"Successfully Inserted"}) 
+
                         except Exception as e:
+                                        logging.error("Exception occurred In Creatprojectclas", exc_info=True)
                                         return Response({"Exception":str(e)})      
 
         
@@ -123,19 +138,18 @@ class CreateDatasetClass(APIView):
         # permission_classes = [IsAuthenticated]
         def get(self, request, format=None):
                 try:
-                        # user_name=request.user.get_username()  #get Username
+                        logger.info(" Call GET method in CreateDatasetClass")
                         user_name=request.POST.get('user_name')  #get Username
-                        dataset_obj=dataset_creation.DatasetClass() #Get dataset_creation.DatasetClass object
-                        dataset_df=dataset_obj.show_dataset_details(DBObject,connection,user_name) #Call show_dataset_details method it will return dataset detail for sepecific user_name
-                        dataset_record=json.loads(dataset_df.to_json(orient='records')) # convert datafreame into json
-                        json_data=get_json_format(dataset_record,['dataset_id','index'])
-                        return Response({"Data":json_data}) #return Data                
+                        dataset_df=IngestionObj.show_dataset_details(user_name) #Call show_dataset_details method it will return dataset detail for sepecific user_name
+                        dataset_df = json.loads(dataset_df)
+                        return Response({"Data":dataset_df}) #return Data                
                 except Exception as e:
+                        logger.error("Error in CreateDatasetClass GET method "+str(e), exc_info=True)
                         return Response({"Exception":str(e)}) 
         
         def post(self, request, format=None):
                 try: 
-
+                        logger.info(" Call POST method in CreateDatasetClass")
                         # user_name=request.user.get_username()
                         user_name=str(request.POST.get('user_name'))  #get Username
                         dataset_name=request.POST.get('dataset_name') #get dataset name
@@ -166,41 +180,53 @@ class CreateDatasetClass(APIView):
                                 except Exception as e:
                                         return Response({"Exception":str(e)})
                         else:
-                                return Response({"message":"Dataset Name alredy Exists"})
+                                return Response({"message":"Dataset Name already Exists"})
 
-
-                        IngestionObj=ingestion.IngestClass(database,user,password,host,port)  #create ingestion.IngestClass Object
-                        Status=IngestionObj.create_dataset(dataset_name,file_name,dataset_visibility,user_name) #call create_dataset method to create dataset and insert csv data into table
-                        return Response({"Status":Status})   #return Status 
+                        dataset_Status=IngestionObj.create_dataset(dataset_name,file_name,dataset_visibility,user_name) #call create_dataset method to create dataset and insert csv data into table
+                        if dataset_Status != 0:
+                                status_code,error_msg=get_Status_code(dataset_Status)
+                                return Response({"status_code":status_code,"error_msg":error_msg}) 
+                        else:
+                                return Response({"status_code":200,"error_msg":"Successfully Inserted"})
                 except Exception as e:
-                        return Response({"Exception":str(e)})                  
+                        logger.error("Error in CreateDatasetClass POST method "+str(e), exc_info=True)
+                        return Response({"Exception":str(e)})   
+
+import json
+
+class DatasetSchemaClass(APIView):
+        def get(self,request,format=None):
+                dataset_id=request.POST.get('dataset_id')
+                schema_obj=SchemaClass(database,user,password,host,port)
+                schema_data=schema_obj.get_dataset_schema(str(dataset_id))
+                return Response({"Schema":str(schema_data)})    
+
+        def put(self,request,format=None):
+                update_schema_data=json.loads(request.body)
+
+                # user_name=request.POST.get('user_name')
+                # dataset_id=request.POST.get('dataset_id')
+
+                # column_list=[]
+                # col_attribute_list=[]
+                # col_datatype_list=[]
+                # column_list.append(request.POST.get('id'))
+                # column_list.append(request.POST.get('name'))
+                # column_list.append(request.POST.get('sal'))
+
+                # col_attribute_list.append(request.POST.get('datatype_id'))
+                # col_attribute_list.append(request.POST.get('datatype_name'))
+                # col_attribute_list.append(request.POST.get('datatype_sal'))
+
+                # col_datatype_list.append(request.POST.get('col_id'))
+                # col_datatype_list.append(request.POST.get('col_name'))
+                # col_datatype_list.append(request.POST.get('col_sal'))
+
+                # schema_obj=SchemaClass(database,user,password,host,port)
+                # schema_status=schema_obj.update_dataset_schema(column_list,col_datatype_list,col_attribute_list,dataset_id,user_name)
+
+                return Response({"Status":update_schema_data})           
                 
-
-class ProjectDetailClass(APIView):
-        """
-        This class is used to Retrive project Data.
-        It will take url string as mlaas/ingest/project_details/.
-        It will take input parameters as Username.
-        And it will return Project Data in Json Format.
-
-        Input  : username
-        Output : json
-        """
-        # permission_classes = [IsAuthenticated]
-        def get(self, request, format=None):
-                try:
-                        # user_name=request.user.get_username()
-                        user_name=request.POST.get('user_name')
-                        # user_id=request.user.id
-                        # user_name=str(request.POST.get('user_name'))  #get Username
-                        project_obj=project_creation.ProjectClass() #create roject_creation.ProjectClass object
-                        project_df=project_obj.show_project_details(DBObject,connection,user_name) #call show_project_details and it will return project detail dataframe
-                        project_json=json.loads(project_df.to_json(orient='records')) # convert datafreame into json
-                        column_data=['dataset_id','index']
-                        json_data=get_json_format(project_json,column_data) #calling function to get pre-define json format
-                        return Response({"Data":json_data}) #return Data 
-                except Exception as e:
-                        return Response({"Exception":str(e)}) 
 
 class DataDetailClass(APIView):
         """
@@ -215,14 +241,16 @@ class DataDetailClass(APIView):
         # permission_classes = [IsAuthenticated]
         def get(self, request, format=None):
                 try:
+                        logger.info(" Call GET method in DataDetailClass")
                         user_name = request.POST.get('user_name')
                         table_name=request.POST.get('table_name')  #get tablename
-                        dataset_obj=dataset_creation.DatasetClass() #Create dataset_creation.DatasetClass Object
-                        dataset_df=dataset_obj.show_data_details(DBObject,connection,table_name,user_name) #call show_data_details and it will return dataset detail data in dataframe
-                        dataset_json=json.loads(dataset_df.to_json(orient='records'))  # convert datafreame into json
+                        dataset_visibility = request.POST.get('dataset_visibility')
+                        dataset_df=IngestionObj.show_data_details(table_name,user_name,dataset_visibility) #call show_data_details and it will return dataset detail data in dataframe
+                        dataset_json=json.loads(dataset_df)  # convert datafreame into json
                         json_data=get_json_format(dataset_json,['dataset_id','index']) #calling function to get pre-define json format
                         return Response({"Dataset":json_data})  #return Data 
                 except Exception as e:
+                        logger.error("Error in DataDetailClass GET method "+str(e), exc_info=True)
                         return Response({"Exception":str(e)}) 
 
 
@@ -238,13 +266,19 @@ class DeleteProjectDetailClass(APIView):
         """  
         def delete(self, request, format=None):
                 try:
+                        logger.info(" Call DELETE method in DeleteProjectDetailClass")
                         # user_name=request.user.get_username()
                         user_name=request.POST.get('user_name')
                         project_id=request.POST.get('project_id')  #get tablename
-                        project_obj=project_creation.ProjectClass()  
-                        project_status=project_obj.delete_project_details(DBObject,connection,project_id,user_name) 
-                        return Response({"Status":project_status})  #return status 
+                        #project_obj=project_creation.ProjectClass()  
+                        project_status= IngestionObj.delete_project_details(project_id,user_name) 
+                        if project_status != 0:
+                                status_code,error_msg=get_Status_code(project_status)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
+                        else:
+                                return Response({"status_code":200,"error_msg":"Successfully Delete","response":"true"})
                 except Exception as e:
+                        logger.error("Error in DeleteProjectDetailClass DELETE method "+str(e), exc_info=True)
                         return Response({"Exception":str(e)}) 
 
 class DeleteDatasetDetailClass(APIView):
@@ -259,13 +293,20 @@ class DeleteDatasetDetailClass(APIView):
         """
         def delete(self, request, format=None):
                 try:
+                        logger.info(" Call DELETE method in DeleteDatasetDetailClass")
                         # user_name=request.user.get_username()
                         user_name=request.POST.get('user_name')
                         dataset_id=request.POST.get('dataset_id')  #get dataset name
-                        dataset_obj=dataset_creation.DatasetClass()
-                        dataset_status=dataset_obj.delete_dataset_details(DBObject,connection,dataset_id,user_name) 
-                        return Response({"Status":dataset_status})  #return status 
+                        #dataset_obj=dataset_creation.DatasetClass()
+                        dataset_status=IngestionObj.delete_dataset_details(dataset_id,user_name) 
+                        if dataset_status != 0:
+                                status_code,error_msg=get_Status_code(dataset_status)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
+                        else:
+                                return Response({"status_code":200,"error_msg":"Successfully Deleted","response":"true"})
+
                 except Exception as e:
+                        logger.error("Error in DeleteDatasetDetailClass DELETE method "+str(e), exc_info=True)
                         return Response({"Exception":str(e)}) 
 
 class DeleteDataDetailClass(APIView):
@@ -281,17 +322,72 @@ class DeleteDataDetailClass(APIView):
         def delete(self, request, format=None):
 
                 try:
+                        logger.info(" Call DELETE method in DeleteDataDetailClass")
                         # user_name=request.user.get_username()
-
                         user_name=request.POST.get('user_name')
                         table_name=request.POST.get('table_name')  #get tablename
-                        dataset_obj=dataset_creation.DatasetClass()
-                        status=dataset_obj.delete_data_details(DBObject,connection,table_name,user_name) 
-                        return Response({"Status":status})  #return status 
+                        #dataset_obj=dataset_creation.DatasetClass()
+                        data_detail_status=IngestionObj.delete_data_details(table_name,user_name) 
+                        if data_detail_status != 0 :
+                                status_code,error_msg=get_Status_code(data_detail_status)
+                                logger.info("Exit From Createprojectclass")
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
+                        else:
+                                return Response({"status_code":200,"error_msg":"Successfully Deleted","response":"true"})
                 except Exception as e:
+                        logger.error("Error in DeleteDataDetailClass DELETE method "+str(e), exc_info=True)
                         return Response({"Exception":str(e)}) 
 
 
-class TestingClass(APIView):
-        def post(self,request,format=None):
-                return Response({"msg":"Hello"})
+class ToggleLogs(APIView):
+        def get(self,request,format=None):
+                reader_obj = open(r'Mlaas/settings.py','r')
+                settings_string = reader_obj.read()
+                logging_line_index = settings_string.find("LOGGING")
+                bracket_index = settings_string.find("(",logging_line_index)
+                bracket_index+=1
+                
+                if settings_string[bracket_index] == 'T':
+                        settings_string = settings_string[:bracket_index] + "False" + settings_string[bracket_index+4:]
+                        logging_status = "False"
+                else:
+                        settings_string = settings_string[:bracket_index] + "True" + settings_string[bracket_index+5:]
+                        logging_status = "True"
+                
+                reader_obj.close()
+                
+                writer_obj = open(r'Mlaas/settings.py','w')
+                writer_obj.write(settings_string)
+                
+                writer_obj.close()
+                
+                return Response({"msg":f"Logging Status changed to {logging_status}"})
+
+class ProjectExistClass(APIView):
+        def get(self,request,format=None):
+                user_name = request.POST.get('user_name')
+                project_name = request.POST.get('project_name')
+                projectexist_status=IngestionObj.does_project_exists(project_name,user_name) 
+                if projectexist_status != False:
+                        status_code,error_msg=get_Status_code(projectexist_status)
+                        return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                else:
+                        return Response({"status_code":200,"error_msg":"you can proceed","response":"true"})  
+class DatasetExistClass(APIView):
+        def get(self,request,format=None):
+                user_name = request.POST.get('user_name')
+                dataset_name = request.POST.get('dataset_name')
+                datasetexist_status=IngestionObj.does_dataset_exists(dataset_name,user_name) 
+                if datasetexist_status != False:
+                        status_code,error_msg=get_Status_code(datasetexist_status)
+                        return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                else:
+                        return Response({"status_code":200,"error_msg":"you can proceed","response":"true"})  
+class DatasetNameClass(APIView):
+        def get(self,request,format=None):
+                user_name = request.POST.get('user_name')
+                dataset_df=IngestionObj.show_dataset_names(user_name)
+                dataset_json=json.loads(dataset_df)  # convert datafreame into json
+                return Response({"Dataset":dataset_json})  #return Data 
+        
+

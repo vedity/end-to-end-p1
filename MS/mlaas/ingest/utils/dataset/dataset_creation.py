@@ -12,6 +12,10 @@
 import os
 import pandas as pd
 from ..project import project_creation
+from common.utils.exception_handler.python_exception import *
+import logging
+
+logger = logging.getLogger('django')
 
 class DatasetClass:
    
@@ -24,7 +28,7 @@ class DatasetClass:
         # Dataset table name
         table_name = 'mlaas.dataset_tbl' 
         # Columns for dataset table.
-        cols = 'dataset_id,dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name' 
+        cols = 'dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name' 
         # Schema for dataset table.
         schema = "dataset_id bigserial,"\
                  "dataset_name  text,"\
@@ -41,9 +45,9 @@ class DatasetClass:
            E.g. column_name_1,column_name_2 .......,column_name_n.
 
         Args:
-            dataset_name ([string]): [name of the dataset.]
-            file_name ([string]): [name of the file.]
-            dataset_visibility ([string]): [visibility of the dataset.]
+            dataset_name ([string]): [name of the dataset.],
+            file_name ([string]): [name of the file.],
+            dataset_visibility ([string]): [visibility of the dataset.],
             user_name ([string]): [name of the user.]
 
         Returns:
@@ -60,8 +64,8 @@ class DatasetClass:
         """This function is used to get server file path.
 
         Args:
-            file_name ([string]): [name of the file.]
-            dataset_visibility ([string]): [visibility of the dataset.]
+            file_name ([string]): [name of the file.],
+            dataset_visibility ([string]): [visibility of the dataset.],
             user_name ([string]): [name of the user.]
 
         Returns:
@@ -118,21 +122,27 @@ class DatasetClass:
            E.g. dataset details : dataset_name,file_name,file_size,dataset_table_name,user_name.
 
         Args:
-            DBObject ([object]): [object of the database class.]
-            connection ([object]): [object of the database connection.]
-            dataset_name ([string]): [name of the dataset.]
-            file_name ([string]): [name of the file.]
-            dataset_visibility ([string]): [visibility of the dataset.]
+            DBObject ([object]): [object of the database class.],
+            connection ([object]): [object of the database connection.],
+            dataset_name ([string]): [name of the dataset.],
+            file_name ([string]): [name of the file.],
+            dataset_visibility ([string]): [visibility of the dataset.],
             user_name ([string]): [name of the user.]
 
         Returns:
             [string,integer]: [it will return status of dataset creation. if successfully created then 1 else 0.
                                 and also return dataset id of created dataset.]
         """
+        logger.info(" Inside create_dataset , make_dataset Execution Start")
+        
         schema_status = DBObject.create_schema(connection)
         table_name,schema,cols = self.make_dataset_schema() # Get table name,schema and columns from dataset class.
-         #? Checking if the same dataset is there for the same user in the dataset table? If yes, then it will not insert a new row in the table
-        if self.dataset_exists(DBObject,connection,table_name,dataset_visibility,dataset_name,user_name): return 2,1
+        
+        #? Checking if the same dataset is there for the same user in the dataset table? If yes, then it will not insert a new row in the table
+        dataset_exist = self.dataset_exists(DBObject,connection,table_name,dataset_visibility,dataset_name,user_name)
+        
+        if dataset_exist == False: pass #? No dataset with same name exists so creating the new one
+        else: return 2,dataset_exist #? dataset_exists() function returns id of the dataset if dataset with same name exists
 
         create_status = DBObject.create_table(connection,table_name,schema) # Get status about dataset tableis created or not.if created then 0 else 1.
 
@@ -146,18 +156,19 @@ class DatasetClass:
         else :
             status = 1 # If Failed.
             dataset_id = None
-
+            
+        logger.info(" Inside create_dataset , make_dataset Execution End")
         return status,dataset_id
     
     def load_dataset(self,DBObject,connection,connection_string,file_name,dataset_visibility,user_name):
         """This function is used to load csv file data into database table.
 
         Args:
-            DBObject ([object]): [object of the database class.]
-            connection ([object]): [object of the database connection.]
-            connection_string ([string]): [connection string of the database.]
-            file_name ([string]): [name of the file.]
-            dataset_visibility ([string]): [visibility of the dataset.]
+            DBObject ([object]): [object of the database class.],
+            connection ([object]): [object of the database connection.],
+            connection_string ([string]): [connection string of the database.],
+            file_name ([string]): [name of the file.],
+            dataset_visibility ([string]): [visibility of the dataset.],
             user_name ([string]): [name of the user.]
 
         Returns:
@@ -169,6 +180,10 @@ class DatasetClass:
         file_data_df = DBObject.read_data(file_path)
         # Get table name.
         table_name = self.get_dataset_table_name(file_name)
+        if dataset_visibility.lower() == "public" :
+            user_name = "public"
+        else:
+            user_name = user_name
         # Get schema status.if successfully then 0 else 1.
         schema_status = DBObject.create_schema(connection,user_name)
         # Get load dataset status. if successfully then 0 else 1.
@@ -179,9 +194,9 @@ class DatasetClass:
         """This function is used to get dataset id of the created dataset.
 
         Args:
-            DBObject ([object]): [object of the database class.]
-            connection ([object]): [object of the database connection.]
-            row_tuples ([list]): [list of the tuple of dataset record.]
+            DBObject ([object]): [object of the database class.],
+            connection ([object]): [object of the database connection.],
+            row_tuples ([list]): [list of the tuple of dataset record.],
             user_name ([string]): [name of the user.]
 
         Returns:
@@ -203,25 +218,27 @@ class DatasetClass:
         """This function is used to show details about all created datasets by user.
 
         Args:
-            DBObject ([object]): [object of the database class.]
-            connection ([object]): [object of the database connection.]
+            DBObject ([object]): [object of the database class.],
+            connection ([object]): [object of the database connection.],
             user_name ([string]): [name of the user.]
 
         Returns:
             [dataframe]: [it will return dataset details in the form of dataframe.]
         """
+        
         table_name,_,cols = self.make_dataset_schema() # Get table name,schema and columns from dataset class.
         # This command is used to get dataset details from dataset table of database.
-        sql_command = "SELECT "+ cols +" FROM "+ table_name + " WHERE USER_NAME ='"+ user_name +"'"
-        dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
-        return dataset_df
+        sql_command = "SELECT * FROM "+ table_name + " WHERE USER_NAME ='"+ user_name +"'"
+        data=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+        
+        return data
 
     def show_data_details(self,DBObject,connection,table_name,user_name):
         """This function is used to show details about loaded dataset.
 
         Args:
-            DBObject ([object]): [object of the database class.]
-            connection ([object]): [object of the database connection.]
+            DBObject ([object]): [object of the database class.],
+            connection ([object]): [object of the database connection.],
             table_name ([string]): [name of the table.]
 
         Returns:
@@ -238,59 +255,74 @@ class DatasetClass:
         """This function is used to delete dataset entry from the dataset table.
 
         Args:
-            DBObject ([object]): [object of the database class.]
-            connection ([object]): [object of the database connection.]
-            dataset_id ([integer]): [dataset id for the delete dataset record.]
+            DBObject ([object]): [object of the database class.],
+            connection ([object]): [object of the database connection.],
+            dataset_id ([integer]): [dataset id for the delete dataset record.],
+            user_name ([string]): [name of the user.],
+            skip_check ([boolean]): [Make this true if you don't want to check how many projects are using this dataset.], Defaults to False.
 
         Returns:
             [integer]: [it will return status of the dataset deletion. if successfully then 0 else 1.]
         """
 
-        try:
-            table_name,_,_ = self.make_dataset_schema() # Get table name,schema and columns from dataset class.
+        logger.info("Entered delete_dataset_details function from the dataset_creation.py file.")
 
-            sql_command = f"SELECT USER_NAME FROM {table_name} WHERE DATASET_ID = '{dataset_id}'"
-            user_name_df = DBObject.select_records(connection,sql_command) 
-            user_name_from_table = user_name_df['user_name'][0]
-            
-            if user_name == user_name_from_table:
+        table_name,_,_ = self.make_dataset_schema() # Get table name,schema and columns from dataset class.
 
-                #? This condition will be false when called form delete_project_details function,
-                #? because that function has already checked that this dataset is used nowhere
-                if not skip_check:   
-                    ProjectObject = project_creation.ProjectClass() # Get dataset class object
+        sql_command = f"SELECT USER_NAME,DATASET_VISIBILITY FROM {table_name} WHERE DATASET_ID = '{dataset_id}'"
+        user_name_df = DBObject.select_records(connection,sql_command) 
+        user_name_from_table,dataset_visibility = user_name_df['user_name'][0],user_name_df['dataset_visibility'][0]
+        if user_name == user_name_from_table:    
+            #? This condition will be false when called form delete_project_details function,
+            #? because that function has already checked that this dataset is used nowhere
+            if not skip_check:   
+                ProjectObject = project_creation.ProjectClass() # Get dataset class object
 
-                    project_table_name,_,_ = ProjectObject.make_project_schema()
-                    
-                    sql_command = f"SELECT PROJECT_ID FROM {project_table_name} WHERE DATASET_ID = '{dataset_id}'"
-                    dataset_ids_df = DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
-                    id_count = len(dataset_ids_df)
-                else:
-                    id_count = 0
-                    
-                if id_count == 0: #? Number of projects that use this dataset
-                    
-                    #? Getting csv table name
-                    sql_command = "SELECT DATASET_TABLE_NAME FROM "+ table_name + " WHERE DATASET_ID ='"+ dataset_id +"'"
-                    dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
-                    dataset_table_name = dataset_df['dataset_table_name'][0] 
-
-                    sql_command = f"DELETE FROM {table_name} WHERE DATASET_ID = '{dataset_id}'"
-                    dataset_status = DBObject.delete_records(connection,sql_command)
-
-                    #? Deleting the CSV Table
-                    dataset_table_name = dataset_table_name.lower()
-                    data_status = self.delete_data_details(DBObject,connection,dataset_table_name,user_name)
-                        
-                    if dataset_status == 0 and data_status == 0: return 0
-                    else: return 1
-                else:
-                    #? More than 1 project is using this dataset, can't delete it.
-                    return 1
+                project_table_name,_,_ = ProjectObject.make_project_schema()
+                
+                sql_command = f"SELECT PROJECT_ID FROM {project_table_name} WHERE DATASET_ID = '{dataset_id}'"
+                dataset_ids_df = DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+                id_count = len(dataset_ids_df)
             else:
-                return 1
-        except:
-            return 1
+                id_count = 0
+                
+            if id_count == 0: #? Number of projects that use this dataset
+                
+                #? Getting csv table name
+                sql_command = "SELECT DATASET_TABLE_NAME FROM "+ table_name + " WHERE DATASET_ID ='"+ dataset_id +"'"
+                dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+                dataset_table_name = dataset_df['dataset_table_name'][0] 
+
+                sql_command = f"DELETE FROM {table_name} WHERE DATASET_ID = '{dataset_id}'"
+                dataset_status = DBObject.delete_records(connection,sql_command)
+
+                #? Deleting the CSV Table
+                if dataset_visibility == 'public':
+                    user_name = 'public'
+                
+                dataset_table_name = dataset_table_name.lower()
+                table_name = dataset_table_name
+                user_name = user_name.lower()
+                data_status = self.delete_data_details(DBObject,connection,table_name,user_name)
+                
+                logger.info("Exiting delete_dataset_details function from the dataset_creation.py file.")
+                
+                if dataset_status == 0 and data_status == 0: 
+                    return 0
+                elif data_status == 1: 
+                    logger.error("delete_data_details function from the dataset_creation.py file is failed in delete_dataset_details function.")
+                    return 2
+                else: 
+                    logger.error("delete_dataset_details function from the dataset_creation.py file is failed.")
+                    return 1
+                
+            else:
+                #? Some project is using this dataset, can't delete it.
+                logger.error("delete_dataset_details function from the dataset_creation.py file is failed because one or more projects are using this dataset.")
+                return 3
+        else:
+            logger.error("delete_dataset_details function from the dataset_creation.py file is failed because the user is not allowed to delete this dataset.")
+            return 4
         
     #* Version 1.2
     def delete_data_details(self,DBObject,connection,table_name,user_name):
@@ -298,13 +330,22 @@ class DatasetClass:
         This function is used to delete the whole table which was created from 
         user input file.
         
-        Input: Database class Object, Connection Object, table_name
-        Output: status of deletion
+        Args:
+            DBObject ([object]): [object of the database class.],
+            connection ([object]): [object of the database connection.],
+            table_name ([string]): [Name of the table that you want to delete.],
+            user_name ([string]): [Name of the user.]
+
+        Returns:
+            [integer]: [it will return status of the dataset deletion. if successfully then 0 else 1.]
         """
+        logger.info("Entered delete_data_details function from the dataset_creation.py file.")
         
         #? Creating Sql Query
         sql_command = 'DROP TABLE '+ user_name +'.'+table_name
         status = DBObject.delete_records(connection,sql_command)
+        
+        logger.info("Exiting delete_data_details function from the dataset_creation.py file.")
         
         return status
 
@@ -312,15 +353,18 @@ class DatasetClass:
         """This function is used to check existing dataset name.
 
         Args:
-            DBObject ([object]): [object of the database class.]
-            connection ([object]): [object of the database connection.]
-            table_name ([string]): [name of the table.]
-            dataset_name ([string]): [name of the dataset.]
+            DBObject ([object]): [object of the database class.],
+            connection ([object]): [object of the database connection.],
+            table_name ([string]): [name of the table.],
+            dataset_name ([string]): [name of the dataset.],
             user_name ([string]): [name of the user.]
 
         Returns:
-            [boolean]: [it will return true or false. if existed then true else false.]
+            [boolean | integer]: [it will return False if no dataset with same name does not exists,
+                                    or else it will return the id of the existing dataset]
         """
+        
+        logger.info("Entered dataset_exists function from the dataset_creation.py file.")
         
         #? Checking if the same dataset is there for the same user in the dataset table? If yes, then it will not insert a new row in the table
         try:
@@ -347,11 +391,31 @@ class DatasetClass:
             data_df=DBObject.select_records(connection,sql_command)
             data=len(data_df)
             
+            logger.info("Exiting dataset_exists function from the dataset_creation.py file.")
+        
             if data == 0: return False
             else: return int(data_df['dataset_id'][0])
             #else: return True
         except:
+            logger.error("dataset_exists function in the dataset_creation.py file failed.")
             return False
+        
+    def show_dataset_names(self,DBObject,connection,user_name):
+        """Show all the existing datasets created by user.
+
+        Args:
+            DBObject ([object]): [object of database class.],
+            connection ([object]): [connection object of database class.],
+            user_name ([string]): [name of the user.]
+
+        Returns:
+            [dataframe]: [it will return dataframe of the selected columns from dataset details.]
+        """
+        table_name,_,_ = self.make_dataset_schema() # Get table name,schema and columns from dataset class.
+        # This command is used to get dataset id and names from dataset table of database.
+        sql_command = "SELECT dataset_id,dataset_name FROM "+ table_name + " WHERE USER_NAME ='"+ user_name +"' or dataset_visibility='public'"
+        dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+        return dataset_df
 
 
 

@@ -1,5 +1,5 @@
 stages:
-#  - automation_tests
+  - automation_tests
   - build
 
 # Automation Testing:
@@ -13,8 +13,7 @@ stages:
 #     - sleep 20s
 #   script:
 #     #- docker ps
-#     #- docker exec mlaas-phase-1_web_1 sh -c "python -m unittest tests"
-#     - echo "Testing Yet to Be Done"
+#     - docker exec mlaas-phase-1_web_1 sh -c "cd MS/mlaas && python -m unittest tests"
 #   only:
 #     - development
 
