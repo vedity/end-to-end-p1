@@ -122,6 +122,24 @@ class TestIngestDatasetDeletion(unittest.TestCase):
         status = json_response["status_code"]
         self.assertEqual(status,"500")
     
+    def testBscenario6_delete_dataset(self):
+        """ 
+
+        Args:
+            
+        """
+        files = '../ingest/dataset/pima_indians_diabetes.csv'
+        file = {'inputfile': open(files, 'rb')}
+        info = {"user_name":"autouser_four","dataset_name":"auto_dataset_name_four","visibility":"public"}
+        response = requests.post("http://localhost:8000/mlaas/ingest/create_dataset/",data = info,files = file)
+        responsedataset = requests.get("http://localhost:8000/mlaas/ingest/create_dataset/",params = {"user_name":"autouser_four"})
+        json_response = responsedataset.json()
+        dataset_id=json_response["response"][0]["dataset_id"]
+        response = requests.delete("http://localhost:8000/mlaas/ingest/delete/dataset_detail/",params ={"user_name":"autouser","dataset_id":dataset_id})
+        json_response = response.json()
+        status = json_response["status_code"]
+        self.assertEqual(status,"500")
+    
   
 class TestCIngestPostProject(unittest.TestCase):
     def testAscenario7_insert_project(self):
@@ -210,6 +228,29 @@ class TestCIngestPostProject(unittest.TestCase):
         status = json_response["status_code"]
         self.assertEqual(status,"500")
 
+    def testEscenario7_insert_project(self):
+        """ 
+        Args:
+            
+    
+        """
+        time.sleep(2)
+        files = '../ingest/dataset/pima_indians_diabetes.csv'
+        file = {'inputfile': open(files, 'rb')}
+        info = {"user_name":"autouser_three","project_name":"auto_project_name_three","description":"this is automated entry","dataset_name":"auto_dataset_name_project","visibility":"private"}
+        response = requests.post("http://localhost:8000/mlaas/ingest/create_project/",data = info,files = file)
+
+        responsedataset = requests.get("http://localhost:8000/mlaas/ingest/create_project/",params = {"user_name":"autouser_three"})
+        json_responsedataset=responsedataset.json()
+        json_dataset_id = json_responsedataset["response"][0]["dataset_id"]
+        files = '../ingest/dataset/pima_indians_diabetes.csv'
+        file = {'inputfile': open(files, 'rb')}
+        info = {"user_name":"autouser","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_dataset_name_project","visibility":"public","dataset_id":json_dataset_id}
+        response = requests.post("http://localhost:8000/mlaas/ingest/create_project/",data = info,files = file)
+        json_response = response.json()
+        status = json_response["status_code"]
+        self.assertEqual(status,"500")
+
 
 class TestDIngestGetProject(unittest.TestCase):
     
@@ -258,6 +299,7 @@ class TestEIngestProjectDeletion(unittest.TestCase):
         json_response = response.json()
         status = json_response["status_code"]
         self.assertEqual(status,"200")
+
     def testBscenario13_delete_project(self):
         """ This function is used to test the DeleteProject DELETE Method With invalid user name and project id .
 
