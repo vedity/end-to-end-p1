@@ -267,12 +267,12 @@ class DatasetClass:
 
     def show_data_details(self,DBObject,connection,dataset_id):
         """This function is used to show details about loaded dataset.
-
+ 
         Args:
             DBObject ([object]): [object of the database class.],
             connection ([object]): [object of the database connection.],
             table_name ([string]): [name of the table.]
-
+ 
         Returns:
             [dataframe]: [it will return loaded csv data in the form of dataframe.]
         """
@@ -326,6 +326,9 @@ class DatasetClass:
 
         sql_command = f"SELECT USER_NAME,DATASET_VISIBILITY FROM {table_name} WHERE DATASET_ID = '{dataset_id}'"
         user_name_df = DBObject.select_records(connection,sql_command) 
+        if  len(user_name_df) == 0:
+            return 5
+        
         user_name_from_table,dataset_visibility = user_name_df['user_name'][0],user_name_df['dataset_visibility'][0]
         if user_name == user_name_from_table:    
             #? This condition will be false when called form delete_project_details function,
@@ -346,6 +349,10 @@ class DatasetClass:
                 #? Getting csv table name
                 sql_command = "SELECT DATASET_TABLE_NAME FROM "+ table_name + " WHERE DATASET_ID ='"+ dataset_id +"'"
                 dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+                
+                if len(dataset_df) == 0:
+                    return 5
+                
                 dataset_table_name = dataset_df['dataset_table_name'][0] 
 
                 sql_command = f"DELETE FROM {table_name} WHERE DATASET_ID = '{dataset_id}'"
@@ -356,8 +363,10 @@ class DatasetClass:
                     user_name = 'public'
                 
                 dataset_table_name = dataset_table_name.lower()
+                
                 table_name = dataset_table_name
                 user_name = user_name.lower()
+                
                 data_status = self.delete_data_details(DBObject,connection,table_name,user_name)
                 
                 logging.info("data ingestion : DatasetClass : delete_dataset_details : execution end")
