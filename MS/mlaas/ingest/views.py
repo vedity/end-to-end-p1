@@ -54,7 +54,8 @@ class CreateProjectClass(APIView):
                 try:
                         logger.info(" Call GET method in CreateProjectClass")
                         #user_name = request.user.get_username()
-                        user_name  = request.POST.get('user_name') #get Username
+                        # user_name  = request.POST.get('user_name') #get Username
+                        user_name= request.query_params.get('user_name')
                         project_df = IngestionObj.show_project_details(user_name) #call show_project_details to retrive project detail data and it will return dataframe
                         if isinstance(project_df,str):
                                 status_code,error_msg=get_Status_code(project_df)
@@ -151,7 +152,7 @@ class CreateDatasetClass(APIView):
         def get(self, request, format=None):
                 try:
                         logger.info(" Call GET method in CreateDatasetClass")
-                        user_name=request.POST.get('user_name')  #get Username
+                        user_name=request.query_params.get('user_name')  #get Username
                         dataset_df=IngestionObj.show_dataset_details(user_name) #Call show_dataset_details method it will return dataset detail for sepecific user_name
                         if isinstance(dataset_df,str):
                                 status_code,error_msg=get_Status_code(dataset_df)
@@ -267,9 +268,9 @@ class DataDetailClass(APIView):
         def get(self, request, format=None):
                 try:
                         logger.info(" Call GET method in DataDetailClass")
-                        user_name = request.POST.get('user_name')
-                        table_name=request.POST.get('table_name')  #get tablename
-                        dataset_visibility = request.POST.get('dataset_visibility')
+                        user_name = request.query_params.get('user_name')
+                        table_name=request.query_params.get('table_name')  #get tablename
+                        dataset_visibility =request.query_params.get('dataset_visibility')
                         dataset_df=IngestionObj.show_data_details(table_name,user_name,dataset_visibility) #call show_data_details and it will return dataset detail data in dataframe
                         if isinstance(dataset_df,str):
                                 status_code,error_msg=get_Status_code(dataset_df)
