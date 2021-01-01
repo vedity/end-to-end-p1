@@ -22,13 +22,11 @@ from .utils.dataset import dataset_creation
 from .utils.ingestion import *
 from common.utils.exception_handler.python_exception import *
 from .utils.project import project_creation
-from ingest.testing import get_json_format
+from common.utils.json_format.json_formater import *
 from rest_framework import views
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth.models import User
-from .serializer import InputSerializer
-from .testing import *
 
 logger = logging.getLogger('django')
 DBObject=db.DBClass()  #Get DBClass object
@@ -51,27 +49,28 @@ class CreateProjectClass(APIView):
         # permission_classes = [IsAuthenticated]
         def get(self, request, format=None):
                 try:
-                        logger.info(" Call GET method in CreateProjectClass")
+                        # logging.info("data ingestion : CreateProjectClass : GET Method : execution start")
                         #user_name = request.user.get_username()
                         user_name  = request.query_params.get('user_name') #get Username
                         project_df = IngestionObj.show_project_details(user_name) #call show_project_details to retrive project detail data and it will return dataframe
                         print(project_df)
                         if isinstance(project_df,str):
                                 status_code,error_msg=get_Status_code(project_df)
-                                logger.info("CreateProjectClass retrival unsuccessfull")
+                                # logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code :"+ status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
-                                logger.info("CreateProjectClass retrival successfull")
+                                # logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code : 200")
                                 return Response({"status_code":"200","error_msg":"successfull retrival","response":project_df})  #return Data
 
                 except Exception as e:
-                        logger.error("Exception in CreateProjectClass GET method "+str(e), exc_info=True)
+                        # logging.error("data ingestion : CreateProjectClass : GET Method : " + str(e))
+			# logging.error("data ingestion : CreateProjectClass : GET Method : "+traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
         
         def post(self, request, format=None):
                         try:
                         # user_name=request.user.get_username()  #get Username
-                                logger.info("call POST method in CreateProjectClass")
+                                # logging.info("data ingestion : CreateProjectClass : POST Method : execution start")
                                 user_name=request.POST.get('user_name')  #get Username
                                 project_name=request.POST.get('project_name') #get project_name
                                 project_desc=request.POST.get('description') #get description
@@ -86,7 +85,7 @@ class CreateProjectClass(APIView):
                                 if dataset_id == None :
                                         project_obj=project_creation.ProjectClass()
                                         table_name,_,_=project_obj.make_project_schema()
-                                        logger.info("Calling project_exist function to check project Name")
+                                        #logger.info("Calling project_exist function to check project Name")
                                         exists_project_status=project_obj.project_exists(DBObject,connection,table_name,project_name,user_name)
                                         if exists_project_status == False:
                                                 my_file=request.FILES['inputfile'] #get inputfile Name
@@ -112,8 +111,9 @@ class CreateProjectClass(APIView):
                                                                 return Response({"visibility":"Not appropriate Value"})
 
                                                 except Exception as e:
-                                                        logger.error(" call POST method in CreateProjectClass while uploading file to server"+str(e))
-                                                        return Response({"Exception":str(e)}) 
+                                                        
+                                                        # logger.error(" call POST method in CreateProjectClass while uploading file to server"+str(e))
+                                                        return Response({"status_code":"500","error_msg":"InvalidFileInput","response":"false"}) 
                                         else:
                                                 #warning
                                                 return Response({"status_code":"500","error_msg":"ProjectALreadyExist","response":"false"})
@@ -124,14 +124,15 @@ class CreateProjectClass(APIView):
                                 project_Status=IngestionObj.create_project(project_name,project_desc,dataset_name,dataset_visibility,file_name,dataset_id,user_name)    #call create_project method to create project and insert csv data into table
                                 if project_Status != 0:
                                         status_code,error_msg=get_Status_code(project_Status)
-                                        logger.info("Exit From POST method of Createprojectclass with unsuccessfull insertion")
+                                        # logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+status_code)
                                         return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                                 else:
-                                        logger.info("Exit From POST method of Createprojectclass with successfull insertion")
+                                        # logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code : 200")
                                         return Response({"status_code":"200","status_msg":"Successfully Inserted","response":"true"}) 
 
                         except Exception as e:
-                                logging.error("Exception occurred In POST method of Creatprojectclas", exc_info=True)
+                                # logging.error("data ingestion : CreateProjectClass : POST Method : " + str(e))
+			        # logging.error("data ingestion : CreateProjectClass : POST Method : "+traceback.format_exc())
                                 return Response({"status_code":"500","error_msg":str(e),"response":"false"})      
 
         
@@ -150,23 +151,24 @@ class CreateDatasetClass(APIView):
         # permission_classes = [IsAuthenticated]
         def get(self, request, format=None):
                 try:
-                        logger.info(" Call GET method in CreateDatasetClass")
+                        # logging.info("data ingestion : CreateDatasetClass : GET Method : execution start")
                         user_name=request.query_params.get('user_name')  #get Username
                         dataset_df=IngestionObj.show_dataset_details(user_name) #Call show_dataset_details method it will return dataset detail for sepecific user_name
                         if isinstance(dataset_df,str):
                                 status_code,error_msg=get_Status_code(dataset_df)
-                                logger.info("Exit From Createprojectclass with unsuccessfull Retrival")
+                                # logging.info("data ingestion : CreateDatasetClass : GET Method : execution stop : status_code : "+status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
-                                logger.info("Exit From Createprojectclass with successfull Retrival")
+                                # logging.info("data ingestion : CreateDatasetClass : GET Method : execution stop : status_code : 200")
                                 return Response({"status_code":"200","error_msg":"successfull retrival","response":dataset_df})  #return Data             
                 except Exception as e:
-                        logger.error("Exception in CreateDatasetClass GET method "+str(e), exc_info=True)
+                        # logging.error("data ingestion : CreateDatasetClass : GET Method : " + str(e))
+			# logging.error("data ingestion : CreateDatasetClass : GET Method : "+ traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
         
         def post(self, request, format=None):
                 try: 
-                        logger.info(" Call POST method in CreateDatasetClass")
+                       
                         # user_name=request.user.get_username()
                         user_name=str(request.POST.get('user_name'))  #get Username
                         dataset_name=request.POST.get('dataset_name') #get dataset name
@@ -266,21 +268,19 @@ class DataDetailClass(APIView):
         # permission_classes = [IsAuthenticated]
         def get(self, request, format=None):
                 try:
-                        logger.info(" Call GET method in DataDetailClass")
-                        user_name = request.query_params.get('user_name')
-                        table_name=request.query_params.get('table_name')  #get tablename
-                        dataset_visibility = request.query_params.get('dataset_visibility')
-                        dataset_df=IngestionObj.show_data_details(table_name,user_name,dataset_visibility) #call show_data_details and it will return dataset detail data in dataframe
+                        
+                        dataset_id = request.query_params.get('dataset_id')
+                        dataset_df=IngestionObj.show_data_details(dataset_id) #call show_data_details and it will return dataset detail data in dataframe
                         if isinstance(dataset_df,str):
                                 status_code,error_msg=get_Status_code(dataset_df)
-                                logger.info("DataDetailClass retrival unsuccessfull")
+                                
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
-                                logger.info("DataDetailClass retrival successfull")
+                                
                                 json_data=get_json_format(dataset_df,['dataset_id','index'])
                                 return Response({"status_code":"200","error_msg":"successfull retrival","response":json_data})  #return Data             
                 except Exception as e:
-                        logger.error("Exception in DataDetailClass GET method "+str(e), exc_info=True)
+                        
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
 
 
