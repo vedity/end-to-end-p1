@@ -13,10 +13,11 @@
 import os
 import datetime
 import json
+import traceback
 import pandas as pd
 from .utils.schema_creation import *
 from database import *
-
+from common.utils.logger_handler import custom_logger as cl
 from .utils import ingestion
 from django.core.files.storage import FileSystemStorage
 from rest_framework.decorators import api_view ,permission_classes
@@ -32,7 +33,15 @@ from django.contrib.auth.models import User
 from .serializer import InputSerializer
 from .testing import *
 import logging
-logger = logging.getLogger('django')
+
+user_name = 'admin'
+log_enable = True
+
+LogObject = cl.LogClass(user_name,log_enable)
+LogObject.log_setting()
+
+logger = logging.getLogger('view')
+
 DBObject=db.DBClass()     #Get DBClass object
 #user=None
 connection,connection_string=DBObject.database_connection(database,user,password,host,port)      #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
@@ -51,17 +60,18 @@ class CreateProjectClass(APIView):
         # permission_classes = [IsAuthenticated]
         def get(self, request, format=None):
                 try:
-                        logger.info(" Call GET method in CreateProjectClass")
+                        logging.info("data ingestion : CreateProjectClass : get : execution start")
                         #user_name = request.user.get_username()
                         user_name  = request.POST.get('user_name') #get Username
                         project_df = IngestionObj.show_project_details(user_name) #call show_project_details to retrive project detail data and it will return dataframe
-                        project_df = json.loads(project_df)
-                        logger.info("project detail retrival successfull")
+                        
+                        logging.info("data ingestion : CreateProjectClass : get : execution end")
                         return Response({"Data":project_df})  #return Data
 
                 except Exception as e:
-                        logger.error("Error in CreateProjectClass GET method "+str(e), exc_info=True)
-                        return Response({"Exception":str(e)}) 
+                        logging.error("data ingestion : CreateProjectClass : get : " + str(e))
+                        logging.error("data ingestion : CreateProjectClass : get : " +traceback.format_exc())
+                        return Response({"Invalid User Exception ":str(e)}) 
         
         def post(self, request, format=None):
                         try:
@@ -141,7 +151,7 @@ class CreateDatasetClass(APIView):
                         logger.info(" Call GET method in CreateDatasetClass")
                         user_name=request.POST.get('user_name')  #get Username
                         dataset_df=IngestionObj.show_dataset_details(user_name) #Call show_dataset_details method it will return dataset detail for sepecific user_name
-                        dataset_df = json.loads(dataset_df)
+                        
                         return Response({"Data":dataset_df}) #return Data                
                 except Exception as e:
                         logger.error("Error in CreateDatasetClass GET method "+str(e), exc_info=True)
@@ -242,12 +252,10 @@ class DataDetailClass(APIView):
         def get(self, request, format=None):
                 try:
                         logger.info(" Call GET method in DataDetailClass")
-                        user_name = request.POST.get('user_name')
-                        table_name=request.POST.get('table_name')  #get tablename
-                        dataset_visibility = request.POST.get('dataset_visibility')
-                        dataset_df=IngestionObj.show_data_details(table_name,user_name,dataset_visibility) #call show_data_details and it will return dataset detail data in dataframe
-                        dataset_json=json.loads(dataset_df)  # convert datafreame into json
-                        json_data=get_json_format(dataset_json,['dataset_id','index']) #calling function to get pre-define json format
+                        dataset_id = request.POST.get('dataset_id')
+                        dataset_df=IngestionObj.show_data_details(dataset_id) #call show_data_details and it will return dataset detail data in dataframe
+                        # convert datafreame into json
+                        json_data=get_json_format(dataset_df,['dataset_id','index']) #calling function to get pre-define json format
                         return Response({"Dataset":json_data})  #return Data 
                 except Exception as e:
                         logger.error("Error in DataDetailClass GET method "+str(e), exc_info=True)
