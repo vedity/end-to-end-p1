@@ -151,7 +151,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise DatabaseConnectionFailed(500)
             
             dataset_df = super(IngestClass,self).show_dataset_details(DBObject,connection,user_name) # Get dataframe of dataset created.
-            if type(dataset_df) == None:
+            if dataset_df is None:
                 raise DatasetDataNotFound(500)
             dataset_df = dataset_df.to_json(orient='records')
             dataset_df = json.loads(dataset_df)
@@ -186,7 +186,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise DatabaseConnectionFailed(500) 
             
             data_details_df = super(IngestClass,self).show_data_details(DBObject,connection,table_name,user_name) # Get dataframe of loaded csv.
-            if type(data_details_df) == type(None) :
+            if data_details_df is None :
                 raise DataNotFound(500)
             data_details_df=data_details_df.to_json(orient='records')
             if len(data_details_df) <= 2 :
@@ -216,7 +216,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise DatabaseConnectionFailed(500)
             
             project_df = super(IngestClass,self).show_project_details(DBObject,connection,user_name) # Get dataframe of project created.
-            if type(project_df) == None:
+            if project_df is None:
                 raise ProjectDataNotFound(500)
             project_df = project_df.to_json(orient='records')
             
@@ -258,7 +258,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         except (DatabaseConnectionFailed,ProjectDeletionFailed,UserAuthenticationFailed) as exc:
             return exc.msg
         
-    def delete_dataset_details(self, dataset_id, user_name):
+    def delete_dataset_detail(self, dataset_id, user_name):
         '''
         This function is used to delete an entry in the project_tbl
         
@@ -292,7 +292,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         except (DatabaseConnectionFailed,DatasetDeletionFailed,DataDeletionFailed,UserAuthenticationFailed,DatasetInUse,DatasetEntryNotFound) as exc:
             return exc.msg
         
-    def delete_data_details(self,table_name,user_name):
+    def delete_data_detail(self,table_name,user_name):
         """
         This function is used to delete the whole table which was created from 
         user input file.
@@ -337,12 +337,14 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             
             dataset_df=super(IngestClass, self).show_dataset_names(DBObject,connection,user_name) 
             
-            if type(dataset_df) == None:
+            if dataset_df is None:
                 raise DatasetDataNotFound(500)
             
             dataset_df = dataset_df.to_json(orient='records')
             if len(dataset_df) <=2:
                 raise DatasetDataNotFound(500)
+
+            dataset_df=json.loads(dataset_df)
             
         except (DatabaseConnectionFailed,DatasetDataNotFound) as exc:
             return exc.msg
