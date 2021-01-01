@@ -283,16 +283,12 @@ class DatasetClass:
 
         table_name,_,_ = self.make_dataset_schema() # Get table name,schema and columns from dataset class.
 
-        logging.debug("data ingestion  :  DatasetClass  :  delete_dataset_details  :  Trying to get user_name & dataset_visibility from dataset_tbl")
         sql_command = f"SELECT USER_NAME,DATASET_VISIBILITY FROM {table_name} WHERE DATASET_ID = '{dataset_id}'"
         user_name_df = DBObject.select_records(connection,sql_command) 
-        
         if  len(user_name_df) == 0:
-            logging.debug(f"data ingestion  :  DatasetClass  :  delete_dataset_details  :  No entry found for the giver dataset_id = {dataset_id}")
             return 5
         
         user_name_from_table,dataset_visibility = user_name_df['user_name'][0],user_name_df['dataset_visibility'][0]
-        logging.debug(f"data ingestion  :  DatasetClass  :  delete_dataset_details  :  Authenticating user {user_name} for the request of [dataset_id = {dataset_id}]'s deletion")
         if user_name == user_name_from_table:    
             #? This condition will be false when called form delete_project_details function,
             #? because that function has already checked that this dataset is used nowhere
@@ -310,7 +306,6 @@ class DatasetClass:
             if id_count == 0: #? Number of projects that use this dataset
                 
                 #? Getting csv table name
-                logging.debug(f"data ingestion  :  DatasetClass  :  delete_dataset_details  :  getting data_table_name for the dataset_id = {dataset_id}")
                 sql_command = "SELECT DATASET_TABLE_NAME FROM "+ table_name + " WHERE DATASET_ID ='"+ dataset_id +"'"
                 dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
                 
@@ -321,16 +316,16 @@ class DatasetClass:
 
                 sql_command = f"DELETE FROM {table_name} WHERE DATASET_ID = '{dataset_id}'"
                 dataset_status = DBObject.delete_records(connection,sql_command)
-                if dataset_status == 1: return 1
-                
+
                 #? Deleting the CSV Table
                 if dataset_visibility == 'public':
                     user_name = 'public'
                 
                 dataset_table_name = dataset_table_name.lower()
+                
+                table_name = dataset_table_name
                 user_name = user_name.lower()
                 
-                logging.debug(f"data ingestion  :  DatasetClass  :  delete_dataset_details  :  Dataset_tbl entry deleted, Now dropping {user_name}.{dataset_table_name} table")
                 data_status = self.delete_data_details(DBObject,connection,table_name,user_name)
                 
                 logger.info("Exiting delete_dataset_details function from the dataset_creation.py file.")
@@ -372,7 +367,6 @@ class DatasetClass:
         #? Creating Sql Query
         sql_command = 'DROP TABLE '+ user_name +'.'+table_name
         status = DBObject.delete_records(connection,sql_command)
-        logging.debug(f"data ingestion  :  DatasetClass  :  delete_data_details  :  Dropped {user_name}.{table_name} table")
         
         logger.info("Exiting delete_data_details function from the dataset_creation.py file.")
         
@@ -415,7 +409,6 @@ class DatasetClass:
                     sql_command = f"SELECT DATASET_ID FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND USER_NAME = '{user_name}'"
                 else:
                     #! There is a public dataset with your name
-                    logging.debug(f"data ingestion  :  DatasetClass  :  dataset_exist  :  A public dataset with the same dataset_name exists at dataset_id = {int(data_df['dataset_id'][0])}")
                     return int(data_df['dataset_id'][0])
             
             data_df=DBObject.select_records(connection,sql_command)
@@ -424,9 +417,7 @@ class DatasetClass:
             logger.info("Exiting dataset_exists function from the dataset_creation.py file.")
         
             if data == 0: return False
-            else: 
-                logging.debug(f"data ingestion  :  DatasetClass  :  dataset_exist  :  A dataset with the same dataset_name = '{dataset_name}' exists ")
-                return int(data_df['dataset_id'][0])
+            else: return int(data_df['dataset_id'][0])
             #else: return True
         except:
             logger.error("dataset_exists function in the dataset_creation.py file failed.")
