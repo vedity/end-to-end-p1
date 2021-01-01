@@ -152,7 +152,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise DatabaseConnectionFailed(500)
             
             dataset_df = super(IngestClass,self).show_dataset_details(DBObject,connection,user_name) # Get dataframe of dataset created.
-            if type(dataset_df) ==None:
+            if type(dataset_df) == None:
                 raise DatasetDataNotFound(500)
             dataset_df = dataset_df.to_json(orient='records')
             dataset_df = json.loads(dataset_df)

@@ -54,8 +54,12 @@ class CreateProjectClass(APIView):
                 try:
                         logger.info(" Call GET method in CreateProjectClass")
                         #user_name = request.user.get_username()
+<<<<<<< HEAD
                         # user_name  = request.POST.get('user_name') #get Username
                         user_name= request.query_params.get('user_name')
+=======
+                        user_name  = request.query_params.get('user_name') #get Username
+>>>>>>> 43298acdbc70c1b149d0aec07ce20e7d248f920c
                         project_df = IngestionObj.show_project_details(user_name) #call show_project_details to retrive project detail data and it will return dataframe
                         if isinstance(project_df,str):
                                 status_code,error_msg=get_Status_code(project_df)
@@ -220,7 +224,7 @@ class CreateDatasetClass(APIView):
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})   
 class DatasetSchemaClass(APIView):
         def get(self,request,format=None):
-                dataset_id=request.POST.get('dataset_id')
+                dataset_id=request.query_params.get('dataset_id')
                 schema_obj=SchemaClass(database,user,password,host,port)
                 schema_data=schema_obj.get_dataset_schema(str(dataset_id))
                 return Response({"Schema":str(schema_data)})    
@@ -270,7 +274,11 @@ class DataDetailClass(APIView):
                         logger.info(" Call GET method in DataDetailClass")
                         user_name = request.query_params.get('user_name')
                         table_name=request.query_params.get('table_name')  #get tablename
+<<<<<<< HEAD
                         dataset_visibility =request.query_params.get('dataset_visibility')
+=======
+                        dataset_visibility = request.query_params.get('dataset_visibility')
+>>>>>>> 43298acdbc70c1b149d0aec07ce20e7d248f920c
                         dataset_df=IngestionObj.show_data_details(table_name,user_name,dataset_visibility) #call show_data_details and it will return dataset detail data in dataframe
                         if isinstance(dataset_df,str):
                                 status_code,error_msg=get_Status_code(dataset_df)
@@ -301,8 +309,8 @@ class DeleteProjectDetailClass(APIView):
                 try:
                         logger.info(" Call DELETE method in DeleteProjectDetailClass")
                         # user_name=request.user.get_username()
-                        user_name=request.POST.get('user_name')
-                        project_id=request.POST.get('project_id')  #get tablename 
+                        user_name=request.query_params.get('user_name')
+                        project_id=request.query_params.get('project_id')  #get tablename 
                         project_status= IngestionObj.delete_project_details(project_id,user_name) 
                         if project_status != 0:
                                 status_code,error_msg=get_Status_code(project_status)
@@ -331,8 +339,8 @@ class DeleteDatasetDetailClass(APIView):
                 try:
                         logger.info(" Call DELETE method in DeleteDatasetDetailClass")
                         # user_name=request.user.get_username()
-                        user_name=request.POST.get('user_name')
-                        dataset_id=request.POST.get('dataset_id')  #get dataset name
+                        user_name=request.query_params.get('user_name')
+                        dataset_id=request.query_params.get('dataset_id')  #get dataset name
                         #dataset_obj=dataset_creation.DatasetClass()
                         dataset_status=IngestionObj.delete_dataset_details(dataset_id,user_name) 
                         if dataset_status != 0:
@@ -364,8 +372,8 @@ class DeleteDataDetailClass(APIView):
                 try:
                         logger.info("Call DELETE method in DeleteDataDetailClass")
                         # user_name=request.user.get_username()
-                        user_name=request.POST.get('user_name')
-                        table_name=request.POST.get('table_name')  #get tablename
+                        user_name=request.query_params.get('user_name')
+                        table_name=request.query_params.get('table_name')  #get tablename
         
                         data_detail_status=IngestionObj.delete_data_details(table_name,user_name) 
                         if data_detail_status != 0 :
@@ -406,8 +414,8 @@ class ToggleLogs(APIView):
 
 class ProjectExistClass(APIView):
         def get(self,request,format=None):
-                user_name = request.POST.get('user_name')
-                project_name = request.POST.get('project_name')
+                user_name = request.query_params.get('user_name')
+                project_name =request.query_params.get('project_name')
                 projectexist_status=IngestionObj.does_project_exists(project_name,user_name) 
                 if projectexist_status != False:
                         status_code,error_msg=get_Status_code(projectexist_status)
@@ -417,8 +425,8 @@ class ProjectExistClass(APIView):
                         return Response({"status_code":"200","error_msg":"you can proceed","response":"true"})  
 class DatasetExistClass(APIView):
         def get(self,request,format=None):
-                user_name = request.POST.get('user_name')
-                dataset_name = request.POST.get('dataset_name')
+                user_name = request.query_params.get('user_name')
+                dataset_name = request.query_params.get('dataset_name')
                 datasetexist_status=IngestionObj.does_dataset_exists(dataset_name,user_name) 
                 if datasetexist_status != False:
                         status_code,error_msg=get_Status_code(datasetexist_status)
@@ -427,7 +435,7 @@ class DatasetExistClass(APIView):
                         return Response({"status_code":"200","error_msg":"you can proceed","response":"true"})  
 class DatasetNameClass(APIView):
         def get(self,request,format=None):
-                user_name = request.POST.get('user_name')
+                user_name =request.query_params.get('user_name')
                 dataset_df=IngestionObj.show_dataset_names(user_name)
                 dataset_json=json.loads(dataset_df)  # convert datafreame into json
                 return Response({"Dataset":dataset_json})  #return Data 
