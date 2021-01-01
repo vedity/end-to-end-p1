@@ -165,7 +165,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         logger.info(" Show Dataset Details Execution End")
         return dataset_df
 
-    def show_data_details(self,table_name,user_name,dataset_visibility):
+    def show_data_details(self,dataset_id):
         """This function is used to show data details.
            It will show all the columns and rows from uploaded csv files.
 
@@ -179,13 +179,11 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         try:
             DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
             
-            if dataset_visibility.lower() == 'public':
-                user_name = 'public'
             
             if connection == None :
                 raise DatabaseConnectionFailed(500) 
             
-            data_details_df = super(IngestClass,self).show_data_details(DBObject,connection,table_name,user_name) # Get dataframe of loaded csv.
+            data_details_df = super(IngestClass,self).show_data_details(DBObject,connection,dataset_id) # Get dataframe of loaded csv.
             if data_details_df is None :
                 raise DataNotFound(500)
             data_details_df=data_details_df.to_json(orient='records')

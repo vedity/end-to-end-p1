@@ -185,7 +185,6 @@ class TestCIngestPostProject(unittest.TestCase):
         info = {"user_name":"autouser_second","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_dataset_name","visibility":"private"}
         response = requests.post("http://localhost:8000/mlaas/ingest/create_project/",data = info,files = file)
         json_response = response.json()
-        print(json_response)
         status = json_response["status_code"]
         self.assertEqual(status,"500")
 
@@ -208,7 +207,6 @@ class TestCIngestPostProject(unittest.TestCase):
         info = {"user_name":"autouser","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_dataset_name","visibility":"public"}
         response = requests.post("http://localhost:8000/mlaas/ingest/create_project/",data = info,files = file)
         json_response = response.json()
-        print(json_response)
         status = json_response["status_code"]
         self.assertEqual(status,"500")
 
@@ -280,17 +278,14 @@ class TestFIngestDataDetailClass(unittest.TestCase):
         """ This function is used to test the DataDetail GET Method With valid inputs.
 
         Args:
-            user_name ([string]): [name of the user.]
-            table_name ([string]):[name of the table.]
-            dataset_visibility ([string]):[name of the visibility(public)]
+            dataset_id ([integer]): [Id of the dataset.]
+           
 
         """
         response = requests.get("http://localhost:8000/mlaas/ingest/create_dataset/",params ={"user_name":"autouser"})
         json_response = response.json()
-        datadetail_username = json_response["response"][0]["user_name"]
-        datadetail_tablename = json_response["response"][0]["dataset_table_name"]
-        datadetail_visibility = json_response["response"][0]["dataset_visibility"]
-        response = requests.get("http://localhost:8000/mlaas/ingest/data_detail/",params ={"user_name":datadetail_username,"table_name":datadetail_tablename,"dataset_visibility":datadetail_visibility})
+        datadetail_id = json_response["response"][0]["dataset_id"]
+        response = requests.get("http://localhost:8000/mlaas/ingest/data_detail/",params ={"dataset_id":datadetail_id})
         json_response = response.json()
         status = json_response["status_code"]
         self.assertEqual(status,"200")
@@ -299,9 +294,7 @@ class TestFIngestDataDetailClass(unittest.TestCase):
         """ This function is used to test the DataDetail GET Method With valid inputs.
 
         Args:
-            user_name ([string]): [name of the user.]
-            table_name ([string]):[name of the table.]
-            dataset_visibility ([string]):[name of the visibility(private)]
+            dataset_id ([integer]): [Id of the dataset.]
     
         """
         files = '../ingest/dataset/pima_indians_diabetes.csv'
@@ -311,10 +304,9 @@ class TestFIngestDataDetailClass(unittest.TestCase):
     
         response = requests.get("http://localhost:8000/mlaas/ingest/create_dataset/",params ={"user_name":"autouser_seconduser"})
         json_response = response.json()
-        datadetail_username = json_response["response"][0]["user_name"]
-        datadetail_tablename = json_response["response"][0]["dataset_table_name"]
-        datadetail_visibility = json_response["response"][0]["dataset_visibility"]
-        response = requests.get("http://localhost:8000/mlaas/ingest/data_detail/",params ={"user_name":datadetail_username,"table_name":datadetail_tablename,"dataset_visibility":datadetail_visibility})
+        datadetail_id = json_response["response"][0]["dataset_id"]
+       
+        response = requests.get("http://localhost:8000/mlaas/ingest/data_detail/",params ={"dataset_id":datadetail_id})
         json_response = response.json()
         status = json_response["status_code"]
         self.assertEqual(status,"200")
@@ -328,7 +320,7 @@ class TestFIngestDataDetailClass(unittest.TestCase):
             dataset_visibility ([string]):[name of the visibility(private)]
     
         """
-        response = requests.get("http://localhost:8000/mlaas/ingest/data_detail/",params ={"user_name":"invalid_user_name","table_name":"invalid_table","dataset_visibility":"invalid_visibility"})
+        response = requests.get("http://localhost:8000/mlaas/ingest/data_detail/",params ={"dataset_id":4})
         json_response = response.json()
         status = json_response["status_code"]
         self.assertEqual(status,"500")
