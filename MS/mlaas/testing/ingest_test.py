@@ -185,6 +185,7 @@ class TestCIngestPostProject(unittest.TestCase):
         info = {"user_name":"autouser_second","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_dataset_name","visibility":"private"}
         response = requests.post("http://localhost:8000/mlaas/ingest/create_project/",data = info,files = file)
         json_response = response.json()
+        print(json_response)
         status = json_response["status_code"]
         self.assertEqual(status,"500")
 
@@ -207,6 +208,7 @@ class TestCIngestPostProject(unittest.TestCase):
         info = {"user_name":"autouser","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_dataset_name","visibility":"public"}
         response = requests.post("http://localhost:8000/mlaas/ingest/create_project/",data = info,files = file)
         json_response = response.json()
+        print(json_response)
         status = json_response["status_code"]
         self.assertEqual(status,"500")
 
