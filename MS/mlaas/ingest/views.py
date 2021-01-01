@@ -116,7 +116,7 @@ class CreateProjectClass(APIView):
                                                         return Response({"Exception":str(e)}) 
                                         else:
                                                 #warning
-                                                return Response({"message":"Project Name already Exists"})
+                                                return Response({"status_code":"500","error_msg":"ProjectALreadyExist","response":"false"})
                                 else:
                                         dataset_id = int(dataset_id)
                                                 
@@ -201,7 +201,7 @@ class CreateDatasetClass(APIView):
 
                                 except Exception as e:
                                         logger.error(" call POST method in CreateDatasetClass while uploading file to server"+str(e))
-                                        return Response({"Exception":str(e)})
+                                        return Response({"status_code":"500","error_msg":"InputProperFile","response":"false"})
                         else:
                                 #warning
                                 return Response({"status_code":"500","Dataset Name already Exists":str(e),"response":"false"})
