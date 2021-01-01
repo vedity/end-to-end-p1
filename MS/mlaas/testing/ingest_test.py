@@ -203,7 +203,6 @@ class TestCIngestPostProject(unittest.TestCase):
         info = {"user_name":"autouser_second","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_dataset_name","visibility":"private"}
         response = requests.post("http://localhost:8000/mlaas/ingest/create_project/",data = info,files = file)
         json_response = response.json()
-        print(json_response)
         status = json_response["status_code"]
         self.assertEqual(status,"500")
 
@@ -309,7 +308,6 @@ class TestEIngestProjectDeletion(unittest.TestCase):
             user_name ([string]): [name of the user.]
             project_id ([string]): [id of project table],
             
-    
         """
         time.sleep(2)
         response = requests.delete("http://localhost:8000/mlaas/ingest/delete/project_detail/",params ={"user_name":"invalid_autouser","project_id":2})
