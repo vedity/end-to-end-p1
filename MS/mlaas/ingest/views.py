@@ -29,7 +29,6 @@ from rest_framework.response import Response
 from django.contrib.auth.models import User
 from .serializer import InputSerializer
 from .testing import *
-import logging
 
 logger = logging.getLogger('django')
 DBObject=db.DBClass()  #Get DBClass object
@@ -56,6 +55,7 @@ class CreateProjectClass(APIView):
                         #user_name = request.user.get_username()
                         user_name  = request.query_params.get('user_name') #get Username
                         project_df = IngestionObj.show_project_details(user_name) #call show_project_details to retrive project detail data and it will return dataframe
+                        print(project_df)
                         if isinstance(project_df,str):
                                 status_code,error_msg=get_Status_code(project_df)
                                 logger.info("CreateProjectClass retrival unsuccessfull")
@@ -333,7 +333,7 @@ class DeleteDatasetDetailClass(APIView):
                         user_name=request.query_params.get('user_name')
                         dataset_id=request.query_params.get('dataset_id')  #get dataset name
                         #dataset_obj=dataset_creation.DatasetClass()
-                        dataset_status=IngestionObj.delete_dataset_details(dataset_id,user_name) 
+                        dataset_status=IngestionObj.delete_dataset_detail(dataset_id,user_name) 
                         if dataset_status != 0:
                                 status_code,error_msg=get_Status_code(dataset_status)
                                 logger.info("DeleteDatasetDetailClass Deletion unsuccessfull")
@@ -366,7 +366,7 @@ class DeleteDataDetailClass(APIView):
                         user_name=request.query_params.get('user_name')
                         table_name=request.query_params.get('table_name')  #get tablename
         
-                        data_detail_status=IngestionObj.delete_data_details(table_name,user_name) 
+                        data_detail_status=IngestionObj.delete_data_detail(table_name,user_name) 
                         if data_detail_status != 0 :
                                 status_code,error_msg=get_Status_code(data_detail_status)
                                 logger.info("DeleteDataDetailClass Deletion unsuccessfull")
@@ -404,6 +404,17 @@ class ToggleLogs(APIView):
                 return Response({"msg":f"Logging Status changed to {logging_status}"})
 
 class ProjectExistClass(APIView):
+        """
+        This class is used to Check ProjectName already exist or not.
+        It will take url string as mlaas/ingest/project_exist/.
+        It will take input parameters as user_name,project_name.
+        And it will return status,error_msg and response.
+
+        Input  : user_name,project_name
+        Output : status_code(500 or 200),
+                 error_msg(Error message for deletion faild or successfull),
+                 Response(false or true)
+        """
         def get(self,request,format=None):
                 user_name = request.query_params.get('user_name')
                 project_name =request.query_params.get('project_name')
@@ -415,6 +426,17 @@ class ProjectExistClass(APIView):
                 else:
                         return Response({"status_code":"200","error_msg":"you can proceed","response":"true"})  
 class DatasetExistClass(APIView):
+        """
+        This class is used to Check Dataset already exist or not.
+        It will take url string as mlaas/ingest/dataset_exist/.
+        It will take input parameters as user_name,dataset_name.
+        And it will return status,error_msg and response.
+
+        Input  : user_name,dataset_name
+        Output : status_code(500 or 200),
+                 error_msg(Error message for deletion faild or successfull),
+                 Response(false or true)
+        """
         def get(self,request,format=None):
                 user_name = request.query_params.get('user_name')
                 dataset_name = request.query_params.get('dataset_name')
@@ -425,11 +447,25 @@ class DatasetExistClass(APIView):
                 else:
                         return Response({"status_code":"200","error_msg":"you can proceed","response":"true"})  
 class DatasetNameClass(APIView):
+        """
+        This class is used to get All Dataset name which are unploaded.
+        It will take url string as mlaas/ingest/datasetname_exist/.
+        It will take input parameters as user_name.
+        And it will return status,error_msg and response.
+
+        Input  : user_name
+        Output : status_code(500 or 200),
+                 error_msg(Error message for deletion faild or successfull),
+                 Response(false or true)
+        """
         def get(self,request,format=None):
                 user_name =request.query_params.get('user_name')
                 dataset_df=IngestionObj.show_dataset_names(user_name)
-                dataset_json=json.loads(dataset_df)  # convert datafreame into json
-                return Response({"Dataset":dataset_json})  #return Data 
+                if isinstance(dataset_df,str):
+                        status_code,error_msg=get_Status_code(dataset_df)
+                        return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                else:
+                        return Response({"status_code":"200","error_msg":"you can proceed","response":dataset_df})
         
 
 class MenuClass(APIView):
