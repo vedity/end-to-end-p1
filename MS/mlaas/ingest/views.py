@@ -13,9 +13,11 @@
 import os
 import datetime
 import json
+import traceback
 import pandas as pd
 from .utils.schema_creation import *
 from database import *
+from common.utils.logger_handler import custom_logger as cl
 from .utils import ingestion
 from django.core.files.storage import FileSystemStorage
 from .utils.dataset import dataset_creation
@@ -27,9 +29,19 @@ from rest_framework import views
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth.models import User
+from .serializer import InputSerializer
+from .testing import *
+import logging
 
-logger = logging.getLogger('django')
-DBObject=db.DBClass()  #Get DBClass object
+user_name = 'admin'
+log_enable = True
+
+LogObject = cl.LogClass(user_name,log_enable)
+LogObject.log_setting()
+
+logger = logging.getLogger('view')
+
+DBObject=db.DBClass()     #Get DBClass object
 #user=None
 connection,connection_string=DBObject.database_connection(database,user,password,host,port)      #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 IngestionObj=ingestion.IngestClass(database,user,password,host,port)
