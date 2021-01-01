@@ -432,3 +432,24 @@ class DatasetNameClass(APIView):
                 return Response({"Dataset":dataset_json})  #return Data 
         
 
+class MenuClass(APIView):
+        def post(self, request, format=None):
+                try:
+                        menu_df=DBObject.read_data('ingest/Menu.csv')
+                        status=DBObject.load_csv_into_db(connection_string,'menu_tbl',menu_df,'mlaas')
+                        return Response({"Status":status})
+                except Exception as e:
+                        return Response({"Exception":str(e)}) 
+        
+        def get(self, request, format=None):
+                try:
+                        sql_command1='select id,modulename,menuname,parent_id,url,icon from mlaas.menu_tbl where parent_id is null'
+                        dataset_df1=DBObject.select_records(connection,sql_command1) #call show_data_details and it will return dataset detail data in dataframe
+                        dataset_json1=json.loads(dataset_df1.to_json(orient='records'))  # convert datafreame into json
+                        sql_command2='select id,modulename,menuname ,parent_id,url,icon from mlaas.menu_tbl where parent_id is not null'
+                        dataset_df2=DBObject.select_records(connection,sql_command2) #call show_data_details and it will return dataset detail data in dataframe
+                        dataset_json2=json.loads(dataset_df2.to_json(orient='records'))  # convert datafreame into json
+                        json_data=menu_nested_format(dataset_json1,dataset_json2)   
+                        return Response({"Dataset":json_data})  #return Data 
+                except Exception as e:
+                        return Response({"Exception":str(e)})
