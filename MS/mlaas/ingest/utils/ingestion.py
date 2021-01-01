@@ -206,7 +206,6 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             if len(data_details_df) == 0 :
                 raise DataNotFound(500)
             
-            data_details_df=json.loads(data_details_df)  # convert datafreame into json
         except (DatabaseConnectionFailed,DataNotFound) as exc:
             logging.error("data ingestion : ingestclass : show_data_details : Exception " + str(exc.msg))
             logging.error("data ingestion : ingestclass : show_data_details : " +traceback.format_exc())
