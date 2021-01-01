@@ -233,19 +233,33 @@ class DatasetClass:
         
         return data
 
-    def show_data_details(self,DBObject,connection,table_name,user_name):
+    def show_data_details(self,DBObject,connection,dataset_id):
         """This function is used to show details about loaded dataset.
-
+ 
         Args:
             DBObject ([object]): [object of the database class.],
             connection ([object]): [object of the database connection.],
             table_name ([string]): [name of the table.]
-
+ 
         Returns:
             [dataframe]: [it will return loaded csv data in the form of dataframe.]
         """
+        # 'dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name' 
+        # make_dataset_schema
+        table_name,*_ = self.make_dataset_schema()
+        sql_command = 'SELECT dataset_table_name,dataset_visibility,user_name FROM ' + table_name + ' Where dataset_id='+ str(dataset_id)
+        # Get dataframe of loaded csv.
+        dataset_df = DBObject.select_records(connection,sql_command) 
+        
+        dataset_records = dataset_df.to_records(index=False)
+        
+        dataset_table_name,dataset_visibility,user_name = dataset_records[0]
+        dataset_table_name,dataset_visibility,user_name = str(dataset_table_name),str(dataset_visibility),str(user_name)
+         
+        if dataset_visibility.lower() == 'public':
+            user_name = 'public'
         # This command is used to get data details (i.e. loaded csv file data) from database.
-        sql_command = 'SELECT * FROM '+ user_name +'.' + table_name 
+        sql_command = 'SELECT * FROM '+ user_name +'.' + dataset_table_name 
         # Get dataframe of loaded csv.
         data_details_df = DBObject.select_records(connection,sql_command) 
         return data_details_df
