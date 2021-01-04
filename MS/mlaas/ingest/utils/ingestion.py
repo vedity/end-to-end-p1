@@ -268,10 +268,13 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise ProjectDeletionFailed(500)
             elif deletion_status == 2:
                 raise UserAuthenticationFailed(500)
+            elif deletion_status == 3:
+                raise EntryNotFound(500)
+            
             logging.info("data ingestion : ingestclass : delete_project_details : execution end")
             return deletion_status
         
-        except (DatabaseConnectionFailed,ProjectDeletionFailed,UserAuthenticationFailed) as exc:
+        except (DatabaseConnectionFailed,ProjectDeletionFailed,UserAuthenticationFailed,EntryNotFound) as exc:
             logging.error("data ingestion : ingestclass : delete_project_details : Exception " + str(exc.msg))
             logging.error("data ingestion : ingestclass : delete_project_details : " +traceback.format_exc())
             return exc.msg
@@ -303,11 +306,11 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             elif deletion_status == 4:
                 raise UserAuthenticationFailed(500)
             elif deletion_status == 5:
-                raise DatasetEntryNotFound(500)
+                raise EntryNotFound(500)
             logging.info("data ingestion : ingestclass : delete_dataset_details : execution end")
             return deletion_status
         
-        except (DatabaseConnectionFailed,DatasetDeletionFailed,DataDeletionFailed,UserAuthenticationFailed,DatasetInUse,DatasetEntryNotFound) as exc:
+        except (DatabaseConnectionFailed,DatasetDeletionFailed,DataDeletionFailed,UserAuthenticationFailed,DatasetInUse,EntryNotFound) as exc:
             logging.error("data ingestion : ingestclass : delete_dataset_details : Exception " + str(exc.msg))
             logging.error("data ingestion : ingestclass : delete_dataset_details : " +traceback.format_exc())
             return exc.msg
