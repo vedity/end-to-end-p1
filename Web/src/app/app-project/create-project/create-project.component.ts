@@ -85,6 +85,8 @@ errorHandler(error) {
 
   save(){
     console.log("called")
+    console.log(this.data);
+    
   }
 
 }

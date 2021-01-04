@@ -2,7 +2,7 @@ export class createproject{
     projectname:string;
     description:string;
     datasetname:string;
-    file:string;
+    file:File;
     datsetid:Int16Array;
     isprivate:boolean;    
 
