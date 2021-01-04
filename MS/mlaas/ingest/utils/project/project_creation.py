@@ -192,7 +192,7 @@ class ProjectClass:
         
         logging.debug("data ingestion : ProjectClass : show_project_details : this will excute select query on table name : "+table_name +" based on user name : "+user_name)
         
-        sql_command = "SELECT * FROM "+ table_name + " WHERE USER_NAME ='"+ user_name +"'"
+        sql_command = "SELECT p.*,d.dataset_name FROM "+ table_name + " p,mlaas.dataset_tbl d WHERE p.USER_NAME ='"+ user_name +"' and p.dataset_id = d.dataset_id"
         project_df=DBObject.select_records(connection,sql_command) # Get project details in the form of dataframe.
         logging.info("data ingestion : ProjectClass : show_project_details : execution end")
         return project_df
