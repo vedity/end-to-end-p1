@@ -7,7 +7,6 @@
 
 */
 '''
-from MS.mlaas.common.utils.exception_handler.python_exception import EntryNotFound
 import pandas as pd 
 import json
 import logging
