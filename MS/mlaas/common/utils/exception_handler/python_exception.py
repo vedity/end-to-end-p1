@@ -237,10 +237,10 @@ class LoadCSVDataFailed(Exception):
     def __str__(self):
         return (self.msg)
 
-class DatasetEntryNotFound(Exception):
-    """  DatasetEntry Not Found Exception"""
+class EntryNotFound(Exception):
+    """  Entry Not Found Exception"""
     def __init__(self,status_code):
-        self.msg = "DatasetEntryNotFound"
+        self.msg = "EntryNotFound"
         self.status_code = status_code
         self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
 

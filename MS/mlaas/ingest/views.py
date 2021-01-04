@@ -13,26 +13,35 @@
 import os
 import datetime
 import json
+import traceback
 import pandas as pd
 from .utils.schema_creation import *
 from database import *
+from common.utils.logger_handler import custom_logger as cl
 from .utils import ingestion
 from django.core.files.storage import FileSystemStorage
 from .utils.dataset import dataset_creation
 from .utils.ingestion import *
 from common.utils.exception_handler.python_exception import *
 from .utils.project import project_creation
-from ingest.testing import get_json_format
+from common.utils.json_format.json_formater import *
 from rest_framework import views
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth.models import User
-from .serializer import InputSerializer
-from .testing import *
-import logging
 
-logger = logging.getLogger('django')
-DBObject=db.DBClass()  #Get DBClass object
+import logging
+import traceback
+
+user_name = 'admin'
+log_enable = True
+
+LogObject = cl.LogClass(user_name,log_enable)
+LogObject.log_setting()
+
+logger = logging.getLogger('view')
+
+DBObject=db.DBClass()     #Get DBClass object
 #user=None
 connection,connection_string=DBObject.database_connection(database,user,password,host,port)      #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 IngestionObj=ingestion.IngestClass(database,user,password,host,port)
@@ -52,26 +61,28 @@ class CreateProjectClass(APIView):
         # permission_classes = [IsAuthenticated]
         def get(self, request, format=None):
                 try:
-                        logger.info(" Call GET method in CreateProjectClass")
+                        # logging.info("data ingestion : CreateProjectClass : GET Method : execution start")
                         #user_name = request.user.get_username()
                         user_name  = request.query_params.get('user_name') #get Username
                         project_df = IngestionObj.show_project_details(user_name) #call show_project_details to retrive project detail data and it will return dataframe
+                        print(project_df)
                         if isinstance(project_df,str):
                                 status_code,error_msg=get_Status_code(project_df)
-                                logger.info("CreateProjectClass retrival unsuccessfull")
+                                # logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code :"+ status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
-                                logger.info("CreateProjectClass retrival successfull")
+                                # logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code : 200")
                                 return Response({"status_code":"200","error_msg":"successfull retrival","response":project_df})  #return Data
 
                 except Exception as e:
-                        logger.error("Exception in CreateProjectClass GET method "+str(e), exc_info=True)
+                        # logging.error("data ingestion : CreateProjectClass : GET Method : " + str(e))
+			# logging.error("data ingestion : CreateProjectClass : GET Method : "+traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
         
         def post(self, request, format=None):
                         try:
                         # user_name=request.user.get_username()  #get Username
-                                logger.info("call POST method in CreateProjectClass")
+                                # logging.info("data ingestion : CreateProjectClass : POST Method : execution start")
                                 user_name=request.POST.get('user_name')  #get Username
                                 project_name=request.POST.get('project_name') #get project_name
                                 project_desc=request.POST.get('description') #get description
@@ -86,7 +97,7 @@ class CreateProjectClass(APIView):
                                 if dataset_id == None :
                                         project_obj=project_creation.ProjectClass()
                                         table_name,_,_=project_obj.make_project_schema()
-                                        logger.info("Calling project_exist function to check project Name")
+                                        #logger.info("Calling project_exist function to check project Name")
                                         exists_project_status=project_obj.project_exists(DBObject,connection,table_name,project_name,user_name)
                                         if exists_project_status == False:
                                                 my_file=request.FILES['inputfile'] #get inputfile Name
@@ -112,11 +123,12 @@ class CreateProjectClass(APIView):
                                                                 return Response({"visibility":"Not appropriate Value"})
 
                                                 except Exception as e:
-                                                        logger.error(" call POST method in CreateProjectClass while uploading file to server"+str(e))
-                                                        return Response({"Exception":str(e)}) 
+                                                        
+                                                        # logger.error(" call POST method in CreateProjectClass while uploading file to server"+str(e))
+                                                        return Response({"status_code":"500","error_msg":"InvalidFileInput","response":"false"}) 
                                         else:
                                                 #warning
-                                                return Response({"message":"Project Name already Exists"})
+                                                return Response({"status_code":"500","error_msg":"ProjectALreadyExist","response":"false"})
                                 else:
                                         dataset_id = int(dataset_id)
                                                 
@@ -124,14 +136,15 @@ class CreateProjectClass(APIView):
                                 project_Status=IngestionObj.create_project(project_name,project_desc,dataset_name,dataset_visibility,file_name,dataset_id,user_name)    #call create_project method to create project and insert csv data into table
                                 if project_Status != 0:
                                         status_code,error_msg=get_Status_code(project_Status)
-                                        logger.info("Exit From POST method of Createprojectclass with unsuccessfull insertion")
+                                        # logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+status_code)
                                         return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                                 else:
-                                        logger.info("Exit From POST method of Createprojectclass with successfull insertion")
+                                        # logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code : 200")
                                         return Response({"status_code":"200","status_msg":"Successfully Inserted","response":"true"}) 
 
                         except Exception as e:
-                                logging.error("Exception occurred In POST method of Creatprojectclas", exc_info=True)
+                                # logging.error("data ingestion : CreateProjectClass : POST Method : " + str(e))
+			        # logging.error("data ingestion : CreateProjectClass : POST Method : "+traceback.format_exc())
                                 return Response({"status_code":"500","error_msg":str(e),"response":"false"})      
 
         
@@ -150,23 +163,24 @@ class CreateDatasetClass(APIView):
         # permission_classes = [IsAuthenticated]
         def get(self, request, format=None):
                 try:
-                        logger.info(" Call GET method in CreateDatasetClass")
+                        # logging.info("data ingestion : CreateDatasetClass : GET Method : execution start")
                         user_name=request.query_params.get('user_name')  #get Username
                         dataset_df=IngestionObj.show_dataset_details(user_name) #Call show_dataset_details method it will return dataset detail for sepecific user_name
                         if isinstance(dataset_df,str):
                                 status_code,error_msg=get_Status_code(dataset_df)
-                                logger.info("Exit From Createprojectclass with unsuccessfull Retrival")
+                                # logging.info("data ingestion : CreateDatasetClass : GET Method : execution stop : status_code : "+status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
-                                logger.info("Exit From Createprojectclass with successfull Retrival")
+                                # logging.info("data ingestion : CreateDatasetClass : GET Method : execution stop : status_code : 200")
                                 return Response({"status_code":"200","error_msg":"successfull retrival","response":dataset_df})  #return Data             
                 except Exception as e:
-                        logger.error("Exception in CreateDatasetClass GET method "+str(e), exc_info=True)
+                        # logging.error("data ingestion : CreateDatasetClass : GET Method : " + str(e))
+			# logging.error("data ingestion : CreateDatasetClass : GET Method : "+ traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
         
         def post(self, request, format=None):
                 try: 
-                        logger.info(" Call POST method in CreateDatasetClass")
+                        # logging.info("data ingestion : CreateDatasetClass : POST Method : execution start")
                         # user_name=request.user.get_username()
                         user_name=str(request.POST.get('user_name'))  #get Username
                         dataset_name=request.POST.get('dataset_name') #get dataset name
@@ -195,27 +209,28 @@ class CreateDatasetClass(APIView):
                                                 filename = fs.save(file_name, my_file)
                                                 file_url = private_path + fs.url(filename)
                                         else:
-                                                #warning
+                                                
                                                 return Response({"status_code":"500","error_msg":"Not appropriate Value","response":"false"}) 
                                                 
 
                                 except Exception as e:
-                                        logger.error(" call POST method in CreateDatasetClass while uploading file to server"+str(e))
-                                        return Response({"Exception":str(e)})
+                                        # logging.error("data ingestion : CreateDatasetClass : POST Method :  Exception : " + str(e))
+                                        return Response({"status_code":"500","error_msg":"InputProperFile","response":"false"})
                         else:
-                                #warning
+
                                 return Response({"status_code":"500","Dataset Name already Exists":str(e),"response":"false"})
 
                         dataset_Status=IngestionObj.create_dataset(dataset_name,file_name,dataset_visibility,user_name) #call create_dataset method to create dataset and insert csv data into table
                         if dataset_Status != 0:
                                 status_code,error_msg=get_Status_code(dataset_Status)
-                                logger.info("Exit From POST method of CreateDatasetclass with unsuccessfull insertion")
+                                # logging.info("data ingestion : CreateDatasetClass : POST Method : execution stop : status_code :"+status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                         else:
-                                logger.info("Exit From POST method of CreateDatasetclass with successfull insertion")
+                                # logging.info("data ingestion : CreateDatasetClass : POST Method : execution stop : status_code : 200")
                                 return Response({"status_code":"200","error_msg":"Successfully Inserted","response":"true"})
                 except Exception as e:
-                        logger.error("Exception in CreateDatasetClass POST method "+str(e), exc_info=True)
+                        # logging.error("data ingestion : CreateDatasetClass : POST Method : Exception : " + str(e))
+			# logging.error("data ingestion : CreateDatasetClass : POST Method : "+ traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})   
 class DatasetSchemaClass(APIView):
         def get(self,request,format=None):
@@ -266,21 +281,20 @@ class DataDetailClass(APIView):
         # permission_classes = [IsAuthenticated]
         def get(self, request, format=None):
                 try:
-                        logger.info(" Call GET method in DataDetailClass")
-                        user_name = request.query_params.get('user_name')
-                        table_name=request.query_params.get('table_name')  #get tablename
-                        dataset_visibility = request.query_params.get('dataset_visibility')
-                        dataset_df=IngestionObj.show_data_details(table_name,user_name,dataset_visibility) #call show_data_details and it will return dataset detail data in dataframe
+                        # logging.info("data ingestion : DataDetailClass : GET Method : execution start")
+                        dataset_id = request.query_params.get('dataset_id')
+                        dataset_df=IngestionObj.show_data_details(dataset_id) #call show_data_details and it will return dataset detail data in dataframe
                         if isinstance(dataset_df,str):
                                 status_code,error_msg=get_Status_code(dataset_df)
-                                logger.info("DataDetailClass retrival unsuccessfull")
+                                # logging.info("data ingestion : DataDetailClass : GET Method : execution stop : status_code :"+status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
-                                logger.info("DataDetailClass retrival successfull")
+                                # logging.info("data ingestion : DataDetailClass : GET Method : execution stop : status_code :200")
                                 json_data=get_json_format(dataset_df,['dataset_id','index'])
                                 return Response({"status_code":"200","error_msg":"successfull retrival","response":json_data})  #return Data             
                 except Exception as e:
-                        logger.error("Exception in DataDetailClass GET method "+str(e), exc_info=True)
+                        # logging.error("data ingestion : DataDetailClass : GET Method : Exception :" + str(e))
+			# logging.error("data ingestion : DataDetailClass : GET Method :  Exception :"+ traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
 
 
@@ -298,6 +312,7 @@ class DeleteProjectDetailClass(APIView):
         """  
         def delete(self, request, format=None):
                 try:
+                        # logging.info("data ingestion : DeleteProjectDetailClass : DELETE Method : execution start")
                         logger.info(" Call DELETE method in DeleteProjectDetailClass")
                         # user_name=request.user.get_username()
                         user_name=request.query_params.get('user_name')
@@ -305,13 +320,14 @@ class DeleteProjectDetailClass(APIView):
                         project_status= IngestionObj.delete_project_details(project_id,user_name) 
                         if project_status != 0:
                                 status_code,error_msg=get_Status_code(project_status)
-                                logger.info("DeleteProjectDetailClass Deletion unsuccessfull")
+                                # logging.info("data ingestion : DeleteProjectDetailClass : DELETE Method : execution stop : status_code :"+status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                         else:
-                                logger.info("DeleteProjectDetailClass Deletion successfull")
+                                # logging.info("data ingestion : DeleteProjectDetailClass : DELETE Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully Delete","response":"true"})
                 except Exception as e:
-                        logger.error("Exception in DeleteProjectDetailClass DELETE method "+str(e), exc_info=True)
+                        # logging.error("data ingestion : DeleteProjectDetailClass : DELETE Method :  Exception : " + str(e))
+			# logging.error("data ingestion : DeleteProjectDetailClass : DELETE Method : "+ traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
 
 class DeleteDatasetDetailClass(APIView):
@@ -328,22 +344,22 @@ class DeleteDatasetDetailClass(APIView):
         """
         def delete(self, request, format=None):
                 try:
-                        logger.info(" Call DELETE method in DeleteDatasetDetailClass")
+                        # logging.info("data ingestion : DeleteDatasetDetailClass : DELETE Method : execution start")
                         # user_name=request.user.get_username()
                         user_name=request.query_params.get('user_name')
                         dataset_id=request.query_params.get('dataset_id')  #get dataset name
-                        #dataset_obj=dataset_creation.DatasetClass()
-                        dataset_status=IngestionObj.delete_dataset_details(dataset_id,user_name) 
+                        dataset_status=IngestionObj.delete_dataset_detail(dataset_id,user_name) 
                         if dataset_status != 0:
                                 status_code,error_msg=get_Status_code(dataset_status)
-                                logger.info("DeleteDatasetDetailClass Deletion unsuccessfull")
+                                # logging.info("data ingestion : DeleteDatasetDetailClass : DELETE Method : execution stop : status_code :"+status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                         else:
-                                logger.info("DeleteDatasetDetailClass Deletion successfull")
+                                # logging.info("data ingestion : DeleteDatasetDetailClass : DELETE Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully Deleted","response":"true"})
 
                 except Exception as e:
-                        logger.error("Exception in DeleteDatasetDetailClass DELETE method "+str(e), exc_info=True)
+                        # logging.error("data ingestion : DeleteDatasetDetailClass : DELETE Method : Exception : " + str(e))
+			# logging.error("data ingestion : DeleteDatasetDetailClass : DELETE Method : "+ traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
 
 class DeleteDataDetailClass(APIView):
@@ -361,74 +377,145 @@ class DeleteDataDetailClass(APIView):
         def delete(self, request, format=None):
 
                 try:
-                        logger.info("Call DELETE method in DeleteDataDetailClass")
+                        # logging.info("data ingestion : DeleteDataDetailClass : DELETE Method : execution start")
                         # user_name=request.user.get_username()
                         user_name=request.query_params.get('user_name')
                         table_name=request.query_params.get('table_name')  #get tablename
-        
-                        data_detail_status=IngestionObj.delete_data_details(table_name,user_name) 
+                        data_detail_status=IngestionObj.delete_data_detail(table_name,user_name) 
                         if data_detail_status != 0 :
                                 status_code,error_msg=get_Status_code(data_detail_status)
-                                logger.info("DeleteDataDetailClass Deletion unsuccessfull")
+                                # logging.info("data ingestion : DeleteDataDetailClass : DELETE Method : execution stop : status_code :"+status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                         else:
-                                logger.info("DeleteDataDetailClass Deletion successfull")
+                                # logging.info("data ingestion : DeleteDataDetailClass : DELETE Method : execution stop : status_code :"+status_code)
                                 return Response({"status_code":"200","error_msg":"Successfully Deleted","response":"true"})
                 except Exception as e:
-                        logger.error("Exception in DeleteDataDetailClass DELETE method "+str(e), exc_info=True)
+                        # logging.error("data ingestion : DeleteDataDetailClass : DELETE Method : Exception :" + str(e))
+			# logging.error("data ingestion : DeleteDataDetailClass : DELETE Method : "+ traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
 
 
-class ToggleLogs(APIView):
-        def get(self,request,format=None):
-                reader_obj = open(r'Mlaas/settings.py','r')
-                settings_string = reader_obj.read()
-                logging_line_index = settings_string.find("LOGGING")
-                bracket_index = settings_string.find("(",logging_line_index)
-                bracket_index+=1
+# class ToggleLogs(APIView):
+#         def get(self,request,format=None):
+#                 reader_obj = open(r'Mlaas/settings.py','r')
+#                 settings_string = reader_obj.read()
+#                 logging_line_index = settings_string.find("LOGGING")
+#                 bracket_index = settings_string.find("(",logging_line_index)
+#                 bracket_index+=1
                 
-                if settings_string[bracket_index] == 'T':
-                        settings_string = settings_string[:bracket_index] + "False" + settings_string[bracket_index+4:]
-                        logging_status = "False"
-                else:
-                        settings_string = settings_string[:bracket_index] + "True" + settings_string[bracket_index+5:]
-                        logging_status = "True"
+#                 if settings_string[bracket_index] == 'T':
+#                         settings_string = settings_string[:bracket_index] + "False" + settings_string[bracket_index+4:]
+#                         logging_status = "False"
+#                 else:
+#                         settings_string = settings_string[:bracket_index] + "True" + settings_string[bracket_index+5:]
+#                         logging_status = "True"
                 
-                reader_obj.close()
+#                 reader_obj.close()
                 
-                writer_obj = open(r'Mlaas/settings.py','w')
-                writer_obj.write(settings_string)
+#                 writer_obj = open(r'Mlaas/settings.py','w')
+#                 writer_obj.write(settings_string)
                 
-                writer_obj.close()
+#                 writer_obj.close()
                 
-                return Response({"msg":f"Logging Status changed to {logging_status}"})
+#                 return Response({"msg":f"Logging Status changed to {logging_status}"})
 
 class ProjectExistClass(APIView):
+        """
+        This class is used to Check ProjectName already exist or not.
+        It will take url string as mlaas/ingest/project_exist/.
+        It will take input parameters as user_name,project_name.
+        And it will return status,error_msg and response.
+
+        Input  : user_name,project_name
+        Output : status_code(500 or 200),
+                 error_msg(Error message for deletion faild or successfull),
+                 Response(false or true)
+        """
         def get(self,request,format=None):
+                # logging.info("data ingestion : ProjectExistClass : GET Method : execution start")
                 user_name = request.query_params.get('user_name')
                 project_name =request.query_params.get('project_name')
                 projectexist_status=IngestionObj.does_project_exists(project_name,user_name) 
                 if projectexist_status != False:
                         status_code,error_msg=get_Status_code(projectexist_status)
-                        logger.info("ProjectExistClass for method ")
+                        # logging.info("data ingestion : ProjectExistClass : GET Method : execution stop : status_code :"+status_code)
                         return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                 else:
+                        # logging.info("data ingestion : ProjectExistClass : GET Method : execution stop : status_code :200")
                         return Response({"status_code":"200","error_msg":"you can proceed","response":"true"})  
 class DatasetExistClass(APIView):
+        """
+        This class is used to Check Dataset already exist or not.
+        It will take url string as mlaas/ingest/dataset_exist/.
+        It will take input parameters as user_name,dataset_name.
+        And it will return status,error_msg and response.
+
+        Input  : user_name,dataset_name
+        Output : status_code(500 or 200),
+                 error_msg(Error message for deletion faild or successfull),
+                 Response(false or true)
+        """
         def get(self,request,format=None):
+                # logging.info("data ingestion : DatasetExistClass : GET Method : execution start")
                 user_name = request.query_params.get('user_name')
                 dataset_name = request.query_params.get('dataset_name')
                 datasetexist_status=IngestionObj.does_dataset_exists(dataset_name,user_name) 
                 if datasetexist_status != False:
                         status_code,error_msg=get_Status_code(datasetexist_status)
+                        # logging.info("data ingestion : DatasetExistClass : GET Method : execution stop : status_code :"+status_code)
                         return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                 else:
+                        # logging.info("data ingestion : DatasetExistClass : GET Method : execution stop : status_code :200")
                         return Response({"status_code":"200","error_msg":"you can proceed","response":"true"})  
 class DatasetNameClass(APIView):
+        """
+        This class is used to get All Dataset name which are unploaded.
+        It will take url string as mlaas/ingest/datasetname_exist/.
+        It will take input parameters as user_name.
+        And it will return status,error_msg and response.
+
+        Input  : user_name
+        Output : status_code(500 or 200),
+                 error_msg(Error message for deletion faild or successfull),
+                 Response(false or true)
+        """
         def get(self,request,format=None):
+                # logging.info("data ingestion : DatasetNameClass : GET Method : execution start")
                 user_name =request.query_params.get('user_name')
                 dataset_df=IngestionObj.show_dataset_names(user_name)
-                dataset_json=json.loads(dataset_df)  # convert datafreame into json
-                return Response({"Dataset":dataset_json})  #return Data 
+                if isinstance(dataset_df,str):
+                        status_code,error_msg=get_Status_code(dataset_df)
+                        # logging.info("data ingestion : DatasetNameClass : GET Method : execution stop : status_code :"+status_code)
+                        return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                else:
+                        # logging.info("data ingestion : DatasetNameClass : GET Method : execution stop : status_code : 200")
+                        return Response({"status_code":"200","error_msg":"you can proceed","response":dataset_df})
         
 
+class MenuClass(APIView):
+        def post(self, request, format=None):
+                try:
+                        # logging.info("data ingestion : MenuClass : POST Method : execution start")
+                        menu_df=DBObject.read_data('ingest/Menu.csv')
+                        status=DBObject.load_csv_into_db(connection_string,'menu_tbl',menu_df,'mlaas')
+                        return Response({"Status":status})
+                except Exception as e:
+                        # logging.error("data ingestion : MenuClass : GET Method : Exception :" + str(e))
+			# logging.error("data ingestion : MenuClass : GET Method : "+ traceback.format_exc())
+                        return Response({"Exception":str(e)}) 
+        
+        def get(self, request, format=None):
+                try:
+                        # logging.info("data ingestion : MenuClass : POST Method : execution start")
+                        sql_command1='select id,modulename,menuname,parent_id,url,icon from mlaas.menu_tbl where parent_id is null'
+                        dataset_df1=DBObject.select_records(connection,sql_command1) #call show_data_details and it will return dataset detail data in dataframe
+                        dataset_json1=json.loads(dataset_df1.to_json(orient='records'))  # convert datafreame into json
+                        sql_command2='select id,modulename,menuname ,parent_id,url,icon from mlaas.menu_tbl where parent_id is not null'
+                        dataset_df2=DBObject.select_records(connection,sql_command2) #call show_data_details and it will return dataset detail data in dataframe
+                        dataset_json2=json.loads(dataset_df2.to_json(orient='records'))  # convert datafreame into json
+                        json_data=menu_nested_format(dataset_json1,dataset_json2)   
+                        return Response({"Dataset":json_data})  #return Data 
+                except Exception as e:
+                        # logging.error("data ingestion : MenuClass : POST Method : Exception :" + str(e))
+			# logging.error("data ingestion : MenuClass : POST Method : "+ traceback.format_exc())
+                        return Response({"Exception":str(e)})
