@@ -20,7 +20,7 @@
           <div class="main-datatable">
             <a href="javascript:void()" (click)="displayfilter()" class="filter-btn"><i
                 class="dripicons-experiment"></i></a>
-            <table datatable [dtOptions]="dtOptions" class="table table-centered table-nowrap">
+            <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table table-centered table-nowrap">
               <thead class="thead-light">
                 <tr>
                   <th>Project Name
@@ -33,8 +33,10 @@
                       name="search-model-status" /></th>
                   <th>Deployment<input class="form-control filter" type="text" [hidden]="filter"
                       placeholder="Deployment" name="search-deployment-status" /></th>
-                  <th>Created<input class="form-control filter" type="text" [hidden]="filter"
-                      placeholder="Search last name" name="Created" /></th>
+                  <th>Created
+                    <!-- <input class="form-control filter" type="text" [hidden]="filter"
+                      placeholder="Search last name" name="Created" /> -->
+                    </th>
                   <th >Actions</th>
                 </tr>
               </thead>
@@ -56,8 +58,9 @@
                   </td>
                   <td>{{data.created_on | date}}</td>
                   <td style="font-size: 20px;font-weight: 700;">
-                    <a href="javascript:void(0);"> <i class=" bx bx-file"></i></a>
-                    <i class=" bx bx-trash"></i>
+                    <a href="javascript:void(0);" [routerLink]="['/datadetail']" [state]="{user_name: 'admin',table_name:'di_carprice_assignment_2020_12_31_09_31_11_tbl',dataset_visibility:'public'}"> <i class=" bx bx-file"></i></a>
+                   
+                    <a href="javascript:void(0);" id="sa-warning" (click)="confirm()"> <i class=" bx bx-trash"></i></a>
                   </td>
                 </tr>
               </tbody>

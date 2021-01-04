@@ -15,18 +15,21 @@ export class ApiService {
   
   getproject():Observable<any>{
     var params=new HttpParams().set("user_name","admin");
-    return this.httpClient.post(this.baseUrl+"create_project/",JSON.stringify({user_name:"admin"}),{headers:this.headers});
+    return this.httpClient.get(this.baseUrl+"create_project/",{headers:this.headers,params});
   }
 
   getDataset():Observable<any>{
-    return this.httpClient.get(this.baseUrl+"create_dataset/",{headers:this.headers});
+    var params=new HttpParams().set("user_name","admin");
+    return this.httpClient.get(this.baseUrl+"create_dataset/",{headers:this.headers,params});
   }
 
   // deleteDataset(id: number):Observable<any>{
   //   return this.httpClient.delete(`${this.baseUrl}${id}/`,{headers:this.headers});
   // }
 
-  getDataDetails():Observable<any>{
-    return this.httpClient.get(this.baseUrl+"data_detail/",{headers:this.headers});
+  getDataDetails(obj):Observable<any>{
+    var params=new HttpParams().append("user_name",obj.user_name)
+    .append("table_name",obj.table_name).append("dataset_visibility",obj.dataset_visibility)
+    return this.httpClient.get(this.baseUrl+"data_detail/",{headers:this.headers,params});
   }
 }

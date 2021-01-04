@@ -20,10 +20,33 @@
             <div class="card table-card">
                 <div class="card-body">
                     <h4 class="card-title mb-4">Data Detail List</h4>
-                    <!-- <perfect-scrollbar class="h-80"> -->
-                            <app-transaction [transactions]="transactions"></app-transaction>
-                    <!-- </perfect-scrollbar> -->
-                    <!-- end table -->
+                    
+                    <div class="main-datatable">
+                        <a href="javascript:void()" class="filter-btn" id="filter" (click)="displayfilter()"><i class="dripicons-experiment"></i></a>
+                    
+                      <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table-responsive row-border hover">
+                        <thead class="thead-light">
+                          <tr>
+                            <th *ngFor="let key of finaldisplaykey">{{key}}
+                                <input class="form-control filter" type="text" [hidden]="filter"
+                                placeholder="{{key}}" name="search-{{key}}" />
+                        
+                    
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody class="tbody">
+                          <tr *ngFor="let data of finaldisplayvalue">
+                            <td *ngFor="let i of data">
+                              {{i}}
+                            </td>
+                            
+                          </tr>
+                        </tbody>
+                      </table>
+                    
+                      
+                    </div>
                 </div>
             </div>
         </div>

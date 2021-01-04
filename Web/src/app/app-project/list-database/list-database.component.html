@@ -64,7 +64,7 @@
                   
                             <div class="main-datatable">
                                 <a href="javascript:void()" (click)="displayfilter()" class="filter-btn"><i class="dripicons-experiment"></i></a>
-                                    <table datatable class="table table-centered table-nowrap">
+                                    <table datatable  [dtTrigger]="dtTrigger" class="table table-centered table-nowrap">
                                         <thead class="thead-light">
                                             <tr>
                                             <th>Dataset
@@ -75,14 +75,16 @@
                                             <input class="form-control filter" type="text" [hidden]="filter"
                                             placeholder="Size" name="search-size" />
                                             </th>
+                                              <th>Created By
+                                                <input class="form-control filter" type="text" [hidden]="filter"
+                                                placeholder="Created By" name="search-created-by" />
+                                                </th>
+
                                             <th>Created On
-                                            <input class="form-control filter" type="text" [hidden]="filter"
-                                            placeholder="Createdd On" name="search-created-on" />
+                                            <!-- <input class="form-control filter" type="text" [hidden]="filter"
+                                            placeholder="Createdd On" name="search-created-on" /> -->
                                             </th>
-                                            <th>Created By
-                                            <input class="form-control filter" type="text" [hidden]="filter"
-                                            placeholder="Created By" name="search-created-by" />
-                                            </th>
+                                          
                                             <th>
                                             Actions
                                             </th>
@@ -93,15 +95,17 @@
                                                 <td>{{data.dataset_name}}</td>
                                                 <td>{{data.file_size}}
                                                 </td>
-                                                <td>
-                                                    {{data.created_on|date}}
-                                                </td>
+                                               
                                                 <td>
                                                     {{data.user_name}}
         
                                                 </td>
+                                                <td>
+                                                    {{data.created_on|date}}
+                                                </td>
                                                 <td style="font-size: 20px;font-weight: 700;">
-                                                    <i class=" bx bx-trash"></i>
+                                                    <a href="javascript:void(0);" [routerLink]="['/datadetail']" [state]="{user_name: 'admin',table_name:'di_carprice_assignment_2020_12_31_09_31_11_tbl',dataset_visibility:'public'}"> <i class=" bx bx-file"></i></a>
+                                                    <a href="javascript:void(0);" id="sa-warning" (click)="confirm()"> <i class=" bx bx-trash"></i></a>
                                                 </td>
                                             </tr>
                                         </tbody>

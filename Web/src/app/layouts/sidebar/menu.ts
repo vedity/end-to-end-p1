@@ -30,16 +30,16 @@ export const MENU: MenuItem[] =
                 link: '/dataset',
                 parentId: 2
             },
-            {
-                id: 6,
-                label: 'Data Detail',
-                link: '/datadetail',
-                parentId: 2
-            },
+            // {
+            //     id: 6,
+            //     label: 'Data Detail',
+            //     link: '/datadetail',
+            //     parentId: 2
+            // },
         ]
     },
     {
-        id: 7,
+        id: 6,
         label: 'Schema Mapping',
         icon: 'bx-home-circle',
         link: 'schema/create',

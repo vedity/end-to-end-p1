@@ -62,13 +62,13 @@ export class TransactionComponent implements OnInit {
 
   displayfilter(){
     this.filter=!this.filter;
-    console.log(this.filter);
     $('.filter').val('').trigger('change');
-   // elem.value += ' NEW';
   }
 
   ngAfterViewInit(): void {
     setTimeout(() => {
+    // this.dtTrigger.next();
+
       this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
         dtInstance.columns().every(function () {
           const that = this;

@@ -71,6 +71,8 @@ File: Main Css File
 // @import "custom/rtl/components-rtl";
 // @import "custom/rtl/pages-rtl";
 
+// @import '~ngx-toastr/toastr';
+// @import '~ngx-toastr/toastr-bs4-alert';
 
 // custom scss
 //  form wizard
@@ -177,4 +179,13 @@ position: absolute;
 
 .required-label{
   color: red !important;
+}
+
+
+.toast-success{
+ background-color:  #34c38f !important;
+}
+
+.toast-error{
+  background-color: #f14646 !important;
 }
