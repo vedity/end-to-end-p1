@@ -12,10 +12,12 @@ Automation Testing:
     - docker-compose build postgresql 
     - docker-compose -f testing_docker-compose.yml up -d &
     #- docker-compose up &
-    - sleep 20s
+    - sleep 12s
   script:
     #- docker ps
     #- docker images
+    - docker exec end-to-end-p1_web_1 sh -c "python manage.py runserver &"
+    - sleep 4s
     - docker exec end-to-end-p1_web_1 sh -c "cd testing && python -m unittest ingest_test"
   only:
     - development
