@@ -15,7 +15,10 @@
     <div class="row">
         <div class="col-md-4 form-group">
             <label for="example-text-input" class="col-form-label">Dataset Name</label>
-            <input class="form-control" type="text" value="Enter Dataset Name" id="example-text-input">
+            <input class="form-control" (change)="checkuniquedatasetname($event)" type="text" id="example-text-input">
+            <div class="invalid-feedback" *ngIf="datasetnameuniqueerror">
+                <span class="text-red">dataset name already exist.</span>
+            </div>
         </div>
         <div class="col-md-4 form-group">
             <label for="example-text-input" class="col-form-label">Upload Dataset</label>
@@ -110,7 +113,7 @@
                                                     {{data.created_on|date}}
                                                 </td>
                                                 <td style="font-size: 20px;font-weight: 700;">
-                                                    <a href="javascript:void(0);" [routerLink]="['/datadetail']" [state]="{dataset_id: data.dataset_id }"> <i class=" bx bx-file"></i></a>
+                                                    <a href="javascript:void(0);" [routerLink]="['/datadetail']" [state]="{dataset_id: data.dataset_id ,dataset_name:data.dataset_name }"> <i class=" bx bx-file"></i></a>
 
                                                     <a href="javascript:void(0);" id="sa-warning" (click)="confirm()"> <i class=" bx bx-trash"></i></a>
                                                 </td>

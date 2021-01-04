@@ -26,7 +26,7 @@ export class ListDatadetailComponent implements OnInit {
     finaldisplayvalue: any;
     constructor(public apiService: ApiService, public router: Router, private toaster: ToastrService) { }
     transactions: any;
-
+title="Data Detail List";
     ngOnInit() {
         var params = history.state;
         if (params.dataset_id != undefined)
@@ -34,6 +34,9 @@ export class ListDatadetailComponent implements OnInit {
         else {
             params = localStorage.getItem("params");
             params = JSON.parse(params);
+        }
+        if(params.dataset_name!=undefined){
+            this.title=params.dataset_name;
         }
         this.apiService.getDataDetails(params).subscribe(
             logs => this.successHandler(logs),

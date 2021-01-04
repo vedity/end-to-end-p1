@@ -58,7 +58,7 @@
                   </td>
                   <td>{{data.created_on | date}}</td>
                   <td style="font-size: 20px;font-weight: 700;">
-                    <a href="javascript:void(0);" [routerLink]="['/datadetail']" [state]="{dataset_id: data.dataset_id }"> <i class=" bx bx-file"></i></a>
+                    <a href="javascript:void(0);" [routerLink]="['/datadetail']" [state]="{dataset_id: data.dataset_id ,dataset_name:data.dataset_name}"> <i class=" bx bx-file"></i></a>
                    
                     <a href="javascript:void(0);" id="sa-warning" (click)="confirm()"> <i class=" bx bx-trash"></i></a>
                   </td>

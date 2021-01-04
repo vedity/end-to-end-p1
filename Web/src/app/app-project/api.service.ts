@@ -32,4 +32,16 @@ export class ApiService {
     //.append("table_name",obj.table_name).append("dataset_visibility",obj.dataset_visibility)
     return this.httpClient.get(this.baseUrl+"data_detail/",{headers:this.headers,params});
   }
+
+  checkUniqueProjectName(obj):Observable<any>{
+    var params=new HttpParams().append("user_name","admin").append("project_name",obj)
+    //.append("table_name",obj.table_name).append("dataset_visibility",obj.dataset_visibility)
+    return this.httpClient.get(this.baseUrl+"project_exist/",{headers:this.headers,params});
+  }
+
+  checkUniqueDatasetName(obj):Observable<any>{
+    var params=new HttpParams().append("user_name","admin").append("dataset_name",obj)
+    //.append("table_name",obj.table_name).append("dataset_visibility",obj.dataset_visibility)
+    return this.httpClient.get(this.baseUrl+"dataset_exist/",{headers:this.headers,params});
+  }
 }
