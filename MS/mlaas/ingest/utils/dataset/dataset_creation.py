@@ -286,6 +286,8 @@ class DatasetClass:
         sql_command = 'SELECT dataset_table_name,dataset_visibility,user_name FROM ' + table_name + ' Where dataset_id='+ str(dataset_id)
         # Get dataframe of loaded csv.
         dataset_df = DBObject.select_records(connection,sql_command) 
+        if len(dataset_df) == 0 or dataset_df is None:
+            return None
         
         dataset_records = dataset_df.to_records(index=False)
         
