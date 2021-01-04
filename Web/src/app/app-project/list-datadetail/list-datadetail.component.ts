@@ -29,7 +29,7 @@ export class ListDatadetailComponent implements OnInit {
 
     ngOnInit() {
         var params = history.state;
-        if (params.user_name != undefined)
+        if (params.dataset_id != undefined)
             localStorage.setItem("params", JSON.stringify(params));
         else {
             params = localStorage.getItem("params");

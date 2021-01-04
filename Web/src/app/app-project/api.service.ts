@@ -28,8 +28,8 @@ export class ApiService {
   // }
 
   getDataDetails(obj):Observable<any>{
-    var params=new HttpParams().append("user_name",obj.user_name)
-    .append("table_name",obj.table_name).append("dataset_visibility",obj.dataset_visibility)
+    var params=new HttpParams().append("dataset_id",obj.dataset_id)
+    //.append("table_name",obj.table_name).append("dataset_visibility",obj.dataset_visibility)
     return this.httpClient.get(this.baseUrl+"data_detail/",{headers:this.headers,params});
   }
 }

@@ -58,7 +58,7 @@
                   </td>
                   <td>{{data.created_on | date}}</td>
                   <td style="font-size: 20px;font-weight: 700;">
-                    <a href="javascript:void(0);" [routerLink]="['/datadetail']" [state]="{user_name: 'admin',table_name:'di_carprice_assignment_2020_12_31_09_31_11_tbl',dataset_visibility:'public'}"> <i class=" bx bx-file"></i></a>
+                    <a href="javascript:void(0);" [routerLink]="['/datadetail']" [state]="{dataset_id: data.dataset_id }"> <i class=" bx bx-file"></i></a>
                    
                     <a href="javascript:void(0);" id="sa-warning" (click)="confirm()"> <i class=" bx bx-trash"></i></a>
                   </td>
