@@ -193,7 +193,7 @@ class CreateDatasetClass(APIView):
                 
                                 file_check_status = IngestionObj.check_file(my_file,file_data)
                                 if file_check_status == False:
-                                        raise FileNotFound(500)
+                                        raise InvalidCsvFormat(500)
 
                                 path='static/server/'
                                 try:
