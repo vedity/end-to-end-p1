@@ -219,6 +219,10 @@ class ProjectClass:
             #? Fetching original user from the table
             sql_command = f"SELECT USER_NAME FROM {table_name} WHERE PROJECT_ID = '{project_id}'"
             user_name_df = DBObject.select_records(connection,sql_command) 
+            if len(user_name_df) == 0:
+                logging.debug(f"data ingestion  :  ProjectClass  :  delete_project_details  :  Entry not found for the project_id = {project_id}")
+                return 3
+            
             user_name_from_table = user_name_df['user_name'][0]
             
             #? Authenticating the user    
@@ -229,6 +233,7 @@ class ProjectClass:
                 project_status = DBObject.delete_records(connection,sql_command)
                 
             else:
+                logging.debug(f"data ingestion  :  ProjectClass  :  delete_project_details  :  Function failed because the Given user = {user_name} is not authorized to delete the project.")
                 project_status = 2
             
             logging.info("data ingestion : ProjectClass : delete_project_details : execution end")
@@ -266,7 +271,9 @@ class ProjectClass:
             
             #! Same project_name exists for the same user, then return status True
             if data == 0: return False
-            else: return True
+            else: 
+                logging.debug(f"data ingestion  :  ProjectClass  :  project_exists  :  Project with the same name({project_name}) exists for the user = {user_name}")
+                return True
         except:
             return False
         

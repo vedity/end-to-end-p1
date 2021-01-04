@@ -405,29 +405,29 @@ class DeleteDataDetailClass(APIView):
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
 
 
-class ToggleLogs(APIView):
-        def get(self,request,format=None):
-                reader_obj = open(r'Mlaas/settings.py','r')
-                settings_string = reader_obj.read()
-                logging_line_index = settings_string.find("LOGGING")
-                bracket_index = settings_string.find("(",logging_line_index)
-                bracket_index+=1
+# class ToggleLogs(APIView):
+#         def get(self,request,format=None):
+#                 reader_obj = open(r'Mlaas/settings.py','r')
+#                 settings_string = reader_obj.read()
+#                 logging_line_index = settings_string.find("LOGGING")
+#                 bracket_index = settings_string.find("(",logging_line_index)
+#                 bracket_index+=1
                 
-                if settings_string[bracket_index] == 'T':
-                        settings_string = settings_string[:bracket_index] + "False" + settings_string[bracket_index+4:]
-                        logging_status = "False"
-                else:
-                        settings_string = settings_string[:bracket_index] + "True" + settings_string[bracket_index+5:]
-                        logging_status = "True"
+#                 if settings_string[bracket_index] == 'T':
+#                         settings_string = settings_string[:bracket_index] + "False" + settings_string[bracket_index+4:]
+#                         logging_status = "False"
+#                 else:
+#                         settings_string = settings_string[:bracket_index] + "True" + settings_string[bracket_index+5:]
+#                         logging_status = "True"
                 
-                reader_obj.close()
+#                 reader_obj.close()
                 
-                writer_obj = open(r'Mlaas/settings.py','w')
-                writer_obj.write(settings_string)
+#                 writer_obj = open(r'Mlaas/settings.py','w')
+#                 writer_obj.write(settings_string)
                 
-                writer_obj.close()
+#                 writer_obj.close()
                 
-                return Response({"msg":f"Logging Status changed to {logging_status}"})
+#                 return Response({"msg":f"Logging Status changed to {logging_status}"})
 
 class ProjectExistClass(APIView):
         """
