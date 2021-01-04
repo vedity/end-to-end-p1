@@ -9,6 +9,7 @@
 '''
 import pandas as pd 
 import json
+import re
 import logging
 import traceback
 from common.utils.database import db
@@ -48,12 +49,12 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         self.port = port # Port Number
 
     def get_db_connection(self):
-        logging.info("data ingestion : ingestclass : get_db_connection : execution start")
         """This function is used to initialize database connection.
         
         Returns:
             [object,string]: [it will return database object as well as connection string.]
         """
+        logging.info("data ingestion : ingestclass : get_db_connection : execution start")
         DBObject = db.DBClass() # Get database object from database class
         connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port) # Initialize connection with database and get connection string , connection object.
         
@@ -380,7 +381,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         return dataset_df
         
 
-    #? Check if project with same name 
+     
     def does_project_exists(self,project_name,user_name):
         """This function is used to check if same name project exist or not .
 
@@ -412,7 +413,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             logging.error("data ingestion : ingestclass : does_project_exists : " +traceback.format_exc())
             return exc.msg
         
-    #? Check if project with same name 
+    
     def does_dataset_exists(self,dataset_name,user_name):
         """This function is used to check existing dataset name.
 
@@ -452,5 +453,45 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             logging.error("data ingestion : ingestclass : does_dataset_exists : Exception " + str(exc.msg))
             logging.error("data ingestion : ingestclass : does_dataset_exists : " +traceback.format_exc())
             return exc.msg
+        
+    def check_file(self,my_file,file_data):
+        """This function is used to check file extension and file format.
+
+        Args:
+            my_file ([string]): [name of the file.]
+            file_data ([blob]): [data of the file.]
+
+        Returns:
+            [bool]: [status of the file. if file is perfect then it will return True else False.]
+        """
+        logging.info("data ingestion : ingestclass : check_file : execution start")
+        original_file_name = str(my_file)
+        file_data_df = file_data
+        ALL_SET = False
+        # it will check file extension.
+        if str(my_file).lower().endswith(('.csv')):
+            check_file_name = original_file_name[:-4]
+            # it will check file name 
+            if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',check_file_name))==True):
+                # get column names.
+                logging.debug('rows =='+str(file_data_df.shape[0]) + " columns =="+ str(file_data_df.shape[1]))
+                if file_data_df.shape[0] > 0 and file_data_df.shape[1] >= 2:
+                    All_SET_Count = 0
+                    logging.debug('column list value =='+str(file_data_df.columns.to_list()))   
+                    col_names = file_data_df.columns.to_list()
+                    for col in col_names:
+                        # it will check column names into the files.
+                        if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',col))==True):
+                            
+                            All_SET_Count = All_SET_Count + 1
+                        else:
+                            All_SET_Count = All_SET_Count - 1  
+                    logging.debug('count value =='+str(All_SET_Count))        
+                    if All_SET_Count == len(col_names):
+                        ALL_SET = True
+                    
+        logging.debug('return value =='+str(ALL_SET))        
+        logging.info("data ingestion : ingestclass : check_file : execution end")          
+        return ALL_SET
         
         
