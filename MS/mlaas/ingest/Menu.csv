@@ -1,0 +1,14 @@
+﻿id,modulename,menuname,parent_id,url,icon
+2,DI,Projects,null,null,bx-home-circle
+3,DI,Create Project,2,/create,null
+4,DI,Create Dataset,2,/dataset,null
+5,DI,All Projects,2,/project,null
+6,DP,Data Preprocess,null,null,bx-home-circle
+7,DP,Data Exploration ,6,null,null
+8,DP,Data Visualization,6,null,null
+9,DP,Data Clean-up,6,null,null
+10,DM,Data Model,null,null,null
+11,DM,Data splitter,10,null,null
+12,DM,Performance Metrics,10,null,null
+13,Reports,Prediction Results,null,null,bx-home-circle
+14,Reports,Prediction and summary,13,null,null

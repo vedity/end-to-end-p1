@@ -11,9 +11,23 @@
 */
 '''
 import pandas as pd
+import logging
+import traceback
 from ..dataset import dataset_creation 
 from common.utils.database import db
-from common.utils.exception_handler.python_exception import *
+from common.utils.exception_handler.python_exception.common.common_exception import *
+from common.utils.exception_handler.python_exception.ingest.ingest_exception import *
+from common.utils.logger_handler import custom_logger as cl
+
+user_name = 'admin'
+log_enable = True
+
+LogObject = cl.LogClass(user_name,log_enable)
+LogObject.log_setting()
+
+logger = logging.getLogger('project_creation')
+
+
 class ProjectClass:
 
     def make_project_schema(self):
@@ -23,6 +37,7 @@ class ProjectClass:
         Returns:
             [string]: [it will return name of the table, structure of the table and columns of the table.]
         """
+        logging.info("data ingestion : ProjectClass : make_project_schema : execution start")
         # Project table name
         table_name = 'mlaas.project_tbl'
         # Columns for project table
@@ -38,6 +53,7 @@ class ProjectClass:
                 "dataset_id  bigint,"\
                 "created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()" 
                 
+        logging.info("data ingestion : ProjectClass : make_project_schema : execution end")
         return table_name,schema,cols
 
     def  make_project_records(self,project_name,project_desc,user_name,dataset_id):
@@ -53,8 +69,10 @@ class ProjectClass:
         Returns:
             [tuple]: [it will return records in the form of tuple.]
         """
+        logging.info("data ingestion : ProjectClass : make_project_records : execution start")
         row = project_name,project_desc,user_name,dataset_id
         row_tuples = [tuple(row)] # Make record for project table.
+        logging.info("data ingestion : ProjectClass : make_project_records : execution end")
         return row_tuples
         
 
@@ -79,6 +97,7 @@ class ProjectClass:
             [string,integer]: [it will return status of the project creation and 
             also return project id of the created project.]
         """
+        logging.info("data ingestion : ProjectClass : make_project : execution start")
         schema_status = DBObject.create_schema(connection)
         # Get table name,schema and columns from dataset class.
         table_name,schema,cols = self.make_project_schema() 
@@ -105,7 +124,8 @@ class ProjectClass:
         else :
             status = 1 # Failed
             project_id = None
-
+            
+        logging.info("data ingestion : ProjectClass : make_project : execution end")
         return status,project_id
 
     def get_project_id(self,DBObject,connection,row_tuples,user_name):
@@ -121,11 +141,17 @@ class ProjectClass:
             [integer]: [it will return the project id of the created project.]
         """
         
+        logging.info("data ingestion : ProjectClass : get_project_id : execution start")
         table_name,*_ = self.make_project_schema()
         project_name,*_ = row_tuples[0]
+        
+        logging.debug("data ingestion : ProjectClass : get_project_id : this will excute select query on table name : "+table_name + " based on project name :"+project_name + " and user name :"+user_name)
+        
         sql_command = "SELECT project_id from "+ table_name + " Where project_name ='"+ project_name + "' and user_name = '"+ user_name + "'"
         project_df = DBObject.select_records(connection,sql_command)
         project_id = int(project_df['project_id'][0])
+        
+        logging.info("data ingestion : ProjectClass : get_project_id : execution end")
         return project_id
     
     def update_dataset_status(self,DBObject,connection,project_id,load_data_status = 0):
@@ -140,9 +166,14 @@ class ProjectClass:
         Returns:
             [integer]: [it will return stauts of update dataset. if successfully then 1 else 0.]
         """
+        logging.info("data ingestion : ProjectClass : update_dataset_status : execution start")
         table_name,*_ = self.make_project_schema()
+        
+        logging.debug("data ingestion : ProjectClass : update_dataset_status : this will excute update query on table name : "+table_name + " and set value of dataset_status : "+str(load_data_status) +" based on project id : "+str(project_id))
+        
         sql_command = "UPDATE "+ table_name + " SET dataset_status=" + str(load_data_status) + " WHERE project_id="+ str(project_id)        
         stauts = DBObject.update_records(connection,sql_command)
+        logging.info("data ingestion : ProjectClass : update_dataset_status : execution end")
         return stauts
     
     def show_project_details(self,DBObject,connection,user_name):
@@ -156,11 +187,15 @@ class ProjectClass:
         Returns:
             [dataframe]: [it will return dataframe of the project details.]
         """
-
+        logging.info("data ingestion : ProjectClass : show_project_details : execution start")
         table_name,*_ = self.make_project_schema() # Get table name,schema and columns from dataset class
         # This command is used to get project details from project table of database.
-        sql_command = "SELECT * FROM "+ table_name + " WHERE USER_NAME ='"+ user_name +"'"
+        
+        logging.debug("data ingestion : ProjectClass : show_project_details : this will excute select query on table name : "+table_name +" based on user name : "+user_name)
+        
+        sql_command = "SELECT p.*,d.dataset_name FROM "+ table_name + " p,mlaas.dataset_tbl d WHERE p.USER_NAME ='"+ user_name +"' and p.dataset_id = d.dataset_id"
         project_df=DBObject.select_records(connection,sql_command) # Get project details in the form of dataframe.
+        logging.info("data ingestion : ProjectClass : show_project_details : execution end")
         return project_df
 
     #* Version 1.3
@@ -178,13 +213,17 @@ class ProjectClass:
         Returns:
             status ([boolean]): [status of the project deletion. if successfully then 0 else 1.]
         """
-        
+        logging.info("data ingestion : ProjectClass : delete_project_details : execution start")
         try:
             table_name,_,_ = self.make_project_schema()
 
             #? Fetching original user from the table
             sql_command = f"SELECT USER_NAME FROM {table_name} WHERE PROJECT_ID = '{project_id}'"
             user_name_df = DBObject.select_records(connection,sql_command) 
+            if len(user_name_df) == 0:
+                logging.debug(f"data ingestion  :  ProjectClass  :  delete_project_details  :  Entry not found for the project_id = {project_id}")
+                return 3
+            
             user_name_from_table = user_name_df['user_name'][0]
             
             #? Authenticating the user    
@@ -195,32 +234,16 @@ class ProjectClass:
                 project_status = DBObject.delete_records(connection,sql_command)
                 
             else:
+                logging.debug(f"data ingestion  :  ProjectClass  :  delete_project_details  :  Function failed because the Given user = {user_name} is not authorized to delete the project.")
                 project_status = 2
-                
+            
+            logging.info("data ingestion : ProjectClass : delete_project_details : execution end")
             return project_status
         
         except:
             return 1
         
-    def show_dataset_names(self,DBObject,connection,user_name):
-        """Show all the existing datasets created by user.
-
-        Args:
-            DBObject ([object]): [object of database class.],
-            connection ([object]): [connection object of database class.],
-            user_name ([string]): [name of the user.]
-
-        Returns:
-            [dataframe]: [it will return dataframe of the selected columns from dataset details.]
-        """
-        
-        DatasetObject = dataset_creation.DatasetClass() # Get dataset class object
-        table_name,_,_ = DatasetObject.make_dataset_schema() # Get table name,schema and columns from dataset class.
-        # This command is used to get dataset id and names from dataset table of database.
-        sql_command = "SELECT dataset_id,dataset_name FROM "+ table_name + " WHERE USER_NAME ='"+ user_name +"' or dataset_visibility='public'"
-        dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
-        
-        return dataset_df
+    
 
     #? Check if project with same name 
     def project_exists(self,DBObject,connection,table_name,project_name,user_name):
@@ -236,14 +259,22 @@ class ProjectClass:
         Returns:
             [boolean]: [it will return true or false. if exists true else false.]
         """
+        
+        logging.info("data ingestion : ProjectClass : project_exists : execution start")
+        
         try:
             #? Checking if Same project_name exists for the same user
             sql_command = f"SELECT PROJECT_ID FROM {table_name} WHERE PROJECT_NAME = '{project_name}' AND USER_NAME = '{user_name}'"
             data=DBObject.select_records(connection,sql_command)
             data=len(data)
+            
+            logging.info("data ingestion : ProjectClass : project_exists : execution end")
+            
             #! Same project_name exists for the same user, then return status True
             if data == 0: return False
-            else: return True
+            else: 
+                logging.debug(f"data ingestion  :  ProjectClass  :  project_exists  :  Project with the same name({project_name}) exists for the user = {user_name}")
+                return True
         except:
             return False
         

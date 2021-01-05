@@ -2,20 +2,23 @@ stages:
   - automation_tests
   - build
 
-# Automation Testing:
-#   image: tmaier/docker-compose:latest
-#   stage: automation_tests
-#   services:
-#     - docker:dind
-#   before_script:
-#     - docker-compose build
-#     - docker-compose up &
-#     - sleep 20s
-#   script:
-#     #- docker ps
-#     - docker exec mlaas-phase-1_web_1 sh -c "cd MS/mlaas && python -m unittest tests"
-#   only:
-#     - development
+Automation Testing:
+  image: tmaier/docker-compose:latest
+  stage: automation_tests
+  services:
+    - docker:dind
+  before_script:
+    - docker-compose build web 
+    - docker-compose build postgresql 
+    - docker-compose -f testing_docker-compose.yml up -d &
+    #- docker-compose up &
+    - sleep 5s
+  script:
+    #- docker ps
+    #- docker images
+    - docker exec end-to-end-p1_web_1 sh -c "cd testing && python -m unittest ingest_test"
+  only:
+    - development
 
 Building & Pushing Docker Images:
   image: docker:latest
