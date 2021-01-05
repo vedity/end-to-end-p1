@@ -124,6 +124,13 @@ export class ListDatabaseComponent implements OnInit {
               .draw();
           }
         });
+        $('select', this.header()).on('change', function () {
+          if (that.search() !== this['value']) {
+            that
+              .search(this['value'])
+              .draw();
+          }
+        });
       });
       dtInstance.destroy();
     });
@@ -136,6 +143,13 @@ export class ListDatabaseComponent implements OnInit {
         dtInstance.columns().every(function () {
           const that = this;
           $('input', this.header()).on('keyup change', function () {
+            if (that.search() !== this['value']) {
+              that
+                .search(this['value'])
+                .draw();
+            }
+          });
+          $('select', this.header()).on('change', function () {
             if (that.search() !== this['value']) {
               that
                 .search(this['value'])

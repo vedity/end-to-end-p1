@@ -63,6 +63,13 @@ errorHandler(error) {
                 .draw();
             }
           });
+          $('select', this.header()).on('change', function () {
+            if (that.search() !== this['value']) {
+              that
+                .search(this['value'])
+                .draw();
+            }
+          });
         });
       });
    
@@ -74,6 +81,13 @@ rendered(){
     dtInstance.columns().every(function () {
       const that = this;
       $('input', this.header()).on('keyup change', function () {
+        if (that.search() !== this['value']) {
+          that
+            .search(this['value'])
+            .draw();
+        }
+      });
+      $('select', this.header()).on('change', function () {
         if (that.search() !== this['value']) {
           that
             .search(this['value'])

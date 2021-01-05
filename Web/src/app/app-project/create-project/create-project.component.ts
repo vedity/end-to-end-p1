@@ -14,7 +14,7 @@ export class CreateProjectComponent implements OnInit {
 
   constructor(public router: Router, public apiService: ProjectApiService, public toaster: ToastrService) { }
   public data: createproject = new createproject();
-
+  disableclass:any="";
   datasetlist: any;
   errorStatus: boolean = true;
   errorMessage: any = "";
@@ -106,8 +106,10 @@ export class CreateProjectComponent implements OnInit {
 console.log(this.data.datsetid);
 if(this.data.datsetid.toString()!=""){
   this.selectchangedisablevalidation=true;
+  this.disableclass="disabled";
 }
 else{
+  this.disableclass="";
   this.selectchangedisablevalidation=false;
 }
   }

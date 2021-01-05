@@ -6,9 +6,9 @@
         <h4 class="mb-0 font-size-18">All Projects</h4>
         <div class="page-title-right">
           <button type="button" (click)="create()" class="btn btn-success">Create Project</button>
-          <ol class="breadcrumb m-0">
+          <!-- <ol class="breadcrumb m-0">
             <li class="breadcrumb-item active">Welcome to Projects</li>
-          </ol>
+          </ol> -->
         </div>
       </div>
     </div>
@@ -29,15 +29,32 @@
                   </th>
                   <th>Datasets<input class="form-control filter" type="text" [hidden]="filter" placeholder="Datasets"
                       name="search-dataset-name" /></th>
-                  <th>Models<input class="form-control filter" type="text" [hidden]="filter" placeholder="Models"
-                      name="search-model-status" /></th>
-                  <th>Deployment<input class="form-control filter" type="text" [hidden]="filter"
-                      placeholder="Deployment" name="search-deployment-status" /></th>
+                  <th class="text-center" >Models
+                    <!-- <input class="form-control filter" type="text" [hidden]="filter" placeholder="Models"
+                      name="search-model-status" /> -->
+                    <select [hidden]="filter" class="form-control filter"  name="search-model-status">
+                      <option value="">None</option>
+                      <option value="0">Success</option>
+                      <option value="-1">Pending</option>
+                      <option value="1">Failed</option>
+                      <option value="2">In Progress</option>
+                    </select>
+                    </th>
+                  <th class="text-center" >Deployment
+                    <!-- <input class="form-control filter" type="text" [hidden]="filter"
+                      placeholder="Deployment" name="search-deployment-status" /> -->
+                      <select [hidden]="filter" class="form-control filter"  name="search-deployment-status">
+                        <option value="">None</option>
+                        <option value="-1">Pending</option>
+                        <option value="0">Active</option>
+                        <option value="1">Suspended</option>
+                      </select>
+                    </th>
                   <th>Created
                     <!-- <input class="form-control filter" type="text" [hidden]="filter"
                       placeholder="Search last name" name="Created" /> -->
                     </th>
-                  <th >Actions</th>
+                  <th class="text-center" >Actions</th>
                 </tr>
               </thead>
               <tbody class="tbody">
@@ -49,19 +66,22 @@
                     <!-- <i *ngIf="data.dataset_status==1" style="color: #f14646;" class="dripicons-stack"></i> -->
                     {{data.dataset_name}}
                   </td>
-                  <td class="status-icon">
-                    <span style="display:none;">{{data.model_status}}</span>
+                  <td class="status-icon" class="text-center" >
+                    <span style="display:none;" >{{data.model_status}}</span>
                     <i *ngIf="data.model_status==0" style="color: #34c38f;" class="dripicons-browser-upload"></i>
                     <i *ngIf="data.model_status==1" style="color: #f14646;" class="dripicons-browser-upload"></i>
                     <i *ngIf="data.model_status==-1" style="color: #a6b0cf;" class="dripicons-browser-upload"></i>
+                    <i *ngIf="data.model_status==2" style="color: #3e6aec;" class="dripicons-browser-upload"></i>
                   </td>
-                  <td>
+                  <td class="text-center" >
+                    <span style="display:none;" >{{data.deployment_status}}</span>
+
                     <span *ngIf="data.deployment_status==-1" class="badge badge-pill badge-pill badge-soft-dark ml-1 font-size-12">Pending</span>
                     <span *ngIf="data.deployment_status==1" class="badge badge-pill badge-soft-danger ml-1 font-size-12">Suspended</span>
                     <span *ngIf="data.deployment_status==0" class="badge badge-pill badge-soft-success ml-1 font-size-12">Active</span>
                   </td>
                   <td>{{data.created_on | date}}</td>
-                  <td style="font-size: 20px;font-weight: 700;">
+                  <td style="font-size: 20px;font-weight: 700;" class="text-center" >
                     <a href="javascript:void(0);" [routerLink]="['/datadetail']" [state]="{dataset_id: data.dataset_id ,dataset_name:data.dataset_name}"> <i class=" bx bx-file"></i></a>
                    
                     <a href="javascript:void(0);" id="sa-warning" (click)="confirm(data.project_id)"> <i class=" bx bx-trash"></i></a>
