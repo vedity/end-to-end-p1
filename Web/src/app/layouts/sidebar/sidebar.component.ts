@@ -198,12 +198,14 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
     // this.apiservice.getMenu().subscribe(
     //   logs =>{
     //     this.menuItems=logs.response;
+    //     this.menu = new MetisMenu(this.sideMenu.nativeElement);
+    //     this._activateMenuDropdown();
     //   } ,
     //   error=>{
-
+    //     this.menuItems = MENU;
     //   }
     // )
-    this.menuItems = MENU;
+   this.menuItems = MENU;
   }
 
   /**

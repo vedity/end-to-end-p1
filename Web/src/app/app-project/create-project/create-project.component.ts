@@ -14,7 +14,7 @@ export class CreateProjectComponent implements OnInit {
 
   constructor(public router: Router, public apiService: ProjectApiService, public toaster: ToastrService) { }
   public data: createproject = new createproject();
-
+  disableclass:any="";
   datasetlist: any;
   errorStatus: boolean = true;
   errorMessage: any = "";
@@ -45,6 +45,9 @@ export class CreateProjectComponent implements OnInit {
         error => this.errorHandler(error)
       );
     }
+    else
+    this.projectnameuniqueerror = false;
+
   }
   projectnameuniqueerror: any = false;
 
@@ -53,8 +56,14 @@ export class CreateProjectComponent implements OnInit {
     if (data.response == 'false') {
       // this.errorStatus=false;
       this.projectnameuniqueerror = true;
-      target.className.replace("ng-valid", " ");
+      target.className=target.className.replace("ng-valid", " ");
       target.className = target.className + " ng-invalid";
+    }
+    else{
+      this.projectnameuniqueerror = false;
+      target.className=target.className.replace("ng-invalid", " ");
+      target.className = target.className + " ng-valid";
+
     }
   }
 
@@ -106,8 +115,10 @@ export class CreateProjectComponent implements OnInit {
 console.log(this.data.datsetid);
 if(this.data.datsetid.toString()!=""){
   this.selectchangedisablevalidation=true;
+  this.disableclass="disabled";
 }
 else{
+  this.disableclass="";
   this.selectchangedisablevalidation=false;
 }
   }
