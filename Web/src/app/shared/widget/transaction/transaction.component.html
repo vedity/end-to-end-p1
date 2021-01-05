@@ -1,10 +1,17 @@
 
 
-<div class="table-responsive">
-  <table id="basic-datatable" class="table table-bordered dt-responsive nowrap datatables no-footer dtr-inline" >
+<div class="">
+    <a href="javascript:void()" (click)="displayfilter()"><i class="dripicons-experiment"></i></a>
+
+  <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table-responsive row-border hover">
     <thead class="thead-light">
       <tr>
-        <th *ngFor="let key of finaldisplaykey">{{key}}</th>
+        <th *ngFor="let key of finaldisplaykey">{{key}}
+            <input class="form-control filter" type="text" [hidden]="filter"
+            placeholder="{{key}}" name="search-{{key}}" />
+    
+
+        </th>
       </tr>
     </thead>
     <tbody class="tbody">
