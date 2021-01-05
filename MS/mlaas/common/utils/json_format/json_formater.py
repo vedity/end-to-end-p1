@@ -79,7 +79,7 @@ def menu_nested_format(dataset_json1,dataset_json2):
     return:
         [list] :[list of dictonery]
     """
-    column_data=['modulename','parent_id','url']
+    column_data=['modulename','parentId','link']
     inside_column_data=['icon','modulename']
     json_data=[]
     json_data1=[]

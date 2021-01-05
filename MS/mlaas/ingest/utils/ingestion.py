@@ -450,7 +450,8 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         
             sql_command = f"SELECT DATASET_VISIBILITY FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND USER_NAME = '{user_name}'"
             visibility_df = DBObject.select_records(connection,sql_command) 
-            
+            if visibility_df is None:
+                return False
             if len(visibility_df) == 0:
                 return False
             
@@ -479,85 +480,61 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         Returns:
             [bool]: [status of the file. if file is perfect then it will return True else False.]
         """
-        logging.info("data ingestion : ingestclass : check_file : execution start")
-        
-        file_data_df = file_data
-        original_file_name = str(my_file)
-        ALL_SET = False
-        
-        if file_data_df is None:
-            # it will check file extension.
-            if str(my_file).lower().endswith(('.csv')):
-                check_file_name = original_file_name[:-4]
-                # it will check file name 
-                if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',check_file_name))==True):
-                    ALL_SET = True
-        else:       
-            # get column names.
-            logging.debug("data ingestion : ingestclass : check_file : rows =="+str(file_data_df.shape[0]) + " columns =="+ str(file_data_df.shape[1]))
-            if file_data_df.shape[0] > 0 and file_data_df.shape[1] >= 2:
-                All_SET_Count = 0
-                logging.debug("data ingestion : ingestclass : check_file : column list value =="+str(file_data_df.columns.to_list()))   
-                col_names = file_data_df.columns.to_list()
-                for col in col_names:
-                    # it will check column names into the files.
-                    if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',col))==True):
-                        
-                        All_SET_Count = All_SET_Count + 1
-                    else:
-                        All_SET_Count = All_SET_Count - 1  
-                logging.debug("data ingestion : ingestclass : check_file : count value =="+str(All_SET_Count))        
-                if All_SET_Count == len(col_names):
-                    ALL_SET = True
-                            
-        logging.debug("data ingestion : ingestclass : check_file : return value =="+str(ALL_SET))        
-        logging.info("data ingestion : ingestclass : check_file : execution end")          
-        return ALL_SET
-        
-    def check_file(self,my_file,file_data):
-        """This function is used to check file extension and file format.
-
-        Args:
-            my_file ([string]): [name of the file.]
-            file_data ([blob]): [data of the file.]
-
-        Returns:
-            [bool]: [status of the file. if file is perfect then it will return True else False.]
-        """
         try:
             logging.info("data ingestion : ingestclass : check_file : execution start")
-            original_file_name = str(my_file)
+            
             file_data_df = file_data
+            original_file_name = str(my_file)
             ALL_SET = False
-            # it will check file extension.
-            if str(my_file).lower().endswith(('.csv')):
-                check_file_name = original_file_name[:-4]
-                # it will check file name 
-                if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',check_file_name))==True):
-                    # get column names.
-                    logging.debug('rows =='+str(file_data_df.shape[0]) + " columns =="+ str(file_data_df.shape[1]))
-                    if file_data_df.shape[0] > 0 and file_data_df.shape[1] >= 2:
-                        All_SET_Count = 0
-                        logging.debug('column list value =='+str(file_data_df.columns.to_list()))   
-                        col_names = file_data_df.columns.to_list()
-                        for col in col_names:
-                            # it will check column names into the files.
-                            if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',col))==True):
-                                
-                                All_SET_Count = All_SET_Count + 1
-                            else:
-                                All_SET_Count = All_SET_Count - 1  
-                        logging.debug('count value =='+str(All_SET_Count))        
-                        if All_SET_Count == len(col_names):
-                            ALL_SET = True
+            
+            if file_data_df is None:
+                # it will check file extension.
+                if str(my_file).lower().endswith(('.csv')):
+                    check_file_name = original_file_name[:-4]
+                    # it will check file name 
+                    if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',check_file_name))==True):
+                        ALL_SET = True
+            else:       
+                # get column names.
+                logging.debug("data ingestion : ingestclass : check_file : rows =="+str(file_data_df.shape[0]) + " columns =="+ str(file_data_df.shape[1]))
+                if file_data_df.shape[0] > 0 and file_data_df.shape[1] >= 2:
+                    All_SET_Count = 0
+                    logging.debug("data ingestion : ingestclass : check_file : column list value =="+str(file_data_df.columns.to_list()))   
+                    col_names = file_data_df.columns.to_list()
+                    for col in col_names:
+                        # it will check column names into the files.
+                        if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',col))==True):
+                            
+                            All_SET_Count = All_SET_Count + 1
+                        else:
+                            All_SET_Count = All_SET_Count - 1  
+                    logging.debug("data ingestion : ingestclass : check_file : count value =="+str(All_SET_Count))        
+                    if All_SET_Count == len(col_names):
+                        ALL_SET = True
             if ALL_SET == False:
-                raise InvalidCsvFormat(500)      
-            logging.debug('return value =='+str(ALL_SET))        
+                    raise InvalidCsvFormat(500)             
+            logging.debug("data ingestion : ingestclass : check_file : return value =="+str(ALL_SET))        
             logging.info("data ingestion : ingestclass : check_file : execution end")          
             return ALL_SET
         except InvalidCsvFormat as exc:
             return exc.msg
+    
+    def user_authentication(self,DBObject,connection,user_name,password):
+        try:
+            sql_command = "SELECT user_name from mlaas.user_auth_tbl where user_name='"+ str(user_name) +"' and password='"+ str(password) +"'"
+            user_df = DBObject.select_records(connection,sql_command)
+            if user_df is None:
+                raise UserAuthenticationFailed(500)
+            
+            if len(user_df) > 0 :
+                return True
+            else:
+                raise UserAuthenticationFailed(500)
 
+        except UserAuthenticationFailed as exc:
+            return exc.msg
+
+   
 
         
         
