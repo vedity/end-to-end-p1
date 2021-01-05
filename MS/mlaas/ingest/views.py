@@ -102,8 +102,11 @@ class CreateProjectClass(APIView):
                                         # exists_project_status=project_obj.project_exists(DBObject,connection,table_name,project_name,user_name)
                                         if exists_project_status == False:
                                                 my_file=request.FILES['inputfile'] #get inputfile Name
-                                                file_data = pd.read_csv(request.FILES['inputfile'])                                
-                
+                                                file_check_status = IngestionObj.check_file(my_file)
+                                                if file_check_status == False:
+                                                        raise FileNotFound(500)
+                                                
+                                                file_data = pd.read_csv(request.FILES['inputfile'])  
                                                 file_check_status = IngestionObj.check_file(my_file,file_data)
                                                 if file_check_status == False:
                                                         raise FileNotFound(500)
@@ -188,7 +191,6 @@ class CreateDatasetClass(APIView):
                         user_name=str(request.POST.get('user_name'))  #get Username
                         dataset_name=request.POST.get('dataset_name') #get dataset name
                         my_file=request.FILES['inputfile'] #get inputfile Name
-                        file_data = pd.read_csv(request.FILES['inputfile'])  
                         dataset_visibility= request.POST.get('visibility')
                         
                         exists_dataset_status=IngestionObj.does_dataset_exists(dataset_name,user_name) 
@@ -197,10 +199,16 @@ class CreateDatasetClass(APIView):
                         if exists_dataset_status == False:
                                 
                                 try:
-                                        file_check_status = IngestionObj.check_file(my_file,file_data)
+                                        file_check_status = IngestionObj.check_file(my_file)
                                         if file_check_status == False:
                                                 raise FileNotFound(500)
-                                
+                                        
+                                        file_data = pd.read_csv(request.FILES['inputfile']) 
+                                        file_check_status = IngestionObj.check_file(my_file,file_data)
+                                        
+                                        if file_check_status == False:
+                                                raise FileNotFound(500)
+                                        
                                         path='static/server/'
                                 
                                         if dataset_visibility == 'public':
@@ -517,15 +525,15 @@ class MenuClass(APIView):
         def get(self, request, format=None):
                 try:
                         # logging.info("data ingestion : MenuClass : POST Method : execution start")
-                        sql_command1='select id,modulename,menuname,parent_id,url,icon from mlaas.menu_tbl where parent_id is null'
+                        sql_command1='select id,modulename,menuname as "label",parent_id as "parentId",url,icon from mlaas.menu_tbl where parent_id is null'
                         dataset_df1=DBObject.select_records(connection,sql_command1) #call show_data_details and it will return dataset detail data in dataframe
                         dataset_json1=json.loads(dataset_df1.to_json(orient='records'))  # convert datafreame into json
-                        sql_command2='select id,modulename,menuname ,parent_id,url,icon from mlaas.menu_tbl where parent_id is not null'
+                        sql_command2='select id,modulename,menuname as "label",parent_id as "parentId",url,icon from mlaas.menu_tbl where parent_id is not null'
                         dataset_df2=DBObject.select_records(connection,sql_command2) #call show_data_details and it will return dataset detail data in dataframe
                         dataset_json2=json.loads(dataset_df2.to_json(orient='records'))  # convert datafreame into json
                         json_data=menu_nested_format(dataset_json1,dataset_json2)   
-                        return Response({"Dataset":json_data})  #return Data 
+                        return Response({"status_code":"200","error_msg":"Menu Data","response":json_data})
                 except Exception as e:
                         # logging.error("data ingestion : MenuClass : POST Method : Exception :" + str(e))
 			# logging.error("data ingestion : MenuClass : POST Method : "+ traceback.format_exc())
-                        return Response({"Exception":str(e)})
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
