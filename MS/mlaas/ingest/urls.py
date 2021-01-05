@@ -3,7 +3,10 @@ from . import views
 from ingest.views import *
 
 urlpatterns = [
-  
+    
+    #URL For User Login
+    path('mlaas/ingest/user/login',UserLoginClass.as_view()),
+
     #URL For Create Project
     path('mlaas/ingest/create_project/',CreateProjectClass.as_view()),
 

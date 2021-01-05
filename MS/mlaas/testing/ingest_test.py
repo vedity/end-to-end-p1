@@ -388,27 +388,6 @@ class TestFIngestDataDetailClass(unittest.TestCase):
         status = json_response["status_code"]
         self.assertEqual(status,"200")
 
-    # def testB_scenario2_datadetail(self):
-    #     """ This function is used to test the DataDetail GET Method With valid inputs.
-
-    #     Args:
-    #         dataset_id ([integer]): [Id of the dataset.]
-    
-    #     """
-    #     files = '../ingest/dataset/CarPrice_Assignment.csv'
-    #     file = {'inputfile': open(files, 'rb')}
-    #     info = {"user_name":"autouser_seconduser","dataset_name":"auto_dataset_name_seconduser","visibility":"private"}
-    #     response = requests.post("http://localhost:8000/mlaas/ingest/create_dataset/",data = info,files = file)
-    
-    #     response = requests.get("http://localhost:8000/mlaas/ingest/create_dataset/",params ={"user_name":"autouser_seconduser"})
-    #     json_response = response.json()
-    #     datadetail_id = json_response["response"][0]["dataset_id"]
-       
-    #     response = requests.get("http://localhost:8000/mlaas/ingest/data_detail/",params ={"dataset_id":datadetail_id})
-    #     json_response = response.json()
-    #     status = json_response["status_code"]
-    #     self.assertEqual(status,"200")
-    
     def testB_scenario3_datadetail(self):
         """ This function is used to test the DataDetail GET Method With invalid dataset_id.
 
