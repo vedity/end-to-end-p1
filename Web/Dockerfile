@@ -5,7 +5,7 @@ FROM node:12.18.1-alpine as build-step
 #RUN mkdir -p /angular
 
 # Change directory so that our commands run inside this new directory
-WORKDIR /app
+# WORKDIR /app
 
 # Copy dependency definitions
 COPY package.json ./
