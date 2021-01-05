@@ -45,6 +45,9 @@ export class CreateProjectComponent implements OnInit {
         error => this.errorHandler(error)
       );
     }
+    else
+    this.projectnameuniqueerror = false;
+
   }
   projectnameuniqueerror: any = false;
 
@@ -53,8 +56,14 @@ export class CreateProjectComponent implements OnInit {
     if (data.response == 'false') {
       // this.errorStatus=false;
       this.projectnameuniqueerror = true;
-      target.className.replace("ng-valid", " ");
+      target.className=target.className.replace("ng-valid", " ");
       target.className = target.className + " ng-invalid";
+    }
+    else{
+      this.projectnameuniqueerror = false;
+      target.className=target.className.replace("ng-invalid", " ");
+      target.className = target.className + " ng-valid";
+
     }
   }
 
