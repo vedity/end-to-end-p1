@@ -6,8 +6,8 @@ unittest.TestLoader.sortTestMethodsUsing = None
 import logging
 logger = logging.getLogger('django')
       
-class TestAIngestPostDataset(unittest.TestCase):
-    def testAscenario1_insert_dataset(self):
+class TestAIngestPostDatasetClass(unittest.TestCase):
+    def testA_scenario1_insert_dataset(self):
         """This function is used to test the CreateDataset POST Method With valid Data Inputs .
 
         Args:
@@ -17,34 +17,15 @@ class TestAIngestPostDataset(unittest.TestCase):
     
         """
         time.sleep(1)
-        files = '../ingest/dataset/pima_indians_diabetes.csv'
+        files = '../ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser","dataset_name":"auto_dataset_name","visibility":"public"}
         response = requests.post("http://localhost:8000/mlaas/ingest/create_dataset/",data = info,files = file)
         json_response = response.json()
         status = json_response["status_code"]
         self.assertEqual(status,"200")
-    
-    def testBscenario2_insert_invalid_dataset(self):
-        """This function is used to test the CreateDataset POST Method With invalid Data Inputs .
 
-        Args:
-            user_name ([string]): [name of the user.]
-            dataset_name ([string]): [name of the dataset.],
-            visibility ([string]): [name of the visibility(public or private)]
-    
-        """
-        time.sleep(1)
-        files = '../ingest/dataset/pima_indians_diabetes.csv'
-        file = {'inputfile': open(files, 'rb')}
-        info = {"user_name":"autouser","dataset_name":"auto_dataset_name","visibility":"public"}
-        response = requests.post("http://localhost:8000/mlaas/ingest/create_dataset/",data = info,files = file)
-        json_response = response.json()
-        status = json_response["status_code"]
-        self.assertEqual(status,"500")
-    
-
-    def testCscenario3_insert_invalidfile_dataset(self):
+    def testB_scenario2_insert_invalidfile_dataset(self):
         """ This function is used to test the CreateDataset POST Method With invalid file Input.
 
         Args:
@@ -61,10 +42,88 @@ class TestAIngestPostDataset(unittest.TestCase):
         json_response = response.json()
         status = json_response["status_code"]
         self.assertEqual(status,"500")
+
+    def testC_scenario1_insert_dataset(self):
+        """This function is used to test the CreateDataset POST Method With valid Data Inputs .
+
+        Args:
+            user_name ([string]): [name of the user.]
+            dataset_name ([string]): [name of the dataset.],
+            visibility ([string]): [name of the visibility(public or private)]
+    
+        """
+        time.sleep(1)
+        files = '../ingest/dataset/pima_indians_diabetes.csv'
+        file = {'inputfile': open(files, 'rb')}
+        info = {"user_name":"autouser","dataset_name":"auto_dataset_name","visibility":"public"}
+        response = requests.post("http://localhost:8000/mlaas/ingest/create_dataset/",data = info,files = file)
+        json_response = response.json()
+        status = json_response["status_code"]
+        self.assertEqual(status,"500")
+
+    def testD_scenario1_insert_dataset(self):
+        """This function is used to test the CreateDataset POST Method With valid Data Inputs .
+
+        Args:
+            user_name ([string]): [name of the user.]
+            dataset_name ([string]): [name of the dataset.],
+            visibility ([string]): [name of the visibility(public or private)]
+    
+        """
+        time.sleep(1)
+        files = '../ingest/dataset/empty.csv'
+        file = {'inputfile': open(files, 'rb')}
+        info = {"user_name":"autouser","dataset_name":"auto_dataset_name","visibility":"public"}
+        response = requests.post("http://localhost:8000/mlaas/ingest/create_dataset/",data = info,files = file)
+        json_response = response.json()
+        status = json_response["status_code"]
+        self.assertEqual(status,"500")
+    
+    def testE_scenario1_insert_dataset(self):
+        """This function is used to test the CreateDataset POST Method With valid Data Inputs .
+
+        Args:
+            user_name ([string]): [name of the user.]
+            dataset_name ([string]): [name of the dataset.],
+            visibility ([string]): [name of the visibility(public or private)]
+    
+        """
+        time.sleep(1)
+        files = '../ingest/dataset/one_column.csv'
+        file = {'inputfile': open(files, 'rb')}
+        info = {"user_name":"autouser","dataset_name":"auto_dataset_name","visibility":"public"}
+        response = requests.post("http://localhost:8000/mlaas/ingest/create_dataset/",data = info,files = file)
+        json_response = response.json()
+        status = json_response["status_code"]
+        self.assertEqual(status,"500")
+
+
+    
+    
+    def testF_scenario6_insert_invalid_dataset(self):
+        """This function is used to test the CreateDataset POST Method With invalid Data Inputs .
+
+        Args:
+            user_name ([string]): [name of the user.]
+            dataset_name ([string]): [name of the dataset.],
+            visibility ([string]): [name of the visibility(public or private)]
+    
+        """
+        time.sleep(1)
+        files = '../ingest/dataset/CarPrice_Assignment.csv'
+        file = {'inputfile': open(files, 'rb')}
+        info = {"user_name":"autouser","dataset_name":"auto_dataset_name","visibility":"public"}
+        response = requests.post("http://localhost:8000/mlaas/ingest/create_dataset/",data = info,files = file)
+        json_response = response.json()
+        status = json_response["status_code"]
+        self.assertEqual(status,"500")
+    
+
+
        
 
 class TestBIngestGetDataset(unittest.TestCase):
-    def testAscenario4_get_dataset(self):
+    def testA_scenario1_get_dataset(self):
         """ This function is used to test the CreateDataset GET Method With valid Username Input .
 
         Args:
@@ -77,7 +136,7 @@ class TestBIngestGetDataset(unittest.TestCase):
         status = json_response["status_code"]
         self.assertEqual(status,"200")
 
-    def testBscenario5_get__invalidfile_dataset(self):
+    def testB_scenario2_get__invalidfile_dataset(self):
         """ This function is used to test the CreateDataset GET Method With invalid Username Input .
 
         Args:
@@ -91,14 +150,14 @@ class TestBIngestGetDataset(unittest.TestCase):
         self.assertEqual(status,"500")
 
 class TestIngestDatasetDeletion(unittest.TestCase):
-    def testAscenario6_delete_dataset(self):
-        """ This function is used to test the DeleteDataset DELETE Method With valid Input .
+    def testA_scenario1_delete_dataset(self):
+        """ This function is used to test the DeleteDataset DELETE Method With valid user_name .
 
         Args:
             user_name ([string]): [name of the user.]
             dataset_id ([integer]):[id of the dataset.]
         """
-        files = '../ingest/dataset/pima_indians_diabetes.csv'
+        files = '../ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser_valid","dataset_name":"auto_dataset_name_valid","visibility":"public"}
         response = requests.post("http://localhost:8000/mlaas/ingest/create_dataset/",data = info,files = file)
@@ -109,26 +168,16 @@ class TestIngestDatasetDeletion(unittest.TestCase):
         json_response = response.json()
         status = json_response["status_code"]
         self.assertEqual(status,"200")
-
-    def testBscenario6_delete_dataset(self):
-        """ This function is used to test the DeleteDataset DELETE Method With invalid Input .
+    
+    def testB_scenario2_delete_dataset(self):
+        """ This function is used to test the DeleteDataset DELETE Method With invalid dataset_id(public)  .
 
         Args:
             user_name ([string]): [name of the user.]
             dataset_id ([integer]):[id of the dataset.]
-        """
-        response = requests.delete("http://localhost:8000/mlaas/ingest/delete/dataset_detail/",params ={"user_name":"autouser","dataset_id":"1"})
-        json_response = response.json()
-        status = json_response["status_code"]
-        self.assertEqual(status,"500")
-    
-    def testBscenario6_delete_dataset(self):
-        """ 
-
-        Args:
             
         """
-        files = '../ingest/dataset/pima_indians_diabetes.csv'
+        files = '../ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser_four","dataset_name":"auto_dataset_name_four","visibility":"public"}
         response = requests.post("http://localhost:8000/mlaas/ingest/create_dataset/",data = info,files = file)
@@ -139,10 +188,58 @@ class TestIngestDatasetDeletion(unittest.TestCase):
         json_response = response.json()
         status = json_response["status_code"]
         self.assertEqual(status,"500")
+
+    def testC_scenario3_delete_dataset(self):
+        """ This function is used to test the DeleteDataset DELETE Method With invalid dataset(private)  .
+
+        Args:
+            user_name ([string]): [name of the user.]
+            dataset_id ([integer]):[id of the dataset.]
+
+        """
+        response = requests.delete("http://localhost:8000/mlaas/ingest/delete/dataset_detail/",params ={"user_name":"autouser","dataset_id":"1"})
+        json_response = response.json()
+        status = json_response["status_code"]
+        self.assertEqual(status,"500")
+    
+    def testD_scenario4_delete_dataset(self):
+        """ This function is used to test the DeleteDataset DELETE Method With invalid dataset(private)  .
+
+        Args:
+            user_name ([string]): [name of the user.]
+            dataset_id ([integer]):[id of the dataset.]
+
+        """
+        response = requests.delete("http://localhost:8000/mlaas/ingest/delete/dataset_detail/",params ={"user_name":"autouser","dataset_id":"1"})
+        json_response = response.json()
+        status = json_response["status_code"]
+        self.assertEqual(status,"500")
+   
     
   
 class TestCIngestPostProject(unittest.TestCase):
-    def testAscenario7_insert_project(self):
+    
+    def testA_scenario1_insert_project(self):
+        """ This function is used to test the CreateProject POST Method With valid Input .
+
+        Args:
+            user_name ([string]): [name of the user.]
+            project_name ([string]): [name of the project.],
+            description ([string]): [write about project info.],
+            dataset_name ([string]): [write about project info.],
+            visibility ([string]): [name of the visibility(public)]
+    
+        """
+        time.sleep(2)
+        files = '../ingest/dataset/CarPrice_Assignment.csv'
+        file = {'inputfile': open(files, 'rb')}
+        info = {"user_name":"autouser_second","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_dataset_name","visibility":"public"}
+        response = requests.post("http://localhost:8000/mlaas/ingest/create_project/",data = info,files = file)
+        json_response = response.json()
+        status = json_response["status_code"]
+        self.assertEqual(status,"200")
+
+    def testB_scenario2_insert_project(self):
         """ This function is used to test the CreateProject POST Method With valid Input .
 
         Args:
@@ -157,57 +254,44 @@ class TestCIngestPostProject(unittest.TestCase):
         responsedataset = requests.get("http://localhost:8000/mlaas/ingest/create_dataset/",params = {"user_name":"autouser"})
         json_responsedataset=responsedataset.json()
         json_dataset_id = json_responsedataset["response"][0]["dataset_id"]
-        files = '../ingest/dataset/pima_indians_diabetes.csv'
+        files = '../ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_dataset_name_project","visibility":"public","dataset_id":json_dataset_id}
         response = requests.post("http://localhost:8000/mlaas/ingest/create_project/",data = info,files = file)
         json_response = response.json()
         status = json_response["status_code"]
         self.assertEqual(status,"200")
-
-    def testBscenario8_insert_project(self):
-        """ This function is used to test the CreateProject POST Method With valid Input .
-
-        Args:
-            user_name ([string]): [name of the user.]
-            project_name ([string]): [name of the project.],
-            description ([string]): [write about project info.],
-            dataset_name ([string]): [write about project info.],
-            visibility ([string]): [name of the visibility(public)]
-    
-        """
-        time.sleep(2)
-        files = '../ingest/dataset/pima_indians_diabetes.csv'
-        file = {'inputfile': open(files, 'rb')}
-        info = {"user_name":"autouser_second","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_dataset_name","visibility":"public"}
-        response = requests.post("http://localhost:8000/mlaas/ingest/create_project/",data = info,files = file)
-        json_response = response.json()
-        status = json_response["status_code"]
-        self.assertEqual(status,"200")
-    
-    def testCscenario9_insert_project(self):
-        """ This function is used to test the CreateProject POST Method With invalid Inputs .
-
-        Args:
-            user_name ([string]): [name of the user.]
-            project_name ([string]): [name of the project.],
-            description ([string]): [write about project info.],
-            dataset_name ([string]): [write about project info.],
-            visibility ([string]): [name of the visibility(public)]
-    
-        """
         
+
+    def testC_scenario3_insert_project(self):
+        """ This function is used to test the CreateProject POST Method With invalid dataset_id .
+        Args:
+            user_name ([string]): [name of the user.]
+            project_name ([string]): [name of the project.],
+            description ([string]): [write about project info.],
+            dataset_name ([string]): [write about project info.],
+            visibility ([string]): [name of the visibility(public)],
+            dataset_id ([integer]) :[id of the dataset]
+    
+        """
         time.sleep(2)
-        files = '../ingest/dataset/pima_indians_diabetes.csv'
+        files = '../ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
-        info = {"user_name":"autouser_second","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_dataset_name","visibility":"private"}
+        info = {"user_name":"autouser_three","project_name":"auto_project_name_three","description":"this is automated entry","dataset_name":"auto_dataset_name_project","visibility":"private"}
+        response = requests.post("http://localhost:8000/mlaas/ingest/create_project/",data = info,files = file)
+
+        responsedataset = requests.get("http://localhost:8000/mlaas/ingest/create_project/",params = {"user_name":"autouser_three"})
+        json_responsedataset=responsedataset.json()
+        json_dataset_id = json_responsedataset["response"][0]["dataset_id"]
+        files = '../ingest/dataset/CarPrice_Assignment.csv'
+        file = {'inputfile': open(files, 'rb')}
+        info = {"user_name":"autouser","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_dataset_name_project","visibility":"public","dataset_id":json_dataset_id}
         response = requests.post("http://localhost:8000/mlaas/ingest/create_project/",data = info,files = file)
         json_response = response.json()
         status = json_response["status_code"]
         self.assertEqual(status,"500")
-
-        
-    def testDscenario10_insert_repeat_project(self):
+    
+    def testD_scenario4_insert_project(self):
         """ This function is used to test the CreateProject POST Method With invalid Input .
 
         Args:
@@ -218,35 +302,10 @@ class TestCIngestPostProject(unittest.TestCase):
             visibility ([string]): [name of the visibility(public)]
     
         """
-       
         time.sleep(2)
-        files = '../ingest/dataset/pima_indians_diabetes.csv'
+        files = '../ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
-        info = {"user_name":"autouser","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_dataset_name","visibility":"public"}
-        response = requests.post("http://localhost:8000/mlaas/ingest/create_project/",data = info,files = file)
-        json_response = response.json()
-        print(json_response)
-        status = json_response["status_code"]
-        self.assertEqual(status,"500")
-
-    def testEscenario7_insert_project(self):
-        """ 
-        Args:
-            
-    
-        """
-        time.sleep(2)
-        files = '../ingest/dataset/pima_indians_diabetes.csv'
-        file = {'inputfile': open(files, 'rb')}
-        info = {"user_name":"autouser_three","project_name":"auto_project_name_three","description":"this is automated entry","dataset_name":"auto_dataset_name_project","visibility":"private"}
-        response = requests.post("http://localhost:8000/mlaas/ingest/create_project/",data = info,files = file)
-
-        responsedataset = requests.get("http://localhost:8000/mlaas/ingest/create_project/",params = {"user_name":"autouser_three"})
-        json_responsedataset=responsedataset.json()
-        json_dataset_id = json_responsedataset["response"][0]["dataset_id"]
-        files = '../ingest/dataset/pima_indians_diabetes.csv'
-        file = {'inputfile': open(files, 'rb')}
-        info = {"user_name":"autouser","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_dataset_name_project","visibility":"public","dataset_id":json_dataset_id}
+        info = {"user_name":"autouser_second","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_dataset_name","visibility":"public"}
         response = requests.post("http://localhost:8000/mlaas/ingest/create_project/",data = info,files = file)
         json_response = response.json()
         status = json_response["status_code"]
@@ -255,7 +314,7 @@ class TestCIngestPostProject(unittest.TestCase):
 
 class TestDIngestGetProject(unittest.TestCase):
     
-    def testAscenario11_get_project_detail(self):
+    def testA_scenario1_get_project_detail(self):
         """ This function is used to test the CreateProject GET Method With valid user name .
 
         Args:
@@ -267,7 +326,7 @@ class TestDIngestGetProject(unittest.TestCase):
         status = json_response["status_code"]
         self.assertEqual(status,"200")
 
-    def testBscenario12_get_all_project(self):
+    def testB_scenario2_get_all_project(self):
         """ This function is used to test the CreateProject GET Method With invalid user name .
 
         Args:
@@ -277,12 +336,10 @@ class TestDIngestGetProject(unittest.TestCase):
         response = requests.get("http://localhost:8000/mlaas/ingest/create_project/",params ={"user_name":"autouser_invalid"})
         json_response = response.json()
         status = json_response["status_code"]
-        self.assertEqual(status,"500")
-
-        
+        self.assertEqual(status,"500")        
   
 class TestEIngestProjectDeletion(unittest.TestCase):
-    def testAscenario13_delete_project(self):
+    def testA_scenario3_delete_project(self):
         """ This function is used to test the DeleteProject DELETE Method With valid user name and project id .
 
         Args:
@@ -295,13 +352,12 @@ class TestEIngestProjectDeletion(unittest.TestCase):
         response = requests.get("http://localhost:8000/mlaas/ingest/create_project/",params ={"user_name":"autouser"})
         json_response = response.json()
         project_id = json_response["response"][0]["project_id"]
-        self.assertEqual(project_id,1)
         response = requests.delete("http://localhost:8000/mlaas/ingest/delete/project_detail/",params ={"user_name":"autouser","project_id":project_id})
         json_response = response.json()
         status = json_response["status_code"]
         self.assertEqual(status,"200")
 
-    def testBscenario13_delete_project(self):
+    def testB_scenario4_delete_project(self):
         """ This function is used to test the DeleteProject DELETE Method With invalid user name and project id .
 
         Args:
@@ -316,7 +372,7 @@ class TestEIngestProjectDeletion(unittest.TestCase):
         self.assertEqual(status,"500")
 
 class TestFIngestDataDetailClass(unittest.TestCase):
-    def testAscenario13_datadetail(self):
+    def testA_scenario1_datadetail(self):
         """ This function is used to test the DataDetail GET Method With valid inputs.
 
         Args:
@@ -332,34 +388,32 @@ class TestFIngestDataDetailClass(unittest.TestCase):
         status = json_response["status_code"]
         self.assertEqual(status,"200")
 
-    def testBscenario13_datadetail(self):
-        """ This function is used to test the DataDetail GET Method With valid inputs.
+    # def testB_scenario2_datadetail(self):
+    #     """ This function is used to test the DataDetail GET Method With valid inputs.
 
-        Args:
-            dataset_id ([integer]): [Id of the dataset.]
+    #     Args:
+    #         dataset_id ([integer]): [Id of the dataset.]
     
-        """
-        files = '../ingest/dataset/pima_indians_diabetes.csv'
-        file = {'inputfile': open(files, 'rb')}
-        info = {"user_name":"autouser_seconduser","dataset_name":"auto_dataset_name_seconduser","visibility":"private"}
-        response = requests.post("http://localhost:8000/mlaas/ingest/create_dataset/",data = info,files = file)
+    #     """
+    #     files = '../ingest/dataset/CarPrice_Assignment.csv'
+    #     file = {'inputfile': open(files, 'rb')}
+    #     info = {"user_name":"autouser_seconduser","dataset_name":"auto_dataset_name_seconduser","visibility":"private"}
+    #     response = requests.post("http://localhost:8000/mlaas/ingest/create_dataset/",data = info,files = file)
     
-        response = requests.get("http://localhost:8000/mlaas/ingest/create_dataset/",params ={"user_name":"autouser_seconduser"})
-        json_response = response.json()
-        datadetail_id = json_response["response"][0]["dataset_id"]
+    #     response = requests.get("http://localhost:8000/mlaas/ingest/create_dataset/",params ={"user_name":"autouser_seconduser"})
+    #     json_response = response.json()
+    #     datadetail_id = json_response["response"][0]["dataset_id"]
        
-        response = requests.get("http://localhost:8000/mlaas/ingest/data_detail/",params ={"dataset_id":datadetail_id})
-        json_response = response.json()
-        status = json_response["status_code"]
-        self.assertEqual(status,"200")
+    #     response = requests.get("http://localhost:8000/mlaas/ingest/data_detail/",params ={"dataset_id":datadetail_id})
+    #     json_response = response.json()
+    #     status = json_response["status_code"]
+    #     self.assertEqual(status,"200")
     
-    def testCscenario13_datadetail(self):
-        """ This function is used to test the DataDetail GET Method With invalid inputs.
+    def testB_scenario3_datadetail(self):
+        """ This function is used to test the DataDetail GET Method With invalid dataset_id.
 
         Args:
-            user_name ([string]): [name of the user.]
-            table_name ([string]):[name of the table.]
-            dataset_visibility ([string]):[name of the visibility(private)]
+            dataset_id ([integer]): [id of the dataset.]
     
         """
         response = requests.get("http://localhost:8000/mlaas/ingest/data_detail/",params ={"dataset_id":4})
