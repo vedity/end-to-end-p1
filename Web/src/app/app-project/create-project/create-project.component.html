@@ -1,71 +1,94 @@
 <div class="container-fluid">
-        <!-- start page title -->
-        <div class="row">
-            <div class="col-12">
-                <div class="page-title-box d-flex align-items-center justify-content-between">
-                    <h4 class="mb-0 font-size-18">Create Project</h4>
-                    <div class="page-title-right">
-                        <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item active">Welcome to create project</li>
-                        </ol>
-                    </div>
+    <!-- start page title -->
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box d-flex align-items-center justify-content-between">
+                <h4 class="mb-0 font-size-18">Create Project</h4>
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item active">Welcome to create project</li>
+                    </ol>
                 </div>
             </div>
         </div>
+    </div>
+    <form #f="ngForm" (ngSubmit)="f.form.valid?save():errorStatus=!errorStatus">
         <div class="row justify-content-md-center">
             <div class="col-lg-6">
-        <div class="form-group">
-                <label for="example-text-input" class="col-form-label">Project Name</label>
-                <input class="form-control" type="text" id="example-text-input">
-
-        </div> 
-        <div class="form-group">
-            <label for="example-text-input" class="col-form-label">Description</label>
-            <textarea class="form-control" id="example-text-input"></textarea>
-        </div>  
-        <div class="form-group row">
-                <div class="col-md-6">
-                        <label for="example-text-input" class="col-form-label">Dataset Name</label>
-                        <input class="form-control" type="text" id="example-text-input">
+                <div class="form-group">
+                    <label class="col-form-label">Project Name <span
+                            class="required-label">&nbsp;*</span></label>
+                    <input class="form-control" (change)="checkuniqueprojectname($event)" required type="text" [(ngModel)]="data.projectname" name="projectname"
+                        #projectname="ngModel">
+                    <div class="invalid-feedback" *ngIf="projectname.errors?.required && (projectname.dirty || projectname.touched)">
+                        <span *ngIf="projectname.errors?.required && (projectname.dirty || projectname.touched)" class="text-red">please enter project name.</span>
+                    </div>
+                    <div class="invalid-feedback" *ngIf="projectnameuniqueerror">
+                        <span class="text-red">project name already exist.</span>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                        <label for="example-text-input" class="col-form-label">Upload Dataset</label>
-                        <div class="custom-file">
-                            <label class="custom-file-label" for="customFile">Choose file</label>
-                            <input type="file" class="custom-file-input" id="customFile">
+                <div class="form-group">
+                    <label class="col-form-label">Description<span
+                            class="required-label">&nbsp;*</span></label>
+                    <textarea class="form-control" [(ngModel)]="data.description" name="description"
+                        #description="ngModel" required ></textarea>
+                        <div class="invalid-feedback" *ngIf="description.errors?.required && (description.dirty || description.touched)">
+                            <span *ngIf="description.errors?.required && (description.dirty || description.touched)" class="text-red">please enter description.</span>
+                            
                         </div>
                 </div>
-            
-        </div>
-        <h5 class="txt-center">OR</h5>
-        <div class="form-group">
-            <label class="col-form-label">Select Dataset</label>
-            <select class="form-control">
-              <option>Select Dataset</option>
-              <option>Large select</option>
-              <option>Small select</option>
-            </select>
-        </div>
-        <!-- <div class="form-group">
-                <div class="col-md-6">
-                        <label for="example-text-input" class="col-form-label">Description</label>
-                        <textarea class="form-control" id="example-text-input"></textarea>
-                                   </div>
-                    <div class="col-md-6 ">
-                            <div>
-                                    <h5 class="txt-center">OR</h5>
-                                </div>
-                                    <label class="col-form-label">Select Dataset</label>
-                                      <select class="form-control">
-                                        <option>Select Dataset</option>
-                                        <option>Large select</option>
-                                        <option>Small select</option>
-                                      </select>
+                <div class="form-group row">
+                    <div class="col-md-6">
+                        <label class="col-form-label">Dataset Name</label>
+                        <!-- (change)="checkuniquedatasetname($event)"  -->
+                        <input class="form-control" [disabled]="selectchangedisablevalidation" (change)="checkuniquedatasetname($event)" [(ngModel)]="data.datasetname" name="datasetname"
+                            #datasetname="ngModel"  type="text" >
+                            <div class="invalid-feedback" *ngIf="datasetname.errors?.required && (datasetname.dirty || datasetname.touched)">
+                                <span *ngIf="datasetname.errors?.required && (datasetname.dirty || datasetname.touched)" class="text-red">please enter dataset name.</span>
+                            </div>
+                            <div class="invalid-feedback" *ngIf="datasetnameuniqueerror">
+                                <span class="text-red">dataset name already exist.</span>
+                            </div>
                     </div>
-        </div> -->
-        <div class="button-items txt-center">
-            <button type="button" class="btn btn-success">Create Project</button>
+                    <div class="col-md-6">
+                        <label class="col-form-label">Upload Dataset</label>
+                        <div class="custom-file">
+                            <label class="custom-file-label" for="customFile">Choose file</label>
+                            <input type="file" (change)="handleFileInput($event.target.files)" [(ngModel)]="data.file" accept=".csv" name="file"
+                            [disabled]="selectchangedisablevalidation"   #file="ngModel" class="custom-file-input" >
+                                <div class="invalid-feedback" *ngIf="file.errors?.required && (file.dirty || file.touched)">
+                                    <span *ngIf="file.errors?.required && (file.dirty || file.touched)" class="text-red">please select .csv file.</span>
+                                </div>
+                        </div>
+                       
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="custom-control custom-checkbox mb-3">
+                        <input type="checkbox" class="custom-control-input" (change)="data.isprivate=$event.target.checked" checked name="isprivate" id="customCheck1" >
+                        <label class="custom-control-label" for="customCheck1">Keep Dataset private</label>
+                    </div>
+                </div>
+                <label class="txt-center">OR</label>
+                <div class="form-group">
+                    <label class="col-form-label">Select Dataset</label>
+  <select class="form-control" [disabled]="datasetdisablevalidation" [(ngModel)]="data.datsetid" name="datsetid" #datsetid="ngModel"
+                        (change)="selectchange()">
+                        <option value="">Select Dataset</option>
+                    <option *ngFor="let item of datasetlist" value="{{item.dataset_id}}"> {{item.dataset_name}}</option>
+                       
+                    </select>
+                </div>
+                <div *ngIf="!errorStatus"  class="invalid-feedback">
+                    All required fields are compulsory to fill.
+                </div>
+                <div [hidden]="errorStatus && validfile" class="invalid-feedback">
+                   {{errorMessage}}
+                </div>
+                <div class="button-items txt-center">
+                    <button type="submit" class="btn btn-success">Create Project</button>
+                </div>
+            </div>
         </div>
-    </div>
+    </form>
 </div>
-    </div>

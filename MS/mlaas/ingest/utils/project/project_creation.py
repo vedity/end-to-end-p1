@@ -15,7 +15,8 @@ import logging
 import traceback
 from ..dataset import dataset_creation 
 from common.utils.database import db
-from common.utils.exception_handler.python_exception import *
+from common.utils.exception_handler.python_exception.common.common_exception import *
+from common.utils.exception_handler.python_exception.ingest.ingest_exception import *
 from common.utils.logger_handler import custom_logger as cl
 
 user_name = 'admin'
@@ -45,9 +46,9 @@ class ProjectClass:
         schema ="project_id bigserial,"\
                 "project_name  text,"\
                 "project_desc  text,"\
-                "dataset_status integer NOT NULL DEFAULT 1,"\
-                "model_status integer NOT NULL DEFAULT 1,"\
-                "deployment_status integer NOT NULL DEFAULT 1,"\
+                "dataset_status integer NOT NULL DEFAULT -1,"\
+                "model_status integer NOT NULL DEFAULT -1,"\
+                "deployment_status integer NOT NULL DEFAULT -1,"\
                 "user_name  text,"\
                 "dataset_id  bigint,"\
                 "created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()" 
@@ -125,7 +126,7 @@ class ProjectClass:
             project_id = None
             
         logging.info("data ingestion : ProjectClass : make_project : execution end")
-        return status,project_id
+        return status,project_id,dataset_id
 
     def get_project_id(self,DBObject,connection,row_tuples,user_name):
         """This function is used to get project id of created project.

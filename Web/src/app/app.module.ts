@@ -23,6 +23,9 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { ErrorInterceptor } from './core/helpers/error.interceptor';
 import { JwtInterceptor } from './core/helpers/jwt.interceptor';
 import { FakeBackendInterceptor } from './core/helpers/fake-backend';
+import {  DataTablesModule } from 'angular-datatables';
+
+import { ToastrModule } from 'ngx-toastr';
 
 if (environment.defaultauth === 'firebase') {
   initFirebaseBackend(environment.firebaseConfig);
@@ -35,6 +38,7 @@ export function createTranslateLoader(http: HttpClient): any {
   return new TranslateHttpLoader(http, 'assets/i18n/', '.json');
 }
 
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -43,6 +47,11 @@ export function createTranslateLoader(http: HttpClient): any {
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
+    ToastrModule.forRoot({
+      timeOut: 2000,
+      positionClass: 'toast-bottom-right',
+      preventDuplicates: true,
+    }),
     HttpClientModule,
     TranslateModule.forRoot({
       loader: {
@@ -59,7 +68,9 @@ export function createTranslateLoader(http: HttpClient): any {
     NgbNavModule,
     NgbTooltipModule,
     SharedModule,
-    ScrollToModule.forRoot()
+    ScrollToModule.forRoot(),
+    DataTablesModule,
+    
   ],
   bootstrap: [AppComponent],
   providers: [

@@ -87,7 +87,7 @@ def menu_nested_format(dataset_json1,dataset_json2):
     for x in dataset_json1:
         outer_dict={}
         for y in dataset_json2: 
-            if x["id"]==y["parent_id"]:  
+            if x["id"]==y["parentId"]:  
                 y_keys=list(y.keys())
                 y_data=list(y.values())
                 inner_dict={}
@@ -100,7 +100,7 @@ def menu_nested_format(dataset_json1,dataset_json2):
         for j in range(len(x_keys)):
             if x_keys[j] not in column_data:
                 outer_dict.update({x_keys[j]:x_data[j]})
-        outer_dict.update({"sub":json_data})
+        outer_dict.update({"subItems":json_data})
         json_data1.append(outer_dict)
         json_data=[]
     json_data1.insert(0,{"id": 1,
