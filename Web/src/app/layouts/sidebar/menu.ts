@@ -1,6 +1,6 @@
 import { MenuItem } from './menu.model';
 
-export const MENU: MenuItem[] =
+export const MENU =
  [
     {
         id: 1,

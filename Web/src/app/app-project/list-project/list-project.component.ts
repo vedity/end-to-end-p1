@@ -3,9 +3,10 @@ import { Router } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { DataTableDirective } from 'angular-datatables';
-import { ApiService } from '../api.service';
+import { ProjectApiService } from '../project-api.service';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
+import { timeout } from 'rxjs/operators';
 
 @Component({
   selector: 'app-list-project',
@@ -20,14 +21,18 @@ export class ListProjectComponent implements OnInit {
    
   dtTrigger: Subject<any> = new Subject<any>();
   filter: boolean = true;
-  constructor(public router: Router, public http: HttpClient, public apiService: ApiService,public toaster:ToastrService) { }
+  constructor(public router: Router, public http: HttpClient, public apiService: ProjectApiService,public toaster:ToastrService) { }
   transactions: any;
   ngOnInit(): void {
-    this.apiService.getproject().subscribe(
-      logs => this.successHandler(logs),
-      error => this.errorHandler(error)
-    );
+   this.getproject();
   }
+
+getproject(){
+  this.apiService.getproject().subscribe(
+    logs => this.successHandler(logs),
+    error => this.errorHandler(error)
+  );
+}
 
   successHandler(data){
     if(data.status_code=="200"){
@@ -61,10 +66,30 @@ errorHandler(error) {
         });
       });
    
-    }, 700);
+    }, 1000);
     }
 
-    confirm() {
+rendered(){
+  this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
+    dtInstance.columns().every(function () {
+      const that = this;
+      $('input', this.header()).on('keyup change', function () {
+        if (that.search() !== this['value']) {
+          that
+            .search(this['value'])
+            .draw();
+        }
+      });
+    });
+    dtInstance.destroy();
+    // Call the dtTrigger to rerender again
+   // this.dtTrigger.next();
+
+  });
+}
+
+
+    confirm(id) {
       Swal.fire({
         title: 'Are you sure?',
         text: 'You won\'t be able to revert this!',
@@ -74,8 +99,22 @@ errorHandler(error) {
         cancelButtonColor: '#f46a6a',
         confirmButtonText: 'Yes, delete it!'
       }).then(result => {
+
         if (result.value) {
-          Swal.fire('Deleted!', 'Project has been deleted.', 'success');
+          this.apiService.deleteproject(id).subscribe(
+            logs=>{Swal.fire('Deleted!', 'Project has been deleted.', 'success');
+            this.getproject();
+            this.rendered();
+
+            setTimeout(() => {
+    this.dtTrigger.next();
+              
+            }, 1000);
+          },
+            error=>Swal.fire('Not Deleted!', 'something went wrong.', 'error')
+          )
+
+          // Swal.fire('Deleted!', 'Project has been deleted.', 'success');
         }
       });
     }

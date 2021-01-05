@@ -4,7 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
 import { DataTableDirective } from 'angular-datatables';
 
-import { ApiService } from '../api.service';
+import { ProjectApiService } from '../project-api.service';
 
 @Component({
     selector: 'app-list-datadetail',
@@ -24,7 +24,7 @@ export class ListDatadetailComponent implements OnInit {
     values: any;
     finaldisplaykey: any;
     finaldisplayvalue: any;
-    constructor(public apiService: ApiService, public router: Router, private toaster: ToastrService) { }
+    constructor(public apiService: ProjectApiService, public router: Router, private toaster: ToastrService) { }
     transactions: any;
 title="Data Detail List";
     ngOnInit() {

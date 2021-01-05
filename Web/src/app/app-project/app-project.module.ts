@@ -28,7 +28,7 @@ import { ListProjectComponent } from './list-project/list-project.component';
 import { CreateProjectComponent } from './create-project/create-project.component';
 import { ManageDatasetComponent } from './manage-dataset/manage-dataset.component';
 import { UploadDatasetComponent } from './upload-dataset/upload-dataset.component';
-// import { DataTablesModule } from 'angular-datatables';
+ import { DataTablesModule } from 'angular-datatables';
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   suppressScrollX: true,
   wheelSpeed: 0.3
@@ -48,7 +48,7 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     ChartsModule,
     NgxChartistModule,
     ReactiveFormsModule,
-    // DataTablesModule,
+     DataTablesModule,
     UIModule,
     WidgetModule,
     FullCalendarModule,

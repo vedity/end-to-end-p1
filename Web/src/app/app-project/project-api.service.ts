@@ -5,7 +5,7 @@ import  { Observable } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
-export class ApiService {
+export class ProjectApiService {
 
    baseUrl = 'http://127.0.0.1:8000/mlaas/ingest/'
    headers = new HttpHeaders ({
@@ -18,14 +18,31 @@ export class ApiService {
     return this.httpClient.get(this.baseUrl+"create_project/",{headers:this.headers,params});
   }
 
+  saveproject(obj:FormData):Observable<any>{
+    console.log(obj);
+    return this.httpClient.post<any>(this.baseUrl+"create_project/",obj);
+  }
+
+  deleteproject(id):Observable<any>{
+    var params=new HttpParams().append("user_name","admin").append('project_id',id);
+   
+    return this.httpClient.delete<any>(this.baseUrl+"delete/project_detail/",{headers:this.headers,params});
+  }
+
   getDataset():Observable<any>{
     var params=new HttpParams().set("user_name","admin");
     return this.httpClient.get(this.baseUrl+"create_dataset/",{headers:this.headers,params});
   }
+  // mlaas/menu/
+  savedataset(obj:FormData):Observable<any>{
+    console.log(obj);
+    return this.httpClient.post<any>(this.baseUrl+"create_dataset/",obj);
+  }
 
-  // deleteDataset(id: number):Observable<any>{
-  //   return this.httpClient.delete(`${this.baseUrl}${id}/`,{headers:this.headers});
-  // }
+  deletedataset(id):Observable<any>{
+    var params=new HttpParams().append("user_name","admin").append('dataset_id',id);
+    return this.httpClient.delete(this.baseUrl+"delete/dataset_detail/",{headers:this.headers,params});
+  }
 
   getDataDetails(obj):Observable<any>{
     var params=new HttpParams().append("dataset_id",obj.dataset_id)

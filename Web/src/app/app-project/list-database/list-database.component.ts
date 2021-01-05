@@ -2,10 +2,10 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { DataTableDirective } from 'angular-datatables';
 import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
-import { ApiService } from '../api.service';
+import { ProjectApiService } from '../project-api.service';
 import Swal from 'sweetalert2';
 import bsCustomFileInput from 'bs-custom-file-input';
-
+import { createdataset } from './dataset.model'
 
 @Component({
   selector: 'app-list-database',
@@ -17,19 +17,21 @@ export class ListDatabaseComponent implements OnInit {
   datatableElement: DataTableDirective;
   dtOptions: DataTables.Settings = {};
   dtTrigger: Subject<any> = new Subject<any>();
-
+  data: createdataset = new createdataset();
   filter: boolean = true;
-  constructor(public apiService: ApiService, public toaster: ToastrService) { }
+  constructor(public apiService: ProjectApiService, public toaster: ToastrService) { }
   transactions: any;
   ngOnInit(): void {
+    this.data.isprivate = true;
+    bsCustomFileInput.init();
+    this.getdataset();
+  }
+  getdataset() {
     this.apiService.getDataset().subscribe(
       logs => this.successHandler(logs),
       error => this.errorHandler(error)
     );
-    bsCustomFileInput.init();
-
   }
-
   successHandler(data) {
     if (data.status_code == "200") {
       this.transactions = data.response;
@@ -44,6 +46,13 @@ export class ListDatabaseComponent implements OnInit {
     this.toaster.error('Something went wrong', 'Error');
   }
 
+  datasetfile: File;
+  handleFileInput(data: FileList) {
+    if (data.length > 0) {
+      console.log(data);
+      this.datasetfile = data.item(0);
+    }
+  }
 
   checkuniquedatasetname(event) {
     var val = event.target.value;
@@ -73,7 +82,7 @@ export class ListDatabaseComponent implements OnInit {
     // elem.value += ' NEW';
   }
 
-  confirm() {
+  confirm(id) {
     Swal.fire({
       title: 'Are you sure?',
       text: 'You won\'t be able to revert this!',
@@ -84,10 +93,42 @@ export class ListDatabaseComponent implements OnInit {
       confirmButtonText: 'Yes, delete it!'
     }).then(result => {
       if (result.value) {
-        Swal.fire('Deleted!', 'Project has been deleted.', 'success');
+        this.apiService.deletedataset(id).subscribe(
+          logs => {
+            if (logs.response == "true") {
+              Swal.fire('Deleted!', 'Project has been deleted.', 'success');
+              this.getdataset();
+              this.rendered();
+              setTimeout(() => {
+                this.dtTrigger.next();
+              }, 1000);
+            }
+            else
+              Swal.fire('Not Deleted!', 'Database is in use.', 'error')
+          },
+          error => Swal.fire('Not Deleted!', 'something went wrong.', 'error')
+        )
+
       }
     });
   }
+
+  rendered() {
+    this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
+      dtInstance.columns().every(function () {
+        const that = this;
+        $('input', this.header()).on('keyup change', function () {
+          if (that.search() !== this['value']) {
+            that
+              .search(this['value'])
+              .draw();
+          }
+        });
+      });
+      dtInstance.destroy();
+    });
+  }
+
   ngAfterViewInit(): void {
     setTimeout(() => {
       this.dtTrigger.next();
@@ -104,6 +145,35 @@ export class ListDatabaseComponent implements OnInit {
         });
       });
 
-    }, 700);
+    }, 1000);
+  }
+  errorStatus: boolean = true
+  save() {
+    let savedata = new FormData();
+    savedata.append('user_name', 'admin')//.user_name="admin";
+    savedata.append('dataset_name', this.data.datasetname);
+    if (this.data.isprivate)
+      savedata.append('visibility', "private");
+    else
+      savedata.append('visibility', "public");
+
+    savedata.append('inputfile', this.datasetfile);
+    this.apiService.savedataset(savedata).subscribe(
+      logs => this.savesuccess(logs),
+      error => this.errorHandler(error)
+    )
+  }
+
+  savesuccess(data) {
+    if (data.status_code == "200") {
+      this.getdataset();
+      this.rendered();
+
+      setTimeout(() => {
+        this.dtTrigger.next();
+      }, 1000);
+    }
+    else
+      this.errorHandler(data);
   }
 }

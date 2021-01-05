@@ -128,7 +128,7 @@ class CreateProjectClass(APIView):
                                                 except Exception as e:
                                                         
                                                         # logger.error(" call POST method in CreateProjectClass while uploading file to server"+str(e))
-                                                        return Response({"status_code":"500","error_msg":"InvalidFileInput","response":"false"}) 
+                                                        return Response({"status_code":"500","error_msg":'InvalidFileInput',"response":"false"}) 
                                         else:
                                                 #warning
                                                 return Response({"status_code":"500","error_msg":"ProjectALreadyExist","response":"false"})

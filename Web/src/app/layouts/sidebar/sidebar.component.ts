@@ -6,6 +6,7 @@ import { Router, NavigationEnd } from '@angular/router';
 import { MENU } from './menu';
 import { MenuItem } from './menu.model';
 import { TranslateService } from '@ngx-translate/core';
+import { LayoutApiService } from '../layouts-api.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -26,7 +27,7 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
 
   @ViewChild('sideMenu') sideMenu: ElementRef;
 
-  constructor(private eventService: EventService, private router: Router, public translate: TranslateService) {
+  constructor(private eventService: EventService,public apiservice:LayoutApiService, private router: Router, public translate: TranslateService) {
     router.events.forEach((event) => {
       if (event instanceof NavigationEnd) {
         this._activateMenuDropdown();
@@ -194,6 +195,14 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
    * Initialize
    */
   initialize(): void {
+    // this.apiservice.getMenu().subscribe(
+    //   logs =>{
+    //     this.menuItems=logs.response;
+    //   } ,
+    //   error=>{
+
+    //   }
+    // )
     this.menuItems = MENU;
   }
 
