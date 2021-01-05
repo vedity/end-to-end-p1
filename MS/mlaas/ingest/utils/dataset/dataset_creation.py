@@ -2,10 +2,10 @@
 /*CHANGE HISTORY
 
 --CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
- Vipul Prajapati          07-DEC-2020           1.0           Initial Version 
- Vipul Prajapati          08-DEC-2020           1.1           Modification for Business Rule ****************************************************************************************/
- Jay Shukla               15-DEC-2020           1.2           Added Deletion Functionality
- Abhishek Negi            12=DEC-2020           1.3           need to Check the code not working fine
+ Vipul Prajapati          07-DEC-2020           1.0           Initial Version. 
+ Vipul Prajapati          08-DEC-2020           1.1           Modification for Business Rule.
+ Jay Shukla               15-DEC-2020           1.2           Added Deletion Functionality.
+ Vipul Prajapati          05-JAN-2021           1.3           no_of_rows field added into dataset tbl.           
 */
 '''
 # from mlaas.ingest.utils import dataset
@@ -40,11 +40,13 @@ class DatasetClass:
         table_name = 'mlaas.dataset_tbl' 
         # Columns for dataset table.
         cols = 'dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name' 
+        #v1.3
         # Schema for dataset table.
         schema = "dataset_id bigserial,"\
                  "dataset_name  text,"\
                  "file_name  text,"\
                  "file_size  text,"\
+                 "no_of_rows integer NOT NULL DEFAULT 0,"\
                  "dataset_table_name  text,"\
                  "dataset_visibility text,"\
                  "user_name  text,"\
@@ -201,6 +203,8 @@ class DatasetClass:
         file_path = self.get_file_path(file_name,dataset_visibility,user_name)
         # Get dataframe of the file data.
         file_data_df = DBObject.read_data(file_path)
+        # Get number of rows.
+        no_of_rows = file_data_df.shape[0]
         # Get table name.
         table_name = self.get_dataset_table_name(file_name)
         if dataset_visibility.lower() == "public" :
@@ -213,7 +217,7 @@ class DatasetClass:
         load_dataset_status = DBObject.load_csv_into_db(connection_string,table_name,file_data_df,user_name)
         
         logging.info("data ingestion : DatasetClass : load_dataset : execution end")
-        return load_dataset_status
+        return load_dataset_status,no_of_rows
     
     def get_dataset_id(self,DBObject,connection,row_tuples,user_name):
         """This function is used to get dataset id of the created dataset.
