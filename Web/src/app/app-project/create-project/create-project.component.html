@@ -4,11 +4,11 @@
         <div class="col-12">
             <div class="page-title-box d-flex align-items-center justify-content-between">
                 <h4 class="mb-0 font-size-18">Create Project</h4>
-                <div class="page-title-right">
+                <!-- <div class="page-title-right">
                     <ol class="breadcrumb m-0">
                         <li class="breadcrumb-item active">Welcome to create project</li>
                     </ol>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
@@ -52,8 +52,8 @@
                     </div>
                     <div class="col-md-6">
                         <label class="col-form-label">Upload Dataset</label>
-                        <div class="custom-file">
-                            <label class="custom-file-label" for="customFile">Choose file</label>
+                        <div class="custom-file ">
+                            <label class="custom-file-label " for="customFile">Choose file</label>
                             <input type="file" (change)="handleFileInput($event.target.files)" [(ngModel)]="data.file" accept=".csv" name="file"
                             [disabled]="selectchangedisablevalidation"   #file="ngModel" class="custom-file-input" >
                                 <div class="invalid-feedback" *ngIf="file.errors?.required && (file.dirty || file.touched)">
