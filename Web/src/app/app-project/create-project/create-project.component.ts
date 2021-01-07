@@ -33,8 +33,8 @@ export class CreateProjectComponent implements OnInit {
       this.datasetlist = data.response;
       // this.toaster.success( 'Data Load Successfully','Success');
     }
-    else
-      this.errorHandler(data);
+    // else
+      // this.errorHandler(data);
   }
 
   checkuniqueprojectname(event) {
@@ -124,7 +124,8 @@ else{
   }
   save() {
     let savedata =new FormData();
-savedata.append('user_name','admin')//.user_name="admin";
+    let user=JSON.parse(localStorage.getItem("currentUser"));
+savedata.append('user_name',user.username)//.user_name="admin";
 savedata.append('dataset_id',this.data.datsetid?this.data.datsetid.toString():'')//.dataset_id=this.data.datsetid;
 savedata.append('dataset_name',this.data.datasetname);
 savedata.append('project_name',this.data.projectname);

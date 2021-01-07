@@ -34,7 +34,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.loginForm = this.formBuilder.group({
-      email: ['admin@themesbrand.com', [Validators.required, Validators.email]],
+      email: ['admin', [Validators.required]],
       password: ['123456', [Validators.required]],
     });
 
@@ -73,7 +73,13 @@ export class LoginComponent implements OnInit, AfterViewInit {
           .pipe(first())
           .subscribe(
             data => {
-              this.router.navigate(['']);
+              console.log(data);
+              if(data.response=="true"){
+                this.router.navigate(['']);
+              }
+              else{
+                this.error = data.error_msg;
+              }
             },
             error => {
               this.error = error ? error : '';

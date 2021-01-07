@@ -15,7 +15,9 @@ export class ListDatadetailComponent implements OnInit {
 
     @ViewChild(DataTableDirective, { static: false })
     datatableElement: DataTableDirective;
-    dtOptions: DataTables.Settings = {};
+    dtOptions: DataTables.Settings = {
+
+    };
     filter: boolean = true;
 
     dtTrigger: Subject<any> = new Subject<any>();
@@ -26,7 +28,7 @@ export class ListDatadetailComponent implements OnInit {
     finaldisplayvalue: any;
     constructor(public apiService: ProjectApiService, public router: Router, private toaster: ToastrService) { }
     transactions: any;
-title="Data Detail List";
+    title = "Data Detail List";
     ngOnInit() {
         var params = history.state;
         if (params.dataset_id != undefined)
@@ -35,8 +37,8 @@ title="Data Detail List";
             params = localStorage.getItem("params");
             params = JSON.parse(params);
         }
-        if(params.dataset_name!=undefined){
-            this.title=params.dataset_name;
+        if (params.dataset_name != undefined) {
+            this.title = params.dataset_name;
         }
         this.apiService.getDataDetails(params).subscribe(
             logs => this.successHandler(logs),
@@ -53,26 +55,24 @@ title="Data Detail List";
             this.keys = Object.keys(this.transactions[0]);
             this.finaldisplaykey = [];
             this.finaldisplayvalue = [];
+           var tbody="";
             this.transactions.forEach((element, index) => {
                 var obj = element;
                 var valueobj = Object.values(obj);
                 var val = [];
+                tbody=tbody+"<tr>";
                 for (let i = 0; i < this.keys.length; i++) {
                     if (valueobj[i]["display"] == "true") {
                         if (index == 0)
                             this.finaldisplaykey.push(this.keys[i]);
-                        val.push(valueobj[i]["values"]);
-                    }
-                    if (i == this.keys.length - 1) {
-                        this.finaldisplayvalue.push(val);
-                        val = [];
+                            tbody=tbody+"<td>"+valueobj[i]["values"]+"</td>";
                     }
                 }
+                tbody=tbody+"</tr>"
             });
-
-
-
-           // this.toaster.success('Data Load Successfully', 'Success');
+            $("#tbody").html(tbody);
+            this.rendered();
+          
         }
         else
             this.errorHandler(data);
@@ -93,7 +93,7 @@ title="Data Detail List";
         // elem.value += ' NEW';
     }
 
-    ngAfterViewInit(): void {
+    rendered() {
         setTimeout(() => {
             this.dtTrigger.next();
 
@@ -109,7 +109,7 @@ title="Data Detail List";
                     });
                 });
             });
-        }, 800);
+        }, 100);
 
     }
 

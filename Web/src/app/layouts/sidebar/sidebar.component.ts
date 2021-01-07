@@ -20,6 +20,7 @@ import { LayoutApiService } from '../layouts-api.service';
 export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
 
   @Input() isCondensed = false;
+
   menu: any;
 
   menuItems = [];
@@ -27,7 +28,8 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
 
   @ViewChild('sideMenu') sideMenu: ElementRef;
 
-  constructor(private eventService: EventService,public apiservice:LayoutApiService, private router: Router, public translate: TranslateService) {
+  constructor(private eventService: EventService, private router: Router, public translate: TranslateService, public apiservice: LayoutApiService) {
+
     router.events.forEach((event) => {
       if (event instanceof NavigationEnd) {
         this._activateMenuDropdown();
@@ -36,8 +38,9 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   ngOnInit() {
-    this.initialize();
-
+    this.apiservice.getMenu().subscribe(
+      log => this.initialize(log)
+    )
     document.body.setAttribute('data-sidebar', 'dark');
 
     this.configData = {
@@ -194,18 +197,12 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
   /**
    * Initialize
    */
-  initialize(): void {
-    // this.apiservice.getMenu().subscribe(
-    //   logs =>{
-    //     this.menuItems=logs.response;
-    //     this.menu = new MetisMenu(this.sideMenu.nativeElement);
-    //     this._activateMenuDropdown();
-    //   } ,
-    //   error=>{
-    //     this.menuItems = MENU;
-    //   }
-    // )
-   this.menuItems = MENU;
+  initialize(logs): void {
+    this.menuItems = logs.response;
+    setTimeout(() => {
+      this.menu = new MetisMenu(this.sideMenu.nativeElement);
+      this._activateMenuDropdown();
+    });
   }
 
   /**

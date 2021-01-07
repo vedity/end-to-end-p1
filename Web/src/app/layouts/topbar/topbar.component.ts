@@ -44,14 +44,15 @@ export class TopbarComponent implements OnInit {
   ];
 
   openMobileMenu: boolean;
-
+  username:any="";
   @Output() settingsButtonClicked = new EventEmitter();
   @Output() mobileMenuButtonClicked = new EventEmitter();
 
   ngOnInit() {
     this.openMobileMenu = false;
     this.element = document.documentElement;
-
+let user=JSON.parse(localStorage.getItem("currentUser"));
+this.username=user.username;
     this.configData = {
       suppressScrollX: true,
       wheelSpeed: 0.3

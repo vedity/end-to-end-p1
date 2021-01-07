@@ -18,3 +18,19 @@
 //     box-shadow: none;
 //   }
 
+
+.sorting_asc{
+    .sort-icon{display:none !important; }
+    .desc-icon{display:none !important;}
+  }
+  .sorting_desc{
+     .sort-icon{display:none !important;}
+     .asc-icon{display:none !important;}
+  }
+  .sorting{
+     .desc-icon{display:none !important;}
+     .asc-icon{display:none !important;}
+  }
+  table{
+     th{background-image:none !important;}
+  }

@@ -27,7 +27,11 @@
                       <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table-responsive row-border hover">
                         <thead class="thead-light">
                           <tr>
-                            <th *ngFor="let key of finaldisplaykey">{{key}}
+                            <th *ngFor="let key of finaldisplaykey">
+                              {{key}}
+                              <!-- <img class="sort-icon" src="sort_both.png">
+                              <img class="desc-icon" src="sort_desc.png">
+                              <img class="asc-icon" src="sort_asc.png"> -->
                                 <input class="form-control filter" type="text" [hidden]="filter"
                                 placeholder="{{key}}" name="search-{{key}}" />
                         
@@ -35,13 +39,13 @@
                             </th>
                           </tr>
                         </thead>
-                        <tbody class="tbody">
-                          <tr *ngFor="let data of finaldisplayvalue">
-                            <td *ngFor="let i of data">
-                              {{i}}
+                        <tbody class="tbody" id="tbody">
+                          <!-- <tr *ngFor="let data of finaldisplayvalue">
+                            <td *ngFor="let i of data" >
+                              {{i.values}}
                             </td>
                             
-                          </tr>
+                          </tr> -->
                         </tbody>
                       </table>
                     
