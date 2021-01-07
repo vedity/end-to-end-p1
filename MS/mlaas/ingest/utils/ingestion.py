@@ -495,24 +495,63 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                     if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',check_file_name))==True):
                         ALL_SET = True
             else:       
-                # get column names.
-                logging.debug("data ingestion : ingestclass : check_file : rows =="+str(file_data_df.shape[0]) + " columns =="+ str(file_data_df.shape[1]))
-                if file_data_df.shape[0] > 0 and file_data_df.shape[1] >= 2:
-                    All_SET_Count = 0
-                    logging.debug("data ingestion : ingestclass : check_file : column list value =="+str(file_data_df.columns.to_list()))   
-                    col_names = file_data_df.columns.to_list()
-                    for col in col_names:
-                        # it will check column names into the files.
-                        if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',col))==True):
+                #* Below code is updated by Jay
+                #? Solved a bug where the Function is only checking the file_name if the 
+                #? - dataframe is None.
+                
+                #Todo: Below condition will need to be updated when we will be supporting more file formates
+                if str(my_file).lower().endswith(('.csv')):
+                    check_file_name = original_file_name[:-4]
+                    # it will check file name 
+                    if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',check_file_name))==True):
+                        
+                        #? File Name is valid so checking for column names.
+                        # get column names.
+                        logging.debug("data ingestion : ingestclass : check_file : rows =="+str(file_data_df.shape[0]) + " columns =="+ str(file_data_df.shape[1]))
+                        if file_data_df.shape[0] > 0 and file_data_df.shape[1] >= 2:
+                            All_SET_Count = 0
+                            logging.debug("data ingestion : ingestclass : check_file : column list value =="+str(file_data_df.columns.to_list()))   
+                            col_names = file_data_df.columns.to_list()
+                            for col in col_names:
+                                # it will check column names into the files.
+                                if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',col))==True):
+                                    
+                                    All_SET_Count = All_SET_Count + 1
+                                else:
+                                    #All_SET_Count = All_SET_Count - 1  #Vipul
+                                    #* Below 4 lines are added by Jay
+                                    #? Once this loop executes, ALL_SET_Count will never match len(col_names)
+                                    #? No need to run the loop forward if the All_SET_Count is never going to match
+                                    #? - the len(col_names), breaking the loop right here will save time
+                                    break
+                                    
+                            logging.debug("data ingestion : ingestclass : check_file : count value =="+str(All_SET_Count))        
+                            if All_SET_Count == len(col_names):
+                                ALL_SET = True
+                            else: pass
+                        else: pass
+                    else: pass
+                else: pass
+                
+                # Vipul's Code
+                # logging.debug("data ingestion : ingestclass : check_file : rows =="+str(file_data_df.shape[0]) + " columns =="+ str(file_data_df.shape[1]))
+                # if file_data_df.shape[0] > 0 and file_data_df.shape[1] >= 2:
+                #     All_SET_Count = 0
+                #     logging.debug("data ingestion : ingestclass : check_file : column list value =="+str(file_data_df.columns.to_list()))   
+                #     col_names = file_data_df.columns.to_list()
+                #     for col in col_names:
+                #         # it will check column names into the files.
+                #         if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',col))==True):
                             
-                            All_SET_Count = All_SET_Count + 1
-                        else:
-                            All_SET_Count = All_SET_Count - 1  
-                    logging.debug("data ingestion : ingestclass : check_file : count value =="+str(All_SET_Count))        
-                    if All_SET_Count == len(col_names):
-                        ALL_SET = True
+                #             All_SET_Count = All_SET_Count + 1
+                #         else:
+                #             #All_SET_Count = All_SET_Count - 1
+                #     logging.debug("data ingestion : ingestclass : check_file : count value =="+str(All_SET_Count))        
+                #     if All_SET_Count == len(col_names):
+                #         ALL_SET = True
+                
             if ALL_SET == False:
-                    raise InvalidCsvFormat(500)             
+                raise InvalidCsvFormat(500)             
             logging.debug("data ingestion : ingestclass : check_file : return value =="+str(ALL_SET))        
             logging.info("data ingestion : ingestclass : check_file : execution end")          
             return ALL_SET
@@ -537,4 +576,4 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
    
 
         
-        
+
