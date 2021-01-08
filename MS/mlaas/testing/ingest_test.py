@@ -399,5 +399,4 @@ class TestFIngestDataDetailClass(unittest.TestCase):
         json_response = response.json()
         status = json_response["status_code"]
         self.assertEqual(status,"500")
-    
-
+        

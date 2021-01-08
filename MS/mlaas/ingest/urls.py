@@ -42,6 +42,7 @@ urlpatterns = [
     
     #URL for menu
     path('mlaas/menu/',MenuClass.as_view()),
-
+    
+    path('mlaas/page/',PaginationClass.as_view()),
 
 ]

@@ -42,6 +42,8 @@ DBObject=db.DBClass()     #Get DBClass object
 connection,connection_string=DBObject.database_connection(database,user,password,host,port)      #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 IngestionObj=ingestion.IngestClass(database,user,password,host,port)
 
+
+
 class UserLoginClass(APIView):
         """ this class used to add user data into table.
 
@@ -431,8 +433,8 @@ class DeleteDataDetailClass(APIView):
         It will take input parameters as table name.
         And it will return status.
 
-        Input  : dataset id
-        Output : status_code(500 or 200),
+        args  : dataset id
+        return : status_code(500 or 200),
                 error_msg(Error message for deletion failed or successfull),
                 Response(false or true)
         """
@@ -488,8 +490,8 @@ class ProjectExistClass(APIView):
         It will take input parameters as user_name,project_name.
         And it will return status,error_msg and response.
 
-        Input  : user_name,project_name
-        Output : status_code(500 or 200),
+        args  : user_name,project_name
+        return : status_code(500 or 200),
                  error_msg(Error message for deletion failed or successfull),
                  Response(false or true)
         """
@@ -512,8 +514,8 @@ class DatasetExistClass(APIView):
         It will take input parameters as user_name,dataset_name.
         And it will return status,error_msg and response.
 
-        Input  : user_name,dataset_name
-        Output : status_code(500 or 200),
+        args  : user_name,dataset_name
+        return : status_code(500 or 200),
                  error_msg(Error message for deletion failed or successfull),
                  Response(false or true)
         """
@@ -529,6 +531,7 @@ class DatasetExistClass(APIView):
                 else:
                         logging.info("data ingestion : DatasetExistClass : GET Method : execution stop : status_code :200")
                         return Response({"status_code":"200","error_msg":"you can proceed","response":"true"})  
+
 class DatasetNameClass(APIView):
         """
         This class is used to get All Dataset name which are unploaded.
@@ -536,8 +539,8 @@ class DatasetNameClass(APIView):
         It will take input parameters as user_name.
         And it will return status,error_msg and response.
 
-        Input  : user_name
-        Output : status_code(500 or 200),
+        Args  : user_name
+        return : status_code(500 or 200),
                  error_msg(Error message for deletion failed or successfull),
                  Response(false or true)
         """
@@ -586,3 +589,18 @@ class MenuClass(APIView):
                         logging.error("data ingestion : MenuClass : POST Method : Exception :" + str(e))
 			# logging.error("data ingestion : MenuClass : POST Method : "+ traceback.format_exc())
                         return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+
+class PaginationClass(APIView):
+        
+        def post(self,request, format=None):
+                start_index = request.POST.get('index')
+                length = request.POST.get('length')
+                search_value= request.POST.get('search')
+                sort_type= request.POST.get('sort_type')
+                column_index= request.POST.get('column_index')
+                global_index = request.POST.get('global_index')
+                table_name = "di_carprice_assignment_2021_01_05_15_31_58_tbl"
+                DBObject=db.DBClass()
+                data=DBObject.pagination(connection,table_name,global_index,int(start_index),int(length),sort_type,column_index)
+                return Response({"Response":data})
+        
