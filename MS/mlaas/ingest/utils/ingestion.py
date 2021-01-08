@@ -533,7 +533,6 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                     else: pass
                 else: pass
                 
-                # Vipul's Code
                 # logging.debug("data ingestion : ingestclass : check_file : rows =="+str(file_data_df.shape[0]) + " columns =="+ str(file_data_df.shape[1]))
                 # if file_data_df.shape[0] > 0 and file_data_df.shape[1] >= 2:
                 #     All_SET_Count = 0
