@@ -14,13 +14,13 @@ export class CreateProjectComponent implements OnInit {
 
   constructor(public router: Router, public apiService: ProjectApiService, public toaster: ToastrService) { }
   public data: createproject = new createproject();
-  disableclass:any="";
+  disableclass: any = "";
   datasetlist: any;
   errorStatus: boolean = true;
   errorMessage: any = "";
   validfile: any;
   ngOnInit() {
-    this.data.isprivate=true;
+    this.data.isprivate = true;
     this.apiService.getDataset().subscribe(
       logs => this.successHandler(logs),
       error => this.errorHandler(error)
@@ -34,7 +34,7 @@ export class CreateProjectComponent implements OnInit {
       // this.toaster.success( 'Data Load Successfully','Success');
     }
     // else
-      // this.errorHandler(data);
+    // this.errorHandler(data);
   }
 
   checkuniqueprojectname(event) {
@@ -46,7 +46,7 @@ export class CreateProjectComponent implements OnInit {
       );
     }
     else
-    this.projectnameuniqueerror = false;
+      this.projectnameuniqueerror = false;
 
   }
   projectnameuniqueerror: any = false;
@@ -56,12 +56,12 @@ export class CreateProjectComponent implements OnInit {
     if (data.response == 'false') {
       // this.errorStatus=false;
       this.projectnameuniqueerror = true;
-      target.className=target.className.replace("ng-valid", " ");
+      target.className = target.className.replace("ng-valid", " ");
       target.className = target.className + " ng-invalid";
     }
-    else{
+    else {
       this.projectnameuniqueerror = false;
-      target.className=target.className.replace("ng-invalid", " ");
+      target.className = target.className.replace("ng-invalid", " ");
       target.className = target.className + " ng-valid";
 
     }
@@ -78,7 +78,9 @@ export class CreateProjectComponent implements OnInit {
     }
     else {
       this.datasetdisablevalidation = false;
-
+      this.datasetnameuniqueerror = false;
+      event.target.className = event.target.className.replace("ng-invalid", " ");
+      event.target.className = event.target.className + " ng-valid";
     }
   }
   selectchangedisablevalidation: any = false;
@@ -89,10 +91,15 @@ export class CreateProjectComponent implements OnInit {
     if (data.response == 'false') {
       // this.errorStatus=false;
       this.datasetnameuniqueerror = true;
-      target.className.replace("ng-valid", " ");
+      target.className = target.className.replace("ng-valid", " ");
       target.className = target.className + " ng-invalid";
     }
+    else {
+      this.datasetnameuniqueerror = false;
+      target.className = target.className.replace("ng-invalid", " ");
+      target.className = target.className + " ng-valid";
 
+    }
   }
 
   datasetfile: File;
@@ -107,45 +114,65 @@ export class CreateProjectComponent implements OnInit {
 
     }
   }
+
   errorHandler(error) {
     console.log(error);
+    if(error.error_msg)
+    this.toaster.error(error.error_msg, 'Error');
+    else
+    {
+      console.log(error);
     this.toaster.error('Something went wrong', 'Error');
+    }
   }
-  selectchange(){
-console.log(this.data.datsetid);
-if(this.data.datsetid.toString()!=""){
-  this.selectchangedisablevalidation=true;
-  this.disableclass="disabled";
-}
-else{
-  this.disableclass="";
-  this.selectchangedisablevalidation=false;
-}
+
+  selectchange() {
+    console.log(this.data.datsetid);
+    if (this.data.datsetid.toString() != "") {
+      this.selectchangedisablevalidation = true;
+      this.disableclass = "disabled";
+    }
+    else {
+      this.disableclass = "";
+      this.selectchangedisablevalidation = false;
+    }
   }
   save() {
-    let savedata =new FormData();
-    let user=JSON.parse(localStorage.getItem("currentUser"));
-savedata.append('user_name',user.username)//.user_name="admin";
-savedata.append('dataset_id',this.data.datsetid?this.data.datsetid.toString():'')//.dataset_id=this.data.datsetid;
-savedata.append('dataset_name',this.data.datasetname);
-savedata.append('project_name',this.data.projectname);
-savedata.append('description',this.data.description);
-if(this.data.isprivate)
-savedata.append('visibility',"private");
-else
-savedata.append('visibility',"public");
+    if((this.datasetfile &&  this.data.datasetname)||this.data.datsetid){
+      this.errorStatus=true;
+      let savedata = new FormData();
+      let user = JSON.parse(localStorage.getItem("currentUser"));
+      savedata.append('user_name', user.username)//.user_name="admin";
+      savedata.append('dataset_id', this.data.datsetid ? this.data.datsetid.toString() : '')//.dataset_id=this.data.datsetid;
+      savedata.append('dataset_name', this.data.datasetname);
+      savedata.append('project_name', this.data.projectname);
+      savedata.append('description', this.data.description);
+      if (this.data.isprivate)
+        savedata.append('visibility', "private");
+      else
+        savedata.append('visibility', "public");
+  
+      savedata.append('inputfile', this.datasetfile);
+      this.apiService.saveproject(savedata).subscribe(
+        logs => this.savesuccess(logs),
+        error => this.errorHandler(error)
+      )
+    }
+   else{
+    this.errorStatus=false;
 
-savedata.append('inputfile',this.datasetfile);
-this.apiService.saveproject(savedata).subscribe(
-  logs => this.savesuccess(logs),
-  error => this.errorHandler(error)
-)
+   }
   }
 
-  savesuccess(data){
-    if(data.status_code=="200")
-    this.router.navigate(['project']);
+  savesuccess(data) {
+    if (data.status_code == "200")
+      this.router.navigate(['project']);
     else
-    this.errorHandler(data);
+      this.errorHandler(data);
+  }
+
+  reset() {
+    this.data = new createproject();
+    $(".custom-file-label").text("Choose file");
   }
 }

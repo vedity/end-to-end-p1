@@ -247,3 +247,21 @@ table.dataTable tbody td{padding:10px 18px !important;}
   input{ cursor:not-allowed !important;}
 }
 
+
+
+.custom-datatable{.sorting_asc{
+  .sort-icon{display:none !important; }
+  .desc-icon{display:none !important;}
+}
+.sorting_desc{
+   .sort-icon{display:none !important;}
+   .asc-icon{display:none !important;}
+}
+.sorting{
+   .desc-icon{display:none !important;}
+   .asc-icon{display:none !important;}
+}
+table{
+   th{background-image:none !important;}
+}
+}

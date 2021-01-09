@@ -17,7 +17,7 @@
             <div class="col-md-4 form-group">
                 <label for="example-text-input" class="col-form-label">Dataset Name<span
                         class="required-label">&nbsp;*</span></label>
-                <input class="form-control" (change)="checkuniquedatasetname($event)" type="text" required
+                <input class="form-control" maxlength="200" (change)="checkuniquedatasetname($event)" type="text" required
                     [(ngModel)]="data.datasetname" name="datasetname" #datasetname="ngModel">
                 <div class="invalid-feedback"
                     *ngIf="datasetname.errors?.required && (datasetname.dirty || datasetname.touched)">
@@ -87,6 +87,13 @@
                                         <input class="form-control filter" type="text" [hidden]="filter"
                                             placeholder="Size" name="search-size" />
                                     </th>
+                                    <th>No. of rows
+                                        <img class="sort-icon" src="sort_both.png">
+                                        <img class="desc-icon" src="sort_desc.png">
+                                        <img class="asc-icon" src="sort_asc.png">
+                                        <input class="form-control filter" type="text" [hidden]="filter"
+                                            placeholder="No. of rows" name="search-total_rows" />
+                                    </th>
                                     <th class="text-center">Visibility
                                         <img class="sort-icon" src="sort_both.png">
                                         <img class="desc-icon" src="sort_desc.png">
@@ -123,6 +130,8 @@
                                     <td>{{data.dataset_name}}</td>
                                     <td>{{data.file_size}}
                                     </td>
+                                    <td>{{data.total_row_count}}
+                                    </td>
                                     <td class="text-center">
                                         <span style="display:none;">{{data.dataset_visibility}}</span>
 
@@ -138,7 +147,7 @@
                                     </td>
                                     <td class="text-center" style="font-size: 20px;font-weight: 700;">
                                         <a href="javascript:void(0);" [routerLink]="['/datadetail']"
-                                            [state]="{dataset_id: data.dataset_id ,dataset_name:data.dataset_name }"> <i
+                                            [state]="{dataset_id: data.dataset_id ,dataset_name:data.dataset_name,navigate_to:'/dataset' }"> <i
                                                 class=" bx bx-file"></i></a>
 
                                         <a href="javascript:void(0);" id="sa-warning"

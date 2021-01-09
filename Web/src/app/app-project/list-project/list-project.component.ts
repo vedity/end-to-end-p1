@@ -61,8 +61,14 @@ getproject(){
 }
 
 errorHandler(error) {
+  console.log(error);
+  if(error.error_msg)
+  this.toaster.error(error.error_msg, 'Error');
+  else
+  {
     console.log(error);
-    this.toaster.error('Something went wrong','Error');
+  this.toaster.error('Something went wrong', 'Error');
+  }
 }
 
   ngAfterViewInit(): void {
@@ -123,7 +129,6 @@ rendered(){
             error=>Swal.fire('Not Deleted!', 'something went wrong.', 'error')
           )
 
-          // Swal.fire('Deleted!', 'Project has been deleted.', 'success');
         }
       });
     }
@@ -136,9 +141,5 @@ rendered(){
 
   create() {
     this.router.navigate(['create']);
-  }
-
-  getUserNumber(): Observable<any> {
-    return this.http.get<any>("http://127.0.0.1:8000/mlaas/ingest/create_project");
   }
 }

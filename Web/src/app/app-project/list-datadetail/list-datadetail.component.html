@@ -3,8 +3,12 @@
     <div class="row">
         <div class="col-12">
             <div class="page-title-box d-flex align-items-center justify-content-between">
-                <h4 class="mb-0 font-size-18">Data Detail</h4>
+                <h4 class="mb-0 font-size-18">
+                   Data Detail </h4>
+                
                 <div class="page-title-right">
+                  <a href="javascript:void(0)" *ngIf="navigate_to!=''" [routerLink]="navigate_to" class="btn btn-success mr-2">Back</a> 
+
                     <button type="button" (click)="mapping()" class="btn btn-success">Schema Mapping</button>
                     <!-- <ol class="breadcrumb m-0">
                         <li class="breadcrumb-item active">Welcome to Data Detail</li>
@@ -20,8 +24,15 @@
             <div class="card table-card">
                 <div class="card-body">
                     <h4 class="card-title mb-4">{{title}}</h4>
+                    <ngx-skeleton-loader *ngIf="!contentloaded"
+                    count="7"
+                    [animation]="animation"
                     
-                    <div class="main-datatable">
+                    [theme]="theme"
+                  >
+                  </ngx-skeleton-loader>
+
+                    <div class="main-datatable" [hidden]="!contentloaded">
                         <a href="javascript:void()" class="filter-btn" id="filter" (click)="displayfilter()"><i class="dripicons-experiment"></i></a>
                     
                       <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table-responsive row-border hover">
@@ -39,7 +50,7 @@
                             </th>
                           </tr>
                         </thead>
-                        <tbody class="tbody" id="tbody">
+                        <tbody class="tbody" id="tbody" >
                           <!-- <tr *ngFor="let data of finaldisplayvalue">
                             <td *ngFor="let i of data" >
                               {{i.values}}

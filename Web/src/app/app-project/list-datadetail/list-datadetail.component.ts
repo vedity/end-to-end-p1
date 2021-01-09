@@ -17,9 +17,20 @@ export class ListDatadetailComponent implements OnInit {
     datatableElement: DataTableDirective;
     dtOptions: DataTables.Settings = {
 
-    };
-    filter: boolean = true;
 
+    };
+    animation = "progress-dark";
+    theme={
+        'border-radius': '5px',
+        'height': '40px',
+        'background-color':' rgb(34 39 54)',
+        'border': '1px solid #32394e',
+        'animation-duration': '20s'
+    
+      };
+    contentloaded=false;
+    filter: boolean = true;
+    navigate_to="";
     dtTrigger: Subject<any> = new Subject<any>();
     //   @Input() transactions: any;
     keys: any;
@@ -40,6 +51,7 @@ export class ListDatadetailComponent implements OnInit {
         if (params.dataset_name != undefined) {
             this.title = params.dataset_name;
         }
+        this.navigate_to=params.navigate_to;
         this.apiService.getDataDetails(params).subscribe(
             logs => this.successHandler(logs),
             error => this.errorHandler(error)
@@ -72,7 +84,6 @@ export class ListDatadetailComponent implements OnInit {
             });
             $("#tbody").html(tbody);
             this.rendered();
-          
         }
         else
             this.errorHandler(data);
@@ -80,8 +91,14 @@ export class ListDatadetailComponent implements OnInit {
 
     errorHandler(error) {
         console.log(error);
+        if(error.error_msg)
+        this.toaster.error(error.error_msg, 'Error');
+        else
+        {
+          console.log(error);
         this.toaster.error('Something went wrong', 'Error');
-    }
+        }
+      }
 
     mapping() {
         this.router.navigate(['schema/create']);
@@ -109,6 +126,10 @@ export class ListDatadetailComponent implements OnInit {
                     });
                 });
             });
+            setTimeout(() => {
+            this.contentloaded=true;
+            });
+
         }, 100);
 
     }

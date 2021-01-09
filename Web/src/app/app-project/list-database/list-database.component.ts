@@ -60,7 +60,13 @@ export class ListDatabaseComponent implements OnInit {
 
   errorHandler(error) {
     console.log(error);
+    if(error.error_msg)
+    this.toaster.error(error.error_msg, 'Error');
+    else
+    {
+      console.log(error);
     this.toaster.error('Something went wrong', 'Error');
+    }
   }
 
   datasetfile: File;
@@ -79,16 +85,25 @@ export class ListDatabaseComponent implements OnInit {
         error => this.errorHandler(error)
       );
     }
+    else{
+      this.datasetnameuniqueerror = false;
+
+    }
   }
   datasetnameuniqueerror: any = false;
 
   successUniquedatasetynamevalidation(data, target) {
-    console.log(data);
     if (data.response == 'false') {
       // this.errorStatus=false;
       this.datasetnameuniqueerror = true;
-      target.className.replace("ng-valid", " ");
-      target.className = target.className + " ng-dirty ng-invalid";
+      target.className = target.className.replace("ng-valid", " ");
+      target.className = target.className + " ng-invalid";
+    }
+    else {
+      this.datasetnameuniqueerror = false;
+      target.className = target.className.replace("ng-invalid", " ");
+      target.className = target.className + " ng-valid";
+
     }
   }
 
@@ -113,7 +128,7 @@ export class ListDatabaseComponent implements OnInit {
         this.apiService.deletedataset(id).subscribe(
           logs => {
             if (logs.response == "true") {
-              Swal.fire('Deleted!', 'Project has been deleted.', 'success');
+              Swal.fire('Deleted!', 'Dataset has been deleted.', 'success');
               this.getdataset();
               this.rendered();
               setTimeout(() => {
@@ -157,7 +172,8 @@ export class ListDatabaseComponent implements OnInit {
   errorStatus: boolean = true
   save() {
     let savedata = new FormData();
-    savedata.append('user_name', 'admin')//.user_name="admin";
+    var user=JSON.parse(localStorage.getItem("currentUser"));
+    savedata.append('user_name', user.username)//.user_name="admin";
     savedata.append('dataset_name', this.data.datasetname);
     if (this.data.isprivate)
       savedata.append('visibility', "private");
