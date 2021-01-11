@@ -267,7 +267,16 @@ class DBClass:
         return columns
     
     
-    def get_order_clause(self,connection,table_name,sort_type,sort_index):     
+    def get_order_clause(self,connection,table_name,sort_type,sort_index):    
+        """ function used to get ORDER by clause string
+
+        Args:
+            table_name[(String)] : [Name of the table]
+            sort_type[(String)] : [value of the sort type]
+            sort_index[(integer)] : [index of column]
+        Return : 
+            [String,List] : [return the Order clause,list of column name]
+        """ 
         if sort_type == sort_type == "":
             order_clause="ORDER BY index"
         else:
@@ -278,6 +287,15 @@ class DBClass:
         return order_clause,columns_list
     
     def get_global_search_clause(self,columns,global_value):
+        """ function used to create search  string for sql command
+
+        Args:
+            table_name[(String)] : [Name of the table]
+            sort_type[(String)] : [value of the sort type]
+            sort_index[(integer)] : [index of column]
+        Return : 
+            [String] : [return the search pattern string]
+        """ 
         
         empty_string=""
         for i in range(len(columns)):

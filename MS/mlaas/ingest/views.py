@@ -304,7 +304,7 @@ class DataDetailClass(APIView):
                 [json] : [It will return json formatted data of table ]
         """   
 
-        def get(self, request, format=None):
+        def post(self, request, format=None):
                 try:
                         logging.info("data ingestion : DataDetailClass : GET Method : execution start")
                         request_body = json.loads(request.body) #get all the request body parameter and convert into dictonery
