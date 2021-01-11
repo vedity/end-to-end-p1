@@ -146,7 +146,7 @@ class ProjectClass:
         project_name,*_ = row_tuples[0]
         
         logging.debug("data ingestion : ProjectClass : get_project_id : this will excute select query on table name : "+table_name + " based on project name :"+project_name + " and user name :"+user_name)
-        
+        project_name=str(project_name).replace("'","''")
         sql_command = "SELECT project_id from "+ table_name + " Where project_name ='"+ project_name + "' and user_name = '"+ user_name + "'"
         project_df = DBObject.select_records(connection,sql_command)
         project_id = int(project_df['project_id'][0])
@@ -263,6 +263,7 @@ class ProjectClass:
         logging.info("data ingestion : ProjectClass : project_exists : execution start")
         
         try:
+            project_name=str(project_name).replace("'","''")
             #? Checking if Same project_name exists for the same user
             sql_command = f"SELECT PROJECT_ID FROM {table_name} WHERE PROJECT_NAME = '{project_name}' AND USER_NAME = '{user_name}'"
             data=DBObject.select_records(connection,sql_command)
