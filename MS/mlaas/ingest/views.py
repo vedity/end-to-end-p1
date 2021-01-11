@@ -155,15 +155,21 @@ class CreateProjectClass(APIView):
                                 else:
                                         dataset_id = int(dataset_id)
                                                 
-                                
-                                project_Status=IngestionObj.create_project(project_name,project_desc,dataset_name,dataset_visibility,file_name,dataset_id,user_name)    #call create_project method to create project and insert csv data into table
-                                if project_Status != 0:
-                                        status_code,error_msg=get_Status_code(project_Status) # extract the status_code and error_msg from project_Status
-                                        logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+status_code)
-                                        return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
+                                datasetexist_status=IngestionObj.does_dataset_exists(dataset_name,user_name) #get the status if dataset exist or not 
+                                if datasetexist_status != False:
+                                        status_code,error_msg=get_Status_code(datasetexist_status) # extract the status_code and error_msg from datasetexist_status
+                                        logging.info("data ingestion : DatasetExistClass : GET Method : execution stop : status_code :"+status_code)
+                                        return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                                 else:
-                                        logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code : 200")
-                                        return Response({"status_code":"200","status_msg":"Successfully Inserted","response":"true"}) 
+                                        logging.info("data ingestion : DatasetExistClass : GET Method : execution stop : status_code :200")
+                                        project_Status=IngestionObj.create_project(project_name,project_desc,dataset_name,dataset_visibility,file_name,dataset_id,user_name)    #call create_project method to create project and insert csv data into table
+                                        if project_Status != 0:
+                                                status_code,error_msg=get_Status_code(project_Status) # extract the status_code and error_msg from project_Status
+                                                logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+status_code)
+                                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
+                                        else:
+                                                logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code : 200")
+                                                return Response({"status_code":"200","status_msg":"Successfully Inserted","response":"true"}) 
 
                         except Exception as e:
                                 logging.error("data ingestion : CreateProjectClass : POST Method : " + str(e))
