@@ -277,13 +277,13 @@ class DBClass:
         Return : 
             [String,List] : [return the Order clause,list of column name]
         """ 
-        if sort_type == sort_type == "":
+        if sort_type == sort_index == "":  #check if value sort_type and sort_index is empty
             order_clause="ORDER BY index"
         else:
-            col_table_name=table_name.partition(".")[2]
-            columns_list=self.get_column_names(connection,col_table_name)
-            columns_list=columns_list[1:]
-            order_clause=f'ORDER BY "{columns_list[int(sort_index)]}" {sort_type}'
+            col_table_name=table_name.partition(".")[2] #trim from the string and get the table name
+            columns_list=self.get_column_names(connection,col_table_name) #get the column list 
+            columns_list=columns_list[1:] #get all index value accept index 0 
+            order_clause=f'ORDER BY "{columns_list[int(sort_index)]}" {sort_type}' #formated string for order By clause
         return order_clause,columns_list
     
     def get_global_search_clause(self,columns,global_value):
@@ -299,20 +299,32 @@ class DBClass:
         
         empty_string=""
         for i in range(len(columns)):
-            empty_string+="cast(\""+str(columns[i])+"\" as varchar) like '%"+str(global_value)+"%' or " 
-        global_search_clause="("+empty_string[:len(empty_string)-3]+")"
+            empty_string+="cast(\""+str(columns[i])+"\" as varchar) like '%"+str(global_value)+"%' or "   # create the string with Like operator  
+        global_search_clause="("+empty_string[:len(empty_string)-3]+")" # remove the "or" string appended at last 
         return global_search_clause
     
     
     def pagination(self,connection,table_name,start_index,length,sort_type,sort_index,global_search_value):
+        """ function used to create Sql query string
+
+        Args:
+                start_index[(Integer)] : [value of the starting index]
+                length[(Integer)] :[value of length of records to be shown]
+                sort_type[(String)] : [value of sort_type ascending or descending]
+                sort_index[(Integer)] : [index value of the column to perform sorting]
+                global_value[(String)] : [value that need be search in table]
+                dataset_id[(Integer)] : [Id of the dataset table]
+        Return : 
+            [String] : [return the sql query string]
+        """
         try: 
-            end_index = (start_index + length)-1
-            order_clause,columns=self.get_order_clause(connection,table_name,sort_type,sort_index)
-            columns_str = '","'.join(columns)
-            columns_str = "\""+columns_str+"\""
+            end_index = (start_index + length)-1 #get total length
+            order_clause,columns=self.get_order_clause(connection,table_name,sort_type,sort_index) #call get_order_clause function and get order by string and column list
+            columns_str = '","'.join(columns) # create string that join comma(,) with column name list sequential manner
+            columns_str = "\""+columns_str+"\"" 
             global_search_clause=""
             if global_search_value!="":
-                global_search_clause=self.get_global_search_clause(columns,global_search_value) 
+                global_search_clause=self.get_global_search_clause(columns,global_search_value)  #call get_global_search_clause function and get search query string
                 global_search_clause= "and "+global_search_clause
             sql_command = f'SELECT {columns_str} From {table_name} where index between {start_index} and {end_index} {global_search_clause} {order_clause}' 
             return sql_command
@@ -320,38 +332,60 @@ class DBClass:
             return str(exc) 
     
     def is_existing_table(self,connection,table_name,schema):
+        """ function used to check the table is Exists or Not in database
+
+        Args:
+                table_name[(String)] : [Name of the table]
+                schema[String] : [Name of the Schema]
+        Return : 
+            [String] : [return the True if record found else False]
+        """
         sql_command = "SELECT 1 FROM information_schema.tables WHERE table_schema ='"+schema+"' AND table_name = '"+table_name+"'"
-        data=self.select_records(connection,sql_command)
-        if len(data) == 0:
+        data=self.select_records(connection,sql_command) #call select_records which return data if found else None
+        if len(data) == 0: # check whether length of data is empty or not
             return "False"
         else:
             return "True"
     
     def get_row_count(self,connection,dataset_id):
+        """ function used to get the row count of the table
+
+        Args:
+                dataset_id[(Integer)] : [Id of the dataset table]
+        Return : 
+            [Interger] : [return the row count]
+        """
         sql_command = "SELECT no_of_rows FROM mlaas.dataset_tbl WHERE dataset_id ="+str(dataset_id)
-        data=self.select_records(connection,sql_command)
-        no_of_rows=data["no_of_rows"]
+        row_data=self.select_records(connection,sql_command) #get the record for specific dataset id
+        no_of_rows=row_data["no_of_rows"] # get the row count
         return no_of_rows
     
     def get_column_list(self,connection,dataset_id):
+        """ function used to get the column name list of the table
+
+        Args:
+                dataset_id[(Integer)] : [Id of the dataset table]
+        Return : 
+            [List] : [return the list of column name]
+        """
         
         sql_command = 'SELECT dataset_table_name,dataset_visibility,user_name FROM mlaas.dataset_tbl  Where dataset_id='+ str(dataset_id)
-        dataset_df = self.select_records(connection,sql_command) 
+        dataset_df = self.select_records(connection,sql_command) #get the dataframe for that perticular dataset id if present ortherwise None 
         if len(dataset_df) == 0 or dataset_df is None:
             return None
         
-        dataset_records = dataset_df.to_records(index=False)
+        dataset_records = dataset_df.to_records(index=False) # convert dataframe to a NumPy record  
         
-        dataset_table_name,dataset_visibility,user_name = dataset_records[0]
-        dataset_table_name,dataset_visibility,user_name = str(dataset_table_name),str(dataset_visibility),str(user_name)
+        dataset_table_name,dataset_visibility,user_name = dataset_records[0]  #get 0 index records
+        dataset_table_name,dataset_visibility,user_name = str(dataset_table_name),str(dataset_visibility),str(user_name) #convert variable  type into string
          
         if dataset_visibility.lower() == 'public':
             user_name = 'public'
     
         sql_command = 'SELECT * FROM '+ user_name +'.' + dataset_table_name 
         data_details_df = self.select_records(connection,sql_command)
-        data_details_df=data_details_df.to_json(orient='records')
-        data_details_df = json.loads(data_details_df)
+        data_details_df=data_details_df.to_json(orient='records') # transform dataframe based on record
+        data_details_df = json.loads(data_details_df)  #convert data_details_df into dictonery
         return data_details_df
 
 

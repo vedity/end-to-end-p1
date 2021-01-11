@@ -2,9 +2,6 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
-    
-    #URL For User Login
-    path('mlaas/ingest/user/login/',UserLoginClass.as_view()),
 
     #URL For Create Project
     path('mlaas/ingest/create_project/',CreateProjectClass.as_view()),
@@ -38,9 +35,6 @@ urlpatterns = [
 
     #URL For dataset name
     path('mlaas/ingest/datasetname_exist/',DatasetNameClass.as_view()),
-    
-    #URL for menu
-    path('mlaas/menu/',MenuClass.as_view()),
     
     #URL For Data Detail Column List (CSV File)
     path('mlaas/ingest/data_detail/column_list/',DataDetailColumnListClass.as_view()),
