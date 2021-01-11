@@ -24,6 +24,8 @@ import { ErrorInterceptor } from './core/helpers/error.interceptor';
 import { JwtInterceptor } from './core/helpers/jwt.interceptor';
 import { FakeBackendInterceptor } from './core/helpers/fake-backend';
 import {  DataTablesModule } from 'angular-datatables';
+import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
+
 
 import { ToastrModule } from 'ngx-toastr';
 
@@ -70,6 +72,7 @@ export function createTranslateLoader(http: HttpClient): any {
     SharedModule,
     ScrollToModule.forRoot(),
     DataTablesModule,
+    NgxSkeletonLoaderModule.forRoot()
     
   ],
   bootstrap: [AppComponent],

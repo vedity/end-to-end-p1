@@ -15,9 +15,22 @@ export class ListDatadetailComponent implements OnInit {
 
     @ViewChild(DataTableDirective, { static: false })
     datatableElement: DataTableDirective;
-    dtOptions: DataTables.Settings = {};
-    filter: boolean = true;
+    dtOptions: DataTables.Settings = {
 
+
+    };
+    animation = "progress-dark";
+    theme={
+        'border-radius': '5px',
+        'height': '40px',
+        'background-color':' rgb(34 39 54)',
+        'border': '1px solid #32394e',
+        'animation-duration': '20s'
+    
+      };
+    contentloaded=false;
+    filter: boolean = true;
+    navigate_to="";
     dtTrigger: Subject<any> = new Subject<any>();
     //   @Input() transactions: any;
     keys: any;
@@ -26,7 +39,7 @@ export class ListDatadetailComponent implements OnInit {
     finaldisplayvalue: any;
     constructor(public apiService: ProjectApiService, public router: Router, private toaster: ToastrService) { }
     transactions: any;
-title="Data Detail List";
+    title = "Data Detail List";
     ngOnInit() {
         var params = history.state;
         if (params.dataset_id != undefined)
@@ -35,9 +48,10 @@ title="Data Detail List";
             params = localStorage.getItem("params");
             params = JSON.parse(params);
         }
-        if(params.dataset_name!=undefined){
-            this.title=params.dataset_name;
+        if (params.dataset_name != undefined) {
+            this.title = params.dataset_name;
         }
+        this.navigate_to=params.navigate_to;
         this.apiService.getDataDetails(params).subscribe(
             logs => this.successHandler(logs),
             error => this.errorHandler(error)
@@ -53,26 +67,23 @@ title="Data Detail List";
             this.keys = Object.keys(this.transactions[0]);
             this.finaldisplaykey = [];
             this.finaldisplayvalue = [];
+           var tbody="";
             this.transactions.forEach((element, index) => {
                 var obj = element;
                 var valueobj = Object.values(obj);
                 var val = [];
+                tbody=tbody+"<tr>";
                 for (let i = 0; i < this.keys.length; i++) {
                     if (valueobj[i]["display"] == "true") {
                         if (index == 0)
                             this.finaldisplaykey.push(this.keys[i]);
-                        val.push(valueobj[i]["values"]);
-                    }
-                    if (i == this.keys.length - 1) {
-                        this.finaldisplayvalue.push(val);
-                        val = [];
+                            tbody=tbody+"<td>"+valueobj[i]["values"]+"</td>";
                     }
                 }
+                tbody=tbody+"</tr>"
             });
-
-
-
-           // this.toaster.success('Data Load Successfully', 'Success');
+            $("#tbody").html(tbody);
+            this.rendered();
         }
         else
             this.errorHandler(data);
@@ -80,8 +91,14 @@ title="Data Detail List";
 
     errorHandler(error) {
         console.log(error);
+        if(error.error_msg)
+        this.toaster.error(error.error_msg, 'Error');
+        else
+        {
+          console.log(error);
         this.toaster.error('Something went wrong', 'Error');
-    }
+        }
+      }
 
     mapping() {
         this.router.navigate(['schema/create']);
@@ -93,7 +110,7 @@ title="Data Detail List";
         // elem.value += ' NEW';
     }
 
-    ngAfterViewInit(): void {
+    rendered() {
         setTimeout(() => {
             this.dtTrigger.next();
 
@@ -109,7 +126,11 @@ title="Data Detail List";
                     });
                 });
             });
-        }, 800);
+            setTimeout(() => {
+            this.contentloaded=true;
+            });
+
+        }, 100);
 
     }
 

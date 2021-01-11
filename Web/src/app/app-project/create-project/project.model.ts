@@ -4,7 +4,7 @@ export class createproject{
     datasetname:string;
     file:string;
     inputfile:File;
-    datsetid:Int16Array;
+    datsetid:string;
     isprivate:boolean;    
     // visibility:string;
 }
