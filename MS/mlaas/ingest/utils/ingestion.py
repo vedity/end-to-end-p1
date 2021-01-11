@@ -5,7 +5,8 @@
  Vipul Prajapati          07-DEC-2020           1.0           Initial Version. 
  Vipul Prajapati          08-DEC-2020           1.1           Modification for Business Rule. 
  Vipul Prajapati          04-JAN-2021           1.2           File Check Mechanism Added.
- Vipul Prajapati          05-JAN-2021           1.3           no_of_rows field added into dataset tbl.           
+ Vipul Prajapati          05-JAN-2021           1.3           no_of_rows field added into dataset tbl.
+ Abhishek Negi            11-JAN-2021           1.4           Added Save file mechanism
 */
 '''
 import pandas as pd 
@@ -13,6 +14,7 @@ import json
 import re
 import logging
 import traceback
+import datetime
 from common.utils.database import db
 from .project.project_creation import *
 from .dataset import dataset_creation as dt
@@ -20,6 +22,7 @@ from .project import project_creation as pj
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.ingest.ingest_exception import *
 from common.utils.logger_handler import custom_logger as cl
+from django.core.files.storage import FileSystemStorage
 
 user_name = 'admin'
 log_enable = True
@@ -573,6 +576,26 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             return exc.msg
 
    
+    def save_file(self,user_name,dataset_visibility,file,file_path):
+        """this function used to save the file uploaded by the user.file name will be append by the timestamp and 
+        if the dataset_visibility is private save into user specific folder,else save into public folder. 
 
-        
+        Args:
+                user_name[(String)]:[Name of the user]
+                dataset_visibility[(String)]:[Name of Visibility public or private ]
+                file_path[(string)] : [path string where we need to save file]
+        return:
+                [String]:[return name of the file]
+        """
+        logging.info("data ingestion : ingestclass : save_file : execution start")
+        if dataset_visibility.lower()=='private':
+            file_path += user_name
+        else:
+            file_path += dataset_visibility
+        fs = FileSystemStorage(location=file_path)
+        file_name = file.name.split(".")[0]+ str(datetime.datetime.now().strftime('_%Y_%m_%d_%H_%M_%S')) + '.csv'
+        fs.save(file_name, file)
+        logging.info("data ingestion : ingestclass : save_file : execution stop")
+        return file_name
+            
 

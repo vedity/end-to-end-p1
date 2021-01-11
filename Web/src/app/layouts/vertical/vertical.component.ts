@@ -1,6 +1,7 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 
+
 @Component({
   selector: 'app-vertical',
   templateUrl: './vertical.component.html',
@@ -13,9 +14,11 @@ import { Router, NavigationEnd } from '@angular/router';
 export class VerticalComponent implements OnInit, AfterViewInit {
 
   isCondensed = false;
-
+  menuItem:any=[];
   constructor(private router: Router) {
+    
     router.events.forEach((event) => {
+     
       if (event instanceof NavigationEnd) {
         document.body.classList.remove('sidebar-enable');
       }
@@ -29,6 +32,8 @@ export class VerticalComponent implements OnInit, AfterViewInit {
     document.body.classList.remove('sidebar-enable');
     document.body.classList.remove('vertical-collpsed');
     document.body.removeAttribute('data-sidebar-size');
+    
+
   }
 
   isMobile() {

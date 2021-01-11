@@ -56,12 +56,11 @@ def get_json_format(project_dataset_json,column_data):
             final_json_data.append(outer_dict) #final outer_dict dictonery append into final_json_data list
     return final_json_data #return custom format data
 
-
 def get_Status_code(Status):
     """this function used to extract the status_code and status_msg from the string
 
     Args:
-        Status[(String)]:[]
+        Status[(String)]:[ value of status code and error message]
     return:
         [String,String]:[return extracted status_code ,status_msg]
     """

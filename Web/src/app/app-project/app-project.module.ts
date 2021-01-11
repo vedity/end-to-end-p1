@@ -29,6 +29,7 @@ import { CreateProjectComponent } from './create-project/create-project.componen
 import { ManageDatasetComponent } from './manage-dataset/manage-dataset.component';
 import { UploadDatasetComponent } from './upload-dataset/upload-dataset.component';
  import { DataTablesModule } from 'angular-datatables';
+import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   suppressScrollX: true,
   wheelSpeed: 0.3
@@ -54,7 +55,8 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     FullCalendarModule,
     NgbNavModule,
     NgbTooltipModule,
-    PerfectScrollbarModule
+    PerfectScrollbarModule,
+    NgxSkeletonLoaderModule.forRoot()
   ],
   providers: [
     {
