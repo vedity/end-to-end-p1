@@ -12,6 +12,7 @@ import psycopg2
 import psycopg2.extras as extras
 import pandas as pd 
 from sqlalchemy import create_engine
+import logging
 
 class DBClass:
 
@@ -112,6 +113,7 @@ class DBClass:
         
         cols = cols # Get columns name for database insert query.
         tuples = row_tuples # Get record for database insert query.
+        logging.info("cols"+str(cols))
         query = "INSERT INTO %s(%s) VALUES %%s" % (table_name, cols) # Make query
         cursor = connection.cursor() # Open cursor for database.
         try:

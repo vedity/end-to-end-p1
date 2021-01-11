@@ -353,6 +353,27 @@ class DataDetailClass(APIView):
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
 
 
+class DataDetailColumnListClass(APIView):
+         def get(self, request, format=None):
+                try:
+                        logging.info("data ingestion : DataDetailClass : GET Method : execution start")
+                        dataset_id = request.query_params.get('dataset_id') #get dataset_id
+                        dataset_df=IngestionObj.show_data_details(dataset_id) #call show_data_details and it will return dataset detail data in dataframe
+                        if isinstance(dataset_df,str): #check the instance of dataset_df
+                                status_code,error_msg=get_Status_code(dataset_df) # extract the status_code and error_msg  from dataset_df
+                                logging.info("data ingestion : DataDetailClass : GET Method : execution stop : status_code :"+status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        else:
+                                logging.info("data ingestion : DataDetailClass : GET Method : execution stop : status_code :200")
+                                getcol = get_column_name(dataset_df)
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":getcol})  #return Data             
+                except Exception as e:
+                        logging.error("data ingestion : DataDetailClass : GET Method : Exception :" + str(e))
+                        logging.error("data ingestion : DataDetailClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
+
+
+
 class DeleteProjectDetailClass(APIView):
         """
         This class is used to delete project detail.
