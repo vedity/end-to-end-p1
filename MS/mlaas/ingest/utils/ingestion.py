@@ -5,7 +5,8 @@
  Vipul Prajapati          07-DEC-2020           1.0           Initial Version. 
  Vipul Prajapati          08-DEC-2020           1.1           Modification for Business Rule. 
  Vipul Prajapati          04-JAN-2021           1.2           File Check Mechanism Added.
- Vipul Prajapati          05-JAN-2021           1.3           no_of_rows field added into dataset tbl.           
+ Vipul Prajapati          05-JAN-2021           1.3           no_of_rows field added into dataset tbl.
+ Abhishek Negi            11-JAN-2021           1.4           Added Save file mechanism
 */
 '''
 import pandas as pd 
@@ -13,6 +14,7 @@ import json
 import re
 import logging
 import traceback
+import datetime
 from common.utils.database import db
 from .project.project_creation import *
 from .dataset import dataset_creation as dt
@@ -20,6 +22,7 @@ from .project import project_creation as pj
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.ingest.ingest_exception import *
 from common.utils.logger_handler import custom_logger as cl
+from django.core.files.storage import FileSystemStorage
 
 user_name = 'admin'
 log_enable = True
@@ -495,24 +498,62 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                     if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',check_file_name))==True):
                         ALL_SET = True
             else:       
-                # get column names.
-                logging.debug("data ingestion : ingestclass : check_file : rows =="+str(file_data_df.shape[0]) + " columns =="+ str(file_data_df.shape[1]))
-                if file_data_df.shape[0] > 0 and file_data_df.shape[1] >= 2:
-                    All_SET_Count = 0
-                    logging.debug("data ingestion : ingestclass : check_file : column list value =="+str(file_data_df.columns.to_list()))   
-                    col_names = file_data_df.columns.to_list()
-                    for col in col_names:
-                        # it will check column names into the files.
-                        if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',col))==True):
+                #* Below code is updated by Jay
+                #? Solved a bug where the Function is only checking the file_name if the 
+                #? - dataframe is None.
+                
+                #Todo: Below condition will need to be updated when we will be supporting more file formates
+                if str(my_file).lower().endswith(('.csv')):
+                    check_file_name = original_file_name[:-4]
+                    # it will check file name 
+                    if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',check_file_name))==True):
+                        
+                        #? File Name is valid so checking for column names.
+                        # get column names.
+                        logging.debug("data ingestion : ingestclass : check_file : rows =="+str(file_data_df.shape[0]) + " columns =="+ str(file_data_df.shape[1]))
+                        if file_data_df.shape[0] > 0 and file_data_df.shape[1] >= 2:
+                            All_SET_Count = 0
+                            logging.debug("data ingestion : ingestclass : check_file : column list value =="+str(file_data_df.columns.to_list()))   
+                            col_names = file_data_df.columns.to_list()
+                            for col in col_names:
+                                # it will check column names into the files.
+                                if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',col))==True):
+                                    
+                                    All_SET_Count = All_SET_Count + 1
+                                else:
+                                    #All_SET_Count = All_SET_Count - 1  #Vipul
+                                    #* Below 4 lines are added by Jay
+                                    #? Once this loop executes, ALL_SET_Count will never match len(col_names)
+                                    #? No need to run the loop forward if the All_SET_Count is never going to match
+                                    #? - the len(col_names), breaking the loop right here will save time
+                                    break
+                                    
+                            logging.debug("data ingestion : ingestclass : check_file : count value =="+str(All_SET_Count))        
+                            if All_SET_Count == len(col_names):
+                                ALL_SET = True
+                            else: pass
+                        else: pass
+                    else: pass
+                else: pass
+                
+                # logging.debug("data ingestion : ingestclass : check_file : rows =="+str(file_data_df.shape[0]) + " columns =="+ str(file_data_df.shape[1]))
+                # if file_data_df.shape[0] > 0 and file_data_df.shape[1] >= 2:
+                #     All_SET_Count = 0
+                #     logging.debug("data ingestion : ingestclass : check_file : column list value =="+str(file_data_df.columns.to_list()))   
+                #     col_names = file_data_df.columns.to_list()
+                #     for col in col_names:
+                #         # it will check column names into the files.
+                #         if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',col))==True):
                             
-                            All_SET_Count = All_SET_Count + 1
-                        else:
-                            All_SET_Count = All_SET_Count - 1  
-                    logging.debug("data ingestion : ingestclass : check_file : count value =="+str(All_SET_Count))        
-                    if All_SET_Count == len(col_names):
-                        ALL_SET = True
+                #             All_SET_Count = All_SET_Count + 1
+                #         else:
+                #             #All_SET_Count = All_SET_Count - 1
+                #     logging.debug("data ingestion : ingestclass : check_file : count value =="+str(All_SET_Count))        
+                #     if All_SET_Count == len(col_names):
+                #         ALL_SET = True
+                
             if ALL_SET == False:
-                    raise InvalidCsvFormat(500)             
+                raise InvalidCsvFormat(500)             
             logging.debug("data ingestion : ingestclass : check_file : return value =="+str(ALL_SET))        
             logging.info("data ingestion : ingestclass : check_file : execution end")          
             return ALL_SET
@@ -535,6 +576,26 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             return exc.msg
 
    
+    def save_file(self,user_name,dataset_visibility,file,file_path):
+        """this function used to save the file uploaded by the user.file name will be append by the timestamp and 
+        if the dataset_visibility is private save into user specific folder,else save into public folder. 
 
-        
-        
+        Args:
+                user_name[(String)]:[Name of the user]
+                dataset_visibility[(String)]:[Name of Visibility public or private ]
+                file_path[(string)] : [path string where we need to save file]
+        return:
+                [String]:[return name of the file]
+        """
+        logging.info("data ingestion : ingestclass : save_file : execution start")
+        if dataset_visibility.lower()=='private':
+            file_path += user_name
+        else:
+            file_path += dataset_visibility
+        fs = FileSystemStorage(location=file_path)
+        file_name = file.name.split(".")[0]+ str(datetime.datetime.now().strftime('_%Y_%m_%d_%H_%M_%S')) + '.csv'
+        fs.save(file_name, file)
+        logging.info("data ingestion : ingestclass : save_file : execution stop")
+        return file_name
+            
+
