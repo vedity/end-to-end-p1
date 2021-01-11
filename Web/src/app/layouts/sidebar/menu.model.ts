@@ -4,7 +4,7 @@ export interface MenuItem {
     icon?: string;
     link?: string;
     subItems?: any;
-    isTitle?: boolean;
+    isTitle?: string;
     badge?: any;
     parentId?: number;
     isLayout?: boolean;

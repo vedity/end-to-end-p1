@@ -70,6 +70,7 @@
     "ngx-owl-carousel-o": "^3.0.0",
     "ngx-perfect-scrollbar": "^9.0.0",
     "ngx-scrollbar": "^7.2.0",
+    "ngx-skeleton-loader": "^2.6.2",
     "ngx-toastr": "^13.2.0",
     "ngx-ui-switch": "^8.3.0",
     "rxjs": "~6.5.4",

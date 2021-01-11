@@ -14,7 +14,6 @@ export class LayoutApiService {
   constructor( private httpClient : HttpClient) { }
   
   getMenu():Observable<any>{
-    // var params=new HttpParams().set("user_name","admin");
     return this.httpClient.get(this.baseUrl+"menu/",{headers:this.headers});
   }
 
