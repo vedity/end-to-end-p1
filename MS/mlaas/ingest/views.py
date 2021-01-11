@@ -59,6 +59,14 @@ class UserLoginClass(APIView):
                         logging.info("data ingestion : UserLoginClass : GET Method : execution start")
                         user_name = request.query_params.get('user_name')
                         password = request.query_params.get('password')
+                        check_user_auth_tbl=DBObject.is_existing_table(connection,'user_auth_tbl','mlaas')
+                        if check_user_auth_tbl == "False":
+                                user_df=DBObject.read_data('ingest/user_registration_tbl.csv')
+                                status=DBObject.load_csv_into_db(connection_string,'user_auth_tbl',user_df,'mlaas')        
+                        check_menu_tbl=DBObject.is_existing_table(connection,'menu_tbl','mlaas')
+                        if check_menu_tbl == "False":
+                                menu_df=DBObject.read_data('ingest/Menu.csv')
+                                status=DBObject.load_csv_into_db(connection_string,'menu_tbl',menu_df,'mlaas')           
                         user_status = IngestionObj.user_authentication(DBObject,connection,user_name,password)
                         if user_status != True:
                                 status_code,error_msg=get_Status_code(user_status)
@@ -75,8 +83,8 @@ class UserLoginClass(APIView):
         def post(self,request):
                 try:
                         logging.info("data ingestion : UserLoginClass : POST Method : execution start")
-                        user_df=DBObject.read_data('ingest/user_registration_tbl.csv')
-                        status=DBObject.load_csv_into_db(connection_string,'user_auth_tbl',user_df,'mlaas')
+                        user_df=DBObject.read_data('ingest/user_registration_tbl.csv') #read the data from csv file store into dataframe variable
+                        status=DBObject.load_csv_into_db(connection_string,'user_auth_tbl',user_df,'mlaas') # this function will insert the csv data into  user_auth table
                         return Response({"Status":status})
                 except Exception as e:
                         logging.error("data ingestion : UserLoginClass : POST Method : Exception :" + str(e))
@@ -141,14 +149,14 @@ class CreateProjectClass(APIView):
                                         exists_project_status = IngestionObj.does_project_exists(project_name,user_name) 
                                         if exists_project_status == False:
                                                 file=request.FILES['inputfile'] #get inputfile Name
-                                                file_data = pd.read_csv(request.FILES['inputfile'])  
-                                                file_check_status = IngestionObj.check_file(file,file_data)
-                                                if file_check_status !=True:
+                                                file_data = pd.read_csv(request.FILES['inputfile']) # read the csv file and store into dataframe variable
+                                                file_check_status = IngestionObj.check_file(file,file_data) # call check_file function to verify csv file data
+                                                if file_check_status !=True: #if file_check_status not equal to true then file must  be inappropriate
                                                         status_code,error_msg=get_Status_code(file_check_status) # extract the status_code and error_msg from file_check_status
                                                         logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+status_code)
                                                         return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
-                                                file_path="static/server/"
-                                                file_name = IngestionObj.save_file(user_name,dataset_visibility,file,file_path)
+                                                file_path="static/server/" 
+                                                file_name = IngestionObj.save_file(user_name,dataset_visibility,file,file_path) 
                                                  
                                         else:
                                                 return Response({"status_code":"500","error_msg":"Project ALready Exist","response":"false"})
@@ -192,7 +200,7 @@ class CreateDatasetClass(APIView):
                 try:
                         logging.info("data ingestion : CreateDatasetClass : GET Method : execution start")
                         user_name=request.query_params.get('user_name')  #get Username
-                        dataset_df=IngestionObj.show_dataset_details(user_name) #Call show_dataset_details method it will return dataset detail for sepecific user_name
+                        dataset_df=IngestionObj.show_dataset_details(user_name) #Call show_dataset_details method it will return dataset detail for specific user_name
                         if isinstance(dataset_df,str): #check the instance of dataset_df
                                 status_code,error_msg=get_Status_code(dataset_df) # extract the status_code and error_msg from dataset_df
                                 logging.info("data ingestion : CreateDatasetClass : GET Method : execution stop : status_code : "+status_code)
@@ -212,11 +220,11 @@ class CreateDatasetClass(APIView):
                         user_name=str(request.POST.get('user_name'))  #get Username
                         dataset_name=request.POST.get('dataset_name') #get dataset name
                         dataset_visibility= request.POST.get('visibility')
-                        exists_dataset_status=IngestionObj.does_dataset_exists(dataset_name,user_name) 
+                        exists_dataset_status=IngestionObj.does_dataset_exists(dataset_name,user_name) #call does_dataset_exists, check if dataset name exist for that perticular user name return false if not,otherwise true
                         if exists_dataset_status == False:
                                 file=request.FILES['inputfile'] #get inputfile Name
-                                file_data = pd.read_csv(request.FILES['inputfile'])                                
-                                file_check_status = IngestionObj.check_file(file,file_data)
+                                file_data = pd.read_csv(request.FILES['inputfile'])   # read the csv file and store into dataframe variable                             
+                                file_check_status = IngestionObj.check_file(file,file_data)  # call check_file function to verify csv file data
                                 if file_check_status !=True:
                                         status_code,error_msg=get_Status_code(file_check_status) # extract the status_code and error_msg from file_check_status
                                         logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+status_code)
@@ -276,37 +284,66 @@ class CreateDatasetClass(APIView):
 
 class DataDetailClass(APIView):
         """
-        This class is used to Retrive dataset detail Data(CSV Data).
-        It will take url string as mlaas/ingest/data_detail/.
+        this class used to get the fixed length of records with option to search and sorting 
+        It will take url string as mlaas/ingest/user/login/.
 
-        Args  :
-                dataset_id[(Integer)] :[ID of dataset]
-
+        Args : 
+                start_index[(Integer)] : [value of the starting index]
+                length[(Integer)] :[value of length of records to be shown]
+                sort_type[(String)] : [value of sort_type ascending or descending]
+                sort_index[(Integer)] : [index value of the column to perform sorting]
+                global_value[(String)] : [value that need be search in table]
+                dataset_id[(Integer)] : [Id of the dataset table]
         Return : 
-                status_code(500 or 200),
-                error_msg(Error message for retrival failed or successfull),
-                Response(return false if failed otherwise json data)
+                [json] : [It will return json formatted data of table ]
         """   
-        # permission_classes = [IsAuthenticated]
+
         def get(self, request, format=None):
                 try:
                         logging.info("data ingestion : DataDetailClass : GET Method : execution start")
+                        request_body = json.loads(request.body) #get all the request body parameter and convert into dictonery
+                        draw=request_body["draw"]
+                        start_index=request_body["start"] #get the start index
+                        length=request_body["length"] #get the length
+                        order_values=request_body['order'] 
+                        sort_type=order_values[0]['dir'] # get the sort type value(asc or desc)
+                        sort_index=order_values[0]['column'] # get the sort_index column value
+                        global_value=request_body['search']['value']  #get String value for global search
                         dataset_id = request.query_params.get('dataset_id') #get dataset_id
-                        dataset_df=IngestionObj.show_data_details(dataset_id) #call show_data_details and it will return dataset detail data in dataframe
+                        row_count=DBObject.get_row_count(connection,dataset_id) #get the row count
+                        dataset_df=IngestionObj.show_data_details(dataset_id,start_index,length,sort_type,sort_index,global_value) #call show_data_details and it will return dataset detail data in dataframe
                         if isinstance(dataset_df,str): #check the instance of dataset_df
                                 status_code,error_msg=get_Status_code(dataset_df) # extract the status_code and error_msg  from dataset_df
                                 logging.info("data ingestion : DataDetailClass : GET Method : execution stop : status_code :"+status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
                                 logging.info("data ingestion : DataDetailClass : GET Method : execution stop : status_code :200")
-                                json_data=get_json_format(dataset_df,['dataset_id','index']) 
-                                return Response({"status_code":"200","error_msg":"successfull retrival","response":json_data})  #return Data             
+                                # return Response({​​​​​"draw":draw,"recordsTotal":RowCount,"recordsFiltered":RowCount,"data":data}​​​​​)
+                                return Response({"draw":draw,"recordsTotal":row_count,"recordsFiltered":row_count,"data":dataset_df})  #return Data             
                 except Exception as e:
                         logging.error("data ingestion : DataDetailClass : GET Method : Exception :" + str(e))
                         logging.error("data ingestion : DataDetailClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
 
-
+class DataDetailColumnListClass(APIView):
+         def get(self, request, format=None):
+                try:
+                        logging.info("data ingestion : DataDetailClass : GET Method : execution start")
+                        dataset_id = request.query_params.get('dataset_id') #get dataset_id
+                        DBObject=db.DBClass()
+                        dataset_df=DBObject.get_column_list(connection,dataset_id) #call show_data_details and it will return dataset detail data in dataframe
+                        if isinstance(dataset_df,str): #check the instance of dataset_df
+                                status_code,error_msg=get_Status_code(dataset_df) # extract the status_code and error_msg  from dataset_df
+                                logging.info("data ingestion : DataDetailClass : GET Method : execution stop : status_code :"+status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        else:
+                                logging.info("data ingestion : DataDetailClass : GET Method : execution stop : status_code :200")
+                                getcolumn = get_column_name(dataset_df)
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":getcolumn})  #return Data             
+                except Exception as e:
+                        logging.error("data ingestion : DataDetailClass : GET Method : Exception :" + str(e))
+                        logging.error("data ingestion : DataDetailClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
 class DeleteProjectDetailClass(APIView):
         """
         This class is used to delete project detail.
@@ -543,28 +580,4 @@ class MenuClass(APIView):
 			# logging.error("data ingestion : MenuClass : POST Method : "+ traceback.format_exc())
                         return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
-class PaginationClass(APIView):
-        """
-        this class used to get the fixed length of records with option to search and sorting 
-        It will take url string as mlaas/ingest/user/login/.
-
-        Args : 
-                start_index[(Integer)] : [value of the starting index]
-                length[(Integer)] :[value of length of records to be shown]
-                sort_type[(String)] : [value of sort_type ascending or descending]
-                column_index[(Integer)] : [index value of the column to perform sorting]
-                global_index[(String)] : [value that need be search in table]
-                table_name[(String)] : [name of the table]
-        Return : 
-                [json] : [It will return json formatted data of table ]
-        """
-        def post(self,request, format=None):
-                start_index = request.POST.get('index')
-                length = request.POST.get('length')
-                sort_type= request.POST.get('sort_type')
-                column_index= request.POST.get('column_index')
-                global_index = request.POST.get('global_index')
-                table_name = request.POST.get('table_name')
-                DBObject=db.DBClass()
-                data=DBObject.pagination(connection,table_name,global_index,int(start_index),int(length),sort_type,column_index)
-                return Response({"Response":data})
+        

@@ -270,7 +270,7 @@ class DatasetClass:
         logging.info("data ingestion : DatasetClass : show_dataset_details : execution end")
         return data
 
-    def show_data_details(self,DBObject,connection,dataset_id):
+    def show_data_details(self,DBObject,connection,dataset_id,start_index,length,sort_type,sort_index,global_value):
         """This function is used to show details about loaded dataset.
  
         Args:
@@ -305,8 +305,9 @@ class DatasetClass:
         
         
         logging.debug("data ingestion : DatasetClass : show_data_details : this will excute select query on table name : "+ user_name +'.' + dataset_table_name )
-        
-        sql_command = 'SELECT * FROM '+ user_name +'.' + dataset_table_name 
+        dataset_table_name=user_name +'.' + dataset_table_name 
+        sql_command=DBObject.pagination(connection,dataset_table_name,start_index,length,sort_type,sort_index,global_value)
+        # sql_command = 'SELECT * FROM '
         # Get dataframe of loaded csv.
         data_details_df = DBObject.select_records(connection,sql_command) 
         logging.info("data ingestion : DatasetClass : show_data_details : execution end")

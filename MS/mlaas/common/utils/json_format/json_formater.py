@@ -108,4 +108,8 @@ def menu_nested_format(dataset_json1,dataset_json2):
     })
 
     return json_data1
+
+def get_column_name(colname):
+    col_name=list(colname[0].keys())[1:]
+    return col_name
     
