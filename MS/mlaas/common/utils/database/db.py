@@ -8,9 +8,11 @@
  Vipul Prajapati          18-DEC-2020           1.3           Added functionality for create schema.
 */
 '''
+from re import search
 import psycopg2
 import psycopg2.extras as extras
 import pandas as pd 
+import json
 from sqlalchemy import create_engine
 
 class DBClass:
@@ -255,11 +257,45 @@ class DBClass:
             raise GetColumnNamesFailed
         
         return columns
+    
+    def get_column_name(self,connection,table_name):
+        sql_command = f'SELECT * From {table_name}'
+        data_record =self.select_records(connection,sql_command)
+        data_df = data_record.to_json(orient='records')
+        json_data = json.loads(data_df) 
+        column_name = list(json_data[0].keys()) 
+        return column_name
+    
+    def get_pattern_string(self,column_name,global_index):
+        empty_string=""
+        count=0
+        for i in range(len(column_name)):
+                empty_string+=" '"+column_name[i]+"' like '%" +global_index +"%' or"
+        string_patern="("+empty_string[:len(empty_string)-3]+")"
+        return string_patern
+    
+    def pagination(self,connection,table_name,global_index,start_index,length,sort_type,column_index):
+        try:
+            
+                length_index = start_index + length
+                column_name=self.get_column_name(connection,table_name)
+                pattern="'car_ID' like '%"+"a%'"
+                if column_index == sort_type == "false":  
+                    if global_index !="false":    
+                        patter_string=self.get_pattern_string(column_name,global_index)  
+                        sql_command = f'SELECT * From {table_name} where index between {start_index} and {length_index} AND {patter_string}  ORDER BY index'
+                    else:
+                       sql_command = f'SELECT * From {table_name} where index between {start_index} and {length_index} ORDER BY index' 
+                else:
+                    if global_index !="false":
+                        patter_string=self.get_pattern_string(column_name,global_index)
+                        sql_command = f'SELECT * From {table_name} where index between {start_index} and {length_index} ORDER BY "{column_name[int(column_index)]}" {sort_type}'
+                    else:
+                        sql_command = f'SELECT * From {table_name} where index between {start_index} and {length_index} ORDER BY "{column_name[int(column_index)]}" {sort_type}'
 
-
-
-
-
-
-
-     
+                data_record =self.select_records(connection,sql_command)
+                data_df = data_record.to_json(orient='records')
+                json_data = json.loads(data_df)
+                return json_data       
+        except Exception as exc:
+            return str(exc) 

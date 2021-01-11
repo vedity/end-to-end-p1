@@ -144,3 +144,13 @@ class  FileNotFound(Exception):
 
     def __str__(self):
         return (self.msg)
+
+class RecordNotFound(Exception):
+    """  Record Not Found Exception"""
+    def __init__(self,status_code):
+        self.msg = "Records Not Found"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+
+    def __str__(self):
+        return (self.msg)

@@ -1,11 +1,10 @@
-from django.urls import path,include
-from . import views
-from ingest.views import *
+from django.urls import path
+from .views import *
 
 urlpatterns = [
     
     #URL For User Login
-    path('mlaas/ingest/user/login',UserLoginClass.as_view()),
+    path('mlaas/ingest/user/login/',UserLoginClass.as_view()),
 
     #URL For Create Project
     path('mlaas/ingest/create_project/',CreateProjectClass.as_view()),
@@ -27,7 +26,7 @@ urlpatterns = [
     path('mlaas/ingest/delete/data_detail/',DeleteDataDetailClass.as_view()),
 
     #URL For dataset Schema
-    path('mlaas/ingest/dataset_schema/', DatasetSchemaClass.as_view()),
+    # path('mlaas/ingest/dataset_schema/', DatasetSchemaClass.as_view()),
 
     #path('mlaas/logging/',ToggleLogs.as_view()),
 
@@ -42,6 +41,7 @@ urlpatterns = [
     
     #URL for menu
     path('mlaas/menu/',MenuClass.as_view()),
-
+    
+    path('mlaas/page/',PaginationClass.as_view()),
 
 ]
