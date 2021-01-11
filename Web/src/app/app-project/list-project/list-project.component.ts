@@ -22,7 +22,7 @@ export class ListProjectComponent implements OnInit {
   dtTrigger: Subject<any> = new Subject<any>();
   filter: boolean = true;
   constructor(public router: Router, public http: HttpClient, public apiService: ProjectApiService,public toaster:ToastrService) { }
-  transactions: any;
+  transactions: any=[];
   ngOnInit(): void {
    this.getproject();
   }
@@ -37,43 +37,44 @@ getproject(){
   successHandler(data){
     if(data.status_code=="200"){
       this.transactions=data.response;
-     // this.toaster.success( 'Data Load Successfully','Success');
     }
-    else
-        this.errorHandler(data);
+    this.dtTrigger.next();
+        this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
+          dtInstance.columns().every(function () {
+            const that = this;
+            $('input', this.header()).on('keyup change', function () {
+              if (that.search() !== this['value']) {
+                that
+                  .search(this['value'])
+                  .draw();
+              }
+            });
+            $('select', this.header()).on('change', function () {
+              if (that.search() !== this['value']) {
+                that
+                  .search(this['value'])
+                  .draw();
+              }
+            });
+          });
+        });
 }
 
 errorHandler(error) {
+  console.log(error);
+  if(error.error_msg)
+  this.toaster.error(error.error_msg, 'Error');
+  else
+  {
     console.log(error);
-    this.toaster.error('Something went wrong','Error');
+  this.toaster.error('Something went wrong', 'Error');
+  }
 }
 
   ngAfterViewInit(): void {
   //  this.dtTrigger.next();
 
-    setTimeout(() => {
-      this.dtTrigger.next();
-      this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
-        dtInstance.columns().every(function () {
-          const that = this;
-          $('input', this.header()).on('keyup change', function () {
-            if (that.search() !== this['value']) {
-              that
-                .search(this['value'])
-                .draw();
-            }
-          });
-          $('select', this.header()).on('change', function () {
-            if (that.search() !== this['value']) {
-              that
-                .search(this['value'])
-                .draw();
-            }
-          });
-        });
-      });
-   
-    }, 1000);
+  
     }
 
 rendered(){
@@ -128,7 +129,6 @@ rendered(){
             error=>Swal.fire('Not Deleted!', 'something went wrong.', 'error')
           )
 
-          // Swal.fire('Deleted!', 'Project has been deleted.', 'success');
         }
       });
     }
@@ -141,9 +141,5 @@ rendered(){
 
   create() {
     this.router.navigate(['create']);
-  }
-
-  getUserNumber(): Observable<any> {
-    return this.http.get<any>("http://127.0.0.1:8000/mlaas/ingest/create_project");
   }
 }

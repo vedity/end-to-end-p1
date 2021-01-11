@@ -17,19 +17,29 @@
     <div class="col-lg-12">
       <div class="card table-card">
         <div class="card-body">
-          <div class="main-datatable">
+          <div class="main-datatable custom-datatable">
             <a href="javascript:void()" (click)="displayfilter()" class="filter-btn"><i
                 class="dripicons-experiment"></i></a>
             <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table table-centered table-nowrap">
               <thead class="thead-light">
                 <tr>
                   <th>Project Name
-                    <input class="form-control filter" type="text" [hidden]="filter" placeholder="Project Name"
+                    <img class="sort-icon" src="sort_both.png">
+                                        <img class="desc-icon" src="sort_desc.png">
+                                        <img class="asc-icon" src="sort_asc.png">
+                    <input class="form-control filter" max="10" maxlength="10" type="text" [hidden]="filter" placeholder="Project Name"
                       name="search-project-name" />
                   </th>
-                  <th>Datasets<input class="form-control filter" type="text" [hidden]="filter" placeholder="Datasets"
+                  <th>Datasets
+                    <img class="sort-icon" src="sort_both.png">
+                    <img class="desc-icon" src="sort_desc.png">
+                    <img class="asc-icon" src="sort_asc.png">
+                    <input class="form-control filter" type="text" [hidden]="filter" placeholder="Datasets"
                       name="search-dataset-name" /></th>
                   <th class="text-center" >Models
+                    <img class="sort-icon" src="sort_both.png">
+                    <img class="desc-icon" src="sort_desc.png">
+                    <img class="asc-icon" src="sort_asc.png">
                     <!-- <input class="form-control filter" type="text" [hidden]="filter" placeholder="Models"
                       name="search-model-status" /> -->
                     <select [hidden]="filter" class="form-control filter"  name="search-model-status">
@@ -41,6 +51,9 @@
                     </select>
                     </th>
                   <th class="text-center" >Deployment
+                    <img class="sort-icon" src="sort_both.png">
+                    <img class="desc-icon" src="sort_desc.png">
+                    <img class="asc-icon" src="sort_asc.png">
                     <!-- <input class="form-control filter" type="text" [hidden]="filter"
                       placeholder="Deployment" name="search-deployment-status" /> -->
                       <select [hidden]="filter" class="form-control filter"  name="search-deployment-status">
@@ -51,6 +64,9 @@
                       </select>
                     </th>
                   <th>Created
+                    <img class="sort-icon" src="sort_both.png">
+                    <img class="desc-icon" src="sort_desc.png">
+                    <img class="asc-icon" src="sort_asc.png">
                     <!-- <input class="form-control filter" type="text" [hidden]="filter"
                       placeholder="Search last name" name="Created" /> -->
                     </th>
@@ -82,7 +98,7 @@
                   </td>
                   <td>{{data.created_on | date}}</td>
                   <td style="font-size: 20px;font-weight: 700;" class="text-center" >
-                    <a href="javascript:void(0);" [routerLink]="['/datadetail']" [state]="{dataset_id: data.dataset_id ,dataset_name:data.dataset_name}"> <i class=" bx bx-file"></i></a>
+                    <a href="javascript:void(0);" [routerLink]="['/datadetail']" [state]="{dataset_id: data.dataset_id ,dataset_name:data.dataset_name,navigate_to:'/project'}"> <i class=" bx bx-file"></i></a>
                    
                     <a href="javascript:void(0);" id="sa-warning" (click)="confirm(data.project_id)"> <i class=" bx bx-trash"></i></a>
                   </td>
