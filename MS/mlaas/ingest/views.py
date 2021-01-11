@@ -23,7 +23,6 @@ from .utils.schema_creation import *
 from .utils import ingestion
 from .utils.dataset import dataset_creation
 from .utils.ingestion import *
-from .utils.api_functionality import *
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.ingest.ingest_exception import *
 from .utils.project import project_creation
@@ -148,7 +147,8 @@ class CreateProjectClass(APIView):
                                                         status_code,error_msg=get_Status_code(file_check_status) # extract the status_code and error_msg from file_check_status
                                                         logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+status_code)
                                                         return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
-                                                file_name = save_file(user_name,dataset_visibility,file,path="static/server/")
+                                                file_path="static/server/"
+                                                file_name = IngestionObj.save_file(user_name,dataset_visibility,file,file_path)
                                                  
                                         else:
                                                 return Response({"status_code":"500","error_msg":"Project ALready Exist","response":"false"})
@@ -221,9 +221,10 @@ class CreateDatasetClass(APIView):
                                         status_code,error_msg=get_Status_code(file_check_status) # extract the status_code and error_msg from file_check_status
                                         logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+status_code)
                                         return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
-                                file_name = save_file(user_name,dataset_visibility,file,path="static/server/")
+                                file_path="static/server/"
+                                file_name =IngestionObj.save_file(user_name,dataset_visibility,file,file_path)
                         else:
-                                return Response({"status_code":"500","error_msg":"Dataset Name already Exists","response":"false"})
+                                return Response({"status_code":"500","error_msg":"Dataset Name Exists","response":"false"})
 
                         dataset_Status=IngestionObj.create_dataset(dataset_name,file_name,dataset_visibility,user_name) #call create_dataset method to create dataset and insert csv data into table
                         if dataset_Status != 0:

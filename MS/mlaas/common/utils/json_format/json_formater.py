@@ -56,7 +56,18 @@ def get_json_format(project_dataset_json,column_data):
             final_json_data.append(outer_dict) #final outer_dict dictonery append into final_json_data list
     return final_json_data #return custom format data
 
+def get_Status_code(Status):
+    """this function used to extract the status_code and status_msg from the string
 
+    Args:
+        Status[(String)]:[ value of status code and error message]
+    return:
+        [String,String]:[return extracted status_code ,status_msg]
+    """
+    status=Status 
+    status_code=status.split(",")[0].split(":")[1]
+    status_msg=status.split(",")[1].split(":")[1]
+    return status_code,status_msg
 
 def menu_nested_format(dataset_json1,dataset_json2):
     """this function used to create predefind jsonformat where multiple list of dictonery has been passed.
