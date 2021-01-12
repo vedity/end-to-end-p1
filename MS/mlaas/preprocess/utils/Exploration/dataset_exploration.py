@@ -8,8 +8,10 @@
 '''
 
 import pandas as pd
-from MS.mlaas.ingest.utils.database import db
+#from ..ingest.utils.database import db
+from common.utils.database import db
 import numpy as np
+import json
 
 class ExploreClass:
 
@@ -51,8 +53,8 @@ class ExploreClass:
         except TypeError:
             stats_df = data_df.describe(include = 'all')
             return stats_df
-    
-        return stats_df.T
+            
+        return  stats_df
     
     def return_columns(self,DBObject, connection, table_name,*args):
         '''
@@ -72,7 +74,9 @@ class ExploreClass:
         
         sql_command = f"SELECT {cols} FROM {table_name}"
         data_df = DBObject.select_records(connection,sql_command)
+        # data_df = data_df.to_json(orient='records')
+        # data_df = json.loads(data_df)
         
         return data_df
     
-    
+

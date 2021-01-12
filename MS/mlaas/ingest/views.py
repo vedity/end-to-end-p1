@@ -319,8 +319,8 @@ class DataDetailColumnListClass(APIView):
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
                                 logging.info("data ingestion : DataDetailClass : GET Method : execution stop : status_code :200")
-                                getcol = get_column_name(dataset_df)
-                                return Response({"status_code":"200","error_msg":"successfull retrival","response":getcol})  #return Data             
+                                getcolumn = get_column_name(dataset_df)
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":getcolumn})  #return Data             
                 except Exception as e:
                         logging.error("data ingestion : DataDetailClass : GET Method : Exception :" + str(e))
                         logging.error("data ingestion : DataDetailClass : GET Method : " +traceback.format_exc())
