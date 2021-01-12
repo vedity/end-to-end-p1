@@ -1,0 +1,41 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box d-flex align-items-center justify-content-between">
+                <h4 class="mb-0 font-size-18">All Projects</h4>
+                <div class="page-title-right">
+                    <div class="tab-menu">
+                        <ul ngbNav #justifiednav="ngbNav" [(activeId)]="active"  class="nav-pills nav-justified">
+                            <li [ngbNavItem]="1">
+                                <a ngbNavLink>
+                                    <span class=""><i class="fas fa-bars"></i></span>
+                                </a>
+                                <ng-template ngbNavContent>
+
+                                    <app-list-project></app-list-project>
+                                </ng-template>
+                            </li>
+                            <li [ngbNavItem]="2">
+                                <a ngbNavLink>
+                                    <span class=""><i class="fas fa-border-all"></i></span>
+                                </a>
+                                <ng-template ngbNavContent>
+                                    <app-detailview-project></app-detailview-project>
+                                </ng-template>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <button type="button" (click)="create()" class="btn btn-success">Create Project</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div [ngbNavOutlet]="justifiednav"></div>
+        </div>
+    </div>
+
+</div>

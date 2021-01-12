@@ -26,10 +26,11 @@ import { ListDatabaseComponent } from './list-database/list-database.component';
 import { ListDatadetailComponent } from './list-datadetail/list-datadetail.component';
 import { ListProjectComponent } from './list-project/list-project.component';
 import { CreateProjectComponent } from './create-project/create-project.component';
-import { ManageDatasetComponent } from './manage-dataset/manage-dataset.component';
-import { UploadDatasetComponent } from './upload-dataset/upload-dataset.component';
+import { ManageProjectComponent } from './manage-project/manage-project.component';
+import { DetailviewProjectComponent } from './detailview-project/detailview-project.component';
  import { DataTablesModule } from 'angular-datatables';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
+import { DatadetailListComponent } from './datadetail-ist/datadetail-list.component';
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   suppressScrollX: true,
   wheelSpeed: 0.3
@@ -38,7 +39,8 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
 @NgModule({
   declarations: [ListDatabaseComponent,
      ListDatadetailComponent, 
-     ListProjectComponent, CreateProjectComponent, ManageDatasetComponent, UploadDatasetComponent],
+     DatadetailListComponent,
+     ListProjectComponent, CreateProjectComponent, ManageProjectComponent, DetailviewProjectComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -56,7 +58,8 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     NgbNavModule,
     NgbTooltipModule,
     PerfectScrollbarModule,
-    NgxSkeletonLoaderModule.forRoot()
+    NgxSkeletonLoaderModule.forRoot(),
+    NgbNavModule
   ],
   providers: [
     {

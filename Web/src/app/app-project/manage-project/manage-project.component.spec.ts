@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ManageDatasetComponent } from './manage-dataset.component';
+import { ManageProjectComponent } from './manage-project.component';
 
-describe('ManageDatasetComponent', () => {
-  let component: ManageDatasetComponent;
-  let fixture: ComponentFixture<ManageDatasetComponent>;
+describe('ManageProjectComponent', () => {
+  let component: ManageProjectComponent;
+  let fixture: ComponentFixture<ManageProjectComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ManageDatasetComponent ]
+      declarations: [ ManageProjectComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ManageDatasetComponent);
+    fixture = TestBed.createComponent(ManageProjectComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
