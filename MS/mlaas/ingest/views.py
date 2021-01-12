@@ -16,10 +16,7 @@ import pandas as pd
 from database import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
-<<<<<<< HEAD
 from .utils import schema_creation 
-=======
->>>>>>> 0a56cca1345461bb08116d3956fb0ab4ca9b1fd0
 from .utils.schema_creation import *
 from .utils import ingestion
 from .utils.ingestion import *
@@ -210,8 +207,8 @@ class DatasetSchemaClass(APIView):
                 dataset_id=request.query_params.get('dataset_id')
                 schema_obj=SchemaClass(database,user,password,host,port)
                 schema_data=schema_obj.get_dataset_schema(str(dataset_id))
-<<<<<<< HEAD
                 return Response({"Schema":schema_data})    
+   
 
         def put(self,request,format=None):
                 update_schema_data=json.loads(request.body)
@@ -235,30 +232,11 @@ class DatasetSchemaClass(APIView):
                 # col_datatype_list.append(request.POST.get('col_id'))
                 # col_datatype_list.append(request.POST.get('col_name'))
                 # col_datatype_list.append(request.POST.get('col_sal'))
-=======
-                return Response({"Schema":str(schema_data)})    
+                    
 
-        def put(self,request,format=None):
-                update_schema_data=json.loads(request.body)
-
-                user_name=request.POST.get('user_name')
-                dataset_id=request.POST.get('dataset_id')
-
-                column_list=[]
-                col_attribute_list=[]
-                col_datatype_list=[]
-                column_list.append(request.POST.get('id'))
-                column_list.append(request.POST.get('name'))
-                column_list.append(request.POST.get('sal'))
-
-                col_attribute_list.append(request.POST.get('datatype_id'))
-                col_attribute_list.append(request.POST.get('datatype_name'))
-                col_attribute_list.append(request.POST.get('datatype_sal'))
-
-                col_datatype_list.append(request.POST.get('col_id'))
-                col_datatype_list.append(request.POST.get('col_name'))
-                col_datatype_list.append(request.POST.get('col_sal'))
->>>>>>> 0a56cca1345461bb08116d3956fb0ab4ca9b1fd0
+                # col_datatype_list.append(request.POST.get('col_id'))
+                # col_datatype_list.append(request.POST.get('col_name'))
+                # col_datatype_list.append(request.POST.get('col_sal'))
 
                 schema_obj=SchemaClass(database,user,password,host,port)
                 schema_status=schema_obj.update_dataset_schema(column_list,col_datatype_list,col_attribute_list,dataset_id,user_name)
