@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'ingest',
+    'common',
     'motaadmin',
     'corsheaders',
     'rest_framework',

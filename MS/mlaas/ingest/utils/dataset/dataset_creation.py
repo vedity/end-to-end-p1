@@ -238,11 +238,12 @@ class DatasetClass:
         dataset_name,*_ = row_tuples[0]
         
         logging.debug("data ingestion : DatasetClass : get_dataset_id : this will excute select query on table name : "+table_name +" based on dataset name : "+dataset_name + " user name : "+user_name)
-        
+        dataset_name=str(dataset_name).replace("'","''")
         # Prepare select sql command to fetch dataset id from dataset table for particular user.
         sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_name ='"+ dataset_name + "' and user_name = '"+ user_name + "'"
         # Get dataframe of dataset id. 
         dataset_df = DBObject.select_records(connection,sql_command)
+
         # Get dataset id.
         dataset_id = int(dataset_df['dataset_id'][0])
         
@@ -270,7 +271,7 @@ class DatasetClass:
         logging.info("data ingestion : DatasetClass : show_dataset_details : execution end")
         return data
 
-    def show_data_details(self,DBObject,connection,dataset_id):
+    def show_data_details(self,DBObject,connection,dataset_id,start_index,length,sort_type,sort_index,global_value):
         """This function is used to show details about loaded dataset.
  
         Args:
@@ -305,8 +306,9 @@ class DatasetClass:
         
         
         logging.debug("data ingestion : DatasetClass : show_data_details : this will excute select query on table name : "+ user_name +'.' + dataset_table_name )
-        
-        sql_command = 'SELECT * FROM '+ user_name +'.' + dataset_table_name 
+        dataset_table_name=user_name +'.' + dataset_table_name 
+        sql_command=DBObject.pagination(connection,dataset_table_name,start_index,length,sort_type,sort_index,global_value)
+        # sql_command = 'SELECT * FROM '
         # Get dataframe of loaded csv.
         data_details_df = DBObject.select_records(connection,sql_command) 
         logging.info("data ingestion : DatasetClass : show_data_details : execution end")
@@ -442,6 +444,7 @@ class DatasetClass:
         
         #? Checking if the same dataset is there for the same user in the dataset table? If yes, then it will not insert a new row in the table
         try:
+            dataset_name=str(dataset_name).replace("'","''")
             #? There can't be 2 public datasets with same name, because that will create ambiguity in Dropdown list
             #? But there can be 2 private datasets with same name, if users are different
             if dataset_visibility == 'public':

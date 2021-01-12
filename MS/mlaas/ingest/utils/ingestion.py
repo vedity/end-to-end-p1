@@ -197,7 +197,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         logging.info("data ingestion : ingestclass : show_dataset_details : execution end")
         return dataset_df
 
-    def show_data_details(self,dataset_id):
+    def show_data_details(self,dataset_id,start_index,length,sort_type,sort_index,global_value):
         """This function is used to show data details.
            It will show all the columns and rows from uploaded csv files.
 
@@ -214,7 +214,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             if connection == None :
                 raise DatabaseConnectionFailed(500) 
             
-            data_details_df = super(IngestClass,self).show_data_details(DBObject,connection,dataset_id) # Get dataframe of loaded csv.
+            data_details_df = super(IngestClass,self).show_data_details(DBObject,connection,dataset_id,start_index,length,sort_type,sort_index,global_value) # Get dataframe of loaded csv.
             if data_details_df is None :
                 raise DataNotFound(500)
             data_details_df=data_details_df.to_json(orient='records')
@@ -595,7 +595,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         fs = FileSystemStorage(location=file_path)
         file_name = file.name.split(".")[0]+ str(datetime.datetime.now().strftime('_%Y_%m_%d_%H_%M_%S')) + '.csv'
         fs.save(file_name, file)
-        logging.info("data ingestion : ingestclass : save_file : execution stop")
+        logging.info("data ingestion : ingestclass : save_file : execution ")
         return file_name
             
 
