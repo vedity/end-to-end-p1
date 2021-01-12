@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { UploadDatasetComponent } from './upload-dataset.component';
+import { DetailviewProjectComponent } from './detailview-project.component';
 
-describe('UploadDatasetComponent', () => {
-  let component: UploadDatasetComponent;
-  let fixture: ComponentFixture<UploadDatasetComponent>;
+describe('DetailviewProjectComponent', () => {
+  let component: DetailviewProjectComponent;
+  let fixture: ComponentFixture<DetailviewProjectComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ UploadDatasetComponent ]
+      declarations: [ DetailviewProjectComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(UploadDatasetComponent);
+    fixture = TestBed.createComponent(DetailviewProjectComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -18,52 +18,7 @@
         </div>
     </div>
 
+    <app-datadetail-list [columnlist]="columnlist" [title]="title" [dataset_id]="dataset_id"></app-datadetail-list>
 
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="card table-card">
-                <div class="card-body">
-                    <h4 class="card-title mb-4">{{title}}</h4>
-                    <ngx-skeleton-loader *ngIf="!contentloaded"
-                    count="7"
-                    [animation]="animation"
-                    
-                    [theme]="theme"
-                  >
-                  </ngx-skeleton-loader>
-
-                    <div class="main-datatable" [hidden]="!contentloaded">
-                        <a href="javascript:void()" class="filter-btn" id="filter" (click)="displayfilter()"><i class="dripicons-experiment"></i></a>
-                    
-                      <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table-responsive row-border hover">
-                        <thead class="thead-light">
-                          <tr>
-                            <th *ngFor="let key of finaldisplaykey">
-                              {{key}}
-                              <!-- <img class="sort-icon" src="sort_both.png">
-                              <img class="desc-icon" src="sort_desc.png">
-                              <img class="asc-icon" src="sort_asc.png"> -->
-                                <input class="form-control filter" type="text" [hidden]="filter"
-                                placeholder="{{key}}" name="search-{{key}}" />
-                        
-                    
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody class="tbody" id="tbody" >
-                          <!-- <tr *ngFor="let data of finaldisplayvalue">
-                            <td *ngFor="let i of data" >
-                              {{i.values}}
-                            </td>
-                            
-                          </tr> -->
-                        </tbody>
-                      </table>
-                    
-                      
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    
 </div>

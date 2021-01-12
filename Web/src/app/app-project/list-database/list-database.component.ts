@@ -128,7 +128,7 @@ export class ListDatabaseComponent implements OnInit {
         this.apiService.deletedataset(id).subscribe(
           logs => {
             if (logs.response == "true") {
-              Swal.fire('Deleted!', 'Dataset has been deleted.', 'success');
+              Swal.fire('Deleted!', logs.error_msg, 'success');
               this.getdataset();
               this.rendered();
               setTimeout(() => {
@@ -136,9 +136,9 @@ export class ListDatabaseComponent implements OnInit {
               }, 1000);
             }
             else
-              Swal.fire('Not Deleted!', 'Database is in use.', 'error')
+              Swal.fire('Not Deleted!', logs.error_msg, 'error')
           },
-          error => Swal.fire('Not Deleted!', 'something went wrong.', 'error')
+          error => Swal.fire('Not Deleted!', 'Something went wrong', 'error')
         )
 
       }
