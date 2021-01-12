@@ -266,7 +266,7 @@ class DatasetClass:
         
         logging.debug("data ingestion : DatasetClass : show_dataset_details : this will excute select query on table name : "+str(table_name) +" based on user name : "+str(user_name))
         # This command is used to get dataset details from dataset table of database.
-        sql_command = "SELECT * FROM "+ table_name + " WHERE USER_NAME ='"+ user_name +"'"
+        sql_command = "SELECT * FROM "+ table_name + " WHERE (USER_NAME ='"+ user_name +"' OR dataset_visibility='public')"
         data=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         logging.info("data ingestion : DatasetClass : show_dataset_details : execution end")
         return data
