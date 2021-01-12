@@ -9,7 +9,7 @@
 class DatasetCreationFailed(Exception):
     """Dataset Creation Failed Exception"""
     def __init__(self,status_code):
-        self.msg = "Dataset Creation Failed"
+        self.msg = "Dataset creation failed"
         self.status_code = status_code
         self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
 
@@ -19,7 +19,7 @@ class DatasetCreationFailed(Exception):
 class DatasetDeletionFailed(Exception):
     """Dataset Deletion Failed Exception"""
     def __init__(self,status_code):
-        self.msg = "Dataset Deletion Failed"
+        self.msg = "Dataset deletion failed"
         self.status_code = status_code
         self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
 
@@ -29,7 +29,7 @@ class DatasetDeletionFailed(Exception):
 class UserAuthenticationFailed(Exception):
     """User Authentication Failed Exception"""
     def __init__(self,status_code):
-        self.msg = "User Authentication Failed"
+        self.msg = "User authentication failed"
         self.status_code = status_code
         self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
 
@@ -39,7 +39,7 @@ class UserAuthenticationFailed(Exception):
 class ProjectDeletionFailed(Exception):
     """Project Deletion Failed Exception"""
     def __init__(self,status_code):
-        self.msg = "Project Deletion Failed"
+        self.msg = "Project deletion failed"
         self.status_code = status_code
         self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
 
@@ -49,7 +49,7 @@ class ProjectDeletionFailed(Exception):
 class DatasetInUse(Exception):
     """Dataset InUse Failed Exception"""
     def __init__(self,status_code):
-        self.msg = "Dataset  is already IN USE"
+        self.msg = "Dataset  is already in use"
         self.status_code = status_code
         self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
 
@@ -59,7 +59,7 @@ class DatasetInUse(Exception):
 class ProjectCreationFailed(Exception):
     """ Project Creation Failed Exception """
     def __init__(self,status_code):
-        self.msg = "ProjectCreation Failed"
+        self.msg = "Project creation failed"
         self.status_code = status_code
         self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
 
@@ -69,7 +69,7 @@ class ProjectCreationFailed(Exception):
 class  ProjectDataNotFound(Exception):
     """  Project Data Not Found. """
     def __init__(self,status_code):
-        self.msg = " ProjectData Not Found"
+        self.msg = " ProjectData not found"
         self.status_code = status_code
         self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
 
@@ -79,7 +79,7 @@ class  ProjectDataNotFound(Exception):
 class DatasetDataNotFound(Exception):
     """ Dataset Data Not Found Exception """
     def __init__(self,status_code):
-        self.msg = "Dataset Data NotFound"
+        self.msg = "Dataset data not found"
         self.status_code = status_code
         self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
 
@@ -89,7 +89,7 @@ class DatasetDataNotFound(Exception):
 class ProjectAlreadyExist(Exception):
     """ Project Already Exist Exception"""
     def __init__(self,status_code):
-        self.msg = "Project Already Exist"
+        self.msg = "Project already exist"
         self.status_code = status_code
         self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
 
@@ -99,7 +99,7 @@ class ProjectAlreadyExist(Exception):
 class DatasetAlreadyExist(Exception):
     """ Dataset Already Exist Exception"""
     def __init__(self,status_code):
-        self.msg = "Dataset Already Exist"
+        self.msg = "Dataset already exist"
         self.status_code = status_code
         self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
 
@@ -110,7 +110,7 @@ class DatasetAlreadyExist(Exception):
 class LoadCSVDataFailed(Exception):
     """  Load CSV Data Failed"""
     def __init__(self,status_code):
-        self.msg = "Load CSV Data Failed"
+        self.msg = "Load csv data failed"
         self.status_code = status_code
         self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
      
