@@ -401,10 +401,8 @@ class TestFIngestDataDetailClass(unittest.TestCase):
         response = requests.get("http://localhost:8000/mlaas/ingest/create_dataset/",params ={"user_name":"autouser"})
         json_response = response.json()
         datadetail_id = json_response["response"][0]["dataset_id"]
-        print(datadetail_id)
         response = requests.post("http://localhost:8000/mlaas/ingest/data_detail/",data = data ,params ={"dataset_id":datadetail_id},headers = headers)
         json_response = response.json()
-        # print(json_response)
         status = json_response["recordsFiltered"][0]
         self.assertEqual(status,205)
 
