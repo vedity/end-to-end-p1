@@ -243,7 +243,7 @@ class CreateDatasetClass(APIView):
 class DataDetailClass(APIView):
         """
         this class used to get the fixed length of records with option to search and sorting 
-        It will take url string as mlaas/ingest/user/login/.
+        It will take url string as mlaas/ingest/data_detail/.
 
         Args : 
                 start_index[(Integer)] : [value of the starting index]
@@ -256,10 +256,12 @@ class DataDetailClass(APIView):
                 [json] : [It will return json formatted data of table ]
         """   
 
-        def post(self, request, format=None):
+        def post(self, request, format=None ):
                 try:
                         logging.info("data ingestion : DataDetailClass : POST Method : execution start")
-                        request_body = json.loads(request.body) #get all the request body parameter and convert into dictonery
+                        # logging.info("json data"+ str(type(request.data)) )
+                        data = json.dumps(request.data)
+                        request_body = json.loads(data) #get all the request body parameter and convert into dictonery
                         draw=request_body["draw"]
                         start_index=request_body["start"] #get the start index
                         length=request_body["length"] #get the length
@@ -272,10 +274,10 @@ class DataDetailClass(APIView):
                         dataset_df=IngestionObj.show_data_details(dataset_id,start_index,length,sort_type,sort_index,global_value) #call show_data_details and it will return dataset detail data in dataframe
                         if isinstance(dataset_df,str): #check the instance of dataset_df
                                 status_code,error_msg=get_Status_code(dataset_df) # extract the status_code and error_msg  from dataset_df
-                                logging.info("data ingestion : DataDetailClass : GET Method : execution stop : status_code :"+status_code)
+                                logging.info("data ingestion : DataDetailClass : POST Method : execution stop : status_code :"+status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
-                                logging.info("data ingestion : DataDetailClass : GET Method : execution stop : status_code :200")
+                                logging.info("data ingestion : DataDetailClass : POST Method : execution stop : status_code :200")
                                 # return Response({​​​​​"draw":draw,"recordsTotal":RowCount,"recordsFiltered":RowCount,"data":data}​​​​​)
                                 return Response({"draw":draw,"recordsTotal":row_count,"recordsFiltered":row_count,"data":dataset_df})  #return Data             
                 except Exception as e:
