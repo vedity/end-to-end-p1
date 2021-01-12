@@ -16,14 +16,7 @@ import pandas as pd
 from database import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
-<<<<<<< HEAD
 from .utils import schema_creation 
-=======
-<<<<<<< HEAD
-from .utils import schema_creation 
-=======
->>>>>>> 0a56cca1345461bb08116d3956fb0ab4ca9b1fd0
->>>>>>> 0681bf4175140182cb68e73f1be1d750aecb83fc
 from .utils.schema_creation import *
 from .utils import ingestion
 from .utils.ingestion import *
