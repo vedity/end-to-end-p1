@@ -22,7 +22,7 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
         info = {"user_name":"autouser","dataset_name":"auto_dataset_name","visibility":"public"}
         response = requests.post("http://localhost:8000/mlaas/ingest/create_dataset/",data = info,files = file)
         json_response = response.json()
-        print(json_response)
+       
         status = json_response["status_code"]
         self.assertEqual(status,"200")
 
@@ -145,9 +145,13 @@ class TestBIngestGetDataset(unittest.TestCase):
     
         """
         time.sleep(2)
-        response = requests.get("http://localhost:8000/mlaas/ingest/create_dataset/",params = {"user_name":"invalid_auto_user"})
+        response = requests.get("http://localhost:8000/mlaas/ingest/create_dataset/",params = {"user_name":"invalid_auto_user_name"})
         json_response = response.json()
-        status = json_response["status_code"]
+        data = json_response["response"]
+        status = "500"
+        for x in range(len(data)):
+            if data[x]["user_name"] == "invalid_auto_user_name":
+                status ="200"
         self.assertEqual(status,"500")
 
 class TestIngestDatasetDeletion(unittest.TestCase):
@@ -160,13 +164,20 @@ class TestIngestDatasetDeletion(unittest.TestCase):
         """
         files = '../ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
+        info = {"user_name":"autouser_second","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_dataset_name","visibility":"public"}
+        response = requests.post("http://localhost:8000/mlaas/ingest/create_project/",data = info,files = file)
+
+        files = '../ingest/dataset/CarPrice_Assignment.csv'
+        file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser_valid","dataset_name":"auto_dataset_name_valid","visibility":"public"}
         response = requests.post("http://localhost:8000/mlaas/ingest/create_dataset/",data = info,files = file)
         response = requests.get("http://localhost:8000/mlaas/ingest/create_dataset/",params ={"user_name":"autouser_valid"})
         response_data = response.json()
-        json_dataset_id = response_data["response"][0]["dataset_id"]
+        json_dataset_id = response_data["response"][1]["dataset_id"]
+        
         response = requests.delete("http://localhost:8000/mlaas/ingest/delete/dataset_detail/",params ={"user_name":"autouser_valid","dataset_id":json_dataset_id})
         json_response = response.json()
+        
         status = json_response["status_code"]
         self.assertEqual(status,"200")
     
