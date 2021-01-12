@@ -41,8 +41,9 @@ Building & Pushing Docker Images:
     # Building DB Image
     - echo "Building Database Image"
     - cd DB
-    - docker pull $DB_RELEASE_IMAGE || true
-    - docker build --cache-from $DB_RELEASE_IMAGE --tag $DB_IMAGE --tag $DB_RELEASE_IMAGE .
+    #- docker pull $DB_RELEASE_IMAGE || true
+    #- docker build --cache-from $DB_RELEASE_IMAGE --tag $DB_IMAGE --tag $DB_RELEASE_IMAGE .
+    - docker build --tag $DB_IMAGE --tag $DB_RELEASE_IMAGE .
     - docker push $DB_IMAGE
     - docker push $DB_RELEASE_IMAGE
     - cd ..
@@ -50,8 +51,9 @@ Building & Pushing Docker Images:
     # Building Micro-Service Image 
     - echo "Building Micro-Service Image"
     - cd MS
-    - docker pull $MS_RELEASE_IMAGE || true
-    - docker build --cache-from $MS_RELEASE_IMAGE --tag $MS_IMAGE --tag $MS_RELEASE_IMAGE .
+    #- docker pull $MS_RELEASE_IMAGE || true
+    #- docker build --cache-from $MS_RELEASE_IMAGE --tag $MS_IMAGE --tag $MS_RELEASE_IMAGE .
+    - docker build --tag $MS_IMAGE --tag $MS_RELEASE_IMAGE .
     - docker push $MS_IMAGE
     - docker push $MS_RELEASE_IMAGE
     - cd ..
@@ -59,8 +61,9 @@ Building & Pushing Docker Images:
     # Building Web Image
     - echo "Building Web Image"
     - cd Web
-    - docker pull $WEB_RELEASE_IMAGE || true
-    - docker build --cache-from $WEB_RELEASE_IMAGE --tag $WEB_IMAGE --tag $WEB_RELEASE_IMAGE .
+    #- docker pull $WEB_RELEASE_IMAGE || true
+    #- docker build --cache-from $WEB_RELEASE_IMAGE --tag $WEB_IMAGE --tag $WEB_RELEASE_IMAGE .
+    - docker build --tag $WEB_IMAGE --tag $WEB_RELEASE_IMAGE .
     - docker push $WEB_IMAGE
     - docker push $WEB_RELEASE_IMAGE
     - cd ..
