@@ -9,23 +9,18 @@
 */
 '''
 
-import os
 import json
 import logging
-import datetime
 import traceback
 import pandas as pd
 from database import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.core.files.storage import FileSystemStorage
 from .utils.schema_creation import *
 from .utils import ingestion
-from .utils.dataset import dataset_creation
 from .utils.ingestion import *
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.ingest.ingest_exception import *
-from .utils.project import project_creation
 from common.utils.logger_handler import custom_logger as cl
 from common.utils.exception_handler.python_exception import *
 from common.utils.json_format.json_formater import *
@@ -206,36 +201,36 @@ class CreateDatasetClass(APIView):
 			# logging.error("data ingestion : CreateDatasetClass : POST Method : "+traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
                   
-# class DatasetSchemaClass(APIView):
-#         def get(self,request,format=None):
-#                 dataset_id=request.query_params.get('dataset_id')
-#                 schema_obj=SchemaClass(database,user,password,host,port)
-#                 schema_data=schema_obj.get_dataset_schema(str(dataset_id))
-#                 return Response({"Schema":str(schema_data)})    
+class DatasetSchemaClass(APIView):
+        def get(self,request,format=None):
+                dataset_id=request.query_params.get('dataset_id')
+                schema_obj=SchemaClass(database,user,password,host,port)
+                schema_data=schema_obj.get_dataset_schema(str(dataset_id))
+                return Response({"Schema":str(schema_data)})    
 
-#         def put(self,request,format=None):
-#                 update_schema_data=json.loads(request.body)
+        def put(self,request,format=None):
+                update_schema_data=json.loads(request.body)
 
-                # user_name=request.POST.get('user_name')
-                # dataset_id=request.POST.get('dataset_id')
+                user_name=request.POST.get('user_name')
+                dataset_id=request.POST.get('dataset_id')
 
-                # column_list=[]
-                # col_attribute_list=[]
-                # col_datatype_list=[]
-                # column_list.append(request.POST.get('id'))
-                # column_list.append(request.POST.get('name'))
-                # column_list.append(request.POST.get('sal'))
+                column_list=[]
+                col_attribute_list=[]
+                col_datatype_list=[]
+                column_list.append(request.POST.get('id'))
+                column_list.append(request.POST.get('name'))
+                column_list.append(request.POST.get('sal'))
 
-                # col_attribute_list.append(request.POST.get('datatype_id'))
-                # col_attribute_list.append(request.POST.get('datatype_name'))
-                # col_attribute_list.append(request.POST.get('datatype_sal'))
+                col_attribute_list.append(request.POST.get('datatype_id'))
+                col_attribute_list.append(request.POST.get('datatype_name'))
+                col_attribute_list.append(request.POST.get('datatype_sal'))
 
-                # col_datatype_list.append(request.POST.get('col_id'))
-                # col_datatype_list.append(request.POST.get('col_name'))
-                # col_datatype_list.append(request.POST.get('col_sal'))
+                col_datatype_list.append(request.POST.get('col_id'))
+                col_datatype_list.append(request.POST.get('col_name'))
+                col_datatype_list.append(request.POST.get('col_sal'))
 
-                # schema_obj=SchemaClass(database,user,password,host,port)
-                # schema_status=schema_obj.update_dataset_schema(column_list,col_datatype_list,col_attribute_list,dataset_id,user_name)
+                schema_obj=SchemaClass(database,user,password,host,port)
+                schema_status=schema_obj.update_dataset_schema(column_list,col_datatype_list,col_attribute_list,dataset_id,user_name)
 
                 return Response({"Status":update_schema_data})           
                 
