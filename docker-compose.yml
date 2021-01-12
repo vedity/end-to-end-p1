@@ -24,20 +24,17 @@ services:
     build: ./DB
     hostname: postgresql
     volumes:
-      #- postgres_data:/var/lib/postgresql/data/
-      - "./DB:/docker-entrypoint-initdb.d"
+      - postgres_data:/var/lib/postgresql/data/
+      #- "./DB:/docker-entrypoint-initdb.d"
     ports:
       - "5432:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
       
-# volumes:
-#   postgres_data:
-#   app:
+volumes:
+  postgres_data:
   
-
-
 networks:
   backend:
     driver: "bridge"
