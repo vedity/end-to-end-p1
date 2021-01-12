@@ -118,6 +118,7 @@ def get_column_name(column_name):
         }
         json_list.append(temp_dict)
     return json_list
+<<<<<<< HEAD
 
 def get_schema_format(column_name,column_datatype):
     json_data = []
@@ -130,4 +131,6 @@ def get_schema_format(column_name,column_datatype):
         }
         json_data.append(temp_dict)
     return json_data
+=======
+>>>>>>> 0a56cca1345461bb08116d3956fb0ab4ca9b1fd0
     
