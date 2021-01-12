@@ -9,23 +9,22 @@
 */
 '''
 
-import os
 import json
 import logging
-import datetime
 import traceback
 import pandas as pd
 from database import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.core.files.storage import FileSystemStorage
+<<<<<<< HEAD
+from .utils import schema_creation 
+=======
+>>>>>>> 0a56cca1345461bb08116d3956fb0ab4ca9b1fd0
 from .utils.schema_creation import *
 from .utils import ingestion
-from .utils.dataset import dataset_creation
 from .utils.ingestion import *
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.ingest.ingest_exception import *
-from .utils.project import project_creation
 from common.utils.logger_handler import custom_logger as cl
 from common.utils.exception_handler.python_exception import *
 from common.utils.json_format.json_formater import *
@@ -111,7 +110,7 @@ class CreateProjectClass(APIView):
                                                 file_name = IngestionObj.save_file(user_name,dataset_visibility,file,file_path) 
                                                  
                                         else:
-                                                return Response({"status_code":"500","error_msg":"Project ALready Exist","response":"false"})
+                                                return Response({"status_code":"500","error_msg":"Project already exist","response":"false"})
                                 else:
                                         dataset_id = int(dataset_id)
                                                 
@@ -190,7 +189,7 @@ class CreateDatasetClass(APIView):
                                 file_path="static/server/"
                                 file_name =IngestionObj.save_file(user_name,dataset_visibility,file,file_path)
                         else:
-                                return Response({"status_code":"500","error_msg":"Dataset Name Exists","response":"false"})
+                                return Response({"status_code":"500","error_msg":"Dataset name exists","response":"false"})
 
                         dataset_Status=IngestionObj.create_dataset(dataset_name,file_name,dataset_visibility,user_name) #call create_dataset method to create dataset and insert csv data into table
                         if dataset_Status != 0:
@@ -206,19 +205,22 @@ class CreateDatasetClass(APIView):
 			# logging.error("data ingestion : CreateDatasetClass : POST Method : "+traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
                   
-# class DatasetSchemaClass(APIView):
-#         def get(self,request,format=None):
-#                 dataset_id=request.query_params.get('dataset_id')
-#                 schema_obj=SchemaClass(database,user,password,host,port)
-#                 schema_data=schema_obj.get_dataset_schema(str(dataset_id))
-#                 return Response({"Schema":str(schema_data)})    
+class DatasetSchemaClass(APIView):
+        def get(self,request,format=None):
+                dataset_id=request.query_params.get('dataset_id')
+                schema_obj=SchemaClass(database,user,password,host,port)
+                schema_data=schema_obj.get_dataset_schema(str(dataset_id))
+<<<<<<< HEAD
+                return Response({"Schema":schema_data})    
 
-#         def put(self,request,format=None):
-#                 update_schema_data=json.loads(request.body)
+        def put(self,request,format=None):
+                update_schema_data=json.loads(request.body)
+                user_name=request.POST.get('user_name')
+                dataset_id=request.POST.get('dataset_id')
 
-                # user_name=request.POST.get('user_name')
-                # dataset_id=request.POST.get('dataset_id')
-
+                # column_list 
+                # col_attribute_list
+                # col_datatype_list
                 # column_list=[]
                 # col_attribute_list=[]
                 # col_datatype_list=[]
@@ -233,9 +235,33 @@ class CreateDatasetClass(APIView):
                 # col_datatype_list.append(request.POST.get('col_id'))
                 # col_datatype_list.append(request.POST.get('col_name'))
                 # col_datatype_list.append(request.POST.get('col_sal'))
+=======
+                return Response({"Schema":str(schema_data)})    
 
-                # schema_obj=SchemaClass(database,user,password,host,port)
-                # schema_status=schema_obj.update_dataset_schema(column_list,col_datatype_list,col_attribute_list,dataset_id,user_name)
+        def put(self,request,format=None):
+                update_schema_data=json.loads(request.body)
+
+                user_name=request.POST.get('user_name')
+                dataset_id=request.POST.get('dataset_id')
+
+                column_list=[]
+                col_attribute_list=[]
+                col_datatype_list=[]
+                column_list.append(request.POST.get('id'))
+                column_list.append(request.POST.get('name'))
+                column_list.append(request.POST.get('sal'))
+
+                col_attribute_list.append(request.POST.get('datatype_id'))
+                col_attribute_list.append(request.POST.get('datatype_name'))
+                col_attribute_list.append(request.POST.get('datatype_sal'))
+
+                col_datatype_list.append(request.POST.get('col_id'))
+                col_datatype_list.append(request.POST.get('col_name'))
+                col_datatype_list.append(request.POST.get('col_sal'))
+>>>>>>> 0a56cca1345461bb08116d3956fb0ab4ca9b1fd0
+
+                schema_obj=SchemaClass(database,user,password,host,port)
+                schema_status=schema_obj.update_dataset_schema(column_list,col_datatype_list,col_attribute_list,dataset_id,user_name)
 
                 return Response({"Status":update_schema_data})           
                 
@@ -243,7 +269,7 @@ class CreateDatasetClass(APIView):
 class DataDetailClass(APIView):
         """
         this class used to get the fixed length of records with option to search and sorting 
-        It will take url string as mlaas/ingest/user/login/.
+        It will take url string as mlaas/ingest/data_detail/.
 
         Args : 
                 start_index[(Integer)] : [value of the starting index]
@@ -256,10 +282,12 @@ class DataDetailClass(APIView):
                 [json] : [It will return json formatted data of table ]
         """   
 
-        def post(self, request, format=None):
+        def post(self, request, format=None ):
                 try:
                         logging.info("data ingestion : DataDetailClass : POST Method : execution start")
-                        request_body = json.loads(request.body) #get all the request body parameter and convert into dictonery
+                        # logging.info("json data"+ str(type(request.data)) )
+                        data = json.dumps(request.data)
+                        request_body = json.loads(data) #get all the request body parameter and convert into dictonery
                         draw=request_body["draw"]
                         start_index=request_body["start"] #get the start index
                         length=request_body["length"] #get the length
@@ -272,10 +300,10 @@ class DataDetailClass(APIView):
                         dataset_df=IngestionObj.show_data_details(dataset_id,start_index,length,sort_type,sort_index,global_value) #call show_data_details and it will return dataset detail data in dataframe
                         if isinstance(dataset_df,str): #check the instance of dataset_df
                                 status_code,error_msg=get_Status_code(dataset_df) # extract the status_code and error_msg  from dataset_df
-                                logging.info("data ingestion : DataDetailClass : GET Method : execution stop : status_code :"+status_code)
+                                logging.info("data ingestion : DataDetailClass : POST Method : execution stop : status_code :"+status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
-                                logging.info("data ingestion : DataDetailClass : GET Method : execution stop : status_code :200")
+                                logging.info("data ingestion : DataDetailClass : POST Method : execution stop : status_code :200")
                                 # return Response({​​​​​"draw":draw,"recordsTotal":RowCount,"recordsFiltered":RowCount,"data":data}​​​​​)
                                 return Response({"draw":draw,"recordsTotal":row_count,"recordsFiltered":row_count,"data":dataset_df})  #return Data             
                 except Exception as e:
@@ -329,7 +357,7 @@ class DeleteProjectDetailClass(APIView):
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                         else:
                                 logging.info("data ingestion : DeleteProjectDetailClass : DELETE Method : execution stop : status_code :200")
-                                return Response({"status_code":"200","error_msg":"Successfully Delete","response":"true"})
+                                return Response({"status_code":"200","error_msg":"Successfully delete","response":"true"})
                 except Exception as e:
                         logging.error("data ingestion : DeleteProjectDetailClass : DELETE Method :  Exception : " + str(e))
                         logging.error("data ingestion : DeleteProjectDetailClass : DELETE Method : " +traceback.format_exc())
@@ -362,7 +390,7 @@ class DeleteDatasetDetailClass(APIView):
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                         else:
                                 logging.info("data ingestion : DeleteDatasetDetailClass : DELETE Method : execution stop : status_code :200")
-                                return Response({"status_code":"200","error_msg":"Successfully Deleted","response":"true"})
+                                return Response({"status_code":"200","error_msg":"Successfully deleted","response":"true"})
 
                 except Exception as e:
                         logging.error("data ingestion : DeleteDatasetDetailClass : DELETE Method : Exception : " + str(e))
@@ -396,7 +424,7 @@ class DeleteDataDetailClass(APIView):
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                         else:
                                 logging.info("data ingestion : DeleteDataDetailClass : DELETE Method : execution stop : status_code :200")
-                                return Response({"status_code":"200","error_msg":"Successfully Deleted","response":"true"})
+                                return Response({"status_code":"200","error_msg":"Successfully deleted","response":"true"})
                 except Exception as e:
                         logging.error("data ingestion : DeleteDataDetailClass : DELETE Method : Exception :" + str(e))
                         logging.error("data ingestion : DeleteDataDetailClass : DELETE Method : " +traceback.format_exc())

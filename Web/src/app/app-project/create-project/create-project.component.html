@@ -21,10 +21,10 @@
                     <input class="form-control" (change)="checkuniqueprojectname($event)" required type="text" [(ngModel)]="data.projectname" name="projectname"
                         #projectname="ngModel" maxlength="200">
                     <div class="invalid-feedback" *ngIf="projectname.errors?.required && (projectname.dirty || projectname.touched)">
-                        <span *ngIf="projectname.errors?.required && (projectname.dirty || projectname.touched)" class="text-red">please enter project name.</span>
+                        <span *ngIf="projectname.errors?.required && (projectname.dirty || projectname.touched)" class="text-red">Please enter project name</span>
                     </div>
                     <div class="invalid-feedback" *ngIf="projectnameuniqueerror">
-                        <span class="text-red">project name already exist.</span>
+                        <span class="text-red">Project name already exist</span>
                     </div>
                 </div>
                 <div class="form-group">
@@ -33,7 +33,7 @@
                     <textarea class="form-control" maxlength="500" [(ngModel)]="data.description" name="description"
                         #description="ngModel" required ></textarea>
                         <div class="invalid-feedback" *ngIf="description.errors?.required && (description.dirty || description.touched)">
-                            <span *ngIf="description.errors?.required && (description.dirty || description.touched)" class="text-red">please enter description.</span>
+                            <span *ngIf="description.errors?.required && (description.dirty || description.touched)" class="text-red">Please enter description</span>
                             
                         </div>
                 </div>
@@ -44,10 +44,10 @@
                         <input class="form-control" maxlength="200" [disabled]="selectchangedisablevalidation" (change)="checkuniquedatasetname($event)" [(ngModel)]="data.datasetname" name="datasetname"
                             #datasetname="ngModel"  type="text" >
                             <div class="invalid-feedback" *ngIf="datasetname.errors?.required && (datasetname.dirty || datasetname.touched)">
-                                <span *ngIf="datasetname.errors?.required && (datasetname.dirty || datasetname.touched)" class="text-red">please enter dataset name.</span>
+                                <span *ngIf="datasetname.errors?.required && (datasetname.dirty || datasetname.touched)" class="text-red">Please enter dataset name</span>
                             </div>
                             <div class="invalid-feedback" *ngIf="datasetnameuniqueerror">
-                                <span class="text-red">dataset name already exist.</span>
+                                <span class="text-red">Dataset name already exist</span>
                             </div>
                     </div>
                     <div class="col-md-6">
@@ -57,7 +57,7 @@
                             <input type="file" (change)="handleFileInput($event.target.files)" [(ngModel)]="data.file" accept=".csv" name="file"
                             [disabled]="selectchangedisablevalidation"   #file="ngModel" class="custom-file-input" >
                             <div class="invalid-feedback" *ngIf="file.errors?.required && (file.dirty || file.touched)">
-                                <span *ngIf="file.errors?.required && (file.dirty || file.touched)" class="text-red">please select .csv file.</span>
+                                <span *ngIf="file.errors?.required && (file.dirty || file.touched)" class="text-red">Please select .csv file</span>
                             </div>
                         </div>
                        

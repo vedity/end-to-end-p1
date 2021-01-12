@@ -7,7 +7,16 @@
 */
 '''
 import pandas as pd 
+import logging
+import json
 from common.utils.database import db
+from common.utils.logger_handler import custom_logger as cl
+from common.utils.json_format.json_formater import *
+user_name = 'admin'
+log_enable = True
+LogObject = cl.LogClass(user_name,log_enable)
+LogObject.log_setting()
+logger = logging.getLogger('view')
 
 class SchemaClass:
     
@@ -44,23 +53,33 @@ class SchemaClass:
         return table_name,cols,schema
     
     def get_dataset_schema(self,dataset_id):
-        DBObject = db.DBClass()
+        """
+        this function used to get the column name and datatype of the table
+
+        Args :
+                dataset_id[(Integer)] : [Id of the dataset table]
+        Return : 
+                [List] : [return the list of dictonery]
+        """
+        DBObject = db.DBClass() # create object for database class
         connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port)
-         
         sql_command = "SELECT dataset_name,dataset_table_name,user_name from mlaas.dataset_tbl Where dataset_id =" + str(dataset_id)
-        dataset_df = DBObject.select_records(connection,sql_command)
-        
-        dataset_records = dataset_df.to_records(index=False)
+        dataset_df = DBObject.select_records(connection,sql_command)  # execute the sql query and return data if found else return None
+        dataset_records = dataset_df.to_records(index=False) # convert dataframe to a NumPy record  
         dataset_name,dataset_table_name,user_name = dataset_records[0]
         dataset_name,dataset_table_name,user_name = str(dataset_name),str(dataset_table_name),str(user_name)
+
+        table_name = dataset_table_name
+
+        #sql query string to get the INFORMATION_SCHEMA for the table and fetch column_name and data type
+        sql_command = "SELECT column_name,data_type FROM INFORMATION_SCHEMA.COLUMNS WHERE "
+        sql_command += "table_name = '{}' order by ordinal_position;".format( table_name )  
         
-        sql_command = "SELECT * From "+ user_name +"."+ dataset_table_name
-        data_details_df = DBObject.select_records(connection,sql_command)
-        data_details_df = data_details_df.drop(['index'], axis=1)
-        # column_list = data_details_df.columns.to_list()
-        col_and_dtype_dict = data_details_df.dtypes.to_dict()
-        
-        return col_and_dtype_dict
+        data_details_df = DBObject.select_records(connection,sql_command) #execute the sql query
+        column_name = data_details_df["column_name"].tolist() # covert the dataframe into list
+        column_data_type = data_details_df["data_type"].tolist() # covert the dataframe into list
+        schema_data = get_schema_format(column_name,column_data_type) #call get_schema_format to get json format data
+        return schema_data
     
     def map_dataset_schema(self,DBObject,connection,user_name,dataset_id,column_lst,data_type_lst,column_attribute_lst):
         prev_cols_lst = []

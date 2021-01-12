@@ -18,3 +18,20 @@
 //     box-shadow: none;
 //   }
 
+.sorting_asc{
+    .sort-icon{display:none;}
+    .desc-icon{display:none;}
+ }
+ .sorting_desc{
+     .sort-icon{display:none;}
+     .asc-icon{display:none;}
+ }
+ .sorting{
+     .desc-icon{display:none;}
+     .asc-icon{display:none;}
+ }
+ table{
+     th{background-image:none;}
+ }
+ 
+ 

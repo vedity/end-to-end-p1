@@ -109,7 +109,28 @@ def menu_nested_format(dataset_json1,dataset_json2):
 
     return json_data1
 
-def get_column_name(colname):
-    col_name=list(colname[0].keys())[1:]
-    return col_name
+def get_column_name(column_name):
+    json_list=[]
+    column_list = list(column_name[0].keys())[1:]
+    for i in column_list:
+        temp_dict ={
+            "data" : i
+        }
+        json_list.append(temp_dict)
+    return json_list
+<<<<<<< HEAD
+
+def get_schema_format(column_name,column_datatype):
+    json_data = []
+    for x in range(len(column_name)):
+        temp_dict = {
+            "column_name": column_name[x],
+            "data_type": column_datatype[x],
+            "column_attribute": "",
+            "change_column_name":"",
+        }
+        json_data.append(temp_dict)
+    return json_data
+=======
+>>>>>>> 0a56cca1345461bb08116d3956fb0ab4ca9b1fd0
     

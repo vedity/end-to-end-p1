@@ -2,7 +2,7 @@
 /*CHANGE HISTORY
 
 --CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
-Abhishek Negi           11-JAN-2020           1.0        
+Abhishek Negi           11-JAN-2020           1.0       Initial Version
 
  ****************************************************************************************/
 
@@ -24,12 +24,9 @@ from .utils.json_format.json_formater import *
 
 user_name = 'admin'
 log_enable = True
-
 LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
-
 logger = logging.getLogger('view')
-
 DBObject=db.DBClass()     #Get DBClass object
 connection,connection_string=DBObject.database_connection(database,user,password,host,port)      #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 IngestionObj=ingestion.IngestClass(database,user,password,host,port)

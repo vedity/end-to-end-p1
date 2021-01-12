@@ -356,6 +356,7 @@ class DBClass:
             [Interger] : [return the row count]
         """
         sql_command = "SELECT no_of_rows FROM mlaas.dataset_tbl WHERE dataset_id ="+str(dataset_id)
+        logger.info("sql_command"+ sql_command)
         row_data=self.select_records(connection,sql_command) #get the record for specific dataset id
         no_of_rows=row_data["no_of_rows"] # get the row count
         return no_of_rows
