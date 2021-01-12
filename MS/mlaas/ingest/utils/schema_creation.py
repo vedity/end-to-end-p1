@@ -7,7 +7,14 @@
 */
 '''
 import pandas as pd 
+import logging
 from common.utils.database import db
+from common.utils.logger_handler import custom_logger as cl
+user_name = 'admin'
+log_enable = True
+LogObject = cl.LogClass(user_name,log_enable)
+LogObject.log_setting()
+logger = logging.getLogger('view')
 
 class SchemaClass:
     
@@ -49,7 +56,6 @@ class SchemaClass:
          
         sql_command = "SELECT dataset_name,dataset_table_name,user_name from mlaas.dataset_tbl Where dataset_id =" + str(dataset_id)
         dataset_df = DBObject.select_records(connection,sql_command)
-        
         dataset_records = dataset_df.to_records(index=False)
         dataset_name,dataset_table_name,user_name = dataset_records[0]
         dataset_name,dataset_table_name,user_name = str(dataset_name),str(dataset_table_name),str(user_name)
@@ -58,9 +64,9 @@ class SchemaClass:
         data_details_df = DBObject.select_records(connection,sql_command)
         data_details_df = data_details_df.drop(['index'], axis=1)
         # column_list = data_details_df.columns.to_list()
-        col_and_dtype_dict = data_details_df.dtypes.to_dict()
-        
-        return col_and_dtype_dict
+        # col_and_dtype_dict = data_details_df.dtypes.to_dict()
+        # column_name,data_type = data_details_df.head(0).appy(lambda x,y :)
+        return 
     
     def map_dataset_schema(self,DBObject,connection,user_name,dataset_id,column_lst,data_type_lst,column_attribute_lst):
         prev_cols_lst = []
