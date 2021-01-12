@@ -130,4 +130,5 @@ def get_schema_format(column_name,column_datatype):
         }
         json_data.append(temp_dict)
     return json_data
+
     

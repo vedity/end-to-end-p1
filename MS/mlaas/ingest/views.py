@@ -16,7 +16,14 @@ import pandas as pd
 from database import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
+<<<<<<< HEAD
 from .utils import schema_creation 
+=======
+<<<<<<< HEAD
+from .utils import schema_creation 
+=======
+>>>>>>> 0a56cca1345461bb08116d3956fb0ab4ca9b1fd0
+>>>>>>> 0681bf4175140182cb68e73f1be1d750aecb83fc
 from .utils.schema_creation import *
 from .utils import ingestion
 from .utils.ingestion import *
@@ -208,6 +215,7 @@ class DatasetSchemaClass(APIView):
                 schema_obj=SchemaClass(database,user,password,host,port)
                 schema_data=schema_obj.get_dataset_schema(str(dataset_id))
                 return Response({"Schema":schema_data})    
+   
 
         def put(self,request,format=None):
                 update_schema_data=json.loads(request.body)
@@ -227,6 +235,11 @@ class DatasetSchemaClass(APIView):
                 # col_attribute_list.append(request.POST.get('datatype_id'))
                 # col_attribute_list.append(request.POST.get('datatype_name'))
                 # col_attribute_list.append(request.POST.get('datatype_sal'))
+
+                # col_datatype_list.append(request.POST.get('col_id'))
+                # col_datatype_list.append(request.POST.get('col_name'))
+                # col_datatype_list.append(request.POST.get('col_sal'))
+                    
 
                 # col_datatype_list.append(request.POST.get('col_id'))
                 # col_datatype_list.append(request.POST.get('col_name'))
