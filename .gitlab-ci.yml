@@ -1,6 +1,7 @@
 stages:
   - automation_tests
-  - build
+  - building_test_image
+  - building_production_image
 
 Automation Testing:
   image: tmaier/docker-compose:latest
@@ -19,10 +20,12 @@ Automation Testing:
     - docker exec end-to-end-p1_web_1 sh -c "cd testing && python -m unittest ingest_test"
   only:
     - development
+    - uat
+    - master
 
-Building & Pushing Docker Images:
+Creating Testing Docker Images:
   image: docker:latest
-  stage: build
+  stage: building_test_image
   services:
     - docker:dind
 
@@ -41,8 +44,9 @@ Building & Pushing Docker Images:
     # Building DB Image
     - echo "Building Database Image"
     - cd DB
-    - docker pull $DB_RELEASE_IMAGE || true
-    - docker build --cache-from $DB_RELEASE_IMAGE --tag $DB_IMAGE --tag $DB_RELEASE_IMAGE .
+    #- docker pull $DB_RELEASE_IMAGE || true
+    #- docker build --cache-from $DB_RELEASE_IMAGE --tag $DB_IMAGE --tag $DB_RELEASE_IMAGE .
+    - docker build --tag $DB_IMAGE --tag $DB_RELEASE_IMAGE .
     - docker push $DB_IMAGE
     - docker push $DB_RELEASE_IMAGE
     - cd ..
@@ -50,8 +54,9 @@ Building & Pushing Docker Images:
     # Building Micro-Service Image 
     - echo "Building Micro-Service Image"
     - cd MS
-    - docker pull $MS_RELEASE_IMAGE || true
-    - docker build --cache-from $MS_RELEASE_IMAGE --tag $MS_IMAGE --tag $MS_RELEASE_IMAGE .
+    #- docker pull $MS_RELEASE_IMAGE || true
+    #- docker build --cache-from $MS_RELEASE_IMAGE --tag $MS_IMAGE --tag $MS_RELEASE_IMAGE .
+    - docker build --tag $MS_IMAGE --tag $MS_RELEASE_IMAGE .
     - docker push $MS_IMAGE
     - docker push $MS_RELEASE_IMAGE
     - cd ..
@@ -59,11 +64,51 @@ Building & Pushing Docker Images:
     # Building Web Image
     - echo "Building Web Image"
     - cd Web
-    - docker pull $WEB_RELEASE_IMAGE || true
-    - docker build --cache-from $WEB_RELEASE_IMAGE --tag $WEB_IMAGE --tag $WEB_RELEASE_IMAGE .
+    #- docker pull $WEB_RELEASE_IMAGE || true
+    #- docker build --cache-from $WEB_RELEASE_IMAGE --tag $WEB_IMAGE --tag $WEB_RELEASE_IMAGE .
+    - docker build --tag $WEB_IMAGE --tag $WEB_RELEASE_IMAGE .
     - docker push $WEB_IMAGE
     - docker push $WEB_RELEASE_IMAGE
     - cd ..
 
   only:
     - uat
+
+Creating Production Docker Images:
+  image: docker:latest
+  stage: building_production_image
+  services:
+    - docker:dind
+
+  variables:
+    #? Naming the Image:  Image_name:modulename-time_of_commit-commit_hash
+    DB_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:db-production
+    MS_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:ms-production
+    WEB_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:web-production
+
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    # Building DB Image
+    - echo "Building Database Image"
+    - cd DB
+    - docker build --tag $DB_RELEASE_IMAGE .
+    - docker push $DB_RELEASE_IMAGE
+    - cd ..
+    
+    # Building Micro-Service Image 
+    - echo "Building Micro-Service Image"
+    - cd MS
+    - docker build --tag $MS_RELEASE_IMAGE .
+    - docker push $MS_RELEASE_IMAGE
+    - cd ..
+    
+    # Building Web Image
+    - echo "Building Web Image"
+    - cd Web
+    - docker build --tag $WEB_RELEASE_IMAGE .
+    - docker push $WEB_RELEASE_IMAGE
+    - cd ..
+
+  only:
+    - master
