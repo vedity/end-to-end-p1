@@ -257,12 +257,12 @@ class DataDetailClass(APIView):
         """   
 
         def post(self, request, format=None ):
+                data = json.dumps(request.data)
+                request_body = json.loads(data) #get all the request body parameter and convert into dictonery
+                draw=request_body["draw"]
                 try:
                         logging.info("data ingestion : DataDetailClass : POST Method : execution start")
                         # logging.info("json data"+ str(type(request.data)) )
-                        data = json.dumps(request.data)
-                        request_body = json.loads(data) #get all the request body parameter and convert into dictonery
-                        draw=request_body["draw"]
                         start_index=request_body["start"] #get the start index
                         length=request_body["length"] #get the length
                         order_values=request_body['order'] 
@@ -283,7 +283,7 @@ class DataDetailClass(APIView):
                 except Exception as e:
                         logging.error("data ingestion : DataDetailClass : GET Method : Exception :" + str(e))
                         logging.error("data ingestion : DataDetailClass : GET Method : " +traceback.format_exc())
-                        return Response({"draw":"draw","recordsTotal":0,"recordsFiltered":0,"data":[]})
+                        return Response({"draw":draw,"recordsTotal":0,"recordsFiltered":0,"data":[]})
 
 class DataDetailColumnListClass(APIView):
          def get(self, request, format=None):
