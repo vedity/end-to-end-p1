@@ -210,38 +210,34 @@ class DatasetSchemaClass(APIView):
                 return Response({"Schema":schema_data})    
    
 
-        def put(self,request,format=None):
+        def post(self,request,format=None):
                 update_schema_data=json.loads(request.body)
-                user_name=request.POST.get('user_name')
-                dataset_id=request.POST.get('dataset_id')
-
-                # column_list 
-                # col_attribute_list
-                # col_datatype_list
-                # column_list=[]
-                # col_attribute_list=[]
-                # col_datatype_list=[]
-                # column_list.append(request.POST.get('id'))
-                # column_list.append(request.POST.get('name'))
-                # column_list.append(request.POST.get('sal'))
-
-                # col_attribute_list.append(request.POST.get('datatype_id'))
-                # col_attribute_list.append(request.POST.get('datatype_name'))
-                # col_attribute_list.append(request.POST.get('datatype_sal'))
-
-                # col_datatype_list.append(request.POST.get('col_id'))
-                # col_datatype_list.append(request.POST.get('col_name'))
-                # col_datatype_list.append(request.POST.get('col_sal'))
-                    
-
-                # col_datatype_list.append(request.POST.get('col_id'))
-                # col_datatype_list.append(request.POST.get('col_name'))
-                # col_datatype_list.append(request.POST.get('col_sal'))
-
+                schema_data = update_schema_data["data"]
+                column_name_list=[]
+                column_datatype_list = []
+                column_attribute_list = []
+                column_change_name = []
+                column_change_datatype = [] #####
+                for index in range(len(schema_data)):
+                        if schema_data[index]["column_name"] == schema_data[index]["change_column_name"] :
+                                return Response({"error":"Column name same"})
+                        column_name_list.append(schema_data[index]["column_name"])
+                        column_datatype_list.append(schema_data[index]["data_type"])
+                        if schema_data[index]["changed_data_type"]=="":
+                                column_change_datatype.append(schema_data[index]["data_type"])
+                        else:
+                                column_change_datatype.append(schema_data[index]["changed_data_type"])
+                        
+                        column_change_name.append(schema_data[index]["change_column_name"])
+                        column_attribute_list.append(schema_data[index]["column_attribute"])
+                        
+                        # column_change_datatype.append(schema_data[index]["changed_data_type"]) #####
+                user_name=request.query_params.get('user_name')
+                dataset_id=request.query_params.get('dataset_id')
                 schema_obj=SchemaClass(database,user,password,host,port)
-                schema_status=schema_obj.update_dataset_schema(column_list,col_datatype_list,col_attribute_list,dataset_id,user_name)
+                schema_status=schema_obj.update_dataset_schema(column_name_list,column_change_name,column_datatype_list,column_attribute_list,column_change_datatype,dataset_id,user_name) ####
 
-                return Response({"Status":update_schema_data})           
+                return Response({"Status":str(schema_status)})           
                 
 
 class DataDetailClass(APIView):
@@ -279,7 +275,7 @@ class DataDetailClass(APIView):
                         if isinstance(dataset_df,str): #check the instance of dataset_df
                                 status_code,error_msg=get_Status_code(dataset_df) # extract the status_code and error_msg  from dataset_df
                                 logging.info("data ingestion : DataDetailClass : POST Method : execution stop : status_code :"+status_code)
-                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                                return Response({"draw":draw,"recordsTotal":0,"recordsFiltered":0,"data":[]})  #return Data
                         else:
                                 logging.info("data ingestion : DataDetailClass : POST Method : execution stop : status_code :200")
                                 # return Response({​​​​​"draw":draw,"recordsTotal":RowCount,"recordsFiltered":RowCount,"data":data}​​​​​)
@@ -287,7 +283,7 @@ class DataDetailClass(APIView):
                 except Exception as e:
                         logging.error("data ingestion : DataDetailClass : GET Method : Exception :" + str(e))
                         logging.error("data ingestion : DataDetailClass : GET Method : " +traceback.format_exc())
-                        return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
+                        return Response({"draw":"draw","recordsTotal":0,"recordsFiltered":0,"data":[]})
 
 class DataDetailColumnListClass(APIView):
          def get(self, request, format=None):

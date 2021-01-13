@@ -39,7 +39,7 @@ class SchemaClass:
         
     def get_schema(self):
         # Project table name
-        table_name = 'schema_tbl'
+        table_name = 'mlaas.schema_tbl'
         # Columns for project table
         cols = 'dataset_id,column_name,changed_column_name,data_type,changed_data_type,column_attribute' 
         # Schema for project table.
@@ -78,64 +78,65 @@ class SchemaClass:
         data_details_df = DBObject.select_records(connection,sql_command) #execute the sql query
         column_name = data_details_df["column_name"].tolist() # covert the dataframe into list
         column_data_type = data_details_df["data_type"].tolist() # covert the dataframe into list
+        
         schema_data = get_schema_format(column_name,column_data_type) #call get_schema_format to get json format data
         return schema_data
     
-    def map_dataset_schema(self,DBObject,connection,user_name,dataset_id,column_lst,data_type_lst,column_attribute_lst):
+    def map_dataset_schema(self,DBObject,connection,user_name,dataset_id,column_name_list,column_lst,data_type_lst,column_attribute_lst,column_change_datatype):
         prev_cols_lst = []
         prev_dtype_lst = []
         
         new_cols_lst = column_lst
-        new_dtype_lst = data_type_lst
-        
+        new_dtype_lst = column_change_datatype
         cols_attribute_lst = column_attribute_lst
-        
-        col_and_dtype_dict = self.get_dataset_schema(dataset_id)
+
         table_name,cols,schema =self.get_schema()
-        table_name = user_name +"."+table_name
-        
-        for col,dtype in col_and_dtype_dict.items():
-            prev_cols_lst.append(col)
-            prev_dtype_lst.append(dtype)
+        # table_name = user_name +"."+table_name
+        prev_cols_lst = column_name_list
+        prev_dtype_lst = data_type_lst
         
         if self.is_existing_schema(DBObject,connection,dataset_id,user_name):
             for prev_col,new_col,prev_dtype,new_dtype,col_attr in zip(prev_cols_lst,new_cols_lst,prev_dtype_lst,new_dtype_lst,cols_attribute_lst): 
-                sql_command = "update "+table_name + " SET changed_column_name = " + new_col + ","\
-                                                           "changed_data_type = " + new_dtype + ","\
-                                                            "column_attribute = " + col_attr +""\
-                              " Where column_name = "+ prev_col + " and data_type = " + prev_dtype
-                              
+                sql_command = "update "+table_name + " SET changed_column_name = '" + new_col + "',"\
+                                                           "changed_data_type = '" + new_dtype + "',"\
+                                                            "column_attribute = '" + col_attr +"'"\
+                              " Where column_name ='"+ prev_col +"' and data_type = '"+ prev_dtype +"'"
+                logger.info("Sql_command : "+ sql_command)
                 status = DBObject.update_records(connection,sql_command)
                 
         else:
-            for prev_col,new_col,prev_dtype,new_dtype,col_attr in zip(prev_cols_lst,new_cols_lst,new_dtype_lst,new_dtype_lst,cols_attribute_lst): 
+            for prev_col,new_col,prev_dtype,new_dtype,col_attr in zip(prev_cols_lst,new_cols_lst,prev_dtype_lst,new_dtype_lst,cols_attribute_lst): 
                 row = dataset_id,prev_col,new_col,prev_dtype,new_dtype,col_attr
                 row_tuples = [tuple(row)] # Make record for project table
                 status = DBObject.insert_records(connection,table_name,row_tuples,cols)
             
         return status
     
-    def update_dataset_schema(self,column_lst,data_type_lst,column_attribute_lst,dataset_id,user_name):
+    def update_dataset_schema(self,column_name_list,column_lst,data_type_lst,column_attribute_lst,column_change_datatype,dataset_id,user_name): ###
+
         DBObject = db.DBClass()
         connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port)
-        schema_status = DBObject.create_schema(connection,user_name)
+        # schema_status = DBObject.create_schema(connection,user_name)
         table_name,col,schema = self.get_schema()
-        table_name = user_name+"."+table_name
+        # table_name = str(user_name)+"."+str(table_name)
         create_status = DBObject.create_table(connection,table_name,schema)
-        
-        mapping_status =self.map_dataset_schema(DBObject,connection,user_name,dataset_id,column_lst,data_type_lst,column_attribute_lst)
+        mapping_status =self.map_dataset_schema(DBObject,connection,user_name,dataset_id,column_name_list,column_lst,data_type_lst,column_attribute_lst,column_change_datatype) ###
         return mapping_status
     
     def is_existing_schema(self,DBObject,connection,dataset_id,user_name):
+        """
+        this function checks schema table already exist
+        """
         table_name,*_ = self.get_schema()
-        sql_command = "select dataset_id from "+ user_name +"."+table_name +" where dataset_id="+dataset_id
+        sql_command = "select dataset_id from "+ table_name +" where dataset_id="+dataset_id
         data=DBObject.select_records(connection,sql_command)
-        data=int(data.shape[0])
-        # if data == None:return False
-        # if data > 0 :
-        #     return True
-        # else:
-        #     return False
-        return False
+        if data is None:
+            return False
+        # data=int(data.shape[0])
+        if len(data) > 0 :
+            return True
+        else:
+            return False
+        
         
        
