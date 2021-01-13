@@ -277,13 +277,15 @@ class DBClass:
         Return : 
             [String,List] : [return the Order clause,list of column name]
         """ 
-        if sort_type == sort_index == "":  #check if value sort_type and sort_index is empty
+        
+        col_table_name=table_name.partition(".")[2] #trim from the string and get the table name
+        columns_list=self.get_column_names(connection,col_table_name) #get the column list 
+        columns_list=columns_list[1:] #get all index value accept index 0 
+        if sort_type =="" and  str(sort_index) == "":  #check if value sort_type and sort_index is empty
             order_clause="ORDER BY index"
         else:
-            col_table_name=table_name.partition(".")[2] #trim from the string and get the table name
-            columns_list=self.get_column_names(connection,col_table_name) #get the column list 
-            columns_list=columns_list[1:] #get all index value accept index 0 
             order_clause=f'ORDER BY "{columns_list[int(sort_index)]}" {sort_type}' #formated string for order By clause
+        
         return order_clause,columns_list
     
     def get_global_search_clause(self,columns,global_value):
@@ -317,16 +319,30 @@ class DBClass:
         Return : 
             [String] : [return the sql query string]
         """
+        
+
         try: 
             end_index = (start_index + length)-1 #get total length
+
+
             order_clause,columns=self.get_order_clause(connection,table_name,sort_type,sort_index) #call get_order_clause function and get order by string and column list
+            
+
             columns_str = '","'.join(columns) # create string that join comma(,) with column name list sequential manner
             columns_str = "\""+columns_str+"\"" 
+            
+
             global_search_clause=""
             if global_search_value!="":
                 global_search_clause=self.get_global_search_clause(columns,global_search_value)  #call get_global_search_clause function and get search query string
-                global_search_clause= "and "+global_search_clause
-            sql_command = f'SELECT {columns_str} From {table_name} where index between {start_index} and {end_index} {global_search_clause} {order_clause}' 
+                global_search_clause= "where "+global_search_clause
+            
+            if str(sort_index) != "" or global_search_value!="":
+                sql_command = f'SELECT {columns_str} From {table_name} {global_search_clause} {order_clause} limit {length}' 
+                
+            else:
+                sql_command = f'SELECT {columns_str} From {table_name} where index between {start_index} and {end_index}  {order_clause}' 
+            
             return sql_command
         except Exception as exc:
             return str(exc) 
@@ -357,7 +373,6 @@ class DBClass:
             [Interger] : [return the row count]
         """
         sql_command = "SELECT no_of_rows FROM mlaas.dataset_tbl WHERE dataset_id ="+str(dataset_id)
-        logger.info("sql_command"+ sql_command)
         row_data=self.select_records(connection,sql_command) #get the record for specific dataset id
         no_of_rows=row_data["no_of_rows"] # get the row count
         return no_of_rows
