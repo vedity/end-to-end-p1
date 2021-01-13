@@ -263,6 +263,7 @@ class ProjectClass:
         logging.info("data ingestion : ProjectClass : project_exists : execution start")
         
         try:
+            project_name=str(project_name).replace("'","''")
             #? Checking if Same project_name exists for the same user
             project_name=str(project_name).replace("'","''")
             sql_command = f"SELECT PROJECT_ID FROM {table_name} WHERE PROJECT_NAME = '{project_name}' AND USER_NAME = '{user_name}'"

@@ -16,6 +16,9 @@ from ingest.utils.dataset import dataset_creation
 
 dc = dataset_creation.DatasetClass()
 
+from ingest.utils.dataset import dataset_creation as dc
+from common.utils.database import db
+
 class ExploreClass:
 
     def get_dataset_statistics(self,DBObject,connection,dataset_id):

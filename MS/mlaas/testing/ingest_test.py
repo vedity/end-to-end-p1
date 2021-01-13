@@ -22,6 +22,7 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
         info = {"user_name":"autouser","dataset_name":"auto_dataset_name","visibility":"public"}
         response = requests.post("http://localhost:8000/mlaas/ingest/create_dataset/",data = info,files = file)
         json_response = response.json()
+       
         status = json_response["status_code"]
         self.assertEqual(status,"200")
 
@@ -144,9 +145,13 @@ class TestBIngestGetDataset(unittest.TestCase):
     
         """
         time.sleep(2)
-        response = requests.get("http://localhost:8000/mlaas/ingest/create_dataset/",params = {"user_name":"invalid_auto_user"})
+        response = requests.get("http://localhost:8000/mlaas/ingest/create_dataset/",params = {"user_name":"invalid_auto_user_name"})
         json_response = response.json()
-        status = json_response["status_code"]
+        data = json_response["response"]
+        status = "500"
+        for x in range(len(data)):
+            if data[x]["user_name"] == "invalid_auto_user_name":
+                status ="200"
         self.assertEqual(status,"500")
 
 class TestIngestDatasetDeletion(unittest.TestCase):
@@ -159,13 +164,20 @@ class TestIngestDatasetDeletion(unittest.TestCase):
         """
         files = '../ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
+        info = {"user_name":"autouser_second","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_dataset_name","visibility":"public"}
+        response = requests.post("http://localhost:8000/mlaas/ingest/create_project/",data = info,files = file)
+
+        files = '../ingest/dataset/CarPrice_Assignment.csv'
+        file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser_valid","dataset_name":"auto_dataset_name_valid","visibility":"public"}
         response = requests.post("http://localhost:8000/mlaas/ingest/create_dataset/",data = info,files = file)
         response = requests.get("http://localhost:8000/mlaas/ingest/create_dataset/",params ={"user_name":"autouser_valid"})
         response_data = response.json()
-        json_dataset_id = response_data["response"][0]["dataset_id"]
+        json_dataset_id = response_data["response"][1]["dataset_id"]
+        
         response = requests.delete("http://localhost:8000/mlaas/ingest/delete/dataset_detail/",params ={"user_name":"autouser_valid","dataset_id":json_dataset_id})
         json_response = response.json()
+        
         status = json_response["status_code"]
         self.assertEqual(status,"200")
     
@@ -380,13 +392,30 @@ class TestFIngestDataDetailClass(unittest.TestCase):
            
 
         """
+        request_data = {
+            "draw": 1,
+            "columns": [{"data": "id","name": "","searchable": "true","orderable": "true",
+            "search": {"value": "","regex": "false"}},
+            {
+            "data": "firstName","name": "","searchable": "true","orderable": "true","search": {
+            "value": "",
+            "regex": "false"}},
+            {"data": "lastName","name": "","searchable": "true","orderable": "true","search": {
+            "value": "",
+            "regex": "false"}}], "order": [{"column": 0,"dir": "asc"}],
+            "start": 1,"length": 10,"search": { "value": "","regex": "false" },"customefilter": [{
+            "username": "admin",
+            "uid":1}]}
+        
+        headers = {'content-type': 'application/json'}
+        data = json.dumps(request_data)
         response = requests.get("http://localhost:8000/mlaas/ingest/create_dataset/",params ={"user_name":"autouser"})
         json_response = response.json()
         datadetail_id = json_response["response"][0]["dataset_id"]
-        response = requests.get("http://localhost:8000/mlaas/ingest/data_detail/",params ={"dataset_id":datadetail_id})
+        response = requests.post("http://localhost:8000/mlaas/ingest/data_detail/",data = data ,params ={"dataset_id":datadetail_id},headers = headers)
         json_response = response.json()
-        status = json_response["status_code"]
-        self.assertEqual(status,"200")
+        status = json_response["recordsFiltered"][0]
+        self.assertEqual(status,205)
 
     def testB_scenario3_datadetail(self):
         """ This function is used to test the DataDetail GET Method With invalid dataset_id.
@@ -395,8 +424,24 @@ class TestFIngestDataDetailClass(unittest.TestCase):
             dataset_id ([integer]): [id of the dataset.]
     
         """
-        response = requests.get("http://localhost:8000/mlaas/ingest/data_detail/",params ={"dataset_id":4})
-        json_response = response.json()
-        status = json_response["status_code"]
-        self.assertEqual(status,"500")
+        request_data = {
+            "draw": 1,
+            "columns": [{"data": "id","name": "","searchable": "true","orderable": "true",
+            "search": {"value": "","regex": "false"}},
+            {
+            "data": "firstName","name": "","searchable": "true","orderable": "true","search": {
+            "value": "",
+            "regex": "false"}},
+            {"data": "lastName","name": "","searchable": "true","orderable": "true","search": {
+            "value": "",
+            "regex": "false"}}], "order": [{"column": 0,"dir": "asc"}],
+            "start": 1,"length": 10,"search": { "value": "","regex": "false" },"customefilter": [{
+            "username": "admin",
+            "uid":1}]}
         
+        headers = {'content-type': 'application/json'}
+        data = json.dumps(request_data)
+        response = requests.post("http://localhost:8000/mlaas/ingest/data_detail/",data = data ,params ={"dataset_id":6},headers = headers)
+        json_response = response.json()
+        status = json_response["draw"]
+        self.assertEqual(status,1)

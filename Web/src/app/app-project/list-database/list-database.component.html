@@ -25,7 +25,7 @@
                         class="text-red">please enter dataset name.</span>
                 </div>
                 <div class="invalid-feedback" *ngIf="datasetnameuniqueerror">
-                    <span class="text-red">dataset name already exist.</span>
+                    <span class="text-red">Dataset name already exist</span>
                 </div>
             </div>
             <div class="col-md-4 form-group">
@@ -36,8 +36,8 @@
                     <input type="file" (change)="handleFileInput($event.target.files)" [(ngModel)]="data.file"
                         accept=".csv" name="file" #file="ngModel" class="custom-file-input" required>
                     <div class="invalid-feedback" *ngIf="file.errors?.required && (file.dirty || file.touched)">
-                        <span *ngIf="file.errors?.required && (file.dirty || file.touched)" class="text-red">please
-                            select .csv file.</span>
+                        <span *ngIf="file.errors?.required && (file.dirty || file.touched)" class="text-red">Please
+                            select .csv file</span>
                     </div>
                 </div>
             </div>
@@ -130,7 +130,7 @@
                                     <td>{{data.dataset_name}}</td>
                                     <td>{{data.file_size}}
                                     </td>
-                                    <td>{{data.total_row_count}}
+                                    <td>{{data.no_of_rows}}
                                     </td>
                                     <td class="text-center">
                                         <span style="display:none;">{{data.dataset_visibility}}</span>
@@ -146,9 +146,11 @@
                                         {{data.created_on|date}}
                                     </td>
                                     <td class="text-center" style="font-size: 20px;font-weight: 700;">
-                                        <a href="javascript:void(0);" [routerLink]="['/datadetail']"
+                                        <!-- <a href="javascript:void(0);" [routerLink]="['/datadetail']"
                                             [state]="{dataset_id: data.dataset_id ,dataset_name:data.dataset_name,navigate_to:'/dataset' }"> <i
-                                                class=" bx bx-file"></i></a>
+                                                class=" bx bx-file"></i></a> -->
+                                                <a href="javascript:void(0);"> <i
+                                                    class=" bx bx-file"></i></a>
 
                                         <a href="javascript:void(0);" id="sa-warning"
                                             (click)="confirm(data.dataset_id)"> <i class=" bx bx-trash"></i></a>

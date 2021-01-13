@@ -8,13 +8,21 @@
  Vipul Prajapati          18-DEC-2020           1.3           Added functionality for create schema.
 */
 '''
-from re import search
 import psycopg2
 import psycopg2.extras as extras
 import pandas as pd 
-import json
 from sqlalchemy import create_engine
+import json
 import logging
+from common.utils.logger_handler import custom_logger as cl
+
+user_name = 'admin'
+log_enable = True
+
+LogObject = cl.LogClass(user_name,log_enable)
+LogObject.log_setting()
+
+logger = logging.getLogger('dataset_creation')
 
 class DBClass:
 
@@ -236,7 +244,7 @@ class DBClass:
         # concatenate string for query to get column names
         # SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = 'some_table';
         sql_command = "SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE "
-        sql_command += "table_name = '{}';".format( table_name )
+        sql_command += "table_name = '{}' order by ordinal_position;".format( table_name )
         
         try:
             # execute the SQL string to get list with col names in a tuple
@@ -256,48 +264,155 @@ class DBClass:
             # close the cursor object to prevent memory leaks
             col_cursor.close()
         except:
-            raise GetColumnNamesFailed
-        
+            raise GetColumnNamesFailed        
         return columns
     
-    def get_column_name(self,connection,table_name):
-        sql_command = f'SELECT * From {table_name}'
-        data_record =self.select_records(connection,sql_command)
-        data_df = data_record.to_json(orient='records')
-        json_data = json.loads(data_df) 
-        column_name = list(json_data[0].keys()) 
-        return column_name
     
-    def get_pattern_string(self,column_name,global_index):
-        empty_string=""
-        count=0
-        for i in range(len(column_name)):
-                empty_string+=" '"+column_name[i]+"' like '%" +global_index +"%' or"
-        string_patern="("+empty_string[:len(empty_string)-3]+")"
-        return string_patern
-    
-    def pagination(self,connection,table_name,global_index,start_index,length,sort_type,column_index):
-        try:
-            
-                length_index = start_index + length
-                column_name=self.get_column_name(connection,table_name)
-                pattern="'car_ID' like '%"+"a%'"
-                if column_index == sort_type == "false":  
-                    if global_index !="false":    
-                        patter_string=self.get_pattern_string(column_name,global_index)  
-                        sql_command = f'SELECT * From {table_name} where index between {start_index} and {length_index} AND {patter_string}  ORDER BY index'
-                    else:
-                       sql_command = f'SELECT * From {table_name} where index between {start_index} and {length_index} ORDER BY index' 
-                else:
-                    if global_index !="false":
-                        patter_string=self.get_pattern_string(column_name,global_index)
-                        sql_command = f'SELECT * From {table_name} where index between {start_index} and {length_index} ORDER BY "{column_name[int(column_index)]}" {sort_type}'
-                    else:
-                        sql_command = f'SELECT * From {table_name} where index between {start_index} and {length_index} ORDER BY "{column_name[int(column_index)]}" {sort_type}'
+    def get_order_clause(self,connection,table_name,sort_type,sort_index):    
+        """ function used to get ORDER by clause string
 
-                data_record =self.select_records(connection,sql_command)
-                data_df = data_record.to_json(orient='records')
-                json_data = json.loads(data_df)
-                return json_data       
+        Args:
+            table_name[(String)] : [Name of the table]
+            sort_type[(String)] : [value of the sort type]
+            sort_index[(integer)] : [index of column]
+        Return : 
+            [String,List] : [return the Order clause,list of column name]
+        """ 
+        
+        col_table_name=table_name.partition(".")[2] #trim from the string and get the table name
+        columns_list=self.get_column_names(connection,col_table_name) #get the column list 
+        columns_list=columns_list[1:] #get all index value accept index 0 
+        if sort_type =="" and  str(sort_index) == "":  #check if value sort_type and sort_index is empty
+            order_clause="ORDER BY index"
+        else:
+            order_clause=f'ORDER BY "{columns_list[int(sort_index)]}" {sort_type}' #formated string for order By clause
+        
+        return order_clause,columns_list
+    
+    def get_global_search_clause(self,columns,global_value):
+        """ function used to create search  string for sql command
+
+        Args:
+            table_name[(String)] : [Name of the table]
+            sort_type[(String)] : [value of the sort type]
+            sort_index[(integer)] : [index of column]
+        Return : 
+            [String] : [return the search pattern string]
+        """ 
+        
+        empty_string=""
+        for i in range(len(columns)):
+            empty_string+="cast(\""+str(columns[i])+"\" as varchar) like '%"+str(global_value)+"%' or "   # create the string with Like operator  
+        global_search_clause="("+empty_string[:len(empty_string)-3]+")" # remove the "or" string appended at last 
+        return global_search_clause
+    
+    
+    def pagination(self,connection,table_name,start_index,length,sort_type,sort_index,global_search_value):
+        """ function used to create Sql query string
+
+        Args:
+                start_index[(Integer)] : [value of the starting index]
+                length[(Integer)] :[value of length of records to be shown]
+                sort_type[(String)] : [value of sort_type ascending or descending]
+                sort_index[(Integer)] : [index value of the column to perform sorting]
+                global_value[(String)] : [value that need be search in table]
+                dataset_id[(Integer)] : [Id of the dataset table]
+        Return : 
+            [String] : [return the sql query string]
+        """
+        
+
+        try: 
+            end_index = (start_index + length)-1 #get total length
+
+
+            order_clause,columns=self.get_order_clause(connection,table_name,sort_type,sort_index) #call get_order_clause function and get order by string and column list
+            
+
+            columns_str = '","'.join(columns) # create string that join comma(,) with column name list sequential manner
+            columns_str = "\""+columns_str+"\"" 
+            
+
+            global_search_clause=""
+            if global_search_value!="":
+                global_search_clause=self.get_global_search_clause(columns,global_search_value)  #call get_global_search_clause function and get search query string
+                global_search_clause= "where "+global_search_clause
+            
+            if str(sort_index) != "" or global_search_value!="":
+                sql_command = f'SELECT {columns_str} From {table_name} {global_search_clause} {order_clause} limit {length}' 
+                
+            else:
+                sql_command = f'SELECT {columns_str} From {table_name} where index between {start_index} and {end_index}  {order_clause}' 
+            
+            return sql_command
         except Exception as exc:
             return str(exc) 
+    
+    def is_existing_table(self,connection,table_name,schema):
+        """ function used to check the table is Exists or Not in database
+
+        Args:
+                table_name[(String)] : [Name of the table]
+                schema[String] : [Name of the Schema]
+        Return : 
+            [String] : [return the True if record found else False]
+        """
+        sql_command = "SELECT 1 FROM information_schema.tables WHERE table_schema ='"+schema+"' AND table_name = '"+table_name+"'"
+        data=self.select_records(connection,sql_command) #call select_records which return data if found else None
+        if len(data) == 0: # check whether length of data is empty or not
+            self.create_schema(connection)
+            return "False"
+        else:
+            return "True"
+    
+    def get_row_count(self,connection,dataset_id):
+        """ function used to get the row count of the table
+
+        Args:
+                dataset_id[(Integer)] : [Id of the dataset table]
+        Return : 
+            [Interger] : [return the row count]
+        """
+        sql_command = "SELECT no_of_rows FROM mlaas.dataset_tbl WHERE dataset_id ="+str(dataset_id)
+        row_data=self.select_records(connection,sql_command) #get the record for specific dataset id
+        no_of_rows=row_data["no_of_rows"] # get the row count
+        return no_of_rows
+    
+    def get_column_list(self,connection,dataset_id):
+        """ function used to get the column name list of the table
+
+        Args:
+                dataset_id[(Integer)] : [Id of the dataset table]
+        Return : 
+            [List] : [return the list of column name]
+        """
+        
+        sql_command = 'SELECT dataset_table_name,dataset_visibility,user_name FROM mlaas.dataset_tbl  Where dataset_id='+ str(dataset_id)
+        dataset_df = self.select_records(connection,sql_command) #get the dataframe for that perticular dataset id if present ortherwise None 
+        if len(dataset_df) == 0 or dataset_df is None:
+            return None
+        
+        dataset_records = dataset_df.to_records(index=False) # convert dataframe to a NumPy record  
+        
+        dataset_table_name,dataset_visibility,user_name = dataset_records[0]  #get 0 index records
+        dataset_table_name,dataset_visibility,user_name = str(dataset_table_name),str(dataset_visibility),str(user_name) #convert variable  type into string
+         
+        if dataset_visibility.lower() == 'public':
+            user_name = 'public'
+    
+        sql_command = 'SELECT * FROM '+ user_name +'.' + dataset_table_name 
+        data_details_df = self.select_records(connection,sql_command)
+        data_details_df=data_details_df.to_json(orient='records') # transform dataframe based on record
+        data_details_df = json.loads(data_details_df)  #convert data_details_df into dictonery
+        return data_details_df
+
+
+        
+
+
+
+
+
+
+
+     
