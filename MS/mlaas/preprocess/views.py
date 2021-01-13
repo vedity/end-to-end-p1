@@ -34,7 +34,7 @@ class DatasetStatisticsClass(APIView):
     """
         This class is used to show the data statistics for each of the feature in the table.
         It will take url string as mlaas/preprocess/exploredata/get_data_statistics.
-      
+
         Args  : 
                 TableName[(String)]   :[Name of table]
                 
@@ -46,9 +46,9 @@ class DatasetStatisticsClass(APIView):
 
     def get(self,request,format=None):
         try:
-            tablename = request.query_params.get('table_name') #get tablename 
+            datasetid = request.query_params.get('dataset_id') #get tablename 
             exploreobj = dataset_exploration.ExploreClass() #python class object 
-            table_df = exploreobj.get_dataset_statistics(DBObject,connection,tablename)  #calls the get_dataset_statisctics python class method and returns dataframe
+            table_df = exploreobj.get_dataset_statistics(DBObject,connection,datasetid)  #calls the get_dataset_statisctics python class method and returns dataframe
             table_df = table_df.to_json(orient='records')
             table_df = json.loads(table_df)
             return Response({"status_code":"200","error_msg":"successfull retrival","response":table_df})
@@ -60,7 +60,7 @@ class DataVisualizationColumnClass(APIView):
     """
         This class is used to show the columns in the table for boxplot visualization.
         It will take url string as mlaas/preprocess/exploredata/get_column.
-      
+        
         Args  : 
                 TableName[(String)]   :[Name of table]
                 ColumnName[(String)]  :[Name of Columns]
