@@ -48,11 +48,11 @@ class UserLoginClass(APIView):
                         password = request.query_params.get('password')
                         check_user_auth_tbl=DBObject.is_existing_table(connection,'user_auth_tbl','mlaas')
                         if check_user_auth_tbl == "False":
-                                user_df=DBObject.read_data('ingest/user_registration_tbl.csv')
+                                user_df=DBObject.read_data('common/user_registration_tbl.csv')
                                 status=DBObject.load_csv_into_db(connection_string,'user_auth_tbl',user_df,'mlaas')        
                         check_menu_tbl=DBObject.is_existing_table(connection,'menu_tbl','mlaas')
                         if check_menu_tbl == "False":
-                                menu_df=DBObject.read_data('ingest/Menu.csv')
+                                menu_df=DBObject.read_data('common/Menu.csv')
                                 status=DBObject.load_csv_into_db(connection_string,'menu_tbl',menu_df,'mlaas')           
                         user_status = IngestionObj.user_authentication(DBObject,connection,user_name,password)
                         if user_status != True:
