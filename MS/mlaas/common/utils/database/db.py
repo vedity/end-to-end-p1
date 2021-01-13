@@ -343,6 +343,7 @@ class DBClass:
         sql_command = "SELECT 1 FROM information_schema.tables WHERE table_schema ='"+schema+"' AND table_name = '"+table_name+"'"
         data=self.select_records(connection,sql_command) #call select_records which return data if found else None
         if len(data) == 0: # check whether length of data is empty or not
+            self.create_schema(connection)
             return "False"
         else:
             return "True"
