@@ -443,5 +443,5 @@ class TestFIngestDataDetailClass(unittest.TestCase):
         data = json.dumps(request_data)
         response = requests.post("http://localhost:8000/mlaas/ingest/data_detail/",data = data ,params ={"dataset_id":6},headers = headers)
         json_response = response.json()
-        status = json_response["status_code"]
-        self.assertEqual(status,"500")
+        status = json_response["draw"]
+        self.assertEqual(status,1)
