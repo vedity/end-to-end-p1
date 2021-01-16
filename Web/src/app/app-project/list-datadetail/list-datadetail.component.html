@@ -1,24 +1,5 @@
-<div class="container-fluid">
-    <!-- start page title -->
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box d-flex align-items-center justify-content-between">
-                <h4 class="mb-0 font-size-18">
-                   Data Detail </h4>
-                
-                <div class="page-title-right">
-                  <a href="javascript:void(0)" *ngIf="navigate_to!=''" [routerLink]="navigate_to" class="btn btn-success mr-2">Back</a> 
 
-                    <button type="button" (click)="mapping()" class="btn btn-success">Schema Mapping</button>
-                    <!-- <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item active">Welcome to Data Detail</li>
-                    </ol> -->
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <app-datadetail-list [columnlist]="columnlist" [title]="title" [dataset_id]="dataset_id"></app-datadetail-list>
+    <app-datadetail-list [title]="title" [dataset_id]="dataset_id" [navigate_to]="navigate_to"></app-datadetail-list>
 
     
-</div>

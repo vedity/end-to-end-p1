@@ -1,4 +1,20 @@
+<div class="container-fluid">
+  <!-- start page title -->
+  <div class="row">
+      <div class="col-12">
+          <div class="page-title-box d-flex align-items-center justify-content-between">
+              <h4 class="mb-0 font-size-18">
+                 Data Detail </h4>
+              
+              <div class="page-title-right">
+                <a href="javascript:void(0)" *ngIf="navigate_to!=''" [routerLink]="navigate_to" class="btn btn-success mr-2">Back</a> 
 
+                  <button type="button" (click)="mapping()" class="btn btn-success">Schema Mapping</button>
+                
+              </div>
+          </div>
+      </div>
+  </div>
 
 
     <div class="row">
@@ -10,58 +26,35 @@
                     count="7"
                     [animation]="animation"
                     
-                    [theme]="theme"
-                  >
+                    [theme]="theme">
                   </ngx-skeleton-loader>
 
-                    <div class="main-datatable" [hidden]="!contentloaded">
+                    <div class="main-datatable datadetail-datatable" >
+                      <div [hidden]="!contentloaded">
                         <a href="javascript:void()" class="filter-btn" id="filter" (click)="displayfilter()"><i class="dripicons-experiment"></i></a>
-                    
-                      <!-- <table datatable [dtOptions]="dtOptions"  class="table-responsive row-border hover">
-                        <thead class="thead-light">
-                          <tr>
-                            <th *ngFor="let item of cloumnlist">
-                              {{item.data}}
-                            
-                        
-                    
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody class="tbody" id="tbody" >
-                         
-                        </tbody>
-                      </table> -->
-                      <table datatable [dtOptions]="dtOptions" class="row-border hover">
-                        <thead >
-                          <tr class="thead">
-                            <th>ID</th>
-                            <th>First name</th>
-                            <th>Last name</th>
-                          </tr>
-                         
-                            <!-- <th *ngFor="let item of columnlist">
-                              {{item.data}}
-                            </th> -->
-                        </thead>
-                        <tbody >
-                            <tr *ngFor="let data of transactions">
-                                <td>{{data }}</td>
-                                <td>{{data }}</td>
-                                <td>{{data }}</td>
-                                <!-- <td>{{ person.firstName }}</td>
-                                <td>{{ person.lastName }}</td> -->
+                        <table datatable *ngIf="columnlist" [dtOptions]="dtOptions"  (keyup)="onFilterchange($event);" class="table table-centered table-responsive table-nowrap">
+                           <thead >
+                            <tr class="thead-light">
+                              <th *ngFor="let item of columnlist">
+                                {{item.data}}
+                                <input class="form-control filter"  type="text" [hidden]="filter"
+                    placeholder="{{item.data}}" name="search-{{item.data}}" id="{{item.data}}" />
+                              </th>
                             </tr>
-                        </tbody>
-                        <!-- <tbody *ngIf="transactions?.length == 0">
-                          <tr>
-                            <td colspan="3" class="no-data-available">No data!</td>
-                          </tr>
-                        <tbody> -->
-                      </table>
-                      
+                          </thead>
+                         <tbody >
+                              <tr *ngFor="let data of transactions;">
+                                  <td *ngFor="let item of columnlist">{{data[item.data]}}</td>
+                              </tr> 
+                          </tbody>
+                          <tbody *ngIf="transactions?.length == 0" id="nodatafound">
+                           
+                          <tbody>
+                        </table>
+                      </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+  </div>

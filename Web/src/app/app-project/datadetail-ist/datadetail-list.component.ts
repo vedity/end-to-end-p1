@@ -13,15 +13,18 @@ import { HttpClient } from '@angular/common/http';
     styleUrls: ['./datadetail-list.component.scss']
 })
 export class DatadetailListComponent implements OnInit {
-    @Input() public columnlist: any;
+    // @Input() public columnlist: any;
     @Input() public title: any;
     @Input() public dataset_id: any;
-    
+    @Input() public navigate_to: any;
+
 
     @ViewChild(DataTableDirective, { static: false })
     datatableElement: DataTableDirective;
     dtOptions: DataTables.Settings = {};
-
+    public columnlist: any;
+    nodatafound="";
+    filtercolumns;
     animation = "progress-dark";
     theme = {
         'border-radius': '5px',
@@ -36,47 +39,68 @@ export class DatadetailListComponent implements OnInit {
     dtTrigger: Subject<any> = new Subject<any>();
     constructor(public apiService: ProjectApiService, public router: Router, private toaster: ToastrService, private http: HttpClient) { }
     transactions: any;
-    thead="";
-    ngOnChanges(changes: SimpleChanges) {
-        console.log(changes);
-      this.columnlist=changes.columnlist.currentValue;
-      console.log(this.columnlist);
-  
-    this.columnlist.forEach(element => {
-       this.thead="<th>"+element.data+"</th>"
-    });
-   // $(".thead").html(thead);
-    }
-
+    thead = "";
+    dtRendered=false;
     ngOnInit(): void {
         const that = this;
+        this.apiService.getColumnList(this.dataset_id).subscribe(
+            logs=>{
+                this.columnlist=logs.response;
+                // this.columnlist.forEach(element => {
+                //     filtercolumns[element.data]="";
+                // });
+            }
+        )
+
+        
+
         this.dtOptions = {
             pageLength: 10,
             serverSide: true,
-            processing: true,
+            //processing: true,
+            autoWidth: false,
             ajax: (dataTablesParameters: any, callback) => {
-                that.http
-                    .post<any>(
-                        'http://127.0.0.1:8000/mlaas/ingest/data_detail/?dataset_id='+this.dataset_id,
-                        dataTablesParameters, {}
-                    ).subscribe(resp => {
+                let filtercolumns={};
+                this.columnlist.forEach(element => {
+                    filtercolumns[element.data]=$("#"+element.data).val();
+                });
+               dataTablesParameters.customfilter=filtercolumns;
+                this.apiService.getDataDetails(dataTablesParameters,this.dataset_id)
+                    .subscribe(resp => {
                         this.transactions = resp.data;
-                        console.log(this.transactions);
-                       
-                            callback({
-                                recordsTotal: resp.recordsTotal,
-                                recordsFiltered: resp.recordsFiltered,
-                                data: []
-                            });
-                        this.contentloaded=true;
+                        if(this.transactions.length==0){
+                            this.nodatafound='<tr><td colspan='+this.columnlist.length+' class="no-data-available">No data!</td></tr>';
+                            $("#nodatafound").html(this.nodatafound);
+                        }
+                        callback({
+                            recordsTotal: resp.recordsTotal,
+                            recordsFiltered: resp.recordsFiltered,
+                            data: []
+                        });
+                        setTimeout(() => {
+                             this.contentloaded = true;
+                        }, 100);
+
                     });
-            },
+            }
         };
+       
+    }
+
+    onFilterchange(event){
+        console.log(event.target.id);
+        console.log(event.target.value);
+        this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
+            dtInstance.draw();
+          });
+    }
+
+    mapping() {
+        this.router.navigate(['schema/create']);
     }
 
     displayfilter() {
         this.filter = !this.filter;
         $('.filter').val('').trigger('change');
-        // elem.value += ' NEW';
     }
 }
