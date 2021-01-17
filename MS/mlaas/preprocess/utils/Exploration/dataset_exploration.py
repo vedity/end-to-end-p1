@@ -23,8 +23,13 @@ class ExploreClass:
         """
             This class returns all the statistics for the given dataset.
             
-            input: DBObject, connection object, id of the dataset.
-            output: dataframe containing statistics.
+            Args:
+                DBObject ([object]): [object of database class.],
+                connection ([object]): [connection object of database class.],
+                dataset-id ([intiger]): [id of the dataset.]
+            
+            Returns:
+                stats_df ([pandas.Dataframe]): [Dataframe containing all the statistics.]
         """
         
         #? getting the name of the dataset_tbl
