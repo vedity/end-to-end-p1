@@ -1,4 +1,6 @@
 pandas
+numpy
+scipy
 psycopg2
 django
 sqlalchemy
