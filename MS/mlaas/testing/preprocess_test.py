@@ -6,6 +6,11 @@ import time
 
 
 class TestADataExplorationClass(unittest.TestCase):
+    """ This function is used to test the DatasetStatisticsClass Get Method With dataset_id .
+
+        Args:
+            dataset_id ([integer]):[id of the dataset.]
+        """
 
     def testA_scenario1_dataset_statisctics(self):
 

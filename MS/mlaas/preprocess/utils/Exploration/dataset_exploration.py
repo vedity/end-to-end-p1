@@ -18,6 +18,8 @@ dc = dataset_creation.DatasetClass()
 
 from ingest.utils.dataset import dataset_creation as dc
 from common.utils.database import db
+from scipy import stats
+import math
 
 class ExploreClass:
 
@@ -85,6 +87,49 @@ class ExploreClass:
     
         return stats_df
 
+    def get_bin_size_width(self,arr):
+        arr.sort()
+        minimum = arr[0]
+        maximum = arr[-1]
+        IQR = iqr(a)
+        n = len(arr)
+        
+        number_of_bins = (2*(IQR/(n**(1/3))))
+        number_of_bins = math.ceil(number_of_bins)
+        bin_width = ((maximum-minimum)/number_of_bins)
+        bin_width = math.ceil(bin_width)
+        
+        return number_of_bins, bin_width 
+    
+    
+    def get_hist_values(arr):
+        size,width = get_bin_size_width(arr)
+        
+        bins = {}
+        n = 0
+        l = arr[0]
+        r = l + width
+        i = 0
+        iteration = 0
+        while i < len(arr):
+            val = arr[i]
+            if val < r:
+                n += 1
+                i += 1
+            else: 
+                bins[l] = bins.get(l,n)
+                l = r
+                r += width
+                iteration += 1
+                if val < r:
+                    n = 1
+                    i += 1
+        else:
+            bins[l] = bins.get(l,n)
+                
+        return bins
+
+        
     def return_columns(self,DBObject, connection, table_name,*args):
         '''
             Returns data to be shown in the boxplot
