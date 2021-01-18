@@ -12,7 +12,7 @@
                   <img class="sort-icon" src="sort_both.png">
                   <img class="desc-icon" src="sort_desc.png">
                   <img class="asc-icon" src="sort_asc.png">
-                  <input class="form-control filter" max="10" maxlength="10" type="text" [hidden]="filter"
+                  <input class="form-control filter"  type="text" [hidden]="filter"
                     placeholder="Project Name" name="search-project-name" />
                 </th>
                 <th>Datasets
@@ -86,11 +86,8 @@
                 </td>
                 <td>{{data.created_on | date}}</td>
                 <td style="font-size: 20px;font-weight: 700;" class="text-center">
-                  <!-- <a href="javascript:void(0);" [routerLink]="['/datadetail']"
+                  <a href="javascript:void(0);" [routerLink]="['/datadetail']"
                     [state]="{dataset_id: data.dataset_id ,dataset_name:data.dataset_name,navigate_to:'/project'}">
-                    <i class=" bx bx-file"></i></a> -->
-
-                    <a href="javascript:void(0);">
                     <i class=" bx bx-file"></i></a>
 
                   <a href="javascript:void(0);" id="sa-warning" (click)="confirm(data.project_id)"> <i

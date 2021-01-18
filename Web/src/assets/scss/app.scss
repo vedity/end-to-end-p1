@@ -265,3 +265,14 @@ table{
    th{background-image:none !important;}
 }
 }
+
+
+.datadetail-datatable{
+  .dataTables_empty {
+    display: none !important;
+  }
+  .no-data-available {
+    text-align: center !important;
+  }
+  
+}

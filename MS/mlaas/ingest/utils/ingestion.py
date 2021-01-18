@@ -4,9 +4,10 @@
 --CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
  Vipul Prajapati          07-DEC-2020           1.0           Initial Version. 
  Vipul Prajapati          08-DEC-2020           1.1           Modification for Business Rule. 
- Vipul Prajapati          04-JAN-2021           1.2           File Check Mechanism Added.
- Vipul Prajapati          05-JAN-2021           1.3           no_of_rows field added into dataset tbl.
- Abhishek Negi            11-JAN-2021           1.4           Added Save file mechanism
+ Jay Shukla               01-Jay-2021           1.2           Added Deletion Functionality
+ Vipul Prajapati          04-JAN-2021           1.3           File Check Mechanism Added.
+ Vipul Prajapati          05-JAN-2021           1.4           no_of_rows field added into dataset tbl.
+ Abhishek Negi            11-JAN-2021           1.5           Added Save file mechanism
 */
 '''
 import pandas as pd 
