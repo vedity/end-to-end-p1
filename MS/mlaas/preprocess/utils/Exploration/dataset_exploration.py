@@ -9,24 +9,17 @@
 
 import pandas as pd
 #from ..ingest.utils.database import db
-from common.utils.database import db
 import numpy as np
-<<<<<<< HEAD
 import json
-from ingest.utils.dataset import dataset_creation
-
-dc = dataset_creation.DatasetClass()
-=======
 from scipy import stats
 import math
->>>>>>> 552923f424b8408f3f8383b73f762885c996e91e
 
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
-from ingest.utils.dataset import dataset_creation as dc
 from common.utils.database import db
-from scipy import stats
-import math
+from ingest.utils.dataset import dataset_creation
+
+dc = dataset_creation.DatasetClass()
 
 class ExploreClass:
 
@@ -89,17 +82,12 @@ class ExploreClass:
             stats_df.rename(columns = {'freq':'Frequency'}, inplace = True)    
 
             stats_df['Column Name'] = 0
-<<<<<<< HEAD
-
-            i = -1
-=======
             stats_df['Plot Values'] = 0
             stats_df['Plot Values'] = stats_df['Plot Values'].astype('object')
             data_df = data_df.dropna()
 
             #? Merging the Column Names
             i = 0
->>>>>>> 552923f424b8408f3f8383b73f762885c996e91e
             for col in data_df.columns:
                 stats_df.iloc[i,-2] = col
                 stats_df.iloc[i,-1] = self.get_values(data_df[col],numerical_columns,col)
@@ -113,41 +101,15 @@ class ExploreClass:
                     #? Dataset Contains only Continuous Data
                     stats_df = stats_df[['Plot Values','Column Name','Mean','Std','Min Value','25%','50%','75%','Max Value','Null Values','Non-Null Values']]
                 except KeyError:
-<<<<<<< HEAD
-                    stats_df = stats_df[['Column Name','Most Frequent','Frequency','Unique Values','Null Values','Non-Null Values']]
-        except AttributeError:
-            stats_df = data_df.describe(include = 'all')
-            return stats_df
-        except TypeError:
-            stats_df = data_df.describe(include = 'all')
-            return stats_df
-    
-        return stats_df
-
-    def get_bin_size_width(self,arr):
-        arr.sort()
-        minimum = arr[0]
-        maximum = arr[-1]
-        IQR = iqr(a)
-        n = len(arr)
-        
-        number_of_bins = (2*(IQR/(n**(1/3))))
-        number_of_bins = math.ceil(number_of_bins)
-        bin_width = ((maximum-minimum)/number_of_bins)
-        bin_width = math.ceil(bin_width)
-        
-        return number_of_bins, bin_width 
-=======
                     #? Dataset Contains only Categorical Data
                     stats_df = stats_df[['Plot Values','Column Name','Most Frequent','Frequency','Unique Values','Null Values','Non-Null Values']]
         except:
             return 2
         
         return stats_df
->>>>>>> 552923f424b8408f3f8383b73f762885c996e91e
     
     
-    def get_hist_values(arr):
+    def get_hist_values(self,arr):
         size,width = get_bin_size_width(arr)
         
         bins = {}
@@ -243,9 +205,6 @@ class ExploreClass:
         
         return number_of_bins  #, bin_width 
     
-<<<<<<< HEAD
-
-=======
     def get_histogram_values(self,arr):
         '''
             Returns the List Containing 2 Lists,  
@@ -314,4 +273,3 @@ class ExploreClass:
         
         
         
->>>>>>> 552923f424b8408f3f8383b73f762885c996e91e
