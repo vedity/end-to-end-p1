@@ -44,7 +44,7 @@ class DatasetStatisticsClass(APIView):
         It will take url string as mlaas/preprocess/exploredata/get_data_statistics.
 
         Args  : 
-                TableName[(String)]   :[Name of table]
+                DatasetId[(Integer)]   :[Dataset ID]
                 
         Return : 
                 status_code(500 or 200),
@@ -54,23 +54,14 @@ class DatasetStatisticsClass(APIView):
 
     def get(self,request,format=None):
         try:
-            dataset_id = request.query_params.get('dataset_id') #get tablename 
-            #exploreobj = dataset_exploration.ExploreClass() #python class object
-            # table_df = exploreobj.get_dataset_statistics(DBObject,connection,datasetid)  #calls the get_dataset_statisctics python class method and returns dataframe
-            # table_df = table_df.to_json(orient='records')
-            # table_df = json.loads(table_df)
-
-            
-            statics_df =  ExploreObj.get_exploration_data(dataset_id)
+            dataset_id = request.query_params.get('dataset_id') #get datasetid       
+            statics_df =  ExploreObj.get_exploration_data(dataset_id) #pass datasetid in function
             logging.info("static_df"+ str(statics_df))
- 
-            if isinstance(statics_df,str): #check the instance of dataset_df
-                status_code,error_msg=get_Status_code(statics_df) # extract the status_code and error_msg from project_df
+            if isinstance(statics_df,str): #check the instance of statics_df
+                status_code,error_msg=get_Status_code(statics_df) # extract the status_code and error_msg from statics_df
                 logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code :"+ status_code)
                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
             else:
-                
-                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code : 200")
                 table_df = statics_df.to_json(orient='records')
                 table_df = json.loads(table_df)
                 return Response({"status_code":"200","error_msg":"successfull retrival","response":table_df})
