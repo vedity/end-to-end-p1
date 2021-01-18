@@ -8,6 +8,6 @@ urlpatterns = [
     path('mlaas/preprocess/exploredata/get_data_statistics',DatasetStatisticsClass.as_view()),
 
     #URL for returning Column for boxplot
-    path('mlaas/preprocess/exploredata/get_column',DataVisualizationColumnClass.as_view())
+    #path('mlaas/preprocess/exploredata/get_column',DataVisualizationColumnClass.as_view())
   
 ]
