@@ -320,7 +320,8 @@ class DBClass:
         """
         try: 
             end_index = (start_index + length)-1 #get total length
-            order_clause,columns=self.get_order_clause(connection,table_name,sort_type,sort_index) #call get_order_clause function and get order by string and column list
+            limit_index=start_index+length
+            order_clause,columns=self.get_order_clause(connection,table_name,sort_type,sort_index) #call get_order_clause function and get order by string and column list            
             columns_str = '","'.join(columns) # create string that join comma(,) with column name list sequential manner
             columns_str = "\""+columns_str+"\"" 
             global_search_clause=""
@@ -328,7 +329,10 @@ class DBClass:
                 global_search_clause=self.get_global_search_clause(columns,global_search_value)  #call get_global_search_clause function and get search query string
                 global_search_clause= "where "+global_search_clause           
             if str(sort_index) != "0" or global_search_value!="":
-                sql_command = f'SELECT * From {table_name} {global_search_clause} {order_clause} limit {length}'                 
+                if start_index==0:
+                    sql_command = f'SELECT * From {table_name} {global_search_clause} {order_clause} limit {length}'                 
+                else:    
+                    sql_command = f'select * from (SELECT * From {table_name} {global_search_clause} {order_clause} limit {limit_index} offset {start_index}) as dt limit {length}'                 
                 logger.info("sql_command1: "+sql_command)
             else:
                 sql_command = f'SELECT * From {table_name} where index between {start_index} and {end_index}  {order_clause}'
@@ -336,8 +340,7 @@ class DBClass:
             return sql_command
         except Exception as exc:
             return str(exc) 
-        
-    
+
     def is_existing_table(self,connection,table_name,schema):
         """ function used to check the table is Exists or Not in database
 
