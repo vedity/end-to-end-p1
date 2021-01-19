@@ -190,6 +190,7 @@ class ExploreClass:
             number_of_bins = self.get_bin_size_width(arr)
             #? Limiting the number of bins in a diagram to 20
             if number_of_bins > 20: number_of_bins = 20
+            elif number_of_bins <= 2: number_of_bins = 3
             #? Getting histogram values & bin_edges
             hist, bin_edges = np.histogram(arr, number_of_bins)
             
