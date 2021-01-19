@@ -86,7 +86,7 @@ class SchemaClass:
             #sql query string to get the INFORMATION_SCHEMA for the table and fetch column_name and data type
             sql_command = "SELECT column_name,data_type FROM INFORMATION_SCHEMA.COLUMNS WHERE "
             sql_command += "table_name = '{}' order by ordinal_position;".format( dataset_table_name )  
-            sql_command = "SELECT * FROM "+table_name ####
+            # sql_command = "SELECT * FROM "+table_name ####
             data_details_df = DBObject.select_records(connection,sql_command) #execute the sql query
             if data_details_df is None:
                 raise DataNotFound(500)

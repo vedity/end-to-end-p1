@@ -124,7 +124,6 @@ def get_schema_format(column_name,column_datatype,predicted_datatype):
     for x in range(len(column_name)):
         temp_dict = {
             "column_name": column_name[x],
-            "data_type": column_datatype[x],
             "column_attribute": predicted_datatype[x],
             "change_column_name":"",
         }
