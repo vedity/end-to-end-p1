@@ -9,4 +9,8 @@ urlpatterns = [
     #URL for menu
     path('mlaas/menu/',MenuClass.as_view()),
 
+    #URL for menu
+    path('mlaas/dataset_schema/datatype_list/',ScheamDatatypeListClass.as_view()),
+
+    path('mlaas/dataset_schema/column_attribute_list/',ScheamColumnListClass.as_view()),
 ]
