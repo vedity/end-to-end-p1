@@ -318,12 +318,16 @@ class DBClass:
         Return : 
             [String] : [return the sql query string]
         """
+        
+
         try: 
             end_index = (start_index + length)-1 #get total length
             limit_index=start_index+length
             order_clause,columns=self.get_order_clause(connection,table_name,sort_type,sort_index) #call get_order_clause function and get order by string and column list            
             columns_str = '","'.join(columns) # create string that join comma(,) with column name list sequential manner
             columns_str = "\""+columns_str+"\"" 
+            
+
             global_search_clause=""
             if global_search_value!="":
                 global_search_clause=self.get_global_search_clause(columns,global_search_value)  #call get_global_search_clause function and get search query string
