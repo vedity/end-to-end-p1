@@ -40,7 +40,12 @@ export class ListProjectComponent implements OnInit {
     if (data.status_code == "200") {
       this.transactions = data.response;
     }
-    this.dtTrigger.next();
+    else{
+      this.transactions=[]
+    }
+    //console.log(this.datatableElement.dtInstance);
+    if(!this.datatableElement.dtInstance){
+      this.dtTrigger.next();
     this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
       dtInstance.columns().every(function () {
         const that = this;
@@ -60,6 +65,12 @@ export class ListProjectComponent implements OnInit {
         });
       });
     });
+    }
+    else{
+      this.rendered();
+      this.dtTrigger.next();
+
+    }
   }
 
   errorHandler(error) {
@@ -73,6 +84,7 @@ export class ListProjectComponent implements OnInit {
   }
 
   rendered() {
+
     this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
       dtInstance.columns().every(function () {
         const that = this;
@@ -93,6 +105,8 @@ export class ListProjectComponent implements OnInit {
       });
       dtInstance.destroy();
     });
+
+
   }
 
 
@@ -110,14 +124,19 @@ export class ListProjectComponent implements OnInit {
       if (result.value) {
         this.apiService.deleteproject(id).subscribe(
           logs => {
-            Swal.fire('Deleted!', logs.error_msg, 'success');
-            this.getproject();
-            this.rendered();
+            if (logs.status_code=="200") {
+              Swal.fire('Deleted!', logs.error_msg, 'success');
+              this.getproject();
+            }
+           else{
+            Swal.fire('Not Deleted!', logs.error_msg, 'error')
+           }
+            //this.rendered();
 
-            setTimeout(() => {
-              this.dtTrigger.next();
+            // setTimeout(() => {
+            //   this.dtTrigger.next();
 
-            }, 1000);
+            // }, 1000);
           },
           error => Swal.fire('Not Deleted!', 'Something went wrong', 'error')
         )

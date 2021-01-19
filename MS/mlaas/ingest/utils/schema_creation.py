@@ -267,8 +267,8 @@ class SchemaClass:
                     flag = True
                 elif attribute_type in ['numerical','timestamp','text','list']:
                     valid_type =  dict_attribute_type[attribute_type]
-                    if valid_type == chg_attribute_type :
-                        
+                    if valid_type != chg_attribute_type :
+                        flag= False     
                 elif attribute_type in ['categorical','categorical list']:
                     if chg_attribute_type in ['numerical','timestamp','text','list']:
                         flag = False
