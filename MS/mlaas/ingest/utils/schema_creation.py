@@ -45,13 +45,12 @@ class SchemaClass:
         # Project table name
         table_name = 'mlaas.schema_tbl'
         # Columns for project table
-        cols = 'project_id,column_name,changed_column_name,data_type,changed_data_type,column_attribute' 
+        cols = 'project_id,column_name,changed_column_name,data_type,column_attribute' 
         # Schema for project table.
         schema ="project_id bigint,"\
                 "column_name  text,"\
                 "changed_column_name  text,"\
                 "data_type  text,"\
-                "changed_data_type  text,"\
                 "column_attribute  text"
                 
         return table_name,cols,schema
@@ -66,6 +65,7 @@ class SchemaClass:
                 [List] : [return the list of dictonery]
         """
         try:
+            logging.info("data ingestion : SchemaClass :get_dataset_schema : execution start")
             DBObject = db.DBClass() # create object for database class
             connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port)
             if connection == None:
@@ -86,30 +86,30 @@ class SchemaClass:
             #sql query string to get the INFORMATION_SCHEMA for the table and fetch column_name and data type
             sql_command = "SELECT column_name,data_type FROM INFORMATION_SCHEMA.COLUMNS WHERE "
             sql_command += "table_name = '{}' order by ordinal_position;".format( dataset_table_name )  
-            # sql_command = "SELECT * FROM "+table_name ####
             data_details_df = DBObject.select_records(connection,sql_command) #execute the sql query
             if data_details_df is None:
                 raise DataNotFound(500)
-            # data_details_df = data_details_df.dtypes.to_dict() ####
             column_name = data_details_df["column_name"].tolist() # covert the dataframe into list
             column_data_type = data_details_df["data_type"].tolist() # covert the dataframe into list
             predicted_datatype = self.get_attribute_datatype(connection,DBObject,table_name,column_name ,no_of_rows)
-            # # return predicted_datatype #####
             schema_data = get_schema_format(column_name,column_data_type,predicted_datatype) #call get_schema_format to get json format data
+            logging.info("data ingestion : SchemaClass :get_dataset_schema : execution stop")
             return schema_data
         except (DatasetDataNotFound,DataNotFound,DatabaseConnectionFailed) as exc:
+            logging.error("data ingestion : SchemaClass : get_dataset_schema : Exception " + str(exc.msg))
+            logging.error("data ingestion : SchemaClass : get_dataset_schema : " +traceback.format_exc())
             return exc.msg
 
-    def map_dataset_schema(self,DBObject,connection,project_id,column_name_list,column_lst,data_type_lst,column_attribute_lst,column_change_datatype):
+    def map_dataset_schema(self,DBObject,connection,project_id,column_name_list,column_lst,data_type_lst,column_attribute_lst):
         """
 
         """
         try:
+            logging.info("data ingestion : SchemaClass : map_dataset_schema : execution start")
             prev_cols_lst = []
             prev_dtype_lst = []
             
             new_cols_lst = column_lst
-            new_dtype_lst = column_change_datatype
             cols_attribute_lst = column_attribute_lst
 
             table_name,cols,schema =self.get_schema()
@@ -119,27 +119,32 @@ class SchemaClass:
             #check if values in schema table,data is exist or not. If exist then update the values else insert new record
             if self.is_existing_schema(DBObject,connection,project_id):
                 #Iterate all column,data type,previous column name one by one to update schema table values
-                for prev_col,new_col,prev_dtype,new_dtype,col_attr in zip(prev_cols_lst,new_cols_lst,prev_dtype_lst,new_dtype_lst,cols_attribute_lst): 
+                for prev_col,new_col,new_dtype,col_attr in zip(prev_cols_lst,new_cols_lst,prev_dtype_lst,cols_attribute_lst): 
                     sql_command = "update "+table_name + " SET changed_column_name = '" + new_col + "',"\
-                                                            "changed_data_type = '" + new_dtype + "',"\
                                                                 "column_attribute = '" + col_attr +"'"\
-                                " Where project_id ='"+ project_id+"' and column_name ='"+ prev_col +"' and data_type = '"+ prev_dtype +"'"
+                                " Where project_id ='"+ project_id+"' and column_name ='"+prev_col+"' "
                     status = DBObject.update_records(connection,sql_command) # execute sql query command
+
                     if status ==1:
                         raise SchemaUpdateFailed(500)
                     
             else:
-                for prev_col,new_col,prev_dtype,new_dtype,col_attr in zip(prev_cols_lst,new_cols_lst,prev_dtype_lst,new_dtype_lst,cols_attribute_lst): 
-                    row = project_id,prev_col,new_col,prev_dtype,new_dtype,col_attr
+                for prev_col,new_col,new_dtype,col_attr in zip(prev_cols_lst,new_cols_lst,prev_dtype_lst,cols_attribute_lst): 
+                    row = project_id,prev_col,new_col,new_dtype,col_attr
                     row_tuples = [tuple(row)] # Make record for project table
+                    logger.info(str(row_tuples) + "row tuple")
                     status = DBObject.insert_records(connection,table_name,row_tuples,cols) #insert the records into schema table
+                    
                     if status ==1:
                         raise SchemaInsertionFailed(500)
+            logging.info("data ingestion : SchemaClass : map_dataset_schema : execution stop")
             return status
         except (SchemaUpdateFailed,SchemaInsertionFailed) as exc:
+            logging.error("data ingestion : SchemaClass : map_dataset_schema : Exception " + str(exc.msg))
+            logging.error("data ingestion : SchemaClass : map_dataset_schema : " +traceback.format_exc())
             return exc.msg
     
-    def update_dataset_schema(self,schema_data,project_id): ###
+    def update_dataset_schema(self,schema_data,dataset_id): ###
         """
         this function use to update the Schema table values with the new upcoming values.
 
@@ -149,13 +154,14 @@ class SchemaClass:
                   data_type_lst [(List)]  : [Existing table column datatype value]
                   column_attribute_lst [(List)]  : []
                   column_change_datatype[(List)]  : [Updated column datatype value]
-                  project_id [(Integer)]  : [Id of the project table]
+                  dataset_id [(Integer)]  : [Id of the project table]
 
         Return :
                 [String] : [Status value if succeed return 0 else 1]
 
         """
         try :
+            logging.info("data ingestion : SchemaClass : update_dataset_schema : execution start")
             DBObject = db.DBClass()
             connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port)
             if connection == None:
@@ -164,28 +170,28 @@ class SchemaClass:
             column_datatype_list = [] #get column datatype list
             column_attribute_list = [] # get column attribute list
             column_change_name = [] # get column change name
-            column_change_datatype = [] # get column datatype name
             for index in range(len(schema_data)):
                 if schema_data[index]["column_name"] == schema_data[index]["change_column_name"] :
                     raise SameColumnName(500)
                 column_name_list.append(schema_data[index]["column_name"])
                 column_datatype_list.append(schema_data[index]["data_type"])
-                if schema_data[index]["changed_data_type"]=="":
-                    column_change_datatype.append(schema_data[index]["data_type"])
-                else:
-                    column_change_datatype.append(schema_data[index]["changed_data_type"])
                 column_change_name.append(schema_data[index]["change_column_name"])
                 column_attribute_list.append(schema_data[index]["column_attribute"])
-
-
             table_name,col,schema = self.get_schema()
             create_status = DBObject.create_table(connection,table_name,schema)
-            mapping_status =self.map_dataset_schema(DBObject,connection,project_id,column_name_list,column_change_name,column_datatype_list,column_attribute_list,column_change_datatype) 
+            sql_command = "SELECT project_id FROM mlaas.project_tbl where dataset_id="+str(dataset_id) #string sql query
+            project_id=DBObject.select_records(connection,sql_command) #execute sql command
+            dataset_records = project_id.to_records(index=False)
+            project_id =dataset_records[0][0] #get the progect id
+            mapping_status =self.map_dataset_schema(DBObject,connection,str(project_id),column_name_list,column_change_name,column_datatype_list,column_attribute_list) 
+            logging.info("data ingestion : SchemaClass : update_dataset_schema : execution stop")
             if mapping_status == 0:
                 return True
             else:
                 raise SchemaUpdateFailed(500 )
         except(SameColumnName,DatabaseConnectionFailed,SchemaUpdateFailed,SchemaCreationFailed) as exc:
+            logging.error("data ingestion : SchemaClass : update_dataset_schema : Exception " + str(exc.msg))
+            logging.error("data ingestion : SchemaClass : update_dataset_schema : " +traceback.format_exc())
             return exc.msg
 
     
@@ -198,12 +204,13 @@ class SchemaClass:
         Return :
                 [Boolean] : [return True if record exists else False]
         """ 
+        logging.info("data ingestion : SchemaClass : is_existing_schema : execution start")
         table_name,*_ = self.get_schema()  #get the table name from schema
         sql_command = "select project_id from "+ table_name +" where project_id="+project_id
         data=DBObject.select_records(connection,sql_command) #execute the query string,if record exist return dataframe else None 
         if data is None: 
             return False
-
+        logging.info("data ingestion : SchemaClass : is_existing_schema : execution stop")
         if len(data) > 0 : #check if record found return True else False
             return True
         else:
@@ -222,13 +229,20 @@ class SchemaClass:
             [List] : [List of the predicted type attribute for columns]
 
         """
+        logging.info("data ingestion : SchemaClass : get_attribute_datatype : execution start")
         sql_command = "SELECT * FROM "+table_name #sql query
         csv_data = DBObject.select_records(connection,sql_command) #execute sql commnad if data exist then return data else return None
         attribute_type = [] #empty list to append attribute type
         for column_name in column_name_list: #iterate column name list 
             column_data = csv_data[column_name].tolist() #get the specified column data convert into list
             unique_values = list(set(column_data)) #get the set of unique values convert into list
-            value = "categorical" if (len(unique_values)/no_of_rows) < 0.2 else "false" #check condition if condition true then set as categorical else false
+            if (len(unique_values)/no_of_rows) < 0.2 :
+                if "," in str(column_data[1]): #check if the comma value present
+                    value = "categorical list"
+                else :
+                    value = "categorical"
+            else:
+                value =  "false" #check condition if condition true then set as categorical else false
             if value =="false": 
                 datatype_value = csv_data.dtypes.to_dict()[column_name] #get datatype specified for perticular column name
                 if datatype_value in ['float64','float32','int32','int64']: #check if int,float,double present then set it "numerical"
@@ -236,40 +250,8 @@ class SchemaClass:
                 elif datatype_value in ['datetime64[ns]']: #check if datetime value present then set it "timestamp"
                     value = "timestamp"
                 elif datatype_value in ['object']:  #check if object type value present then set it "text"
-                    value = "text"
+                        value = "text"
             attribute_type.append(value) #append type attribute value into list 
+        logging.info("data ingestion : SchemaClass : get_attribute_datatype : execution stop")    
         return attribute_type
 
-    def check_valid_type(self,dataset_id,column_name,chg_attribute_type):
-        """
-        this function used to validate the attribute type for the perticular columns.
-        Args : 
-                [(dataset_id)]  : [Id of the dataset]
-                [(column_name)] : [Name of the column]
-                [(attribute_type)] : [Name of the attribute type]
-        Return : 
-            [Boolean] : [return True if valid else return False]
-        """
-        dict_attribute_type = {
-            'categorical':'false',
-            'categorical list':'false',
-            'numerical' : 'categorical',
-            'timestamp': 'categorical',
-            'text' : 'categorical',
-            'list' : 'categorical List',
-        }
-        schema_data = self.get_dataset_schema(dataset_id)
-        flag = True
-        for dict_value in schema_data:
-            if dict_value["column_name"] == column_name:
-                attribute_type = dict_value["column_attribute"]
-                if chg_attribute_type == attribute_type:
-                    flag = True
-                elif attribute_type in ['numerical','timestamp','text','list']:
-                    valid_type =  dict_attribute_type[attribute_type]
-                    if valid_type != chg_attribute_type :
-                        flag= False     
-                elif attribute_type in ['categorical','categorical list']:
-                    if chg_attribute_type in ['numerical','timestamp','text','list']:
-                        flag = False
-        return flag  

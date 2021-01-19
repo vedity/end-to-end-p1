@@ -35,9 +35,6 @@ urlpatterns = [
     #URL For dataset name
     path('mlaas/ingest/datasetname_exist/',DatasetNameClass.as_view()),
 
-    #URL for Schema column validation
-    path('mlaas/ingest/dataset_schema/column_validate/',SchemaColumnValidationClass.as_view()),
-
     
     #URL For Data Detail Column List (CSV File)
     path('mlaas/ingest/data_detail/column_list/',DataDetailColumnListClass.as_view()),

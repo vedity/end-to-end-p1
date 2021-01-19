@@ -260,19 +260,7 @@ class DatasetSchemaClass(APIView):
                         logging.error("data ingestion : DatasetSchemaClass : POST Method : " +traceback.format_exc())
                         return Response({"status":"500","error_msg":str(e),"response":"false"})
 
-class SchemaColumnValidationClass(APIView):
-        def get(self,request,format=None):
-                try:
-                        logging.info("data ingestion : SchemaColumnValidationClass : GET Method : execution start")
-                        dataset_id =  request.query_params.get('dataset_id') #get dataset id
-                        column_name =  request.query_params.get('column_name') #get column name
-                        attribute_type = request.query_params.get('attribute_type') #get attribute type name
-                        status=schema_obj.check_valid_type(dataset_id,column_name,attribute_type) 
-                        return Response({"Status":status})
-                except Exception as e:
-                        logging.error("data ingestion : SchemaColumnValidationClass : GET Method : Exception :" + str(e))
-                        logging.error("data ingestion : SchemaColumnValidationClass : GET Method : " +traceback.format_exc())
-                        return Response({"status":"500","error_msg":str(e),"response":"false"})
+
 
 class DataDetailClass(APIView):
         """
