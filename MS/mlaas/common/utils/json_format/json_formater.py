@@ -111,7 +111,7 @@ def menu_nested_format(dataset_json1,dataset_json2):
 
 def get_column_name(column_name):
     json_list=[]
-    column_list = list(column_name[0].keys())[1:]
+    column_list = list(column_name[0].keys())
     for i in column_list:
         temp_dict ={
             "data" : i

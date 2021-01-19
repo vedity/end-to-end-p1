@@ -1,2 +1,11 @@
 
 
+.datadetail-datatable
+{
+  th:first-child {
+  display: none;
+}
+td:first-child {
+  display: none;
+}
+}

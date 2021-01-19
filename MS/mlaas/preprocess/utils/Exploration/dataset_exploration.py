@@ -8,14 +8,20 @@
 '''
 
 import pandas as pd
+#from ..ingest.utils.database import db
 import numpy as np
+import json
 from scipy import stats
 import math
+import logging
 
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
-from ingest.utils.dataset import dataset_creation as dc
 from common.utils.database import db
+from ingest.utils.dataset import dataset_creation
+import logging
+
+dc = dataset_creation.DatasetClass()
 
 class ExploreClass:
 
@@ -47,6 +53,7 @@ class ExploreClass:
         #? Getting CSV table name
         sql_command = "SELECT DATASET_TABLE_NAME FROM "+ table_name + " WHERE DATASET_ID ='"+ dataset_id +"'"
         dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+        
         dataset_table_name = dataset_df['dataset_table_name'][0] 
         
         #? changing the database schema for the public databases
@@ -61,6 +68,7 @@ class ExploreClass:
             #? Getting Statistics
             stats_df = data_df.describe(include = 'all')
             
+        
             #? Getting Categorical & Continuous Columns
             cols = data_df.columns
             num_cols = data_df._get_numeric_data().columns
@@ -81,14 +89,15 @@ class ExploreClass:
             stats_df['Plot Values'] = 0
             stats_df['Plot Values'] = stats_df['Plot Values'].astype('object')
             data_df = data_df.dropna()
-
+            logging.info("dataset_df:data_exploration"+str(stats_df))
             #? Merging the Column Names
             i = 0
             for col in data_df.columns:
                 stats_df.iloc[i,-2] = col
                 stats_df.iloc[i,-1] = self.get_values(data_df[col],numerical_columns,col)
+                logging.info("dataset_df:data_exploration")           
                 i += 1
-
+            logging.info("dataset_df:data_exploration"+str(stats_df))
             #? Dataset Contains both Categorical & Continuous Data
             try:
                 stats_df = stats_df[['Plot Values','Column Name','Mean','Std','Min Value','25%','50%','75%','Max Value','Most Frequent','Frequency','Unique Values','Null Values','Non-Null Values']]
@@ -104,6 +113,35 @@ class ExploreClass:
         
         return stats_df
     
+    
+    def get_hist_values(self,arr):
+        size,width = get_bin_size_width(arr)
+        
+        bins = {}
+        n = 0
+        l = arr[0]
+        r = l + width
+        i = 0
+        iteration = 0
+        while i < len(arr):
+            val = arr[i]
+            if val < r:
+                n += 1
+                i += 1
+            else: 
+                bins[l] = bins.get(l,n)
+                l = r
+                r += width
+                iteration += 1
+                if val < r:
+                    n = 1
+                    i += 1
+        else:
+            bins[l] = bins.get(l,n)
+                
+        return bins
+
+        
     def return_columns(self,DBObject, connection, table_name,*args):
         '''
             Returns data to be shown in the Visualization.
@@ -123,6 +161,8 @@ class ExploreClass:
         #? Get Data Of the Column
         sql_command = f"SELECT {cols} FROM {table_name}"
         data_df = DBObject.select_records(connection,sql_command)
+        # data_df = data_df.to_json(orient='records')
+        # data_df = json.loads(data_df)
         
         return data_df
 
@@ -181,7 +221,7 @@ class ExploreClass:
                 
             Returns:
                 List[(Intiger|Float)]: List of 2 Lists containing bin_edges & histogram values.
-
+ 
         '''
         try:
             #? Sorting the array

@@ -7,12 +7,12 @@
 */
 '''
 
-from MS.mlaas.common.utils.exception_handler.python_exception.common.common_exception import EntryNotFound
-from MS.mlaas.preprocess.utils.Exploration.dataset_exploration import ExploreClass
+from common.utils.exception_handler.python_exception.common.common_exception import EntryNotFound
+from preprocess.utils.Exploration.dataset_exploration import ExploreClass
 import logging
 import traceback
 
-from .exploration import dataset_exploration as de
+from .Exploration import dataset_exploration as de
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
 from common.utils.database import db
@@ -75,16 +75,17 @@ class PreprocessingClass(de.ExploreClass):
             if connection == None :
                 raise DatabaseConnectionFailed(500)  
             
-            stats_df = super(ExploreClass,self).get_dataset_statistics(DBObject,connection,dataset_id)
-            if stats_df == 1:
-                return EntryNotFound(500)
-            elif stats_df == 2:
-                return StatisticsError(500)
+            stats_df = super(PreprocessingClass,self).get_dataset_statistics(DBObject,connection,dataset_id)
+            if isinstance(stats_df, int):
+                if stats_df == 1:
+                    return EntryNotFound(500)
+                elif stats_df == 2:
+                    return StatisticsError(500)
             
         except (Exception,EntryNotFound,StatisticsError) as exc:
-            logging.error("data preprocessing : PreprocessingClass : get_exploration_data : Exception " + str(exc.msg))
+            logging.error("data preprocessing : PreprocessingClass : get_exploration_data : Exception " + str(exc))
             logging.error("data preprocessing : PreprocessingClass : get_exploration_data : " +traceback.format_exc())
-            return exc.msg
+            return str(exc)
             
         logging.info("data preprocessing : PreprocessingClass : get_exploration_data : execution end")
         return stats_df

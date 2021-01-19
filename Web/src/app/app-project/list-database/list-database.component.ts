@@ -26,36 +26,50 @@ export class ListDatabaseComponent implements OnInit {
     bsCustomFileInput.init();
     this.getdataset();
   }
+
   getdataset() {
     this.apiService.getDataset().subscribe(
       logs => this.successHandler(logs),
       error => this.errorHandler(error)
     );
   }
+  
   successHandler(data) {
     if (data.status_code == "200") {
       this.transactions = data.response;
     }
+    else{
+      this.transactions=[];
+    }
+    console.log(this.datatableElement.dtInstance);
+    
+    if(!this.datatableElement.dtInstance){
       this.dtTrigger.next();
-      this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
-        dtInstance.columns().every(function () {
-          const that = this;
-          $('input', this.header()).on('keyup change', function () {
-            if (that.search() !== this['value']) {
-              that
-                .search(this['value'])
-                .draw();
-            }
-          });
-          $('select', this.header()).on('change', function () {
-            if (that.search() !== this['value']) {
-              that
-                .search(this['value'])
-                .draw();
-            }
-          });
+    this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
+      dtInstance.columns().every(function () {
+        const that = this;
+        $('input', this.header()).on('keyup change', function () {
+          if (that.search() !== this['value']) {
+            that
+              .search(this['value'])
+              .draw();
+          }
+        });
+        $('select', this.header()).on('change', function () {
+          if (that.search() !== this['value']) {
+            that
+              .search(this['value'])
+              .draw();
+          }
         });
       });
+    });
+    }
+    else{
+      this.rendered();
+      this.dtTrigger.next();
+
+    }
   }
 
   errorHandler(error) {
@@ -127,13 +141,10 @@ export class ListDatabaseComponent implements OnInit {
       if (result.value) {
         this.apiService.deletedataset(id).subscribe(
           logs => {
-            if (logs.response == "true") {
+            if (logs.status_code == "200") {
               Swal.fire('Deleted!', logs.error_msg, 'success');
               this.getdataset();
-              this.rendered();
-              setTimeout(() => {
-                this.dtTrigger.next();
-              }, 1000);
+              
             }
             else
               Swal.fire('Not Deleted!', logs.error_msg, 'error')
@@ -190,11 +201,6 @@ export class ListDatabaseComponent implements OnInit {
   savesuccess(data) {
     if (data.status_code == "200") {
       this.getdataset();
-      this.rendered();
-
-      setTimeout(() => {
-        this.dtTrigger.next();
-      }, 1000);
     }
     else
       this.errorHandler(data);

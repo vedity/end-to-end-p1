@@ -123,6 +123,7 @@ class DBClass:
         
         cols = cols # Get columns name for database insert query.
         tuples = row_tuples # Get record for database insert query.
+        logging.info("cols"+str(cols))
         query = "INSERT INTO %s(%s) VALUES %%s" % (table_name, cols) # Make query
         cursor = connection.cursor() # Open cursor for database.
         try:
@@ -279,13 +280,12 @@ class DBClass:
         """ 
         
         col_table_name=table_name.partition(".")[2] #trim from the string and get the table name
-        columns_list=self.get_column_names(connection,col_table_name) #get the column list 
-        columns_list=columns_list[1:] #get all index value accept index 0 
-        if sort_type =="" and  str(sort_index) == "":  #check if value sort_type and sort_index is empty
+        columns_list1=self.get_column_names(connection,col_table_name) #get the column list 
+        columns_list=columns_list1[1:] #get all index value accept index 0 
+        if sort_type =="asc" and  str(sort_index) == "0":  #check if value sort_type and sort_index is empty
             order_clause="ORDER BY index"
         else:
-            order_clause=f'ORDER BY "{columns_list[int(sort_index)]}" {sort_type}' #formated string for order By clause
-        
+            order_clause=f'ORDER BY "{columns_list1[int(sort_index)]}" {sort_type}' #formated string for order By clause 
         return order_clause,columns_list
     
     def get_global_search_clause(self,columns,global_value):
@@ -319,34 +319,29 @@ class DBClass:
         Return : 
             [String] : [return the sql query string]
         """
-        
-
         try: 
             end_index = (start_index + length)-1 #get total length
-
-
-            order_clause,columns=self.get_order_clause(connection,table_name,sort_type,sort_index) #call get_order_clause function and get order by string and column list
-            
-
+            limit_index=start_index+length
+            order_clause,columns=self.get_order_clause(connection,table_name,sort_type,sort_index) #call get_order_clause function and get order by string and column list            
             columns_str = '","'.join(columns) # create string that join comma(,) with column name list sequential manner
             columns_str = "\""+columns_str+"\"" 
-            
-
             global_search_clause=""
             if global_search_value!="":
                 global_search_clause=self.get_global_search_clause(columns,global_search_value)  #call get_global_search_clause function and get search query string
-                global_search_clause= "where "+global_search_clause
-            
-            if str(sort_index) != "" or global_search_value!="":
-                sql_command = f'SELECT {columns_str} From {table_name} {global_search_clause} {order_clause} limit {length}' 
-                
+                global_search_clause= "where "+global_search_clause           
+            if str(sort_index) != "0" or global_search_value!="":
+                if start_index==0:
+                    sql_command = f'SELECT * From {table_name} {global_search_clause} {order_clause} limit {length}'                 
+                else:    
+                    sql_command = f'select * from (SELECT * From {table_name} {global_search_clause} {order_clause} limit {limit_index} offset {start_index}) as dt limit {length}'                 
+                logger.info("sql_command1: "+sql_command)
             else:
-                sql_command = f'SELECT {columns_str} From {table_name} where index between {start_index} and {end_index}  {order_clause}' 
-            
+                sql_command = f'SELECT * From {table_name} where index between {start_index} and {end_index}  {order_clause}'
+                logger.info("sql_command2: "+sql_command)            
             return sql_command
         except Exception as exc:
             return str(exc) 
-    
+
     def is_existing_table(self,connection,table_name,schema):
         """ function used to check the table is Exists or Not in database
 
