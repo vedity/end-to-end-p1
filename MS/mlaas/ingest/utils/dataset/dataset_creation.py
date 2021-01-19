@@ -74,8 +74,9 @@ class DatasetClass:
         file_size = self.get_file_size(file_path)# Get size of uploaded file.
         dataset_table_name = self.get_dataset_table_name(file_name) # Make table name for loaded csv.
         row=dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name # Make record for dataset table.
+        logging.info("row error"+str(row))
         row_tuples = [tuple(row)] # Convert row record into list of tuple.
-        
+        logging.info("row tuples error"+str(row_tuples))
         logging.info("data ingestion : DatasetClass : make_dataset_records : execution end")
         return row_tuples
     
@@ -171,6 +172,7 @@ class DatasetClass:
         create_status = DBObject.create_table(connection,table_name,schema) # Get status about dataset tableis created or not.if created then 0 else 1.
 
         row_tuples = self.make_dataset_records(dataset_name,file_name,dataset_visibility,user_name) # Get record for dataset table.
+        logging.info("row tuples in make dataset"+str(row_tuples))
         insert_status = DBObject.insert_records(connection,table_name,row_tuples,cols) # Get status about inserting records into dataset table. if successful then 0 else 1.
         
         # Condition will check dataset table created and data is successfully stored into project table or not.if both successful then 0 else 1. 
@@ -235,15 +237,17 @@ class DatasetClass:
         # Get table name.
         table_name,*_ = self.make_dataset_schema()
         # Get dataset name.
+        logging.info("index of list",str(row_tuples))
         dataset_name,*_ = row_tuples[0]
         
         logging.debug("data ingestion : DatasetClass : get_dataset_id : this will excute select query on table name : "+table_name +" based on dataset name : "+dataset_name + " user name : "+user_name)
         dataset_name=str(dataset_name).replace("'","''")
         # Prepare select sql command to fetch dataset id from dataset table for particular user.
-        sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_name ='"+ dataset_name + "' and user_name = '"+ user_name + "'"
+        dataset_name=str(dataset_name).replace("'","''")
+        sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_name ='" + dataset_name + "' and user_name = '"+ user_name + "'"
+        logging.info("dataset_id"+str(sql_command))
         # Get dataframe of dataset id. 
         dataset_df = DBObject.select_records(connection,sql_command)
-
         # Get dataset id.
         dataset_id = int(dataset_df['dataset_id'][0])
         
@@ -447,6 +451,7 @@ class DatasetClass:
             dataset_name=str(dataset_name).replace("'","''")
             #? There can't be 2 public datasets with same name, because that will create ambiguity in Dropdown list
             #? But there can be 2 private datasets with same name, if users are different
+            dataset_name=str(dataset_name).replace("'","''")
             if dataset_visibility == 'public':
                 #? Is there any(public & private) dataset with same name?
                 sql_command = f"SELECT DATASET_ID FROM {table_name} WHERE DATASET_NAME = '{dataset_name}'"
