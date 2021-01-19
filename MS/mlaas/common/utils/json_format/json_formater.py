@@ -119,13 +119,13 @@ def get_column_name(column_name):
         json_list.append(temp_dict)
     return json_list
 
-def get_schema_format(column_name,column_datatype):
+def get_schema_format(column_name,column_datatype,predicted_datatype):
     json_data = []
     for x in range(len(column_name)):
         temp_dict = {
             "column_name": column_name[x],
             "data_type": column_datatype[x],
-            "column_attribute": "",
+            "column_attribute": predicted_datatype[x],
             "change_column_name":"",
         }
         json_data.append(temp_dict)

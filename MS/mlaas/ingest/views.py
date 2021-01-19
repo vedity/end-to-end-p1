@@ -37,6 +37,7 @@ logger = logging.getLogger('view')
 DBObject=db.DBClass()     #Get DBClass object
 connection,connection_string=DBObject.database_connection(database,user,password,host,port)      #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 IngestionObj=ingestion.IngestClass(database,user,password,host,port)
+schema_obj=SchemaClass(database,user,password,host,port) #initialize Schema object from schema class
 
 
 class CreateProjectClass(APIView):
@@ -203,42 +204,75 @@ class CreateDatasetClass(APIView):
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
                   
 class DatasetSchemaClass(APIView):
+        """
+        this class used to get the data from schema table and/or update the data of schema table
+
+        Args : 
+                column_name_list[(List)]  : [Existing table column name value]
+                column_change_name [(List)]  : [Updated column name value]
+                column_datatype_list [(List)]  : [Existing table column datatype value]
+                column_attribute_list [(List)]  : []
+                column_change_datatype[(List)]  : [Updated column datatype value]
+                dataset_id [(Integer)]  : [Id of the dataset table]
+
+        Return :
+                status_code(500 or 200),
+                error_msg(Error message for retrival & insertions failed or successfull),
+                Response(return false if failed otherwise json data) 
+        """
+
         def get(self,request,format=None):
-                dataset_id=request.query_params.get('dataset_id')
-                schema_obj=SchemaClass(database,user,password,host,port)
-                schema_data=schema_obj.get_dataset_schema(str(dataset_id))
-                return Response({"Schema":schema_data})    
+                try:
+                        logging.info("data ingestion : DatasetSchemaClass : GET Method : execution start")
+                        dataset_id=request.query_params.get('dataset_id') #get dataset id
+                        schema_data=schema_obj.get_dataset_schema(str(dataset_id)) #get the schema detail,if exist then return data else return string with error_msg and status code
+                        # return Response({"data":schema_data})
+                        if isinstance(schema_data,list):  
+                                logging.info("data ingestion : DatasetSchemaClass : GET Method : execution stop")
+                                return Response({"Status":"200","error_msg":"Successfull retrival","response":schema_data})
+                        else:
+                                status_code,error_msg=get_Status_code(schema_data) # extract the status_code and error_msg from schema_data
+                                logging.info("data ingestion : DatasetSchemaClass : GET Method : execution stop : status_code :"+status_code)
+                                return Response({"Status":status_code,"error_msg":error_msg,"response":"false"})
+                except Exception as e:
+                        logging.error("data ingestion : DataDetailClass : GET Method : Exception :" + str(e))
+                        logging.error("data ingestion : DataDetailClass : GET Method : " +traceback.format_exc())
+                        return Response({"status":"500","error_msg":str(e),"response":"false"})
+                            
    
 
         def post(self,request,format=None):
-                update_schema_data=json.loads(request.body)
-                schema_data = update_schema_data["data"]
-                column_name_list=[]
-                column_datatype_list = []
-                column_attribute_list = []
-                column_change_name = []
-                column_change_datatype = [] #####
-                for index in range(len(schema_data)):
-                        if schema_data[index]["column_name"] == schema_data[index]["change_column_name"] :
-                                return Response({"error":"Column name same"})
-                        column_name_list.append(schema_data[index]["column_name"])
-                        column_datatype_list.append(schema_data[index]["data_type"])
-                        if schema_data[index]["changed_data_type"]=="":
-                                column_change_datatype.append(schema_data[index]["data_type"])
+                try:
+                        logging.info("data ingestion : DatasetSchemaClass : POST Method : execution start")
+                        update_schema_data=json.loads(request.body) #convert the data into dictonery
+                        schema_data = update_schema_data["data"] #access "data" key value from the schema_data dict
+                        dataset_id=request.query_params.get('dataset_id') #get the dataset id
+                        schema_status=schema_obj.update_dataset_schema(schema_data,dataset_id)
+                        if schema_status !=True:
+                                status_code,error_msg=get_Status_code(schema_status) # extract the status_code and error_msg from schema_status
+                                logging.info("data ingestion : DatasetSchemaClass : POST Method : execution stop : status_code :"+status_code)
+                                return Response({"Status":status_code,"error_msg":error_msg,"response":"false"})
                         else:
-                                column_change_datatype.append(schema_data[index]["changed_data_type"])
-                        
-                        column_change_name.append(schema_data[index]["change_column_name"])
-                        column_attribute_list.append(schema_data[index]["column_attribute"])
-                        
-                        # column_change_datatype.append(schema_data[index]["changed_data_type"]) #####
-                user_name=request.query_params.get('user_name')
-                dataset_id=request.query_params.get('dataset_id')
-                schema_obj=SchemaClass(database,user,password,host,port)
-                schema_status=schema_obj.update_dataset_schema(column_name_list,column_change_name,column_datatype_list,column_attribute_list,column_change_datatype,dataset_id,user_name) ####
+                                logging.info("data ingestion : DatasetSchemaClass : POST Method : execution stop : status_code :200")
+                                return Response({"Status":"200","error_msg":"Successfully updated","response":"true"})           
+                except Exception as e:
+                        logging.error("data ingestion : DatasetSchemaClass : POST Method : Exception :" + str(e))
+                        logging.error("data ingestion : DatasetSchemaClass : POST Method : " +traceback.format_exc())
+                        return Response({"status":"500","error_msg":str(e),"response":"false"})
 
-                return Response({"Status":str(schema_status)})           
-                
+class SchemaColumnValidationClass(APIView):
+        def get(self,request,format=None):
+                try:
+                        logging.info("data ingestion : SchemaColumnValidationClass : GET Method : execution start")
+                        dataset_id =  request.query_params.get('dataset_id') #get dataset id
+                        column_name =  request.query_params.get('column_name') #get column name
+                        attribute_type = request.query_params.get('attribute_type') #get attribute type name
+                        status=schema_obj.check_valid_type(dataset_id,column_name,attribute_type) 
+                        return Response({"Status":status})
+                except Exception as e:
+                        logging.error("data ingestion : SchemaColumnValidationClass : GET Method : Exception :" + str(e))
+                        logging.error("data ingestion : SchemaColumnValidationClass : GET Method : " +traceback.format_exc())
+                        return Response({"status":"500","error_msg":str(e),"response":"false"})
 
 class DataDetailClass(APIView):
         """
@@ -253,7 +287,9 @@ class DataDetailClass(APIView):
                 global_value[(String)] : [value that need be search in table]
                 dataset_id[(Integer)] : [Id of the dataset table]
         Return : 
-                [json] : [It will return json formatted data of table ]
+                status_code(500 or 200),
+                error_msg(Error message for retrival & insertions failed or successfull),
+                Response(return false if failed otherwise json data)
         """   
 
         def post(self, request, format=None ):
@@ -286,20 +322,29 @@ class DataDetailClass(APIView):
                         return Response({"draw":draw,"recordsTotal":0,"recordsFiltered":0,"data":[]})
 
 class DataDetailColumnListClass(APIView):
-         def get(self, request, format=None):
+        """ 
+        this class used to get the list of column name from the csv file uploaded by user
+        for the specific dataset id
+        
+        Args:
+                [(dataset_id)] : [Id of the dataset table]
+        Return: 
+                [(List)] : [List of column name]
+
+        """
+        def get(self, request, format=None):
                 try:
                         logging.info("data ingestion : DataDetailClass : GET Method : execution start")
                         dataset_id = request.query_params.get('dataset_id') #get dataset_id
-                        DBObject=db.DBClass()
                         dataset_df=DBObject.get_column_list(connection,dataset_id) #call show_data_details and it will return dataset detail data in dataframe
                         if isinstance(dataset_df,str): #check the instance of dataset_df
                                 status_code,error_msg=get_Status_code(dataset_df) # extract the status_code and error_msg  from dataset_df
                                 logging.info("data ingestion : DataDetailClass : GET Method : execution stop : status_code :"+status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
+                                column_name = get_column_name(dataset_df) #Extract column name from dict and return list column name except index column
                                 logging.info("data ingestion : DataDetailClass : GET Method : execution stop : status_code :200")
-                                getcolumn = get_column_name(dataset_df)
-                                return Response({"status_code":"200","error_msg":"successfull retrival","response":getcolumn})  #return Data             
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":column_name})  #return Data             
                 except Exception as e:
                         logging.error("data ingestion : DataDetailClass : GET Method : Exception :" + str(e))
                         logging.error("data ingestion : DataDetailClass : GET Method : " +traceback.format_exc())
@@ -479,5 +524,4 @@ class DatasetNameClass(APIView):
                         return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                 else:
                         logging.info("data ingestion : DatasetNameClass : GET Method : execution stop : status_code : 200")
-                        return Response({"status_code":"200","error_msg":"you can proceed","response":dataset_df})
-        
+                        return Response({"status_code":"200","error_msg":"you can proceed","response":dataset_df}) 
