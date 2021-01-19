@@ -7,7 +7,7 @@ urlpatterns = [
     path('mlaas/ingest/user/login',UserLoginClass.as_view()),
 
     #URL for menu
-    path('mlaas/menu',MenuClass.as_view()),
+    path('mlaas/menu/',MenuClass.as_view()),
 
     #URL for menu
     path('mlaas/dataset_schema/datatype/',ScheamDatatypeListClass.as_view()),
