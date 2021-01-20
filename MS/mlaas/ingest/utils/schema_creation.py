@@ -23,7 +23,6 @@ LogObject.log_setting()
 logger = logging.getLogger('view')
 
 class SchemaClass:
-    
     def __init__(self,database,user,password,host,port):
         """This constructor is used to initialize database credentials.
            It will initialize when object of this class is created with below parameter.
@@ -42,11 +41,11 @@ class SchemaClass:
         self.port = port # Port Number
         
     def get_schema(self):
-        # Project table name
+        # schema table name
         table_name = 'mlaas.schema_tbl'
-        # Columns for project table
+        # Columns for schema table
         cols = 'project_id,column_name,changed_column_name,data_type,column_attribute' 
-        # Schema for project table.
+        # Schema of schema_table
         schema ="project_id bigint,"\
                 "column_name  text,"\
                 "changed_column_name  text,"\
@@ -83,16 +82,14 @@ class SchemaClass:
             else:
                 table_name = dataset_table_name
 
-            #sql query string to get the INFORMATION_SCHEMA for the table and fetch column_name and data type
-            sql_command = "SELECT column_name,data_type FROM INFORMATION_SCHEMA.COLUMNS WHERE "
-            sql_command += "table_name = '{}' order by ordinal_position;".format( dataset_table_name )  
+            #sql query string
+            sql_command = "SELECT * from "+table_name
             data_details_df = DBObject.select_records(connection,sql_command) #execute the sql query
             if data_details_df is None:
                 raise DataNotFound(500)
-            column_name = data_details_df["column_name"].tolist() # covert the dataframe into list
-            column_data_type = data_details_df["data_type"].tolist() # covert the dataframe into list
+            column_name = data_details_df.columns.values.tolist() # covert the dataframe into list
             predicted_datatype = self.get_attribute_datatype(connection,DBObject,table_name,column_name ,no_of_rows)
-            schema_data = get_schema_format(column_name,column_data_type,predicted_datatype) #call get_schema_format to get json format data
+            schema_data = get_schema_format(column_name,predicted_datatype) #call get_schema_format to get json format data
             logging.info("data ingestion : SchemaClass :get_dataset_schema : execution stop")
             return schema_data
         except (DatasetDataNotFound,DataNotFound,DatabaseConnectionFailed) as exc:
@@ -132,7 +129,6 @@ class SchemaClass:
                 for prev_col,new_col,new_dtype,col_attr in zip(prev_cols_lst,new_cols_lst,prev_dtype_lst,cols_attribute_lst): 
                     row = project_id,prev_col,new_col,new_dtype,col_attr
                     row_tuples = [tuple(row)] # Make record for project table
-                    logger.info(str(row_tuples) + "row tuple")
                     status = DBObject.insert_records(connection,table_name,row_tuples,cols) #insert the records into schema table
                     
                     if status ==1:
@@ -144,7 +140,7 @@ class SchemaClass:
             logging.error("data ingestion : SchemaClass : map_dataset_schema : " +traceback.format_exc())
             return exc.msg
     
-    def update_dataset_schema(self,schema_data,dataset_id): ###
+    def update_dataset_schema(self,schema_data,project_id): ###
         """
         this function use to update the Schema table values with the new upcoming values.
 
@@ -179,10 +175,6 @@ class SchemaClass:
                 column_attribute_list.append(schema_data[index]["column_attribute"])
             table_name,col,schema = self.get_schema()
             create_status = DBObject.create_table(connection,table_name,schema)
-            sql_command = "SELECT project_id FROM mlaas.project_tbl where dataset_id="+str(dataset_id) #string sql query
-            project_id=DBObject.select_records(connection,sql_command) #execute sql command
-            dataset_records = project_id.to_records(index=False)
-            project_id =dataset_records[0][0] #get the progect id
             mapping_status =self.map_dataset_schema(DBObject,connection,str(project_id),column_name_list,column_change_name,column_datatype_list,column_attribute_list) 
             logging.info("data ingestion : SchemaClass : update_dataset_schema : execution stop")
             if mapping_status == 0:

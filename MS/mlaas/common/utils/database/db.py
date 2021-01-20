@@ -36,6 +36,8 @@ class DBClass:
             [dataframe]: [it will return read csv file data in the form of dataframe.]
         """
         read_df=pd.read_csv(file_path) #  Read csv file and load data into dataframe.
+        column_list=[*range(0, len(read_df.columns), 1)] 
+        read_df=pd.read_csv(file_path,parse_dates=column_list) #  Read csv file and load data into dataframe.
         return read_df
 
 
@@ -123,7 +125,6 @@ class DBClass:
         
         cols = cols # Get columns name for database insert query.
         tuples = row_tuples # Get record for database insert query.
-        logging.info("cols"+str(cols))
         query = "INSERT INTO %s(%s) VALUES %%s" % (table_name, cols) # Make query
         cursor = connection.cursor() # Open cursor for database.
         try:

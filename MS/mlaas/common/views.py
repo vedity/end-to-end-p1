@@ -21,6 +21,9 @@ from .utils.exception_handler.python_exception.ingest.ingest_exception import *
 from .utils.logger_handler import custom_logger as cl
 from .utils.exception_handler.python_exception import *
 from .utils.json_format.json_formater import *
+from .utils.activity_timeline import *
+from .utils.activity_timeline import activity_timeline
+from database import *
 import json
 user_name = 'admin'
 log_enable = True
@@ -30,6 +33,7 @@ logger = logging.getLogger('view')
 DBObject=db.DBClass()     #Get DBClass object
 connection,connection_string=DBObject.database_connection(database,user,password,host,port)      #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 IngestionObj=ingestion.IngestClass(database,user,password,host,port)
+timeline_Obj=activity_timeline.ActivityTimelineClass(database,user,password,host,port)
 class UserLoginClass(APIView):
         """ this class used to add user data into table.
 
@@ -158,5 +162,29 @@ class ScheamColumnListClass(APIView):
                         logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
 			# logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
                         return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+
+
+class ActivityTimelineClass(APIView):
         
+        def post(self,request,format=None):
+                try:
+                        logging.info("data ingestion : ActivityTimelineClass : GET Method : execution start")
+                        
+                        status = timeline_Obj.insert_user_activity()
+                        return Response({"status":status})
+                except Exception as e:
+                        logging.error("data ingestion : ActivityTimelineClass : GET Method : Exception :" + str(e))
+                        logging.error("data ingestion : ActivityTimelineClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+        def get(self,request,format=None):
+                try:
+                        logging.info("data ingestion : ActivityTimelineClass : GET Method : execution start")
+                        status = timeline_Obj.get_user_activity()
+                        return Response({"status":status})
+                except Exception as e:
+                        logging.error("data ingestion : ActivityTimelineClass : GET Method : Exception :" + str(e))
+                        logging.error("data ingestion : ActivityTimelineClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+ 
+      
         
