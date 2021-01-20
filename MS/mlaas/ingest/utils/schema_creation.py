@@ -141,7 +141,7 @@ class SchemaClass:
             logging.error("data ingestion : SchemaClass : map_dataset_schema : " +traceback.format_exc())
             return exc.msg
     
-    def update_dataset_schema(self,schema_data,dataset_id): ###
+    def update_dataset_schema(self,schema_data,project_id): ###
         """
         this function use to update the Schema table values with the new upcoming values.
 
