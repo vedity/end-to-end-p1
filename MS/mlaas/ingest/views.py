@@ -239,14 +239,12 @@ class DatasetSchemaClass(APIView):
                         logging.error("data ingestion : DataDetailClass : GET Method : " +traceback.format_exc())
                         return Response({"status":"500","error_msg":str(e),"response":"false"})
                             
-   
-
         def post(self,request,format=None):
                 try:
                         logging.info("data ingestion : DatasetSchemaClass : POST Method : execution start")
                         update_schema_data=json.loads(request.body) #convert the data into dictonery
                         schema_data = update_schema_data["data"] #access "data" key value from the schema_data dict
-                        project_id=request.query_params.get('project_id') 
+                        project_id=request.query_params.get('project_id')
                         schema_status=schema_obj.update_dataset_schema(schema_data,project_id)
                         if schema_status !=True:
                                 status_code,error_msg=get_Status_code(schema_status) # extract the status_code and error_msg from schema_status
