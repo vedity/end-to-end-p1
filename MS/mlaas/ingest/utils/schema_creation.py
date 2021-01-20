@@ -16,6 +16,7 @@ from common.utils.exception_handler.python_exception.common.common_exception imp
 from common.utils.exception_handler.python_exception.ingest.ingest_exception import *
 from dateutil.parser import parse
 import pandas as pd
+import traceback
 user_name = 'admin'
 log_enable = True
 LogObject = cl.LogClass(user_name,log_enable)

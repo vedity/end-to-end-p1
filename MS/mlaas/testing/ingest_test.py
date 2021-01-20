@@ -16,7 +16,7 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
             visibility ([string]): [name of the visibility(public or private)]
     
         """
-        time.sleep(1)
+        #time.sleep(1)
         files = '../ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser","dataset_name":"auto_dataset_name","visibility":"public"}
