@@ -74,7 +74,6 @@ class DatasetClass:
         file_size = self.get_file_size(file_path)# Get size of uploaded file.
         dataset_table_name = self.get_dataset_table_name(file_name) # Make table name for loaded csv.
         row=dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name # Make record for dataset table.
-        logging.info("row error"+str(row))
         row_tuples = [tuple(row)] # Convert row record into list of tuple.
         logging.info("row tuples error"+str(row_tuples))
         logging.info("data ingestion : DatasetClass : make_dataset_records : execution end")

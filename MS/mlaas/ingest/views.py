@@ -246,8 +246,8 @@ class DatasetSchemaClass(APIView):
                         logging.info("data ingestion : DatasetSchemaClass : POST Method : execution start")
                         update_schema_data=json.loads(request.body) #convert the data into dictonery
                         schema_data = update_schema_data["data"] #access "data" key value from the schema_data dict
-                        dataset_id=request.query_params.get('dataset_id') #get the dataset id
-                        schema_status=schema_obj.update_dataset_schema(schema_data,dataset_id)
+                        project_id=request.query_params.get('project_id') 
+                        schema_status=schema_obj.update_dataset_schema(schema_data,project_id)
                         if schema_status !=True:
                                 status_code,error_msg=get_Status_code(schema_status) # extract the status_code and error_msg from schema_status
                                 logging.info("data ingestion : DatasetSchemaClass : POST Method : execution stop : status_code :"+status_code)
