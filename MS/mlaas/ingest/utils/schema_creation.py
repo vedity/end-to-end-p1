@@ -176,12 +176,17 @@ class SchemaClass:
                 column_attribute_list.append(schema_data[index]["column_attribute"])
             table_name,col,schema = self.get_schema()
             create_status = DBObject.create_table(connection,table_name,schema)
-            mapping_status =self.map_dataset_schema(DBObject,connection,str(project_id),column_name_list,column_change_name,column_datatype_list,column_attribute_list) 
-            logging.info("data ingestion : SchemaClass : update_dataset_schema : execution stop")
-            if mapping_status == 0:
-                return True
-            else:
-                raise SchemaUpdateFailed(500 )
+            if create_status in [1,0]:
+                mapping_status =self.map_dataset_schema(DBObject,connection,str(project_id),column_name_list,column_change_name,column_datatype_list,column_attribute_list) 
+                logging.info("data ingestion : SchemaClass : update_dataset_schema : execution stop")
+                if mapping_status == 0:
+                    return True
+                else:
+                    raise SchemaUpdateFailed(500)
+            else :
+                raise TableCreationFailed(500)
+            
+            
         except(SameColumnName,DatabaseConnectionFailed,SchemaUpdateFailed,SchemaCreationFailed) as exc:
             logging.error("data ingestion : SchemaClass : update_dataset_schema : Exception " + str(exc.msg))
             logging.error("data ingestion : SchemaClass : update_dataset_schema : " +traceback.format_exc())
