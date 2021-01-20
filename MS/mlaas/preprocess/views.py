@@ -38,7 +38,7 @@ connection,connection_string=DBObject.database_connection(database,user,password
 ExploreObj =  preprocessing.PreprocessingClass(database,user,password,host,port)
 
 
-class DatasetStatisticsClass(APIView):
+class DatasetExplorationClass(APIView):
     """
         This class is used to show the data statistics for each of the feature in the table.
         It will take url string as mlaas/preprocess/exploredata/get_data_statistics.
