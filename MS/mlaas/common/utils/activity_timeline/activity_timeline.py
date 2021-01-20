@@ -55,12 +55,6 @@ class ActivityTimelineClass:
         return table_name,cols,schema
     
     def insert_user_activity(self,user_id,project_id,dataset_id,activity_name,activity_description,date,timestamp,operation):
-        """
-        this function used to insert the record into activity table
-
-        Args:
-            userid[(Integer)] :[Id of  the user]
-        """
         DBObject = db.DBClass() # create object for database class
         connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port)
         table_name,cols,schema = self.get_schema()
@@ -82,13 +76,6 @@ class ActivityTimelineClass:
         return "inserted"
     
     def get_user_activity(self):
-        """
-        this function used to get the records from activity table  for te specific users
-        Args:
-            user_id[(String)] : [Id of the user]
-        Return:
-            [List]: []
-        """
         user_id=1
         DBObject = db.DBClass() # create object for database class
         connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port)
@@ -101,19 +88,10 @@ class ActivityTimelineClass:
         return activity_df
 
     def is_existing_schema(self,DBObject,connection,table_name,schema):
-        """
-        this function checks activity table created or not,If not then it will create the activity table
-
-        Args : 
-                table_name[(String)] : [Name of the table]
-                Schema[(String)] : [structure of activity table]
-        Return :
-                [Boolean] : [return True if exists or created else False]
-        """ 
-        status = DBObject.is_existing_table(connection,table_name,'mlaas')
-        if status == 'False': 
-            create_status = DBObject.create_table(connection,table_name,schema)
-            return True
-        elif status == 'True':
-            return True
-        return False
+            status = DBObject.is_existing_table(connection,table_name,'mlaas')
+            if status == 'False': 
+                create_status = DBObject.create_table(connection,table_name,schema)
+                return True
+            elif status == 'True':
+                return True
+            return False
