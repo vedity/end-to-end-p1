@@ -330,7 +330,8 @@ class DataDetailColumnListClass(APIView):
                         else:
                                 column_name = get_column_name(dataset_df) #Extract column name from dict and return list column name except index column
                                 logging.info("data ingestion : DataDetailClass : GET Method : execution stop : status_code :200")
-                                return Response({"status_code":"200","error_msg":"successfull retrival","response":column_name})  #return Data             
+                                getcolumn = get_column_name(dataset_df)
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":getcolumn})  #return Data             
                 except Exception as e:
                         logging.error("data ingestion : DataDetailClass : GET Method : Exception :" + str(e))
                         logging.error("data ingestion : DataDetailClass : GET Method : " +traceback.format_exc())
