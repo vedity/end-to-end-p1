@@ -7,19 +7,18 @@
 */
 '''
 
-import pandas as pd
-#from ..ingest.utils.database import db
-import numpy as np
-import json
 from scipy import stats
-import math
-import logging
-
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
 from common.utils.database import db
 from ingest.utils.dataset import dataset_creation
 import logging
+import math
+import pandas as pd
+import numpy as np
+import json
+
+
 
 dc = dataset_creation.DatasetClass()
 
@@ -53,7 +52,6 @@ class ExploreClass:
         #? Getting CSV table name
         sql_command = "SELECT DATASET_TABLE_NAME FROM "+ table_name + " WHERE DATASET_ID ='"+ dataset_id +"'"
         dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
-        
         dataset_table_name = dataset_df['dataset_table_name'][0] 
         
         #? changing the database schema for the public databases
@@ -93,7 +91,6 @@ class ExploreClass:
             axislist =[]
             for col in data_df.columns:
                 stats_df.iloc[i,-2] = col
-                #stats_df.iloc[i,-1] = self.get_values(data_df[col],numerical_columns,col) 
                 axislist.append(self.get_values(data_df[col],numerical_columns,col))            
                 i += 1
             stats_df['Plot Values'] = axislist
@@ -111,61 +108,8 @@ class ExploreClass:
         except:
             return 2
         logging.info("loop end"+str(stats_df)) 
-        return stats_df
+        return stats_df     
     
-    
-    def get_hist_values(self,arr):
-        size,width = get_bin_size_width(arr)
-        
-        bins = {}
-        n = 0
-        l = arr[0]
-        r = l + width
-        i = 0
-        iteration = 0
-        while i < len(arr):
-            val = arr[i]
-            if val < r:
-                n += 1
-                i += 1
-            else: 
-                bins[l] = bins.get(l,n)
-                l = r
-                r += width
-                iteration += 1
-                if val < r:
-                    n = 1
-                    i += 1
-        else:
-            bins[l] = bins.get(l,n)
-                
-        return bins
-
-        
-    def return_columns(self,DBObject, connection, table_name,*args):
-        '''
-            Returns data to be shown in the Visualization.
-            
-            input: DBObject, connection object, name of the csv table, columns.
-            output: dataframe. 
-        '''
-        
-        cols = ''
-        for i in args:
-            cols += str(i)
-            cols += ' '
-        
-        cols = cols.strip()
-        cols = cols.replace(" ",",")
-        
-        #? Get Data Of the Column
-        sql_command = f"SELECT {cols} FROM {table_name}"
-        data_df = DBObject.select_records(connection,sql_command)
-        # data_df = data_df.to_json(orient='records')
-        # data_df = json.loads(data_df)
-        
-        return data_df
-
     def iqr(self,arr):
         '''
             Returns Interquartile range of values in the given array.
@@ -233,7 +177,6 @@ class ExploreClass:
             if number_of_bins > 20: number_of_bins = 20
             elif number_of_bins <= 2: number_of_bins = 3
             #? Getting histogram values & bin_edges
-            logging.info("approching np.hist")
             hist, bin_edges = np.histogram(a=arr, bins=number_of_bins)
             logging.info("np.hist finished")
             return [bin_edges[:-1].tolist(),hist.tolist()]
@@ -275,10 +218,8 @@ class ExploreClass:
         
         if col_name in numerical:
             check = self.get_histogram_values(arr.tolist()) 
-            logging.info("numeric valur"+str(check))  
             return check
         else:
-            logging.info("categorical valur")
             return self.get_count_plot(arr)
         
         
