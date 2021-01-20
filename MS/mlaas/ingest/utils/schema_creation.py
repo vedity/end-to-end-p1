@@ -129,6 +129,7 @@ class SchemaClass:
                 for prev_col,new_col,new_dtype,col_attr in zip(prev_cols_lst,new_cols_lst,prev_dtype_lst,cols_attribute_lst): 
                     row = project_id,prev_col,new_col,new_dtype,col_attr
                     row_tuples = [tuple(row)] # Make record for project table
+                    logger.info(str(row_tuples) + "row tuple")
                     status = DBObject.insert_records(connection,table_name,row_tuples,cols) #insert the records into schema table
                     
                     if status ==1:
@@ -140,7 +141,7 @@ class SchemaClass:
             logging.error("data ingestion : SchemaClass : map_dataset_schema : " +traceback.format_exc())
             return exc.msg
     
-    def update_dataset_schema(self,schema_data,project_id): ###
+    def update_dataset_schema(self,schema_data,dataset_id): ###
         """
         this function use to update the Schema table values with the new upcoming values.
 

@@ -121,7 +121,7 @@ def get_column_name(column_name):
 
 def get_schema_format(column_name,predicted_datatype):
     json_data = []
-    for x in range(len(column_name)):
+    for x in range(1,len(column_name)):
         temp_dict = {
             "column_name": column_name[x],
             "data_type": predicted_datatype[x],
