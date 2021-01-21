@@ -438,7 +438,7 @@ class DeleteProjectDetailClass(APIView):
                                 operation = "Delete"
                                 status = timeline_Obj.insert_user_activity(user_id,project_id,str(dataset_id),activity_name,activity_description,current_date,timestamp,operation)
                                 logging.info("data ingestion : DeleteProjectDetailClass : DELETE Method : execution stop : status_code :200")
-                                return Response({"status_code":"200","error_msg":"Successfully delete","response":"true"})
+                                return Response({"status_code":"200","error_msg":"Successfully deleted","response":"true"})
                 except Exception as e:
                         logging.error("data ingestion : DeleteProjectDetailClass : DELETE Method :  Exception : " + str(e))
                         logging.error("data ingestion : DeleteProjectDetailClass : DELETE Method : " +traceback.format_exc())

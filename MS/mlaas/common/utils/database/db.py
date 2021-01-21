@@ -36,11 +36,12 @@ class DBClass:
             [dataframe]: [it will return read csv file data in the form of dataframe.]
         """
         read_df=pd.read_csv(file_path, na_filter= False) #  Read csv file and load data into dataframe.
-        # column_list = read_df.select_dtypes(include=['object'])
-        # logging.info("Test tyoe: "+str(df_num))
-        
-        # column_list=[*range(0, len(read_df.columns), 1)] 
-        # read_df=pd.read_csv(file_path,na_filter= False,parse_dates=column_list) #  Read csv file and load data into dataframe.
+        column_name_list = read_df.columns.values.tolist()
+        column_list = []
+        for name in column_name_list:
+            if read_df.dtypes.to_dict()[name] == 'object':
+                column_list.append(name)
+        read_df=pd.read_csv(file_path,na_filter= False,parse_dates=column_list) #  Read csv file and load data into dataframe.
         return read_df
 
 
