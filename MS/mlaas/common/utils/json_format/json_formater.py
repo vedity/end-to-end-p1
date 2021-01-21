@@ -86,7 +86,7 @@ def menu_nested_format(dataset_json1,dataset_json2):
     for x in dataset_json1:
         outer_dict={}
         for y in dataset_json2: 
-            if x["id"]==y["parentId"]:  
+            if str(x['id'])==str(y['parentId']):
                 y_keys=list(y.keys())
                 y_data=list(y.values())
                 inner_dict={}
@@ -102,11 +102,10 @@ def menu_nested_format(dataset_json1,dataset_json2):
         outer_dict.update({"subItems":json_data})
         json_data1.append(outer_dict)
         json_data=[]
-    json_data1.insert(0,{"id": 1,
-        "label": 'MENU',
-        "isTitle": 'true'
-    })
-
+    # json_data1.insert(0,{"id": 1,
+    #     "label": 'MENU',
+    #     "isTitle": 'true'
+    # })
     return json_data1
 
 def get_column_name(column_name):
