@@ -353,7 +353,7 @@ class DataDetailClass(APIView):
                         sort_type=order_values[0]['dir'] # get the sort type value(asc or desc)
                         sort_index=order_values[0]['column'] # get the sort_index column value
                         global_value=request_body['search']['value']  #get String value for global search
-                        customefilter=request_body['customefilter']    
+                        customefilter=request_body['customfilter']     
                         dataset_id = request.query_params.get('dataset_id') #get dataset_id
                         row_count=DBObject.get_row_count(connection,dataset_id) #get the row count
                         dataset_df=IngestionObj.show_data_details(dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter) #call show_data_details and it will return dataset detail data in dataframe

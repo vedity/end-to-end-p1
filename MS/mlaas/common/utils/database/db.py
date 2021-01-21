@@ -311,7 +311,7 @@ class DBClass:
         return global_search_clause
     
     def get_customfilter(self,customefilter):
-        dict=customefilter[0]
+        dict=customefilter
         empty_string=""
         for x in dict:
             if dict[x]!="":
