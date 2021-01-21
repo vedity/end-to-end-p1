@@ -19,6 +19,7 @@ export class CreateProjectComponent implements OnInit {
   errorStatus: boolean = true;
   errorMessage: any = "";
   validfile: any;
+  loaderdiv=false;
   ngOnInit() {
     this.data.isprivate = true;
     this.apiService.getDataset().subscribe(
@@ -153,6 +154,7 @@ export class CreateProjectComponent implements OnInit {
         savedata.append('visibility', "public");
   
       savedata.append('inputfile', this.datasetfile);
+      this.loaderdiv=true;
       this.apiService.saveproject(savedata).subscribe(
         logs => this.savesuccess(logs),
         error => this.errorHandler(error)
@@ -165,6 +167,7 @@ export class CreateProjectComponent implements OnInit {
   }
 
   savesuccess(data) {
+    this.loaderdiv=false;
     if (data.status_code == "200")
       this.router.navigate(['project']);
     else
@@ -173,6 +176,9 @@ export class CreateProjectComponent implements OnInit {
 
   reset() {
     this.data = new createproject();
+    this.disableclass = "";
+    this.datasetdisablevalidation=false;
+    this.selectchangedisablevalidation=false;
     $(".custom-file-label").text("Choose file");
   }
 }

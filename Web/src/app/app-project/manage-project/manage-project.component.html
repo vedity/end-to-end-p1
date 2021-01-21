@@ -1,4 +1,4 @@
-<div class="container-fluid">
+<div class="container-fluid {{classname}}">
     <div class="row">
         <div class="col-12">
             <div class="page-title-box d-flex align-items-center justify-content-between">
@@ -38,4 +38,143 @@
         </div>
     </div>
 
+
+
+    <a href="javascript:void(0);" title="Timeline" (click)="toggleTimeline()" class="timer-btn text-center"><i
+        class="bx bx-time font-size-20 color-light "></i></a>
+    <div class="right-panel-timeline">
+      <h4>Timeline</h4>
+      <perfect-scrollbar style="height: calc(100vh - 185px);">
+        <div class="box">
+          <p>Today <span class="badge badge-pill badge-soft-dark ml-1 ">4 Activities</span></p>
+          <div class="card">
+            <div class="card-body">
+              <!-- <h4 class="card-title mb-5">Activity</h4> -->
+              <ul class="verti-timeline list-unstyled">
+                <li class="event-list">
+                  <div class="event-timeline-dot">
+                    <i class="bx font-size-20"></i>
+                  </div>
+                  <div class="media">
+                    <div class="media-body">
+                      <div>
+                        <h5>You Created Project <span>03:00 Pm</span></h5>
+                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. </p>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                <li class="event-list">
+                  <div class="event-timeline-dot">
+                    <i class="bx font-size-20 color-red"></i>
+                  </div>
+                  <div class="media">
+  
+                    <div class="media-body">
+                      <div>
+                        <h5>You Deleted Project <span>03:00 Pm</span></h5>
+                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. </p>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                <li class="event-list active">
+                  <div class="event-timeline-dot">
+                    <i class="bx font-size-20 color-blue"></i>
+                  </div>
+                  <div class="media">
+                    <div class="media-body">
+                      <div>
+                        <h5>You Edited Project <span>03:00 Pm</span></h5>
+                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. </p>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                <li class="event-list">
+                  <div class="event-timeline-dot ">
+                    <i class="bx font-size-20 color-green"></i>
+                  </div>
+                  <div class="media">
+                    <div class="media-body">
+                      <div>
+                        <h5>You Created Project <span>03:00 Pm</span></h5>
+                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. </p>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+              <!-- <div class="text-center mt-4"><a href="" class="btn btn-primary btn-sm">View More <i
+                        class="mdi mdi-arrow-right ml-1"></i></a></div> -->
+            </div>
+          </div>
+        </div>
+        <div class="box">
+          <p>Yesterday <span class="badge badge-pill badge-soft-dark ml-1 ">4 Activities</span></p>
+          <div class="card">
+            <div class="card-body">
+              <!-- <h4 class="card-title mb-5">Activity</h4> -->
+              <ul class="verti-timeline list-unstyled">
+                <li class="event-list">
+                  <div class="event-timeline-dot">
+                    <i class="bx font-size-20"></i>
+                  </div>
+                  <div class="media">
+                    <div class="media-body">
+                      <div>
+                        <h5>You Created Project <span>03:00 Pm</span></h5>
+                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. </p>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                <li class="event-list">
+                  <div class="event-timeline-dot">
+                    <i class="bx font-size-20"></i>
+                  </div>
+                  <div class="media">
+  
+                    <div class="media-body">
+                      <div>
+                        <h5>You Delete Project <span>03:00 Pm</span></h5>
+                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. </p>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                <li class="event-list active">
+                  <div class="event-timeline-dot">
+                    <i class="bx font-size-20 "></i>
+                  </div>
+                  <div class="media">
+                    <div class="media-body">
+                      <div>
+                        <h5>You Edited Project <span>03:00 Pm</span></h5>
+                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. </p>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                <li class="event-list">
+                  <div class="event-timeline-dot">
+                    <i class="bx font-size-20"></i>
+                  </div>
+                  <div class="media">
+                    <div class="media-body">
+                      <div>
+                        <h5>You Created Project <span>03:00 Pm</span></h5>
+                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. </p>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+              <!-- <div class="text-center mt-4"><a href="" class="btn btn-primary btn-sm">View More <i
+                      class="mdi mdi-arrow-right ml-1"></i></a></div> -->
+            </div>
+          </div>
+        </div>
+      </perfect-scrollbar>
+    </div>
 </div>
