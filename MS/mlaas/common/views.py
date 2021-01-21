@@ -169,7 +169,6 @@ class ActivityTimelineClass(APIView):
         def post(self,request,format=None):
                 try:
                         logging.info("data ingestion : ActivityTimelineClass : GET Method : execution start")
-                        
                         status = timeline_Obj.insert_user_activity()
                         return Response({"status":status})
                 except Exception as e:
