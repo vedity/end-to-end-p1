@@ -270,8 +270,8 @@ class DatasetSchemaClass(APIView):
                 """
                 try:
                         logging.info("data ingestion : DatasetSchemaClass : GET Method : execution start")
-                        dataset_id=request.query_params.get('dataset_id') #get dataset id
-                        schema_data=schema_obj.get_dataset_schema(str(dataset_id)) #get the schema detail,if exist then return data else return string with error_msg and status code
+                        project_id=request.query_params.get('project_id') #get dataset id
+                        schema_data=schema_obj.get_dataset_schema(str(project_id)) #get the schema detail,if exist then return data else return string with error_msg and status code
                         # return Response({"data":schema_data})
                         if isinstance(schema_data,list):  
                                 logging.info("data ingestion : DatasetSchemaClass : GET Method : execution stop")
@@ -353,7 +353,7 @@ class DataDetailClass(APIView):
                         sort_type=order_values[0]['dir'] # get the sort type value(asc or desc)
                         sort_index=order_values[0]['column'] # get the sort_index column value
                         global_value=request_body['search']['value']  #get String value for global search
-                        customefilter=request_body['customfilter']    
+                        customefilter=request_body['customfilter']     
                         dataset_id = request.query_params.get('dataset_id') #get dataset_id
                         row_count=DBObject.get_row_count(connection,dataset_id) #get the row count
                         dataset_df=IngestionObj.show_data_details(dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter) #call show_data_details and it will return dataset detail data in dataframe

@@ -429,6 +429,7 @@ class DBClass:
         data_details_df=data_details_df.to_json(orient='records') # transform dataframe based on record
         data_details_df = json.loads(data_details_df)  #convert data_details_df into dictonery
         return data_details_df
+    
 
 
         
