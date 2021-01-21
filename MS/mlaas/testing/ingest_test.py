@@ -16,7 +16,7 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
             visibility ([string]): [name of the visibility(public or private)]
     
         """
-        time.sleep(1)
+        #time.sleep(1)
         files = '../ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser","dataset_name":"auto_dataset_name","visibility":"public"}
@@ -80,7 +80,7 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
         status = json_response["status_code"]
         self.assertEqual(status,"500")
     
-    def testE_scenario1_insert_dataset(self):
+    def testE_scenario1_insert_invalid_dataset(self):
         """This function is used to test the CreateDataset POST Method With valid Data Inputs .
 
         Args:
@@ -174,7 +174,6 @@ class TestIngestDatasetDeletion(unittest.TestCase):
         response = requests.get("http://localhost:8000/mlaas/ingest/create_dataset/",params ={"user_name":"autouser_valid"})
         response_data = response.json()
         json_dataset_id = response_data["response"][1]["dataset_id"]
-        
         response = requests.delete("http://localhost:8000/mlaas/ingest/delete/dataset_detail/",params ={"user_name":"autouser_valid","dataset_id":json_dataset_id})
         json_response = response.json()
         

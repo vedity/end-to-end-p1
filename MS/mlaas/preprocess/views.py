@@ -17,8 +17,8 @@ from .utils import preprocessing
 from common.utils.database import db
 from database import *
 from common.utils.json_format.json_formater import *
-import json
 from database import *
+import json
 import pandas as pd
 import logging
 
@@ -38,7 +38,7 @@ connection,connection_string=DBObject.database_connection(database,user,password
 ExploreObj =  preprocessing.PreprocessingClass(database,user,password,host,port)
 
 
-class DatasetStatisticsClass(APIView):
+class DatasetExplorationClass(APIView):
     """
         This class is used to show the data statistics for each of the feature in the table.
         It will take url string as mlaas/preprocess/exploredata/get_data_statistics.
@@ -67,30 +67,4 @@ class DatasetStatisticsClass(APIView):
                 return Response({"status_code":"200","error_msg":"successfull retrival","response":table_df})
         except Exception as e:
             return Response({"status_code":"500","error_msg":str(e),"response":"false"})
-
-
-# class DataVisualizationColumnClass(APIView):
-#     """
-#         This class is used to show the columns in the table for boxplot visualization.
-#         It will take url string as mlaas/preprocess/exploredata/get_column.
-        
-#         Args  : 
-#                 TableName[(String)]   :[Name of table]
-#                 ColumnName[(String)]  :[Name of Columns]
-                
-#         Return : 
-#                 status_code(500 or 200),
-#                 error_msg(Error message for retrival failed or successfull),
-#                 Response(return false if failed otherwise json data)
-#         """
-
-#     def get(self,request,format=None):
-#         try:
-#             columnname = request.query_params.get('column_name')  #get columnname
-#             tablename = request.query_params.get('table_name')  #get tablename
-#             exploreobj = dataset_exploration.ExploreClass()  #python class object
-#             column_df = exploreobj.return_columns(DBObject, connection, tablename,columnname)   #calls the return_column python class method and returns dataframe
-#             return Response({"status_code":"200","error_msg":"successfull retrival","response":column_df})
-#         except Exception as e:
-#             return Response({"status_code":"500","error_msg":str(e),"response":"false"})
 
