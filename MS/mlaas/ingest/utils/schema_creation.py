@@ -6,6 +6,7 @@
  
 */
 '''
+
 import pandas as pd 
 import logging
 import json
@@ -55,7 +56,7 @@ class SchemaClass:
                 
         return table_name,cols,schema
     
-    def get_dataset_schema(self,dataset_id):
+    def get_dataset_schema(self,project_id):
         """
         this function used to get the column name and datatype of the table
 
@@ -70,29 +71,46 @@ class SchemaClass:
             connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port)
             if connection == None:
                 raise DatabaseConnectionFailed(500)
-            sql_command = "SELECT dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows from mlaas.dataset_tbl Where dataset_id =" +dataset_id
-            dataset_df = DBObject.select_records(connection,sql_command)  # execute the sql query and return data if found else return None
-            if dataset_df is None or len(dataset_df) == 0:
-                raise DatasetDataNotFound(500)
-            dataset_records = dataset_df.to_records(index=False) # convert dataframe to a NumPy record  
-            dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows = dataset_records[0]
-            dataset_name,dataset_table_name,user_name,dataset_visibility = str(dataset_name),str(dataset_table_name),str(user_name),str(dataset_visibility)
+            
+            sql_command = "SELECT project_id from mlaas.schema_tbl where project_id="+str(project_id)
+            dataset_df = DBObject.select_records(connection,sql_command)
+            if dataset_df is None or len(dataset_df)==0 :
+                    sql_command = "SELECT dataset_id from mlaas.project_tbl where project_id="+str(project_id)
+                    dataset_df = DBObject.select_records(connection,sql_command)
+                    dataset_id = dataset_df['dataset_id'][0]
+                    sql_command = "SELECT dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows from mlaas.dataset_tbl Where dataset_id =" + str(dataset_id)
+                    dataset_df = DBObject.select_records(connection,sql_command)  # execute the sql query and return data if found else return None
+                    if dataset_df is None or len(dataset_df) == 0:
+                        raise DatasetDataNotFound(500)
+                    dataset_records = dataset_df.to_records(index=False) # convert dataframe to a NumPy record  
+                    dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows = dataset_records[0]
+                    dataset_name,dataset_table_name,user_name,dataset_visibility = str(dataset_name),str(dataset_table_name),str(user_name),str(dataset_visibility)
 
-            if dataset_visibility =="private":
-                table_name=user_name+"."+dataset_table_name
+                    if dataset_visibility =="private":
+                        table_name=user_name+"."+dataset_table_name
+                    else:
+                        table_name = dataset_table_name
+
+                    #sql query string
+                    sql_command = "SELECT * from "+table_name
+                    data_details_df = DBObject.select_records(connection,sql_command) #execute the sql query
+                    if data_details_df is None:
+                        raise DataNotFound(500)
+                    column_name = data_details_df.columns.values.tolist() # covert the dataframe into list
+                    predicted_datatype = self.get_attribute_datatype(connection,DBObject,table_name,column_name ,no_of_rows)
+                    schema_data = get_schema_format(column_name,predicted_datatype) #call get_schema_format to get json format data
+                    
             else:
-                table_name = dataset_table_name
+                    sql_command = "SELECT column_name,changed_column_name,data_type,column_attribute from mlaas.schema_tbl where project_id="+str(project_id)
+                    dataset_df = DBObject.select_records(connection,sql_command)
+                    if dataset_df is None or len(dataset_df)==0:
+                        raise DataNotFound(500)
+                    column_name,changed_column_name,data_type,column_attribute = dataset_df['column_name'],dataset_df['changed_column_name'],dataset_df['data_type'],dataset_df['column_attribute']
+                    schema_data= get_updated_schema_format(column_name,changed_column_name,data_type,column_attribute)
 
-            #sql query string
-            sql_command = "SELECT * from "+table_name
-            data_details_df = DBObject.select_records(connection,sql_command) #execute the sql query
-            if data_details_df is None:
-                raise DataNotFound(500)
-            column_name = data_details_df.columns.values.tolist() # covert the dataframe into list
-            predicted_datatype = self.get_attribute_datatype(connection,DBObject,table_name,column_name ,no_of_rows)
-            schema_data = get_schema_format(column_name,predicted_datatype) #call get_schema_format to get json format data
             logging.info("data ingestion : SchemaClass :get_dataset_schema : execution stop")
             return schema_data
+
         except (DatasetDataNotFound,DataNotFound,DatabaseConnectionFailed) as exc:
             logging.error("data ingestion : SchemaClass : get_dataset_schema : Exception " + str(exc.msg))
             logging.error("data ingestion : SchemaClass : get_dataset_schema : " +traceback.format_exc())

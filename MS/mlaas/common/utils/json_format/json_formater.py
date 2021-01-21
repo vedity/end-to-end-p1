@@ -131,4 +131,16 @@ def get_schema_format(column_name,predicted_datatype):
         json_data.append(temp_dict)
     return json_data
 
+def get_updated_schema_format(column_name,changed_column_name,data_type,column_attribute):
+    json_data = []
+    for x in range(len(column_name)):
+        temp_dict = {
+            "column_name": column_name[x],
+            "data_type":data_type[x],
+            "column_attribute":column_attribute[x],
+            "change_column_name":changed_column_name[x],
+        }
+        json_data.append(temp_dict)
+    return json_data
+
     

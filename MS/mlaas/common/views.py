@@ -35,17 +35,18 @@ connection,connection_string=DBObject.database_connection(database,user,password
 IngestionObj=ingestion.IngestClass(database,user,password,host,port)
 timeline_Obj=activity_timeline.ActivityTimelineClass(database,user,password,host,port)
 class UserLoginClass(APIView):
-        """ this class used to add user data into table.
-
-        Args   :
-                user_name[(String)] : [Name of user]
-                password [(String)] : [password value]
-        Return :
-                status_code(500 or 200),
-                error_msg(Error message for login successfull & unsuccessfull),
-                Response(return false if failed otherwise true)
-        """
+        
         def get(self,request,format=None):
+                """ this class used to check the authorized user login data.
+
+                Args   :
+                        user_name[(String)] : [Name of user]
+                        password [(String)] : [password value]
+                Return :
+                        status_code(500 or 200),
+                        error_msg(Error message for login successfull & unsuccessfull),
+                        Response(return false if failed otherwise true)
+                """
                 try:
                         logging.info("data ingestion : UserLoginClass : GET Method : execution start")
                         user_name = request.query_params.get('user_name')
@@ -72,6 +73,14 @@ class UserLoginClass(APIView):
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
         
         def post(self,request):
+                """ this function used to insert user data into table.
+
+                Args   :
+                        csv_file[(CSV)] : [CSV data of authorized user]
+                Return :
+
+                        Response(return 1 if failed otherwise 0)
+                """
                 try:
                         logging.info("data ingestion : UserLoginClass : POST Method : execution start")
                         user_df=DBObject.read_data('ingest/user_registration_tbl.csv') #read the data from csv file store into dataframe variable
@@ -140,9 +149,11 @@ class ScheamDatatypeListClass(APIView):
                         return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
 class ScheamColumnListClass(APIView):
-        """
-        """
+       
         def get(self, request, format=None):
+                """
+
+                """
                 try :
                         logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
                         column_attribute = {"column_attribute":["ignore","target"] }
