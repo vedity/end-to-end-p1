@@ -276,3 +276,18 @@ table{
   }
   
 }
+
+
+
+.loader-box{position: absolute; left:0; right:0; top:0; bottom:0; background:rgba(0,0,0,0.6); text-align:center; vertical-align: middle; z-index:1000;
+  .inner-loader-box{position: absolute; top:50%; left:0; transform: translateY(-50%); right:0; width:250px; height:150px; background:#262b3c; text-align:center; margin:auto;padding-top: 40px;
+      border-radius: 4px;}
+}
+
+.container-fluid{position: relative;}
+
+table{
+  tr{
+      td:first-child{max-width:200px; overflow: hidden;}
+  }
+}

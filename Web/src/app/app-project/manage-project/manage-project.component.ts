@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 })
 export class ManageProjectComponent implements OnInit {
 active=1;
+classname="";
   constructor(public router:Router) { }
 
   ngOnInit() {
@@ -15,5 +16,12 @@ active=1;
 
   create() {
     this.router.navigate(['create']);
+  }
+
+  toggleTimeline(){
+    if(this.classname=="")
+    this.classname="red";
+    else
+    this.classname="";
   }
 }
