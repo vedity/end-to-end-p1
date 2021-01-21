@@ -175,6 +175,9 @@ class SchemaClass:
                 column_datatype_list.append(schema_data[index]["data_type"])
                 column_change_name.append(schema_data[index]["change_column_name"])
                 column_attribute_list.append(schema_data[index]["column_attribute"])
+            check_attribute_type = False if len(column_attribute_list) == column_attribute_list.count("ignore") else True
+            if check_attribute_type == False :
+                raise IgnoreAttributeClass(500)
             table_name,col,schema = self.get_schema()
             create_status = DBObject.create_table(connection,table_name,schema)
             if create_status in [1,0]:
@@ -188,7 +191,7 @@ class SchemaClass:
                 raise TableCreationFailed(500)
             
             
-        except(SameColumnName,DatabaseConnectionFailed,SchemaUpdateFailed,SchemaCreationFailed) as exc:
+        except(SameColumnName,DatabaseConnectionFailed,SchemaUpdateFailed,SchemaCreationFailed,IgnoreAttributeClass) as exc:
             logging.error("data ingestion : SchemaClass : update_dataset_schema : Exception " + str(exc.msg))
             logging.error("data ingestion : SchemaClass : update_dataset_schema : " +traceback.format_exc())
             return exc.msg

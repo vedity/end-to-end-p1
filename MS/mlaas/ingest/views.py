@@ -13,6 +13,7 @@ import json
 import logging
 import traceback
 import pandas as pd
+import datetime 
 from database import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -25,6 +26,9 @@ from common.utils.exception_handler.python_exception.ingest.ingest_exception imp
 from common.utils.logger_handler import custom_logger as cl
 from common.utils.exception_handler.python_exception import *
 from common.utils.json_format.json_formater import *
+from common.utils.activity_timeline import *
+from common.utils.activity_timeline import activity_timeline
+
 
 user_name = 'admin'
 log_enable = True
@@ -38,28 +42,29 @@ DBObject=db.DBClass()     #Get DBClass object
 connection,connection_string=DBObject.database_connection(database,user,password,host,port)      #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 IngestionObj=ingestion.IngestClass(database,user,password,host,port)
 schema_obj=SchemaClass(database,user,password,host,port) #initialize Schema object from schema class
+timeline_Obj=activity_timeline.ActivityTimelineClass(database,user,password,host,port)
 
 
+# Class for Project to retrive & insert 
+#It will take url string as mlaas/ingest/create_project/.
 class CreateProjectClass(APIView):
-        """
-        This class is used to Create Project and Insert Uploaded CSV File data into Table.
-        It will take url string as mlaas/ingest/create_project/.
-        And if Method is "POST" then it will return Status or if Method is "GET" then it will return Data in Json Format else it will return Method is not allowed.
 
-        Args  : 
-                User_name[(String)]   :[Name of user]
-                ProjectName[(String)] :[Name of project]
-                Description[(String)] :[Discreption of project]
-                dataset_visibility[(String)] :[Name of Visibility public or private]
-                dataset_id[(Integer)] :[ID of dataset selected by user from dropdown]
-                inputfile(CSV File)   :[Input CSV file]
-        Return : 
-                status_code(500 or 200),
-                error_msg(Error message for retrival & insertions failed or successfull),
-                Response(return false if failed otherwise json data)
-        """
-        # permission_classes = [IsAuthenticated]
         def get(self, request, format=None):
+                """
+                This function is used to get Project details uploaded by te user.
+        
+                Args  : 
+                        User_name[(String)]   :[Name of user]
+                        ProjectName[(String)] :[Name of project]
+                        Description[(String)] :[Discreption of project]
+                        dataset_visibility[(String)] :[Name of Visibility public or private]
+                        dataset_id[(Integer)] :[ID of dataset selected by user from dropdown]
+                        inputfile(CSV File)   :[Input CSV file]
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival & insertions failed or successfull),
+                        Response(return false if failed otherwise json data)
+                """
                 try:
                         logging.info("data ingestion : CreateProjectClass : GET Method : execution start")
                         #user_name = request.user.get_username()
@@ -79,6 +84,21 @@ class CreateProjectClass(APIView):
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
         
         def post(self, request, format=None):
+                        """
+                        This function is used to Create Project and Insert Uploaded CSV File data into Table
+
+                        Args  : 
+                                User_name[(String)]   :[Name of user]
+                                ProjectName[(String)] :[Name of project]
+                                Description[(String)] :[Discreption of project]
+                                dataset_visibility[(String)] :[Name of Visibility public or private]
+                                dataset_id[(Integer)] :[ID of dataset selected by user from dropdown]
+                                inputfile(CSV File)   :[Input CSV file]
+                        Return : 
+                                status_code(500 or 200),
+                                error_msg(Error message for retrival & insertions failed or successfull),
+                                Response(return false if failed otherwise true)
+                        """
                         try:
                                 
                                 logging.info("data ingestion : CreateProjectClass : POST Method : execution start")
@@ -119,12 +139,19 @@ class CreateProjectClass(APIView):
                                         return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                                 else:
                                         logging.info("data ingestion : DatasetExistClass : GET Method : execution stop : status_code :200")
-                                        project_Status=IngestionObj.create_project(project_name,project_desc,dataset_name,dataset_visibility,file_name,dataset_id,user_name)    #call create_project method to create project and insert csv data into table
+                                        project_Status,project_id,dataset_id=IngestionObj.create_project(project_name,project_desc,dataset_name,dataset_visibility,file_name,dataset_id,user_name)    #call create_project method to create project and insert csv data into table
                                         if project_Status != 0:
                                                 status_code,error_msg=get_Status_code(project_Status) # extract the status_code and error_msg from project_Status
                                                 logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+status_code)
                                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                                         else:
+                                                user_id = 1
+                                                activity_name = "Create Project"
+                                                activity_description = f'You have created project "{project_name}"'
+                                                current_date = str(datetime.date.today())
+                                                timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                                                operation = "Create"
+                                                timeline_Obj.insert_user_activity(user_id,project_id,dataset_id,activity_name,activity_description,current_date,timestamp,operation)
                                                 logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code : 200")
                                                 return Response({"status_code":"200","status_msg":"Successfully Inserted","response":"true"}) 
 
@@ -133,25 +160,24 @@ class CreateProjectClass(APIView):
                                 logging.error("data ingestion : CreateProjectClass : POST Method : " +traceback.format_exc())
                                 return Response({"status_code":"500","error_msg":str(e),"response":"false"})      
 
-        
-class CreateDatasetClass(APIView):
-        """
-        This Class is used to Create Dataset and Insert Uploaded CSV File data into Table.
-        It will take url string as mlaas/ingest/create_dataset/.
-        And if Method is "POST" then it will return Status or if Method is "GET" then it will return Data in Json Format else it will return Method is not allowed.
 
-        Args   :
-                user_name[(String)]   :[Name of user]
-                dataset_Name[(String)] :[Name of dataset]
-                dataset_visibility[(String)] :[Name of Visibility public or private]
-                inputfile(CSV File)   :[Input CSV file]
-        Return : 
-                status_code(500 or 200),
-                error_msg(Error message for retrival & insertions failed or successfull),
-                Response(return false if failed otherwise json data) 
-        """
+# Class for Dataset to retrive & insert
+# It will take url string as mlaas/ingest/create_dataset/.    
+class CreateDatasetClass(APIView):
+        
         # permission_classes = [IsAuthenticated]
         def get(self, request, format=None):
+                """
+                This function is used to Create Dataset and Insert Uploaded CSV File data into Table.
+                
+
+                Args   :
+                        user_name[(String)]   :[Name of user]
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival & insertions failed or successfull),
+                        Response(return false if failed otherwise json data) 
+                """
                 try:
                         logging.info("data ingestion : CreateDatasetClass : GET Method : execution start")
                         user_name=request.query_params.get('user_name')  #get Username
@@ -169,6 +195,19 @@ class CreateDatasetClass(APIView):
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
         
         def post(self, request, format=None):
+                """
+                This function is used to Create Dataset and Insert Uploaded CSV File data into Table.
+
+                Args   :
+                        user_name[(String)]   :[Name of user]
+                        dataset_Name[(String)] :[Name of dataset]
+                        dataset_visibility[(String)] :[Name of Visibility public or private]
+                        inputfile(CSV File)   :[Input CSV file]
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival & insertions failed or successfull),
+                        Response(return false if failed otherwise true) 
+                """
                 try: 
                         logging.info("data ingestion : CreateDatasetClass : POST Method : execution start")
                         # user_name=request.user.get_username()
@@ -190,12 +229,20 @@ class CreateDatasetClass(APIView):
                         else:
                                 return Response({"status_code":"500","error_msg":"Dataset name exists","response":"false"})
 
-                        dataset_Status=IngestionObj.create_dataset(dataset_name,file_name,dataset_visibility,user_name) #call create_dataset method to create dataset and insert csv data into table
+                        dataset_Status,dataset_id=IngestionObj.create_dataset(dataset_name,file_name,dataset_visibility,user_name) #call create_dataset method to create dataset and insert csv data into table
                         if dataset_Status != 0:
                                 status_code,error_msg=get_Status_code(dataset_Status) # extract the status_code and error_msg from dataset_status
                                 logging.info("data ingestion : CreateDatasetClass : POST Method : execution stop : status_code :"+status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                         else:
+                                user_id = 1
+                                project_id=0
+                                activity_name = "Create Dataset"
+                                activity_description = f'You have created dataset "{dataset_name}"'
+                                current_date = str(datetime.date.today())
+                                timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                                operation = "Create"
+                                status = timeline_Obj.insert_user_activity(user_id,project_id,dataset_id,activity_name,activity_description,current_date,timestamp,operation)
                                 logging.info("data ingestion : CreateDatasetClass : POST Method : execution stop : status_code : 200")
                                 return Response({"status_code":"200","error_msg":"Successfully Inserted","response":"true"})
                         
@@ -203,26 +250,24 @@ class CreateDatasetClass(APIView):
                         logging.error("data ingestion : CreateDatasetClass : POST Method : Exception : " + str(e))
 			# logging.error("data ingestion : CreateDatasetClass : POST Method : "+traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
-                  
+
+
+# Class for Schema to retrive & insert
+# It will take url string as mlaas/ingest/dataset_schema/. 
 class DatasetSchemaClass(APIView):
-        """
-        this class used to get the data from schema table and/or update the data of schema table
-
-        Args : 
-                column_name_list[(List)]  : [Existing table column name value]
-                column_change_name [(List)]  : [Updated column name value]
-                column_datatype_list [(List)]  : [Existing table column datatype value]
-                column_attribute_list [(List)]  : []
-                column_change_datatype[(List)]  : [Updated column datatype value]
-                dataset_id [(Integer)]  : [Id of the dataset table]
-
-        Return :
-                status_code(500 or 200),
-                error_msg(Error message for retrival & insertions failed or successfull),
-                Response(return false if failed otherwise json data) 
-        """
-
+        
         def get(self,request,format=None):
+                """
+                this function used to get the column datatype for schema page from csv data uploaded by the user.
+
+                Args : 
+                        dataset_id [(Integer)]  : [Id of the dataset table]
+
+                Return :
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival & insertions failed or successfull),
+                        Response(return false if failed otherwise json data) 
+                """
                 try:
                         logging.info("data ingestion : DatasetSchemaClass : GET Method : execution start")
                         dataset_id=request.query_params.get('dataset_id') #get dataset id
@@ -241,6 +286,22 @@ class DatasetSchemaClass(APIView):
                         return Response({"status":"500","error_msg":str(e),"response":"false"})
                             
         def post(self,request,format=None):
+                """
+                this function used to update column name and insert attribute type for the column in schema table.
+
+                Args : 
+                        column_name_list[(List)]  : [Existing table column name value]
+                        column_change_name [(List)]  : [Updated column name value]
+                        column_datatype_list [(List)]  : [Existing table column datatype value]
+                        column_attribute_list [(List)]  : []
+                        column_change_datatype[(List)]  : [Updated column datatype value]
+                        dataset_id [(Integer)]  : [Id of the dataset table]
+
+                Return :
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival & insertions failed or successfull),
+                        Response(return false if failed otherwise json data) 
+                """
                 try:
                         logging.info("data ingestion : DatasetSchemaClass : POST Method : execution start")
                         update_schema_data=json.loads(request.body) #convert the data into dictonery
@@ -259,27 +320,27 @@ class DatasetSchemaClass(APIView):
                         logging.error("data ingestion : DatasetSchemaClass : POST Method : " +traceback.format_exc())
                         return Response({"status":"500","error_msg":str(e),"response":"false"})
 
-
-
+#class for retrive csv data 
+#It will take url string as mlaas/ingest/data_detail/.
 class DataDetailClass(APIView):
-        """
-        this class used to get the fixed length of records with option to search and sorting 
-        It will take url string as mlaas/ingest/data_detail/.
-
-        Args : 
-                start_index[(Integer)] : [value of the starting index]
-                length[(Integer)] :[value of length of records to be shown]
-                sort_type[(String)] : [value of sort_type ascending or descending]
-                sort_index[(Integer)] : [index value of the column to perform sorting]
-                global_value[(String)] : [value that need be search in table]
-                dataset_id[(Integer)] : [Id of the dataset table]
-        Return : 
-                status_code(500 or 200),
-                error_msg(Error message for retrival & insertions failed or successfull),
-                Response(return false if failed otherwise json data)
-        """   
+           
 
         def post(self, request, format=None ):
+                """
+                this function used to get the fixed length of records with option to search and sorting 
+
+                Args : 
+                        start_index[(Integer)] : [value of the starting index]
+                        length[(Integer)] :[value of length of records to be shown]
+                        sort_type[(String)] : [value of sort_type ascending or descending]
+                        sort_index[(Integer)] : [index value of the column to perform sorting]
+                        global_value[(String)] : [value that need be search in table]
+                        dataset_id[(Integer)] : [Id of the dataset table]
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival & insertions failed or successfull),
+                        Response(return false if failed otherwise json data)
+                """
                 data = json.dumps(request.data)
                 request_body = json.loads(data) #get all the request body parameter and convert into dictonery
                 draw=request_body["draw"]
@@ -309,18 +370,21 @@ class DataDetailClass(APIView):
                         logging.error("data ingestion : DataDetailClass : GET Method : " +traceback.format_exc())
                         return Response({"draw":draw,"recordsTotal":0,"recordsFiltered":0,"data":[]})
 
-class DataDetailColumnListClass(APIView):
-        """ 
-        this class used to get the list of column name from the csv file uploaded by user
-        for the specific dataset id
-        
-        Args:
-                [(dataset_id)] : [Id of the dataset table]
-        Return: 
-                [(List)] : [List of column name]
 
-        """
+#class to get column name list of csv data
+#It will take url string as mlaas/ingest/data_detail/column_list/
+class DataDetailColumnListClass(APIView):
         def get(self, request, format=None):
+                """ 
+                this function used to get the list of column name from the csv file uploaded by user
+                for the specific dataset id
+                
+                Args:
+                        [(dataset_id)] : [Id of the dataset table]
+                Return: 
+                        [(List)] : [List of column name]
+
+                """
                 try:
                         logging.info("data ingestion : DataDetailClass : GET Method : execution start")
                         dataset_id = request.query_params.get('dataset_id') #get dataset_id
@@ -338,65 +402,84 @@ class DataDetailColumnListClass(APIView):
                         logging.error("data ingestion : DataDetailClass : GET Method : Exception :" + str(e))
                         logging.error("data ingestion : DataDetailClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
-class DeleteProjectDetailClass(APIView):
-        """
-        This class is used to delete project detail.
-        It will take url string as mlaas/ingest/delete/project_detail/.
 
-        Args   : 
-                User_name[(String)]   :[Name of user]
-                project_id[(Integer)] :[ID of project]
-                
-        Return : 
-                status_code(500 or 200),
-                error_msg(Error message for deletion failed or successfull),
-                Response(false or true)
-        """  
+#class for delete project
+#It will take url string as mlaas/ingest/delete/project_detail/.
+class DeleteProjectDetailClass(APIView):  
         def delete(self, request, format=None):
+                """
+                This function is used to delete project detail.
+
+                Args   : 
+                        User_name[(String)]   :[Name of user]
+                        project_id[(Integer)] :[ID of project]
+                        
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for deletion failed or successfull),
+                        Response(false or true)
+                """
                 try:
                         logging.info("data ingestion : DeleteProjectDetailClass : DELETE Method : execution start")
                         # user_name=request.user.get_username()
                         user_name=request.query_params.get('user_name') # get username
                         project_id=request.query_params.get('project_id')  #get tablename 
-                        project_status= IngestionObj.delete_project_details(project_id,user_name)  #get the project_status if project Deletion failed or successfull
+                        project_status,dataset_id,project_name= IngestionObj.delete_project_details(project_id,user_name)  #get the project_status if project Deletion failed or successfull
                         if project_status != 0:
                                 status_code,error_msg=get_Status_code(project_status) # extract the status_code and error_msg from  project_status
                                 logging.info("data ingestion : DeleteProjectDetailClass : DELETE Method : execution stop : status_code :"+status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                         else:
+                                user_id = 1
+                                activity_name = "Delete Project"
+                                activity_description = f'You have deleted project "{project_name}"'
+                                current_date = str(datetime.date.today())
+                                timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                                operation = "Delete"
+                                status = timeline_Obj.insert_user_activity(user_id,project_id,str(dataset_id),activity_name,activity_description,current_date,timestamp,operation)
                                 logging.info("data ingestion : DeleteProjectDetailClass : DELETE Method : execution stop : status_code :200")
-                                return Response({"status_code":"200","error_msg":"Successfully delete","response":"true"})
+                                return Response({"status_code":"200","error_msg":"Successfully deleted","response":"true"})
                 except Exception as e:
                         logging.error("data ingestion : DeleteProjectDetailClass : DELETE Method :  Exception : " + str(e))
                         logging.error("data ingestion : DeleteProjectDetailClass : DELETE Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
 
+#class for delete dataset
+#It will take url string as mlaas/ingest/delete/dataset_detail/.
 class DeleteDatasetDetailClass(APIView):
-        """
-        This class is used to delete Dataset detail.
-        It will take url string as mlaas/ingest/delete/dataset_detail/.
-
-        Args   : 
-                User_name[(String)]   :[Name of user]
-                dataset_id[(Integer)] :[ID of dataset]
-
-        Return : 
-                status_code(500 or 200),
-                error_msg(Error message for deletion failed or successfull),
-                Response(false or true)
-        """
         def delete(self, request, format=None):
+                """
+                This function is used to delete Dataset detail.
+                It will take url string as mlaas/ingest/delete/dataset_detail/.
+
+                Args   : 
+                        User_name[(String)]   :[Name of user]
+                        dataset_id[(Integer)] :[ID of dataset]
+
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for deletion failed or successfull),
+                        Response(false or true)
+                """
                 try:
                         logging.info("data ingestion : DeleteDatasetDetailClass : DELETE Method : execution start")
                         # user_name=request.user.get_username()
                         user_name=request.query_params.get('user_name') #get user_name
                         dataset_id=request.query_params.get('dataset_id')  #get dataset_name
-                        dataset_status=IngestionObj.delete_dataset_detail(dataset_id,user_name) #get the dataset_status if dataset Deletion failed or successfull 
+                        dataset_status,dataset_name=IngestionObj.delete_dataset_detail(dataset_id,user_name) #get the dataset_status if dataset Deletion failed or successfull 
                         if dataset_status != 0:
                                 status_code,error_msg=get_Status_code(dataset_status) # extract the status_code and error_msg from dataset_status
                                 logging.info("data ingestion : DeleteDatasetDetailClass : DELETE Method : execution stop : status_code :"+status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                         else:
+                                user_id = 1
+                                project_id=0
+                                activity_name = "Delete Dataset"
+                                activity_description = f'You have deleted dataset "{dataset_name}"'
+                                current_date = str(datetime.date.today())
+                                timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                                operation = "Delete"
+                                status = timeline_Obj.insert_user_activity(user_id,project_id,dataset_id,activity_name,activity_description,current_date,timestamp,operation)
                                 logging.info("data ingestion : DeleteDatasetDetailClass : DELETE Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully deleted","response":"true"})
 
@@ -405,21 +488,23 @@ class DeleteDatasetDetailClass(APIView):
                         logging.error("data ingestion : DeleteDatasetDetailClass : DELETE Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
 
+#class to delete Csv data(data_detail)                     
+#It will take url string as mlaas/ingest/delete/data_detail/.
+
 class DeleteDataDetailClass(APIView):
-        """
-        This class is used to delete data(CSV) detail.
-        It will take url string as mlaas/ingest/delete/data_detail/.
-
-        Args  : 
-                user_name[(String)]  :  [Name of the user]
-                table_name[(String)] :  [Name of the table]
-        Return : 
-                status_code(500 or 200),
-                error_msg(Error message for deletion failed or successfull),
-                Response(false or true)
-        """
         def delete(self, request, format=None):
+                """
+                This function is used to delete data(CSV) detail.
+                It will take url string as mlaas/ingest/delete/data_detail/.
 
+                Args  : 
+                        user_name[(String)]  :  [Name of the user]
+                        table_name[(String)] :  [Name of the table]
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for deletion failed or successfull),
+                        Response(false or true)
+                """
                 try:
                         logging.info("data ingestion : DeleteDataDetailClass : DELETE Method : execution start")
                         # user_name=request.user.get_username()
@@ -438,20 +523,22 @@ class DeleteDataDetailClass(APIView):
                         logging.error("data ingestion : DeleteDataDetailClass : DELETE Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
 
-class ProjectExistClass(APIView):
-        """
-        This class is used to Check ProjectName already exist or not.
-        It will take url string as mlaas/ingest/project_exist/.
 
-        Args  : 
-                user_name[(String)] : [Name of the user]
-                project_name[(String)] : [Name of the project]
-        Return : 
-                status_code(500 or 200),
-                error_msg(Error message for deletion failed or successfull),
-                Response(false or true)
-        """
+#class to check Project name exist or not
+#It will take url string as mlaas/ingest/project_exist/.
+class ProjectExistClass(APIView):
         def get(self,request,format=None):
+                """
+                This function is used to Check ProjectName already exist or not.
+
+                Args  : 
+                        user_name[(String)] : [Name of the user]
+                        project_name[(String)] : [Name of the project]
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for deletion failed or successfull),
+                        Response(false or true)
+                """
                 logging.info("data ingestion : ProjectExistClass : GET Method : execution start")
                 user_name = request.query_params.get('user_name') #get user_name
                 project_name =request.query_params.get('project_name') #get project_name
@@ -463,21 +550,23 @@ class ProjectExistClass(APIView):
                 else:
                         logging.info("data ingestion : ProjectExistClass : GET Method : execution stop : status_code :200")
                         return Response({"status_code":"200","error_msg":"you can proceed","response":"true"})  
+
+
+#class to check dataset name exist or not
+#It will take url string as mlaas/ingest/dataset_exist/.
 class DatasetExistClass(APIView):
-        """
-        This class is used to Check Dataset already exist or not.
-        It will take url string as mlaas/ingest/dataset_exist/.
-
-
-        Args  : 
-                user_name[(String)] : [Name of the user]
-                dataset_name[(String)] : [Name of the dataset]
-        Return : 
-                status_code(500 or 200),
-                error_msg(Error message for deletion failed or successfull),
-                Response(false or true)
-        """
         def get(self,request,format=None):
+                """
+                This function is used to Check Dataset already exist or not.
+
+                Args  : 
+                        user_name[(String)] : [Name of the user]
+                        dataset_name[(String)] : [Name of the dataset]
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for deletion failed or successfull),
+                        Response(false or true)
+                """
                 logging.info("data ingestion : DatasetExistClass : GET Method : execution start")
                 user_name = request.query_params.get('user_name') #get user_name
                 dataset_name = request.query_params.get('dataset_name') #get dataset_name
@@ -490,20 +579,20 @@ class DatasetExistClass(APIView):
                         logging.info("data ingestion : DatasetExistClass : GET Method : execution stop : status_code :200")
                         return Response({"status_code":"200","error_msg":"you can proceed","response":"true"})  
 
+#class to get public dataset name 
+#It will take url string as mlaas/ingest/datasetname_exist/.
 class DatasetNameClass(APIView):
-        """
-        This class is used to get All Dataset name which are uploaded.
-        It will take url string as mlaas/ingest/datasetname_exist/.
-
-
-        Args  : 
-                user_name[(String)] : [Name of the user]
-        Return : 
-                status_code(500 or 200),
-                error_msg(Error message for deletion failed or successfull),
-                Response(false or true)
-        """
         def get(self,request,format=None):
+                """
+                This function is used to get all public dataset of  Dataset name which are uploaded user.
+
+                Args  : 
+                        user_name[(String)] : [Name of the user]
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for deletion failed or successfull),
+                        Response(false or true)
+                """
                 logging.info("data ingestion : DatasetNameClass : GET Method : execution start")
                 user_name =request.query_params.get('user_name') #get user_name
                 dataset_df=IngestionObj.show_dataset_names(user_name) #retrive all dataset name for that perticular user_name
