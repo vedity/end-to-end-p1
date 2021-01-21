@@ -35,9 +35,12 @@ class DBClass:
         Returns:
             [dataframe]: [it will return read csv file data in the form of dataframe.]
         """
-        read_df=pd.read_csv(file_path) #  Read csv file and load data into dataframe.
-        column_list=[*range(0, len(read_df.columns), 1)] 
-        read_df=pd.read_csv(file_path,parse_dates=column_list) #  Read csv file and load data into dataframe.
+        read_df=pd.read_csv(file_path, na_filter= False) #  Read csv file and load data into dataframe.
+        # column_list = read_df.select_dtypes(include=['object'])
+        # logging.info("Test tyoe: "+str(df_num))
+        
+        # column_list=[*range(0, len(read_df.columns), 1)] 
+        # read_df=pd.read_csv(file_path,na_filter= False,parse_dates=column_list) #  Read csv file and load data into dataframe.
         return read_df
 
 
@@ -221,9 +224,10 @@ class DBClass:
         engine = create_engine(connection_string) # Create database engine.
         schema_name = user_name.lower()
         try :
-            file_data_df.to_sql(table_name,engine,schema=schema_name) # Load data into database with table structure.
+            file_data_df.to_sql(table_name,engine,schema=schema_name,) # Load data into database with table structure.
             status = 0 # If successfully.
-        except :
+        except Exception as e:
+            logging.info("Exception: "+str(e))
             status = 1 # If failed.
             
         return status
@@ -281,12 +285,11 @@ class DBClass:
         """ 
         
         col_table_name=table_name.partition(".")[2] #trim from the string and get the table name
-        columns_list1=self.get_column_names(connection,col_table_name) #get the column list 
-        columns_list=columns_list1[1:] #get all index value accept index 0 
+        columns_list=self.get_column_names(connection,col_table_name) #get the column list    
         if sort_type =="asc" and  str(sort_index) == "0":  #check if value sort_type and sort_index is empty
-            order_clause="ORDER BY index"
+            order_clause=f'ORDER BY "{columns_list[0]}"'
         else:
-            order_clause=f'ORDER BY "{columns_list1[int(sort_index)]}" {sort_type}' #formated string for order By clause 
+            order_clause=f'ORDER BY "{columns_list[int(sort_index)]}" {sort_type}' #formated string for order By clause 
         return order_clause,columns_list
     
     def get_global_search_clause(self,columns,global_value):
@@ -306,8 +309,18 @@ class DBClass:
         global_search_clause="("+empty_string[:len(empty_string)-3]+")" # remove the "or" string appended at last 
         return global_search_clause
     
+    def get_customfilter(self,customefilter):
+        dict=customefilter[0]
+        empty_string=""
+        for x in dict:
+            if dict[x]!="":
+                dict[x]=dict[x].replace("'","''")
+                empty_string+="cast(\""+x+"\" as varchar) like '%"+dict[x]+"%' or "
+        customefilter="("+empty_string[:len(empty_string)-3]+")" # remove the "or" string appended at last 
+        return customefilter
     
-    def pagination(self,connection,table_name,start_index,length,sort_type,sort_index,global_search_value):
+    
+    def pagination(self,connection,table_name,start_index,length,sort_type,sort_index,global_search_value,customefilter):
         """ function used to create Sql query string
 
         Args:
@@ -320,28 +333,39 @@ class DBClass:
         Return : 
             [String] : [return the sql query string]
         """
-        
-
         try: 
             end_index = (start_index + length)-1 #get total length
             limit_index=start_index+length
-            order_clause,columns=self.get_order_clause(connection,table_name,sort_type,sort_index) #call get_order_clause function and get order by string and column list            
-            columns_str = '","'.join(columns) # create string that join comma(,) with column name list sequential manner
-            columns_str = "\""+columns_str+"\"" 
-            
-
+            order_clause,columns_list=self.get_order_clause(connection,table_name,sort_type,sort_index) #call get_order_clause function and get order by string and column list            
+            order_clause,columns_list=self.get_order_clause(connection,table_name,sort_type,sort_index) #call get_order_clause function and get order by string and column list            
+            columns=columns_list[1:]
             global_search_clause=""
             if global_search_value!="":
                 global_search_clause=self.get_global_search_clause(columns,global_search_value)  #call get_global_search_clause function and get search query string
-                global_search_clause= "where "+global_search_clause           
-            if str(sort_index) != "0" or global_search_value!="":
+                global_search_clause= "where "+global_search_clause  
+            customefilter=self.get_customfilter(customefilter)
+            customefilter_clause=""
+            if customefilter!='()':
+                customefilter_clause="where "+customefilter
+                # if global_search_value=="":
+                #     customefilter_clause="where "+customefilter_clause  
+            logging.info("customefilter_clause: "+customefilter_clause)         
+            
+            if str(sort_index) != "0" or global_search_value!="" or customefilter_clause!="":  
                 if start_index==0:
-                    sql_command = f'SELECT * From {table_name} {global_search_clause} {order_clause} limit {length}'                 
-                else:    
-                    sql_command = f'select * from (SELECT * From {table_name} {global_search_clause} {order_clause} limit {limit_index} offset {start_index}) as dt limit {length}'                 
+                    if customefilter_clause !="":
+                       sql_command = f'select * from (SELECT * From {table_name} {global_search_clause} {order_clause}) as dt {customefilter_clause} {order_clause} limit {length}'                  
+                    else:
+                        sql_command = f'SELECT * From {table_name} {global_search_clause} {order_clause} limit {length}'                 
+                else:
+                    if customefilter_clause !="":
+                        sql_command = f'select * from (SELECT * From {table_name} {global_search_clause} {order_clause} limit {limit_index} offset {start_index}) as dt {customefilter_clause} {order_clause} limit {length}'                 
+                    else:   
+                        sql_command = f'select * from (SELECT * From {table_name} {global_search_clause} {order_clause} limit {limit_index} offset {start_index}) as dt limit {length}'                 
                 logger.info("sql_command1: "+sql_command)
+            
             else:
-                sql_command = f'SELECT * From {table_name} where index between {start_index} and {end_index}  {order_clause}'
+                sql_command = f'SELECT * From {table_name} where "{columns_list[0]}" between {start_index} and {end_index}  {order_clause}'
                 logger.info("sql_command2: "+sql_command)            
             return sql_command
         except Exception as exc:
