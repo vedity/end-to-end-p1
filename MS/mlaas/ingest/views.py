@@ -180,10 +180,11 @@ class CreateDatasetClass(APIView):
                                 file=request.FILES['inputfile'] #get inputfile Name
                                 file_data = pd.read_csv(request.FILES['inputfile'])   # read the csv file and store into dataframe variable                             
                                 file_check_status = IngestionObj.check_file(file,file_data)  # call check_file function to verify csv file data
-                                if file_check_status !=True:
-                                        status_code,error_msg=get_Status_code(file_check_status) # extract the status_code and error_msg from file_check_status
-                                        logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+status_code)
-                                        return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                                # file_check_status ==
+                                # if file_check_status !=True:
+                                #         status_code,error_msg=get_Status_code(file_check_status) # extract the status_code and error_msg from file_check_status
+                                #         logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+status_code)
+                                #         return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                                 file_path="static/server/"
                                 file_name =IngestionObj.save_file(user_name,dataset_visibility,file,file_path)
                         else:
@@ -291,9 +292,10 @@ class DataDetailClass(APIView):
                         sort_type=order_values[0]['dir'] # get the sort type value(asc or desc)
                         sort_index=order_values[0]['column'] # get the sort_index column value
                         global_value=request_body['search']['value']  #get String value for global search
+                        customefilter=request_body['customefilter']    
                         dataset_id = request.query_params.get('dataset_id') #get dataset_id
                         row_count=DBObject.get_row_count(connection,dataset_id) #get the row count
-                        dataset_df=IngestionObj.show_data_details(dataset_id,start_index,length,sort_type,sort_index,global_value) #call show_data_details and it will return dataset detail data in dataframe
+                        dataset_df=IngestionObj.show_data_details(dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter) #call show_data_details and it will return dataset detail data in dataframe
                         if isinstance(dataset_df,str): #check the instance of dataset_df
                                 status_code,error_msg=get_Status_code(dataset_df) # extract the status_code and error_msg  from dataset_df
                                 logging.info("data ingestion : DataDetailClass : POST Method : execution stop : status_code :"+status_code)
