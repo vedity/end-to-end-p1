@@ -270,8 +270,8 @@ class DatasetSchemaClass(APIView):
                 """
                 try:
                         logging.info("data ingestion : DatasetSchemaClass : GET Method : execution start")
-                        dataset_id=request.query_params.get('dataset_id') #get dataset id
-                        schema_data=schema_obj.get_dataset_schema(str(dataset_id)) #get the schema detail,if exist then return data else return string with error_msg and status code
+                        project_id=request.query_params.get('project_id') #get dataset id
+                        schema_data=schema_obj.get_dataset_schema(str(project_id)) #get the schema detail,if exist then return data else return string with error_msg and status code
                         # return Response({"data":schema_data})
                         if isinstance(schema_data,list):  
                                 logging.info("data ingestion : DatasetSchemaClass : GET Method : execution stop")
