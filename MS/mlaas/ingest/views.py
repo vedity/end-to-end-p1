@@ -62,7 +62,6 @@ class CreateProjectClass(APIView):
                 """
                 try:
                         logging.info("data ingestion : CreateProjectClass : GET Method : execution start")
-                        #user_name = request.user.get_username()
                         user_name  = request.query_params.get('user_name') #get Username
                         project_df = IngestionObj.show_project_details(user_name) #call show_project_details to retrive project detail data and it will return dataframe
                         if isinstance(project_df,str): #check the instance of dataset_df
@@ -97,7 +96,6 @@ class CreateProjectClass(APIView):
                         try:
                                 
                                 logging.info("data ingestion : CreateProjectClass : POST Method : execution start")
-                                # user_name=request.user.get_username()  #get Username
                                 user_name=request.POST.get('user_name')  #get Username
                                 project_name=request.POST.get('project_name') #get project_name
                                 project_desc=request.POST.get('description') #get description
@@ -205,7 +203,6 @@ class CreateDatasetClass(APIView):
                 """
                 try: 
                         logging.info("data ingestion : CreateDatasetClass : POST Method : execution start")
-                        # user_name=request.user.get_username()
                         user_name=str(request.POST.get('user_name'))  #get Username
                         dataset_name=request.POST.get('dataset_name') #get dataset name
                         dataset_visibility= request.POST.get('visibility')
@@ -214,11 +211,10 @@ class CreateDatasetClass(APIView):
                                 file=request.FILES['inputfile'] #get inputfile Name
                                 file_data = pd.read_csv(request.FILES['inputfile'])   # read the csv file and store into dataframe variable                             
                                 file_check_status = IngestionObj.check_file(file,file_data)  # call check_file function to verify csv file data
-                                # file_check_status ==
-                                # if file_check_status !=True:
-                                #         status_code,error_msg=get_Status_code(file_check_status) # extract the status_code and error_msg from file_check_status
-                                #         logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+status_code)
-                                #         return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                                if file_check_status !=True:
+                                        status_code,error_msg=get_Status_code(file_check_status) # extract the status_code and error_msg from file_check_status
+                                        logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+status_code)
+                                        return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                                 file_path="static/server/"
                                 file_name =IngestionObj.save_file(user_name,dataset_visibility,file,file_path)
                         else:
@@ -243,7 +239,7 @@ class CreateDatasetClass(APIView):
                         
                 except Exception as e:
                         logging.error("data ingestion : CreateDatasetClass : POST Method : Exception : " + str(e))
-			# logging.error("data ingestion : CreateDatasetClass : POST Method : "+traceback.format_exc())
+			logging.error("data ingestion : CreateDatasetClass : POST Method : "+traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
 
 
@@ -267,7 +263,6 @@ class DatasetSchemaClass(APIView):
                         logging.info("data ingestion : DatasetSchemaClass : GET Method : execution start")
                         project_id=request.query_params.get('project_id') #get dataset id
                         schema_data=schema_obj.get_dataset_schema(str(project_id)) #get the schema detail,if exist then return data else return string with error_msg and status code
-                        # return Response({"data":schema_data})
                         if isinstance(schema_data,list):  
                                 logging.info("data ingestion : DatasetSchemaClass : GET Method : execution stop")
                                 return Response({"status_code":"200","error_msg":"Successfull retrival","response":schema_data})
@@ -340,7 +335,6 @@ class DataDetailClass(APIView):
                 draw=request_body["draw"]
                 try:
                         logging.info("data ingestion : DataDetailClass : POST Method : execution start")
-                        # logging.info("json data"+ str(type(request.data)) )
                         start_index=request_body["start"] #get the start index
                         length=request_body["length"] #get the length
                         order_values=request_body['order'] 
@@ -415,7 +409,6 @@ class DeleteProjectDetailClass(APIView):
                 """
                 try:
                         logging.info("data ingestion : DeleteProjectDetailClass : DELETE Method : execution start")
-                        # user_name=request.user.get_username()
                         user_name=request.query_params.get('user_name') # get username
                         project_id=request.query_params.get('project_id')  #get tablename 
                         project_status,dataset_id,project_name= IngestionObj.delete_project_details(project_id,user_name)  #get the project_status if project Deletion failed or successfull
@@ -457,7 +450,6 @@ class DeleteDatasetDetailClass(APIView):
                 """
                 try:
                         logging.info("data ingestion : DeleteDatasetDetailClass : DELETE Method : execution start")
-                        # user_name=request.user.get_username()
                         user_name=request.query_params.get('user_name') #get user_name
                         dataset_id=request.query_params.get('dataset_id')  #get dataset_name
                         dataset_status,dataset_name=IngestionObj.delete_dataset_detail(dataset_id,user_name) #get the dataset_status if dataset Deletion failed or successfull 
@@ -501,7 +493,6 @@ class DeleteDataDetailClass(APIView):
                 """
                 try:
                         logging.info("data ingestion : DeleteDataDetailClass : DELETE Method : execution start")
-                        # user_name=request.user.get_username()
                         user_name=request.query_params.get('user_name')
                         table_name=request.query_params.get('table_name')  #get tablename
                         data_detail_status=IngestionObj.delete_data_detail(table_name,user_name) 
