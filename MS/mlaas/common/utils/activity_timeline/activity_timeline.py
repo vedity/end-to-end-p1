@@ -85,7 +85,7 @@ class ActivityTimelineClass:
     
     def get_user_activity(self,user_name):
         """
-        this function used to get the records from activity table  for te specific users
+        this function used to get the records from activity table  for the specific users
         Args:
             user_id[(String)] : [Id of the user]
         Return:
