@@ -55,11 +55,6 @@ class CreateProjectClass(APIView):
         
                 Args  : 
                         User_name[(String)]   :[Name of user]
-                        ProjectName[(String)] :[Name of project]
-                        Description[(String)] :[Discreption of project]
-                        dataset_visibility[(String)] :[Name of Visibility public or private]
-                        dataset_id[(Integer)] :[ID of dataset selected by user from dropdown]
-                        inputfile(CSV File)   :[Input CSV file]
                 Return : 
                         status_code(500 or 200),
                         error_msg(Error message for retrival & insertions failed or successfull),
