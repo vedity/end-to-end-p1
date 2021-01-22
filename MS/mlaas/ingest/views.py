@@ -238,9 +238,9 @@ class CreateDatasetClass(APIView):
                                 return Response({"status_code":"200","error_msg":"Successfully Inserted","response":"true"})
                         
                 except Exception as e:
-                        logging.error("data ingestion : CreateDatasetClass : POST Method : Exception : " + str(e))
-			logging.error("data ingestion : CreateDatasetClass : POST Method : "+traceback.format_exc())
-                        return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
+                                logging.error("data ingestion : CreateDatasetClass : POST Method : Exception : " + str(e))
+                                logging.error("data ingestion : CreateDatasetClass : POST Method : "+traceback.format_exc())
+                                return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
 
 
 # Class for Schema to retrive & insert
