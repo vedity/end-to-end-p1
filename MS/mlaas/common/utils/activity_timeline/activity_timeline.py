@@ -41,9 +41,9 @@ class ActivityTimelineClass:
         # table name
         table_name = 'mlaas.activity_tbl'
         # Columns for activity table
-        cols = 'user_id,project_id,dataset_id,activity_name,activity_description,date,timestamp,operation' 
+        cols = 'user_name,project_id,dataset_id,activity_name,activity_description,date,timestamp,operation' 
         # Schema for activity table.
-        schema ="user_id bigint,"\
+        schema ="user_name text,"\
                 "project_id bigint,"\
                 "dataset_id bigint,"\
                 "activity_name  text,"\
@@ -54,12 +54,12 @@ class ActivityTimelineClass:
                 
         return table_name,cols,schema
     
-    def insert_user_activity(self,user_id,project_id,dataset_id,activity_name,activity_description,current_date,timestamp,operation):
+    def insert_user_activity(self,user_name,project_id,dataset_id,activity_name,activity_description,current_date,timestamp,operation):
         """
         this function used to insert the record into activity table
 
         Args:
-            userid[(Integer)] :[Id of  the user]
+            user_name[(string)] :[Name of user]
             project_id[(Integer)] :[Id of the project]
             dataset_id[(Integer)] :[Id of the dataset]
             activity_name[(String)] :[Name of activity(create,delete)]
@@ -76,14 +76,14 @@ class ActivityTimelineClass:
         table_name,cols,schema = self.get_schema()
         create_status = self.is_existing_schema(DBObject,connection,table_name,schema) #check if the table is created or not
         if create_status ==True:
-            rows = user_id,project_id,dataset_id,activity_name,activity_description,current_date,timestamp,operation
+            rows = user_name,project_id,dataset_id,activity_name,activity_description,current_date,timestamp,operation
             row_tuples = [tuple(rows)] # form the tuple of sql values to be inserted
             status = DBObject.insert_records(connection,table_name,row_tuples,cols) #insert the record and return 1 if inserted else return 1
             if status ==1:
                 return False
         return True
     
-    def get_user_activity(self):
+    def get_user_activity(self,user_name):
         """
         this function used to get the records from activity table  for te specific users
         Args:
@@ -95,7 +95,7 @@ class ActivityTimelineClass:
         DBObject = db.DBClass() # create object for database class
         connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port)
 
-        sql_command = ("SELECT user_id,activity_description,date,timestamp,operation from mlaas.activity_tbl where user_id='"+str(user_id)+"' order by timestamp")
+        sql_command = ("SELECT user_name,activity_description,date,timestamp,operation from mlaas.activity_tbl where user_name='"+str(user_name)+"' order by timestamp")
         activity_df = DBObject.select_records(connection,sql_command) #excute the sql query 
         activity_df = activity_df.to_json(orient='records',date_format='iso') # convert into json string 
         activity_df = json.loads(activity_df) #convert into dict format
