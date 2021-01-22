@@ -420,7 +420,8 @@ class DBClass:
         
         dataset_table_name,dataset_visibility,user_name = dataset_records[0]  #get 0 index records
         dataset_table_name,dataset_visibility,user_name = str(dataset_table_name),str(dataset_visibility),str(user_name) #convert variable  type into string
-         
+
+
         if dataset_visibility.lower() == 'public':
             user_name = 'public'
     
@@ -430,6 +431,22 @@ class DBClass:
         data_details_df = json.loads(data_details_df)  #convert data_details_df into dictonery
         return data_details_df
     
+
+    
+
+    def get_datasetid(self,DBObject,connection,dataset_id,table_name):
+        '''This function is used to get dataset table name from datasetid
+        Args:
+                dataset_id[(Integer)] : [Id of the dataset table]
+                table_name[(String)] : [table name]
+        Return : 
+            
+                [Dataframe] : [return the dataframe of dataset table name]
+        '''
+        sql_command = "SELECT DATASET_TABLE_NAME FROM "+ table_name + " WHERE DATASET_ID ='"+ dataset_id +"'"
+        dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+        return dataset_df['dataset_table_name'][0] 
+        
 
 
         
