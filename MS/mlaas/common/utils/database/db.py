@@ -130,6 +130,7 @@ class DBClass:
         tuples = row_tuples # Get record for database insert query.
         logging.info("cols"+str(cols))
         query = "INSERT INTO %s(%s) VALUES %%s" % (table_name, cols) # Make query
+        logging.info(query+"==============")
         cursor = connection.cursor() # Open cursor for database.
         try:
             extras.execute_values(cursor, query, tuples) # Excute insert query.
@@ -139,6 +140,9 @@ class DBClass:
             connection.rollback() # Rollback the changes.
             cursor.close() # Close the cursor.
             return 1 # If failed.
+
+    #def bulk_insert(table_name,**kwargs):
+
 
     
     def select_records(self,connection,sql_command):
@@ -209,7 +213,37 @@ class DBClass:
 
         return status
 
+    def column_rename(self,file_data_df):
+        """This function is used to rename column of dataframe for % , ( , ) this special characters.
 
+        Args:
+            file_data_df ([dataframe]): [dataframe of the file data.]
+
+        Returns:
+            columns [List of renamed column]: [List of unchanged column]
+        """
+        df_columns=file_data_df.columns.values
+        df_columns_new =[]
+        
+        for i in df_columns: # this loop check a column name
+            str1 =""
+            for x in i: # this loop check each character column name
+                if '%' in x:
+                    str1 += x.replace('%','percent_isg') #It will replace column name when column name contains % 
+
+                elif '(' in x:
+                    str1 += x.replace('(','open_Bracket_isg') #It will replace column name when column name contains ( 
+
+                elif ')' in x:
+                    str1 += x.replace(')','close_Bracket_isg') #It will replace column name when column name contains )
+                    
+                else:
+                    str1 += x
+            df_columns_new.append(str1) # it append the renamed column name
+                 
+        return df_columns_new ,df_columns # it returns list of changed and unchanged column name
+
+    
     def load_csv_into_db(self,connection_string,table_name,file_data_df,user_name):
         """This function is used to load csv data  into database table.
 
@@ -222,16 +256,29 @@ class DBClass:
         Returns:
             [integer]: [it will return status of loaded data into database table. if successfully then 0 else 1.]
         """
+        change_col,unchange_col = self.column_rename(file_data_df)
+        
+        for i in range(len(change_col)): # this loop will rename the updated column name into he dataframe column
+            var_1=change_col[i]
+            var_2=unchange_col[i]
+            file_data_df.rename(columns={var_2:var_1},inplace=True)
+            
+
         engine = create_engine(connection_string) # Create database engine.
         schema_name = user_name.lower()
+            
         try :
             file_data_df.to_sql(table_name,engine,schema=schema_name,) # Load data into database with table structure.
+
+            logging.info("file_data_df in load csv into db :========================="+str(file_data_df))
             status = 0 # If successfully.
         except Exception as e:
             logging.info("Exception: "+str(e))
             status = 1 # If failed.
-            
+                
         return status
+
+            
 
     def get_column_names(self, connection, table_name):
         '''
