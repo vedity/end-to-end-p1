@@ -145,13 +145,13 @@ class CreateProjectClass(APIView):
                                                 logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+status_code)
                                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                                         else:
-                                                user_id = 1
+                                                
                                                 activity_name = "Create Project"
                                                 activity_description = f'You have created project "{project_name}"'
                                                 current_date = str(datetime.date.today())
                                                 timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
                                                 operation = "Create"
-                                                timeline_Obj.insert_user_activity(user_id,project_id,dataset_id,activity_name,activity_description,current_date,timestamp,operation)
+                                                timeline_Obj.insert_user_activity(user_name,project_id,dataset_id,activity_name,activity_description,current_date,timestamp,operation)
                                                 logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code : 200")
                                                 return Response({"status_code":"200","status_msg":"Successfully Inserted","response":"true"}) 
 
@@ -235,14 +235,14 @@ class CreateDatasetClass(APIView):
                                 logging.info("data ingestion : CreateDatasetClass : POST Method : execution stop : status_code :"+status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                         else:
-                                user_id = 1
+                                
                                 project_id=0
                                 activity_name = "Create Dataset"
                                 activity_description = f'You have created dataset "{dataset_name}"'
                                 current_date = str(datetime.date.today())
                                 timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
                                 operation = "Create"
-                                status = timeline_Obj.insert_user_activity(user_id,project_id,dataset_id,activity_name,activity_description,current_date,timestamp,operation)
+                                status = timeline_Obj.insert_user_activity(user_name,project_id,dataset_id,activity_name,activity_description,current_date,timestamp,operation)
                                 logging.info("data ingestion : CreateDatasetClass : POST Method : execution stop : status_code : 200")
                                 return Response({"status_code":"200","error_msg":"Successfully Inserted","response":"true"})
                         
@@ -430,13 +430,13 @@ class DeleteProjectDetailClass(APIView):
                                 logging.info("data ingestion : DeleteProjectDetailClass : DELETE Method : execution stop : status_code :"+status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                         else:
-                                user_id = 1
+                                
                                 activity_name = "Delete Project"
                                 activity_description = f'You have deleted project "{project_name}"'
                                 current_date = str(datetime.date.today())
                                 timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
                                 operation = "Delete"
-                                status = timeline_Obj.insert_user_activity(user_id,project_id,str(dataset_id),activity_name,activity_description,current_date,timestamp,operation)
+                                status = timeline_Obj.insert_user_activity(user_name,project_id,str(dataset_id),activity_name,activity_description,current_date,timestamp,operation)
                                 logging.info("data ingestion : DeleteProjectDetailClass : DELETE Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully deleted","response":"true"})
                 except Exception as e:
@@ -472,14 +472,14 @@ class DeleteDatasetDetailClass(APIView):
                                 logging.info("data ingestion : DeleteDatasetDetailClass : DELETE Method : execution stop : status_code :"+status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                         else:
-                                user_id = 1
+                                
                                 project_id=0
                                 activity_name = "Delete Dataset"
                                 activity_description = f'You have deleted dataset "{dataset_name}"'
                                 current_date = str(datetime.date.today())
                                 timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
                                 operation = "Delete"
-                                status = timeline_Obj.insert_user_activity(user_id,project_id,dataset_id,activity_name,activity_description,current_date,timestamp,operation)
+                                status = timeline_Obj.insert_user_activity(user_name,project_id,dataset_id,activity_name,activity_description,current_date,timestamp,operation)
                                 logging.info("data ingestion : DeleteDatasetDetailClass : DELETE Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully deleted","response":"true"})
 
