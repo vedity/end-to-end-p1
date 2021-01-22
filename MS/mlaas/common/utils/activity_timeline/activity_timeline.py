@@ -95,10 +95,12 @@ class ActivityTimelineClass:
         DBObject = db.DBClass() # create object for database class
         connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port)
 
-        sql_command = ("SELECT user_name,activity_description,date,timestamp,operation from mlaas.activity_tbl where user_name='"+str(user_name)+"' order by timestamp")
+        sql_command = ("SELECT user_name,activity_description,date,timestamp,operation from mlaas.activity_tbl where user_name='"+str(user_name)+"' order by timestamp desc")
         activity_df = DBObject.select_records(connection,sql_command) #excute the sql query 
-        activity_df = activity_df.to_json(orient='records',date_format='iso') # convert into json string 
+        activity_df = activity_df.to_json(orient='records',date_format='iso',force_ascii=True) # convert into json string 
+        logging.info("check activity"+str(activity_df))
         activity_df = json.loads(activity_df) #convert into dict format
+        
         return activity_df
 
     def is_existing_schema(self,DBObject,connection,table_name,schema):

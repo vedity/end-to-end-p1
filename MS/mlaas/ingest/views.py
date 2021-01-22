@@ -147,7 +147,7 @@ class CreateProjectClass(APIView):
                                         else:
                                                 
                                                 activity_name = "Create Project"
-                                                activity_description = f'You have created project "{project_name}"'
+                                                activity_description = f"You have created project '{project_name}'"
                                                 current_date = str(datetime.date.today())
                                                 timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
                                                 operation = "Create"
@@ -238,7 +238,7 @@ class CreateDatasetClass(APIView):
                                 
                                 project_id=0
                                 activity_name = "Create Dataset"
-                                activity_description = f'You have created dataset "{dataset_name}"'
+                                activity_description = "You have created dataset '{x}'".format(x=dataset_name)
                                 current_date = str(datetime.date.today())
                                 timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
                                 operation = "Create"
@@ -431,7 +431,7 @@ class DeleteProjectDetailClass(APIView):
                         else:
                                 
                                 activity_name = "Delete Project"
-                                activity_description = f'You have deleted project "{project_name}"'
+                                activity_description = f"You have deleted project '{project_name}'"
                                 current_date = str(datetime.date.today())
                                 timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
                                 operation = "Delete"
@@ -474,7 +474,7 @@ class DeleteDatasetDetailClass(APIView):
                                 
                                 project_id=0
                                 activity_name = "Delete Dataset"
-                                activity_description = f'You have deleted dataset "{dataset_name}"'
+                                activity_description = f"You have deleted dataset '{dataset_name}'"
                                 current_date = str(datetime.date.today())
                                 timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
                                 operation = "Delete"
