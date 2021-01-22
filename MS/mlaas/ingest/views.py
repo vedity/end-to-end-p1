@@ -323,7 +323,6 @@ class DatasetSchemaClass(APIView):
 #class for retrive csv data 
 #It will take url string as mlaas/ingest/data_detail/.
 class DataDetailClass(APIView):
-           
 
         def post(self, request, format=None ):
                 """
