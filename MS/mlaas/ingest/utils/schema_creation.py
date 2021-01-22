@@ -73,13 +73,13 @@ class SchemaClass:
                 raise DatabaseConnectionFailed(500)
             
             sql_command = "SELECT project_id from mlaas.schema_tbl where project_id="+str(project_id)
+            logging.info("sql_command"+sql_command )
             dataset_df = DBObject.select_records(connection,sql_command)
             if dataset_df is None or len(dataset_df)==0 :
-                    sql_command = "SELECT dataset_id from mlaas.project_tbl where project_id="+str(project_id)
-                    dataset_df = DBObject.select_records(connection,sql_command)
-                    dataset_id = dataset_df['dataset_id'][0]
-                    sql_command = "SELECT dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows from mlaas.dataset_tbl Where dataset_id =" + str(dataset_id)
-                    dataset_df = DBObject.select_records(connection,sql_command)  # execute the sql query and return data if found else return None
+                    project_df = DBObject.get_project_detail(DBObject,connection,project_id)
+                    dataset_id = project_df['dataset_id'][0]
+
+                    dataset_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
                     if dataset_df is None or len(dataset_df) == 0:
                         raise DatasetDataNotFound(500)
                     dataset_records = dataset_df.to_records(index=False) # convert dataframe to a NumPy record  
