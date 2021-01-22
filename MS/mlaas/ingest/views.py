@@ -275,15 +275,15 @@ class DatasetSchemaClass(APIView):
                         # return Response({"data":schema_data})
                         if isinstance(schema_data,list):  
                                 logging.info("data ingestion : DatasetSchemaClass : GET Method : execution stop")
-                                return Response({"Status":"200","error_msg":"Successfull retrival","response":schema_data})
+                                return Response({"status_code":"200","error_msg":"Successfull retrival","response":schema_data})
                         else:
                                 status_code,error_msg=get_Status_code(schema_data) # extract the status_code and error_msg from schema_data
                                 logging.info("data ingestion : DatasetSchemaClass : GET Method : execution stop : status_code :"+status_code)
-                                return Response({"Status":status_code,"error_msg":error_msg,"response":"false"})
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                 except Exception as e:
                         logging.error("data ingestion : DataDetailClass : GET Method : Exception :" + str(e))
                         logging.error("data ingestion : DataDetailClass : GET Method : " +traceback.format_exc())
-                        return Response({"status":"500","error_msg":str(e),"response":"false"})
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
                             
         def post(self,request,format=None):
                 """
@@ -311,14 +311,14 @@ class DatasetSchemaClass(APIView):
                         if schema_status !=True:
                                 status_code,error_msg=get_Status_code(schema_status) # extract the status_code and error_msg from schema_status
                                 logging.info("data ingestion : DatasetSchemaClass : POST Method : execution stop : status_code :"+status_code)
-                                return Response({"Status":status_code,"error_msg":error_msg,"response":"false"})
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
                                 logging.info("data ingestion : DatasetSchemaClass : POST Method : execution stop : status_code :200")
-                                return Response({"Status":"200","error_msg":"Successfully updated","response":"true"})           
+                                return Response({"status_code":"200","error_msg":"Successfully updated","response":"true"})           
                 except Exception as e:
                         logging.error("data ingestion : DatasetSchemaClass : POST Method : Exception :" + str(e))
                         logging.error("data ingestion : DatasetSchemaClass : POST Method : " +traceback.format_exc())
-                        return Response({"status":"500","error_msg":str(e),"response":"false"})
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
 
 #class for retrive csv data 
 #It will take url string as mlaas/ingest/data_detail/.
