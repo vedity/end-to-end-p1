@@ -139,9 +139,9 @@ class MenuClass(APIView):
                         json_data=menu_nested_format(dataset_json1,dataset_json2)   
                         return Response({"status_code":"200","error_msg":"Menu Data","response":json_data})
                 except Exception as e:
-                        logging.error("data ingestion : MenuClass : POST Method : Exception :" + str(e))
-			logging.error("data ingestion : MenuClass : POST Method : "+ traceback.format_exc())
-                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+                                logging.error("data ingestion : MenuClass : POST Method : Exception :" + str(e))
+                                logging.error("data ingestion : MenuClass : POST Method : "+ traceback.format_exc())
+                                return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
 class ScheamDatatypeListClass(APIView):
         
@@ -160,13 +160,13 @@ class ScheamDatatypeListClass(APIView):
                 """
                 def get(self, request, format=None):
                         try :
-                                logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
-                                schema_df=DBObject.read_data('common/attribute_list.csv')
-                                return Response({"status_code":"200","error_msg":"Successfull retrival","response":schema_df})
+                                        logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
+                                        schema_df=DBObject.read_data('common/attribute_list.csv')
+                                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":schema_df})
                         except Exception as e:
-                                logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
-		        	logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
-                                return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+                                        logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
+                                        logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
+                                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
         def post(self, request, format=None):
                 """
@@ -189,14 +189,14 @@ class ScheamDatatypeListClass(APIView):
                         Response(return error_msg if failed otherwise true )  
                 """
                 try :
-                        logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
-                        schema_df=DBObject.read_data('common/attribute_list.csv') #read the data from csv file store into dataframe variable
-                        status=DBObject.load_csv_into_db(connection_string,'attribute_types',schema_df,'mlaas') # this function will insert the csv data into  attribute_types table
-                        return Response({"status_code":"200","error_msg":"Successfull insertion","response":"true"})
+                                logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
+                                schema_df=DBObject.read_data('common/attribute_list.csv') #read the data from csv file store into dataframe variable
+                                status=DBObject.load_csv_into_db(connection_string,'attribute_types',schema_df,'mlaas') # this function will insert the csv data into  attribute_types table
+                                return Response({"status_code":"200","error_msg":"Successfull insertion","response":"true"})
                 except Exception as e:
-                        logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
-			logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
-                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+                                logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
+                                logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
+                                return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
 class ScheamColumnListClass(APIView):
 
@@ -222,13 +222,13 @@ class ScheamColumnListClass(APIView):
                 """
                 def get(self, request, format=None):
                         try :
-                                logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
-                                column_attribute = {"column_attribute":["ignore","target"] }
-                                return Response({"status_code":"200","error_msg":"Successfull retrival","response":column_attribute})
+                                        logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
+                                        column_attribute = {"column_attribute":["ignore","target"] }
+                                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":column_attribute})
                         except Exception as e:
-                                logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
-		        	logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
-                                return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+                                        logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
+                                        logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
+                                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
         def post(self, request, format=None):
                 """
@@ -251,14 +251,14 @@ class ScheamColumnListClass(APIView):
                         Response(return error if failed otherwise true)  
                 """
                 try :
-                        logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
-                        schema_df=DBObject.read_data('common/attribute_list.csv') #read the data from csv file store into dataframe variable
-                        status=DBObject.load_csv_into_db(connection_string,'attribute_types',schema_df,'mlaas') # this function will insert the csv data into  attribute_types table
-                        return Response({"status_code":"200","error_msg":"Successfull insertion","response":"true"})
+                                logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
+                                schema_df=DBObject.read_data('common/attribute_list.csv') #read the data from csv file store into dataframe variable
+                                status=DBObject.load_csv_into_db(connection_string,'attribute_types',schema_df,'mlaas') # this function will insert the csv data into  attribute_types table
+                                return Response({"status_code":"200","error_msg":"Successfull insertion","response":"true"})
                 except Exception as e:
-                        logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
-			logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
-                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+                                logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
+                                logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
+                                return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
 
 class ActivityTimelineClass(APIView):
