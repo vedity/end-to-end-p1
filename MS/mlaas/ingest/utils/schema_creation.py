@@ -73,13 +73,13 @@ class SchemaClass:
                 raise DatabaseConnectionFailed(500)
             
             sql_command = "SELECT project_id from mlaas.schema_tbl where project_id="+str(project_id)
+            logging.info("sql_command"+sql_command )
             dataset_df = DBObject.select_records(connection,sql_command)
             if dataset_df is None or len(dataset_df)==0 :
-                    sql_command = "SELECT dataset_id from mlaas.project_tbl where project_id="+str(project_id)
-                    dataset_df = DBObject.select_records(connection,sql_command)
-                    dataset_id = dataset_df['dataset_id'][0]
-                    sql_command = "SELECT dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows from mlaas.dataset_tbl Where dataset_id =" + str(dataset_id)
-                    dataset_df = DBObject.select_records(connection,sql_command)  # execute the sql query and return data if found else return None
+                    project_df = DBObject.get_project_detail(DBObject,connection,project_id)
+                    dataset_id = project_df['dataset_id'][0]
+
+                    dataset_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
                     if dataset_df is None or len(dataset_df) == 0:
                         raise DatasetDataNotFound(500)
                     dataset_records = dataset_df.to_records(index=False) # convert dataframe to a NumPy record  
@@ -118,7 +118,17 @@ class SchemaClass:
 
     def map_dataset_schema(self,DBObject,connection,project_id,column_name_list,column_lst,data_type_lst,column_attribute_lst):
         """
-
+        this function used to insert the records into a table if not exist otherwise it will update the records if  found.
+        Args:
+                column_name_list[(List)]  : [Existing table column name value]
+                column_lst [(List)]  : [Updated column name value]
+                data_type_lst [(List)]  : [Existing table column datatype value]
+                column_attribute_lst [(List)]  : []
+                column_change_datatype[(List)]  : [Updated column datatype value]
+                project_id [(Integer)]  : [Id of the project table]
+                 
+        Return:
+            [(integer)] : [return 0 if successfully inserted or updated other wise return 1]
         """
         try:
             logging.info("data ingestion : SchemaClass : map_dataset_schema : execution start")
@@ -165,12 +175,7 @@ class SchemaClass:
         this function use to update the Schema table values with the new upcoming values.
 
         Args : 
-                  column_name_list[(List)]  : [Existing table column name value]
-                  column_lst [(List)]  : [Updated column name value]
-                  data_type_lst [(List)]  : [Existing table column datatype value]
-                  column_attribute_lst [(List)]  : []
-                  column_change_datatype[(List)]  : [Updated column datatype value]
-                  dataset_id [(Integer)]  : [Id of the project table]
+                project_id [(Integer)]  : [Id of the project table]
 
         Return :
                 [String] : [Status value if succeed return 0 else 1]

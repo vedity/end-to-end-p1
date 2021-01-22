@@ -432,20 +432,27 @@ class DBClass:
         return data_details_df
     
 
-    
-
-    def get_datasetid(self,DBObject,connection,dataset_id,table_name):
-        '''This function is used to get dataset table name from datasetid
+    def get_dataset_detail(self,DBObject,connection,dataset_id):
+        '''This function is used to get details for dataset table.
         Args:
                 dataset_id[(Integer)] : [Id of the dataset table]
-                table_name[(String)] : [table name]
         Return : 
-            
-                [Dataframe] : [return the dataframe of dataset table name]
+                [Dataframe] : [return the dataframe of dataset table ]
         '''
-        sql_command = "SELECT DATASET_TABLE_NAME FROM "+ table_name + " WHERE DATASET_ID ='"+ dataset_id +"'"
+        sql_command = "SELECT dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows from mlaas.dataset_tbl Where dataset_id =" + str(dataset_id)
         dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
-        return dataset_df['dataset_table_name'][0] 
+        return dataset_df 
+    
+    def get_project_detail(self,DBObject,connection,project_id):
+        '''This function is used to get details for project table.
+        Args:
+                project_id[(Integer)] : [Id of the project table]
+        Return : 
+                [Dataframe] : [return the dataframe of project table]
+        '''
+        sql_command = "SELECT dataset_id from mlaas.project_tbl Where project_id =" + str(project_id)
+        dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+        return dataset_df
         
 
 
