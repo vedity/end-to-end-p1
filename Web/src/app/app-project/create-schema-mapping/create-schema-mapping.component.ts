@@ -12,16 +12,17 @@ export class CreateSchemaMappingComponent implements OnInit {
   constructor(public apiService: SchemaMappingApiService, public toaster: ToastrService) { }
   @Input() public dataset_id: any;
   @Input() public title: any;
-  @Input() public project_id: any;
-
+  @Input() public project_id: any
+  loaderdiv=false;
   displaytitle = "false";
   columnattrList: any = [];
   datatypeList: any = [];
   datasetSchema: any = [];
+  finaldata:any=[];
   ngOnInit(): void {
     this.getColumnAttributeList();
     //this.getDataTypeList()
-    this.getSchema(this.dataset_id);
+    this.getSchema(this.project_id);
   }
 
   getSchema(datasetid) {
@@ -34,6 +35,7 @@ export class CreateSchemaMappingComponent implements OnInit {
   successHandler(logs) {
     console.log(logs.response);
     this.datasetSchema = logs.response;
+    this.finaldata=logs.response;
   }
 
   getColumnAttributeList() {
@@ -60,7 +62,7 @@ export class CreateSchemaMappingComponent implements OnInit {
   }
 
   errorHandler(error) {
-    console.log(error);
+    this.loaderdiv=false;
     if (error.error_msg)
       this.toaster.error(error.error_msg, 'Error');
     else {
@@ -72,25 +74,34 @@ export class CreateSchemaMappingComponent implements OnInit {
   save(){
     if($(".schema-mapping").find(".errorstatus").length>0){
       this.toaster.error('Please enter valid input', 'Error');
-
     }
     else{
      let savedata=[];
+     this.loaderdiv=true;
       this.datasetSchema.forEach((element,index) => {
-        // let schema=new schemamapping();
        var schema= {change_column_name:$("#columnname_"+index).val().toString(),
         column_name:element.column_name,
-        data_type:element.column_attribute,
+        data_type:element.data_type,
         column_attribute:$("#selectattr_"+index+" :selected").val().toString()}
         savedata.push(schema);
       });
       console.log(savedata);
-      this.apiService.saveDatasetSchema(this.dataset_id,this.project_id,{data:savedata});
+      this.apiService.saveDatasetSchema(this.dataset_id,this.project_id,{data:savedata}).subscribe(logs=>this.savesuccessHandler(logs),error=>this.errorHandler(error));
     }
   }
 
-  reset(){
+  savesuccessHandler(data){
+    this.loaderdiv=false;
+    if (data.status_code == "200"){
+      this.toaster.success(data.error_msg,"Success");
+      this.getSchema(this.project_id);
+    }
+    else
+      this.errorHandler(data);
+  }
 
+  reset(){
+    this.getSchema(this.project_id);
   }
 
 

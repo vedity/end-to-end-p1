@@ -36,7 +36,7 @@
                              <thead >
                               <tr class="thead-light">
                                 
-                                <th *ngFor="let item of columnlist;let i as index" >
+                                <th *ngFor="let item of columnlist" >
                                   {{item.data}}
                                   <input class="form-control filter"  type="text" [hidden]="filter"
                      name="search-{{item.data}}" id="{{item.data}}" />

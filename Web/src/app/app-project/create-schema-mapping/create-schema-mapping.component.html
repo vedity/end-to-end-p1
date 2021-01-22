@@ -21,7 +21,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let data of datasetSchema;let i= index" id="tr_{{i}}">
+                        <tr *ngFor="let data of datasetSchema;let i= index" id="tr_{{i}}" class="{{data.column_attribute}}-selected">
                             <td>
                                 {{data.column_name}}
                             </td>
@@ -30,17 +30,17 @@
                     <option value="">Select Option</option>
                     <option *ngFor="let item of datatypeList" value="{{item}}">{{item}}</option>
                 </select> -->
-                                {{data.column_attribute}}
+                                {{data.data_type}}
 
                             </td>
                             <td>
-                                <select class="form-control selectattr" id="selectattr_{{i}}" (change)="changeattrinute($event.target.value,i)">
+                                <select class="form-control selectattr" id="selectattr_{{i}}" [(ngModel)]="data.column_attribute" (change)="changeattrinute($event.target.value,i)">
                                     <option value="">Select Option</option>
                                     <option *ngFor="let item of columnattrList" value="{{item}}">{{item}}</option>
                                 </select>
                             </td>
                             <td id="td_{{i}}">
-                                <input class="form-control columnname" type="text" id="columnname_{{i}}"
+                                <input class="form-control columnname" type="text" id="columnname_{{i}}" [value]="data.change_column_name"
                                     (change)="checksame(data.column_name,$event.target.value,i)" maxlength="100">
                                 <div class="invalid-feedback">
                                     <span class="text-red">Change column name must be different from column name</span>
@@ -58,3 +58,12 @@
         </div>
     </div>
 </div>
+<div class="loader-box" [hidden]="!loaderdiv">
+    <div class="inner-loader-box">
+    <div class="spinner-border text-warning m-1" role="status">
+        <span class="sr-only">Loading...</span>
+    
+      </div>
+      <p>Loading...</p>
+    </div>
+    </div>
