@@ -8,7 +8,7 @@ Abhishek Negi           11-JAN-2020           1.0       Initial Version
 
 */
 '''
-
+import json
 import logging
 import traceback
 from database import *
@@ -24,7 +24,7 @@ from .utils.json_format.json_formater import *
 from .utils.activity_timeline import *
 from .utils.activity_timeline import activity_timeline
 from database import *
-import json
+
 user_name = 'admin'
 log_enable = True
 LogObject = cl.LogClass(user_name,log_enable)
@@ -140,7 +140,7 @@ class MenuClass(APIView):
                         return Response({"status_code":"200","error_msg":"Menu Data","response":json_data})
                 except Exception as e:
                         logging.error("data ingestion : MenuClass : POST Method : Exception :" + str(e))
-			# logging.error("data ingestion : MenuClass : POST Method : "+ traceback.format_exc())
+			logging.error("data ingestion : MenuClass : POST Method : "+ traceback.format_exc())
                         return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
 class ScheamDatatypeListClass(APIView):
@@ -165,7 +165,7 @@ class ScheamDatatypeListClass(APIView):
                                 return Response({"status_code":"200","error_msg":"Successfull retrival","response":schema_df})
                         except Exception as e:
                                 logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
-		        	# logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
+		        	logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
                                 return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
         def post(self, request, format=None):
@@ -195,7 +195,7 @@ class ScheamDatatypeListClass(APIView):
                         return Response({"status_code":"200","error_msg":"Successfull insertion","response":"true"})
                 except Exception as e:
                         logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
-			# logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
+			logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
                         return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
 class ScheamColumnListClass(APIView):
@@ -227,7 +227,7 @@ class ScheamColumnListClass(APIView):
                                 return Response({"status_code":"200","error_msg":"Successfull retrival","response":column_attribute})
                         except Exception as e:
                                 logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
-		        	# logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
+		        	logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
                                 return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
         def post(self, request, format=None):
@@ -257,7 +257,7 @@ class ScheamColumnListClass(APIView):
                         return Response({"status_code":"200","error_msg":"Successfull insertion","response":"true"})
                 except Exception as e:
                         logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
-			# logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
+			logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
                         return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
 
