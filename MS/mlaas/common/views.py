@@ -8,7 +8,7 @@ Abhishek Negi           11-JAN-2020           1.0       Initial Version
 
 */
 '''
-
+import json
 import logging
 import traceback
 from database import *
@@ -24,7 +24,7 @@ from .utils.json_format.json_formater import *
 from .utils.activity_timeline import *
 from .utils.activity_timeline import activity_timeline
 from database import *
-import json
+
 user_name = 'admin'
 log_enable = True
 LogObject = cl.LogClass(user_name,log_enable)
@@ -139,32 +139,47 @@ class MenuClass(APIView):
                         json_data=menu_nested_format(dataset_json1,dataset_json2)   
                         return Response({"status_code":"200","error_msg":"Menu Data","response":json_data})
                 except Exception as e:
-                        logging.error("data ingestion : MenuClass : POST Method : Exception :" + str(e))
-			# logging.error("data ingestion : MenuClass : POST Method : "+ traceback.format_exc())
-                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+                                logging.error("data ingestion : MenuClass : POST Method : Exception :" + str(e))
+                                logging.error("data ingestion : MenuClass : POST Method : "+ traceback.format_exc())
+                                return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
 class ScheamDatatypeListClass(APIView):
+        
         def get(self, request, format=None):
                 """
-                this function used to get datatype list for schema page 
-                Args:
-                       [This function does not take any argument] 
-                Return:
+                This class is used to get  Datatype list.
+                It will take url string as mlaas/dataset_schema/datatype/.
+
+                Args  : 
+                        
+                        
+                Return : 
                         status_code(500 or 200),
-                        error_msg(Error message for retrive successfull or unsuccessfull),
-                        Response(return false if failed otherwise List of datatype )  
+                        error_msg(Error message for retrival failed or successfull),
+                        Response(return false if failed otherwise json data)
                 """
-                try :
-                        logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
-                        schema_df=DBObject.read_data('common/attribute_list.csv')
-                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":schema_df})
-                except Exception as e:
-                        logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
-			# logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
-                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+                def get(self, request, format=None):
+                        try :
+                                        logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
+                                        schema_df=DBObject.read_data('common/attribute_list.csv')
+                                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":schema_df})
+                        except Exception as e:
+                                        logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
+                                        logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
+                                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
         def post(self, request, format=None):
                 """
+                This class is used to post  Datatype list.
+                It will take url string as mlaas/dataset_schema/datatype/.
+
+                Args  : 
+                        
+                        
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival failed or successfull),
+                        Response(return false if failed otherwise json data)
                 this function used to get datatype list for schema page 
                 Args:
                        [This function does not take any argument] 
@@ -174,19 +189,30 @@ class ScheamDatatypeListClass(APIView):
                         Response(return error_msg if failed otherwise true )  
                 """
                 try :
-                        logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
-                        schema_df=DBObject.read_data('common/attribute_list.csv') #read the data from csv file store into dataframe variable
-                        status=DBObject.load_csv_into_db(connection_string,'attribute_types',schema_df,'mlaas') # this function will insert the csv data into  attribute_types table
-                        return Response({"status_code":"200","error_msg":"Successfull insertion","response":"true"})
+                                logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
+                                schema_df=DBObject.read_data('common/attribute_list.csv') #read the data from csv file store into dataframe variable
+                                status=DBObject.load_csv_into_db(connection_string,'attribute_types',schema_df,'mlaas') # this function will insert the csv data into  attribute_types table
+                                return Response({"status_code":"200","error_msg":"Successfull insertion","response":"true"})
                 except Exception as e:
-                        logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
-			# logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
-                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+                                logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
+                                logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
+                                return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
 class ScheamColumnListClass(APIView):
-       
+
         def get(self, request, format=None):
                 """
+                This class is used to get  schema column list.
+                It will take url string as mlaas/dataset_schema/column_attribute_list/.
+
+                Args  : 
+                        
+                        
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival failed or successfull),
+                        Response(return false if failed otherwise json data)
+       
                 this function used to get Attribute list for schema page and
 
                 Return:
@@ -194,17 +220,28 @@ class ScheamColumnListClass(APIView):
                         error_msg(Error message for retrive successfull or unsuccessfull),
                         Response(return false if failed otherwise List of column attribute)  
                 """
-                try :
-                        logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
-                        column_attribute = {"column_attribute":["ignore","target"] }
-                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":column_attribute})
-                except Exception as e:
-                        logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
-			# logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
-                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+                def get(self, request, format=None):
+                        try :
+                                        logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
+                                        column_attribute = {"column_attribute":["ignore","target"] }
+                                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":column_attribute})
+                        except Exception as e:
+                                        logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
+                                        logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
+                                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
         def post(self, request, format=None):
                 """
+                This class is used to post  schema column list.
+                It will take url string as mlaas/dataset_schema/column_attribute_list/.
+
+                Args  : 
+                        
+                        
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival failed or successfull),
+                        Response(return false if failed otherwise json data)
                 this function used to insert Schema datatype values into a database.
                 Args:
                         [This function does not take any argument]
@@ -214,15 +251,47 @@ class ScheamColumnListClass(APIView):
                         Response(return error if failed otherwise true)  
                 """
                 try :
-                        logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
-                        schema_df=DBObject.read_data('common/attribute_list.csv') #read the data from csv file store into dataframe variable
-                        status=DBObject.load_csv_into_db(connection_string,'attribute_types',schema_df,'mlaas') # this function will insert the csv data into  attribute_types table
-                        return Response({"status_code":"200","error_msg":"Successfull insertion","response":"true"})
+                                logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
+                                schema_df=DBObject.read_data('common/attribute_list.csv') #read the data from csv file store into dataframe variable
+                                status=DBObject.load_csv_into_db(connection_string,'attribute_types',schema_df,'mlaas') # this function will insert the csv data into  attribute_types table
+                                return Response({"status_code":"200","error_msg":"Successfull insertion","response":"true"})
                 except Exception as e:
-                        logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
-			# logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
-                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+                                logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
+                                logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
+                                return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
+
+class ActivityTimelineClass(APIView):
+        
+
+        def get(self,request,format=None):
+                """
+                This class is used to show the user activity for each of single user.
+                It will take url string as mlaas/activity_timeline/.
+
+                Args  : 
+                        user_name[(String)]   :[User Name]
+                        
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival failed or successfull),
+                        Response(return false if failed otherwise json data)
+                """
+             
+                try:
+                        logging.info("data ingestion : ActivityTimelineClass : GET Method : execution start")
+                        user_name = request.query_params.get('user_name')
+                        activity_df = timeline_Obj.get_user_activity(user_name)
+                        if isinstance(activity_df,str): #check the instance of activity_df
+                                status_code,error_msg=get_Status_code(activity_df) # extract the status_code and error_msg from activity_df
+                                logging.info("data ingestion : ActivityTimelineClass : GET Method : execution : status_code :"+ status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        else:
+                        
+                              return Response({"status_code":"200","error_msg":"Successfull retrival","response":activity_df})  
+                except Exception as e:
+                        logging.error("data ingestion : ActivityTimelineClass : GET Method : Exception :" + str(e))
+                        logging.error("data ingestion : ActivityTimelineClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
  
-      
         

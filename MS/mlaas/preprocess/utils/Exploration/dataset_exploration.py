@@ -11,6 +11,7 @@ from scipy import stats
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
 from common.utils.database import db
+from common.utils.database.db import DBClass
 from ingest.utils.dataset import dataset_creation
 import logging
 import math
@@ -21,7 +22,6 @@ import json
 
 
 dc = dataset_creation.DatasetClass()
-
 class ExploreClass:
 
     def get_dataset_statistics(self,DBObject,connection,dataset_id):
@@ -50,9 +50,9 @@ class ExploreClass:
         else: return 1
         
         #? Getting CSV table name
-        sql_command = "SELECT DATASET_TABLE_NAME FROM "+ table_name + " WHERE DATASET_ID ='"+ dataset_id +"'"
-        dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
-        dataset_table_name = dataset_df['dataset_table_name'][0] 
+        datasetid_obj = db.DBClass()
+        dataset_table_name = datasetid_obj.get_datasetid(DBObject,connection,dataset_id,table_name)
+        
         
         #? changing the database schema for the public databases
         if dataset_visibility == 'public':

@@ -39,8 +39,10 @@ ExploreObj =  preprocessing.PreprocessingClass(database,user,password,host,port)
 
 
 class DatasetExplorationClass(APIView):
-    """
-        This class is used to show the data statistics for each of the feature in the table.
+    
+    def get(self,request,format=None):
+        """
+        This class is used to get the data statistics for each of the feature in the table.
         It will take url string as mlaas/preprocess/exploredata/get_data_statistics.
 
         Args  : 
@@ -52,14 +54,12 @@ class DatasetExplorationClass(APIView):
                 Response(return false if failed otherwise json data)
         """
 
-    def get(self,request,format=None):
         try:
             dataset_id = request.query_params.get('dataset_id') #get datasetid       
             statics_df =  ExploreObj.get_exploration_data(dataset_id) #pass datasetid in function
-            logging.info("static_df"+ str(statics_df))
             if isinstance(statics_df,str): #check the instance of statics_df
                 status_code,error_msg=get_Status_code(statics_df) # extract the status_code and error_msg from statics_df
-                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code :"+ status_code)
+                logging.info("data preprocessing : DatasetExplorationClass : GET Method : execution : status_code :"+ status_code)
                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
             else:
                 table_df = statics_df.to_json(orient='records')
