@@ -32,6 +32,7 @@ import { DataTablesModule } from 'angular-datatables';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
 import { CreateSchemaMappingComponent } from './create-schema-mapping/create-schema-mapping.component';
 import { ManageSchemaMappingComponent } from './manage-schema-mapping/manage-schema-mapping.component';
+import { DataExplorationComponent } from './data-exploration/data-exploration.component';
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   suppressScrollX: true,
@@ -43,7 +44,9 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     ListDatadetailComponent,
     
     ListProjectComponent, CreateProjectComponent, ManageProjectComponent, DetailviewProjectComponent,
-    CreateSchemaMappingComponent, ManageSchemaMappingComponent],
+    CreateSchemaMappingComponent,DataExplorationComponent, ManageSchemaMappingComponent
+  
+  ],
   imports: [
     CommonModule,
     FormsModule,

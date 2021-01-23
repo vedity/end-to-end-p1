@@ -72,7 +72,7 @@ export class ListDatadetailComponent implements OnInit {
                  .subscribe(resp => {
                      this.transactions = resp.data;
                      if(this.transactions.length==0){
-                         this.nodatafound='<tr><td colspan='+this.columnlist.length+' class="no-data-available">No data!</td></tr>';
+                         this.nodatafound='<tr><td></td><td colspan="6" class="no-data-available">No data available in table</td></tr>';
                          $("#nodatafound").html(this.nodatafound);
                      }
                      callback({

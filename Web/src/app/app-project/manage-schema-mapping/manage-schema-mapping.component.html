@@ -32,35 +32,7 @@
             </a>
             <ng-template ngbNavContent>
                 
-                <div class="page-title-box d-flex align-items-center justify-content-between">
-                    <h4 class="mb-0 font-size-18">Data Exploration</h4>
-                 
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="card table-card">
-                            <div class="card-body">
-                             <h4 class="card-title mb-4">CarPrice Assignment</h4>
-                             <div class="box">
-                                 <div class="col col-no">
-                                     <p>1</p>
-                                 </div>
-                                 <div class="col col-name">
-                                    <p>Customer_ID</p>
-                                    <span>Numeric</span>
-                                 </div>
-                                 <div class="col col-graph">
-
-                                 </div>
-                                 <div class="col col-count">
-                                     
-                                 </div>
-
-                             </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+              <app-data-exploration [dataset_id]="dataset_id" [project_id]="project_id" [title]="title"></app-data-exploration>
             </ng-template>
           </li>
           <li [ngbNavItem]="4">
