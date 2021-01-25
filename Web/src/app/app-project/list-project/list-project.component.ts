@@ -6,8 +6,6 @@ import { DataTableDirective } from 'angular-datatables';
 import { ProjectApiService } from '../project-api.service';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
-import { timeout } from 'rxjs/operators';
-import { NgbTabChangeEvent } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-list-project',

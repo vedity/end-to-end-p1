@@ -31,12 +31,12 @@
   
                       <div class="main-datatable datadetail-datatable" >
                         <div [hidden]="!contentloaded">
-                          <a href="javascript:void()" class="filter-btn" id="filter" (click)="displayfilter()"><i class="dripicons-experiment"></i></a>
+                          <a href="javascript:void(0)" class="filter-btn" id="filter" (click)="displayfilter()"><i class="dripicons-experiment"></i></a>
                           <table datatable *ngIf="columnlist" [dtOptions]="dtOptions"  (keyup)="onFilterchange($event);" class="table table-centered table-responsive table-nowrap">
                              <thead >
                               <tr class="thead-light">
                                 
-                                <th *ngFor="let item of columnlist;let i as index" >
+                                <th *ngFor="let item of columnlist" >
                                   {{item.data}}
                                   <input class="form-control filter"  type="text" [hidden]="filter"
                      name="search-{{item.data}}" id="{{item.data}}" />
@@ -51,7 +51,7 @@
                                 </tr> 
                             </tbody>
                             <tbody *ngIf="transactions?.length == 0" id="nodatafound">
-                             
+                              <tr><td></td><td colspan="6" class="no-data-available">No data available in table</td></tr>
                             <tbody>
                           </table>
                         </div>

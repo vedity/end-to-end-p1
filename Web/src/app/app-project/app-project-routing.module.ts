@@ -15,10 +15,10 @@ import { ManageSchemaMappingComponent } from './manage-schema-mapping/manage-sch
 
 const routes: Routes = [
   { path: '', redirectTo: 'project' },
-  { path: 'project', component: ListProjectComponent },
+  { path: 'manage', component: ListProjectComponent },
   {path: 'dataset', component: ListDatabaseComponent},
   {path: 'datadetail', component: ListDatadetailComponent},
-  {path: 'manage', component: ManageProjectComponent},
+  {path: 'project', component: ManageProjectComponent},
   {path: 'upload', component: DetailviewProjectComponent},
   {path: 'create', component: CreateProjectComponent},
   {path: 'schema', component: ManageSchemaMappingComponent},
