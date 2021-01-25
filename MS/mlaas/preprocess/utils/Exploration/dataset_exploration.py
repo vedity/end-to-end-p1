@@ -18,6 +18,9 @@ import math
 import pandas as pd
 import numpy as np
 import json
+from ingest.utils.dataset import dataset_creation
+
+dc = dataset_creation.DatasetClass()
 
 
 
@@ -41,7 +44,7 @@ class ExploreClass:
         table_name,_,_ = dc.make_dataset_schema()
         
         #? Getting user_name and dataset_vaisibility
-        sql_command = f"SELECT USER_NAME,DATASET_VISIBILITY FROM {table_name} WHERE DATASET_ID = '{dataset_id}'"
+        sql_command = f"SELECT USER_NAME,DATASET_VISIBILITY,DATASET_TABLE_NAME,no_of_rows FROM {table_name} WHERE DATASET_ID = '{dataset_id}'"
         visibility_df = DBObject.select_records(connection,sql_command) 
 
         if len(visibility_df) != 0: 
@@ -50,8 +53,7 @@ class ExploreClass:
         else: return 1
         
         #? Getting CSV table name
-        datasetid_obj = db.DBClass()
-        dataset_table_name = datasetid_obj.get_datasetid(DBObject,connection,dataset_id,table_name)
+        dataset_table_name = visibility_df['dataset_table_name'][0]
         
         
         #? changing the database schema for the public databases
