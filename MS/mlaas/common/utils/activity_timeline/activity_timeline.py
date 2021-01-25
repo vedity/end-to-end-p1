@@ -91,17 +91,27 @@ class ActivityTimelineClass:
         Return:
             [List]: [List of activity data]
         """
-        user_id=1
-        DBObject = db.DBClass() # create object for database class
-        connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port)
+        try:
+            DBObject = db.DBClass() # create object for database class
+            connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port)
 
-        sql_command = ("SELECT user_name,activity_description,date,timestamp,operation from mlaas.activity_tbl where user_name='"+str(user_name)+"' order by timestamp desc")
-        activity_df = DBObject.select_records(connection,sql_command) #excute the sql query 
-        activity_df = activity_df.to_json(orient='records',date_format='iso',force_ascii=True) # convert into json string 
-        logging.info("check activity"+str(activity_df))
-        activity_df = json.loads(activity_df) #convert into dict format
-        
-        return activity_df
+            sql_command = ("SELECT user_name,activity_description,date,timestamp,operation from mlaas.activity_tbl where user_name='"+str(user_name)+"' order by timestamp desc")
+            activity_df = DBObject.select_records(connection,sql_command) #excute the sql query 
+
+            if activity_df is None:
+                raise DataNotFound(500)
+
+            length_df = activity_df['user_name']
+            
+            if len(length_df)==0:
+                raise DataNotFound(500)
+            activity_df = activity_df.to_json(orient='records',date_format='iso',force_ascii=True) # convert into json string 
+
+            activity_df = json.loads(activity_df) #convert into dict format
+            
+            return activity_df
+        except (DataNotFound) as exc:
+            return exc.msg
 
     def is_existing_schema(self,DBObject,connection,table_name,schema):
         """
