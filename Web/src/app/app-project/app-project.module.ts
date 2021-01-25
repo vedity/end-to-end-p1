@@ -33,6 +33,8 @@ import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
 import { CreateSchemaMappingComponent } from './create-schema-mapping/create-schema-mapping.component';
 import { ManageSchemaMappingComponent } from './manage-schema-mapping/manage-schema-mapping.component';
 import { DataExplorationComponent } from './data-exploration/data-exploration.component';
+import { DataVisualizationComponent } from './data-visualization/data-visualization.component';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   suppressScrollX: true,
@@ -42,10 +44,14 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
 @NgModule({
   declarations: [ListDatabaseComponent,
     ListDatadetailComponent,
-    
-    ListProjectComponent, CreateProjectComponent, ManageProjectComponent, DetailviewProjectComponent,
-    CreateSchemaMappingComponent,DataExplorationComponent, ManageSchemaMappingComponent
-  
+    ListProjectComponent, 
+    CreateProjectComponent, 
+    ManageProjectComponent, 
+    DetailviewProjectComponent,
+    CreateSchemaMappingComponent, 
+    DataExplorationComponent, 
+    DataVisualizationComponent,
+    ManageSchemaMappingComponent,
   ],
   imports: [
     CommonModule,
@@ -56,6 +62,8 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     NgApexchartsModule,
     ChartsModule,
     NgxChartistModule,
+    NgxEchartsModule,
+    NgSelectModule,
     ReactiveFormsModule,
     DataTablesModule,
     UIModule,
