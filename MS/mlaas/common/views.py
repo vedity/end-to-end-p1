@@ -135,7 +135,7 @@ class MenuClass(APIView):
                         sql_command2='select id,modulename,menuname as "label",url as "link",parent_id as "parentId",icon from mlaas.menu_tbl where parent_id !='+"'null'"
                         dataset_df2=DBObject.select_records(connection,sql_command2) #call show_data_details and it will return dataset detail data in dataframe
                         dataset_json2=json.loads(dataset_df2.to_json(orient='records'))  # convert datafreame into json
-                        
+                
                         json_data=menu_nested_format(dataset_json1,dataset_json2)   
                         return Response({"status_code":"200","error_msg":"Menu Data","response":json_data})
                 except Exception as e:
@@ -220,15 +220,15 @@ class ScheamColumnListClass(APIView):
                         error_msg(Error message for retrive successfull or unsuccessfull),
                         Response(return false if failed otherwise List of column attribute)  
                 """
-                def get(self, request, format=None):
-                        try :
-                                        logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
-                                        column_attribute = {"column_attribute":["ignore","target"] }
-                                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":column_attribute})
-                        except Exception as e:
-                                        logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
-                                        logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
-                                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+               
+                try :
+                                logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
+                                column_attribute = {"column_attribute":["ignore","target"] }
+                                return Response({"status_code":"200","error_msg":"Successfull retrival","response":column_attribute})
+                except Exception as e:
+                                logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
+                                logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
+                                return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
         def post(self, request, format=None):
                 """
