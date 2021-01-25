@@ -205,10 +205,9 @@ class DatasetClass:
         file_path = self.get_file_path(file_name,dataset_visibility,user_name)
         # Get dataframe of the file data.
         file_data_df = DBObject.read_data(file_path)
-        logging.info("file_data_df :========================="+str(file_data_df))
+        # logging.info("file_data_df :"+str(file_data_df))
         # Get number of rows.
         no_of_rows = file_data_df.shape[0]
-        logging.info("file_data_df :========================="+str(no_of_rows))
         # Get table name.
         table_name = self.get_dataset_table_name(file_name)
         if dataset_visibility.lower() == "public" :
@@ -217,7 +216,7 @@ class DatasetClass:
             user_name = user_name
         # Get schema status.if successfully then 0 else 1.
         schema_status = DBObject.create_schema(connection,user_name)
-        # Get load dataset status. if successfully then 0 else 1.load_csv_into_db(connection_string,table_name,file_data_df,user_name)
+        # Get load dataset status. if successfully then 0 else 1.
         load_dataset_status = DBObject.load_csv_into_db(connection_string,table_name,file_data_df,user_name)
         
         logging.info("data ingestion : DatasetClass : load_dataset : execution end")
