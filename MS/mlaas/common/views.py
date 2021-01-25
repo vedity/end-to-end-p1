@@ -158,15 +158,14 @@ class ScheamDatatypeListClass(APIView):
                         error_msg(Error message for retrival failed or successfull),
                         Response(return false if failed otherwise json data)
                 """
-                def get(self, request, format=None):
-                        try :
-                                        logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
-                                        schema_df=DBObject.read_data('common/attribute_list.csv')
-                                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":schema_df})
-                        except Exception as e:
-                                        logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
-                                        logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
-                                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+                try :
+                                logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
+                                schema_df=DBObject.read_data('common/attribute_list.csv')
+                                return Response({"status_code":"200","error_msg":"Successfull retrival","response":str(schema_df)})
+                except Exception as e:
+                                logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
+                                logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
+                                return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
         def post(self, request, format=None):
                 """
@@ -220,15 +219,14 @@ class ScheamColumnListClass(APIView):
                         error_msg(Error message for retrive successfull or unsuccessfull),
                         Response(return false if failed otherwise List of column attribute)  
                 """
-                def get(self, request, format=None):
-                        try :
-                                        logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
-                                        column_attribute = {"column_attribute":["ignore","target"] }
-                                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":column_attribute})
-                        except Exception as e:
-                                        logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
-                                        logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
-                                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+                try :
+                                logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
+                                column_attribute = {"column_attribute":["ignore","target"] }
+                                return Response({"status_code":"200","error_msg":"Successfull retrival","response":column_attribute})
+                except Exception as e:
+                                logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
+                                logging.error("data ingestion : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
+                                return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
         def post(self, request, format=None):
                 """
