@@ -519,7 +519,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                             col_names = file_data_df.columns.to_list()
                             for col in col_names:
                                 # it will check column names into the files.
-                                if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',col))==True):
+                                if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_()]*$',col))==True):
                                     
                                     All_SET_Count = All_SET_Count + 1
                                 else:

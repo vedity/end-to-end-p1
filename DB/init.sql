@@ -1,6 +1,14 @@
-CREATE TABLE menu (
+CREATE TABLE menu_tbl (
  	id int,
- 	firstName varchar(255),
- 	lastName varchar(255),
- 	address text
+ 	modulename text,
+ 	menuname text,
+	parentid float,
+	url text,
+ 	icon text
+ 	);
+
+CREATE TABLE user_auth_tbl (
+ 	uid int,
+ 	username text,
+ 	password text,
  	);
