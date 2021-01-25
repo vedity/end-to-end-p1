@@ -286,6 +286,7 @@ class ActivityTimelineClass(APIView):
                                 status_code,error_msg=get_Status_code(activity_df) # extract the status_code and error_msg from activity_df
                                 logging.info("data ingestion : ActivityTimelineClass : GET Method : execution : status_code :"+ status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                
                         else:
                         
                               return Response({"status_code":"200","error_msg":"Successfull retrival","response":activity_df})  
