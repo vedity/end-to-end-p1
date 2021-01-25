@@ -1,0 +1,104 @@
+<div class="page-title-box d-flex align-items-center justify-content-between">
+    <h4 class="mb-0 font-size-18">Data Exploration</h4>
+ 
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card table-card">
+           
+
+            <div class="card-body">
+             <h4 class="card-title mb-4">{{title}}</h4>
+
+             <ngx-skeleton-loader *ngIf="loaderdiv"
+             count="7"
+             [animation]="animation"
+             
+             [theme]="theme">
+           </ngx-skeleton-loader>
+             <div class="row-box" *ngFor="let item of exploredData;let i=index">
+                 <div class="col col-no">
+                     <p>{{i+1}}</p>
+                 </div>
+                 <div class="col col-name">
+                    <p>{{item["Column Name"]}}</p>
+                    <span>Numeric</span>
+                 </div>
+                 <div class="col col-graph">
+                  
+                        
+                         
+                        <a href="javascript:void(0);" class="expand-graph" (click)="centerModal(centerDataModal,item)"><i class="mdi mdi-arrow-expand"></i></a>
+                      
+                      
+                    <apx-chart class="apex-charts" dir="ltr" [series]="[{data:item['Plot Values'][1]}]"
+                    [chart]="columnlabelChart.chart" [plotOptions]="columnlabelChart.plotOptions"
+                    [yaxis]="columnlabelChart.yaxis" [title]="columnlabelChart.title"
+                    [stroke]="columnlabelChart.stroke" [dataLabels]="columnlabelChart.dataLabels"
+                    [xaxis]="columnlabelChart.xaxis" [legend]="columnlabelChart.legend"
+                    [colors]="columnlabelChart.colors" [fill]="columnlabelChart.fill"
+                    [grid]="columnlabelChart.grid">
+                </apx-chart>
+                 </div>
+                 <div class="col col-count">
+                     <p>23456</p>
+                     <span>Data Count</span>
+                 </div>
+                 <div class="col col-count">
+                    <p>23456</p>
+                    <span>Missing Data</span>
+                </div>
+                <div class="col col-count">
+                    <p>{{item["Unique Values"]}}</p>
+                    <span>Unique Data</span>
+                </div>
+                <div class="col col-count">
+                    <p>{{item["Min Value"]==null?0:item["Min Value"]}}</p>
+                    <span>Min Value</span>
+                </div>
+                <div class="col col-count">
+                    <p>{{item["Max Value"]==null?0:item["Max Value"] }}</p>
+                    <span>Max Value</span>
+                </div>
+                <div class="col col-count">
+                    <p>{{item["Mean"]==null?0:item["Mean"] }}</p>
+                    <span>Mean Value</span>
+                </div>
+             </div>
+            
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- <div class="loader-box" [hidden]="!loaderdiv">
+    <div class="inner-loader-box">
+    <div class="spinner-border text-warning m-1" role="status">
+        <span class="sr-only">Loading...</span>
+    
+      </div>
+      <p>Loading...</p>
+    </div>
+    </div> -->
+
+
+    <ng-template #centerDataModal let-modal>
+        <div class="modal-header">
+          <h5 class="modal-title mt-0">{{modeltitle}}</h5>
+          <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-hidden="true">×</button>
+        </div>
+        <div class="modal-body">
+            <apx-chart class="apex-charts" dir="ltr" [series]="columnlabelChartexpand.series"
+            [chart]="columnlabelChartexpand.chart" [plotOptions]="columnlabelChartexpand.plotOptions"
+            [yaxis]="columnlabelChartexpand.yaxis" [title]="columnlabelChartexpand.title"
+            [stroke]="columnlabelChartexpand.stroke" [dataLabels]="columnlabelChartexpand.dataLabels"
+            [xaxis]="columnlabelChartexpand.xaxis" [yaxis]="columnlabelChartexpand.xaxis" [legend]="columnlabelChartexpand.legend"
+            [colors]="columnlabelChartexpand.colors" [fill]="columnlabelChartexpand.fill"
+            [grid]="columnlabelChartexpand.grid">
+        </apx-chart>
+    
+       
+          
+        </div>
+      </ng-template>

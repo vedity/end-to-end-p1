@@ -1,96 +1,108 @@
 <div class="module-main">
-        
-    <div class="tab-menu" [hidden]="displaytitle">
-        <ul ngbNav #justifiednav="ngbNav" [activeId]="1" class="nav-pills nav-justified">
-          <li [ngbNavItem]="1">
-            <a ngbNavLink title="Data Detail">
-                <span class="font-size-18"><i class="bx bx-spreadsheet"></i></span>
-              <!-- <span class="">Data Detail</span> -->
-              <!-- <span class="">List View</span> -->
-            </a>
-            <ng-template ngbNavContent>
-                <app-list-datadetail [title]="title"  [dataset_id]="dataset_id" [navigate_to]="navigate_to" [displaytitle]="displaytitle"></app-list-datadetail>
-                
-            </ng-template>
-          </li>
-          <li [ngbNavItem]="2">
-            <a ngbNavLink title="Schema Mapping">
-                <span class="font-size-18"><i class="bx bx-message-square-add"></i></span>
-              <!-- <span class="">Schema Mapping</span> -->
-              <!-- <span class="">Grid View</span> -->
-            </a>
-            <ng-template ngbNavContent>
-                
-                <app-create-schema-mapping  [dataset_id]="dataset_id" [project_id]="project_id" [title]="title"></app-create-schema-mapping>
-            </ng-template>
-          </li>
-          <li [ngbNavItem]="3">
-            <a ngbNavLink title="Data Exploration">
-                <span class="font-size-18"><i class="bx bx-screenshot"></i></span>
-              <!-- <span class="">Data Exploration</span> -->
-              <!-- <span class="">Grid View</span> -->
-            </a>
-            <ng-template ngbNavContent>
-                
-                <div class="page-title-box d-flex align-items-center justify-content-between">
-                    <h4 class="mb-0 font-size-18">Data Exploration</h4>
-                 
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="card table-card">
-                            <div class="card-body">
-                             <h4 class="card-title mb-4">CarPrice Assignment</h4>
-                             <div class="box">
-                                 <div class="col col-no">
-                                     <p>1</p>
-                                 </div>
-                                 <div class="col col-name">
-                                    <p>Customer_ID</p>
-                                    <span>Numeric</span>
-                                 </div>
-                                 <div class="col col-graph">
 
-                                 </div>
-                                 <div class="col col-count">
-                                     
-                                 </div>
+  <div class="tab-menu" [hidden]="displaytitle">
+    <ul ngbNav #justifiednav="ngbNav" [activeId]="1" class="nav-pills nav-justified">
+      <li [ngbNavItem]="1">
+        <a ngbNavLink title="Data Detail">
+          <span class="font-size-18"><i class="bx bx-spreadsheet"></i></span>
+          <!-- <span class="">Data Detail</span> -->
+          <!-- <span class="">List View</span> -->
+        </a>
+        <ng-template ngbNavContent>
+          <app-list-datadetail [title]="title" [dataset_id]="dataset_id" [navigate_to]="navigate_to"
+            [displaytitle]="displaytitle"></app-list-datadetail>
 
-                             </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </ng-template>
-          </li>
-          <li [ngbNavItem]="4">
-            <a ngbNavLink title="Visualization">
-                <span class="font-size-18"><i class="bx bx-bar-chart"></i></span>
-              <!-- <span class="">visualization</span> -->
-              <!-- <span class="">Grid View</span> -->
-            </a>
-            <ng-template ngbNavContent>
-               <h4>4</h4>
-                
-            </ng-template>
-          </li>
-          <li [ngbNavItem]="5">
-            <a ngbNavLink title="Data Cleanup">
-                <span class="font-size-18"><i class="bx bx-brush"></i></span>
-              <!-- <span class="">Data cleanup</span> -->
-              <!-- <span class="">Grid View</span> -->
-            </a>
-            <ng-template ngbNavContent>
-         <h4>5</h4>
-                
-            </ng-template>
-          </li>
+        </ng-template>
+      </li>
+      <li [ngbNavItem]="2">
+        <a ngbNavLink title="Schema Mapping">
+          <span class="font-size-18"><i class="bx bx-message-square-add"></i></span>
+          <!-- <span class="">Schema Mapping</span> -->
+          <!-- <span class="">Grid View</span> -->
+        </a>
+        <ng-template ngbNavContent>
 
-        </ul>
-      </div>
+          <app-create-schema-mapping [dataset_id]="dataset_id" [project_id]="project_id" [title]="title">
+          </app-create-schema-mapping>
+        </ng-template>
+      </li>
+      <li [ngbNavItem]="3">
+        <a ngbNavLink title="Data Exploration">
+          <span class="font-size-18"><i class="bx bx-screenshot"></i></span>
+          <!-- <span class="">Data Exploration</span> -->
+          <!-- <span class="">Grid View</span> -->
+        </a>
+        <ng-template ngbNavContent>
 
-    
+          <app-data-exploration [dataset_id]="dataset_id" [project_id]="project_id" [title]="title">
+          </app-data-exploration>
+        </ng-template>
+      </li>
+      <li [ngbNavItem]="4">
+        <a ngbNavLink title="Visualization">
+          <span class="font-size-18"><i class="bx bx-bar-chart"></i></span>
+          <!-- <span class="">visualization</span> -->
+          <!-- <span class="">Grid View</span> -->
+        </a>
+        <ng-template ngbNavContent>
+          <app-data-visualization [dataset_id]="dataset_id" [project_id]="project_id" [title]="title">
+          </app-data-visualization>
+        </ng-template>
+      </li>
+      <li [ngbNavItem]="5">
+        <a ngbNavLink title="Data Cleanup">
+          <span class="font-size-18"><i class="bx bx-brush"></i></span>
+          <!-- <span class="">Data cleanup</span> -->
+          <!-- <span class="">Grid View</span> -->
+        </a>
+        <ng-template ngbNavContent>
+          <h4>Data Cleanup</h4>
+          <ul ngbNav #customNav="ngbNav" [activeId]="1" class="nav-tabs nav-tabs-custom nav-justified">
+            <li [ngbNavItem]="1">
+              <a ngbNavLink>
+                <span class="d-block d-sm-none"><i class="fas fa-home"></i></span>
+                <span class="d-none d-sm-block">Home</span>
+              </a>
+              <ng-template ngbNavContent>
+                <h2>home</h2>
+              </ng-template>
+            </li>
+            <li [ngbNavItem]="2">
+              <a ngbNavLink>
+                <span class="d-block d-sm-none"><i class="far fa-user"></i></span>
+                <span class="d-none d-sm-block">Profile</span>
+              </a>
+              <ng-template ngbNavContent>
+               <h2>profile</h2>
+              </ng-template>
+            </li>
+            <li [ngbNavItem]="3">
+              <a ngbNavLink>
+                <span class="d-block d-sm-none"><i class="far fa-envelope"></i></span>
+                <span class="d-none d-sm-block">Messages</span>
+              </a>
+              <ng-template ngbNavContent>
+               <h2>Messages</h2>
+              </ng-template>
+            </li>
+            <li [ngbNavItem]="4">
+              <a ngbNavLink>
+                <span class="d-block d-sm-none"><i class="fas fa-cog"></i></span>
+                <span class="d-none d-sm-block">Settings</span>
+              </a>
+              <ng-template ngbNavContent>
+                <h2>settings</h2>
+              </ng-template>
+            </li>
+          </ul>
+          <div [ngbNavOutlet]="customNav"></div>
+        </ng-template>
+      </li>
 
-<div [ngbNavOutlet]="justifiednav"></div>
+    </ul>
+  </div>
+
+
+
+  <div [ngbNavOutlet]="justifiednav"></div>
 </div>
-
