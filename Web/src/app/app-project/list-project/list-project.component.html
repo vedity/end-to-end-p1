@@ -60,7 +60,7 @@
             </thead>
             <tbody class="tbody">
               <tr *ngFor="let data of transactions">
-                <td>{{data.project_name}}</td>
+                <td title="{{data.project_name}}">{{data.project_name}}</td>
                 <td>
                   <span style="display:none;">{{data.dataset_status}}</span>
                   <!-- <i *ngIf="data.dataset_status==0" style="color: #34c38f;" class="dripicons-stack"></i> -->
@@ -86,8 +86,8 @@
                 </td>
                 <td>{{data.created_on | date}}</td>
                 <td style="font-size: 20px;font-weight: 700;" class="text-center">
-                  <a href="javascript:void(0);" [routerLink]="['/datadetail']"
-                    [state]="{dataset_id: data.dataset_id ,dataset_name:data.dataset_name,navigate_to:'/project'}">
+                  <a href="javascript:void(0);" [routerLink]="['/schema']"
+                    [state]="{dataset_id: data.dataset_id ,project_id:data.project_id,dataset_name:data.dataset_name,navigate_to:'/project'}">
                     <i class=" bx bx-file"></i></a>
 
                   <a href="javascript:void(0);" id="sa-warning" (click)="confirm(data.project_id)"> <i

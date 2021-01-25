@@ -17,8 +17,8 @@
             <div class="col-md-4 form-group">
                 <label for="example-text-input" class="col-form-label">Dataset Name<span
                         class="required-label">&nbsp;*</span></label>
-                <input class="form-control" maxlength="200" (change)="checkuniquedatasetname($event)" type="text" required
-                    [(ngModel)]="data.datasetname" name="datasetname" #datasetname="ngModel">
+                <input class="form-control" maxlength="150" (change)="checkuniquedatasetname($event)" type="text"
+                    required [(ngModel)]="data.datasetname" name="datasetname" #datasetname="ngModel">
                 <div class="invalid-feedback"
                     *ngIf="datasetname.errors?.required && (datasetname.dirty || datasetname.touched)">
                     <span *ngIf="datasetname.errors?.required && (datasetname.dirty || datasetname.touched)"
@@ -127,7 +127,7 @@
                             </thead>
                             <tbody class="tbody">
                                 <tr *ngFor="let data of transactions">
-                                    <td>{{data.dataset_name}}</td>
+                                    <td title="{{data.dataset_name}}">{{data.dataset_name}}</td>
                                     <td>{{data.file_size}}
                                     </td>
                                     <td>{{data.no_of_rows}}
@@ -146,11 +146,10 @@
                                         {{data.created_on|date}}
                                     </td>
                                     <td class="text-center" style="font-size: 20px;font-weight: 700;">
-                                        <!-- <a href="javascript:void(0);" [routerLink]="['/datadetail']"
-                                            [state]="{dataset_id: data.dataset_id ,dataset_name:data.dataset_name,navigate_to:'/dataset' }"> <i
-                                                class=" bx bx-file"></i></a> -->
-                                                <a href="javascript:void(0);"> <i
-                                                    class=" bx bx-file"></i></a>
+                                        <a href="javascript:void(0);" [routerLink]="['/schema']"
+                                            [state]="{dataset_id: data.dataset_id ,dataset_name:data.dataset_name,navigate_to:'/dataset' }">
+                                            <i class=" bx bx-file"></i></a>
+
 
                                         <a href="javascript:void(0);" id="sa-warning"
                                             (click)="confirm(data.dataset_id)"> <i class=" bx bx-trash"></i></a>
@@ -164,5 +163,15 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<div class="loader-box" [hidden]="!loaderdiv">
+    <div class="inner-loader-box">
+        <div class="spinner-border text-warning m-1" role="status">
+            <span class="sr-only">Loading...</span>
+
+        </div>
+        <p>Loading...</p>
     </div>
 </div>

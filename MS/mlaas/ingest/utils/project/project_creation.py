@@ -218,14 +218,15 @@ class ProjectClass:
             table_name,_,_ = self.make_project_schema()
 
             #? Fetching original user from the table
-            sql_command = f"SELECT USER_NAME FROM {table_name} WHERE PROJECT_ID = '{project_id}'"
+            sql_command = f"SELECT USER_NAME,PROJECT_NAME,DATASET_ID FROM {table_name} WHERE PROJECT_ID = '{project_id}'"
             user_name_df = DBObject.select_records(connection,sql_command) 
             if len(user_name_df) == 0:
                 logging.debug(f"data ingestion  :  ProjectClass  :  delete_project_details  :  Entry not found for the project_id = {project_id}")
-                return 3
+                return 3,_,_
             
             user_name_from_table = user_name_df['user_name'][0]
-            
+            project_name = user_name_df['project_name'][0]
+            dataset_id = user_name_df['dataset_id'][0]
             #? Authenticating the user    
             if user_name == user_name_from_table:
 
@@ -238,10 +239,10 @@ class ProjectClass:
                 project_status = 2
             
             logging.info("data ingestion : ProjectClass : delete_project_details : execution end")
-            return project_status
+            return project_status,dataset_id,project_name
         
         except:
-            return 1
+            return 1,None,None
         
     
 

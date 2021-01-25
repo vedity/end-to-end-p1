@@ -6,6 +6,7 @@
  
 */
 '''
+
 import pandas as pd 
 import logging
 import json
@@ -55,7 +56,7 @@ class SchemaClass:
                 
         return table_name,cols,schema
     
-    def get_dataset_schema(self,dataset_id):
+    def get_dataset_schema(self,project_id):
         """
         this function used to get the column name and datatype of the table
 
@@ -70,29 +71,46 @@ class SchemaClass:
             connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port)
             if connection == None:
                 raise DatabaseConnectionFailed(500)
-            sql_command = "SELECT dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows from mlaas.dataset_tbl Where dataset_id =" +dataset_id
-            dataset_df = DBObject.select_records(connection,sql_command)  # execute the sql query and return data if found else return None
-            if dataset_df is None or len(dataset_df) == 0:
-                raise DatasetDataNotFound(500)
-            dataset_records = dataset_df.to_records(index=False) # convert dataframe to a NumPy record  
-            dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows = dataset_records[0]
-            dataset_name,dataset_table_name,user_name,dataset_visibility = str(dataset_name),str(dataset_table_name),str(user_name),str(dataset_visibility)
+            
+            sql_command = "SELECT project_id from mlaas.schema_tbl where project_id="+str(project_id)
+            logging.info("sql_command"+sql_command )
+            dataset_df = DBObject.select_records(connection,sql_command)
+            if dataset_df is None or len(dataset_df)==0 :
+                    project_df = DBObject.get_project_detail(DBObject,connection,project_id)
+                    dataset_id = project_df['dataset_id'][0]
 
-            if dataset_visibility =="private":
-                table_name=user_name+"."+dataset_table_name
+                    dataset_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
+                    if dataset_df is None or len(dataset_df) == 0:
+                        raise DatasetDataNotFound(500)
+                    dataset_records = dataset_df.to_records(index=False) # convert dataframe to a NumPy record  
+                    dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows = dataset_records[0]
+                    dataset_name,dataset_table_name,user_name,dataset_visibility = str(dataset_name),str(dataset_table_name),str(user_name),str(dataset_visibility)
+
+                    if dataset_visibility =="private":
+                        table_name=user_name+"."+dataset_table_name
+                    else:
+                        table_name = dataset_table_name
+
+                    #sql query string
+                    sql_command = "SELECT * from "+table_name
+                    data_details_df = DBObject.select_records(connection,sql_command) #execute the sql query
+                    if data_details_df is None:
+                        raise DataNotFound(500)
+                    column_name = data_details_df.columns.values.tolist() # covert the dataframe into list
+                    predicted_datatype = self.get_attribute_datatype(connection,DBObject,table_name,column_name ,no_of_rows)
+                    schema_data = get_schema_format(column_name,predicted_datatype) #call get_schema_format to get json format data
+                    
             else:
-                table_name = dataset_table_name
+                    sql_command = "SELECT column_name,changed_column_name,data_type,column_attribute from mlaas.schema_tbl where project_id="+str(project_id)
+                    dataset_df = DBObject.select_records(connection,sql_command)
+                    if dataset_df is None or len(dataset_df)==0:
+                        raise DataNotFound(500)
+                    column_name,changed_column_name,data_type,column_attribute = dataset_df['column_name'],dataset_df['changed_column_name'],dataset_df['data_type'],dataset_df['column_attribute']
+                    schema_data= get_updated_schema_format(column_name,changed_column_name,data_type,column_attribute)
 
-            #sql query string
-            sql_command = "SELECT * from "+table_name
-            data_details_df = DBObject.select_records(connection,sql_command) #execute the sql query
-            if data_details_df is None:
-                raise DataNotFound(500)
-            column_name = data_details_df.columns.values.tolist() # covert the dataframe into list
-            predicted_datatype = self.get_attribute_datatype(connection,DBObject,table_name,column_name ,no_of_rows)
-            schema_data = get_schema_format(column_name,predicted_datatype) #call get_schema_format to get json format data
             logging.info("data ingestion : SchemaClass :get_dataset_schema : execution stop")
             return schema_data
+
         except (DatasetDataNotFound,DataNotFound,DatabaseConnectionFailed) as exc:
             logging.error("data ingestion : SchemaClass : get_dataset_schema : Exception " + str(exc.msg))
             logging.error("data ingestion : SchemaClass : get_dataset_schema : " +traceback.format_exc())
@@ -100,7 +118,17 @@ class SchemaClass:
 
     def map_dataset_schema(self,DBObject,connection,project_id,column_name_list,column_lst,data_type_lst,column_attribute_lst):
         """
-
+        this function used to insert the records into a table if not exist otherwise it will update the records if  found.
+        Args:
+                column_name_list[(List)]  : [Existing table column name value]
+                column_lst [(List)]  : [Updated column name value]
+                data_type_lst [(List)]  : [Existing table column datatype value]
+                column_attribute_lst [(List)]  : []
+                column_change_datatype[(List)]  : [Updated column datatype value]
+                project_id [(Integer)]  : [Id of the project table]
+                 
+        Return:
+            [(integer)] : [return 0 if successfully inserted or updated other wise return 1]
         """
         try:
             logging.info("data ingestion : SchemaClass : map_dataset_schema : execution start")
@@ -147,12 +175,7 @@ class SchemaClass:
         this function use to update the Schema table values with the new upcoming values.
 
         Args : 
-                  column_name_list[(List)]  : [Existing table column name value]
-                  column_lst [(List)]  : [Updated column name value]
-                  data_type_lst [(List)]  : [Existing table column datatype value]
-                  column_attribute_lst [(List)]  : []
-                  column_change_datatype[(List)]  : [Updated column datatype value]
-                  dataset_id [(Integer)]  : [Id of the project table]
+                project_id [(Integer)]  : [Id of the project table]
 
         Return :
                 [String] : [Status value if succeed return 0 else 1]
@@ -175,6 +198,9 @@ class SchemaClass:
                 column_datatype_list.append(schema_data[index]["data_type"])
                 column_change_name.append(schema_data[index]["change_column_name"])
                 column_attribute_list.append(schema_data[index]["column_attribute"])
+            check_attribute_type = False if len(column_attribute_list) == column_attribute_list.count("ignore") else True
+            if check_attribute_type == False :
+                raise IgnoreAttributeClass(500)
             table_name,col,schema = self.get_schema()
             create_status = DBObject.create_table(connection,table_name,schema)
             if create_status in [1,0]:
@@ -188,7 +214,7 @@ class SchemaClass:
                 raise TableCreationFailed(500)
             
             
-        except(SameColumnName,DatabaseConnectionFailed,SchemaUpdateFailed,SchemaCreationFailed) as exc:
+        except(SameColumnName,DatabaseConnectionFailed,SchemaUpdateFailed,SchemaCreationFailed,IgnoreAttributeClass) as exc:
             logging.error("data ingestion : SchemaClass : update_dataset_schema : Exception " + str(exc.msg))
             logging.error("data ingestion : SchemaClass : update_dataset_schema : " +traceback.format_exc())
             return exc.msg

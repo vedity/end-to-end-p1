@@ -52,24 +52,6 @@ export class ProjectApiService {
     var params=new HttpParams().append("user_name",this.user.username).append('dataset_id',id);
     return this.httpClient.delete(this.baseUrl+"delete/dataset_detail/",{headers:this.headers,params});
   }
-
-  getDataDetails(obj,dataset_id):Observable<any>{
-    var params=new HttpParams().append("dataset_id",dataset_id)
-    //.append("table_name",obj.table_name).append("dataset_visibility",obj.dataset_visibility)
-    return this.httpClient.post(this.baseUrl+"data_detail/",obj,{headers:this.headers,params});
-  }
-
-  getDataDetailslist(obj):Observable<any>{
-    var params=new HttpParams().append("dataset_id",obj.dataset_id)
-    //.append("table_name",obj.table_name).append("dataset_visibility",obj.dataset_visibility)
-    return this.httpClient.get(this.baseUrl+"data_detail/",{headers:this.headers,params});
-  }
-
-  getColumnList(dataset_id):Observable<any>{
-    var params=new HttpParams().append("dataset_id",dataset_id)
-    //.append("table_name",obj.table_name).append("dataset_visibility",obj.dataset_visibility)
-    return this.httpClient.get(this.baseUrl+"data_detail/column_list/",{headers:this.headers,params});
-  }
   
   checkUniqueProjectName(obj):Observable<any>{
       this.user=JSON.parse(localStorage.getItem("currentUser"));

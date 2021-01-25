@@ -15,7 +15,6 @@ urlpatterns = [
     #url for schema column attribute
     path('mlaas/dataset_schema/column_attribute_list/',ScheamColumnListClass.as_view()),
     
-
     #url for activity timeline
     path('mlaas/activity_timeline/',ActivityTimelineClass.as_view()),
 

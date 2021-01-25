@@ -36,11 +36,12 @@ class DBClass:
             [dataframe]: [it will return read csv file data in the form of dataframe.]
         """
         read_df=pd.read_csv(file_path, na_filter= False) #  Read csv file and load data into dataframe.
-        # column_list = read_df.select_dtypes(include=['object'])
-        # logging.info("Test tyoe: "+str(df_num))
-        
-        # column_list=[*range(0, len(read_df.columns), 1)] 
-        # read_df=pd.read_csv(file_path,na_filter= False,parse_dates=column_list) #  Read csv file and load data into dataframe.
+        column_name_list = read_df.columns.values.tolist()
+        column_list = []
+        for name in column_name_list:
+            if read_df.dtypes.to_dict()[name] == 'object':
+                column_list.append(name)
+        read_df=pd.read_csv(file_path,na_filter= False,parse_dates=column_list) #  Read csv file and load data into dataframe.
         return read_df
 
 
@@ -128,7 +129,6 @@ class DBClass:
         
         cols = cols # Get columns name for database insert query.
         tuples = row_tuples # Get record for database insert query.
-        logging.info("cols"+str(cols))
         query = "INSERT INTO %s(%s) VALUES %%s" % (table_name, cols) # Make query
         logging.info(query+"==============")
         cursor = connection.cursor() # Open cursor for database.
@@ -358,7 +358,7 @@ class DBClass:
         return global_search_clause
     
     def get_customfilter(self,customefilter):
-        dict=customefilter[0]
+        dict=customefilter
         empty_string=""
         for x in dict:
             if dict[x]!="":
@@ -467,7 +467,8 @@ class DBClass:
         
         dataset_table_name,dataset_visibility,user_name = dataset_records[0]  #get 0 index records
         dataset_table_name,dataset_visibility,user_name = str(dataset_table_name),str(dataset_visibility),str(user_name) #convert variable  type into string
-         
+
+
         if dataset_visibility.lower() == 'public':
             user_name = 'public'
     
@@ -476,6 +477,30 @@ class DBClass:
         data_details_df=data_details_df.to_json(orient='records') # transform dataframe based on record
         data_details_df = json.loads(data_details_df)  #convert data_details_df into dictonery
         return data_details_df
+    
+
+    def get_dataset_detail(self,DBObject,connection,dataset_id):
+        '''This function is used to get details for dataset table.
+        Args:
+                dataset_id[(Integer)] : [Id of the dataset table]
+        Return : 
+                [Dataframe] : [return the dataframe of dataset table ]
+        '''
+        sql_command = "SELECT dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows from mlaas.dataset_tbl Where dataset_id =" + str(dataset_id)
+        dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+        return dataset_df 
+    
+    def get_project_detail(self,DBObject,connection,project_id):
+        '''This function is used to get details for project table.
+        Args:
+                project_id[(Integer)] : [Id of the project table]
+        Return : 
+                [Dataframe] : [return the dataframe of project table]
+        '''
+        sql_command = "SELECT dataset_id from mlaas.project_tbl Where project_id =" + str(project_id)
+        dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+        return dataset_df
+        
 
 
         
