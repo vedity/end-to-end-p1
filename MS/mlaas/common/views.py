@@ -135,7 +135,7 @@ class MenuClass(APIView):
                         sql_command2='select id,modulename,menuname as "label",url as "link",parent_id as "parentId",icon from mlaas.menu_tbl where parent_id !='+"'null'"
                         dataset_df2=DBObject.select_records(connection,sql_command2) #call show_data_details and it will return dataset detail data in dataframe
                         dataset_json2=json.loads(dataset_df2.to_json(orient='records'))  # convert datafreame into json
-                        
+                
                         json_data=menu_nested_format(dataset_json1,dataset_json2)   
                         return Response({"status_code":"200","error_msg":"Menu Data","response":json_data})
                 except Exception as e:
@@ -284,6 +284,7 @@ class ActivityTimelineClass(APIView):
                                 status_code,error_msg=get_Status_code(activity_df) # extract the status_code and error_msg from activity_df
                                 logging.info("data ingestion : ActivityTimelineClass : GET Method : execution : status_code :"+ status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                
                         else:
                         
                               return Response({"status_code":"200","error_msg":"Successfull retrival","response":activity_df})  

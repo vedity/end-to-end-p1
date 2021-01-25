@@ -84,7 +84,7 @@ class testBDataSchemaClass(unittest.TestCase):
         info = {"project_id" : project_id} #request parameter as projectid
         response = requests.post("http://localhost:8000/mlaas/ingest/dataset_schema/",params= info,json = scenario1) #get response
         json_response = response.json() # response to json
-        status = json_response["Status"] #fetch response status
+        status = json_response["status_code"] #fetch response status
         self.assertEqual(status,"200") #compare status
 
     @unittest.expectedFailure   #this line is for compulsary failure
@@ -105,7 +105,7 @@ class testBDataSchemaClass(unittest.TestCase):
         status = json_response["Status"]
         self.assertEqual(status,"200")
 
-    #@unittest.expectedFailure
+    @unittest.expectedFailure
     def testC_scenario3(self):
         """ This function is used to test that  Application should not allow to choose each column as ignore.
             This is negative test.
@@ -120,7 +120,7 @@ class testBDataSchemaClass(unittest.TestCase):
         info = {"project_id" : project_id}
         response = requests.post("http://localhost:8000/mlaas/ingest/dataset_schema/",params= info,json = scenario3)
         json_response = response.json()
-        status = json_response["Status"]
+        status = json_response["status_code"]
         self.assertEqual(status,"200")
 
     def testD_scenario4(self):
@@ -137,6 +137,6 @@ class testBDataSchemaClass(unittest.TestCase):
         info = {"project_id" : project_id}
         response = requests.post("http://localhost:8000/mlaas/ingest/dataset_schema/",params= info,json = scenario1)
         json_response = response.json()
-        status = json_response["Status"]
+        status = json_response["status_code"]
         self.assertEqual(status,"200")
 

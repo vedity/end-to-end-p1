@@ -1,0 +1,127 @@
+<div class="page-title-box d-flex align-items-center justify-content-between">
+    <h4 class="mb-0 font-size-18">Data Visualizations</h4>
+ 
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card table-card">
+            <div class="card-body">
+                <h4 class="card-title mb-4">CarPrice Assignment</h4>
+
+                <div class="visualization-box">
+
+                    <!-- <canvas id="canvas"></canvas> -->
+
+                    <apx-chart class="apex-charts" *ngIf="chart_type=='histogram'" dir="ltr"
+                        [series]="columnlabelChartexpand.series"
+                        [chart]="columnlabelChartexpand.chart"
+                        [plotOptions]="columnlabelChartexpand.plotOptions"
+                        [yaxis]="columnlabelChartexpand.yaxis"
+                        [title]="columnlabelChartexpand.title"
+                        [stroke]="columnlabelChartexpand.stroke"
+                        [dataLabels]="columnlabelChartexpand.dataLabels"
+                        [xaxis]="columnlabelChartexpand.xaxis"
+                        [yaxis]="columnlabelChartexpand.yaxis"
+                        [legend]="columnlabelChartexpand.legend"
+                        [colors]="columnlabelChartexpand.colors"
+                        [fill]="columnlabelChartexpand.fill" [grid]="columnlabelChartexpand.grid">
+                    </apx-chart>  
+                    
+                    <apx-chart *ngIf="chart_type=='scalter'" class="apex-charts" dir="ltr"
+                    [series]="scalterChart.series"
+                    [chart]="scalterChart.chart"
+                    [dataLabels]="scalterChart.dataLabels"
+                    [fill]="scalterChart.fill"
+                    [title]="scalterChart.title"
+                    [xaxis]="scalterChart.xaxis"
+                    [yaxis]="scalterChart.yaxis" >
+                </apx-chart>
+                <!-- <div echarts [options]="boxplotChartoption" *ngIf="chart_type=='boxplot'" class="demo-chart"></div> -->
+                
+
+                <div  *ngIf="chart_type=='distribution'" class="demo-chart txt-center"><h2>Distribution Chart</h2> <h4>Working</h4></div>
+
+                <apx-chart *ngIf="chart_type=='heatmap'" class="apex-charts" dir="ltr"
+                [series]="heatmapchart.series"
+                [chart]="heatmapchart.chart"
+                [title]="heatmapchart.title"
+                [plotOptions]="heatmapchart.plotOptions"
+                [dataLabels]="heatmapchart.dataLabels"></apx-chart>
+               
+
+                <apx-chart *ngIf="chart_type=='countplot'"  class="apex-charts" dir="ltr"
+                [series]="countplotChart.series"
+                [chart]="countplotChart.chart"
+                [plotOptions]="countplotChart.plotOptions"
+                [dataLabels]="countplotChart.dataLabels"
+                [stroke]="countplotChart.stroke"
+                [fill]="countplotChart.fill"
+                [tooltip]="countplotChart.tooltip"
+                [title]="countplotChart.title"
+                [xaxis]="countplotChart.xaxis"
+                [yaxis]="countplotChart.yaxis" >
+            </apx-chart>
+
+
+                <apx-chart *ngIf="chart_type=='boxplot'" class="apex-charts" dir="ltr"
+                [series]="boxplotChart.series"
+                [chart]="boxplotChart.chart"
+                [title]="boxplotChart.title"
+                [xaxis]="boxplotChart.xaxis"
+                [yaxis]="boxplotChart.yaxis" >
+            </apx-chart>
+
+
+                </div>
+                <div class="visualization-right">
+                    <a href="javascript:void(0);" titile="Map-option" class="map-option"><i class="mdi mdi-close"></i></a>
+                    <h4 class="mb-3">Select Chart Type</h4>
+
+                    <div class="custom-control custom-radio custom-radio-success mb-2">
+                        <input type="radio" checked class="custom-control-input" id="histogram" (change)="chartchange('histogram')"
+                            name="customRadio">
+                        <label class="custom-control-label" for="histogram">Histogram</label>
+                    </div>
+                    <div class="custom-control custom-radio custom-radio-success mb-2">
+                        <input type="radio" class="custom-control-input" id="boxplot" (change)="chartchange('boxplot')"
+                            name="customRadio">
+                        <label class="custom-control-label" for="boxplot">Box Plot</label>
+                    </div>
+                    <div class="custom-control custom-radio custom-radio-success mb-2">
+                        <input type="radio" class="custom-control-input" id="scattlerplot" (change)="chartchange('scalter')"
+                            name="customRadio">
+                        <label class="custom-control-label" for="scattlerplot">Scattler Plot</label>
+                    </div>
+                    <div class="custom-control custom-radio custom-radio-success mb-2">
+                        <input type="radio" class="custom-control-input" id="distribution" (change)="chartchange('distribution')"
+                            name="customRadio">
+                        <label class="custom-control-label" for="distribution">Distribution
+                            Plot</label>
+                    </div>
+                    <div class="custom-control custom-radio custom-radio-success mb-2">
+                        <input type="radio" class="custom-control-input" id="countplot" (change)="chartchange('countplot')"
+                            name="customRadio">
+                        <label class="custom-control-label" for="countplot">Count Plot</label>
+                    </div>
+                    <div class="custom-control custom-radio custom-radio-warning mb-2">
+                        <input type="radio" class="custom-control-input" id="heatmap" (change)="chartchange('heatmap')"
+                            name="customRadio">
+                        <label class="custom-control-label" for="heatmap">Heat Map</label>
+                    </div>
+
+                    <div class="mb-3 mt-4">
+                        <h4 class="mb-3">Column Select</h4>
+                        <ng-select [items]="selectValue" [closeOnSelect]="false"  [multiple]="true"></ng-select>
+                    </div>
+                    <div class="mb-3 mt-4">
+                        <h4 class="mb-3">Change Axies Range</h4>
+                        <!-- <input type="range" class="custom-range" id="customRange1"> -->
+                        <input type="range" class="custom-range mt-2" min="0" max="5" id="customRange2">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
