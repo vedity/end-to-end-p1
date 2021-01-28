@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DatadetailListComponent } from './datadetail-list.component';
+import { DataVisualizationComponent } from './data-visualization.component';
 
-describe('DatadetailListComponent', () => {
-  let component: DatadetailListComponent;
-  let fixture: ComponentFixture<DatadetailListComponent>;
+describe('DataVisualizationComponent', () => {
+  let component: DataVisualizationComponent;
+  let fixture: ComponentFixture<DataVisualizationComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DatadetailListComponent ]
+      declarations: [ DataVisualizationComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(DatadetailListComponent);
+    fixture = TestBed.createComponent(DataVisualizationComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

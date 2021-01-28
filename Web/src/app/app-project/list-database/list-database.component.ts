@@ -6,6 +6,7 @@ import { ProjectApiService } from '../project-api.service';
 import Swal from 'sweetalert2';
 import bsCustomFileInput from 'bs-custom-file-input';
 import { createdataset } from './dataset.model'
+import { NgForm } from '@angular/forms';
 
 @Component({
   selector: 'app-list-database',
@@ -19,6 +20,8 @@ export class ListDatabaseComponent implements OnInit {
   dtTrigger: Subject<any> = new Subject<any>();
   data: createdataset = new createdataset();
   filter: boolean = true;
+  loaderdiv=false;
+  f:NgForm;
   constructor(public apiService: ProjectApiService, public toaster: ToastrService) { }
   transactions: any=[];
   ngOnInit(): void {
@@ -74,6 +77,7 @@ export class ListDatabaseComponent implements OnInit {
 
   errorHandler(error) {
     console.log(error);
+    this.loaderdiv=false;
     if(error.error_msg)
     this.toaster.error(error.error_msg, 'Error');
     else
@@ -139,8 +143,10 @@ export class ListDatabaseComponent implements OnInit {
       confirmButtonText: 'Yes, delete it!'
     }).then(result => {
       if (result.value) {
+        this.loaderdiv=true;
         this.apiService.deletedataset(id).subscribe(
           logs => {
+            this.loaderdiv=false;
             if (logs.status_code == "200") {
               Swal.fire('Deleted!', logs.error_msg, 'success');
               this.getdataset();
@@ -149,7 +155,12 @@ export class ListDatabaseComponent implements OnInit {
             else
               Swal.fire('Not Deleted!', logs.error_msg, 'error')
           },
-          error => Swal.fire('Not Deleted!', 'Something went wrong', 'error')
+          error => {
+            this.loaderdiv=false;
+            Swal.fire('Not Deleted!', 'Something went wrong', 'error')
+
+        
+        }
         )
 
       }
@@ -192,6 +203,7 @@ export class ListDatabaseComponent implements OnInit {
       savedata.append('visibility', "public");
 
     savedata.append('inputfile', this.datasetfile);
+    this.loaderdiv=true;
     this.apiService.savedataset(savedata).subscribe(
       logs => this.savesuccess(logs),
       error => this.errorHandler(error)
@@ -200,6 +212,10 @@ export class ListDatabaseComponent implements OnInit {
 
   savesuccess(data) {
     if (data.status_code == "200") {
+      this.loaderdiv=false;
+      this.data=new createdataset();
+      $(".custom-file-label").text("Choose file");
+     
       this.getdataset();
     }
     else

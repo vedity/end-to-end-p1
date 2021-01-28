@@ -86,7 +86,7 @@ def menu_nested_format(dataset_json1,dataset_json2):
     for x in dataset_json1:
         outer_dict={}
         for y in dataset_json2: 
-            if x["id"]==y["parentId"]:  
+            if str(x['id'])==str(y['parentId']):
                 y_keys=list(y.keys())
                 y_data=list(y.values())
                 inner_dict={}
@@ -106,7 +106,6 @@ def menu_nested_format(dataset_json1,dataset_json2):
         "label": 'MENU',
         "isTitle": 'true'
     })
-
     return json_data1
 
 def get_column_name(column_name):
@@ -119,14 +118,26 @@ def get_column_name(column_name):
         json_list.append(temp_dict)
     return json_list
 
-def get_schema_format(column_name,column_datatype):
+def get_schema_format(column_name,predicted_datatype):
+    json_data = []
+    for x in range(1,len(column_name)):
+        temp_dict = {
+            "column_name": column_name[x],
+            "data_type": predicted_datatype[x],
+            "column_attribute":"",
+            "change_column_name":"",
+        }
+        json_data.append(temp_dict)
+    return json_data
+
+def get_updated_schema_format(column_name,changed_column_name,data_type,column_attribute):
     json_data = []
     for x in range(len(column_name)):
         temp_dict = {
             "column_name": column_name[x],
-            "data_type": column_datatype[x],
-            "column_attribute": "",
-            "change_column_name":"",
+            "data_type":data_type[x],
+            "column_attribute":column_attribute[x],
+            "change_column_name":changed_column_name[x],
         }
         json_data.append(temp_dict)
     return json_data

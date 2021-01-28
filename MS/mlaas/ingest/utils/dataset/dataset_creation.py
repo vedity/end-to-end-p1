@@ -205,6 +205,7 @@ class DatasetClass:
         file_path = self.get_file_path(file_name,dataset_visibility,user_name)
         # Get dataframe of the file data.
         file_data_df = DBObject.read_data(file_path)
+        # logging.info("file_data_df :"+str(file_data_df))
         # Get number of rows.
         no_of_rows = file_data_df.shape[0]
         # Get table name.
@@ -275,7 +276,7 @@ class DatasetClass:
         logging.info("data ingestion : DatasetClass : show_dataset_details : execution end")
         return data
 
-    def show_data_details(self,DBObject,connection,dataset_id,start_index,length,sort_type,sort_index,global_value):
+    def show_data_details(self,DBObject,connection,dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter):
         """This function is used to show details about loaded dataset.
  
         Args:
@@ -311,7 +312,7 @@ class DatasetClass:
         
         logging.debug("data ingestion : DatasetClass : show_data_details : this will excute select query on table name : "+ user_name +'.' + dataset_table_name )
         dataset_table_name=user_name +'.' + dataset_table_name 
-        sql_command=DBObject.pagination(connection,dataset_table_name,start_index,length,sort_type,sort_index,global_value)
+        sql_command=DBObject.pagination(connection,dataset_table_name,start_index,length,sort_type,sort_index,global_value,customefilter)
         # sql_command = 'SELECT * FROM '
         # Get dataframe of loaded csv.
         data_details_df = DBObject.select_records(connection,sql_command) 
@@ -342,7 +343,7 @@ class DatasetClass:
         user_name_df = DBObject.select_records(connection,sql_command) 
         if  len(user_name_df) == 0:
             logging.debug(f"data ingestion  :  DatasetClass  :  delete_dataset_details  :  No entry found for the giver dataset_id = {dataset_id}")
-            return 5
+            return 5,_
         
         user_name_from_table,dataset_visibility = user_name_df['user_name'][0],user_name_df['dataset_visibility'][0]
         logging.debug(f"data ingestion  :  DatasetClass  :  delete_dataset_details  :  Authenticating user {user_name} for the request of [dataset_id = {dataset_id}]'s deletion")
@@ -364,17 +365,18 @@ class DatasetClass:
                 
                 #? Getting csv table name
                 logging.debug(f"data ingestion  :  DatasetClass  :  delete_dataset_details  :  getting data_table_name for the dataset_id = {dataset_id}")
-                sql_command = "SELECT DATASET_TABLE_NAME FROM "+ table_name + " WHERE DATASET_ID ='"+ dataset_id +"'"
+                sql_command = "SELECT DATASET_TABLE_NAME,dataset_name FROM "+ table_name + " WHERE DATASET_ID ='"+ dataset_id +"'"
                 dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
                 
                 if len(dataset_df) == 0:
-                    return 5
+                    return 5,_
                 
                 dataset_table_name = dataset_df['dataset_table_name'][0] 
-
+                #v 1.4
+                dataset_name = dataset_df['dataset_name'][0]
                 sql_command = f"DELETE FROM {table_name} WHERE DATASET_ID = '{dataset_id}'"
                 dataset_status = DBObject.delete_records(connection,sql_command)
-                if dataset_status == 1: return 1
+                if dataset_status == 1: return 1,_
                 
                 #? Deleting the CSV Table
                 if dataset_visibility == 'public':
@@ -391,17 +393,17 @@ class DatasetClass:
                 logging.info("data ingestion : DatasetClass : delete_dataset_details : execution end")
                 
                 if dataset_status == 0 and data_status == 0: 
-                    return 0
+                    return 0,dataset_name
                 elif data_status == 1: 
-                    return 2
+                    return 2,_
                 else: 
-                    return 1
+                    return 1,_
                 
             else:
                 #? Some project is using this dataset, can't delete it.   
-                return 3
+                return 3,_
         else:
-            return 4
+            return 4,_
         
     #* Version 1.2
     def delete_data_details(self,DBObject,connection,table_name,user_name):

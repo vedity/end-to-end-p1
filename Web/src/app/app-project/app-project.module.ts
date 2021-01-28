@@ -28,9 +28,14 @@ import { ListProjectComponent } from './list-project/list-project.component';
 import { CreateProjectComponent } from './create-project/create-project.component';
 import { ManageProjectComponent } from './manage-project/manage-project.component';
 import { DetailviewProjectComponent } from './detailview-project/detailview-project.component';
- import { DataTablesModule } from 'angular-datatables';
+import { DataTablesModule } from 'angular-datatables';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
-import { DatadetailListComponent } from './datadetail-ist/datadetail-list.component';
+import { CreateSchemaMappingComponent } from './create-schema-mapping/create-schema-mapping.component';
+import { ManageSchemaMappingComponent } from './manage-schema-mapping/manage-schema-mapping.component';
+import { DataExplorationComponent } from './data-exploration/data-exploration.component';
+import { DataVisualizationComponent } from './data-visualization/data-visualization.component';
+import { NgSelectModule } from '@ng-select/ng-select';
+
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   suppressScrollX: true,
   wheelSpeed: 0.3
@@ -38,9 +43,16 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
 
 @NgModule({
   declarations: [ListDatabaseComponent,
-     ListDatadetailComponent, 
-     DatadetailListComponent,
-     ListProjectComponent, CreateProjectComponent, ManageProjectComponent, DetailviewProjectComponent],
+    ListDatadetailComponent,
+    ListProjectComponent, 
+    CreateProjectComponent, 
+    ManageProjectComponent, 
+    DetailviewProjectComponent,
+    CreateSchemaMappingComponent, 
+    DataExplorationComponent, 
+    DataVisualizationComponent,
+    ManageSchemaMappingComponent,
+  ],
   imports: [
     CommonModule,
     FormsModule,
@@ -50,8 +62,10 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     NgApexchartsModule,
     ChartsModule,
     NgxChartistModule,
+    NgxEchartsModule,
+    NgSelectModule,
     ReactiveFormsModule,
-     DataTablesModule,
+    DataTablesModule,
     UIModule,
     WidgetModule,
     FullCalendarModule,

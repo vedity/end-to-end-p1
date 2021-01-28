@@ -2,8 +2,9 @@
 /*CHANGE HISTORY
 
  --CREATED BY-------------CREATION DATE-------------VERSION-----------PURPOSE----------------------
- Shivani Bhalodiya        04-jan-2021                 1.0             Initial Version 
- 
+ Shivani Bhalodiya        04-JAN-2021                 1.0             Initial Version 
+ Abhishek Negi            13-JAN-2021                 1.1             Added SameColumnName class exception
+ Abhishek Negi            13-JAN-2021                 1.2             Added SchemaCreationFailed class exception
  */
 '''
 class DatasetCreationFailed(Exception):
@@ -111,6 +112,66 @@ class LoadCSVDataFailed(Exception):
     """  Load CSV Data Failed"""
     def __init__(self,status_code):
         self.msg = "Load csv data failed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)
+    
+#v1.1
+class SameColumnName(Exception):
+    """  Value of column name and change column name cannot be same"""
+    def __init__(self,status_code):
+        self.msg = "Column name same"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)
+class SchemaUpdateFailed(Exception):
+    """  updating schema table failed"""
+    def __init__(self,status_code):
+        self.msg = "Schema update failed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)
+
+class SchemaCreationFailed(Exception):
+    """  Schema creation failed"""
+    def __init__(self,status_code):
+        self.msg = "Schema creation failed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)
+
+class SchemaInsertionFailed(Exception):
+    """  Schema Insertion failed"""
+    def __init__(self,status_code):
+        self.msg = "Schema Insertion failed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)
+
+class TableCreationFailed(Exception):
+    """  Table Creation Failed"""
+    def __init__(self,status_code):
+        self.msg = "Table creation failed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)
+
+class IgnoreAttributeClass(Exception):
+    """  """
+    def __init__(self,status_code):
+        self.msg = "All attribute type are Ignore"
         self.status_code = status_code
         self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
      

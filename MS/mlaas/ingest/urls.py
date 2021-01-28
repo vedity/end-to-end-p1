@@ -12,9 +12,6 @@ urlpatterns = [
     #URL For Data Detail(CSV File)
     path('mlaas/ingest/data_detail/',DataDetailClass.as_view()),
 
-    #URL For Data Detail Column List (CSV File)
-    path('mlaas/ingest/data_detail_column_list/',DataDetailColumnListClass.as_view()),
-
     #URL For delete Project Detail
     path('mlaas/ingest/delete/project_detail/',DeleteProjectDetailClass.as_view()),
 
@@ -37,6 +34,7 @@ urlpatterns = [
 
     #URL For dataset name
     path('mlaas/ingest/datasetname_exist/',DatasetNameClass.as_view()),
+
     
     #URL For Data Detail Column List (CSV File)
     path('mlaas/ingest/data_detail/column_list/',DataDetailColumnListClass.as_view()),

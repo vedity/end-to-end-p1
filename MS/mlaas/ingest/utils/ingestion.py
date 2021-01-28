@@ -119,9 +119,9 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         except (DatabaseConnectionFailed,ProjectAlreadyExist,LoadCSVDataFailed,ProjectCreationFailed,Exception) as exc:
             logging.error("data ingestion : ingestclass : create_project : Exception " + str(exc.msg))
             logging.error("data ingestion : ingestclass : create_project : " +traceback.format_exc())
-            return exc.msg
+            return exc.msg,None,None
         logging.info("data ingestion : ingestclass : create_project : execution end")
-        return project_status
+        return project_status,project_id,load_dataset_id
 
         
     def create_dataset(self,dataset_name,file_name,dataset_visibility,user_name):
@@ -163,10 +163,10 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         except (DatabaseConnectionFailed,DatasetAlreadyExist,DatasetCreationFailed,LoadCSVDataFailed) as exc:
             logging.error("data ingestion : ingestclass : create_dataset : Exception " + str(exc.msg))
             logging.error("data ingestion : ingestclass : create_dataset : " +traceback.format_exc())
-            return exc.msg
+            return exc.msg,None
         
         logging.info("data ingestion : ingestclass : create_dataset : execution end")
-        return dataset_status
+        return dataset_status,dataset_id
         
     def show_dataset_details(self,user_name):
         """This function is used to show dataset details.
@@ -199,7 +199,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         logging.info("data ingestion : ingestclass : show_dataset_details : execution end")
         return dataset_df
 
-    def show_data_details(self,dataset_id,start_index,length,sort_type,sort_index,global_value):
+    def show_data_details(self,dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter):
         """This function is used to show data details.
            It will show all the columns and rows from uploaded csv files.
 
@@ -216,7 +216,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             if connection == None :
                 raise DatabaseConnectionFailed(500) 
             
-            data_details_df = super(IngestClass,self).show_data_details(DBObject,connection,dataset_id,start_index,length,sort_type,sort_index,global_value) # Get dataframe of loaded csv.
+            data_details_df = super(IngestClass,self).show_data_details(DBObject,connection,dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter) # Get dataframe of loaded csv.
             if data_details_df is None :
                 raise DataNotFound(500)
             data_details_df=data_details_df.to_json(orient='records')
@@ -281,7 +281,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             if connection == None:
                 raise DatabaseConnectionFailed(500)
             
-            deletion_status = super(IngestClass, self).delete_project_details(DBObject,connection,project_id,user_name)
+            deletion_status,dataset_id,project_name = super(IngestClass, self).delete_project_details(DBObject,connection,project_id,user_name)
             if deletion_status == 1:
                 raise ProjectDeletionFailed(500)
             elif deletion_status == 2:
@@ -290,12 +290,12 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise EntryNotFound(500)
             
             logging.info("data ingestion : ingestclass : delete_project_details : execution end")
-            return deletion_status
+            return deletion_status,dataset_id,project_name
         
         except (DatabaseConnectionFailed,ProjectDeletionFailed,UserAuthenticationFailed,EntryNotFound) as exc:
             logging.error("data ingestion : ingestclass : delete_project_details : Exception " + str(exc.msg))
             logging.error("data ingestion : ingestclass : delete_project_details : " +traceback.format_exc())
-            return exc.msg
+            return exc.msg,None,None
         
     def delete_dataset_detail(self, dataset_id, user_name):
         '''
@@ -314,7 +314,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             if connection == None:
                 raise DatabaseConnectionFailed(500)
             
-            deletion_status = super(IngestClass, self).delete_dataset_details(DBObject,connection,dataset_id,user_name)
+            deletion_status,dataset_name = super(IngestClass, self).delete_dataset_details(DBObject,connection,dataset_id,user_name)
             if deletion_status == 1:
                 raise DatasetDeletionFailed(500)
             elif deletion_status == 2:
@@ -326,12 +326,12 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             elif deletion_status == 5:
                 raise EntryNotFound(500)
             logging.info("data ingestion : ingestclass : delete_dataset_details : execution end")
-            return deletion_status
+            return deletion_status,dataset_name
         
         except (DatabaseConnectionFailed,DatasetDeletionFailed,DataDeletionFailed,UserAuthenticationFailed,DatasetInUse,EntryNotFound) as exc:
             logging.error("data ingestion : ingestclass : delete_dataset_details : Exception " + str(exc.msg))
             logging.error("data ingestion : ingestclass : delete_dataset_details : " +traceback.format_exc())
-            return exc.msg
+            return exc.msg,None
         
     def delete_data_detail(self,table_name,user_name):
         """
@@ -519,7 +519,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                             col_names = file_data_df.columns.to_list()
                             for col in col_names:
                                 # it will check column names into the files.
-                                if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',col))==True):
+                                if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_()%]*$',col))==True):
                                     
                                     All_SET_Count = All_SET_Count + 1
                                 else:
