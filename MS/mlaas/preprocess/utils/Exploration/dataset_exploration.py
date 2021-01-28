@@ -113,34 +113,6 @@ class ExploreClass:
         
         return stats_df
     
-    
-    def get_hist_values(self,arr):
-        size,width = get_bin_size_width(arr)
-        
-        bins = {}
-        n = 0
-        l = arr[0]
-        r = l + width
-        i = 0
-        iteration = 0
-        while i < len(arr):
-            val = arr[i]
-            if val < r:
-                n += 1
-                i += 1
-            else: 
-                bins[l] = bins.get(l,n)
-                l = r
-                r += width
-                iteration += 1
-                if val < r:
-                    n = 1
-                    i += 1
-        else:
-            bins[l] = bins.get(l,n)
-                
-        return bins
-
         
     def return_columns(self,DBObject, connection, table_name,*args):
         '''
