@@ -497,7 +497,45 @@ class DBClass:
         return dataset_df
         
 
+    # def column_rename(self,file_data_df):
+    #     """This function is used to rename column of dataframe for % , ( , ) this special characters.
 
+    #     Args:
+    #         file_data_df ([dataframe]): [dataframe of the file data.]
+
+    #     Returns:
+    #         columns [List of renamed column]: [List of unchanged column]
+    #     """
+    #     df_columns=file_data_df.columns.values
+    #     df_columns_new =[]
+        
+    #     for i in df_columns: # this loop check a column name
+    #         str1 =""
+    #         for x in i: # this loop check each character column name
+    #             if '%' in x:
+    #                 str1 += x.replace('%','percent_isg') #It will replace column name when column name contains % 
+
+    #             elif '(' in x:
+    #                 str1 += x.replace('(','open_Bracket_isg') #It will replace column name when column name contains ( 
+
+    #             elif ')' in x:
+    #                 str1 += x.replace(')','close_Bracket_isg') #It will replace column name when column name contains )
+                    
+    #             else:
+    #                 str1 += x
+    #         df_columns_new.append(str1) # it append the renamed column name
+
+                 
+    #     return df_columns_new ,df_columns # it returns list of changed and unchanged column name
+    
+ # change_col,unchange_col = self.column_rename(file_data_df)
+
+
+        
+        # for i in range(len(change_col)): # this loop will rename the updated column name into he dataframe column
+        #     var_1=change_col[i]
+        #     var_2=unchange_col[i]
+        #     file_data_df.rename(columns={var_2:var_1},inplace=True)
         
 
 
