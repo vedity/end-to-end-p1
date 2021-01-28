@@ -60,6 +60,8 @@ export class ListDatadetailComponent implements OnInit {
      this.dtOptions = {
          pageLength: 10,
          serverSide: true,
+         scrollCollapse:true,
+         scrollY:"calc(100vh - 420px)",
          //processing: true,
          autoWidth: false,
          ajax: (dataTablesParameters: any, callback) => {
