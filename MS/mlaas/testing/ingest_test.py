@@ -150,7 +150,7 @@ class TestIngestDatasetDeletion(unittest.TestCase):
         response = requests.post("http://localhost:8000/mlaas/ingest/create_dataset/",data = info,files = file)
         response = requests.get("http://localhost:8000/mlaas/ingest/create_dataset/",params ={"user_name":"autouser_valid"})
         response_data = response.json()
-        json_dataset_id = response_data["response"][1]["dataset_id"]
+        json_dataset_id = response_data["response"][0]["dataset_id"]
         response = requests.delete("http://localhost:8000/mlaas/ingest/delete/dataset_detail/",params ={"user_name":"autouser_valid","dataset_id":json_dataset_id})
         json_response = response.json()
         

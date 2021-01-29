@@ -199,6 +199,8 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
    */
   initialize(logs): void {
     this.menuItems = logs.response;
+    console.log(this.menuItems);
+    
     setTimeout(() => {
       this.menu = new MetisMenu(this.sideMenu.nativeElement);
       this._activateMenuDropdown();
