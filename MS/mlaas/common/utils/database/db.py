@@ -65,6 +65,37 @@ class DBClass:
             return None,None
             
         return connection,connection_string
+
+    def create_sequence(self,connection):
+        cursor = connection.cursor()
+        try:
+            sql_command = 'CREATE SEQUENCE dataset_sequence INCREMENT 1 START 1;'
+            cursor.execute(sql_command)
+            connection.commit()
+            cursor.close()
+            return 0
+        except (Exception,psycopg2.DatabaseError) as error:
+            connection.rollback() # Rollback the changes.
+            cursor.close() # Close the cursor
+            return 1 # If failed.
+
+    def get_sequence(self,connection):
+        sql_command = "select nextval('dataset_sequence')"
+        data = self.select_records(connection, sql_command)
+        return data
+
+    def is_exist_sequence(self,connection,seq_name):
+        sql_command = "SELECT * FROM information_schema.sequences where sequence_name ='"+ seq_name +"'"
+        data=self.select_records(connection,sql_command) #call select_records which return data if found else None
+        if len(data) == 0: # check whether length of data is empty or not
+            data = self.create_sequence(connection)
+            if data == 0:
+                return "True"
+            else :
+                return "False"
+        else:
+            return "True"
+
     #v1.3
     def create_schema(self,connection,user_name = None):
         """This function is used to create schema.
@@ -129,11 +160,14 @@ class DBClass:
         
         cols = cols # Get columns name for database insert query.
         tuples = row_tuples # Get record for database insert query.
+        logging.info("tuple:"+str(tuples))
         query = "INSERT INTO %s(%s) VALUES %%s" % (table_name, cols) # Make query
+        logging.info("Query:"+str(query))
         cursor = connection.cursor() # Open cursor for database.
         try:
             extras.execute_values(cursor, query, tuples) # Excute insert query.
             connection.commit() # Commit the changes.
+            cursor.close()
             return 0 # If successfully inserted.
         except (Exception, psycopg2.DatabaseError) as error:
             connection.rollback() # Rollback the changes.
@@ -473,8 +507,7 @@ class DBClass:
     
 
     
-
-    def get_dataset_tablename(self,DBObject,connection,dataset_id):
+    def get_dataset_detail(self,DBObject,connection,dataset_id):
         '''This function is used to get dataset table name from datasetid
         Args:
                 dataset_id[(Integer)] : [Id of the dataset table]
@@ -492,7 +525,7 @@ class DBClass:
         Return : 
                 [Dataframe] : [return the dataframe of project table]
         '''
-        sql_command = "SELECT DATASET_TABLE_NAME FROM mlaas.dataset_tbl WHERE DATASET_ID ='"+ dataset_id +"'"
+        sql_command = "SELECT dataset_id from mlaas.project_tbl where project_id='"+ project_id +"'"
         dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         return dataset_df
         

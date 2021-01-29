@@ -16,6 +16,8 @@ import re
 import logging
 import traceback
 import datetime
+
+
 from common.utils.database import db
 from .project.project_creation import *
 from .dataset import dataset_creation as dt
@@ -67,7 +69,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         logging.info("data ingestion : ingestclass : get_db_connection : execution end")
         return DBObject,connection,connection_string
     
-    def create_project(self,project_name,project_desc,dataset_name = None,dataset_visibility = None,file_name = None,dataset_id = None,user_name = None):
+    def create_project(self,project_name,project_desc,page_name,dataset_desc=None,dataset_name = None,dataset_visibility = None,file_name = None,dataset_id = None,user_name = None):
         """This function is used to create project.
            E.g. sales forecast , travel time predictions etc.
            
@@ -91,7 +93,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise DatabaseConnectionFailed(500)  
             
             
-            project_status,project_id,load_dataset_id = super(IngestClass,self).make_project(DBObject,connection,project_name,project_desc,dataset_name,dataset_visibility,file_name ,dataset_id,user_name)
+            project_status,project_id,load_dataset_id = super(IngestClass,self).make_project(DBObject,connection,project_name,project_desc,page_name,dataset_desc,dataset_name,dataset_visibility,file_name ,dataset_id,user_name)
             logging.debug("data ingestion : ingestclass : create_project : we get status of project : "+str(project_status)+ " and Project id : "+str(project_id)+" and dataset_id : "+str(dataset_id))
             if project_status == 2:
                 raise ProjectAlreadyExist(500)
@@ -124,7 +126,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         return project_status,project_id,load_dataset_id
 
         
-    def create_dataset(self,dataset_name,file_name,dataset_visibility,user_name):
+    def create_dataset(self,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name):
         """This function is used to create dataset.
            E.g. sales , traveltime etc.
            
@@ -143,8 +145,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
             if connection == None:
                 raise DatabaseConnectionFailed(500)
-            dataset_status,dataset_id = super(IngestClass,self).make_dataset(DBObject,connection,dataset_name,file_name,dataset_visibility,user_name) # Get Status about dataset creation,if successfully then 0 else 1.
-            
+            dataset_status,dataset_id = super(IngestClass,self).make_dataset(DBObject,connection,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name) # Get Status about dataset creation,if successfully then 0 else 1.
             if dataset_status == 2:
                 raise DatasetAlreadyExist(500)
             
@@ -578,7 +579,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             return exc.msg
 
    
-    def save_file(self,user_name,dataset_visibility,file,file_path):
+    def save_file(self,DBObject,connection,user_name,dataset_visibility,file,file_path):
         """this function used to save the file uploaded by the user.file name will be append by the timestamp and 
         if the dataset_visibility is private save into user specific folder,else save into public folder. 
 
@@ -595,9 +596,16 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         else:
             file_path += dataset_visibility
         fs = FileSystemStorage(location=file_path)
-        file_name = file.name.split(".")[0]+ str(datetime.datetime.now().strftime('_%Y_%m_%d_%H_%M_%S')) + '.csv'
+        check_squence = DBObject.is_exist_sequence(connection,seq_name="dataset_sequence")
+        if check_squence =="True":
+            seq = DBObject.get_sequence(connection) 
+        file_name = file.name.split(".")[0]+"_"+ str(seq['nextval'][0]) + '.csv'
         fs.save(file_name, file)
         logging.info("data ingestion : ingestclass : save_file : execution ")
         return file_name
+    
+    
+
+
             
 

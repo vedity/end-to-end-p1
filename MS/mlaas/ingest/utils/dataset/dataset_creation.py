@@ -39,7 +39,7 @@ class DatasetClass:
         # Dataset table name
         table_name = 'mlaas.dataset_tbl' 
         # Columns for dataset table.
-        cols = 'dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name' 
+        cols = 'dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name,dataset_desc,page_name,parent_dataset_id' 
         #v1.3
         # Schema for dataset table.
         schema = "dataset_id bigserial,"\
@@ -50,12 +50,15 @@ class DatasetClass:
                  "dataset_table_name  text,"\
                  "dataset_visibility text,"\
                  "user_name  text,"\
+                 "dataset_desc text,"\
+                 "page_name text,"\
+                 "parent_dataset_id NULL bigserial,"\
                  "created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()" 
                  
         logging.info("data ingestion : DatasetClass : make_dataset_schema : execution end")          
         return table_name,schema,cols
 
-    def  make_dataset_records(self,dataset_name,file_name,dataset_visibility,user_name):
+    def  make_dataset_records(self,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,parent_dataset_id,flag):
         """This function is used to make records for inserting data into table based on input dataframe.
            E.g. column_name_1,column_name_2 .......,column_name_n.
 
@@ -69,11 +72,16 @@ class DatasetClass:
             [tuple]: [it will return records in the form of tuple.]
         """
         logging.info("data ingestion : DatasetClass : make_dataset_records : execution start")
-        
-        file_path = self.get_file_path(file_name,dataset_visibility,user_name)
-        file_size = self.get_file_size(file_path)# Get size of uploaded file.
-        dataset_table_name = self.get_dataset_table_name(file_name) # Make table name for loaded csv.
-        row=dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name # Make record for dataset table.
+        if flag == None:
+            file_path = self.get_file_path(file_name,dataset_visibility,user_name)
+            file_size = self.get_file_size(file_path)# Get size of uploaded file.
+            dataset_table_name = self.get_dataset_table_name(file_name) # Make table name for loaded csv.
+            
+        else:
+            file_size = '0' 
+            dataset_table_name = file_name
+            file_name = 'None'
+        row=dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name,dataset_desc,page_name,parent_dataset_id # Make record for dataset table.
         logging.info("row error"+str(row))
         row_tuples = [tuple(row)] # Convert row record into list of tuple.
         logging.info("row tuples error"+str(row_tuples))
@@ -142,7 +150,7 @@ class DatasetClass:
         
  
 
-    def make_dataset(self,DBObject,connection,dataset_name,file_name,dataset_visibility,user_name):
+    def make_dataset(self,DBObject,connection,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,parent_dataset_id=None,flag=None):
         """This function is used to main dataset table and also load main dataset details into database table.
            E.g. dataset details : dataset_name,file_name,file_size,dataset_table_name,user_name.
 
@@ -163,18 +171,19 @@ class DatasetClass:
         schema_status = DBObject.create_schema(connection)
         table_name,schema,cols = self.make_dataset_schema() # Get table name,schema and columns from dataset class.
         
+        if flag==None:
         #? Checking if the same dataset is there for the same user in the dataset table? If yes, then it will not insert a new row in the table
-        dataset_exist = self.dataset_exists(DBObject,connection,table_name,dataset_visibility,dataset_name,user_name)
-        
-        if dataset_exist == False: pass #? No dataset with same name exists so creating the new one
-        else: return 2,dataset_exist #? dataset_exists() function returns id of the dataset if dataset with same name exists
+            dataset_exist = self.dataset_exists(DBObject,connection,table_name,dataset_visibility,dataset_name,user_name)
+            
+            if dataset_exist == False: pass #? No dataset with same name exists so creating the new one
+            else: return 2,dataset_exist #? dataset_exists() function returns id of the dataset if dataset with same name exists
 
         create_status = DBObject.create_table(connection,table_name,schema) # Get status about dataset tableis created or not.if created then 0 else 1.
-
-        row_tuples = self.make_dataset_records(dataset_name,file_name,dataset_visibility,user_name) # Get record for dataset table.
+        logging.info("create_status :"+str(create_status))
+        row_tuples = self.make_dataset_records(dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,parent_dataset_id,flag) # Get record for dataset table.
         logging.info("row tuples in make dataset"+str(row_tuples))
         insert_status = DBObject.insert_records(connection,table_name,row_tuples,cols) # Get status about inserting records into dataset table. if successful then 0 else 1.
-        
+        logging.info("insert_status :"+str(insert_status))
         # Condition will check dataset table created and data is successfully stored into project table or not.if both successful then 0 else 1. 
         if schema_status in [0,1] and create_status in [0,1] and insert_status == 0 :
             dataset_id = self.get_dataset_id(DBObject,connection,row_tuples,user_name)

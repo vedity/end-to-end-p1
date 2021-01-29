@@ -76,7 +76,7 @@ class ProjectClass:
         return row_tuples
         
 
-    def make_project(self,DBObject,connection,project_name,project_desc,dataset_name,dataset_visibility,file_name ,dataset_id,user_name):
+    def make_project(self,DBObject,connection,project_name,project_desc,page_name,dataset_desc,dataset_name,dataset_visibility,file_name ,dataset_id,user_name):
         """This function is used to make project and it will create main project table and also
            load project details into database main project table.
            E.g. project name : sales forecast, travel time prediction etc.
@@ -109,7 +109,7 @@ class ProjectClass:
         DatasetObject = dataset_creation.DatasetClass()
 
         if dataset_id == None:
-            _,dataset_id = DatasetObject.make_dataset(DBObject,connection,dataset_name,file_name,dataset_visibility,user_name)
+            _,dataset_id = DatasetObject.make_dataset(DBObject,connection,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name)
         else:
             dataset_id = dataset_id
         

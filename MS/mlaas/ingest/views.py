@@ -78,80 +78,80 @@ class CreateProjectClass(APIView):
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
         
         def post(self, request, format=None):
-                        """
-                        This function is used to Create Project and Insert Uploaded CSV File data into Table
+                """
+                This function is used to Create Project and Insert Uploaded CSV File data into Table
 
-                        Args  : 
-                                User_name[(String)]   :[Name of user]
-                                ProjectName[(String)] :[Name of project]
-                                Description[(String)] :[Discreption of project]
-                                dataset_visibility[(String)] :[Name of Visibility public or private]
-                                dataset_id[(Integer)] :[ID of dataset selected by user from dropdown]
-                                inputfile(CSV File)   :[Input CSV file]
-                        Return : 
-                                status_code(500 or 200),
-                                error_msg(Error message for retrival & insertions failed or successfull),
-                                Response(return false if failed otherwise true)
-                        """
-                        try:
+                Args  : 
+                        User_name[(String)]   :[Name of user]
+                        ProjectName[(String)] :[Name of project]
+                        Description[(String)] :[Discreption of project]
+                        dataset_visibility[(String)] :[Name of Visibility public or private]
+                        dataset_id[(Integer)] :[ID of dataset selected by user from dropdown]
+                        inputfile(CSV File)   :[Input CSV file]
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival & insertions failed or successfull),
+                        Response(return false if failed otherwise true)
+                """
+                try:
                                 
-                                logging.info("data ingestion : CreateProjectClass : POST Method : execution start")
-                                user_name=request.POST.get('user_name')  #get Username
-                                project_name=request.POST.get('project_name') #get project_name
-                                project_desc=request.POST.get('description') #get description
-                                dataset_name = request.POST.get('dataset_name')#get dataset name
-                                dataset_visibility = request.POST.get('visibility') #get Visibility
-                                dataset_id = request.POST.get('dataset_id') # get dataset_id, if selected the dataset from dropdown menu otherwise None 
-                                file_name = None
-                                if dataset_id == "":
-                                        dataset_id = None
-                                else:
-                                        dataset_id = dataset_id               
-                                if dataset_id == None :
-                                        exists_project_status = IngestionObj.does_project_exists(project_name,user_name) 
-                                        if exists_project_status == False:
-                                                file=request.FILES['inputfile'] #get inputfile Name
-                                                file_data = pd.read_csv(request.FILES['inputfile']) # read the csv file and store into dataframe variable
-                                                file_check_status = IngestionObj.check_file(file,file_data) # call check_file function to verify csv file data
-                                                if file_check_status !=True: #if file_check_status not equal to true then file must  be inappropriate
-                                                        status_code,error_msg=get_Status_code(file_check_status) # extract the status_code and error_msg from file_check_status
-                                                        logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+status_code)
-                                                        return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
-                                                file_path="static/server/" 
-                                                file_name = IngestionObj.save_file(user_name,dataset_visibility,file,file_path) 
-                                                 
-                                        else:
-                                                return Response({"status_code":"500","error_msg":"Project already exist","response":"false"})
-                                else:
-                                        dataset_id = int(dataset_id)
-                                                
-                                datasetexist_status=IngestionObj.does_dataset_exists(dataset_name,user_name) #get the status if dataset exist or not 
-                                if datasetexist_status != False:
-                                        status_code,error_msg=get_Status_code(datasetexist_status) # extract the status_code and error_msg from datasetexist_status
-                                        logging.info("data ingestion : DatasetExistClass : GET Method : execution stop : status_code :"+status_code)
-                                        return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
-                                else:
-                                        logging.info("data ingestion : DatasetExistClass : GET Method : execution stop : status_code :200")
-                                        project_Status,project_id,dataset_id=IngestionObj.create_project(project_name,project_desc,dataset_name,dataset_visibility,file_name,dataset_id,user_name)    #call create_project method to create project and insert csv data into table
-                                        if project_Status != 0:
-                                                status_code,error_msg=get_Status_code(project_Status) # extract the status_code and error_msg from project_Status
+                        logging.info("data ingestion : CreateProjectClass : POST Method : execution start")
+                        user_name=request.POST.get('user_name')  #get Username
+                        project_name=request.POST.get('project_name') #get project_name
+                        project_desc=request.POST.get('project_desc') #get description
+                        dataset_desc=request.POST.get('dataset_desc') #get description
+                        dataset_name = request.POST.get('dataset_name')#get dataset name
+                        page_name = "Create Project"
+                        dataset_visibility = request.POST.get('visibility') #get Visibility
+                        dataset_id = request.POST.get('dataset_id') # get dataset_id, if selected the dataset from dropdown menu otherwise None 
+                        file_name = None
+                        if dataset_id == "":
+                                dataset_id = None
+                        else:
+                                dataset_id = dataset_id               
+                        if dataset_id == None :
+                                exists_project_status = IngestionObj.does_project_exists(project_name,user_name) 
+                                if exists_project_status == False:
+                                        file=request.FILES['inputfile'] #get inputfile Name
+                                        file_data = pd.read_csv(request.FILES['inputfile']) # read the csv file and store into dataframe variable
+                                        file_check_status = IngestionObj.check_file(file,file_data) # call check_file function to verify csv file data
+                                        if file_check_status !=True: #if file_check_status not equal to true then file must  be inappropriate
+                                                status_code,error_msg=get_Status_code(file_check_status) # extract the status_code and error_msg from file_check_status
                                                 logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+status_code)
                                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
-                                        else:
+                                        file_path="static/server/" 
+                                        file_name = IngestionObj.save_file(DBObject,connection,user_name,dataset_visibility,file,file_path) 
+                                                 
+                                else:
+                                        return Response({"status_code":"500","error_msg":"Project already exist","response":"false"})
+                        else:
+                                dataset_id = int(dataset_id)
                                                 
-                                                activity_name = "Create Project"
-                                                activity_description = f"You have created project '{project_name}'"
-                                                current_date = str(datetime.date.today())
-                                                timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
-                                                operation = "Create"
-                                                timeline_Obj.insert_user_activity(user_name,project_id,dataset_id,activity_name,activity_description,current_date,timestamp,operation)
-                                                logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code : 200")
-                                                return Response({"status_code":"200","status_msg":"Successfully Inserted","response":"true"}) 
+                        datasetexist_status=IngestionObj.does_dataset_exists(dataset_name,user_name) #get the status if dataset exist or not 
+                        if datasetexist_status != False:
+                                status_code,error_msg=get_Status_code(datasetexist_status) # extract the status_code and error_msg from datasetexist_status
+                                logging.info("data ingestion : DatasetExistClass : GET Method : execution stop : status_code :"+status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        else:
+                                logging.info("data ingestion : DatasetExistClass : GET Method : execution stop : status_code :200")
+                                project_Status,project_id,dataset_id=IngestionObj.create_project(project_name,project_desc,page_name,dataset_desc,dataset_name,dataset_visibility,file_name,dataset_id,user_name)    #call create_project method to create project and insert csv data into table
+                                if project_Status != 0:
+                                        status_code,error_msg=get_Status_code(project_Status) # extract the status_code and error_msg from project_Status
+                                        logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+status_code)
+                                        return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
+                                else:
+                                                
+                                        activity_name = "Create Project"
+                                        activity_description = f"You have created project '{project_name}'"
+                                        operation = "Create"
+                                        timeline_Obj.insert_user_activity(user_name,project_id,dataset_id,activity_name,activity_description,operation)
+                                        logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code : 200")
+                                        return Response({"status_code":"200","status_msg":"Successfully Inserted","response":"true"}) 
 
-                        except Exception as e:
-                                logging.error("data ingestion : CreateProjectClass : POST Method : " + str(e))
-                                logging.error("data ingestion : CreateProjectClass : POST Method : " +traceback.format_exc())
-                                return Response({"status_code":"500","error_msg":str(e),"response":"false"})      
+                except Exception as e:
+                        logging.error("data ingestion : CreateProjectClass : POST Method : " + str(e))
+                        logging.error("data ingestion : CreateProjectClass : POST Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})      
 
 
 # Class for Dataset to retrive & insert
@@ -205,7 +205,9 @@ class CreateDatasetClass(APIView):
                         logging.info("data ingestion : CreateDatasetClass : POST Method : execution start")
                         user_name=str(request.POST.get('user_name'))  #get Username
                         dataset_name=request.POST.get('dataset_name') #get dataset name
-                        dataset_visibility= request.POST.get('visibility')
+                        dataset_visibility= request.POST.get('visibility') #get the visibility
+                        dataset_desc = request.POST.get('description') #get the description
+                        page_name = "Create dataset"
                         exists_dataset_status=IngestionObj.does_dataset_exists(dataset_name,user_name) #call does_dataset_exists, check if dataset name exist for that perticular user name return false if not,otherwise true
                         if exists_dataset_status == False:
                                 file=request.FILES['inputfile'] #get inputfile Name
@@ -217,11 +219,11 @@ class CreateDatasetClass(APIView):
                                         logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+status_code)
                                         return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                                 file_path="static/server/"
-                                file_name =IngestionObj.save_file(user_name,dataset_visibility,file,file_path)
+                                file_name =IngestionObj.save_file(DBObject,connection,user_name,dataset_visibility,file,file_path)
                         else:
                                 return Response({"status_code":"500","error_msg":"Dataset name exists","response":"false"})
 
-                        dataset_Status,dataset_id=IngestionObj.create_dataset(dataset_name,file_name,dataset_visibility,user_name) #call create_dataset method to create dataset and insert csv data into table
+                        dataset_Status,dataset_id=IngestionObj.create_dataset(dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name) #call create_dataset method to create dataset and insert csv data into table
                         if dataset_Status != 0:
                                 status_code,error_msg=get_Status_code(dataset_Status) # extract the status_code and error_msg from dataset_status
                                 logging.info("data ingestion : CreateDatasetClass : POST Method : execution stop : status_code :"+status_code)
@@ -231,10 +233,8 @@ class CreateDatasetClass(APIView):
                                 project_id=0
                                 activity_name = "Create Dataset"
                                 activity_description = "You have created dataset '{x}'".format(x=dataset_name)
-                                current_date = str(datetime.date.today())
-                                timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
                                 operation = "Create"
-                                status = timeline_Obj.insert_user_activity(user_name,project_id,dataset_id,activity_name,activity_description,current_date,timestamp,operation)
+                                status = timeline_Obj.insert_user_activity(user_name,project_id,dataset_id,activity_name,activity_description,operation)
                                 logging.info("data ingestion : CreateDatasetClass : POST Method : execution stop : status_code : 200")
                                 return Response({"status_code":"200","error_msg":"Successfully Inserted","response":"true"})
                         
@@ -244,9 +244,34 @@ class CreateDatasetClass(APIView):
                                 return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
 
 
-# Class for Schema to retrive & insert
+class SchemaSaveClass(APIView):
+
+        def post(self,request,format=None):
+                try:
+                        logging.info("data ingestion : SechemaSaveClass : POST Method : execution start")
+                        update_schema_data=json.loads(request.body) #convert the data into dictonery
+                        schema_data = update_schema_data["data"] #access "data" key value from the schema_data dict
+                        project_id=request.query_params.get('project_id')
+                        schema_status=schema_obj.schema_save(DBObject,connection,connection_string,schema_data,project_id)
+                        if isinstance(schema_status,str): #check the instance of dataset_df
+                                status_code,error_msg=get_Status_code(schema_status) # extract the status_code and error_msg from schema_status
+                                logging.info("data ingestion : SechemaSaveClass : POST Method : execution stop : status_code :"+status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        else:
+                                logging.info("data ingestion : SechemaSaveClass : POST Method : execution stop : status_code :200")
+                                return Response({"status_code":"200","error_msg":"Successfully save","response":"true"})           
+                except Exception as e:
+                        logging.error("data ingestion : SechemaSaveClass : POST Method : Exception :" + str(e))
+                        logging.error("data ingestion : SechemaSaveClass : POST Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+
+
+
+
+
+# Class to retrive & insert for Schema data
 # It will take url string as mlaas/ingest/dataset_schema/. 
-class DatasetSchemaClass(APIView):
+class SchemaClass(APIView):
         
         def get(self,request,format=None):
                 """
@@ -421,10 +446,8 @@ class DeleteProjectDetailClass(APIView):
                                 
                                 activity_name = "Delete Project"
                                 activity_description = f"You have deleted project '{project_name}'"
-                                current_date = str(datetime.date.today())
-                                timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
                                 operation = "Delete"
-                                status = timeline_Obj.insert_user_activity(user_name,project_id,str(dataset_id),activity_name,activity_description,current_date,timestamp,operation)
+                                status = timeline_Obj.insert_user_activity(user_name,project_id,str(dataset_id),activity_name,activity_description,operation)
                                 logging.info("data ingestion : DeleteProjectDetailClass : DELETE Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully deleted","response":"true"})
                 except Exception as e:
@@ -463,10 +486,8 @@ class DeleteDatasetDetailClass(APIView):
                                 project_id=0
                                 activity_name = "Delete Dataset"
                                 activity_description = f"You have deleted dataset '{dataset_name}'"
-                                current_date = str(datetime.date.today())
-                                timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
                                 operation = "Delete"
-                                status = timeline_Obj.insert_user_activity(user_name,project_id,dataset_id,activity_name,activity_description,current_date,timestamp,operation)
+                                status = timeline_Obj.insert_user_activity(user_name,project_id,dataset_id,activity_name,activity_description,operation)
                                 logging.info("data ingestion : DeleteDatasetDetailClass : DELETE Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully deleted","response":"true"})
 

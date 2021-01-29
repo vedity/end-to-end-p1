@@ -15,6 +15,8 @@ from common.utils.logger_handler import custom_logger as cl
 from common.utils.json_format.json_formater import *
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.ingest.ingest_exception import *
+from .dataset.dataset_creation import *
+from .dataset import dataset_creation
 from dateutil.parser import parse
 import pandas as pd
 import traceback
@@ -23,8 +25,8 @@ log_enable = True
 LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
 logger = logging.getLogger('view')
-
-class SchemaClass:
+from .dataset import dataset_creation as dt
+class SchemaClass(dt.DatasetClass):
     def __init__(self,database,user,password,host,port):
         """This constructor is used to initialize database credentials.
            It will initialize when object of this class is created with below parameter.
@@ -279,4 +281,74 @@ class SchemaClass:
             attribute_type.append(value) #append type attribute value into list 
         logging.info("data ingestion : SchemaClass : get_attribute_datatype : execution stop")    
         return attribute_type
+    
+    def schema_save(self,DBObject,connection,connection_string,schema_data,project_id):
+        column_name_list=[] #get column name list
+        column_attribute_list = [] # get column attribute list
+        column_change_name = [] # get change column name
+        for index in range(len(schema_data)):
+            if schema_data[index]["change_column_name"] == "":
+                column_change_name.append(schema_data[index]["column_name"])
+            else:
+                column_change_name.append(schema_data[index]["change_column_name"])
+            column_name_list.append(schema_data[index]["column_name"])
+            column_attribute_list.append(schema_data[index]["column_attribute"])
+        
+        select_query = self.get_query_string(column_name_list,column_change_name,column_attribute_list)
+        dataframe = DBObject.get_project_detail(DBObject,connection,project_id)
+        dataset_id = dataframe['dataset_id'][0]
+        status = self.create_dataset(DBObject,connection,connection_string,select_query,dataset_id)
+        return status
+    
+    def get_query_string(self,column_name_list,column_change_name,column_attribute_list):
+        query = ""
+        for index in range(len(column_attribute_list)):
+            if column_attribute_list[index] !='ignore':
+                query +='"'+column_name_list[index]+'" as '+column_change_name[index]+',' # append the string
+        return query[0:len(query)-1]
+
+    def create_dataset(self,DBObject,connection,connection_string,select_query,dataset_id):
+        try:
+
+            dataframe = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
+            dataframe = dataframe.to_records(index=False) # convert dataframe to a NumPy record
+            dataset_name,dataset_table_name,user_name,dataset_visibility,_ = dataframe[0]
+            dataset_name,dataset_table_name,user_name,dataset_visibility = str(dataset_name),str(dataset_table_name),str(user_name),str(dataset_visibility)
+            if dataset_visibility =="private":
+                table_name = user_name+"."+dataset_table_name
+            else:
+                table_name = dataset_table_name
+            sql_command = "SELECT "+select_query+" from "+table_name # sql_query
+            file_data_df = DBObject.select_records(connection,sql_command) # execute the sql command and get the dataframe
+            table_name = self.get_table_name(DBObject,connection,dataset_table_name) # get the updated table name
+            page_name = "Schema Create" 
+            parent_dataset_id=int(dataset_id) 
+            dataset_visibility ="private"  
+            dataset_desc ="New Dataset created"  
+            dataset_status,dataset_id = super(SchemaClass,self).make_dataset(DBObject,connection,dataset_name,table_name,dataset_visibility,user_name,dataset_desc,page_name,parent_dataset_id,flag=1)
+            if dataset_status == 2:
+                raise DatasetAlreadyExist(500)
+            
+            elif dataset_status == 1 :
+                raise DatasetCreationFailed(500)
+            # Condition will check dataset successfully created or not. if successfully then 0 else 1.
+            elif dataset_status == 0 :
+                load_dataset_status = DBObject.load_csv_into_db(connection_string,table_name,file_data_df,user_name)
+                if load_dataset_status == 1:
+                    raise LoadCSVDataFailed(500)
+            return load_dataset_status
+        except (DatasetAlreadyExist,DatasetCreationFailed,LoadCSVDataFailed) as exc:
+            logging.error("data ingestion : ingestclass : create_dataset : Exception " + str(exc.msg))
+            logging.error("data ingestion : ingestclass : create_dataset : " +traceback.format_exc())
+            return exc.msg
+    
+    def get_table_name(self,DBObject,connection,table_name):
+        split_value = table_name.split('_tbl')[0].split('_')[-1]
+        table_name = table_name.split(split_value)
+        seq = DBObject.get_sequence(connection)
+        table_name = table_name[0]+str(seq['nextval'][0])+table_name[1]
+        return table_name
+    
+
+
 
