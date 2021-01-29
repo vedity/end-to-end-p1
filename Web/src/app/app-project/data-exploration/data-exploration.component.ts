@@ -1,4 +1,5 @@
 import { Component, ErrorHandler, Input, OnInit } from '@angular/core';
+import { arrayToHash } from '@fullcalendar/core/util/object';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { DataExplorationApiService } from '../data-exploration.service';
@@ -30,7 +31,7 @@ export class DataExplorationComponent implements OnInit {
      'animation-duration': '20s'
 
  };
-
+ displayselectedtitle="Continous";
   ngOnInit(): void {
 this.loaderdiv=true;
     this.columnlabelChart=  {
@@ -71,9 +72,6 @@ this.loaderdiv=true;
           enabled: false
       },
       
-     
-      
-     
       yaxis: {
           axisBorder: {
               show: false
@@ -115,12 +113,22 @@ this.loaderdiv=true;
     )
   }
 
+
+
+  continuousexploredata:any;
+  categoricalexploredata:any;
   successHandler(logs) {
-    this.loaderdiv=false;
 
       if(logs.status_code=="200"){
         console.log(logs.response);
         this.exploredData = logs.response;
+       var data= this.groupBy(this.exploredData,"Datatype");
+       this.continuousexploredata=data["Continious"];
+       this.categoricalexploredata=data["Categorical"];
+       console.log(this.continuousexploredata);
+       console.log(this.categoricalexploredata);
+       this.loaderdiv=false;
+
         this.finaldata=logs.response;
       }
   else{
@@ -128,7 +136,12 @@ this.loaderdiv=true;
   }
   }
 
-  
+  groupBy(xs, key) {
+    return xs.reduce(function (rv, x) {
+      (rv[x[key]] = rv[x[key]] || []).push(x);
+      return rv;
+    }, {});
+  };
 
   errorHandler(error) {
     this.loaderdiv=false;
@@ -155,26 +168,20 @@ this.loaderdiv=true;
           toolbar: {
               show: true
           },
-      
       },
       dataLabels: {
           enabled: false
       },
       colors: ['#34c38f'],
-      
       series: [{
-         
           data: obj["Plot Values"][1]
       }],
       xaxis: {
-          categories: ['2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023'],
+          categories: obj["Plot Values"][0],
           position: 'bottom',
-         
-          
-  
       },
       yaxis: {
-          categories: obj["Plot Values"][0],
+         // categories: obj["Plot Values"][0],
           position: 'left',
           labels: {
               show: true,
