@@ -26,3 +26,7 @@ canvas {
 .card-body{position: relative; }
 .visualization-box{width:80%;  padding:40px;  display: inline-block; margin-right:-4px; }
 .visualization-right{width:20%; background:#222736; position: absolute; right:0; top:0; height:100%; padding:20px;  }
+
+.exploration-row{
+     height: calc(100vh - 310px);
+}
