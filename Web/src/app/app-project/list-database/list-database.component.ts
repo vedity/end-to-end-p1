@@ -16,7 +16,8 @@ import { NgForm } from '@angular/forms';
 export class ListDatabaseComponent implements OnInit {
   @ViewChild(DataTableDirective, { static: false })
   datatableElement: DataTableDirective;
-  dtOptions: DataTables.Settings = {};
+  dtOptions: DataTables.Settings = {   scrollCollapse:true,
+    scrollY:"calc(100vh - 420px)",};
   dtTrigger: Subject<any> = new Subject<any>();
   data: createdataset = new createdataset();
   filter: boolean = true;

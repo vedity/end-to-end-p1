@@ -12,7 +12,7 @@
                         <input type="text" class="form-control" (keyup)="filterdata($event.target.value)">
                     </div>
                 </div>
-                <div class="row">
+                <div class="row main-row">
                     <div class="col-lg-3 " *ngFor="let item of transactions" [hidden]="item.display==false">
                         <div class="project-card" id="project-card-{{item.project_id}}" >
                             <div class="float-right text-center">

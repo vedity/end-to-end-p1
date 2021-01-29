@@ -50,6 +50,22 @@ scenario3 = {
     }]
 }
 
+scenario4 = {
+     "data" : [{
+       "column_name": "index",
+        "data_type": "numerical",
+        "column_attribute":"",
+        "change_column_name":"index_change"
+    },
+    {
+        "column_name": "uid",
+        "data_type": "categorical",
+        "column_attribute":"",
+        "change_column_name":"uid_change"
+    }]
+}
+
+
 class TestADataExplorationClass(unittest.TestCase):
     
     def testA_scenario1_dataset_statisctics(self):
@@ -140,3 +156,20 @@ class testBDataSchemaClass(unittest.TestCase):
         status = json_response["status_code"]
         self.assertEqual(status,"200")
 
+    def testE_scenario5(self):
+        """ This function is used to test that application should allow not to select the Target column.
+            This is positive test.
+        Args:
+            project_id ([integer]):[id of the project.]
+            Json : [json as scenario1](define in above code)
+        """
+
+        time.sleep(1)
+        projectid_response = requests.get("http://localhost:8000/mlaas/ingest/create_project/",params ={"user_name":"autouser_second"})
+        projectid_json_response = projectid_response.json()
+        project_id = projectid_json_response["response"][0]["project_id"]
+        info = {"project_id" : project_id}
+        response = requests.post("http://localhost:8000/mlaas/ingest/dataset_schema/",params= info,json = scenario4)
+        json_response = response.json()
+        status = json_response["status_code"]
+        self.assertEqual(status,"200")

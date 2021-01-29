@@ -7,7 +7,16 @@
         <div class="card table-card">
             <div class="card-body">
                 <h4 class="card-title mb-4">{{title}}</h4>
-                <table class="table table-centered table-nowrap">
+
+                <ngx-skeleton-loader *ngIf="displaydiv"
+            count="7"
+            [animation]="animation"
+            
+            [theme]="theme">
+          </ngx-skeleton-loader>
+          <div *ngIf="!displaydiv">
+<perfect-scrollbar class="schemamapping-row">
+                <table class="table table-centered table-nowrap" >
                     <thead class="thead-light">
                         <tr>
                             <th>
@@ -52,8 +61,12 @@
                 </table>
                 <div class="button-items text-center">
                     <button type="button" class="btn btn-secondary" (click)="reset()">Reset</button>
-                    <button type="button" class="btn btn-success" (click)="save()">Submit</button>
+                    <button type="button" class="btn btn-success" (click)="save()">Save</button>
+                    <button type="button" class="btn btn-secondary" (click)="smallModal(smallDataModal)">Save As</button>
                 </div>
+            </perfect-scrollbar>
+                
+            </div>
             </div>
         </div>
     </div>
@@ -67,3 +80,34 @@
       <p>Loading...</p>
     </div>
     </div>
+
+
+    <ng-template #smallDataModal let-modal>
+        <div class="modal-header">
+          <h5 class="modal-title mt-0">Save the Dataset</h5>
+          <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-hidden="true">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <div class="custom-control custom-checkbox mb-3">
+                  <input type="checkbox" class="custom-control-input" id="customCheck1">
+                  <label class="custom-control-label" for="customCheck1">Keep private</label>
+                </div>     
+            
+      </div>
+      <div class="form-group">
+        <label for="example-text-input" class="col-form-label">Dataset Name</label>
+        <input class="form-control" type="text" id="example-text-input">
+     
+    </div> 
+    <div class="form-group">
+    <label for="example-text-input" class="col-form-label">Description</label>
+    <textarea class="form-control" id="example-text-input"></textarea>
+    </div>  
+     
+      <div class="button-items text-center">
+        <button type="button" class="btn btn-success">Submit</button>
+    </div>
+     
+        </div>
+      </ng-template>

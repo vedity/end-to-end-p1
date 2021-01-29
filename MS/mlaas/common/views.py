@@ -105,6 +105,7 @@ class MenuClass(APIView):
                 try:
                         logging.info("data ingestion : MenuClass : POST Method : execution start")
                         menu_df=DBObject.read_data('common/Menu.csv')
+                        DBObject.create_schema(connection)
                         status=DBObject.load_csv_into_db(connection_string,'menu_tbl',menu_df,'mlaas')
                         if status != 0:
                                 logging.info("data ingestion : MenuClass : POST Method : execution stop : status_code :500")
@@ -261,7 +262,34 @@ class ScheamColumnListClass(APIView):
 
 class ActivityTimelineClass(APIView):
         
+        def post(self,request,formate=None):
+                """
+                This class will create schema  of master activity table.
+                It will take url string as mlaas/activity_timeline/.
 
+                Args  : 
+                        None
+                        
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for inserstion failed or successfull),
+                        Response(return false if failed otherwise schema will create with msg)
+                """
+                try:
+                        logging.info("activity table ingestion : ActivityTimeLine : POST Method : execution start")
+                        activity_df=DBObject.read_data('common/activity_master_tbl.csv')
+                        status=DBObject.load_csv_into_db(connection_string,'activity_master_tbl',activity_df,'mlaas')
+                        if status != 0:
+                                logging.info("activity table ingestion : ActivityTimeLine : POST Method : execution stops: status_code :500")
+                                return Response({"status_code":"500","error_msg":"Insertion Failed","response":"false"})
+                        else:
+                                logging.info("activity table ingestion : ActivityTimeLine : POST Method : execution stop : status_code : 200")
+                                return Response({"status_code":"200","error_msg":"Insertion successfull","response":"true"})
+                except Exception as e:
+                        logging.error("activity table ingestion : ActivityTimeLine : GET Method : Exception :" + str(e))
+                        logging.error("activity table ingestion : ActivityTimeLine : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)}) 
+        
         def get(self,request,format=None):
                 """
                 This class is used to show the user activity for each of single user.
@@ -280,6 +308,7 @@ class ActivityTimelineClass(APIView):
                         logging.info("data ingestion : ActivityTimelineClass : GET Method : execution start")
                         user_name = request.query_params.get('user_name')
                         activity_df = timeline_Obj.get_user_activity(user_name)
+
                         if isinstance(activity_df,str): #check the instance of activity_df
                                 status_code,error_msg=get_Status_code(activity_df) # extract the status_code and error_msg from activity_df
                                 logging.info("data ingestion : ActivityTimelineClass : GET Method : execution : status_code :"+ status_code)

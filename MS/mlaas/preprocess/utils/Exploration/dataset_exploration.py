@@ -91,22 +91,27 @@ class ExploreClass:
             #? Merging the Column Names
             i = 0
             axislist =[]
+            datatype = []
+            datacount = []
             for col in data_df.columns:
                 stats_df.iloc[i,-2] = col
-                axislist.append(self.get_values(data_df[col],numerical_columns,col))            
+                axislist.append(self.get_values(data_df[col],numerical_columns,col))
+                datatype.append(self.get_datatype(data_df[col],numerical_columns,col))   
+                datacount.append(data_df[col].count())
                 i += 1
             stats_df['Plot Values'] = axislist
-            
+            stats_df['Datatype'] = datatype
+            stats_df['DataCount'] = datacount
             #? Dataset Contains both Categorical & Continuous Data
             try:
-                stats_df = stats_df[['Plot Values','Column Name','Mean','Std','Min Value','25%','50%','75%','Max Value','Most Frequent','Frequency','Unique Values','Null Values','Non-Null Values']]
+                stats_df = stats_df[['Plot Values','Column Name','Datatype','DataCount','Mean','Std','Min Value','25%','50%','75%','Max Value','Most Frequent','Frequency','Unique Values','Null Values','Non-Null Values']]
             except KeyError:
                 try:
                     #? Dataset Contains only Continuous Data
-                    stats_df = stats_df[['Plot Values','Column Name','Mean','Std','Min Value','25%','50%','75%','Max Value','Null Values','Non-Null Values']]
+                    stats_df = stats_df[['Plot Values','Column Name','Datatype','Mean','Std','Min Value','25%','50%','75%','Max Value','Null Values','Non-Null Values']]
                 except KeyError:
                     #? Dataset Contains only Categorical Data
-                    stats_df = stats_df[['Plot Values','Column Name','Most Frequent','Frequency','Unique Values','Null Values','Non-Null Values']]
+                    stats_df = stats_df[['Plot Values','Column Name','Datatype','Most Frequent','Frequency','Unique Values','Null Values','Non-Null Values']]
         except:
             return 2
         logging.info("loop end"+str(stats_df)) 
@@ -225,5 +230,23 @@ class ExploreClass:
             return self.get_count_plot(arr)
         
         
+    def get_datatype(self,arr,numerical,col_name):
+        '''This function bifurcate Continious or Categorical Datatype
+        Args:
+                arr[(Intiger|Float|String)]: Takes pandas.Series object as input.
+                numerical[List(String)]: Names of numerical columns.
+                col_name[String]: Name of the current column.
+                
+            Returns:
+                datatype[String] : Continious/Categorical
+        '''
         
+        if col_name in numerical:
+            datatype = "Continious"
+            return datatype
+        else:
+            datatype = "Categorical"
+            return datatype
+        
+           
         

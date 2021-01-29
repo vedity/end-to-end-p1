@@ -8,6 +8,7 @@ import  { Observable } from 'rxjs';
 export class ProjectApiService {
 
    baseUrl = 'http://127.0.0.1:8000/mlaas/ingest/'
+   baseUrlnew = 'http://127.0.0.1:8000/mlaas/';
    headers = new HttpHeaders ({
      'Content-type': 'application/json',
    });
@@ -41,6 +42,13 @@ export class ProjectApiService {
     var params=new HttpParams().set("user_name",this.user.username);
     return this.httpClient.get(this.baseUrl+"create_dataset/",{headers:this.headers,params});
   }
+
+  
+  getActivityTimeline():Observable<any>{
+    this.user=JSON.parse(localStorage.getItem("currentUser"));
+  var params=new HttpParams().set("user_name",this.user.username);
+  return this.httpClient.get(this.baseUrlnew+"activity_timeline/",{headers:this.headers,params});
+}
   // mlaas/menu/
   savedataset(obj:FormData):Observable<any>{
     console.log(obj);
