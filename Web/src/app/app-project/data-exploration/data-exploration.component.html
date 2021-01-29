@@ -10,12 +10,15 @@
             <div class="card-body">
              <h4 class="card-title mb-4">{{title}}</h4>
 
-             <ngx-skeleton-loader *ngIf="loaderdiv"
-             count="7"
-             [animation]="animation"
-             
-             [theme]="theme">
-           </ngx-skeleton-loader>
+            
+           <perfect-scrollbar class="exploration-row"> 
+            <ngx-skeleton-loader *ngIf="loaderdiv"
+            count="7"
+            [animation]="animation"
+            
+            [theme]="theme">
+          </ngx-skeleton-loader>
+          
              <div class="row-box" *ngFor="let item of exploredData;let i=index">
                  <div class="col col-no">
                      <p>{{i+1}}</p>
@@ -65,7 +68,7 @@
                     <span>Mean Value</span>
                 </div>
              </div>
-            
+            </perfect-scrollbar>
             </div>
         </div>
     </div>

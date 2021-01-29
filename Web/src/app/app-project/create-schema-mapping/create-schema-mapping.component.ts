@@ -1,4 +1,5 @@
 import { Component, ErrorHandler, Input, OnInit } from '@angular/core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { SchemaMappingApiService } from '../schema-mapping-api.service';
 
@@ -9,7 +10,7 @@ import { SchemaMappingApiService } from '../schema-mapping-api.service';
 })
 export class CreateSchemaMappingComponent implements OnInit {
 
-  constructor(public apiService: SchemaMappingApiService, public toaster: ToastrService) { }
+  constructor(public apiService: SchemaMappingApiService, public toaster: ToastrService,private modalService: NgbModal) { }
   @Input() public dataset_id: any;
   @Input() public title: any;
   @Input() public project_id: any
@@ -19,7 +20,18 @@ export class CreateSchemaMappingComponent implements OnInit {
   datatypeList: any = [];
   datasetSchema: any = [];
   finaldata:any=[];
+  displaydiv=false;
+  animation = "progress-dark";
+ theme = {
+     'border-radius': '5px',
+     'height': '40px',
+     'background-color': ' rgb(34 39 54)',
+     'border': '1px solid #32394e',
+     'animation-duration': '20s'
+
+ };
   ngOnInit(): void {
+    this.displaydiv=true;
     this.getColumnAttributeList();
     //this.getDataTypeList()
     this.getSchema(this.project_id);
@@ -34,6 +46,7 @@ export class CreateSchemaMappingComponent implements OnInit {
 
   successHandler(logs) {
     console.log(logs.response);
+    this.displaydiv=false;
     this.datasetSchema = logs.response;
     this.finaldata=logs.response;
   }
@@ -117,12 +130,8 @@ export class CreateSchemaMappingComponent implements OnInit {
     if(columnname==newname)
     $("#td_"+index).addClass("errorstatus");
   }
-}
 
-export class schemamapping{
-  column_name:string;
-  column_attribute?:string;
-  change_column_name?:string;
-  data_type:string;
-
+  smallModal(smallDataModal: any) {
+    this.modalService.open(smallDataModal, { size: 'sm',windowClass:'modal-holder', centered: true });
+  }
 }

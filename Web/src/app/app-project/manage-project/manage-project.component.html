@@ -45,61 +45,23 @@
     <div class="right-panel-timeline">
       <h4>Timeline</h4>
       <perfect-scrollbar style="height: calc(100vh - 185px);">
-        <div class="box">
-          <p>Today <span class="badge badge-pill badge-soft-dark ml-1 ">4 Activities</span></p>
-          <div class="card">
+        <div class="box" *ngFor="let item of keys;let i=index">
+      <p *ngIf="(currentDate | date:'yMMdd') == (item | date:'yMMdd')">Today <span class="badge badge-pill badge-soft-dark ml-1 ">{{transactions[item].length}} Activities</span></p>
+      <p *ngIf="(currentDate | date:'yMMdd') != (item | date:'yMMdd')">{{item | date}} <span class="badge badge-pill badge-soft-dark ml-1 ">{{transactions[item].length}} Activities</span></p>
+          
+      <div class="card">
             <div class="card-body">
               <!-- <h4 class="card-title mb-5">Activity</h4> -->
               <ul class="verti-timeline list-unstyled">
-                <li class="event-list">
-                  <div class="event-timeline-dot">
-                    <i class="bx font-size-20"></i>
+                <li class="event-list" *ngFor="let activity of transactions[item]">
+                  <div class="event-timeline-dot  ">
+                    <i class="bx font-size-20 {{activity.operation | lowercase}}"></i>
                   </div>
                   <div class="media">
                     <div class="media-body">
                       <div>
-                        <h5>You Created Project <span>03:00 Pm</span></h5>
-                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. </p>
-                      </div>
-                    </div>
-                  </div>
-                </li>
-                <li class="event-list">
-                  <div class="event-timeline-dot">
-                    <i class="bx font-size-20 color-red"></i>
-                  </div>
-                  <div class="media">
-  
-                    <div class="media-body">
-                      <div>
-                        <h5>You Deleted Project <span>03:00 Pm</span></h5>
-                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. </p>
-                      </div>
-                    </div>
-                  </div>
-                </li>
-                <li class="event-list active">
-                  <div class="event-timeline-dot">
-                    <i class="bx font-size-20 color-blue"></i>
-                  </div>
-                  <div class="media">
-                    <div class="media-body">
-                      <div>
-                        <h5>You Edited Project <span>03:00 Pm</span></h5>
-                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. </p>
-                      </div>
-                    </div>
-                  </div>
-                </li>
-                <li class="event-list">
-                  <div class="event-timeline-dot ">
-                    <i class="bx font-size-20 color-green"></i>
-                  </div>
-                  <div class="media">
-                    <div class="media-body">
-                      <div>
-                        <h5>You Created Project <span>03:00 Pm</span></h5>
-                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. </p>
+                        <h5>{{activity.operation}} <span>{{activity.timestamp |date :'shortTime'}}</span></h5>
+                        <p>{{activity.activity_description}} </p>
                       </div>
                     </div>
                   </div>
@@ -110,71 +72,7 @@
             </div>
           </div>
         </div>
-        <div class="box">
-          <p>Yesterday <span class="badge badge-pill badge-soft-dark ml-1 ">4 Activities</span></p>
-          <div class="card">
-            <div class="card-body">
-              <!-- <h4 class="card-title mb-5">Activity</h4> -->
-              <ul class="verti-timeline list-unstyled">
-                <li class="event-list">
-                  <div class="event-timeline-dot">
-                    <i class="bx font-size-20"></i>
-                  </div>
-                  <div class="media">
-                    <div class="media-body">
-                      <div>
-                        <h5>You Created Project <span>03:00 Pm</span></h5>
-                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. </p>
-                      </div>
-                    </div>
-                  </div>
-                </li>
-                <li class="event-list">
-                  <div class="event-timeline-dot">
-                    <i class="bx font-size-20"></i>
-                  </div>
-                  <div class="media">
-  
-                    <div class="media-body">
-                      <div>
-                        <h5>You Delete Project <span>03:00 Pm</span></h5>
-                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. </p>
-                      </div>
-                    </div>
-                  </div>
-                </li>
-                <li class="event-list active">
-                  <div class="event-timeline-dot">
-                    <i class="bx font-size-20 "></i>
-                  </div>
-                  <div class="media">
-                    <div class="media-body">
-                      <div>
-                        <h5>You Edited Project <span>03:00 Pm</span></h5>
-                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. </p>
-                      </div>
-                    </div>
-                  </div>
-                </li>
-                <li class="event-list">
-                  <div class="event-timeline-dot">
-                    <i class="bx font-size-20"></i>
-                  </div>
-                  <div class="media">
-                    <div class="media-body">
-                      <div>
-                        <h5>You Created Project <span>03:00 Pm</span></h5>
-                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. </p>
-                      </div>
-                    </div>
-                  </div>
-                </li>
-              </ul>
-              <!-- <div class="text-center mt-4"><a href="" class="btn btn-primary btn-sm">View More <i
-                      class="mdi mdi-arrow-right ml-1"></i></a></div> -->
-            </div>
-          </div>
-        </div>
+     
       </perfect-scrollbar>
     </div>
 </div>

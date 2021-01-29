@@ -116,10 +116,16 @@ this.loaderdiv=true;
   }
 
   successHandler(logs) {
-    console.log(logs.response);
-    this.exploredData = logs.response;
-    this.finaldata=logs.response;
     this.loaderdiv=false;
+
+      if(logs.status_code=="200"){
+        console.log(logs.response);
+        this.exploredData = logs.response;
+        this.finaldata=logs.response;
+      }
+  else{
+    this.errorHandler(logs)
+  }
   }
 
   
