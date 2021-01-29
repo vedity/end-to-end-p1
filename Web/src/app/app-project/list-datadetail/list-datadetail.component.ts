@@ -55,8 +55,6 @@ export class ListDatadetailComponent implements OnInit {
          }
      )
 
-     
-
      this.dtOptions = {
          pageLength: 10,
          serverSide: true,
