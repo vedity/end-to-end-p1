@@ -93,7 +93,7 @@ class ActivityTimelineClass:
             DBObject = db.DBClass() # create object for database class
             connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port)
 
-            sql_command = ("SELECT user_name,activity_description,date(timestamp),timestamp,operation from mlaas.activity_tbl where user_name='"+str(user_name)+"' order by timestamp desc")
+            sql_command = ("SELECT user_name,activity_name,activity_description,date(timestamp),timestamp,operation from mlaas.activity_tbl where user_name='"+str(user_name)+"' order by timestamp desc")
             activity_df = DBObject.select_records(connection,sql_command) #excute the sql query 
 
             if activity_df is None:
