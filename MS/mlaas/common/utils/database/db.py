@@ -160,9 +160,7 @@ class DBClass:
         
         cols = cols # Get columns name for database insert query.
         tuples = row_tuples # Get record for database insert query.
-        logging.info("tuple:"+str(tuples))
         query = "INSERT INTO %s(%s) VALUES %%s" % (table_name, cols) # Make query
-        logging.info("Query:"+str(query))
         cursor = connection.cursor() # Open cursor for database.
         try:
             extras.execute_values(cursor, query, tuples) # Excute insert query.

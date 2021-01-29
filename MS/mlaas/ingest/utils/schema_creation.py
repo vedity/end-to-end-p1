@@ -48,9 +48,11 @@ class SchemaClass(dt.DatasetClass):
         # schema table name
         table_name = 'mlaas.schema_tbl'
         # Columns for schema table
-        cols = 'project_id,column_name,changed_column_name,data_type,column_attribute' 
+        cols = 'project_id,dataset_id,table_name,column_name,changed_column_name,data_type,column_attribute' 
         # Schema of schema_table
         schema ="project_id bigint,"\
+                "dataset_id bigint,"\
+                "table_name text,"\
                 "column_name  text,"\
                 "changed_column_name  text,"\
                 "data_type  text,"\
@@ -118,17 +120,18 @@ class SchemaClass(dt.DatasetClass):
             logging.error("data ingestion : SchemaClass : get_dataset_schema : " +traceback.format_exc())
             return exc.msg
 
-    def map_dataset_schema(self,DBObject,connection,project_id,column_name_list,column_lst,data_type_lst,column_attribute_lst):
+    def map_dataset_schema(self,DBObject,connection,project_id,dataset_id,table_name,column_name_list,column_lst,data_type_lst,column_attribute_lst):
         """
-        this function used to insert the records into a table if not exist otherwise it will update the records if  found.
+        this function used to insert the records into a table if not exist otherwise it will update the record.
         Args:
                 column_name_list[(List)]  : [Existing table column name value]
                 column_lst [(List)]  : [Updated column name value]
                 data_type_lst [(List)]  : [Existing table column datatype value]
-                column_attribute_lst [(List)]  : []
+                column_attribute_lst [(List)]  : [name of type attribute(ignore,target)]
                 column_change_datatype[(List)]  : [Updated column datatype value]
                 project_id [(Integer)]  : [Id of the project table]
-                 
+                dataset_id [(Integer)]  : [Id of the dataset table]
+                table_name[(String)] : [updated table name]
         Return:
             [(integer)] : [return 0 if successfully inserted or updated other wise return 1]
         """
@@ -140,17 +143,17 @@ class SchemaClass(dt.DatasetClass):
             new_cols_lst = column_lst
             cols_attribute_lst = column_attribute_lst
 
-            table_name,cols,schema =self.get_schema()
+            schema_table_name,cols,schema =self.get_schema()
             prev_cols_lst = column_name_list
             prev_dtype_lst = data_type_lst
             
             #check if values in schema table,data is exist or not. If exist then update the values else insert new record
-            if self.is_existing_schema(DBObject,connection,project_id):
+            if self.is_existing_schema(DBObject,connection,project_id,dataset_id):
                 #Iterate all column,data type,previous column name one by one to update schema table values
                 for prev_col,new_col,new_dtype,col_attr in zip(prev_cols_lst,new_cols_lst,prev_dtype_lst,cols_attribute_lst): 
-                    sql_command = "update "+table_name + " SET changed_column_name = '" + new_col + "',"\
+                    sql_command = "update "+ schema_table_name + " SET changed_column_name = '" + new_col + "',"\
                                                                 "column_attribute = '" + col_attr +"'"\
-                                " Where project_id ='"+ project_id+"' and column_name ='"+prev_col+"' "
+                                " Where project_id ='"+ project_id+"' and dataset_id ='"+ dataset_id +"' "
                     status = DBObject.update_records(connection,sql_command) # execute sql query command
 
                     if status ==1:
@@ -158,10 +161,10 @@ class SchemaClass(dt.DatasetClass):
                     
             else:
                 for prev_col,new_col,new_dtype,col_attr in zip(prev_cols_lst,new_cols_lst,prev_dtype_lst,cols_attribute_lst): 
-                    row = project_id,prev_col,new_col,new_dtype,col_attr
+                    row = project_id,dataset_id,table_name,prev_col,new_col,new_dtype,col_attr
                     row_tuples = [tuple(row)] # Make record for project table
                     logger.info(str(row_tuples) + "row tuple")
-                    status = DBObject.insert_records(connection,table_name,row_tuples,cols) #insert the records into schema table
+                    status = DBObject.insert_records(connection,schema_table_name,row_tuples,cols) #insert the records into schema table
                     
                     if status ==1:
                         raise SchemaInsertionFailed(500)
@@ -172,7 +175,7 @@ class SchemaClass(dt.DatasetClass):
             logging.error("data ingestion : SchemaClass : map_dataset_schema : " +traceback.format_exc())
             return exc.msg
     
-    def update_dataset_schema(self,schema_data,project_id): ###
+    def update_dataset_schema(self,DBObject,connection,project_id,dataset_id,table_name,column_name_list,column_change_name,column_datatype_list,column_attribute_list): ###
         """
         this function use to update the Schema table values with the new upcoming values.
 
@@ -185,28 +188,10 @@ class SchemaClass(dt.DatasetClass):
         """
         try :
             logging.info("data ingestion : SchemaClass : update_dataset_schema : execution start")
-            DBObject = db.DBClass()
-            connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port)
-            if connection == None:
-                raise DatabaseConnectionFailed(500)
-            column_name_list=[] #get column name list
-            column_datatype_list = [] #get column datatype list
-            column_attribute_list = [] # get column attribute list
-            column_change_name = [] # get column change name
-            for index in range(len(schema_data)):
-                if schema_data[index]["column_name"] == schema_data[index]["change_column_name"] :
-                    raise SameColumnName(500)
-                column_name_list.append(schema_data[index]["column_name"])
-                column_datatype_list.append(schema_data[index]["data_type"])
-                column_change_name.append(schema_data[index]["change_column_name"])
-                column_attribute_list.append(schema_data[index]["column_attribute"])
-            check_attribute_type = False if len(column_attribute_list) == column_attribute_list.count("ignore") else True
-            if check_attribute_type == False :
-                raise IgnoreAttributeClass(500)
-            table_name,col,schema = self.get_schema()
-            create_status = DBObject.create_table(connection,table_name,schema)
+            schema_table_name,col,schema = self.get_schema()
+            create_status = DBObject.create_table(connection,schema_table_name,schema)
             if create_status in [1,0]:
-                mapping_status =self.map_dataset_schema(DBObject,connection,str(project_id),column_name_list,column_change_name,column_datatype_list,column_attribute_list) 
+                mapping_status =self.map_dataset_schema(DBObject,connection,str(project_id),str(dataset_id),table_name,column_name_list,column_change_name,column_datatype_list,column_attribute_list) 
                 logging.info("data ingestion : SchemaClass : update_dataset_schema : execution stop")
                 if mapping_status == 0:
                     return True
@@ -222,7 +207,7 @@ class SchemaClass(dt.DatasetClass):
             return exc.msg
 
     
-    def is_existing_schema(self,DBObject,connection,project_id):
+    def is_existing_schema(self,DBObject,connection,project_id,dataset_id):
         """
         this function checks Data for the perticular dataset Id in schema table already exist or not
 
@@ -233,7 +218,7 @@ class SchemaClass(dt.DatasetClass):
         """ 
         logging.info("data ingestion : SchemaClass : is_existing_schema : execution start")
         table_name,*_ = self.get_schema()  #get the table name from schema
-        sql_command = "select project_id from "+ table_name +" where project_id="+project_id
+        sql_command = "select project_id from "+ table_name +" where project_id='"+project_id+"' and dataset_id ='"+dataset_id+"'"
         data=DBObject.select_records(connection,sql_command) #execute the query string,if record exist return dataframe else None 
         if data is None: 
             return False
@@ -275,41 +260,89 @@ class SchemaClass(dt.DatasetClass):
                 if datatype_value in ['float64','float32','int32','int64']: #check if int,float,double present then set it "numerical"
                     value = "numerical"
                 elif datatype_value in ['datetime64[ns]']: #check if datetime value present then set it "timestamp"
-                    value = "timestamp"
+                    vaslue = "timestamp"
                 elif datatype_value in ['object']:  #check if object type value present then set it "text"
                         value = "text"
             attribute_type.append(value) #append type attribute value into list 
         logging.info("data ingestion : SchemaClass : get_attribute_datatype : execution stop")    
         return attribute_type
     
-    def schema_save(self,DBObject,connection,connection_string,schema_data,project_id):
-        column_name_list=[] #get column name list
-        column_attribute_list = [] # get column attribute list
-        column_change_name = [] # get change column name
-        for index in range(len(schema_data)):
-            if schema_data[index]["change_column_name"] == "":
-                column_change_name.append(schema_data[index]["column_name"])
+    def save_schema(self,DBObject,connection,connection_string,schema_data,project_id):
+        """
+        Args :
+                schema_data[(List)]   : [list of dictonery with details of schema]
+                project_id[(Integer)] : [Id of the project table]
+        Return :
+                [Integer|string] : [return 0 if successfully updated else return error string]
+        """
+        try:
+            logging.info("data ingestion : SchemaClass : save_schema : execution start")
+            column_name_list=[] #get column name list
+            column_attribute_list = [] # get column attribute list
+            column_datatype_list = [] #get column datatype list
+            column_change_name = [] # get change column name
+            for index in range(len(schema_data)):
+                if schema_data[index]["change_column_name"] == "":
+                    column_change_name.append(schema_data[index]["column_name"])
+                else:
+                    column_change_name.append(schema_data[index]["change_column_name"])
+                column_datatype_list.append(schema_data[index]["data_type"])
+                column_name_list.append(schema_data[index]["column_name"])
+                column_attribute_list.append(schema_data[index]["column_attribute"])
+            
+            select_query = self.get_query_string(column_name_list,column_change_name,column_attribute_list)
+            dataframe = DBObject.get_project_detail(DBObject,connection,project_id)
+            dataset_id = dataframe['dataset_id'][0]
+            dataset_status,dataset_id,table_name = self.create_dataset(DBObject,connection,connection_string,select_query,dataset_id)
+            if dataset_status ==0:
+                schema_status = self.update_dataset_schema(DBObject,connection,project_id,dataset_id,table_name,column_name_list,column_change_name,column_datatype_list,column_attribute_list)
+                if schema_status ==True:
+                    sql_command = "UPDATE mlaas.project_tbl set link_dataset_id="+str(dataset_id)+" where project_id="+str(project_id)
+                    update_status = DBObject.update_records(connection,sql_command)
+                else:
+                    raise SchemaUpdateFailed(500)
             else:
-                column_change_name.append(schema_data[index]["change_column_name"])
-            column_name_list.append(schema_data[index]["column_name"])
-            column_attribute_list.append(schema_data[index]["column_attribute"])
+                raise DatasetCreationFailed(500)
+            logging.info("data ingestion : SchemaClass : save_schema : execution stop")
+            return update_status
+        except (DatasetCreationFailed,SchemaUpdateFailed) as exc:
+            logging.error("data ingestion : ingestclass : create_dataset : Exception " + str(exc.msg))
+            logging.error("data ingestion : ingestclass : create_dataset : " +traceback.format_exc())
+            return exc.msg
         
-        select_query = self.get_query_string(column_name_list,column_change_name,column_attribute_list)
-        dataframe = DBObject.get_project_detail(DBObject,connection,project_id)
-        dataset_id = dataframe['dataset_id'][0]
-        status = self.create_dataset(DBObject,connection,connection_string,select_query,dataset_id)
-        return status
     
     def get_query_string(self,column_name_list,column_change_name,column_attribute_list):
+        """
+        funtion used to generate query string which will be used in select query to fetch the details.
+
+        Args :
+                column_name_list[(List)]       : [Existing table column name value]
+                column_change_name [(List)]    : [change column name value]
+                column_attribute_lst [(List)]  : [name of type attribute list]
+        Return :
+                [String] : [return the query string]
+        """
+        logging.info("data ingestion : SchemaClass : get_query_string : execution start")
         query = ""
         for index in range(len(column_attribute_list)):
             if column_attribute_list[index] !='ignore':
                 query +='"'+column_name_list[index]+'" as '+column_change_name[index]+',' # append the string
+        logging.info("data ingestion : SchemaClass : get_query_string : execution stop")       
         return query[0:len(query)-1]
 
     def create_dataset(self,DBObject,connection,connection_string,select_query,dataset_id):
+        """
+        function will create new record in dataset table and update the schema table with selected column name and attribute,
+        update the column[link_dataset_id] in project table with dataset_id which newly created in dataset table. 
+        
+        Args :
+                select_query[(String)] : [String query which used in "sql query"]
+                dataset_id[(Integer)]  : [Id of the dataset]
+        Return :
+                [integer,integer,string] : [dataset status(0) if success else status(1),ID of the dataset,name of table]
+        """
         try:
-
+            logging.info("data ingestion : SchemaClass : create_dataset : execution start")
             dataframe = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
             dataframe = dataframe.to_records(index=False) # convert dataframe to a NumPy record
             dataset_name,dataset_table_name,user_name,dataset_visibility,_ = dataframe[0]
@@ -321,10 +354,10 @@ class SchemaClass(dt.DatasetClass):
             sql_command = "SELECT "+select_query+" from "+table_name # sql_query
             file_data_df = DBObject.select_records(connection,sql_command) # execute the sql command and get the dataframe
             table_name = self.get_table_name(DBObject,connection,dataset_table_name) # get the updated table name
-            page_name = "Schema Create" 
+            page_name = "Schema mapping" 
             parent_dataset_id=int(dataset_id) 
             dataset_visibility ="private"  
-            dataset_desc ="New Dataset created"  
+            dataset_desc ="New Dataset created"  ##
             dataset_status,dataset_id = super(SchemaClass,self).make_dataset(DBObject,connection,dataset_name,table_name,dataset_visibility,user_name,dataset_desc,page_name,parent_dataset_id,flag=1)
             if dataset_status == 2:
                 raise DatasetAlreadyExist(500)
@@ -336,17 +369,27 @@ class SchemaClass(dt.DatasetClass):
                 load_dataset_status = DBObject.load_csv_into_db(connection_string,table_name,file_data_df,user_name)
                 if load_dataset_status == 1:
                     raise LoadCSVDataFailed(500)
-            return load_dataset_status
+            logging.info("data ingestion : SchemaClass : create_dataset : execution stop")
+            return load_dataset_status,dataset_id,table_name
         except (DatasetAlreadyExist,DatasetCreationFailed,LoadCSVDataFailed) as exc:
             logging.error("data ingestion : ingestclass : create_dataset : Exception " + str(exc.msg))
             logging.error("data ingestion : ingestclass : create_dataset : " +traceback.format_exc())
-            return exc.msg
+            return exc.msg,None,None
     
     def get_table_name(self,DBObject,connection,table_name):
-        split_value = table_name.split('_tbl')[0].split('_')[-1]
-        table_name = table_name.split(split_value)
-        seq = DBObject.get_sequence(connection)
-        table_name = table_name[0]+str(seq['nextval'][0])+table_name[1]
+        """
+        function used to create table name by adding unique sequence number init.
+        Args :
+                table_name[(String)] : [Name of old table]
+        Return :
+                [String] : [return the table name]
+        """
+        logging.info("data ingestion : SchemaClass : get_table_name : execution start")
+        split_value = table_name.split('_tbl')[0].split('_')[-1] # Extract the sequence number
+        table_name = table_name.split(split_value) # split with the sequence number
+        seq = DBObject.get_sequence(connection) #get the sequence number
+        table_name = table_name[0]+str(seq['nextval'][0])+table_name[1] #create table name by joining sequence
+        logging.info("data ingestion : SchemaClass : get_table_name : execution stop")
         return table_name
     
 

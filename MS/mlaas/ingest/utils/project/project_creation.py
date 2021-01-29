@@ -41,7 +41,7 @@ class ProjectClass:
         # Project table name
         table_name = 'mlaas.project_tbl'
         # Columns for project table
-        cols = 'project_name,project_desc,user_name,dataset_id' 
+        cols = 'project_name,project_desc,user_name,dataset_id,link_dataset_id' 
         # Schema for project table.
         schema ="project_id bigserial,"\
                 "project_name  text,"\
@@ -51,12 +51,13 @@ class ProjectClass:
                 "deployment_status integer NOT NULL DEFAULT -1,"\
                 "user_name  text,"\
                 "dataset_id  bigint,"\
+                "link_dataset_id bigint,"\
                 "created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()" 
                 
         logging.info("data ingestion : ProjectClass : make_project_schema : execution end")
         return table_name,schema,cols
 
-    def  make_project_records(self,project_name,project_desc,user_name,dataset_id):
+    def  make_project_records(self,project_name,project_desc,user_name,dataset_id,link_dataset_id):
         """This function is used to make records for inserting data into project table.
            E.g. column_name_1,column_name_2 .......,column_name_n.
 
@@ -70,7 +71,7 @@ class ProjectClass:
             [tuple]: [it will return records in the form of tuple.]
         """
         logging.info("data ingestion : ProjectClass : make_project_records : execution start")
-        row = project_name,project_desc,user_name,dataset_id
+        row = project_name,project_desc,user_name,dataset_id,link_dataset_id
         row_tuples = [tuple(row)] # Make record for project table.
         logging.info("data ingestion : ProjectClass : make_project_records : execution end")
         return row_tuples
@@ -113,8 +114,9 @@ class ProjectClass:
         else:
             dataset_id = dataset_id
         
+        link_dataset_id = dataset_id
         # Get row for project table.
-        row_tuples = self.make_project_records(project_name,project_desc,user_name,dataset_id) 
+        row_tuples = self.make_project_records(project_name,project_desc,user_name,dataset_id,link_dataset_id) 
         # Get status about inserting records into project table. if successful then 0 else 1. 
         insert_status = DBObject.insert_records(connection,table_name,row_tuples,cols) 
         # This condition is used to check project table and data is successfully stored into project table or not.if successful then 0 else 1. 

@@ -52,7 +52,7 @@ class DatasetClass:
                  "user_name  text,"\
                  "dataset_desc text,"\
                  "page_name text,"\
-                 "parent_dataset_id NULL bigserial,"\
+                 "parent_dataset_id bigserial,"\
                  "created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()" 
                  
         logging.info("data ingestion : DatasetClass : make_dataset_schema : execution end")          
@@ -150,7 +150,7 @@ class DatasetClass:
         
  
 
-    def make_dataset(self,DBObject,connection,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,parent_dataset_id=None,flag=None):
+    def make_dataset(self,DBObject,connection,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,parent_dataset_id=0,flag=None):
         """This function is used to main dataset table and also load main dataset details into database table.
            E.g. dataset details : dataset_name,file_name,file_size,dataset_table_name,user_name.
 
@@ -174,19 +174,18 @@ class DatasetClass:
         if flag==None:
         #? Checking if the same dataset is there for the same user in the dataset table? If yes, then it will not insert a new row in the table
             dataset_exist = self.dataset_exists(DBObject,connection,table_name,dataset_visibility,dataset_name,user_name)
-            
             if dataset_exist == False: pass #? No dataset with same name exists so creating the new one
             else: return 2,dataset_exist #? dataset_exists() function returns id of the dataset if dataset with same name exists
-
+        
         create_status = DBObject.create_table(connection,table_name,schema) # Get status about dataset tableis created or not.if created then 0 else 1.
-        logging.info("create_status :"+str(create_status))
         row_tuples = self.make_dataset_records(dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,parent_dataset_id,flag) # Get record for dataset table.
-        logging.info("row tuples in make dataset"+str(row_tuples))
         insert_status = DBObject.insert_records(connection,table_name,row_tuples,cols) # Get status about inserting records into dataset table. if successful then 0 else 1.
-        logging.info("insert_status :"+str(insert_status))
+        
         # Condition will check dataset table created and data is successfully stored into project table or not.if both successful then 0 else 1. 
         if schema_status in [0,1] and create_status in [0,1] and insert_status == 0 :
-            dataset_id = self.get_dataset_id(DBObject,connection,row_tuples,user_name)
+            if parent_dataset_id == 0:
+                file_name = None
+            dataset_id = self.get_dataset_id(DBObject,connection,row_tuples,user_name,file_name)
             status = 0 # If Successfully.
         else :
             status = 1 # If Failed.
@@ -231,7 +230,7 @@ class DatasetClass:
         logging.info("data ingestion : DatasetClass : load_dataset : execution end")
         return load_dataset_status,no_of_rows
     
-    def get_dataset_id(self,DBObject,connection,row_tuples,user_name):
+    def get_dataset_id(self,DBObject,connection,row_tuples,user_name,file_name):
         """This function is used to get dataset id of the created dataset.
 
         Args:
@@ -249,12 +248,15 @@ class DatasetClass:
         # Get dataset name.
         logging.info("index of list",str(row_tuples))
         dataset_name,*_ = row_tuples[0]
-        
+
         logging.debug("data ingestion : DatasetClass : get_dataset_id : this will excute select query on table name : "+table_name +" based on dataset name : "+dataset_name + " user name : "+user_name)
         dataset_name=str(dataset_name).replace("'","''")
         # Prepare select sql command to fetch dataset id from dataset table for particular user.
         dataset_name=str(dataset_name).replace("'","''")
-        sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_name ='" + dataset_name + "' and user_name = '"+ user_name + "'"
+        if file_name == None:
+            sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_name ='" + dataset_name + "' and user_name = '"+ user_name + "'"
+        else:
+            sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_table_name ='" + str(file_name) + "'"
         logging.info("dataset_id"+str(sql_command))
         # Get dataframe of dataset id. 
         dataset_df = DBObject.select_records(connection,sql_command)

@@ -252,7 +252,7 @@ class SchemaSaveClass(APIView):
                         update_schema_data=json.loads(request.body) #convert the data into dictonery
                         schema_data = update_schema_data["data"] #access "data" key value from the schema_data dict
                         project_id=request.query_params.get('project_id')
-                        schema_status=schema_obj.schema_save(DBObject,connection,connection_string,schema_data,project_id)
+                        schema_status=schema_obj.save_schema(DBObject,connection,connection_string,schema_data,project_id)
                         if isinstance(schema_status,str): #check the instance of dataset_df
                                 status_code,error_msg=get_Status_code(schema_status) # extract the status_code and error_msg from schema_status
                                 logging.info("data ingestion : SechemaSaveClass : POST Method : execution stop : status_code :"+status_code)
