@@ -141,7 +141,7 @@ class CreateProjectClass(APIView):
                                                 
                                                 activity_df = timeline_Obj.get_activity(3,"US")
                                                 activity_name = activity_df[0]["activity_name"]
-                                                activity_description = activity_df[0]["activity_description"]
+                                                activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= project_name)
                                                 timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
                                                 operation = activity_df[0]["operation"]
                                                 timeline_Obj.insert_user_activity(user_name,project_id,dataset_id,activity_name,activity_description,timestamp,operation)
@@ -229,7 +229,7 @@ class CreateDatasetClass(APIView):
                         else:
                                 activity_df = timeline_Obj.get_activity(1,"US")
                                 activity_name = activity_df[0]["activity_name"]
-                                activity_description = activity_df[0]["activity_description"]
+                                activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= dataset_name)
                                 project_id=0
                                 timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
                                 operation = activity_df[0]["operation"]
@@ -420,7 +420,7 @@ class DeleteProjectDetailClass(APIView):
                                 
                                 activity_df = timeline_Obj.get_activity(1,"US")
                                 activity_name = activity_df[0]["activity_name"]
-                                activity_description = activity_df[0]["activity_description"]
+                                activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= project_name)
                                 timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
                                 operation = activity_df[0]["operation"]
                                 status = timeline_Obj.insert_user_activity(user_name,project_id,str(dataset_id),activity_name,activity_description,timestamp,operation)
@@ -462,7 +462,7 @@ class DeleteDatasetDetailClass(APIView):
                                 project_id=0
                                 activity_df = timeline_Obj.get_activity(2,"US")
                                 activity_name = activity_df[0]["activity_name"]
-                                activity_description = activity_df[0]["activity_description"]
+                                activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= dataset_name)
                                 timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
                                 operation = activity_df[0]["operation"]
                                 status = timeline_Obj.insert_user_activity(user_name,project_id,dataset_id,activity_name,activity_description,timestamp,operation)
