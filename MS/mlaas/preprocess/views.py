@@ -39,7 +39,6 @@ ExploreObj =  preprocessing.PreprocessingClass(database,user,password,host,port)
 
 
 class DatasetExplorationClass(APIView):
-    
     def get(self,request,format=None):
         """
         This class is used to get the data statistics for each of the feature in the table.
