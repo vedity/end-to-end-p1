@@ -1,4 +1,5 @@
 import { Component, ErrorHandler, Input, OnInit } from '@angular/core';
+import { arrayToHash } from '@fullcalendar/core/util/object';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { DataExplorationApiService } from '../data-exploration.service';
@@ -115,12 +116,22 @@ this.loaderdiv=true;
     )
   }
 
+
+
+  continuousexploredata:any;
+  categoricalexploredata:any;
   successHandler(logs) {
-    this.loaderdiv=false;
 
       if(logs.status_code=="200"){
         console.log(logs.response);
         this.exploredData = logs.response;
+       var data= this.groupBy(this.exploredData,"Datatype");
+       this.continuousexploredata=data["Continious"];
+       this.categoricalexploredata=data["Categorical"];
+       console.log(this.continuousexploredata);
+       console.log(this.categoricalexploredata);
+       this.loaderdiv=false;
+
         this.finaldata=logs.response;
       }
   else{
@@ -128,7 +139,12 @@ this.loaderdiv=true;
   }
   }
 
-  
+  groupBy(xs, key) {
+    return xs.reduce(function (rv, x) {
+      (rv[x[key]] = rv[x[key]] || []).push(x);
+      return rv;
+    }, {});
+  };
 
   errorHandler(error) {
     this.loaderdiv=false;

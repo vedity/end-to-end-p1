@@ -16,7 +16,8 @@ export class ListProjectComponent implements OnInit {
 
   @ViewChild(DataTableDirective, { static: false })
   datatableElement: DataTableDirective;
-  dtOptions: DataTables.Settings = {};
+  dtOptions: DataTables.Settings = {   scrollCollapse:true,
+    scrollY:"calc(100vh - 420px)",};
   // active = 1;
   dtTrigger: Subject<any> = new Subject<any>();
   filter: boolean = true;
