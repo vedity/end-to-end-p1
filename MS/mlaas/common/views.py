@@ -105,6 +105,7 @@ class MenuClass(APIView):
                 try:
                         logging.info("data ingestion : MenuClass : POST Method : execution start")
                         menu_df=DBObject.read_data('common/Menu.csv')
+                        DBObject.create_schema(connection)
                         status=DBObject.load_csv_into_db(connection_string,'menu_tbl',menu_df,'mlaas')
                         if status != 0:
                                 logging.info("data ingestion : MenuClass : POST Method : execution stop : status_code :500")
