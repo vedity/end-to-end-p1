@@ -41,20 +41,19 @@ class ActivityTimelineClass:
         # table name
         table_name = 'mlaas.activity_tbl'
         # Columns for activity table
-        cols = 'user_name,project_id,dataset_id,activity_name,activity_description,date,timestamp,operation' 
+        cols = 'user_name,project_id,dataset_id,activity_name,activity_description,timestamp,operation' 
         # Schema for activity table.
         schema ="user_name text,"\
                 "project_id bigint,"\
                 "dataset_id bigint,"\
                 "activity_name  text,"\
                 "activity_description  text,"\
-                "date  date,"\
                 "timestamp  timestamp,"\
                 "operation  text"
                 
         return table_name,cols,schema
     
-    def insert_user_activity(self,user_name,project_id,dataset_id,activity_name,activity_description,current_date,timestamp,operation):
+    def insert_user_activity(self,user_name,project_id,dataset_id,activity_name,activity_description,timestamp,operation):
         """
         this function used to insert the record into activity table
 
@@ -64,7 +63,6 @@ class ActivityTimelineClass:
             dataset_id[(Integer)] :[Id of the dataset]
             activity_name[(String)] :[Name of activity(create,delete)]
             activity_description[(String)] :[description of the activity perform]
-            current_date[(Date)] :[current date user perform activity]
             timestamp[(timestamp)] :[timestamp of user activity perform]
             operation[(String)] : [Name of the operation(create,delete)]
         Return : 
@@ -76,7 +74,7 @@ class ActivityTimelineClass:
         table_name,cols,schema = self.get_schema()
         create_status = self.is_existing_schema(DBObject,connection,table_name,schema) #check if the table is created or not
         if create_status ==True:
-            rows = user_name,project_id,dataset_id,activity_name,activity_description,current_date,timestamp,operation
+            rows = user_name,project_id,dataset_id,activity_name,activity_description,timestamp,operation
             row_tuples = [tuple(rows)] # form the tuple of sql values to be inserted
             status = DBObject.insert_records(connection,table_name,row_tuples,cols) #insert the record and return 1 if inserted else return 1
             if status ==1:
@@ -95,18 +93,17 @@ class ActivityTimelineClass:
             DBObject = db.DBClass() # create object for database class
             connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port)
 
-            sql_command = ("SELECT user_name,activity_description,date,timestamp,operation from mlaas.activity_tbl where user_name='"+str(user_name)+"' order by timestamp desc")
+            sql_command = ("SELECT user_name,activity_description,date(timestamp),timestamp,operation from mlaas.activity_tbl where user_name='"+str(user_name)+"' order by timestamp desc")
             activity_df = DBObject.select_records(connection,sql_command) #excute the sql query 
 
             if activity_df is None:
                 raise DataNotFound(500)
 
-            length_df = activity_df['user_name']
-            
+            length_df = activity_df['user_name']            
             if len(length_df)==0:
                 raise DataNotFound(500)
-            activity_df = activity_df.to_json(orient='records',date_format='iso',force_ascii=True) # convert into json string 
 
+            activity_df = activity_df.to_json(orient='records',date_format='iso',force_ascii=True) # convert into json string 
             activity_df = json.loads(activity_df) #convert into dict format
             
             return activity_df
@@ -130,3 +127,31 @@ class ActivityTimelineClass:
         elif status == 'True':
             return True
         return False
+
+    def get_activity(self,id,language):
+        '''This function is used to fetch the activity from master activity table.
+            Args : 
+                id[(Integer)] : [id of the activity]
+                language[(String)] : [Language of activity shown]
+            Return :
+                [Dataframe] : [return activity_name,activity_description,operation]
+
+        '''
+        try:
+            DBObject = db.DBClass() 
+            connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port)
+
+            sql_command = ("SELECT activity_name,activity_description,operation from mlaas.activity_master_tbl where id='"+str(id)+"' and language='"+str(language)+"'")
+            activity_df = DBObject.select_records(connection,sql_command) #excute the sql query 
+
+            if activity_df is None:
+                raise DataNotFound(500)
+
+            activity_df = activity_df.to_json(orient='records',date_format='iso',force_ascii=True) # convert into json string 
+
+            activity_df = json.loads(activity_df) #convert into dict format
+            
+            return activity_df
+        except (DataNotFound) as exc:
+            return exc.msg
+
