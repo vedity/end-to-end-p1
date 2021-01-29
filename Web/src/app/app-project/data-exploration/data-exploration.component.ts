@@ -31,7 +31,7 @@ export class DataExplorationComponent implements OnInit {
      'animation-duration': '20s'
 
  };
-
+ displayselectedtitle="Continous";
   ngOnInit(): void {
 this.loaderdiv=true;
     this.columnlabelChart=  {
@@ -72,9 +72,6 @@ this.loaderdiv=true;
           enabled: false
       },
       
-     
-      
-     
       yaxis: {
           axisBorder: {
               show: false
@@ -171,26 +168,20 @@ this.loaderdiv=true;
           toolbar: {
               show: true
           },
-      
       },
       dataLabels: {
           enabled: false
       },
       colors: ['#34c38f'],
-      
       series: [{
-         
           data: obj["Plot Values"][1]
       }],
       xaxis: {
-          categories: ['2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023'],
+          categories: obj["Plot Values"][0],
           position: 'bottom',
-         
-          
-  
       },
       yaxis: {
-          categories: obj["Plot Values"][0],
+         // categories: obj["Plot Values"][0],
           position: 'left',
           labels: {
               show: true,
