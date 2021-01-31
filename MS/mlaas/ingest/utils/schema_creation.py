@@ -60,7 +60,7 @@ class SchemaClass(dt.DatasetClass):
                 
         return table_name,cols,schema
     
-    def get_dataset_schema(self,project_id):
+    def get_dataset_schema(self,project_id,dataset_id):
         """
         this function used to get the column name and datatype of the table
 
@@ -76,18 +76,18 @@ class SchemaClass(dt.DatasetClass):
             if connection == None:
                 raise DatabaseConnectionFailed(500)
             
-            sql_command = "SELECT project_id from mlaas.schema_tbl where project_id="+str(project_id)
+            sql_command = "SELECT project_id,dataset_id from mlaas.schema_tbl where project_id='"+str(project_id)+"' and dataset_id='"+str(dataset_id)+"'" 
             logging.info("sql_command"+sql_command )
             dataset_df = DBObject.select_records(connection,sql_command)
             if dataset_df is None or len(dataset_df)==0 :
-                    project_df = DBObject.get_project_detail(DBObject,connection,project_id)
-                    dataset_id = project_df['dataset_id'][0]
+                    # project_df = DBObject.get_project_detail(DBObject,connection,project_id)
+                    # dataset_id = project_df['dataset_id'][0]
 
                     dataset_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
                     if dataset_df is None or len(dataset_df) == 0:
                         raise DatasetDataNotFound(500)
                     dataset_records = dataset_df.to_records(index=False) # convert dataframe to a NumPy record  
-                    dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows = dataset_records[0]
+                    dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows,_ = dataset_records[0]
                     dataset_name,dataset_table_name,user_name,dataset_visibility = str(dataset_name),str(dataset_table_name),str(user_name),str(dataset_visibility)
 
                     if dataset_visibility =="private":
@@ -105,7 +105,8 @@ class SchemaClass(dt.DatasetClass):
                     schema_data = get_schema_format(column_name,predicted_datatype) #call get_schema_format to get json format data
                     
             else:
-                    sql_command = "SELECT column_name,changed_column_name,data_type,column_attribute from mlaas.schema_tbl where project_id="+str(project_id)
+                    sql_command = "SELECT column_name,changed_column_name,data_type,column_attribute from mlaas.schema_tbl where project_id='"+str(project_id)+"' and dataset_id='"+str(dataset_id)+"'"
+                    logging.info("sql_command"+sql_command )
                     dataset_df = DBObject.select_records(connection,sql_command)
                     if dataset_df is None or len(dataset_df)==0:
                         raise DataNotFound(500)
@@ -267,8 +268,13 @@ class SchemaClass(dt.DatasetClass):
         logging.info("data ingestion : SchemaClass : get_attribute_datatype : execution stop")    
         return attribute_type
     
-    def save_schema(self,DBObject,connection,connection_string,schema_data,project_id):
+    def save_schema(self,DBObject,connection,connection_string,schema_data,project_id,method_name,dataset_name=None,dataset_desc=None,visibility=None):
         """
+        function used to call create dataset function to insert a record into dataset table with(if click in save) always private visibility,
+        (if click on Save as) then visibility can be private or public,
+        call update_dataset_schema function which update the schema of the selected dataset and
+        update the column[link_dataset_id] in project table with dataset_id which newly created in dataset table.
+        
         Args :
                 schema_data[(List)]   : [list of dictonery with details of schema]
                 project_id[(Integer)] : [Id of the project table]
@@ -290,10 +296,14 @@ class SchemaClass(dt.DatasetClass):
                 column_name_list.append(schema_data[index]["column_name"])
                 column_attribute_list.append(schema_data[index]["column_attribute"])
             
+            # check For all column if attribute type are ignore then return True and raise error else False
+            check_attribute_type = True if len(column_attribute_list) == column_attribute_list.count("ignore") else False
+            if check_attribute_type == True :
+                raise IgnoreAttributeClass(500)
             select_query = self.get_query_string(column_name_list,column_change_name,column_attribute_list)
             dataframe = DBObject.get_project_detail(DBObject,connection,project_id)
             dataset_id = dataframe['dataset_id'][0]
-            dataset_status,dataset_id,table_name = self.create_dataset(DBObject,connection,connection_string,select_query,dataset_id)
+            dataset_status,dataset_id,table_name = self.create_dataset(DBObject,connection,connection_string,select_query,dataset_id,method_name,dataset_name,dataset_desc,visibility)
             if dataset_status ==0:
                 schema_status = self.update_dataset_schema(DBObject,connection,project_id,dataset_id,table_name,column_name_list,column_change_name,column_datatype_list,column_attribute_list)
                 if schema_status ==True:
@@ -305,7 +315,7 @@ class SchemaClass(dt.DatasetClass):
                 raise DatasetCreationFailed(500)
             logging.info("data ingestion : SchemaClass : save_schema : execution stop")
             return update_status
-        except (DatasetCreationFailed,SchemaUpdateFailed) as exc:
+        except (DatasetCreationFailed,SchemaUpdateFailed,IgnoreAttributeClass) as exc:
             logging.error("data ingestion : ingestclass : create_dataset : Exception " + str(exc.msg))
             logging.error("data ingestion : ingestclass : create_dataset : " +traceback.format_exc())
             return exc.msg
@@ -313,7 +323,7 @@ class SchemaClass(dt.DatasetClass):
     
     def get_query_string(self,column_name_list,column_change_name,column_attribute_list):
         """
-        funtion used to generate query string which will be used in select query to fetch the details.
+        function used to generate query string which will be used in select query to fetch the details.
 
         Args :
                 column_name_list[(List)]       : [Existing table column name value]
@@ -330,11 +340,10 @@ class SchemaClass(dt.DatasetClass):
         logging.info("data ingestion : SchemaClass : get_query_string : execution stop")       
         return query[0:len(query)-1]
 
-    def create_dataset(self,DBObject,connection,connection_string,select_query,dataset_id):
+    def create_dataset(self,DBObject,connection,connection_string,select_query,dataset_id,method_name,dataset_name,dataset_desc,visibility):
         """
-        function will create new record in dataset table and update the schema table with selected column name and attribute,
-        update the column[link_dataset_id] in project table with dataset_id which newly created in dataset table. 
-        
+        function will insert new record in dataset table and update the schema table with selected 
+        column name and attribute and load the csv data into table.
         Args :
                 select_query[(String)] : [String query which used in "sql query"]
                 dataset_id[(Integer)]  : [Id of the dataset]
@@ -345,8 +354,8 @@ class SchemaClass(dt.DatasetClass):
             logging.info("data ingestion : SchemaClass : create_dataset : execution start")
             dataframe = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
             dataframe = dataframe.to_records(index=False) # convert dataframe to a NumPy record
-            dataset_name,dataset_table_name,user_name,dataset_visibility,_ = dataframe[0]
-            dataset_name,dataset_table_name,user_name,dataset_visibility = str(dataset_name),str(dataset_table_name),str(user_name),str(dataset_visibility)
+            dataset_name,dataset_table_name,user_name,dataset_visibility,_,dataset_desc = dataframe[0]
+            dataset_name,dataset_table_name,user_name,dataset_visibility,dataset_desc = str(dataset_name),str(dataset_table_name),str(user_name),str(dataset_visibility),str(dataset_desc)
             if dataset_visibility =="private":
                 table_name = user_name+"."+dataset_table_name
             else:
@@ -356,9 +365,15 @@ class SchemaClass(dt.DatasetClass):
             table_name = self.get_table_name(DBObject,connection,dataset_table_name) # get the updated table name
             page_name = "Schema mapping" 
             parent_dataset_id=int(dataset_id) 
-            dataset_visibility ="private"  
-            dataset_desc ="New Dataset created"  ##
-            dataset_status,dataset_id = super(SchemaClass,self).make_dataset(DBObject,connection,dataset_name,table_name,dataset_visibility,user_name,dataset_desc,page_name,parent_dataset_id,flag=1)
+              
+            if method_name =='Save as':
+                dataset_name = dataset_name 
+                dataset_visibility = visibility
+                dataset_desc = dataset_desc
+            else:
+                dataset_visibility ="private"
+
+            dataset_status,dataset_id = super(SchemaClass,self).make_dataset(DBObject,connection,dataset_name,table_name,dataset_visibility,user_name,dataset_desc,page_name,parent_dataset_id,method_name,flag=1)
             if dataset_status == 2:
                 raise DatasetAlreadyExist(500)
             

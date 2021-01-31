@@ -247,12 +247,41 @@ class CreateDatasetClass(APIView):
 class SchemaSaveClass(APIView):
 
         def post(self,request,format=None):
+                """ 
+                """
                 try:
                         logging.info("data ingestion : SechemaSaveClass : POST Method : execution start")
                         update_schema_data=json.loads(request.body) #convert the data into dictonery
                         schema_data = update_schema_data["data"] #access "data" key value from the schema_data dict
                         project_id=request.query_params.get('project_id')
-                        schema_status=schema_obj.save_schema(DBObject,connection,connection_string,schema_data,project_id)
+                        method_name = 'Save'
+                        schema_status=schema_obj.save_schema(DBObject,connection,connection_string,schema_data,project_id,method_name)
+                        if isinstance(schema_status,str): #check the instance of dataset_df
+                                status_code,error_msg=get_Status_code(schema_status) # extract the status_code and error_msg from schema_status
+                                logging.info("data ingestion : SechemaSaveClass : POST Method : execution stop : status_code :"+status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        else:
+                                logging.info("data ingestion : SechemaSaveClass : POST Method : execution stop : status_code :200")
+                                return Response({"status_code":"200","error_msg":"Successfully save","response":"true"})           
+                except Exception as e:
+                        logging.error("data ingestion : SechemaSaveClass : POST Method : Exception :" + str(e))
+                        logging.error("data ingestion : SechemaSaveClass : POST Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+class SchemaSaveAsClass(APIView):
+
+        def post(self,request,format=None):
+                """ 
+                """
+                try:
+                        logging.info("data ingestion : SechemaSaveClass : POST Method : execution start")
+                        update_schema_data=json.loads(request.body) #convert the data into dictonery
+                        schema_data = update_schema_data["data"] #access "data" key value from the schema_data dict
+                        project_id=request.query_params.get('project_id')
+                        dataset_name = request.query_params.get('dataset_name')
+                        dataset_desc = request.query_params.get('description')
+                        visibility = request.query_params.get('visibility')
+                        method_name = 'Save as'
+                        schema_status=schema_obj.save_schema(DBObject,connection,connection_string,schema_data,project_id,method_name,dataset_name,dataset_desc,visibility)
                         if isinstance(schema_status,str): #check the instance of dataset_df
                                 status_code,error_msg=get_Status_code(schema_status) # extract the status_code and error_msg from schema_status
                                 logging.info("data ingestion : SechemaSaveClass : POST Method : execution stop : status_code :"+status_code)
@@ -287,8 +316,9 @@ class SchemaClass(APIView):
                 """
                 try:
                         logging.info("data ingestion : DatasetSchemaClass : GET Method : execution start")
-                        project_id=request.query_params.get('project_id') #get dataset id
-                        schema_data=schema_obj.get_dataset_schema(str(project_id)) #get the schema detail,if exist then return data else return string with error_msg and status code
+                        project_id=request.query_params.get('project_id') #get project id
+                        dataset_id=request.query_params.get('dataset_id') #get dataset id
+                        schema_data=schema_obj.get_dataset_schema(str(project_id),dataset_id) #get the schema detail,if exist then return data else return string with error_msg and status code
                         if isinstance(schema_data,list):  
                                 logging.info("data ingestion : DatasetSchemaClass : GET Method : execution stop")
                                 return Response({"status_code":"200","error_msg":"Successfull retrival","response":schema_data})
