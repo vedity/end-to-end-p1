@@ -98,6 +98,7 @@ class SchemaClass(dt.DatasetClass):
                     #sql query string
                     sql_command = "SELECT * from "+table_name
                     data_details_df = DBObject.select_records(connection,sql_command) #execute the sql query
+    
                     if data_details_df is None:
                         raise DataNotFound(500)
                     column_name = data_details_df.columns.values.tolist() # covert the dataframe into list
@@ -362,6 +363,7 @@ class SchemaClass(dt.DatasetClass):
                 table_name = dataset_table_name
             sql_command = "SELECT "+select_query+" from "+table_name # sql_query
             file_data_df = DBObject.select_records(connection,sql_command) # execute the sql command and get the dataframe
+            no_of_rows = file_data_df.shape[0]
             table_name = self.get_table_name(DBObject,connection,dataset_table_name) # get the updated table name
             page_name = "Schema mapping" 
             parent_dataset_id=int(dataset_id) 
@@ -384,6 +386,9 @@ class SchemaClass(dt.DatasetClass):
                 load_dataset_status = DBObject.load_csv_into_db(connection_string,table_name,file_data_df,user_name)
                 if load_dataset_status == 1:
                     raise LoadCSVDataFailed(500)
+                else:
+                    sql_command = "UPDATE mlaas.dataset_tbl SET no_of_rows="+str(no_of_rows)+" where dataset_id="+str(dataset_id)
+                    update_status = DBObject.update_records(connection,sql_command)
             logging.info("data ingestion : SchemaClass : create_dataset : execution stop")
             return load_dataset_status,dataset_id,table_name
         except (DatasetAlreadyExist,DatasetCreationFailed,LoadCSVDataFailed) as exc:

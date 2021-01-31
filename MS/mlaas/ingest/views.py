@@ -248,9 +248,15 @@ class SchemaSaveClass(APIView):
 
         def post(self,request,format=None):
                 """ 
+                Args :
+                Return :
+                        status_code(500 or 200),
+                        error_msg(Error message for insertions failed or successfull),
+                        Response(return false if failed otherwise true) 
+                        
                 """
                 try:
-                        logging.info("data ingestion : SechemaSaveClass : POST Method : execution start")
+                        logging.info("data ingestion : SchemaSaveClass : POST Method : execution start")
                         update_schema_data=json.loads(request.body) #convert the data into dictonery
                         schema_data = update_schema_data["data"] #access "data" key value from the schema_data dict
                         project_id=request.query_params.get('project_id')
@@ -258,22 +264,28 @@ class SchemaSaveClass(APIView):
                         schema_status=schema_obj.save_schema(DBObject,connection,connection_string,schema_data,project_id,method_name)
                         if isinstance(schema_status,str): #check the instance of dataset_df
                                 status_code,error_msg=get_Status_code(schema_status) # extract the status_code and error_msg from schema_status
-                                logging.info("data ingestion : SechemaSaveClass : POST Method : execution stop : status_code :"+status_code)
+                                logging.info("data ingestion : SchemaSaveClass : POST Method : execution stop : status_code :"+status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
-                                logging.info("data ingestion : SechemaSaveClass : POST Method : execution stop : status_code :200")
+                                logging.info("data ingestion : SchemaSaveClass : POST Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully save","response":"true"})           
                 except Exception as e:
-                        logging.error("data ingestion : SechemaSaveClass : POST Method : Exception :" + str(e))
-                        logging.error("data ingestion : SechemaSaveClass : POST Method : " +traceback.format_exc())
+                        logging.error("data ingestion : SchemaSaveClass : POST Method : Exception :" + str(e))
+                        logging.error("data ingestion : SchemaSaveClass : POST Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+                        
 class SchemaSaveAsClass(APIView):
 
         def post(self,request,format=None):
                 """ 
+                Args :
+                Return :
+                        status_code(500 or 200),
+                        error_msg(Error message for  insertions failed or successfull),
+                        Response(return false if failed otherwise false) 
                 """
                 try:
-                        logging.info("data ingestion : SechemaSaveClass : POST Method : execution start")
+                        logging.info("data ingestion : SchemaSaveAsClass : POST Method : execution start")
                         update_schema_data=json.loads(request.body) #convert the data into dictonery
                         schema_data = update_schema_data["data"] #access "data" key value from the schema_data dict
                         project_id=request.query_params.get('project_id')
@@ -284,14 +296,14 @@ class SchemaSaveAsClass(APIView):
                         schema_status=schema_obj.save_schema(DBObject,connection,connection_string,schema_data,project_id,method_name,dataset_name,dataset_desc,visibility)
                         if isinstance(schema_status,str): #check the instance of dataset_df
                                 status_code,error_msg=get_Status_code(schema_status) # extract the status_code and error_msg from schema_status
-                                logging.info("data ingestion : SechemaSaveClass : POST Method : execution stop : status_code :"+status_code)
+                                logging.info("data ingestion : SchemaSaveAsClass : POST Method : execution stop : status_code :"+status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
-                                logging.info("data ingestion : SechemaSaveClass : POST Method : execution stop : status_code :200")
+                                logging.info("data ingestion : SchemaSaveAsClass : POST Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully save","response":"true"})           
                 except Exception as e:
-                        logging.error("data ingestion : SechemaSaveClass : POST Method : Exception :" + str(e))
-                        logging.error("data ingestion : SechemaSaveClass : POST Method : " +traceback.format_exc())
+                        logging.error("data ingestion : SchemaSaveAsClass : POST Method : Exception :" + str(e))
+                        logging.error("data ingestion : SchemaSaveAsClass : POST Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
 
 
@@ -311,7 +323,7 @@ class SchemaClass(APIView):
 
                 Return :
                         status_code(500 or 200),
-                        error_msg(Error message for retrival & insertions failed or successfull),
+                        error_msg(Error message for retrival failed or successfull),
                         Response(return false if failed otherwise json data) 
                 """
                 try:
@@ -331,40 +343,6 @@ class SchemaClass(APIView):
                         logging.error("data ingestion : DataDetailClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
                             
-        def post(self,request,format=None):
-                """
-                this function used to update column name and insert attribute type for the column in schema table.
-
-                Args : 
-                        column_name_list[(List)]  : [Existing table column name value]
-                        column_change_name [(List)]  : [Updated column name value]
-                        column_datatype_list [(List)]  : [Existing table column datatype value]
-                        column_attribute_list [(List)]  : []
-                        column_change_datatype[(List)]  : [Updated column datatype value]
-                        dataset_id [(Integer)]  : [Id of the dataset table]
-
-                Return :
-                        status_code(500 or 200),
-                        error_msg(Error message for retrival & insertions failed or successfull),
-                        Response(return false if failed otherwise json data) 
-                """
-                try:
-                        logging.info("data ingestion : DatasetSchemaClass : POST Method : execution start")
-                        update_schema_data=json.loads(request.body) #convert the data into dictonery
-                        schema_data = update_schema_data["data"] #access "data" key value from the schema_data dict
-                        project_id=request.query_params.get('project_id')
-                        schema_status=schema_obj.update_dataset_schema(schema_data,project_id)
-                        if schema_status !=True:
-                                status_code,error_msg=get_Status_code(schema_status) # extract the status_code and error_msg from schema_status
-                                logging.info("data ingestion : DatasetSchemaClass : POST Method : execution stop : status_code :"+status_code)
-                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
-                        else:
-                                logging.info("data ingestion : DatasetSchemaClass : POST Method : execution stop : status_code :200")
-                                return Response({"status_code":"200","error_msg":"Successfully updated","response":"true"})           
-                except Exception as e:
-                        logging.error("data ingestion : DatasetSchemaClass : POST Method : Exception :" + str(e))
-                        logging.error("data ingestion : DatasetSchemaClass : POST Method : " +traceback.format_exc())
-                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
 
 #class for retrive csv data 
 #It will take url string as mlaas/ingest/data_detail/.
