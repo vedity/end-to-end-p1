@@ -6,5 +6,4 @@ export class createproject{
     inputfile:File;
     datsetid:string;
     isprivate:boolean;    
-    // visibility:string;
 }

@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ProjectApiService } from '../project-api.service';
-
 @Component({
   selector: 'app-manage-project',
   templateUrl: 'manage-project.component.html',
@@ -12,15 +11,12 @@ export class ManageProjectComponent implements OnInit {
   active = 1;
   classname = "";
   transactions: any;
-  currentDate:any;
-  
+  keys: any = [];
+  currentDate: any;
   constructor(public router: Router, public toaster: ToastrService, public apiService: ProjectApiService) { }
 
   ngOnInit() {
-    this.currentDate=new Date();
-    
-  console.log(this.currentDate);
-
+    this.currentDate = new Date();
     this.getactivivtyTimeline();
   }
 
@@ -30,13 +26,11 @@ export class ManageProjectComponent implements OnInit {
       error => this.errorHandler(error)
     );
   }
-   keys:any=[];
+
   successHandler(data) {
     if (data.status_code == "200") {
-      console.log(data.response);
       this.transactions = this.groupBy(data.response, 'date');
-      console.log(this.transactions);
-      this.keys=Object.keys(this.transactions);
+      this.keys = Object.keys(this.transactions);
     }
     else {
       this.transactions = []
@@ -50,18 +44,13 @@ export class ManageProjectComponent implements OnInit {
     }, {});
   };
 
-
   errorHandler(error) {
-    console.log(error);
     if (error.error_msg)
       this.toaster.error(error.error_msg, 'Error');
     else {
-      console.log(error);
       this.toaster.error('Something went wrong', 'Error');
     }
   }
-
-
 
   create() {
     this.router.navigate(['create']);

@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
 import { ProjectApiService } from '../project-api.service';
-
 @Component({
   selector: 'app-detailview-project',
   templateUrl: './detailview-project.component.html',
@@ -15,7 +14,6 @@ export class DetailviewProjectComponent implements OnInit {
 
   ngOnInit() {
     this.getproject();
-
   }
 
   getproject() {
@@ -29,8 +27,6 @@ export class DetailviewProjectComponent implements OnInit {
     if (data.status_code == "200") {
       this.transactions = data.response;
       this.tabledata = data.response;
-      console.log(this.transactions);
-
     }
     else {
       this.transactions = []
@@ -38,15 +34,12 @@ export class DetailviewProjectComponent implements OnInit {
   }
 
   errorHandler(error) {
-    console.log(error);
     if (error.error_msg)
       this.toaster.error(error.error_msg, 'Error');
     else {
-      console.log(error);
       this.toaster.error('Something went wrong', 'Error');
     }
   }
-
 
   confirm(id) {
     Swal.fire({
@@ -58,7 +51,6 @@ export class DetailviewProjectComponent implements OnInit {
       cancelButtonColor: '#f46a6a',
       confirmButtonText: 'Yes, delete it!'
     }).then(result => {
-
       if (result.value) {
         this.apiService.deleteproject(id).subscribe(
           logs => {
@@ -72,7 +64,6 @@ export class DetailviewProjectComponent implements OnInit {
           },
           error => Swal.fire('Not Deleted!', 'Something went wrong', 'error')
         )
-
       }
     });
   }
