@@ -59,6 +59,10 @@ class UserLoginClass(APIView):
                         if check_menu_tbl == "False":
                                 menu_df=DBObject.read_data('common/Menu.csv')
                                 status=DBObject.load_csv_into_db(connection_string,'menu_tbl',menu_df,'mlaas')           
+                        check_activity_master_tbl=DBObject.is_existing_table(connection,'activity_master_tbl','mlaas')
+                        if check_activity_master_tbl == "False":
+                                activity_df=DBObject.read_data('common/activity_master_tbl.csv')
+                                status=DBObject.load_csv_into_db(connection_string,'activity_master_tbl',activity_df,'mlaas')
                         user_status = IngestionObj.user_authentication(DBObject,connection,user_name,password)
                         if user_status != True:
                                 status_code,error_msg=get_Status_code(user_status)
