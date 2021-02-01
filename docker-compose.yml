@@ -7,6 +7,9 @@ services:
       - "./MS/mlaas:/mlaas" 
     ports:
       - "8000:8000"
+      - "8080:8080"
+      - "7077:7077"
+      - "8081:8081"
     depends_on:
       - postgresql
 
@@ -38,10 +41,3 @@ volumes:
 networks:
   backend:
     driver: "bridge"
-  
-    
- 
-
-
-  
-    
