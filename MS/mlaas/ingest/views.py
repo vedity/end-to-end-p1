@@ -209,12 +209,17 @@ class CreateDatasetClass(APIView):
                         exists_dataset_status=IngestionObj.does_dataset_exists(dataset_name,user_name) #call does_dataset_exists, check if dataset name exist for that perticular user name return false if not,otherwise true
                         if exists_dataset_status == False:
                                 file=request.FILES['inputfile'] #get inputfile Name
-                                file_data = pd.read_csv(request.FILES['inputfile'])   # read the csv file and store into dataframe variable                             
+                                try:
+                                        file_data = pd.read_csv(request.FILES['inputfile'])   # read the csv file and store into dataframe variable 
+                                except:
+                                        return Response({"status_code":500,"error_msg":"Invalid CSV Format","response":"false"})
+                                        
+                                                                    
                                 file_check_status = IngestionObj.check_file(file,file_data)  # call check_file function to verify csv file data
                                 
                                 if file_check_status !=True:
                                         status_code,error_msg=get_Status_code(file_check_status) # extract the status_code and error_msg from file_check_status
-                                        logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+status_code)
+                                        logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+error_msg)
                                         return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                                 file_path="static/server/"
                                 file_name =IngestionObj.save_file(user_name,dataset_visibility,file,file_path)
