@@ -3,24 +3,20 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { SchemaMappingApiService } from '../schema-mapping-api.service';
-
 @Component({
   selector: 'app-manage-schema-mapping',
   templateUrl: './manage-schema-mapping.component.html',
   styleUrls: ['./manage-schema-mapping.component.scss']
 })
 export class ManageSchemaMappingComponent implements OnInit {
-
-
   displaytitle = false;
   navigate_to = "";
   constructor(public apiService: SchemaMappingApiService, public router: Router, private toaster: ToastrService, private http: HttpClient) { }
   title = "Data Detail List";
   dataset_id: any;
   columnlist: any = [];
-  project_id:any;
+  project_id: any;
   async ngOnInit() {
-
     var params = history.state;
     if (params.dataset_id != undefined)
       localStorage.setItem("params", JSON.stringify(params));
@@ -37,7 +33,5 @@ export class ManageSchemaMappingComponent implements OnInit {
       this.displaytitle = true;
     }
     this.dataset_id = params.dataset_id;
-
   }
-
 }

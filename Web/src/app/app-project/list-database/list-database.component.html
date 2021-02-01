@@ -1,14 +1,8 @@
 <div class="container-fluid">
-    <!-- start page title -->
     <div class="row">
         <div class="col-12">
             <div class="page-title-box d-flex align-items-center justify-content-between">
                 <h4 class="mb-0 font-size-18">Create Dataset</h4>
-                <!-- <div class="page-title-right">
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item active">Welcome to Dataset</li>
-                    </ol>
-                </div> -->
             </div>
         </div>
     </div>
@@ -49,14 +43,10 @@
                 </div>
             </div>
             <div class="col-md-2">
-
                 <div class="button-items">
                     <button type="submit" class="btn btn-success upload-btn">Upload Dataset</button>
                 </div>
             </div>
-            <!-- <div *ngIf="!errorStatus"  class="invalid-feedback">
-            All required fields are compulsory to fill.
-        </div> -->
         </div>
     </form>
     <div class="row">
@@ -64,14 +54,12 @@
             <div class="card table-card">
                 <div class="card-body">
                     <h4 class="card-title mb-4">Dataset List</h4>
-
                     <div class="main-datatable">
                         <a href="javascript:void(0)" (click)="displayfilter()" class="filter-btn"><i
                                 class="dripicons-experiment"></i></a>
                         <table datatable [dtTrigger]="dtTrigger" class="table table-centered table-nowrap">
                             <thead class="thead-light">
                                 <tr>
-
                                     <th>Dataset
                                         <img class="sort-icon" src="sort_both.png">
                                         <img class="desc-icon" src="sort_desc.png">
@@ -79,7 +67,6 @@
                                         <input class="form-control filter" type="text" [hidden]="filter"
                                             placeholder="Dataset Name" name="search-dataset-name" />
                                     </th>
-
                                     <th>Size
                                         <img class="sort-icon" src="sort_both.png">
                                         <img class="desc-icon" src="sort_desc.png">
@@ -111,15 +98,11 @@
                                         <input class="form-control filter" type="text" [hidden]="filter"
                                             placeholder="Created By" name="search-created-by" />
                                     </th>
-
                                     <th>Created On
                                         <img class="sort-icon" src="sort_both.png">
                                         <img class="desc-icon" src="sort_desc.png">
                                         <img class="asc-icon" src="sort_asc.png">
-                                        <!-- <input class="form-control filter" type="text" [hidden]="filter"
-                                            placeholder="Createdd On" name="search-created-on" /> -->
                                     </th>
-
                                     <th class="text-center">
                                         Actions
                                     </th>
@@ -140,7 +123,6 @@
                                     </td>
                                     <td>
                                         {{data.user_name}}
-
                                     </td>
                                     <td>
                                         {{data.created_on|date}}
@@ -149,8 +131,6 @@
                                         <a href="javascript:void(0);" [routerLink]="['/schema']"
                                             [state]="{dataset_id: data.dataset_id ,dataset_name:data.dataset_name,navigate_to:'/dataset' }">
                                             <i class=" bx bx-file"></i></a>
-
-
                                         <a href="javascript:void(0);" id="sa-warning"
                                             (click)="confirm(data.dataset_id)"> <i class=" bx bx-trash"></i></a>
                                     </td>
@@ -158,8 +138,6 @@
                             </tbody>
                         </table>
                     </div>
-
-                    <!-- end table -->
                 </div>
             </div>
         </div>
@@ -170,7 +148,6 @@
     <div class="inner-loader-box">
         <div class="spinner-border text-warning m-1" role="status">
             <span class="sr-only">Loading...</span>
-
         </div>
         <p>Loading...</p>
     </div>

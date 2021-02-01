@@ -7,24 +7,26 @@ import Swal from 'sweetalert2';
 import bsCustomFileInput from 'bs-custom-file-input';
 import { createdataset } from './dataset.model'
 import { NgForm } from '@angular/forms';
-
 @Component({
   selector: 'app-list-database',
   templateUrl: './list-database.component.html',
   styleUrls: ['./list-database.component.scss']
 })
+
 export class ListDatabaseComponent implements OnInit {
   @ViewChild(DataTableDirective, { static: false })
   datatableElement: DataTableDirective;
-  dtOptions: DataTables.Settings = {   scrollCollapse:true,
-    scrollY:"calc(100vh - 420px)",};
+  dtOptions: DataTables.Settings = {
+    scrollCollapse: true,
+    scrollY: "calc(100vh - 420px)",
+  };
   dtTrigger: Subject<any> = new Subject<any>();
   data: createdataset = new createdataset();
   filter: boolean = true;
-  loaderdiv=false;
-  f:NgForm;
+  loaderdiv = false;
+  f: NgForm;
   constructor(public apiService: ProjectApiService, public toaster: ToastrService) { }
-  transactions: any=[];
+  transactions: any = [];
   ngOnInit(): void {
     this.data.isprivate = true;
     bsCustomFileInput.init();
@@ -37,61 +39,54 @@ export class ListDatabaseComponent implements OnInit {
       error => this.errorHandler(error)
     );
   }
-  
+
   successHandler(data) {
     if (data.status_code == "200") {
       this.transactions = data.response;
     }
-    else{
-      this.transactions=[];
+    else {
+      this.transactions = [];
     }
-    console.log(this.datatableElement.dtInstance);
-    
-    if(!this.datatableElement.dtInstance){
+    if (!this.datatableElement.dtInstance) {
       this.dtTrigger.next();
-    this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
-      dtInstance.columns().every(function () {
-        const that = this;
-        $('input', this.header()).on('keyup change', function () {
-          if (that.search() !== this['value']) {
-            that
-              .search(this['value'])
-              .draw();
-          }
-        });
-        $('select', this.header()).on('change', function () {
-          if (that.search() !== this['value']) {
-            that
-              .search(this['value'])
-              .draw();
-          }
+      this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
+        dtInstance.columns().every(function () {
+          const that = this;
+          $('input', this.header()).on('keyup change', function () {
+            if (that.search() !== this['value']) {
+              that
+                .search(this['value'])
+                .draw();
+            }
+          });
+          $('select', this.header()).on('change', function () {
+            if (that.search() !== this['value']) {
+              that
+                .search(this['value'])
+                .draw();
+            }
+          });
         });
       });
-    });
     }
-    else{
+    else {
       this.rendered();
       this.dtTrigger.next();
-
     }
   }
 
   errorHandler(error) {
-    console.log(error);
-    this.loaderdiv=false;
-    if(error.error_msg)
-    this.toaster.error(error.error_msg, 'Error');
-    else
-    {
-      console.log(error);
-    this.toaster.error('Something went wrong', 'Error');
+    this.loaderdiv = false;
+    if (error.error_msg)
+      this.toaster.error(error.error_msg, 'Error');
+    else {
+      this.toaster.error('Something went wrong', 'Error');
     }
   }
 
   datasetfile: File;
   handleFileInput(data: FileList) {
     if (data.length > 0) {
-      console.log(data);
       this.datasetfile = data.item(0);
     }
   }
@@ -104,16 +99,14 @@ export class ListDatabaseComponent implements OnInit {
         error => this.errorHandler(error)
       );
     }
-    else{
+    else {
       this.datasetnameuniqueerror = false;
-
     }
   }
-  datasetnameuniqueerror: any = false;
 
+  datasetnameuniqueerror: any = false;
   successUniquedatasetynamevalidation(data, target) {
     if (data.response == 'false') {
-      // this.errorStatus=false;
       this.datasetnameuniqueerror = true;
       target.className = target.className.replace("ng-valid", " ");
       target.className = target.className + " ng-invalid";
@@ -122,15 +115,12 @@ export class ListDatabaseComponent implements OnInit {
       this.datasetnameuniqueerror = false;
       target.className = target.className.replace("ng-invalid", " ");
       target.className = target.className + " ng-valid";
-
     }
   }
 
   displayfilter() {
     this.filter = !this.filter;
-    console.log(this.filter);
     $('.filter').val('').trigger('change');
-    // elem.value += ' NEW';
   }
 
   confirm(id) {
@@ -144,26 +134,22 @@ export class ListDatabaseComponent implements OnInit {
       confirmButtonText: 'Yes, delete it!'
     }).then(result => {
       if (result.value) {
-        this.loaderdiv=true;
+        this.loaderdiv = true;
         this.apiService.deletedataset(id).subscribe(
           logs => {
-            this.loaderdiv=false;
+            this.loaderdiv = false;
             if (logs.status_code == "200") {
               Swal.fire('Deleted!', logs.error_msg, 'success');
               this.getdataset();
-              
             }
             else
               Swal.fire('Not Deleted!', logs.error_msg, 'error')
           },
           error => {
-            this.loaderdiv=false;
+            this.loaderdiv = false;
             Swal.fire('Not Deleted!', 'Something went wrong', 'error')
-
-        
-        }
+          }
         )
-
       }
     });
   }
@@ -191,11 +177,10 @@ export class ListDatabaseComponent implements OnInit {
     });
   }
 
- 
   errorStatus: boolean = true
   save() {
     let savedata = new FormData();
-    var user=JSON.parse(localStorage.getItem("currentUser"));
+    var user = JSON.parse(localStorage.getItem("currentUser"));
     savedata.append('user_name', user.username)//.user_name="admin";
     savedata.append('dataset_name', this.data.datasetname);
     if (this.data.isprivate)
@@ -204,7 +189,7 @@ export class ListDatabaseComponent implements OnInit {
       savedata.append('visibility', "public");
 
     savedata.append('inputfile', this.datasetfile);
-    this.loaderdiv=true;
+    this.loaderdiv = true;
     this.apiService.savedataset(savedata).subscribe(
       logs => this.savesuccess(logs),
       error => this.errorHandler(error)
@@ -213,10 +198,9 @@ export class ListDatabaseComponent implements OnInit {
 
   savesuccess(data) {
     if (data.status_code == "200") {
-      this.loaderdiv=false;
-      this.data=new createdataset();
+      this.loaderdiv = false;
+      this.data = new createdataset();
       $(".custom-file-label").text("Choose file");
-     
       this.getdataset();
     }
     else
