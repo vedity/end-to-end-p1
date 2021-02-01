@@ -529,7 +529,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                                     #? Once this loop executes, ALL_SET_Count will never match len(col_names)
                                     #? No need to run the loop forward if the All_SET_Count is never going to match
                                     #? - the len(col_names), breaking the loop right here will save time
-                                    break
+                                    raise InvalidColumnName(500)
                                     
                             logging.debug("data ingestion : ingestclass : check_file : count value =="+str(All_SET_Count))        
                             if All_SET_Count == len(col_names):

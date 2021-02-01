@@ -128,6 +128,16 @@ class SameColumnName(Exception):
      
     def __str__(self):
         return (self.msg)
+
+class InvalidColumnName(Exception):
+    """  Value of column name and change column name cannot be same"""
+    def __init__(self,status_code):
+        self.msg = "Column name contains ( , )  or % "
+        self.status_code = status_code
+        self.msg = self.msg
+     
+    def __str__(self):
+        return (self.msg)
 class SchemaUpdateFailed(Exception):
     """  updating schema table failed"""
     def __init__(self,status_code):

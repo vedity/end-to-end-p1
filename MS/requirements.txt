@@ -7,3 +7,4 @@ sqlalchemy
 djangorestframework
 requests
 django-cors-headers
+pyspark

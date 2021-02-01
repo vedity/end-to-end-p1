@@ -141,12 +141,14 @@ class CreateProjectClass(APIView):
                                         return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                                 else:
                                                 
-                                        activity_name = "Create Project"
-                                        activity_description = f"You have created project '{project_name}'"
-                                        operation = "Create"
-                                        timeline_Obj.insert_user_activity(user_name,project_id,dataset_id,activity_name,activity_description,operation)
-                                        logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code : 200")
-                                        return Response({"status_code":"200","status_msg":"Successfully Inserted","response":"true"}) 
+                                                activity_df = timeline_Obj.get_activity(3,"US")
+                                                activity_name = activity_df[0]["activity_name"]
+                                                activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= project_name)
+                                                timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                                                operation = activity_df[0]["operation"]
+                                                timeline_Obj.insert_user_activity(user_name,project_id,dataset_id,activity_name,activity_description,timestamp,operation)
+                                                logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code : 200")
+                                                return Response({"status_code":"200","status_msg":"Successfully Inserted","response":"true"}) 
 
                 except Exception as e:
                         logging.error("data ingestion : CreateProjectClass : POST Method : " + str(e))
@@ -211,12 +213,17 @@ class CreateDatasetClass(APIView):
                         exists_dataset_status=IngestionObj.does_dataset_exists(dataset_name,user_name) #call does_dataset_exists, check if dataset name exist for that perticular user name return false if not,otherwise true
                         if exists_dataset_status == False:
                                 file=request.FILES['inputfile'] #get inputfile Name
-                                file_data = pd.read_csv(request.FILES['inputfile'])   # read the csv file and store into dataframe variable                             
+                                try:
+                                        file_data = pd.read_csv(request.FILES['inputfile'])   # read the csv file and store into dataframe variable 
+                                except:
+                                        return Response({"status_code":500,"error_msg":"Invalid CSV Format","response":"false"})
+                                        
+                                                                    
                                 file_check_status = IngestionObj.check_file(file,file_data)  # call check_file function to verify csv file data
                                 
                                 if file_check_status !=True:
                                         status_code,error_msg=get_Status_code(file_check_status) # extract the status_code and error_msg from file_check_status
-                                        logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+status_code)
+                                        logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+error_msg)
                                         return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                                 file_path="static/server/"
                                 file_name =IngestionObj.save_file(DBObject,connection,user_name,dataset_visibility,file,file_path)
@@ -229,12 +236,13 @@ class CreateDatasetClass(APIView):
                                 logging.info("data ingestion : CreateDatasetClass : POST Method : execution stop : status_code :"+status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                         else:
-                                
+                                activity_df = timeline_Obj.get_activity(1,"US")
+                                activity_name = activity_df[0]["activity_name"]
+                                activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= dataset_name)
                                 project_id=0
-                                activity_name = "Create Dataset"
-                                activity_description = "You have created dataset '{x}'".format(x=dataset_name)
-                                operation = "Create"
-                                status = timeline_Obj.insert_user_activity(user_name,project_id,dataset_id,activity_name,activity_description,operation)
+                                timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                                operation = activity_df[0]["operation"]
+                                status = timeline_Obj.insert_user_activity(user_name,project_id,dataset_id,activity_name,activity_description,timestamp,operation)
                                 logging.info("data ingestion : CreateDatasetClass : POST Method : execution stop : status_code : 200")
                                 return Response({"status_code":"200","error_msg":"Successfully Inserted","response":"true"})
                         
@@ -452,10 +460,12 @@ class DeleteProjectDetailClass(APIView):
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                         else:
                                 
-                                activity_name = "Delete Project"
-                                activity_description = f"You have deleted project '{project_name}'"
-                                operation = "Delete"
-                                status = timeline_Obj.insert_user_activity(user_name,project_id,str(dataset_id),activity_name,activity_description,operation)
+                                activity_df = timeline_Obj.get_activity(1,"US")
+                                activity_name = activity_df[0]["activity_name"]
+                                activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= project_name)
+                                timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                                operation = activity_df[0]["operation"]
+                                status = timeline_Obj.insert_user_activity(user_name,project_id,str(dataset_id),activity_name,activity_description,timestamp,operation)
                                 logging.info("data ingestion : DeleteProjectDetailClass : DELETE Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully deleted","response":"true"})
                 except Exception as e:
@@ -492,10 +502,12 @@ class DeleteDatasetDetailClass(APIView):
                         else:
                                 
                                 project_id=0
-                                activity_name = "Delete Dataset"
-                                activity_description = f"You have deleted dataset '{dataset_name}'"
-                                operation = "Delete"
-                                status = timeline_Obj.insert_user_activity(user_name,project_id,dataset_id,activity_name,activity_description,operation)
+                                activity_df = timeline_Obj.get_activity(2,"US")
+                                activity_name = activity_df[0]["activity_name"]
+                                activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= dataset_name)
+                                timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                                operation = activity_df[0]["operation"]
+                                status = timeline_Obj.insert_user_activity(user_name,project_id,dataset_id,activity_name,activity_description,timestamp,operation)
                                 logging.info("data ingestion : DeleteDatasetDetailClass : DELETE Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully deleted","response":"true"})
 

@@ -13,7 +13,9 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .utils.Exploration import dataset_exploration
+#from .utils.Visual import data_visualization
 from .utils import preprocessing
+from .utils import data_visualization as dv
 from common.utils.database import db
 from database import *
 from common.utils.json_format.json_formater import *
@@ -37,9 +39,7 @@ DBObject=db.DBClass()     #Get DBClass object
 connection,connection_string=DBObject.database_connection(database,user,password,host,port)      #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 ExploreObj =  preprocessing.PreprocessingClass(database,user,password,host,port)
 
-
 class DatasetExplorationClass(APIView):
-    
     def get(self,request,format=None):
         """
         This class is used to get the data statistics for each of the feature in the table.
@@ -68,3 +68,12 @@ class DatasetExplorationClass(APIView):
         except Exception as e:
             return Response({"status_code":"500","error_msg":str(e),"response":"false"})
 
+# class DataVisualizationClass(APIView):
+
+#     def get(self,request,format=None):
+#         try:
+#             statics_df = dv.VisualizationClass()
+#             statics_df = statics_df.get_data_visualization()
+#             return Response({"status_code":"200","error_msg":"successfull retrival","response":statics_df}) 
+#         except Exception as e:
+#            return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
