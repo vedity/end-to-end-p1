@@ -10,22 +10,28 @@
 import pandas as pd 
 import logging
 import json
+import pandas as pd
+import datetime 
+import traceback
+from database import *
 from common.utils.database import db
 from common.utils.logger_handler import custom_logger as cl
 from common.utils.json_format.json_formater import *
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.ingest.ingest_exception import *
+from common.utils.activity_timeline import activity_timeline
 from .dataset.dataset_creation import *
 from .dataset import dataset_creation
 from dateutil.parser import parse
-import pandas as pd
-import traceback
+from .dataset import dataset_creation as dt
+
 user_name = 'admin'
 log_enable = True
 LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
 logger = logging.getLogger('view')
-from .dataset import dataset_creation as dt
+timeline_Obj=activity_timeline.ActivityTimelineClass(database,user,password,host,port)
+
 class SchemaClass(dt.DatasetClass):
     def __init__(self,database,user,password,host,port):
         """This constructor is used to initialize database credentials.
@@ -177,7 +183,7 @@ class SchemaClass(dt.DatasetClass):
             logging.error("data ingestion : SchemaClass : map_dataset_schema : " +traceback.format_exc())
             return exc.msg
     
-    def update_dataset_schema(self,DBObject,connection,project_id,dataset_id,table_name,column_name_list,column_change_name,column_datatype_list,column_attribute_list): ###
+    def update_dataset_schema(self,DBObject,connection,project_id,dataset_id,table_name,column_name_list,change_column_name,column_datatype_list,column_attribute_list): ###
         """
         this function use to update the Schema table values with the new upcoming values.
 
@@ -193,7 +199,7 @@ class SchemaClass(dt.DatasetClass):
             schema_table_name,col,schema = self.get_schema()
             create_status = DBObject.create_table(connection,schema_table_name,schema)
             if create_status in [1,0]:
-                mapping_status =self.map_dataset_schema(DBObject,connection,str(project_id),str(dataset_id),table_name,column_name_list,column_change_name,column_datatype_list,column_attribute_list) 
+                mapping_status =self.map_dataset_schema(DBObject,connection,str(project_id),str(dataset_id),table_name,column_name_list,change_column_name,column_datatype_list,column_attribute_list) 
                 logging.info("data ingestion : SchemaClass : update_dataset_schema : execution stop")
                 if mapping_status == 0:
                     return True
@@ -287,12 +293,12 @@ class SchemaClass(dt.DatasetClass):
             column_name_list=[] #get column name list
             column_attribute_list = [] # get column attribute list
             column_datatype_list = [] #get column datatype list
-            column_change_name = [] # get change column name
+            change_column_name = [] # get change column name
             for index in range(len(schema_data)):
                 if schema_data[index]["change_column_name"] == "":
-                    column_change_name.append(schema_data[index]["column_name"])
+                    change_column_name.append(schema_data[index]["column_name"])
                 else:
-                    column_change_name.append(schema_data[index]["change_column_name"])
+                    change_column_name.append(schema_data[index]["change_column_name"])
                 column_datatype_list.append(schema_data[index]["data_type"])
                 column_name_list.append(schema_data[index]["column_name"])
                 column_attribute_list.append(schema_data[index]["column_attribute"])
@@ -301,13 +307,15 @@ class SchemaClass(dt.DatasetClass):
             check_attribute_type = True if len(column_attribute_list) == column_attribute_list.count("ignore") else False
             if check_attribute_type == True :
                 raise IgnoreAttributeClass(500)
-            select_query = self.get_query_string(column_name_list,column_change_name,column_attribute_list)
+            select_query = self.get_query_string(column_name_list,change_column_name,column_attribute_list)
             dataframe = DBObject.get_project_detail(DBObject,connection,project_id)
             dataset_id = dataframe['dataset_id'][0]
             dataset_status,dataset_id,table_name = self.create_dataset(DBObject,connection,connection_string,select_query,dataset_id,method_name,dataset_name,dataset_desc,visibility)
+
             if dataset_status ==0:
-                schema_status = self.update_dataset_schema(DBObject,connection,project_id,dataset_id,table_name,column_name_list,column_change_name,column_datatype_list,column_attribute_list)
+                schema_status = self.update_dataset_schema(DBObject,connection,project_id,dataset_id,table_name,column_name_list,change_column_name,column_datatype_list,column_attribute_list)
                 if schema_status ==True:
+                    timeline_status = self.update_timeline(project_id,dataset_id,column_name_list,column_attribute_list,change_column_name,method_name,dataset_name)
                     sql_command = "UPDATE mlaas.project_tbl set link_dataset_id="+str(dataset_id)+" where project_id="+str(project_id)
                     update_status = DBObject.update_records(connection,sql_command)
                 else:
@@ -322,13 +330,13 @@ class SchemaClass(dt.DatasetClass):
             return exc.msg
         
     
-    def get_query_string(self,column_name_list,column_change_name,column_attribute_list):
+    def get_query_string(self,column_name_list,change_column_name,column_attribute_list):
         """
         function used to generate query string which will be used in select query to fetch the details.
 
         Args :
                 column_name_list[(List)]       : [Existing table column name value]
-                column_change_name [(List)]    : [change column name value]
+                change_column_name [(List)]    : [change column name value]
                 column_attribute_lst [(List)]  : [name of type attribute list]
         Return :
                 [String] : [return the query string]
@@ -337,7 +345,7 @@ class SchemaClass(dt.DatasetClass):
         query = ""
         for index in range(len(column_attribute_list)):
             if column_attribute_list[index] !='ignore':
-                query +='"'+column_name_list[index]+'" as '+column_change_name[index]+',' # append the string
+                query +='"'+column_name_list[index]+'" as '+change_column_name[index]+',' # append the string
         logging.info("data ingestion : SchemaClass : get_query_string : execution stop")       
         return query[0:len(query)-1]
 
@@ -366,7 +374,7 @@ class SchemaClass(dt.DatasetClass):
             no_of_rows = file_data_df.shape[0]
             table_name = self.get_table_name(DBObject,connection,dataset_table_name) # get the updated table name
             page_name = "Schema mapping" 
-            parent_dataset_id=int(dataset_id) 
+         
               
             if method_name =='Save as':
                 dataset_name = dataset_name 
@@ -375,7 +383,7 @@ class SchemaClass(dt.DatasetClass):
             else:
                 dataset_visibility ="private"
 
-            dataset_status,dataset_id = super(SchemaClass,self).make_dataset(DBObject,connection,dataset_name,table_name,dataset_visibility,user_name,dataset_desc,page_name,parent_dataset_id,method_name,flag=1)
+            dataset_status,dataset_id = super(SchemaClass,self).make_dataset(DBObject,connection,dataset_name,table_name,dataset_visibility,user_name,dataset_desc,page_name,method_name,flag=1)
             if dataset_status == 2:
                 raise DatasetAlreadyExist(500)
             
@@ -411,7 +419,104 @@ class SchemaClass(dt.DatasetClass):
         table_name = table_name[0]+str(seq['nextval'][0])+table_name[1] #create table name by joining sequence
         logging.info("data ingestion : SchemaClass : get_table_name : execution stop")
         return table_name
-    
 
+    def update_timeline(self,project_id,dataset_id,column_name_list,column_attribute_list,change_column_name,method_type,dataset_name):
+        """
+        function used to insert record all the changes done in schema mapping.
+        1)For the column been selected and target , 
+        2)For the column been ignore
+        3)For the column name updated
+        4)For "Save as" option Updated dataset name inserted by user
+
+        Args:
+                project_id[(Integer)]:[Id of the project]
+                dataset_id[(Integer)]:[Id of the dataset]
+                method_type[(String)]:[Name of the method(Save,Save as)]
+                dataset_name[(String)]:[Updated dataset name uploaded  by user]
+                column_name_list[(List)]  : [Existing table column name value]
+                change_column_name[(List)] : [Change column name values]
+                column_attribute_list [(List)]  : [name of type attribute(select,ignore,target)]
+        Return :
+                [(Boolean)] : [return True if successfully updated record else return False]
+        """
+        logging.info("data ingestion : SchemaClass : update_timeline : execution start")
+        column_name,column_change,target_column_lst,selected_column_lst,ignore_column_list= self.get_schema_column_values(column_name_list,column_attribute_list,change_column_name)
+        activity_id =[5,6,7,8]
+        activity_description=""
+
+        for id in activity_id:
+            activity_df = timeline_Obj.get_activity(id,"US")
+            activity_name = activity_df[0]["activity_name"]
+            activity_description = "{x}".format(x=activity_df[0]["activity_description"])
+            activity=""
+            if id==5:
+                for index in range(len(column_name)):
+                    activity += activity_description.replace('*',column_name[index]).replace('?',column_change[index])+"," 
+
+            elif id==6:
+                column_target='"'+",".join(target_column_lst)+'"'
+                column_selected='"'+",".join(selected_column_lst)+'"'
+                activity += activity_description.replace('*',column_selected).replace('?',column_target)+","
+
+            elif id==7:
+                column_ignore='"'+",".join(ignore_column_list)+'"'
+                activity += activity_description.replace('*',column_ignore)+","
+
+            elif id==8:
+                if method_type=='Save as':
+                    activity = activity_description.replace('*',dataset_name)+","
+                else:
+                    break
+            activity_description = activity[0:len(activity)-1]
+            timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+            operation = activity_df[0]["operation"]
+            status = timeline_Obj.insert_user_activity(user_name,project_id,dataset_id,activity_name,activity_description,timestamp,operation)
+            if status==False:
+                logger.info("Insert failed at "+str(activity_name))
+                break
+        logging.info("data ingestion : SchemaClass : update_timeline : execution stop")
+        return status
+    
+    def get_schema_column_values(self,column_name_list,column_attribute_list,change_column_name):
+        """
+        function used to find the below column values :
+        1)actual column name
+        1)changed column name
+        2)target attribute  column name
+        3)Select attribute  column name
+        4)ignore attribute  column name
+
+        Args :
+                column_name_list[(List)]  : [Existing table column name value]
+                change_column_name[(List)] : [Change column name values]
+                column_attribute_list [(List)]  : [name of type attribute(select,ignore,target)]
+        Return :
+                column_name[(List)] :[return the column name ]
+                column_change[(List)]  : [return column change value ]
+                target_column_lst[(List)] : [return the target attribute column name]
+                selected_column_lst[(List)] : [return the select attribute column name]
+                ignore_column_list[(List)] : [return the ignore attribute column name]
+        """
+        logging.info("data ingestion : SchemaClass : get_schema_column_values : execution start")
+        target_column_lst=[]
+        selected_column_lst=[]
+        ignore_column_list = []
+        column_name=[]
+        column_change = []
+        for index in range(len(column_attribute_list)):
+            if column_attribute_list[index]=='target':
+                target_column_lst.append(change_column_name[index])
+
+            if column_attribute_list[index]=='select':
+                selected_column_lst.append(change_column_name[index])
+
+            if column_attribute_list[index]=='ignore':
+                ignore_column_list.append(change_column_name[index])
+
+            if column_name_list[index]!=change_column_name[index]:
+                column_name.append(column_name_list[index])
+                column_change.append(change_column_name[index])
+        logging.info("data ingestion : SchemaClass : get_schema_column_values : execution stop")
+        return column_name,column_change,target_column_lst,selected_column_lst,ignore_column_list
 
 

@@ -39,7 +39,7 @@ class DatasetClass:
         # Dataset table name
         table_name = 'mlaas.dataset_tbl' 
         # Columns for dataset table.
-        cols = 'dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name,dataset_desc,page_name,parent_dataset_id,save_flag' 
+        cols = 'dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name,dataset_desc,page_name,save_flag' 
         #v1.3
         # Schema for dataset table.
         schema = "dataset_id bigserial,"\
@@ -52,14 +52,13 @@ class DatasetClass:
                  "user_name text,"\
                  "dataset_desc text,"\
                  "page_name text,"\
-                 "parent_dataset_id bigserial,"\
                  "save_flag text,"\
                  "created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()" 
                  
         logging.info("data ingestion : DatasetClass : make_dataset_schema : execution end")          
         return table_name,schema,cols
 
-    def  make_dataset_records(self,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,parent_dataset_id,method_name,flag):
+    def  make_dataset_records(self,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,method_name,flag):
         """This function is used to make records for inserting data into table based on input dataframe.
            E.g. column_name_1,column_name_2 .......,column_name_n.
 
@@ -82,7 +81,7 @@ class DatasetClass:
             file_size = None 
             dataset_table_name = file_name
             file_name = None
-        row=dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name,dataset_desc,page_name,parent_dataset_id,method_name # Make record for dataset table.
+        row=dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name,dataset_desc,page_name,method_name # Make record for dataset table.
         logging.info("row error"+str(row))
         row_tuples = [tuple(row)] # Convert row record into list of tuple.
         logging.info("row tuples error"+str(row_tuples))
@@ -151,7 +150,7 @@ class DatasetClass:
         
  
 
-    def make_dataset(self,DBObject,connection,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,parent_dataset_id=0,method_name=None,flag=None):
+    def make_dataset(self,DBObject,connection,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,method_name=None,flag=None):
         """This function is used to main dataset table and also load main dataset details into database table.
            E.g. dataset details : dataset_name,file_name,file_size,dataset_table_name,user_name.
 
@@ -179,12 +178,12 @@ class DatasetClass:
             else: return 2,dataset_exist #? dataset_exists() function returns id of the dataset if dataset with same name exists
         
         create_status = DBObject.create_table(connection,table_name,schema) # Get status about dataset tableis created or not.if created then 0 else 1.
-        row_tuples = self.make_dataset_records(dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,parent_dataset_id,method_name,flag) # Get record for dataset table.
+        row_tuples = self.make_dataset_records(dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,method_name,flag) # Get record for dataset table.
         insert_status = DBObject.insert_records(connection,table_name,row_tuples,cols) # Get status about inserting records into dataset table. if successful then 0 else 1.
         
         # Condition will check dataset table created and data is successfully stored into project table or not.if both successful then 0 else 1. 
         if schema_status in [0,1] and create_status in [0,1] and insert_status == 0 :
-            if parent_dataset_id == 0:
+            if flag==None:
                 file_name = None
             dataset_id = self.get_dataset_id(DBObject,connection,row_tuples,user_name,file_name)
             status = 0 # If Successfully.

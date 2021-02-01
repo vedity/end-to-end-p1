@@ -45,8 +45,10 @@ schema_obj=SchemaClass(database,user,password,host,port) #initialize Schema obje
 timeline_Obj=activity_timeline.ActivityTimelineClass(database,user,password,host,port)
 
 
+
 # Class for Project to retrive & insert 
 #It will take url string as mlaas/ingest/create_project/.
+
 class CreateProjectClass(APIView):
 
         def get(self, request, format=None):
