@@ -21,6 +21,8 @@ from common.utils.database.db import DBClass
 from ingest.utils.dataset import dataset_creation
 from ingest.utils.dataset import dataset_creation
 
+pd.options.display.float_format = '{:,.2f}'.format
+
 dc = dataset_creation.DatasetClass()
 
 class ExploreClass:
@@ -72,11 +74,7 @@ class ExploreClass:
             numerical_columns = list(num_cols)
             stats_df = stats_df.T
             stats_df.rename(columns = {'unique':'Unique Values'}, inplace = True)    
-            stats_df["Null Values"] = len(data_df) - stats_df['count']
-            stats_df["Null Values"] = stats_df['Null Values'].astype(int)
             stats_df.rename(columns = {'count':'Non-Null Values'}, inplace = True)  
-            stats_df["Non-Null Values"] = stats_df['Non-Null Values'].astype(int)
-            stats_df["DataCount"] = len(data_df)
             stats_df.rename(columns = {'mean':'Mean'}, inplace = True)
             stats_df.rename(columns = {'std':'Std'}, inplace = True)    
             stats_df.rename(columns = {'min':'Min Value'}, inplace = True)    
@@ -84,6 +82,10 @@ class ExploreClass:
             stats_df.rename(columns = {'top':'Most Frequent'}, inplace = True)    
             stats_df.rename(columns = {'freq':'Most Frequency'}, inplace = True)    
 
+            stats_df["Null Values"] = len(data_df) - stats_df['Non-Null Values']
+            stats_df["Null Values"] = stats_df['Null Values'].astype(int)
+            stats_df["Non-Null Values"] = stats_df['Non-Null Values'].astype(int)
+            stats_df["DataCount"] = len(data_df)
             stats_df['Least Frequency'] = np.NAN
             stats_df['Least Frequent'] = np.NAN
             stats_df['Column Name'] = 0
@@ -125,7 +127,6 @@ class ExploreClass:
             
         except:
             return 2
-        logging.info("loop end"+str(stats_df)) 
         return stats_df     
     
     def iqr(self,arr):
@@ -256,11 +257,11 @@ class ExploreClass:
                 col_name[String]: Name of the current column.
                 
             Returns:
-                datatype[String] : Continious/Categorical
+                datatype[String] : Continuous/Categorical
         '''
         
         if col_name in numerical:
-            datatype = "Continious"
+            datatype = "Continuous"
             return datatype
         else:
             datatype = "Categorical"
