@@ -1,8 +1,7 @@
-import { Component, ErrorHandler, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { SchemaMappingApiService } from '../schema-mapping-api.service';
-
 @Component({
   selector: 'app-create-schema-mapping',
   templateUrl: './create-schema-mapping.component.html',
@@ -28,12 +27,11 @@ export class CreateSchemaMappingComponent implements OnInit {
      'background-color': ' rgb(34 39 54)',
      'border': '1px solid #32394e',
      'animation-duration': '20s'
-
  };
+
   ngOnInit(): void {
     this.displaydiv=true;
     this.getColumnAttributeList();
-    //this.getDataTypeList()
     this.getSchema(this.project_id);
   }
 
@@ -45,7 +43,6 @@ export class CreateSchemaMappingComponent implements OnInit {
   }
 
   successHandler(logs) {
-    console.log(logs.response);
     this.displaydiv=false;
     this.datasetSchema = logs.response;
     this.finaldata=logs.response;
@@ -64,10 +61,9 @@ export class CreateSchemaMappingComponent implements OnInit {
       error => this.errorHandler(error)
     )
   }
+
   DatatypeSuccessHandler(data) {
     this.datatypeList = data.response.attribute_name;
-    console.log(this.datatypeList);
-
   }
 
   columnattributesSuccessHandler(data) {
@@ -79,7 +75,6 @@ export class CreateSchemaMappingComponent implements OnInit {
     if (error.error_msg)
       this.toaster.error(error.error_msg, 'Error');
     else {
-      console.log(error);
       this.toaster.error('Something went wrong', 'Error');
     }
   }
@@ -98,7 +93,6 @@ export class CreateSchemaMappingComponent implements OnInit {
         column_attribute:$("#selectattr_"+index+" :selected").val().toString()}
         savedata.push(schema);
       });
-      console.log(savedata);
       this.apiService.saveDatasetSchema(this.dataset_id,this.project_id,{data:savedata}).subscribe(logs=>this.savesuccessHandler(logs),error=>this.errorHandler(error));
     }
   }
@@ -116,7 +110,6 @@ export class CreateSchemaMappingComponent implements OnInit {
   reset(){
     this.getSchema(this.project_id);
   }
-
 
   changeattrinute(value,i){
     $("#tr_"+i).removeClass("target-selected");
