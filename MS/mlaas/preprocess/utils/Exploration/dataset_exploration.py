@@ -8,23 +8,21 @@
 '''
 
 from scipy import stats
-from common.utils.exception_handler.python_exception.common.common_exception import *
-from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
-from common.utils.database import db
-from common.utils.database.db import DBClass
-from ingest.utils.dataset import dataset_creation
 import logging
 import math
 import pandas as pd
 import numpy as np
 import json
+
+from common.utils.exception_handler.python_exception.common.common_exception import *
+from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
+from common.utils.database import db
+from common.utils.database.db import DBClass
+from ingest.utils.dataset import dataset_creation
 from ingest.utils.dataset import dataset_creation
 
 dc = dataset_creation.DatasetClass()
 
-
-
-dc = dataset_creation.DatasetClass()
 class ExploreClass:
 
     def get_dataset_statistics(self,DBObject,connection,dataset_id):
@@ -220,6 +218,13 @@ class ExploreClass:
         unique_values = arr.value_counts()
         classes = list(unique_values.index)
         values = unique_values.tolist()
+        
+        #? If there are more than 50 bins than the count plot is not suitable
+        #? Resizing the countplot
+        if len(values) > 50:
+            stepsize = int(np.ceil(len(values)/50))
+            classes = classes[::stepsize]
+            values = values[::stepsize]
         
         return [classes, values]
     
