@@ -1,38 +1,51 @@
-.module-main{position: relative;}
-.tab-menu{position: absolute; right:15px; top:-12px;}
+.module-main {
+    position: relative;
+}
 
-.target-selected{background:#4c546c;
-td:first-child{color:#fff;}
+.tab-menu {
+    position: absolute;
+    right: 15px;
+    top: -12px;
 }
+
+.target-selected {
+    background: #4c546c;
+    td:first-child {
+        color: #fff;
+    }
+}
+
 .nav-pills .nav-link {
-     border-radius: 0 !important; 
-     padding: 0.5rem 0.8rem !important; border-right:1px solid #32394e;
+    border-radius: 0 !important;
+    padding: 0.5rem 0.8rem !important;
+    border-right: 1px solid #32394e;
 }
-.nav {border:1px solid #32394e;}
+
+.nav {
+    border: 1px solid #32394e;
+}
 
 table {
-     tr{
-          td{border-top: 1px solid #32394e !important;}
-     }
-}
-.invalid-feedback{
-     display: none;
+    tr {
+        td {
+            border-top: 1px solid #32394e !important;
+        }
+    }
 }
 
-td.errorstatus{
-     input{
-          border: 1px solid #f46a6a !important;  
-     }
-     .invalid-feedback{
-          display: block;
-     }
-  }
+.invalid-feedback {
+    display: none;
+}
 
-  .schemamapping-row{
-     height: calc(100vh - 310px);
-  }
-// .button-items{
-//      padding: 15px 0 0 0;
-// }
- 
-  
+td.errorstatus {
+    input {
+        border: 1px solid #f46a6a !important;
+    }
+    .invalid-feedback {
+        display: block;
+    }
+}
+
+.schemamapping-row {
+    height: calc(100vh - 310px);
+}
