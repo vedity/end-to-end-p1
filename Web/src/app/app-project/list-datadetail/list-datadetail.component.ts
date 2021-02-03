@@ -5,7 +5,6 @@ import { Subject } from 'rxjs';
 import { DataTableDirective } from 'angular-datatables';
 import { HttpClient } from '@angular/common/http';
 import { SchemaMappingApiService } from '../schema-mapping-api.service';
-import { timeout } from 'rxjs/operators';
 @Component({
     selector: 'app-list-datadetail',
     templateUrl: './list-datadetail.component.html',
@@ -42,7 +41,6 @@ export class ListDatadetailComponent implements OnInit {
         this.apiService.getColumnList(this.dataset_id).subscribe(
             logs => {
                 this.columnlist = logs.response;
-
             }
         )
         this.dtOptions = {
@@ -61,7 +59,6 @@ export class ListDatadetailComponent implements OnInit {
                 this.apiService.getDataDetails(dataTablesParameters, this.dataset_id)
                     .subscribe(resp => {
                         this.transactions = resp.data;
-
                         if (this.transactions.length == 0) {
                             this.nodatafound = '<tr><td></td><td colspan="6" class="no-data-available">No data available in table</td></tr>';
                             $("#nodatafound").html(this.nodatafound);
