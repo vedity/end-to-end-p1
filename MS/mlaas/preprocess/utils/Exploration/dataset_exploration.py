@@ -106,7 +106,6 @@ class ExploreClass:
                 stats_df.iloc[i,-2] = col
                 #? Getting Histogram/CountPlot Values
                 axislist.append(self.get_values(data_df[col],numerical_columns,col))
-                datatype.append(self.get_datatype(data_df[col],numerical_columns,col))   
                 #? Getting Datatypes
                 datatype.append(self.get_datatype(data_df[col],numerical_columns,col))  
                 #? Getting Least Frequent Values & Count
