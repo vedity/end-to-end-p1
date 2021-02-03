@@ -5,6 +5,7 @@ import { Subject } from 'rxjs';
 import { DataTableDirective } from 'angular-datatables';
 import { HttpClient } from '@angular/common/http';
 import { SchemaMappingApiService } from '../schema-mapping-api.service';
+import { timeout } from 'rxjs/operators';
 @Component({
     selector: 'app-list-datadetail',
     templateUrl: './list-datadetail.component.html',
@@ -41,24 +42,26 @@ export class ListDatadetailComponent implements OnInit {
         this.apiService.getColumnList(this.dataset_id).subscribe(
             logs => {
                 this.columnlist = logs.response;
+
             }
         )
         this.dtOptions = {
             pageLength: 10,
             serverSide: true,
-            scrollCollapse: true,
-            scrollX:true,
-            scrollY: "calc(100vh - 420px)",
-            autoWidth: false,
+             scrollCollapse: true,
+             scrollX: true,
+            scrollY: "calc(100vh - 450px)",
+             //autoWidth:true,
             ajax: (dataTablesParameters: any, callback) => {
                 let filtercolumns = {};
-                this.columnlist.forEach(element => {
-                    filtercolumns[element.data] = $("#" + element.data).val();
+                this.columnlist.forEach((element, index) => {
+                    filtercolumns[element.data] = $("#col-" + index).val();
                 });
                 dataTablesParameters.customfilter = filtercolumns;
                 this.apiService.getDataDetails(dataTablesParameters, this.dataset_id)
                     .subscribe(resp => {
                         this.transactions = resp.data;
+
                         if (this.transactions.length == 0) {
                             this.nodatafound = '<tr><td></td><td colspan="6" class="no-data-available">No data available in table</td></tr>';
                             $("#nodatafound").html(this.nodatafound);
@@ -68,14 +71,32 @@ export class ListDatadetailComponent implements OnInit {
                             recordsFiltered: resp.recordsFiltered,
                             data: []
                         });
-                        setTimeout(() => {
-                            this.contentloaded = true;
-                        }, 100);
 
                     });
+            },
+            drawCallback: (settings) => {
+                setTimeout(() => {
+                    $(".main-datatable").trigger('resize')
+                });
+            },
+            initComplete: (settings, json) => {
+                setTimeout(() => {
+                    $(".main-datatable").trigger('resize')
+                   setTimeout(() => {
+                    this.contentloaded = true;
+                        
+                   }, 100); 
+                });
+              
             }
         };
+// setTimeout(() => {
+//     // this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
+//     //     dtInstance.draw();
+//     // });
+// }, 1000);
     }
+
 
     onFilterchange(event) {
         this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {

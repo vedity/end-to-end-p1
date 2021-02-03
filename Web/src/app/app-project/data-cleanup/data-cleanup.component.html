@@ -1,0 +1,238 @@
+<div class="page-title-box d-flex align-items-center justify-content-between">
+    <h4 class="mb-0 font-size-18">Data Cleanup</h4>
+    <button type="button" class="btn btn-success modeling-btn">Modeling</button>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card table-card">
+            <div class="card-body">
+                <h4 class="card-title mb-4">{{title}}</h4>
+                <div class="left-box">
+                    <perfect-scrollbar style="height: 490px;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Column Name</th>
+                                    <th>Handling</th>
+
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr class="active-row">
+                                    <td>
+                                        <div class="custom-control custom-checkbox mb-3">
+                                            <input type="checkbox" class="custom-control-input" id="customCheck1" checked>
+                                            <label class="custom-control-label" for="customCheck1">Customer_id</label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="handling">
+                                            <p>Replace Missing Value</p>
+                                            <a href="javascript:void(0);"> <i class=" bx bx-trash"></i></a>
+                                        </div>
+                                        <div class="handling">
+                                            <p>Removie Noise</p>
+                                            <a href="javascript:void(0);"> <i class=" bx bx-trash"></i></a>
+                                        </div>
+                                        <div class="handling">
+                                            <p>Encoded</p>
+                                            <a href="javascript:void(0);"> <i class=" bx bx-trash"></i></a>
+                                        </div>
+
+
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="custom-control custom-checkbox mb-3">
+                                            <input type="checkbox" class="custom-control-input" id="customCheck2">
+                                            <label class="custom-control-label" for="customCheck2">Customer_Name</label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="handling">
+                                            <p>Replace Missing Value</p>
+                                            <a href="javascript:void(0);"> <i class=" bx bx-trash"></i></a>
+                                        </div>
+                                        <div class="handling">
+                                            <p>Removie Noise</p>
+                                            <a href="javascript:void(0);"> <i class=" bx bx-trash"></i></a>
+                                        </div>
+                                        <div class="handling">
+                                            <p>Encoded</p>
+                                            <a href="javascript:void(0);"> <i class=" bx bx-trash"></i></a>
+                                        </div>
+
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="custom-control custom-checkbox mb-3">
+                                            <input type="checkbox" class="custom-control-input" id="customCheck3">
+                                            <label class="custom-control-label" for="customCheck3">Item_id</label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="handling">
+                                            <p>Replace Missing Value</p>
+                                            <a href="javascript:void(0);"> <i class=" bx bx-trash"></i></a>
+                                        </div>
+                                        <div class="handling">
+                                            <p>Removie Noise</p>
+                                            <a href="javascript:void(0);"> <i class=" bx bx-trash"></i></a>
+                                        </div>
+                                        <div class="handling">
+                                            <p>Encoded</p>
+                                            <a href="javascript:void(0);"> <i class=" bx bx-trash"></i></a>
+                                        </div>
+
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="custom-control custom-checkbox mb-3">
+                                            <input type="checkbox" class="custom-control-input" id="customCheck3">
+                                            <label class="custom-control-label" for="customCheck3">Item_Name</label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="handling">
+                                            <p>Replace Missing Value</p>
+                                            <a href="javascript:void(0);"> <i class=" bx bx-trash"></i></a>
+                                        </div>
+                                        <div class="handling">
+                                            <p>Removie Noise</p>
+                                            <a href="javascript:void(0);"> <i class=" bx bx-trash"></i></a>
+                                        </div>
+                                        <div class="handling">
+                                            <p>Encoded</p>
+                                            <a href="javascript:void(0);"> <i class=" bx bx-trash"></i></a>
+                                        </div>
+
+                                    </td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+                    </perfect-scrollbar>
+                </div>
+                <div class="right-box">
+                    <perfect-scrollbar style="height:56vh;">
+                        <div class="right-inner">
+
+                            <h4 class="mb-3">Missing Value Handling</h4>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="custom-control custom-radio mb-3 ">
+                                        <input type="radio" id="customRadio1" name="customRadio" class="custom-control-input">
+                                        <label class="custom-control-label" for="customRadio1">Replace
+                                    missing value with</label>
+                                    </div>
+                                    <div class="ml-3">
+                                        <div class="custom-control custom-radio mb-3 ">
+                                            <input type="radio" id="median" name="min" class="custom-control-input">
+                                            <label class="custom-control-label" for="median">With
+                                        Median</label>
+                                        </div>
+                                        <div class="custom-control custom-radio mb-3 ">
+                                            <input type="radio" id="mean" name="min" class="custom-control-input">
+                                            <label class="custom-control-label" for="mean">With Mean</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="custom-control custom-radio mb-3 col-md-6">
+                                        <input type="radio" id="customRadio2" name="customRadio" class="custom-control-input">
+                                        <label class="custom-control-label" for="customRadio2">Drop affected
+                                    rows</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <h4 class="mb-3">Rescaling</h4>
+                            <div class="row mb-4">
+
+                                <div class="col-md-3">
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" id="min-max" name="rescaling" class="custom-control-input">
+                                        <label class="custom-control-label" for="min-max">Min-Max</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" id="scaler" name="rescaling" class="custom-control-input">
+                                        <label class="custom-control-label" for="scaler">Std.Scaler</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" id="robust" name="rescaling" class="custom-control-input">
+                                        <label class="custom-control-label" for="robust">Robust</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" id="normalization" name="rescaling" class="custom-control-input">
+                                        <label class="custom-control-label" for="normalization">Normalization</label>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <h4 class="mb-3">Remove Noise By</h4>
+                            <div class="row mb-4">
+                                <div class="col-md-3">
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" id="regression" name="noise" class="custom-control-input">
+                                        <label class="custom-control-label" for="regression">Regression</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" id="binning" name="noise" class="custom-control-input">
+                                        <label class="custom-control-label" for="binning">Binning</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h4 class="mb-3">Select Encode Type</h4>
+                            <div class="row mb-4">
+                                <div class="col-md-3">
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" id="hot-encoding" name="encode" class="custom-control-input">
+                                        <label class="custom-control-label" for="hot-encoding">One hot
+                                    encoding</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" id="label" name="encode" class="custom-control-input">
+                                        <label class="custom-control-label" for="label">Label
+                                    encoding</label>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="form-group">
+                                <div class="custom-control custom-checkbox mb-3">
+                                    <input type="checkbox" class="custom-control-input" id="duplicate">
+                                    <label class="custom-control-label" for="duplicate">Remove duplicate
+                                data</label>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </perfect-scrollbar>
+
+                    <div class="button-items text-center">
+                        <button type="button" class="btn btn-secondary">Reset</button>
+                        <button type="button" class="btn btn-success">Save</button>
+                        <button type="button" class="btn btn-secondary">Save As</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
