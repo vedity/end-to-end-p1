@@ -8,23 +8,24 @@
 '''
 
 from scipy import stats
-from common.utils.exception_handler.python_exception.common.common_exception import *
-from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
-from common.utils.database import db
-from common.utils.database.db import DBClass
-from ingest.utils.dataset import dataset_creation
 import logging
 import math
 import pandas as pd
 import numpy as np
 import json
+
+from ingest.utils.dataset import dataset_creation
+from common.utils.exception_handler.python_exception.common.common_exception import *
+from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
+from common.utils.database import db
+from common.utils.database.db import DBClass
+from ingest.utils.dataset import dataset_creation
 from ingest.utils.dataset import dataset_creation
 
-dc = dataset_creation.DatasetClass()
-
-
+pd.options.display.float_format = '{:,.2f}'.format
 
 dc = dataset_creation.DatasetClass()
+
 class ExploreClass:
 
     def get_dataset_statistics(self,DBObject,connection,dataset_id):
@@ -69,34 +70,37 @@ class ExploreClass:
             stats_df = data_df.describe(include = 'all')
 
             #? Getting Categorical & Continuous Columns
-            cols = data_df.columns
+            # cols = data_df.columns
             num_cols = data_df._get_numeric_data().columns
             numerical_columns = list(num_cols)
             stats_df = stats_df.T
             stats_df.rename(columns = {'unique':'Unique Values'}, inplace = True)    
-            stats_df["Null Values"] = len(data_df) - stats_df['count']
-            stats_df["Null Values"] = stats_df['Null Values'].astype(int)
             stats_df.rename(columns = {'count':'Non-Null Values'}, inplace = True)  
-            stats_df["Non-Null Values"] = stats_df['Non-Null Values'].astype(int)
-            stats_df["DataCount"] = len(data_df)
             stats_df.rename(columns = {'mean':'Mean'}, inplace = True)
             stats_df.rename(columns = {'std':'Std'}, inplace = True)    
             stats_df.rename(columns = {'min':'Min Value'}, inplace = True)    
             stats_df.rename(columns = {'max':'Max Value'}, inplace = True)    
-            stats_df.rename(columns = {'top':'Most Frequent'}, inplace = True)    
+            stats_df.rename(columns = {'top':'Most Frequent'}, inplace = True) 
             stats_df.rename(columns = {'freq':'Most Frequency'}, inplace = True)    
 
+            stats_df["Null Values"] = len(data_df) - stats_df['Non-Null Values']
+            stats_df["Null Values"] = stats_df['Null Values'].astype(int)
+            stats_df["Non-Null Values"] = stats_df['Non-Null Values'].astype(int)
+            stats_df["DataCount"] = len(data_df)
             stats_df['Least Frequency'] = np.NAN
             stats_df['Least Frequent'] = np.NAN
             stats_df['Column Name'] = 0
             stats_df['Plot Values'] = 0
             stats_df['Plot Values'] = stats_df['Plot Values'].astype('object')
             data_df = data_df.dropna()
-
+            
+            #? Merging the Column Names
             i = 0
             axislist =[]
             datatype = []
-
+            # datacount = []
+            
+            
             for col in data_df.columns:
                 #? Merging Column Names
                 stats_df.iloc[i,-2] = col
@@ -110,24 +114,29 @@ class ExploreClass:
                     stats_df.iloc[i,-3] = value_count.index[-1]
                     stats_df.iloc[i,-4] = int(value_count[-1])
                 i += 1
+
             stats_df['Plot Values'] = axislist
             stats_df['Datatype'] = datatype
+            # stats_df['DataCount'] = datacount
+            
+            IQR = stats_df['75%']-stats_df['25%']
+            stats_df['open'] = stats_df['25%']-1.5 * IQR
+            stats_df['close'] = stats_df['75%']+1.5 * IQR
             
             #? Dataset Contains both Categorical & Continuous Data
             try:
-                stats_df = stats_df[['Plot Values','Column Name','Datatype','DataCount','Mean','Std','Min Value','25%','50%','75%','Max Value','Most Frequent','Most Frequency','Least Frequent','Least Frequency','Unique Values','Null Values','Non-Null Values']]
+                stats_df = stats_df[['Plot Values','Column Name','Datatype','DataCount','Mean','Std','Min Value','25%','50%','75%','Max Value','Most Frequent','Most Frequency','Least Frequent','Least Frequency','Unique Values','Null Values','Non-Null Values','open','close']]
+            
             except KeyError:
                 try:
                     #? Dataset Contains only Continuous Data
-                    stats_df = stats_df[['Plot Values','Column Name','Datatype','Mean','Std','Min Value','25%','50%','75%','Max Value','Null Values','Non-Null Values']]
+                    stats_df = stats_df[['Plot Values','Column Name','Datatype','DataCount','Mean','Std','Min Value','25%','50%','75%','Max Value','Null Values','Non-Null Values','open','close']]
                 except KeyError:
                     #? Dataset Contains only Categorical Data
-                    stats_df = stats_df[['Plot Values','Column Name','Datatype','Most Frequent','Most Frequency','Least Frequent','Least Frequency','Unique Values','Null Values','Non-Null Values']]
-            
-            
+                    stats_df = stats_df[['Plot Values','Column Name','Datatype','DataCount','Most Frequent','Most Frequency','Least Frequent','Least Frequency','Unique Values','Null Values','Non-Null Values']]
         except:
             return 2
-        logging.info("loop end"+str(stats_df)) 
+        
         return stats_df     
     
     def iqr(self,arr):
@@ -198,7 +207,6 @@ class ExploreClass:
             elif number_of_bins <= 2: number_of_bins = 3
             #? Getting histogram values & bin_edges
             hist, bin_edges = np.histogram(a=arr, bins=number_of_bins)
-            logging.info("np.hist finished")
             return [bin_edges[:-1].tolist(),hist.tolist()]
         
         except (Exception) as exc:
@@ -220,6 +228,13 @@ class ExploreClass:
         unique_values = arr.value_counts()
         classes = list(unique_values.index)
         values = unique_values.tolist()
+        
+        #? If there are more than 50 bins than the count plot is not suitable
+        #? Resizing the countplot
+        if len(values) > 50:
+            stepsize = int(np.ceil(len(values)/50))
+            classes = classes[::stepsize]
+            values = values[::stepsize]
         
         return [classes, values]
     
@@ -251,15 +266,13 @@ class ExploreClass:
                 col_name[String]: Name of the current column.
                 
             Returns:
-                datatype[String] : Continious/Categorical
+                datatype[String] : Continuous/Categorical
         '''
         
         if col_name in numerical:
-            datatype = "Continious"
+            datatype = "Continuous"
             return datatype
         else:
             datatype = "Categorical"
             return datatype
-        
-           
         
