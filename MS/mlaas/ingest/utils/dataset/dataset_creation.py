@@ -72,6 +72,7 @@ class DatasetClass:
             [tuple]: [it will return records in the form of tuple.]
         """
         logging.info("data ingestion : DatasetClass : make_dataset_records : execution start")
+        #if falg is None
         if flag == None:
             file_path = self.get_file_path(file_name,dataset_visibility,user_name)
             file_size = self.get_file_size(file_path)# Get size of uploaded file.
@@ -180,13 +181,12 @@ class DatasetClass:
         row_tuples = self.make_dataset_records(dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,parrent_dataset_id,flag) # Get record for dataset table.
         insert_status = DBObject.insert_records(connection,table_name,row_tuples,cols) # Get status about inserting records into dataset table. if successful then 0 else 1.
 
-        logging.info("fie_name::"+str(file_name))
+        # logging.info("fie_name::"+str(file_name)) ####
         schema_file_name = file_name
         
         # Condition will check dataset table created and data is successfully stored into project table or not.if both successful then 0 else 1. 
         if schema_status in [0,1] and create_status in [0,1] and insert_status == 0 :
             if flag==None:
-                file_name_update=file_name
                 file_name = None
             dataset_id = self.get_dataset_id(DBObject,connection,row_tuples,user_name,file_name)
             status = 0 # If Successfully.
@@ -196,12 +196,12 @@ class DatasetClass:
                 parrent_dataset_id = int(dataset_id)
                 
                 schema_table_name = DBObject.get_table_name(connection,schema_file_name)
-                logging.info(str(schema_file_name)+"======")
+                # logging.info(str(schema_file_name)+"======")####
                 updated_table_name = self.get_dataset_table_name(schema_table_name)
-                logging.info("update schema table name::"+str(updated_table_name))
+                # logging.info("update schema table name::"+str(updated_table_name))####
                 row_tuples = self.make_dataset_records(dataset_name,str(updated_table_name),str(dataset_visibility),str(user_name),dataset_desc,page_name,parrent_dataset_id,flag=1)
                 insert_status = DBObject.insert_records(connection,table_name,row_tuples,cols) # Get status about inserting records into dataset table. if successful then 0 else 1.
-                logging.info(str(schema_file_name)+"======")
+                # logging.info(str(schema_file_name)+"======")####
                 load_dataset_status,no_of_rows = self.load_dataset(DBObject,connection,connection_string,schema_file_name,dataset_visibility,user_name,updated_table_name)
                 # sql_command = "UPDATE mlaas.dataset_tbl SET no_of_rows="+str(no_of_rows)+" where dataset_id="+str(load_dataset_id)
                 # update_status = DBObject.update_records(connection,sql_command)
@@ -230,7 +230,7 @@ class DatasetClass:
         # Get file relative file path.
         file_path = self.get_file_path(file_name,dataset_visibility,user_name)
         # Get dataframe of the file data.
-        logging.info("fie_path"+str(file_path))
+        # logging.info("fie_path"+str(file_path))####
         file_data_df = DBObject.read_data(file_path)
         # logging.info("file_data_df :"+str(file_data_df))
         # Get number of rows.
@@ -492,23 +492,22 @@ class DatasetClass:
             dataset_name=str(dataset_name).replace("'","''")
             if dataset_visibility == 'public':
                 #? Is there any(public & private) dataset with same name?
-                sql_command = f"SELECT DATASET_ID FROM {table_name} WHERE DATASET_NAME = '{dataset_name}'"
+                sql_command = f"SELECT DATASET_ID FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' and page_name in ('Create dataset','Create Project')"
                 #! Possible Security Issue: User will get to know that some other user has private dataset with same name
             else:
                 #? Is there any public dataset with same name?
-                sql_command = f"SELECT DATASET_ID FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND DATASET_VISIBILITY = 'public'"
+                sql_command = f"SELECT DATASET_ID FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND DATASET_VISIBILITY = 'public' and page_name in ('Create dataset','Create Project')"
                 data_df=DBObject.select_records(connection,sql_command)
                 data=len(data_df)
 
                 if data == 0:
                     #? No public dataset with same name
                     #? Is there any private dataset from you with same name?
-                    sql_command = f"SELECT DATASET_ID FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND USER_NAME = '{user_name}'"
+                    sql_command = f"SELECT DATASET_ID FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND USER_NAME = '{user_name}' and page_name in ('Create dataset','Create Project')"
                 else:
                     #! There is a public dataset with your name
                     logging.debug(f"data ingestion  :  DatasetClass  :  dataset_exist  :  A public dataset with the same dataset_name exists at dataset_id = {int(data_df['dataset_id'][0])}")
                     return int(data_df['dataset_id'][0])
-            
             data_df=DBObject.select_records(connection,sql_command)
             data=len(data_df)
             
