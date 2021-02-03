@@ -15,18 +15,18 @@
             <div class="card table-card">
                 <div class="card-body">
                     <h4 class="card-title mb-4">{{title}}</h4>
-                    <ngx-skeleton-loader *ngIf="!contentloaded" count="7" [animation]="animation" [theme]="theme">
+                    <ngx-skeleton-loader [hidden]="contentloaded" count="7" [animation]="animation" [theme]="theme">
                     </ngx-skeleton-loader>
                     <div class="main-datatable datadetail-datatable">
                         <div [hidden]="!contentloaded">
                             <a href="javascript:void(0)" class="filter-btn" id="filter" (click)="displayfilter()"><i
                   class="dripicons-experiment"></i></a>
-                            <table datatable *ngIf="columnlist" [dtOptions]="dtOptions" (keyup)="onFilterchange($event);" class="table table-centered table-nowrap">
+                            <table datatable *ngIf="columnlist" [dtOptions]="dtOptions" (keyup)="onFilterchange($event);" class="table table-centered  table-nowrap" style="width: 100%;">
                                 <thead>
                                     <tr class="thead-light">
-                                        <th *ngFor="let item of columnlist">
+                                        <th *ngFor="let item of columnlist;let colindex=index">
                                             {{item.data}}
-                                            <input class="form-control filter" type="text" [hidden]="filter" name="search-{{item.data}}" id="{{item.data}}" />
+                                            <input class="form-control filter" type="text" [hidden]="filter" name="search-{{item.data}}" id="col-{{colindex}}" />
                                         </th>
                                     </tr>
                                 </thead>
