@@ -13,9 +13,8 @@ import math
 import pandas as pd
 import numpy as np
 import json
+
 from ingest.utils.dataset import dataset_creation
-
-
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
 from common.utils.database import db
@@ -71,7 +70,7 @@ class ExploreClass:
             stats_df = data_df.describe(include = 'all')
 
             #? Getting Categorical & Continuous Columns
-            cols = data_df.columns
+            # cols = data_df.columns
             num_cols = data_df._get_numeric_data().columns
             numerical_columns = list(num_cols)
             stats_df = stats_df.T
@@ -82,7 +81,7 @@ class ExploreClass:
             stats_df.rename(columns = {'min':'Min Value'}, inplace = True)    
             stats_df.rename(columns = {'max':'Max Value'}, inplace = True)    
             stats_df.rename(columns = {'top':'Most Frequent'}, inplace = True) 
-            stats_df.rename(columns = {'freq':'Frequency'}, inplace = True)    
+            stats_df.rename(columns = {'freq':'Most Frequency'}, inplace = True)    
 
             stats_df["Null Values"] = len(data_df) - stats_df['Non-Null Values']
             stats_df["Null Values"] = stats_df['Null Values'].astype(int)
@@ -99,7 +98,7 @@ class ExploreClass:
             i = 0
             axislist =[]
             datatype = []
-            datacount = []
+            # datacount = []
             
             
             for col in data_df.columns:
@@ -107,30 +106,38 @@ class ExploreClass:
                 stats_df.iloc[i,-2] = col
                 #? Getting Histogram/CountPlot Values
                 axislist.append(self.get_values(data_df[col],numerical_columns,col))
-                datatype.append(self.get_datatype(data_df[col],numerical_columns,col))   
-                datacount.append(data_df[col].count())
-                
+                #? Getting Datatypes
+                datatype.append(self.get_datatype(data_df[col],numerical_columns,col))  
+                #? Getting Least Frequent Values & Count
+                if datatype[-1].startswith("Ca"):
+                    value_count = data_df[col].value_counts()
+                    stats_df.iloc[i,-3] = value_count.index[-1]
+                    stats_df.iloc[i,-4] = int(value_count[-1])
                 i += 1
+
             stats_df['Plot Values'] = axislist
             stats_df['Datatype'] = datatype
-            stats_df['DataCount'] = datacount
+            # stats_df['DataCount'] = datacount
+            
             IQR = stats_df['75%']-stats_df['25%']
             stats_df['open'] = stats_df['25%']-1.5 * IQR
             stats_df['close'] = stats_df['75%']+1.5 * IQR
+            
             #? Dataset Contains both Categorical & Continuous Data
             try:
-                stats_df = stats_df[['Plot Values','Column Name','Datatype','DataCount','Mean','Std','Min Value','25%','50%','75%','Max Value','Most Frequent','Frequency','Unique Values','Null Values','Non-Null Values','open','close']]
+                stats_df = stats_df[['Plot Values','Column Name','Datatype','DataCount','Mean','Std','Min Value','25%','50%','75%','Max Value','Most Frequent','Most Frequency','Least Frequent','Least Frequency','Unique Values','Null Values','Non-Null Values','open','close']]
             
             except KeyError:
                 try:
                     #? Dataset Contains only Continuous Data
-                    stats_df = stats_df[['Plot Values','Column Name','Datatype','DataCount','Mean','Std','Min Value','25%','50%','75%','Max Value','Null Values','Non-Null Values']]
+                    stats_df = stats_df[['Plot Values','Column Name','Datatype','DataCount','Mean','Std','Min Value','25%','50%','75%','Max Value','Null Values','Non-Null Values','open','close']]
                 except KeyError:
                     #? Dataset Contains only Categorical Data
-                    stats_df = stats_df[['Plot Values','Column Name','Datatype','DataCount','Most Frequent','Frequency','Unique Values','Null Values','Non-Null Values']]
+                    stats_df = stats_df[['Plot Values','Column Name','Datatype','DataCount','Most Frequent','Most Frequency','Least Frequent','Least Frequency','Unique Values','Null Values','Non-Null Values']]
         except:
             return 2
-        return stats_df
+        
+        return stats_df     
     
     def iqr(self,arr):
         '''
