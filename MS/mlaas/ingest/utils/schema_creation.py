@@ -268,7 +268,7 @@ class SchemaClass(dt.DatasetClass):
                 if datatype_value in ['float64','float32','int32','int64']: #check if int,float,double present then set it "numerical"
                     value = "numerical"
                 elif datatype_value in ['datetime64[ns]']: #check if datetime value present then set it "timestamp"
-                    vaslue = "timestamp"
+                    value = "timestamp"
                 elif datatype_value in ['object']:  #check if object type value present then set it "text"
                         value = "text"
             attribute_type.append(value) #append type attribute value into list 
@@ -309,13 +309,19 @@ class SchemaClass(dt.DatasetClass):
                 raise IgnoreAttributeClass(500)
             select_query = self.get_query_string(column_name_list,change_column_name,column_attribute_list)
             dataframe = DBObject.get_project_detail(DBObject,connection,project_id)
-            dataset_id = dataframe['dataset_id'][0]
-            dataset_status,dataset_id,table_name = self.create_dataset(DBObject,connection,connection_string,select_query,dataset_id,method_name,dataset_name,dataset_desc,visibility)
-
+            
+            if method_name=='Save':
+                dataset_id = dataframe['link_dataset_id'][0]
+                logging.info(str(dataset_id))
+                dataset_status,table_name,dataset_id = self.update_save_dataset(DBObject,connection,connection_string,select_query,dataset_id)
+            else:
+                dataset_id = dataframe['dataset_id'][0]
+                dataset_status,dataset_id,table_name = self.create_dataset(DBObject,connection,connection_string,select_query,dataset_id,method_name,dataset_name,dataset_desc,visibility)
             if dataset_status ==0:
+                # delete_status = self.is_exist_save_dataset('')
                 schema_status = self.update_dataset_schema(DBObject,connection,project_id,dataset_id,table_name,column_name_list,change_column_name,column_datatype_list,column_attribute_list)
                 if schema_status ==True:
-                    timeline_status = self.update_timeline(project_id,dataset_id,column_name_list,column_attribute_list,change_column_name,method_name,dataset_name)
+                    # timeline_status = self.update_timeline(project_id,dataset_id,column_name_list,column_attribute_list,change_column_name,method_name,dataset_name)
                     sql_command = "UPDATE mlaas.project_tbl set link_dataset_id="+str(dataset_id)+" where project_id="+str(project_id)
                     update_status = DBObject.update_records(connection,sql_command)
                 else:
@@ -372,7 +378,7 @@ class SchemaClass(dt.DatasetClass):
             sql_command = "SELECT "+select_query+" from "+table_name # sql_query
             file_data_df = DBObject.select_records(connection,sql_command) # execute the sql command and get the dataframe
             no_of_rows = file_data_df.shape[0]
-            table_name = self.get_table_name(DBObject,connection,dataset_table_name) # get the updated table name
+            table_name = DBObject.get_table_name(connection,dataset_table_name) # get the updated table name
             page_name = "Schema mapping" 
          
               
@@ -382,8 +388,8 @@ class SchemaClass(dt.DatasetClass):
                 dataset_desc = dataset_desc
             else:
                 dataset_visibility ="private"
-
-            dataset_status,dataset_id = super(SchemaClass,self).make_dataset(DBObject,connection,dataset_name,table_name,dataset_visibility,user_name,dataset_desc,page_name,method_name,flag=1)
+            parrent_dataset_id = int(dataset_id)
+            dataset_status,dataset_id = super(SchemaClass,self).make_dataset(DBObject,connection,dataset_name,table_name,dataset_visibility,user_name,dataset_desc,page_name,parrent_dataset_id,flag=1,schema_flag=1)
             if dataset_status == 2:
                 raise DatasetAlreadyExist(500)
             
@@ -404,25 +410,11 @@ class SchemaClass(dt.DatasetClass):
             logging.error("data ingestion : ingestclass : create_dataset : " +traceback.format_exc())
             return exc.msg,None,None
     
-    def get_table_name(self,DBObject,connection,table_name):
-        """
-        function used to create table name by adding unique sequence number init.
-        Args :
-                table_name[(String)] : [Name of old table]
-        Return :
-                [String] : [return the table name]
-        """
-        logging.info("data ingestion : SchemaClass : get_table_name : execution start")
-        split_value = table_name.split('_tbl')[0].split('_')[-1] # Extract the sequence number
-        table_name = table_name.split(split_value) # split with the sequence number
-        seq = DBObject.get_sequence(connection) #get the sequence number
-        table_name = table_name[0]+str(seq['nextval'][0])+table_name[1] #create table name by joining sequence
-        logging.info("data ingestion : SchemaClass : get_table_name : execution stop")
-        return table_name
+    
 
     def update_timeline(self,project_id,dataset_id,column_name_list,column_attribute_list,change_column_name,method_type,dataset_name):
         """
-        function used to insert record all the changes done in schema mapping.
+        function used to insert record all the changes done in schema mapping into activity timeline table that performed by user.
         1)For the column been selected and target , 
         2)For the column been ignore
         3)For the column name updated
@@ -467,6 +459,7 @@ class SchemaClass(dt.DatasetClass):
                     activity = activity_description.replace('*',dataset_name)+","
                 else:
                     break
+                
             activity_description = activity[0:len(activity)-1]
             timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
             operation = activity_df[0]["operation"]
@@ -519,4 +512,43 @@ class SchemaClass(dt.DatasetClass):
         logging.info("data ingestion : SchemaClass : get_schema_column_values : execution stop")
         return column_name,column_change,target_column_lst,selected_column_lst,ignore_column_list
 
+
+    def update_save_dataset(self,DBObject,connection,connection_string,select_query,dataset_id):
+        try:
+            sql_command = "SELECT dataset_table_name,user_name,dataset_visibility from mlaas.dataset_tbl where parrent_dataset_id='"+str(dataset_id)+"' and page_name='schema mapping'"
+            logging.info(str(sql_command))
+            dataframe = DBObject.select_records(connection,sql_command)
+            dataframe = dataframe.to_records(index=False) # convert dataframe to a NumPy record
+            logger.info(str(dataframe))
+            dataset_table_name,user_name,dataset_visibility = dataframe[0]
+            dataset_table_name,user_name,dataset_visibility = str(dataset_table_name),str(user_name),str(dataset_visibility)
+            if dataset_visibility =="private":
+                table_name = user_name+"."+dataset_table_name
+            else:
+                table_name = dataset_table_name
+            # dataset_table_name = str(dataset_table_name)
+            old_table_name = table_name
+            sql_command = "SELECT "+select_query+" from "+str(table_name) # sql_query
+            file_data_df = DBObject.select_records(connection,sql_command) # execute the sql command and get the dataframe
+            no_of_rows = file_data_df.shape[0]
+            table_name = DBObject.get_table_name(connection,dataset_table_name)
+            load_dataset_status = DBObject.load_csv_into_db(connection_string,table_name,file_data_df,user_name)
+            if load_dataset_status == 1:
+                raise LoadCSVDataFailed(500)
+            else:
+                sql_command = "UPDATE mlaas.dataset_tbl SET dataset_table_name='"+str(table_name)+"',no_of_rows="+str(no_of_rows)+" where parrent_dataset_id='"+str(dataset_id)+"' and page_name='schema mapping'"
+                logging.info(str(sql_command))
+                
+                update_status = DBObject.update_records(connection,sql_command)
+                logging.info("table_name"+str(old_table_name))
+                sql_command = "drop table "+old_table_name
+                logging.info("table_name"+str(sql_command))
+                status = DBObject.delete_records(connection,sql_command)
+                sql_command = "SELECT dataset_id from mlaas.dataset_tbl Where dataset_table_name ='" + str(table_name) + "'"
+                dataset_df = DBObject.select_records(connection,sql_command)
+                # Get dataset id
+                dataset_id = int(dataset_df['dataset_id'][0])
+            return update_status,table_name,dataset_id
+        except(LoadCSVDataFailed)as exc:
+            return exc.msg
 

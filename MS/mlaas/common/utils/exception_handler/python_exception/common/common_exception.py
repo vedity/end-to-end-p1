@@ -6,10 +6,28 @@
  
  */
 '''
+class InvalidCsvName(Exception):
+    """ CSV Formate Exception """
+    def __init__(self,status_code):
+        self.msg = "Invalid file name"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+    def __str__(self):
+        return (self.msg)
+
 class InvalidCsvFormat(Exception):
     """ CSV Formate Exception """
     def __init__(self,status_code):
-        self.msg = "Invalid CSV Format"
+        self.msg = "Invalid csv format"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+    def __str__(self):
+        return (self.msg)
+
+class NumericColumnfound(Exception):
+    """  """
+    def __init__(self,status_code):
+        self.msg = "CSV column headers cannot be numeric"
         self.status_code = status_code
         self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
     def __str__(self):
@@ -152,5 +170,17 @@ class RecordNotFound(Exception):
         self.status_code = status_code
         self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
 
+    def __str__(self):
+        return (self.msg)
+
+
+
+class RowsAndColumnsRequired(Exception):
+    """  Record Not Found Exception"""
+    def __init__(self,status_code):
+        self.msg = "CSV must have multiple rows and columns"
+        self.status_code = status_code
+        self.msg = self.msg
+    
     def __str__(self):
         return (self.msg)
