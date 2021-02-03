@@ -39,23 +39,26 @@ class DatasetClass:
         # Dataset table name
         table_name = 'mlaas.dataset_tbl' 
         # Columns for dataset table.
-        cols = 'dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name' 
+        cols = 'dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name,dataset_desc,page_name,parrent_dataset_id' 
         #v1.3
         # Schema for dataset table.
         schema = "dataset_id bigserial,"\
-                 "dataset_name  text,"\
-                 "file_name  text,"\
-                 "file_size  text,"\
+                 "dataset_name text,"\
+                 "file_name text,"\
+                 "file_size text,"\
                  "no_of_rows integer NOT NULL DEFAULT 0,"\
                  "dataset_table_name  text,"\
                  "dataset_visibility text,"\
-                 "user_name  text,"\
+                 "user_name text,"\
+                 "dataset_desc text,"\
+                 "page_name text,"\
+                 "parrent_dataset_id bigserial,"\
                  "created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()" 
                  
         logging.info("data ingestion : DatasetClass : make_dataset_schema : execution end")          
         return table_name,schema,cols
 
-    def  make_dataset_records(self,dataset_name,file_name,dataset_visibility,user_name):
+    def  make_dataset_records(self,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,parrent_dataset_id,flag):
         """This function is used to make records for inserting data into table based on input dataframe.
            E.g. column_name_1,column_name_2 .......,column_name_n.
 
@@ -69,11 +72,15 @@ class DatasetClass:
             [tuple]: [it will return records in the form of tuple.]
         """
         logging.info("data ingestion : DatasetClass : make_dataset_records : execution start")
-        
-        file_path = self.get_file_path(file_name,dataset_visibility,user_name)
-        file_size = self.get_file_size(file_path)# Get size of uploaded file.
-        dataset_table_name = self.get_dataset_table_name(file_name) # Make table name for loaded csv.
-        row=dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name # Make record for dataset table.
+        if flag == None:
+            file_path = self.get_file_path(file_name,dataset_visibility,user_name)
+            file_size = self.get_file_size(file_path)# Get size of uploaded file.
+            dataset_table_name = self.get_dataset_table_name(file_name) # Make table name for loaded csv.
+        else:
+            file_size = 'null' 
+            dataset_table_name = file_name
+            file_name = 'null'
+        row=dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name,dataset_desc,page_name,parrent_dataset_id # Make record for dataset table.
         logging.info("row error"+str(row))
         row_tuples = [tuple(row)] # Convert row record into list of tuple.
         logging.info("row tuples error"+str(row_tuples))
@@ -142,7 +149,7 @@ class DatasetClass:
         
  
 
-    def make_dataset(self,DBObject,connection,dataset_name,file_name,dataset_visibility,user_name):
+    def make_dataset(self,DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,parrent_dataset_id=0,flag=None,schema_flag=0):
         """This function is used to main dataset table and also load main dataset details into database table.
            E.g. dataset details : dataset_name,file_name,file_size,dataset_table_name,user_name.
 
@@ -163,22 +170,41 @@ class DatasetClass:
         schema_status = DBObject.create_schema(connection)
         table_name,schema,cols = self.make_dataset_schema() # Get table name,schema and columns from dataset class.
         
+        if flag==None:
         #? Checking if the same dataset is there for the same user in the dataset table? If yes, then it will not insert a new row in the table
-        dataset_exist = self.dataset_exists(DBObject,connection,table_name,dataset_visibility,dataset_name,user_name)
+            dataset_exist = self.dataset_exists(DBObject,connection,table_name,dataset_visibility,dataset_name,user_name)
+            if dataset_exist == False: pass #? No dataset with same name exists so creating the new one
+            else: return 2,dataset_exist #? dataset_exists() function returns id of the dataset if dataset with same name exists
         
-        if dataset_exist == False: pass #? No dataset with same name exists so creating the new one
-        else: return 2,dataset_exist #? dataset_exists() function returns id of the dataset if dataset with same name exists
-
         create_status = DBObject.create_table(connection,table_name,schema) # Get status about dataset tableis created or not.if created then 0 else 1.
-
-        row_tuples = self.make_dataset_records(dataset_name,file_name,dataset_visibility,user_name) # Get record for dataset table.
-        logging.info("row tuples in make dataset"+str(row_tuples))
+        row_tuples = self.make_dataset_records(dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,parrent_dataset_id,flag) # Get record for dataset table.
         insert_status = DBObject.insert_records(connection,table_name,row_tuples,cols) # Get status about inserting records into dataset table. if successful then 0 else 1.
+
+        logging.info("fie_name::"+str(file_name))
+        schema_file_name = file_name
         
         # Condition will check dataset table created and data is successfully stored into project table or not.if both successful then 0 else 1. 
         if schema_status in [0,1] and create_status in [0,1] and insert_status == 0 :
-            dataset_id = self.get_dataset_id(DBObject,connection,row_tuples,user_name)
+            if flag==None:
+                file_name_update=file_name
+                file_name = None
+            dataset_id = self.get_dataset_id(DBObject,connection,row_tuples,user_name,file_name)
             status = 0 # If Successfully.
+
+            if schema_flag==0:
+                page_name='schema mapping'
+                parrent_dataset_id = int(dataset_id)
+                
+                schema_table_name = DBObject.get_table_name(connection,schema_file_name)
+                logging.info(str(schema_file_name)+"======")
+                updated_table_name = self.get_dataset_table_name(schema_table_name)
+                logging.info("update schema table name::"+str(updated_table_name))
+                row_tuples = self.make_dataset_records(dataset_name,str(updated_table_name),str(dataset_visibility),str(user_name),dataset_desc,page_name,parrent_dataset_id,flag=1)
+                insert_status = DBObject.insert_records(connection,table_name,row_tuples,cols) # Get status about inserting records into dataset table. if successful then 0 else 1.
+                logging.info(str(schema_file_name)+"======")
+                load_dataset_status,no_of_rows = self.load_dataset(DBObject,connection,connection_string,schema_file_name,dataset_visibility,user_name,updated_table_name)
+                # sql_command = "UPDATE mlaas.dataset_tbl SET no_of_rows="+str(no_of_rows)+" where dataset_id="+str(load_dataset_id)
+                # update_status = DBObject.update_records(connection,sql_command)
         else :
             status = 1 # If Failed.
             dataset_id = None
@@ -186,7 +212,7 @@ class DatasetClass:
         logging.info("data ingestion : DatasetClass : make_dataset : execution end")
         return status,dataset_id
     
-    def load_dataset(self,DBObject,connection,connection_string,file_name,dataset_visibility,user_name):
+    def load_dataset(self,DBObject,connection,connection_string,file_name,dataset_visibility,user_name,updated_table_name=None):
         """This function is used to load csv file data into database table.
 
         Args:
@@ -204,12 +230,17 @@ class DatasetClass:
         # Get file relative file path.
         file_path = self.get_file_path(file_name,dataset_visibility,user_name)
         # Get dataframe of the file data.
+        logging.info("fie_path"+str(file_path))
         file_data_df = DBObject.read_data(file_path)
         # logging.info("file_data_df :"+str(file_data_df))
         # Get number of rows.
         no_of_rows = file_data_df.shape[0]
         # Get table name.
-        table_name = self.get_dataset_table_name(file_name)
+        if updated_table_name==None:
+            table_name = self.get_dataset_table_name(file_name)
+        else:
+            table_name = updated_table_name
+            logging.info("table_name"+str(table_name))
         if dataset_visibility.lower() == "public" :
             user_name = "public"
         else:
@@ -222,7 +253,7 @@ class DatasetClass:
         logging.info("data ingestion : DatasetClass : load_dataset : execution end")
         return load_dataset_status,no_of_rows
     
-    def get_dataset_id(self,DBObject,connection,row_tuples,user_name):
+    def get_dataset_id(self,DBObject,connection,row_tuples,user_name,file_name):
         """This function is used to get dataset id of the created dataset.
 
         Args:
@@ -240,12 +271,15 @@ class DatasetClass:
         # Get dataset name.
         logging.info("index of list",str(row_tuples))
         dataset_name,*_ = row_tuples[0]
-        
+
         logging.debug("data ingestion : DatasetClass : get_dataset_id : this will excute select query on table name : "+table_name +" based on dataset name : "+dataset_name + " user name : "+user_name)
         dataset_name=str(dataset_name).replace("'","''")
         # Prepare select sql command to fetch dataset id from dataset table for particular user.
         dataset_name=str(dataset_name).replace("'","''")
-        sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_name ='" + dataset_name + "' and user_name = '"+ user_name + "'"
+        if file_name == None:
+            sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_name ='" + dataset_name + "' and user_name = '"+ user_name + "'"
+        else:
+            sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_table_name ='" + str(file_name) + "'"
         logging.info("dataset_id"+str(sql_command))
         # Get dataframe of dataset id. 
         dataset_df = DBObject.select_records(connection,sql_command)
@@ -271,7 +305,8 @@ class DatasetClass:
         
         logging.debug("data ingestion : DatasetClass : show_dataset_details : this will excute select query on table name : "+str(table_name) +" based on user name : "+str(user_name))
         # This command is used to get dataset details from dataset table of database.
-        sql_command = "SELECT * FROM "+ table_name + " WHERE (USER_NAME ='"+ user_name +"' OR dataset_visibility='public')"
+        sql_command = "SELECT * FROM "+ table_name + " WHERE (USER_NAME ='"+ user_name +"' OR dataset_visibility='public') and page_name='Create dataset'"
+        logger.info(str(sql_command)+"-----------------------------------")
         data=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         logging.info("data ingestion : DatasetClass : show_dataset_details : execution end")
         return data
@@ -311,7 +346,7 @@ class DatasetClass:
         
         
         logging.debug("data ingestion : DatasetClass : show_data_details : this will excute select query on table name : "+ user_name +'.' + dataset_table_name )
-        dataset_table_name=user_name +'.' + dataset_table_name 
+        dataset_table_name=user_name +'."' + dataset_table_name +'"'
         sql_command=DBObject.pagination(connection,dataset_table_name,start_index,length,sort_type,sort_index,global_value,customefilter)
         # sql_command = 'SELECT * FROM '
         # Get dataframe of loaded csv.

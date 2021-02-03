@@ -237,7 +237,7 @@ class ScheamColumnListClass(APIView):
                 """
                 This class is used to post  schema column list.
                 It will take url string as mlaas/dataset_schema/column_attribute_list/.
-
+        
                 Args  : 
                         
                         
