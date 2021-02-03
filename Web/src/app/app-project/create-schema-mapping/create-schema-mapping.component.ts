@@ -32,11 +32,11 @@ export class CreateSchemaMappingComponent implements OnInit {
   ngOnInit(): void {
     this.displaydiv=true;
     this.getColumnAttributeList();
-    this.getSchema(this.project_id);
+    this.getSchema(this.project_id,this.dataset_id);
   }
 
-  getSchema(datasetid) {
-    this.apiService.getDatasetSchema(datasetid).subscribe(
+  getSchema(projectid,datasetid) {
+    this.apiService.getDatasetSchema(projectid,datasetid).subscribe(
       logs => this.successHandler(logs),
       error => this.errorHandler(error)
     )
@@ -101,14 +101,16 @@ export class CreateSchemaMappingComponent implements OnInit {
     this.loaderdiv=false;
     if (data.status_code == "200"){
       this.toaster.success(data.error_msg,"Success");
-      this.getSchema(this.project_id);
+      this.getSchema(this.project_id,this.dataset_id);
+
     }
     else
       this.errorHandler(data);
   }
 
   reset(){
-    this.getSchema(this.project_id);
+    this.getSchema(this.project_id,this.dataset_id);
+
   }
 
   changeattrinute(value,i){

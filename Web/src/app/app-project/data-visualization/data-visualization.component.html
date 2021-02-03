@@ -50,11 +50,10 @@
                         <input type="radio" class="custom-control-input" id="countplot" (change)="chartchange('countplot')" name="customRadio">
                         <label class="custom-control-label" for="countplot">Count Plot</label>
                     </div>
-                    <!-- <div class="custom-control custom-radio custom-radio-warning mb-2">
-                        <input type="radio" class="custom-control-input" id="heatmap" (change)="chartchange('heatmap')"
-                            name="customRadio">
+                    <div class="custom-control custom-radio custom-radio-warning mb-2">
+                        <input type="radio" class="custom-control-input" id="heatmap" (change)="chartchange('heatmap')" name="customRadio">
                         <label class="custom-control-label" for="heatmap">Heat Map</label>
-                    </div> -->
+                    </div>
                     <div class="mb-3 mt-4">
                         <h4 class="mb-3">Column Select</h4>
                         <ng-select [items]="selectValue" [closeOnSelect]="false" [multiple]="true"></ng-select>

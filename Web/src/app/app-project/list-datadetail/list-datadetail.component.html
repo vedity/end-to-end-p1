@@ -24,9 +24,9 @@
                             <table datatable *ngIf="columnlist" [dtOptions]="dtOptions" (keyup)="onFilterchange($event);" class="table table-centered  table-nowrap" style="width: 100%;">
                                 <thead>
                                     <tr class="thead-light">
-                                        <th *ngFor="let item of columnlist">
+                                        <th *ngFor="let item of columnlist;let colindex=index">
                                             {{item.data}}
-                                            <input class="form-control filter" type="text" [hidden]="filter" name="search-{{item.data}}" id="{{item.data}}" />
+                                            <input class="form-control filter" type="text" [hidden]="filter" name="search-{{item.data}}" id="col-{{colindex}}" />
                                         </th>
                                     </tr>
                                 </thead>
