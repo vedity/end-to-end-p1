@@ -109,6 +109,14 @@ def menu_nested_format(dataset_json1,dataset_json2):
     return json_data1
 
 def get_column_name(column_name):
+    """this function used to extract the column name from the list of dictonery of csv data.
+
+    Args:
+        column_name [(list)] : [list of dictonery with keys as column_name and value as csv data]
+        
+    return:
+        [list] :[return the list of column name]
+    """
     json_list=[]
     column_list = list(column_name[0].keys())
     for i in column_list:
@@ -119,6 +127,16 @@ def get_column_name(column_name):
     return json_list
 
 def get_schema_format(column_name,predicted_datatype):
+    """this function used to create json formated data for schema page.
+
+    Args:
+        column_name [(list)] : [list of column_name]
+        predicted_datatype [(list)] : [list of datatype]
+
+    return:
+        [list] :[return the list of dictonery]
+        
+    """
     json_data = []
     for x in range(1,len(column_name)):
         temp_dict = {
