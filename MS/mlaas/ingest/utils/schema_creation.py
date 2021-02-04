@@ -324,7 +324,7 @@ class SchemaClass(dt.DatasetClass):
             dataframe = DBObject.get_project_detail(DBObject,connection,project_id)
             
             if method_name=='Save':
-                original_dataset_id = dataframe['dataset_id'][0]
+                original_dataset_id = dataframe['original_dataset_id'][0]
                 logging.info(str(original_dataset_id))
                 dataset_status,table_name,old_table_name,original_dataset_id = self.update_save_dataset(DBObject,connection,connection_string,select_query,original_dataset_id)
             else:
@@ -385,6 +385,7 @@ class SchemaClass(dt.DatasetClass):
             dataframe = dataframe.to_records(index=False) # convert dataframe to a NumPy record
             dataset_name,dataset_table_name,user_name,dataset_visibility,_,dataset_desc = dataframe[0]
             dataset_name,dataset_table_name,user_name,dataset_visibility,dataset_desc = str(dataset_name),str(dataset_table_name),str(user_name),str(dataset_visibility),str(dataset_desc)
+            
             if dataset_visibility =="private":
                 table_name = user_name+"."+dataset_table_name
             else:
@@ -394,13 +395,13 @@ class SchemaClass(dt.DatasetClass):
             no_of_rows = file_data_df.shape[0]
             table_name = DBObject.get_table_name(connection,dataset_table_name) # get the updated table name
 
-            page_name = "Schema mapping" 
-            dataset_name = dataset_name 
-            dataset_visibility = visibility
+            page_name = "Schema mapping"  
+            dataset_name = dataset_name #assign dataset name
+            dataset_visibility = visibility #assign visibility 
             dataset_desc = dataset_desc
-            parrent_dataset_id = int(original_dataset_id)
+            parent_dataset_id = int(original_dataset_id)
 
-            dataset_status,original_dataset_id = super(SchemaClass,self).make_dataset(DBObject,connection,connection_string,dataset_name,table_name,dataset_visibility,user_name,dataset_desc,page_name,parrent_dataset_id,flag=1,schema_flag=1)
+            dataset_status,original_dataset_id = super(SchemaClass,self).make_dataset(DBObject,connection,connection_string,dataset_name,table_name,dataset_visibility,user_name,dataset_desc,page_name,parent_dataset_id,flag=1,schema_flag=1)
             if dataset_status == 2:
                 raise DatasetAlreadyExist(500)
             
@@ -507,6 +508,7 @@ class SchemaClass(dt.DatasetClass):
         ignore_column_list = []
         column_name=[]
         column_change = []
+        #extract the list by attribute type
         for index in range(len(column_attribute_list)):
             if column_attribute_list[index]=='target':
                 target_column_lst.append(change_column_name[index])
@@ -525,13 +527,25 @@ class SchemaClass(dt.DatasetClass):
 
 
     def update_save_dataset(self,DBObject,connection,connection_string,select_query,original_dataset_id):
+        """
+        function will create new table with changes done in schema page and update the table name with old  table name and delete the old table
+        Args :
+                select_query[(String)]: [query string to select records ]
+                original_dataset_id[(Integer)] : [Id of the dataset ]
+        Return : 
+                update_status[Integer] : [return 0 if successfull or 1 failed]
+                table_name[String] : [return the updated table name]
+                dataset_table_name[String] : [return old table name]
+                original_dataset_id[Integer] : [Id of the dataset]
+        """
         try:
-            sql_command = "SELECT dataset_table_name,user_name,dataset_visibility from mlaas.dataset_tbl where parrent_dataset_id='"+str(original_dataset_id)+"' and page_name='schema mapping'"
-            
+            logging.info("data ingestion : SchemaClass : update_save_dataset : execution start")
+            sql_command = "SELECT dataset_table_name,user_name,dataset_visibility from mlaas.dataset_tbl where parent_dataset_id='"+str(original_dataset_id)+"' and page_name='schema mapping'"
+            logging.info(str(sql_command)+"++++++++++++++++++++")
             dataframe = DBObject.select_records(connection,sql_command)
             dataframe = dataframe.to_records(index=False) # convert dataframe to a NumPy record
-
-            dataset_table_name,user_name,dataset_visibility = dataframe[0]
+            
+            dataset_table_name,user_name,dataset_visibility = dataframe[0] #Get all dataset table details into respective variables
             dataset_table_name,user_name,dataset_visibility = str(dataset_table_name),str(user_name),str(dataset_visibility)
             if dataset_visibility =="private":
                 table_name = user_name+"."+dataset_table_name
@@ -545,16 +559,19 @@ class SchemaClass(dt.DatasetClass):
             no_of_rows = file_data_df.shape[0]
             table_name = DBObject.get_table_name(connection,dataset_table_name)
             
+            #load the dataframe into table
             load_dataset_status = DBObject.load_csv_into_db(connection_string,table_name,file_data_df,user_name)
             if load_dataset_status == 1:
                 raise LoadCSVDataFailed(500)
             else:
-                sql_command = "UPDATE mlaas.dataset_tbl SET dataset_table_name='"+str(table_name)+"',no_of_rows="+str(no_of_rows)+" where parrent_dataset_id='"+str(original_dataset_id)+"' and page_name='schema mapping'"
+                #command will update the dataset_table_name with new table name and update te no_of_rows
+                sql_command = "UPDATE mlaas.dataset_tbl SET dataset_table_name='"+str(table_name)+"',no_of_rows="+str(no_of_rows)+" where parent_dataset_id='"+str(original_dataset_id)+"' and page_name='schema mapping'"
                 update_status = DBObject.update_records(connection,sql_command)
                 
+                #command will drop the old table
                 sql_command = "drop table "+old_table_name
                 status = DBObject.delete_records(connection,sql_command)
-
+            logging.info("data ingestion : SchemaClass : update_save_dataset : execution stop")
             return update_status,table_name,dataset_table_name,original_dataset_id
         except(LoadCSVDataFailed)as exc:
             return exc.msg

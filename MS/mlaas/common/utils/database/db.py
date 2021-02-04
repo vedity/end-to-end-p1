@@ -478,6 +478,7 @@ class DBClass:
         """
         
         sql_command = 'SELECT dataset_table_name,dataset_visibility,user_name FROM mlaas.dataset_tbl  Where original_dataset_id='+ str(original_dataset_id)
+        logging.info("++++++"+str(sql_command))
         dataset_df = self.select_records(connection,sql_command) #get the dataframe for that perticular dataset id if present ortherwise None 
         if len(dataset_df) == 0 or dataset_df is None:
             return None

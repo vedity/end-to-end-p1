@@ -39,7 +39,7 @@ class DatasetClass:
         # Dataset table name
         table_name = 'mlaas.dataset_tbl' 
         # Columns for dataset table.
-        cols = 'dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name,dataset_desc,page_name,parrent_dataset_id' 
+        cols = 'dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name,dataset_desc,page_name,parent_dataset_id' 
         #v1.3
         # Schema for dataset table.
         schema = "original_dataset_id bigserial,"\
@@ -52,13 +52,13 @@ class DatasetClass:
                  "user_name text,"\
                  "dataset_desc text,"\
                  "page_name text,"\
-                 "parrent_dataset_id bigserial,"\
+                 "parent_dataset_id bigserial,"\
                  "created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()" 
                  
         logging.info("data ingestion : DatasetClass : make_dataset_schema : execution end")          
         return table_name,schema,cols
 
-    def  make_dataset_records(self,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,parrent_dataset_id,flag):
+    def  make_dataset_records(self,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,parent_dataset_id,flag):
         """This function is used to make records for inserting data into table based on input dataframe.
            E.g. column_name_1,column_name_2 .......,column_name_n.
 
@@ -81,7 +81,7 @@ class DatasetClass:
             file_size = 'null' 
             dataset_table_name = file_name
             file_name = 'null'
-        row=dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name,dataset_desc,page_name,parrent_dataset_id # Make record for dataset table.
+        row=dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name,dataset_desc,page_name,parent_dataset_id # Make record for dataset table.
         logging.info("row error"+str(row))
         row_tuples = [tuple(row)] # Convert row record into list of tuple.
         logging.info("row tuples error"+str(row_tuples))
@@ -150,7 +150,7 @@ class DatasetClass:
         
  
 
-    def make_dataset(self,DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,parrent_dataset_id=0,flag=None,schema_flag=0):
+    def make_dataset(self,DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,parent_dataset_id=0,flag=None,schema_flag=0):
         """This function is used to main dataset table and also load main dataset details into database table.
            E.g. dataset details : dataset_name,file_name,file_size,dataset_table_name,user_name.
 
@@ -178,7 +178,7 @@ class DatasetClass:
             else: return 2,dataset_exist #? dataset_exists() function returns id of the dataset if dataset with same name exists
         
         create_status = DBObject.create_table(connection,table_name,schema) # Get status about dataset tableis created or not.if created then 0 else 1.
-        row_tuples = self.make_dataset_records(dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,parrent_dataset_id,flag) # Get record for dataset table.
+        row_tuples = self.make_dataset_records(dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,parent_dataset_id,flag) # Get record for dataset table.
         insert_status = DBObject.insert_records(connection,table_name,row_tuples,cols) # Get status about inserting records into dataset table. if successful then 0 else 1.
 
         # logging.info("fie_name::"+str(file_name)) ####
@@ -193,13 +193,13 @@ class DatasetClass:
 
             if schema_flag==0:
                 page_name='schema mapping'
-                parrent_dataset_id = int(original_dataset_id)
+                parent_dataset_id = int(original_dataset_id)
                 
                 schema_table_name = DBObject.get_table_name(connection,schema_file_name)
                 # logging.info(str(schema_file_name)+"======")####
                 updated_table_name = self.get_dataset_table_name(schema_table_name)
                 # logging.info("update schema table name::"+str(updated_table_name))####
-                row_tuples = self.make_dataset_records(dataset_name,str(updated_table_name),str(dataset_visibility),str(user_name),dataset_desc,page_name,parrent_dataset_id,flag=1)
+                row_tuples = self.make_dataset_records(dataset_name,str(updated_table_name),str(dataset_visibility),str(user_name),dataset_desc,page_name,parent_dataset_id,flag=1)
                 insert_status = DBObject.insert_records(connection,table_name,row_tuples,cols) # Get status about inserting records into dataset table. if successful then 0 else 1.
                 # logging.info(str(schema_file_name)+"======")####
                 load_dataset_status,no_of_rows = self.load_dataset(DBObject,connection,connection_string,schema_file_name,dataset_visibility,user_name,updated_table_name)
@@ -278,10 +278,10 @@ class DatasetClass:
         # Prepare select sql command to fetch dataset id from dataset table for particular user.
         dataset_name=str(dataset_name).replace("'","''")
         if file_name == None:
-            sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_name ='" + dataset_name + "' and user_name = '"+ user_name + "' and page_name in ('Create dataset','Create Project')"
+            sql_command = "SELECT original_dataset_id from "+ table_name + " Where dataset_name ='" + dataset_name + "' and user_name = '"+ user_name + "' and page_name in ('Create dataset','Create Project')"
         else:
-            sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_table_name ='" + str(file_name) + "' and page_name in ('Create dataset','Create Project')"
-        logging.info("dataset_id"+str(sql_command))
+            sql_command = "SELECT original_dataset_id from "+ table_name + " Where dataset_table_name ='" + str(file_name) + "' "
+        logging.info("original_dataset_id"+str(sql_command))
         # Get dataframe of dataset id. 
         dataset_df = DBObject.select_records(connection,sql_command)
         # Get dataset id.
@@ -493,22 +493,22 @@ class DatasetClass:
             dataset_name=str(dataset_name).replace("'","''")
             if dataset_visibility == 'public':
                 #? Is there any(public & private) dataset with same name?
-                sql_command = f"SELECT DATASET_ID FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' and page_name in ('Create dataset','Create Project')"
+                sql_command = f"SELECT original_dataset_id FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' and page_name in ('Create dataset','Create Project')"
                 #! Possible Security Issue: User will get to know that some other user has private dataset with same name
             else:
                 #? Is there any public dataset with same name?
-                sql_command = f"SELECT DATASET_ID FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND DATASET_VISIBILITY = 'public' and page_name in ('Create dataset','Create Project')"
+                sql_command = f"SELECT original_dataset_id FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND DATASET_VISIBILITY = 'public' and page_name in ('Create dataset','Create Project')"
                 data_df=DBObject.select_records(connection,sql_command)
                 data=len(data_df)
 
                 if data == 0:
                     #? No public dataset with same name
                     #? Is there any private dataset from you with same name?
-                    sql_command = f"SELECT DATASET_ID FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND USER_NAME = '{user_name}' and page_name in ('Create dataset','Create Project')"
+                    sql_command = f"SELECT original_dataset_id FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND USER_NAME = '{user_name}' and page_name in ('Create dataset','Create Project')"
                 else:
                     #! There is a public dataset with your name
-                    logging.debug(f"data ingestion  :  DatasetClass  :  dataset_exist  :  A public dataset with the same dataset_name exists at dataset_id = {int(data_df['dataset_id'][0])}")
-                    return int(data_df['dataset_id'][0])
+                    logging.debug(f"data ingestion  :  DatasetClass  :  dataset_exist  :  A public dataset with the same dataset_name exists at original_dataset_id = {int(data_df['original_dataset_id'][0])}")
+                    return int(data_df['original_dataset_id'][0])
             data_df=DBObject.select_records(connection,sql_command)
             data=len(data_df)
             
