@@ -65,6 +65,37 @@ class DBClass:
             return None,None
             
         return connection,connection_string
+
+    def create_sequence(self,connection):
+        cursor = connection.cursor()
+        try:
+            sql_command = 'CREATE SEQUENCE dataset_sequence INCREMENT 1 START 1;'
+            cursor.execute(sql_command)
+            connection.commit()
+            cursor.close()
+            return 0
+        except (Exception,psycopg2.DatabaseError) as error:
+            connection.rollback() # Rollback the changes.
+            cursor.close() # Close the cursor
+            return 1 # If failed.
+
+    def get_sequence(self,connection):
+        sql_command = "select nextval('dataset_sequence')"
+        data = self.select_records(connection, sql_command)
+        return data
+
+    def is_exist_sequence(self,connection,seq_name):
+        sql_command = "SELECT * FROM information_schema.sequences where sequence_name ='"+ seq_name +"'"
+        data=self.select_records(connection,sql_command) #call select_records which return data if found else None
+        if len(data) == 0: # check whether length of data is empty or not
+            data = self.create_sequence(connection)
+            if data == 0:
+                return "True"
+            else :
+                return "False"
+        else:
+            return "True"
+
     #v1.3
     def create_schema(self,connection,user_name = None):
         """This function is used to create schema.
@@ -131,10 +162,12 @@ class DBClass:
         tuples = row_tuples # Get record for database insert query.
         logging.info("cols"+str(cols))
         query = "INSERT INTO %s(%s) VALUES %%s" % (table_name, cols) # Make query
+        
         cursor = connection.cursor() # Open cursor for database.
         try:
             extras.execute_values(cursor, query, tuples) # Excute insert query.
             connection.commit() # Commit the changes.
+            cursor.close()
             return 0 # If successfully inserted.
         except (Exception, psycopg2.DatabaseError) as error:
             connection.rollback() # Rollback the changes.
@@ -253,14 +286,14 @@ class DBClass:
         Returns:
             [integer]: [it will return status of loaded data into database table. if successfully then 0 else 1.]
         """
-        change_col,unchange_col = self.column_rename(file_data_df)
+        # change_col,unchange_col = self.column_rename(file_data_df)
 
 
         
-        for i in range(len(change_col)): # this loop will rename the updated column name into he dataframe column
-            var_1=change_col[i]
-            var_2=unchange_col[i]
-            file_data_df.rename(columns={var_2:var_1},inplace=True)
+        # for i in range(len(change_col)): # this loop will rename the updated column name into he dataframe column
+        #     var_1=change_col[i]
+        #     var_2=unchange_col[i]
+        #     file_data_df.rename(columns={var_2:var_1},inplace=True)
             
         #logging.info("------------changed column "+str(file_data_df))
         engine = create_engine(connection_string) # Create database engine.
@@ -327,6 +360,7 @@ class DBClass:
         """ 
         
         col_table_name=table_name.partition(".")[2] #trim from the string and get the table name
+        col_table_name=col_table_name[1:-1]
         columns_list=self.get_column_names(connection,col_table_name) #get the column list    
         if sort_type =="asc" and  str(sort_index) == "0":  #check if value sort_type and sort_index is empty
             order_clause=f'ORDER BY "{columns_list[0]}"'
@@ -466,7 +500,7 @@ class DBClass:
         if dataset_visibility.lower() == 'public':
             user_name = 'public'
     
-        sql_command = 'SELECT * FROM '+ user_name +'.' + dataset_table_name 
+        sql_command = 'SELECT * FROM '+ user_name +'."' + dataset_table_name +'"' 
         data_details_df = self.select_records(connection,sql_command)
         data_details_df=data_details_df.to_json(orient='records') # transform dataframe based on record
         data_details_df = json.loads(data_details_df)  #convert data_details_df into dictonery
@@ -474,15 +508,14 @@ class DBClass:
     
 
     
-
-    def get_dataset_tablename(self,DBObject,connection,dataset_id):
+    def get_dataset_detail(self,DBObject,connection,dataset_id):
         '''This function is used to get dataset table name from datasetid
         Args:
                 dataset_id[(Integer)] : [Id of the dataset table]
         Return : 
                 [Dataframe] : [return the dataframe of dataset table ]
         '''
-        sql_command = "SELECT dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows from mlaas.dataset_tbl Where dataset_id =" + str(dataset_id)
+        sql_command = "SELECT dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows,dataset_desc from mlaas.dataset_tbl Where dataset_id =" + str(dataset_id)
         dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         return dataset_df 
     
@@ -493,10 +526,25 @@ class DBClass:
         Return : 
                 [Dataframe] : [return the dataframe of project table]
         '''
-        sql_command = "SELECT DATASET_TABLE_NAME FROM mlaas.dataset_tbl WHERE DATASET_ID ='"+ dataset_id +"'"
+        sql_command = "SELECT dataset_id,link_dataset_id from mlaas.project_tbl where project_id='"+ project_id +"'"
         dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         return dataset_df
-        
+    
+    def get_table_name(self,connection,table_name):
+        """
+        function used to create table name by adding unique sequence number init.
+        Args :
+                table_name[(String)] : [Name of old table]
+        Return :
+                [String] : [return the table name]
+        """
+        logging.info("data ingestion : SchemaClass : get_table_name : execution start")
+        split_value = table_name.split('_tbl')[0].split('_')[-1] # Extract the sequence number
+        table_name = table_name.split(split_value) # split with the sequence number
+        seq = self.get_sequence(connection) #get the sequence number
+        table_name = table_name[0]+str(seq['nextval'][0])+table_name[1] #create table name by joining sequence
+        logging.info("data ingestion : SchemaClass : get_table_name : execution stop")
+        return table_name
 
     # def column_rename(self,file_data_df):
     #     """This function is used to rename column of dataframe for % , ( , ) this special characters.

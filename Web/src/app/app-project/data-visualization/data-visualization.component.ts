@@ -297,89 +297,89 @@ export class DataVisualizationComponent implements OnInit {
       }
     };
 
-    // this.heatmapchart = {
-    //   series: [
-    //     {
-    //       name: "Jan",
-    //       data: this.generateData(20, {
-    //         min: -30,
-    //         max: 55
-    //       })
-    //     },
-    //     {
-    //       name: "Feb",
-    //       data: this.generateData(20, {
-    //         min: -30,
-    //         max: 55
-    //       })
-    //     },
-    //     {
-    //       name: "Mar",
-    //       data: this.generateData(20, {
-    //         min: -30,
-    //         max: 55
-    //       })
-    //     },
-    //     {
-    //       name: "Apr",
-    //       data: this.generateData(20, {
-    //         min: -30,
-    //         max: 55
-    //       })
-    //     },
-    //     {
-    //       name: "May",
-    //       data: this.generateData(20, {
-    //         min: -30,
-    //         max: 55
-    //       })
-    //     },
-    //     {
-    //       name: "Jun",
-    //       data: this.generateData(20, {
-    //         min: -30,
-    //         max: 55
-    //       })
-    //     },
-    //     {
-    //       name: "Jul",
-    //       data: this.generateData(20, {
-    //         min: -30,
-    //         max: 55
-    //       })
-    //     },
-    //     {
-    //       name: "Aug",
-    //       data: this.generateData(20, {
-    //         min: -30,
-    //         max: 55
-    //       })
-    //     },
-    //     {
-    //       name: "Sep",
-    //       data: this.generateData(20, {
-    //         min: -30,
-    //         max: 55
-    //       })
-    //     }
-    //   ],
-    //   chart: {
-    //     height: 350,
-    //     type: "heatmap"
-    //   },
-    //   colors: ["#ff0000"],
-    //   plotOptions: {
-    //     heatmap: {
-    //       shadeIntensity: 0.5,
-    //     }
-    //   },
-    //   dataLabels: {
-    //     enabled: false
-    //   },
-    //   title: {
-    //     text: "HeatMap Chart with Color Range"
-    //   }
-    // };
+    this.heatmapchart = {
+      series: [
+        {
+          name: "Jan",
+          data: this.generateData(20, {
+            min: -30,
+            max: 55
+          })
+        },
+        {
+          name: "Feb",
+          data: this.generateData(20, {
+            min: -30,
+            max: 55
+          })
+        },
+        {
+          name: "Mar",
+          data: this.generateData(20, {
+            min: -30,
+            max: 55
+          })
+        },
+        {
+          name: "Apr",
+          data: this.generateData(20, {
+            min: -30,
+            max: 55
+          })
+        },
+        {
+          name: "May",
+          data: this.generateData(20, {
+            min: -30,
+            max: 55
+          })
+        },
+        {
+          name: "Jun",
+          data: this.generateData(20, {
+            min: -30,
+            max: 55
+          })
+        },
+        {
+          name: "Jul",
+          data: this.generateData(20, {
+            min: -30,
+            max: 55
+          })
+        },
+        {
+          name: "Aug",
+          data: this.generateData(20, {
+            min: -30,
+            max: 55
+          })
+        },
+        {
+          name: "Sep",
+          data: this.generateData(20, {
+            min: -30,
+            max: 55
+          })
+        }
+      ],
+      chart: {
+        height: 350,
+        type: "heatmap"
+      },
+      colors: ["#ff0000"],
+      plotOptions: {
+        heatmap: {
+          shadeIntensity: 0.5,
+        }
+      },
+      dataLabels: {
+        enabled: false
+      },
+      title: {
+        text: "HeatMap Chart with Color Range"
+      }
+    };
   }
 
   public generateData(count, yrange) {
@@ -395,6 +395,8 @@ export class DataVisualizationComponent implements OnInit {
       });
       i++;
     }
+    console.log(series);
+    
     return series;
   }
 

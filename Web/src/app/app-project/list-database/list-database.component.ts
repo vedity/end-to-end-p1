@@ -18,7 +18,7 @@ export class ListDatabaseComponent implements OnInit {
   datatableElement: DataTableDirective;
   dtOptions: DataTables.Settings = {
     scrollCollapse: true,
-    scrollY: "calc(100vh - 420px)",
+    scrollY: "calc(100vh - 520px)",
   };
   dtTrigger: Subject<any> = new Subject<any>();
   data: createdataset = new createdataset();

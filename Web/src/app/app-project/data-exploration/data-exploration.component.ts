@@ -19,6 +19,7 @@ export class DataExplorationComponent implements OnInit {
   finaldata: any = [];
   columnlabelChart: any;
   columnlabelChartexpand: any;
+  boxplotChartexpand: any;
   animation = "progress-dark";
   theme = {
     'border-radius': '5px',
@@ -92,6 +93,8 @@ export class DataExplorationComponent implements OnInit {
         }
       },
     };
+
+
     this.getExplorationData(this.dataset_id);
   }
 
@@ -108,7 +111,7 @@ export class DataExplorationComponent implements OnInit {
     if (logs.status_code == "200") {
       this.exploredData = logs.response;
       var data = this.groupBy(this.exploredData, "Datatype");
-      this.continuousexploredata = data["Continious"];
+      this.continuousexploredata = data["Continuous"];
       this.categoricalexploredata = data["Categorical"];
       this.loaderdiv = false;
       this.finaldata = logs.response;
@@ -135,6 +138,7 @@ export class DataExplorationComponent implements OnInit {
   }
 
   modeltitle: any;
+  hideboxplot=true;
   centerModal(centerDataModal: any, obj) {
     this.modeltitle = obj["Column Name"];
     this.columnlabelChartexpand = {
@@ -169,6 +173,57 @@ export class DataExplorationComponent implements OnInit {
         offsetY: 0,
       }
     };
+
+    if(obj["open"]!=null){
+      this.boxplotChartexpand = {
+        series: [
+          {
+            name: "candle",
+            data: 
+            [
+              {
+                x: obj["Column Name"] ,
+                y: [obj["open"], obj["25%"], obj["75%"], obj["close"]]
+              },
+              {
+                x: obj["Column Name"] ,
+                y: [obj["open"], obj["25%"], obj["50%"], obj["75%"]]
+              },
+              {
+                x: obj["Column Name"] ,
+                y: [obj["close"], obj["25%"], obj["50%"], obj["75%"]]
+              },
+              {
+                x: obj["Column Name"] ,
+                y: [obj["25%"], obj["open"], obj["close"], obj["75%"]]
+              }
+              
+              
+            ]
+          }
+        ],
+        chart: {
+          type: "candlestick",
+          height: '500px'
+        },
+        title: {
+          text: "CandleStick Chart",
+          align: "left"
+        },
+        xaxis: {
+          type: "string"
+        },
+        yaxis: {
+          tooltip: {
+            enabled: true
+          }
+        }
+      };
+   
+   this.hideboxplot=false }
+    else{
+      this.hideboxplot=true;
+    }
     this.modalService.open(centerDataModal, { centered: true, windowClass: 'modal-holder' });
   }
 }

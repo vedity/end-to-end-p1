@@ -208,29 +208,3 @@ canvas {
     right: 260px;
     margin-top: 5px;
 }
-
-.modal-body {
-    ul {
-        border: 2px solid #34c38f;
-        width: 198px;
-        float: right;
-        margin-bottom: 15px;
-    }
-    .nav-pills .nav-link.active,
-    .nav-pills .show>.nav-link {
-        color: #fff;
-        background-color: rgba(52, 195, 143, 0.5);
-        border-radius: 0px !important;
-        font-weight: normal;
-    }
-    a {
-        font-size: 14px;
-    }
-    .nav-tabs-custom .nav-item .nav-link::after {
-        display: none !important;
-    }
-}
-
-.exploration-row {
-    height: calc(100vh - 325px);
-}

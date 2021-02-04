@@ -29,6 +29,7 @@ import { ManageSchemaMappingComponent } from './manage-schema-mapping/manage-sch
 import { DataExplorationComponent } from './data-exploration/data-exploration.component';
 import { DataVisualizationComponent } from './data-visualization/data-visualization.component';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { DataCleanupComponent } from './data-cleanup/data-cleanup.component';
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   suppressScrollX: true,
@@ -44,6 +45,7 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     CreateSchemaMappingComponent, 
     DataExplorationComponent, 
     DataVisualizationComponent,
+    DataCleanupComponent,
     ManageSchemaMappingComponent,
   ],
   imports: [

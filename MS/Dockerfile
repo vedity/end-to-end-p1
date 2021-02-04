@@ -1,7 +1,7 @@
 FROM tiangolo/uwsgi-nginx-flask
 COPY requirements.txt .
 RUN pip install -r requirements.txt
-
+ 
 WORKDIR /opt/spark
 # Get and install software
 RUN apt -y upgrade && apt -y update 
@@ -13,7 +13,7 @@ RUN \
   #tar xvf scala-2.12.0.tgz && \
   #mv scala-2.12.0 /usr/local/scala && \ 
   tar xvf spark-3.0.1-bin-hadoop2.7.tgz
-
+ 
 # Environment variables
 ENV SPARK_HOME=/opt/spark/spark-3.0.1-bin-hadoop2.7 \
     PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin

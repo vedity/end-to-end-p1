@@ -134,7 +134,7 @@ class InvalidColumnName(Exception):
     def __init__(self,status_code):
         self.msg = "Column name contains ( , )  or % "
         self.status_code = status_code
-        self.msg = self.msg
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
      
     def __str__(self):
         return (self.msg)
@@ -182,6 +182,16 @@ class IgnoreAttributeClass(Exception):
     """  """
     def __init__(self,status_code):
         self.msg = "All attribute type are Ignore"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)
+
+class RowsColumnRequired(Exception):
+    """  """
+    def __init__(self,status_code):
+        self.msg = "CSV must have multiple rows and columns"
         self.status_code = status_code
         self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
      
