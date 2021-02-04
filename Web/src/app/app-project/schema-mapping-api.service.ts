@@ -31,7 +31,7 @@ export class SchemaMappingApiService {
   }
 
   getDatasetSchema(project_id,dataset_id): Observable<any> {
-    var params = new HttpParams().append("project_id", dataset_id).append("dataset_id",project_id);
+    var params = new HttpParams().append("project_id", project_id).append("dataset_id",dataset_id);
     return this.httpClient.get(this.baseUrl + "ingest/dataset_schema/", { headers: this.headers, params });
   }
 

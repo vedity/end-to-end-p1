@@ -222,12 +222,12 @@ class CreateDatasetClass(APIView):
                                         return Response({"status_code":500,"error_msg":"Invalid CSV Format","response":"false"})
                                         
                                                                     
-                                # file_check_status = IngestionObj.check_file(file,file_data)  # call check_file function to verify csv file data
+                                file_check_status = IngestionObj.check_file(file,file_data)  # call check_file function to verify csv file data
                                 
-                                # if file_check_status !=True:
-                                #         status_code,error_msg=get_Status_code(file_check_status) # extract the status_code and error_msg from file_check_status
-                                #         logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+error_msg)
-                                #         return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                                if file_check_status !=True:
+                                        status_code,error_msg=get_Status_code(file_check_status) # extract the status_code and error_msg from file_check_status
+                                        logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+error_msg)
+                                        return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                                 file_path="static/server/"
                                 file_name =IngestionObj.save_file(DBObject,connection,user_name,dataset_visibility,file,file_path)
                         else:

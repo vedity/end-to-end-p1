@@ -36,7 +36,6 @@ LogObject.log_setting()
 logger = logging.getLogger('ingestion')
 
 
-
 class IngestClass(pj.ProjectClass,dt.DatasetClass):
 
     def __init__(self,database,user,password,host,port):

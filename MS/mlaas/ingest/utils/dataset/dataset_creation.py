@@ -235,6 +235,7 @@ class DatasetClass:
         # logging.info("file_data_df :"+str(file_data_df))
         # Get number of rows.
         no_of_rows = file_data_df.shape[0]
+        logger.info("no_of_rows:===="+str(no_of_rows))
         # Get table name.
         if updated_table_name==None:
             table_name = self.get_dataset_table_name(file_name)
@@ -277,10 +278,10 @@ class DatasetClass:
         # Prepare select sql command to fetch dataset id from dataset table for particular user.
         dataset_name=str(dataset_name).replace("'","''")
         if file_name == None:
-            sql_command = "SELECT original_dataset_id from "+ table_name + " Where dataset_name ='" + dataset_name + "' and user_name = '"+ user_name + "'"
+            sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_name ='" + dataset_name + "' and user_name = '"+ user_name + "' and page_name in ('Create dataset','Create Project')"
         else:
-            sql_command = "SELECT original_dataset_id from "+ table_name + " Where dataset_table_name ='" + str(file_name) + "'"
-        logging.info("original_dataset_id"+str(sql_command))
+            sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_table_name ='" + str(file_name) + "' and page_name in ('Create dataset','Create Project')"
+        logging.info("dataset_id"+str(sql_command))
         # Get dataframe of dataset id. 
         dataset_df = DBObject.select_records(connection,sql_command)
         # Get dataset id.
@@ -492,22 +493,22 @@ class DatasetClass:
             dataset_name=str(dataset_name).replace("'","''")
             if dataset_visibility == 'public':
                 #? Is there any(public & private) dataset with same name?
-                sql_command = f"SELECT original_dataset_id FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' and page_name in ('Create dataset','Create Project')"
+                sql_command = f"SELECT DATASET_ID FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' and page_name in ('Create dataset','Create Project')"
                 #! Possible Security Issue: User will get to know that some other user has private dataset with same name
             else:
                 #? Is there any public dataset with same name?
-                sql_command = f"SELECT original_dataset_id FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND DATASET_VISIBILITY = 'public' and page_name in ('Create dataset','Create Project')"
+                sql_command = f"SELECT DATASET_ID FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND DATASET_VISIBILITY = 'public' and page_name in ('Create dataset','Create Project')"
                 data_df=DBObject.select_records(connection,sql_command)
                 data=len(data_df)
 
                 if data == 0:
                     #? No public dataset with same name
                     #? Is there any private dataset from you with same name?
-                    sql_command = f"SELECT original_dataset_id FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND USER_NAME = '{user_name}' and page_name in ('Create dataset','Create Project')"
+                    sql_command = f"SELECT DATASET_ID FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND USER_NAME = '{user_name}' and page_name in ('Create dataset','Create Project')"
                 else:
                     #! There is a public dataset with your name
-                    logging.debug(f"data ingestion  :  DatasetClass  :  dataset_exist  :  A public dataset with the same dataset_name exists at original_dataset_id = {int(data_df['original_dataset_id'][0])}")
-                    return int(data_df['original_dataset_id'][0])
+                    logging.debug(f"data ingestion  :  DatasetClass  :  dataset_exist  :  A public dataset with the same dataset_name exists at dataset_id = {int(data_df['dataset_id'][0])}")
+                    return int(data_df['dataset_id'][0])
             data_df=DBObject.select_records(connection,sql_command)
             data=len(data_df)
             
