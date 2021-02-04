@@ -30,6 +30,11 @@ import { DataExplorationComponent } from './data-exploration/data-exploration.co
 import { DataVisualizationComponent } from './data-visualization/data-visualization.component';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { DataCleanupComponent } from './data-cleanup/data-cleanup.component';
+import { ChartModule,HIGHCHARTS_MODULES } from 'angular-highcharts';
+import * as more from 'highcharts/highcharts-more.src';
+import * as exporting from 'highcharts/modules/exporting.src';
+import * as theme from 'highcharts/themes/dark-unica.src';
+
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   suppressScrollX: true,
@@ -63,6 +68,8 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     DataTablesModule,
     UIModule,
     WidgetModule,
+    ChartModule,
+    
     FullCalendarModule,
     NgbNavModule,
     NgbTooltipModule,
@@ -73,8 +80,9 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   providers: [
     {
       provide: PERFECT_SCROLLBAR_CONFIG,
-      useValue: DEFAULT_PERFECT_SCROLLBAR_CONFIG
-    },
+      useValue: DEFAULT_PERFECT_SCROLLBAR_CONFIG,
+      
+    },  { provide: HIGHCHARTS_MODULES, useFactory: () => [ more, exporting ,theme] },
     LoaderService,
     { provide: HTTP_INTERCEPTORS, useClass: LoaderInterceptorService, multi: true }
   ]

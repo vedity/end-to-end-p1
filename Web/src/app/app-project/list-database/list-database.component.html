@@ -6,7 +6,7 @@
             </div>
         </div>
     </div>
-    <form #f="ngForm" (ngSubmit)="f.form.valid?save():errorStatus=!errorStatus">
+    <form #f="ngForm" (ngSubmit)="!f.form.valid?errorStatus=!errorStatus:save();f.reset();">
         <div class="row">
             <div class="col-md-4 form-group">
                 <label for="example-text-input" class="col-form-label">Dataset Name<span
