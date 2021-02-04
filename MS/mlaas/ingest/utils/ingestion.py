@@ -68,7 +68,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         logging.info("data ingestion : ingestclass : get_db_connection : execution end")
         return DBObject,connection,connection_string
     
-    def create_project(self,project_name,project_desc,page_name,dataset_desc=None,dataset_name = None,dataset_visibility = None,file_name = None,dataset_id = None,user_name = None):
+    def create_project(self,project_name,project_desc,page_name,dataset_desc=None,dataset_name = None,dataset_visibility = None,file_name = None,original_dataset_id = None,user_name = None):
         """This function is used to create project.
            E.g. sales forecast , travel time predictions etc.
            
@@ -78,7 +78,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             dataset_name ([string], optional): [name of the dataset]. Defaults to None.
             dataset_visibility ([string], optional): [visibility of the dataset]. Defaults to None.
             file_name ([string], optional): [name of the csv file]. Defaults to None.
-            dataset_id ([integer], optional): [dataset id of the selected dataset name]. Defaults to None.
+            original_dataset_id ([integer], optional): [dataset id of the selected dataset name]. Defaults to None.
             user_name ([string], optional): [name of the user]. Defaults to None.
 
         Returns:
@@ -92,23 +92,23 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise DatabaseConnectionFailed(500)  
             
             
-            project_status,project_id,load_dataset_id = super(IngestClass,self).make_project(DBObject,connection,connection_string,project_name,project_desc,page_name,dataset_desc,dataset_name,dataset_visibility,file_name ,dataset_id,user_name)
-            logging.debug("data ingestion : ingestclass : create_project : we get status of project : "+str(project_status)+ " and Project id : "+str(project_id)+" and dataset_id : "+str(dataset_id))
+            project_status,project_id,load_dataset_id = super(IngestClass,self).make_project(DBObject,connection,connection_string,project_name,project_desc,page_name,dataset_desc,dataset_name,dataset_visibility,file_name ,original_dataset_id,user_name)
+            logging.debug("data ingestion : ingestclass : create_project : we get status of project : "+str(project_status)+ " and Project id : "+str(project_id)+" and original_dataset_id : "+str(original_dataset_id))
             if project_status == 2:
                 raise ProjectAlreadyExist(500)
                 
             elif project_status == 1:
                 raise ProjectCreationFailed(500) # If Failed.
                 
-            elif project_status == 0 and dataset_id == None:
+            elif project_status == 0 and original_dataset_id == None:
                 load_data_status,no_of_rows = super(IngestClass,self).load_dataset(DBObject,connection,connection_string,file_name,dataset_visibility,user_name)
-                logging.debug("data ingestion : ingestclass : create_project : we get status of load_dataset : "+str(load_data_status)+ " and no of records in dataset : "+str(no_of_rows)+" and dataset_id : "+str(load_dataset_id))
+                logging.debug("data ingestion : ingestclass : create_project : we get status of load_dataset : "+str(load_data_status)+ " and no of records in dataset : "+str(no_of_rows)+" and original_dataset_id : "+str(load_dataset_id))
                 if load_data_status == 1:
                     raise LoadCSVDataFailed(500)
                 else:
                     #v1.3
                     # update number of rows into dataset.
-                    sql_command = "UPDATE mlaas.dataset_tbl SET no_of_rows="+str(no_of_rows)+" where dataset_id="+str(load_dataset_id)
+                    sql_command = "UPDATE mlaas.dataset_tbl SET no_of_rows="+str(no_of_rows)+" where original_dataset_id="+str(load_dataset_id)
                     update_status = DBObject.update_records(connection,sql_command)
                 
                 status = super(IngestClass,self).update_dataset_status(DBObject,connection,project_id,load_data_status)
@@ -144,7 +144,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
             if connection == None:
                 raise DatabaseConnectionFailed(500)
-            dataset_status,dataset_id = super(IngestClass,self).make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name) # Get Status about dataset creation,if successfully then 0 else 1.
+            dataset_status,original_dataset_id = super(IngestClass,self).make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name) # Get Status about dataset creation,if successfully then 0 else 1.
             if dataset_status == 2:
                 raise DatasetAlreadyExist(500)
             
@@ -157,8 +157,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                     raise LoadCSVDataFailed(500)
                 else:
                     # update number of rows into dataset.
-                    sql_command = "UPDATE mlaas.dataset_tbl set no_of_rows="+str(no_of_rows)+" where dataset_id="+str(dataset_id)
-                    logger.info("sql_command++++"+sql_command)
+                    sql_command = "UPDATE mlaas.dataset_tbl set no_of_rows="+str(no_of_rows)+" where original_dataset_id="+str(original_dataset_id)
                     update_status = DBObject.update_records(connection,sql_command)
 
             
@@ -168,7 +167,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             return exc.msg,None
         
         logging.info("data ingestion : ingestclass : create_dataset : execution end")
-        return dataset_status,dataset_id
+        return dataset_status,original_dataset_id
         
     def show_dataset_details(self,user_name):
         """This function is used to show dataset details.
@@ -201,7 +200,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         logging.info("data ingestion : ingestclass : show_dataset_details : execution end")
         return dataset_df
 
-    def show_data_details(self,dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter):
+    def show_data_details(self,original_dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter):
         """This function is used to show data details.
            It will show all the columns and rows from uploaded csv files.
 
@@ -218,7 +217,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             if connection == None :
                 raise DatabaseConnectionFailed(500) 
             
-            data_details_df = super(IngestClass,self).show_data_details(DBObject,connection,dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter) # Get dataframe of loaded csv.
+            data_details_df = super(IngestClass,self).show_data_details(DBObject,connection,original_dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter) # Get dataframe of loaded csv.
             if data_details_df is None :
                 raise DataNotFound(500)
             data_details_df=data_details_df.to_json(orient='records',date_format='iso')
@@ -283,7 +282,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             if connection == None:
                 raise DatabaseConnectionFailed(500)
             
-            deletion_status,dataset_id,project_name = super(IngestClass, self).delete_project_details(DBObject,connection,project_id,user_name)
+            deletion_status,original_dataset_id,project_name = super(IngestClass, self).delete_project_details(DBObject,connection,project_id,user_name)
             if deletion_status == 1:
                 raise ProjectDeletionFailed(500)
             elif deletion_status == 2:
@@ -292,19 +291,19 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise EntryNotFound(500)
             
             logging.info("data ingestion : ingestclass : delete_project_details : execution end")
-            return deletion_status,dataset_id,project_name
+            return deletion_status,original_dataset_id,project_name
         
         except (DatabaseConnectionFailed,ProjectDeletionFailed,UserAuthenticationFailed,EntryNotFound) as exc:
             logging.error("data ingestion : ingestclass : delete_project_details : Exception " + str(exc.msg))
             logging.error("data ingestion : ingestclass : delete_project_details : " +traceback.format_exc())
             return exc.msg,None,None
         
-    def delete_dataset_detail(self, dataset_id, user_name):
+    def delete_dataset_detail(self, original_dataset_id, user_name):
         '''
         This function is used to delete an entry in the project_tbl
         
         Args:
-            dataset_id ([integer]): [id of the dataset entry which you want to delete.],
+            original_dataset_id ([integer]): [id of the dataset entry which you want to delete.],
             user_name ([string]): [Name of the user.]
             
         Returns:
@@ -316,7 +315,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             if connection == None:
                 raise DatabaseConnectionFailed(500)
             
-            deletion_status,dataset_name = super(IngestClass, self).delete_dataset_details(DBObject,connection,dataset_id,user_name)
+            deletion_status,dataset_name = super(IngestClass, self).delete_dataset_details(DBObject,connection,original_dataset_id,user_name)
             if deletion_status == 1:
                 raise DatasetDeletionFailed(500)
             elif deletion_status == 2:
