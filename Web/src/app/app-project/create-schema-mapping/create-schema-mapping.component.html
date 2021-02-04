@@ -24,8 +24,8 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr *ngFor="let data of datasetSchema;let i= index" id="tr_{{i}}"
-                                    class="{{data.column_attribute}}-selected">
+
+                                <tr *ngFor="let data of datasetSchema;let i= index" id="tr_{{i}}" class="{{data.column_attribute}}-selected">
                                     <td>
                                         {{data.column_name}}
                                     </td>
@@ -38,23 +38,20 @@
 
                                     </td>
                                     <td>
-                                        <select class="form-control selectattr" id="selectattr_{{i}}"
-                                            [(ngModel)]="data.column_attribute"
-                                            (change)="changeattrinute($event.target.value,i)">
+                                        <select class="form-control selectattr" id="selectattr_{{i}}" [(ngModel)]="data.column_attribute" (change)="changeattrinute($event.target.value,i)">
                                             <option value="">Select Option</option>
                                             <option *ngFor="let item of columnattrList" value="{{item}}">{{item}}
                                             </option>
                                         </select>
                                     </td>
-                                    <td id="td_{{i}}">
-                                        <input class="form-control columnname" type="text" id="columnname_{{i}}"
-                                            [value]="data.change_column_name"
-                                            (change)="checksame(data.column_name,$event.target.value,i)"
-                                            maxlength="100">
+                                    <td id="td_{{i}}" [ngClass]="{'errorstatus': data.change_column_name == data.column_name}">
+                                        <input class="form-control columnname" type="text" id="columnname_{{i}}" [value]="data.change_column_name" (keydown)="checksame(data.column_name,$event.target.value,i)" maxlength="100">
                                         <div class="invalid-feedback">
                                             <span class="text-red">Change column name must be different from column
                                                 name</span>
                                         </div>
+
+
                                     </td>
                                 </tr>
 
@@ -88,20 +85,20 @@
     <div class="modal-body">
         <div class="form-group">
             <div class="custom-control custom-checkbox mb-3">
-                <input type="checkbox" class="custom-control-input" id="customCheck1">
+                <input type="checkbox" class="custom-control-input" [(ngModel)]="saveAs.isPrivate" id="customCheck1">
                 <label class="custom-control-label" for="customCheck1">Keep private</label>
             </div>
         </div>
         <div class="form-group">
             <label for="example-text-input" class="col-form-label">Dataset Name</label>
-            <input class="form-control" type="text" id="example-text-input">
+            <input class="form-control" type="text" id="example-text-input" [(ngModel)]="saveAs.dataset_name">
         </div>
         <div class="form-group">
             <label for="example-text-input" class="col-form-label">Description</label>
-            <textarea class="form-control" id="example-text-input"></textarea>
+            <textarea class="form-control" id="example-text-input" [(ngModel)]="saveAs.description"></textarea>
         </div>
         <div class="button-items text-center">
-            <button type="button" class="btn btn-success">Submit</button>
+            <button type="button" class="btn btn-success" (click)="savaAs()">Submit</button>
         </div>
     </div>
 </ng-template>

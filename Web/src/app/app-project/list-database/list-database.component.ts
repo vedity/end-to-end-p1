@@ -200,6 +200,7 @@ export class ListDatabaseComponent implements OnInit {
     if (data.status_code == "200") {
       this.loaderdiv = false;
       this.data = new createdataset();
+      this.data.isprivate=true;
       $(".custom-file-label").text("Choose file");
       this.getdataset();
     }
