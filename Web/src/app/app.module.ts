@@ -26,7 +26,9 @@ import { JwtInterceptor } from './core/helpers/jwt.interceptor';
 import { FakeBackendInterceptor } from './core/helpers/fake-backend';
 import {  DataTablesModule } from 'angular-datatables';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
-
+import { ChartModule,HIGHCHARTS_MODULES } from 'angular-highcharts';
+import * as more from 'highcharts/highcharts-more.src';
+import * as exporting from 'highcharts/modules/exporting.src';
 
 import { ToastrModule } from 'ngx-toastr';
 
@@ -67,6 +69,7 @@ export function createTranslateLoader(http: HttpClient): any {
     AppRoutingModule,
     ExtrapagesModule,
     CarouselModule,
+    ChartModule,
     NgSelectModule,
     NgbAccordionModule,
     NgbNavModule,
@@ -82,6 +85,7 @@ export function createTranslateLoader(http: HttpClient): any {
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: FakeBackendInterceptor, multi: true },
+    { provide: HIGHCHARTS_MODULES, useFactory: () => [ more, exporting ] },
   ],
 })
 export class AppModule { }

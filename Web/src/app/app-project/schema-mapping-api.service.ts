@@ -36,7 +36,19 @@ export class SchemaMappingApiService {
   }
 
   saveDatasetSchema(dataset_id, project_id, obj): Observable<any> {
-    var params = new HttpParams().append("dataset_id", dataset_id).append("project_id", project_id)
-    return this.httpClient.post(this.baseUrl + "ingest/dataset_schema/", obj, { headers: this.headers, params });
+    var params = new HttpParams().append("project_id", project_id)
+    // .append("dataset_id", dataset_id)
+    return this.httpClient.post(this.baseUrl + "ingest/dataset_schema/save/", obj, { headers: this.headers, params });
+  }
+
+  saveasDatasetSchema(project_id,dataset_name,dataset_desc,visibility,method_name, obj): Observable<any> {
+    var params = new HttpParams()
+    .append("project_id", project_id)
+    .append("dataset_name", dataset_name.toString())
+    .append("dataset_desc", dataset_desc.toString())
+    .append("visibility", visibility)
+    .append("method_name", method_name.toString())
+    // .append("dataset_id", dataset_id)
+    return this.httpClient.post(this.baseUrl + "ingest/dataset_schema/save_as/", obj, { headers: this.headers, params });
   }
 }

@@ -2,6 +2,80 @@ import { Component, Input, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { DataExplorationApiService } from '../data-exploration.service';
+import { Chart } from 'angular-highcharts';
+import * as Highcharts from 'highcharts';
+// require('highcharts/themes/dark-unica')(Highcharts);
+Highcharts.setOptions({
+  colors: ['#058DC7', '#50B432', '#ED561B', '#DDDF00', '#24CBE5', '#64E572',
+    '#FF9655', '#FFF263', '#6AF9C4'],
+  chart: {
+    backgroundColor: {
+      // linearGradient: [0, 0, 500, 500],
+
+      stops: [
+        [0, 'rgb(255, 255, 255)'],
+        [1, 'rgb(240, 240, 255)']
+      ]
+    },
+  },
+  title: {
+    style: {
+      display: 'none',
+      color: '#fff',
+      font: 'bold 16px "Trebuchet MS", Verdana, sans-serif'
+    }
+  },
+  subtitle: {
+    style: {
+      color: '#fff',
+      font: 'bold 12px "Trebuchet MS", Verdana, sans-serif'
+    }
+  },
+  legend: {
+    itemStyle: {
+      font: '9pt Trebuchet MS, Verdana, sans-serif',
+      color: '#fff'
+    },
+    itemHoverStyle: {
+      color: '#fff'
+    }
+  },
+  credits: {
+    style: {
+      display: 'none'
+    }
+  },
+  xAxis: {
+    gridLineColor: '#32394e',
+    labels: {
+      style: {
+        color: '#bfc8e2'
+      }
+    },
+    lineColor: '#32394e',
+    minorGridLineColor: '#505053',
+    tickColor: '#32394e',
+    tickWidth: 1,
+    
+  },
+  yAxis: {
+    gridLineColor: '#32394e',
+    labels: {
+      style: {
+        color: '#bfc8e2'
+      }
+    },
+    lineColor: '#32394e',
+    minorGridLineColor: '#505053',
+    tickColor: '#707073',
+    tickWidth: 0,
+    
+  },
+});
+
+
+
+// import * as Highcharts from 'angular-highcharts';
 @Component({
   selector: 'app-data-exploration',
   templateUrl: './data-exploration.component.html',
@@ -9,10 +83,14 @@ import { DataExplorationApiService } from '../data-exploration.service';
 })
 
 export class DataExplorationComponent implements OnInit {
-  constructor(public apiService: DataExplorationApiService, public toaster: ToastrService, private modalService: NgbModal) { }
+
+
+
+  constructor(public apiService: DataExplorationApiService, public toaster: ToastrService, private modalService: NgbModal,) { }
   @Input() public dataset_id: any;
   @Input() public title: any;
   @Input() public project_id: any
+  chart: Chart;
   loaderdiv = false;
   displaytitle = "false";
   exploredData: any = [];
@@ -138,7 +216,7 @@ export class DataExplorationComponent implements OnInit {
   }
 
   modeltitle: any;
-  hideboxplot=true;
+  hideboxplot = true;
   centerModal(centerDataModal: any, obj) {
     this.modeltitle = obj["Column Name"];
     this.columnlabelChartexpand = {
@@ -174,55 +252,122 @@ export class DataExplorationComponent implements OnInit {
       }
     };
 
-    if(obj["open"]!=null){
-      this.boxplotChartexpand = {
-        series: [
-          {
-            name: "candle",
-            data: 
-            [
-              {
-                x: obj["Column Name"] ,
-                y: [obj["open"], obj["25%"], obj["75%"], obj["close"]]
-              },
-              {
-                x: obj["Column Name"] ,
-                y: [obj["open"], obj["25%"], obj["50%"], obj["75%"]]
-              },
-              {
-                x: obj["Column Name"] ,
-                y: [obj["close"], obj["25%"], obj["50%"], obj["75%"]]
-              },
-              {
-                x: obj["Column Name"] ,
-                y: [obj["25%"], obj["open"], obj["close"], obj["75%"]]
-              }
-              
-              
-            ]
-          }
-        ],
+    if (obj["open"] != null) {
+      let chart = new Chart({
+
         chart: {
-          type: "candlestick",
-          height: '500px'
+          type: 'boxplot'
+
         },
-        title: {
-          text: "CandleStick Chart",
-          align: "left"
+
+        // title: {
+        //    text: 'Highcharts Box Plot Example'
+        // },
+
+        legend: {
+          enabled: false
         },
-        xaxis: {
-          type: "string"
-        },
-        yaxis: {
-          tooltip: {
-            enabled: true
+
+        xAxis: {
+          categories: [obj["Column Name"]],
+          title: {
+            //   text: 'Experiment No.'
           }
-        }
-      };
-   
-   this.hideboxplot=false }
-    else{
-      this.hideboxplot=true;
+        },
+        yAxis: {
+          title: {
+            text: ''
+          }
+        },
+        exporting: {
+            enabled: false
+        },
+        series: [{
+          name: 'Observations',
+          type: 'boxplot',
+          color: "#34c38f",
+          data: [
+            // [-102, 51, 102, 153, 306]
+            [obj["open"], obj["25%"],obj["50%"], obj["75%"], obj["close"]]
+          ],
+          tooltip: {
+            headerFormat: ''
+            // headerFormat: '<em>Experiment No {point.key}</em><br/>'
+          }
+        }, 
+        {
+          name: 'Outliers',
+          color: "#34c38f",
+          type: 'scatter',
+          data: [ // x, y positions where 0 is the first category
+            [obj["Column Name"], obj["close"]+10],
+
+          ],
+          marker: {
+            fillColor: '#34c38f',
+            lineWidth: 1,
+            lineColor: "#34c38f"
+          },
+          tooltip: {
+            pointFormat: '{point.y}'
+            // pointFormat: 'Observation: {point.y}'
+          },
+
+        }]
+
+      });
+      this.chart = chart;
+
+
+      // this.boxplotChartexpand = {
+      //   series: [
+      //     {
+      //       name: "candle",
+      //       data: 
+      //       [
+      //         {
+      //           x: new Date(1538778600000),
+      //           y: [obj["open"], obj["25%"], obj["75%"], obj["close"]]
+      //         },
+      //         {
+      //           x: new Date(1538780400000),
+      //           y: [obj["open"], obj["25%"], obj["50%"], obj["75%"]]
+      //         },
+      //         {
+      //           x:new Date(1538780400000),
+      //           y: [obj["close"], obj["25%"], obj["50%"], obj["75%"]]
+      //         },
+      //         {
+      //           x: new Date(1538784000000),
+      //           y: [obj["25%"], obj["open"], obj["close"], obj["75%"]]
+      //         }
+
+
+      //       ]
+      //     }
+      //   ],
+      //   chart: {
+      //     type: "candlestick",
+      //     height: '500px'
+      //   },
+      //   title: {
+      //     text: "CandleStick Chart",
+      //     align: "left"
+      //   },
+      //   xaxis: {
+      //     type: "datetime"
+      //   },
+      //   yaxis: {
+      //     tooltip: {
+      //       enabled: true
+      //     }
+      //   }
+      // };
+
+      this.hideboxplot = false
+    }
+    else {
+      this.hideboxplot = true;
     }
     this.modalService.open(centerDataModal, { centered: true, windowClass: 'modal-holder' });
   }
