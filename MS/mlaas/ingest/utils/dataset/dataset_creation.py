@@ -235,6 +235,7 @@ class DatasetClass:
         # logging.info("file_data_df :"+str(file_data_df))
         # Get number of rows.
         no_of_rows = file_data_df.shape[0]
+        logger.info("no_of_rows:===="+str(no_of_rows))
         # Get table name.
         if updated_table_name==None:
             table_name = self.get_dataset_table_name(file_name)
@@ -277,9 +278,9 @@ class DatasetClass:
         # Prepare select sql command to fetch dataset id from dataset table for particular user.
         dataset_name=str(dataset_name).replace("'","''")
         if file_name == None:
-            sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_name ='" + dataset_name + "' and user_name = '"+ user_name + "'"
+            sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_name ='" + dataset_name + "' and user_name = '"+ user_name + "' and page_name in ('Create dataset','Create Project')"
         else:
-            sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_table_name ='" + str(file_name) + "'"
+            sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_table_name ='" + str(file_name) + "' and page_name in ('Create dataset','Create Project')"
         logging.info("dataset_id"+str(sql_command))
         # Get dataframe of dataset id. 
         dataset_df = DBObject.select_records(connection,sql_command)
