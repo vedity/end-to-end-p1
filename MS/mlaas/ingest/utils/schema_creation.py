@@ -544,10 +544,10 @@ class SchemaClass(dt.DatasetClass):
                 sql_command = "drop table "+old_table_name
                 logging.info("table_name"+str(sql_command))
                 status = DBObject.delete_records(connection,sql_command)
-                sql_command = "SELECT dataset_id from mlaas.dataset_tbl Where dataset_table_name ='" + str(table_name) + "'"
-                dataset_df = DBObject.select_records(connection,sql_command)
-                # Get dataset id
-                dataset_id = int(dataset_df['dataset_id'][0])
+                # sql_command = "SELECT dataset_id from mlaas.dataset_tbl Where dataset_table_name ='" + str(table_name) + "'"
+                # dataset_df = DBObject.select_records(connection,sql_command)
+                # # Get dataset id
+                # dataset_id = int(dataset_df['dataset_id'][0])
             return update_status,table_name,dataset_id
         except(LoadCSVDataFailed)as exc:
             return exc.msg
