@@ -32,6 +32,8 @@ export class CreateSchemaMappingComponent implements OnInit {
   ngOnInit(): void {
     this.displaydiv=true;
     this.getColumnAttributeList();
+    console.log(this.project_id,this.dataset_id);
+    
     this.getSchema(this.project_id,this.dataset_id);
   }
 
