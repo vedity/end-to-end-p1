@@ -48,7 +48,7 @@ class ExploreClass:
         #? Getting user_name and dataset_vaisibility
         sql_command = f"SELECT USER_NAME,DATASET_VISIBILITY,DATASET_TABLE_NAME,no_of_rows FROM {table_name} WHERE DATASET_ID = '{dataset_id}'"
         visibility_df = DBObject.select_records(connection,sql_command) 
-
+        
         if len(visibility_df) != 0: 
             user_name,dataset_visibility = visibility_df['user_name'][0],visibility_df['dataset_visibility'][0]
         #? No entry for the given dataset_id        
@@ -56,7 +56,7 @@ class ExploreClass:
         
         #? Getting CSV table name
         dataset_table_name = visibility_df['dataset_table_name'][0]
-        
+        dataset_table_name = '"'+ dataset_table_name+'"'
         
         #? changing the database schema for the public databases
         if dataset_visibility == 'public':
@@ -64,101 +64,100 @@ class ExploreClass:
         
         #? Getting all the data
         sql_command = f"SELECT * FROM {user_name}.{dataset_table_name}"
-        data_df = DBObject.select_records(connection,sql_command)
+        data_df = DBObject.select_records(connection,sql_command)    
+        # try:
+        #? Getting Statistics
+        stats_df = data_df.describe(include = 'all')
         
+        #? Getting Categorical & Continuous Columns
+        # cols = data_df.columns
+        num_cols = data_df._get_numeric_data().columns
+        numerical_columns = list(num_cols)
+        stats_df = stats_df.T
+        stats_df.rename(columns = {'unique':'Unique Values'}, inplace = True)    
+        stats_df.rename(columns = {'count':'Non-Null Values'}, inplace = True)  
+        stats_df.rename(columns = {'mean':'Mean'}, inplace = True)
+        stats_df.rename(columns = {'std':'Std'}, inplace = True)    
+        stats_df.rename(columns = {'min':'Min Value'}, inplace = True)    
+        stats_df.rename(columns = {'max':'Max Value'}, inplace = True)    
+        stats_df.rename(columns = {'top':'Most Frequent'}, inplace = True) 
+        stats_df.rename(columns = {'freq':'Most Frequency'}, inplace = True)    
+
+        stats_df["Null Values"] = len(data_df) - stats_df['Non-Null Values']
+        stats_df["Null Values"] = stats_df['Null Values'].astype(int)
+        stats_df["Non-Null Values"] = stats_df['Non-Null Values'].astype(int)
+        stats_df["DataCount"] = len(data_df)
+        stats_df['Least Frequency'] = np.NAN
+        stats_df['Least Frequent'] = np.NAN
+        stats_df['Column Name'] = 0
+        stats_df['Plot Values'] = 0
+        stats_df['Plot Values'] = stats_df['Plot Values'].astype('object')
+        stats_df['Right Outlier Values'] = 0
+        stats_df['Right Outlier Values'] = stats_df['Right Outlier Values'].astype('object')
+        stats_df['Left Outlier Values'] = 0
+        stats_df['Left Outlier Values'] = stats_df['Left Outlier Values'].astype('object')
+        data_df = data_df.dropna()
+        
+        #? Getting OutliersTreatment Object
+        ot_obj = ot.OutliersTreatmentClass()
+        
+        #? Merging the Column Names
+        i = 0
+        axislist =[]
+        loweraxislist = []
+        upperaxislist = []
+        datatype = []
+        # datacount = []
+        
+        for col in data_df.columns:
+            #? Merging Column Names
+            stats_df.iloc[i,-4] = col
+            #? Getting Histogram/CountPlot Values
+            axislist.append(self.get_values(data_df[col],numerical_columns,col))
+            #? Getting Datatypes
+            datatype.append(self.get_datatype(data_df[col],numerical_columns,col))  
+            
+            if col in numerical_columns:    
+                bin_edges,hist = self.get_histogram_values(data_df[col].tolist())
+                upper_limit,upper_limit_extreme,lower_limit,lower_limit_extreme = ot_obj.extreme_value_analysis(data_df[col],False)
+                lower_outliers, upper_outliers = self.get_outlier_hist(hist,bin_edges,upper_limit,lower_limit)
+                
+                upperaxislist.append(upper_outliers)
+                loweraxislist.append(lower_outliers)
+            else:
+                upperaxislist.append(list())
+                loweraxislist.append(list())
+            
+            #? Getting Least Frequent Values & Count
+            if datatype[-1].startswith("Ca"):
+                value_count = data_df[col].value_counts()
+                stats_df.iloc[i,-5] = value_count.index[-1]
+                stats_df.iloc[i,-6] = int(value_count[-1])
+            i += 1
+
+        stats_df['Plot Values'] = axislist
+        stats_df['Left Outlier Values'] = loweraxislist
+        stats_df['Right Outlier Values'] = upperaxislist
+        stats_df['Datatype'] = datatype
+        # stats_df['DataCount'] = datacount
+        
+        IQR = stats_df['75%']-stats_df['25%']
+        stats_df['open'] = stats_df['25%']-1.5 * IQR
+        stats_df['close'] = stats_df['75%']+1.5 * IQR
+        
+        #? Dataset Contains both Categorical & Continuous Data
         try:
-            #? Getting Statistics
-            stats_df = data_df.describe(include = 'all')
-
-            #? Getting Categorical & Continuous Columns
-            # cols = data_df.columns
-            num_cols = data_df._get_numeric_data().columns
-            numerical_columns = list(num_cols)
-            stats_df = stats_df.T
-            stats_df.rename(columns = {'unique':'Unique Values'}, inplace = True)    
-            stats_df.rename(columns = {'count':'Non-Null Values'}, inplace = True)  
-            stats_df.rename(columns = {'mean':'Mean'}, inplace = True)
-            stats_df.rename(columns = {'std':'Std'}, inplace = True)    
-            stats_df.rename(columns = {'min':'Min Value'}, inplace = True)    
-            stats_df.rename(columns = {'max':'Max Value'}, inplace = True)    
-            stats_df.rename(columns = {'top':'Most Frequent'}, inplace = True) 
-            stats_df.rename(columns = {'freq':'Most Frequency'}, inplace = True)    
-
-            stats_df["Null Values"] = len(data_df) - stats_df['Non-Null Values']
-            stats_df["Null Values"] = stats_df['Null Values'].astype(int)
-            stats_df["Non-Null Values"] = stats_df['Non-Null Values'].astype(int)
-            stats_df["DataCount"] = len(data_df)
-            stats_df['Least Frequency'] = np.NAN
-            stats_df['Least Frequent'] = np.NAN
-            stats_df['Column Name'] = 0
-            stats_df['Plot Values'] = 0
-            stats_df['Plot Values'] = stats_df['Plot Values'].astype('object')
-            stats_df['Right Outlier Values'] = 0
-            stats_df['Right Outlier Values'] = stats_df['Right Outlier Values'].astype('object')
-            stats_df['Left Outlier Values'] = 0
-            stats_df['Left Outlier Values'] = stats_df['Left Outlier Values'].astype('object')
-            data_df = data_df.dropna()
-            
-            #? Getting OutliersTreatment Object
-            ot_obj = ot.OutliersTreatmentClass()
-            
-            #? Merging the Column Names
-            i = 0
-            axislist =[]
-            loweraxislist = []
-            upperaxislist = []
-            datatype = []
-            # datacount = []
-            
-            for col in data_df.columns:
-                #? Merging Column Names
-                stats_df.iloc[i,-2] = col
-                #? Getting Histogram/CountPlot Values
-                axislist.append(self.get_values(data_df[col],numerical_columns,col))
-                #? Getting Datatypes
-                datatype.append(self.get_datatype(data_df[col],numerical_columns,col))  
-                
-                if col in numerical_columns:    
-                    bin_edges,hist = self.get_histogram_values(data_df[col])
-                    upper_limit,upper_limit_extreme,lower_limit,lower_limit_extreme = ot_obj.extreme_value_analysis(data_df[col],False)
-                    lower_outliers, upper_outliers = self.get_outlier_hist(hist,bin_edges,upper_limit,lower_limit)
-                    
-                    upperaxislist.append(upper_outliers)
-                    loweraxislist.append(lower_outliers)
-                else:
-                    upperaxislist.append(list())
-                    loweraxislist.append(list())
-                
-                #? Getting Least Frequent Values & Count
-                if datatype[-1].startswith("Ca"):
-                    value_count = data_df[col].value_counts()
-                    stats_df.iloc[i,-3] = value_count.index[-1]
-                    stats_df.iloc[i,-4] = int(value_count[-1])
-                i += 1
-
-            stats_df['Plot Values'] = axislist
-            stats_df['Left Outlier Values'] = loweraxislist
-            stats_df['Right Outlier Values'] = upperaxislist
-            stats_df['Datatype'] = datatype
-            # stats_df['DataCount'] = datacount
-            
-            IQR = stats_df['75%']-stats_df['25%']
-            stats_df['open'] = stats_df['25%']-1.5 * IQR
-            stats_df['close'] = stats_df['75%']+1.5 * IQR
-            
-            #? Dataset Contains both Categorical & Continuous Data
+            stats_df = stats_df[['Plot Values','Left Outlier Values','Right Outlier Values','Column Name','Datatype','DataCount','Mean','Std','Min Value','25%','50%','75%','Max Value','Most Frequent','Most Frequency','Least Frequent','Least Frequency','Unique Values','Null Values','Non-Null Values','open','close']]
+        
+        except KeyError:
             try:
-                stats_df = stats_df[['Plot Values','Left Outlier Values','Right Outlier Values','Column Name','Datatype','DataCount','Mean','Std','Min Value','25%','50%','75%','Max Value','Most Frequent','Most Frequency','Least Frequent','Least Frequency','Unique Values','Null Values','Non-Null Values','open','close']]
-            
+                #? Dataset Contains only Continuous Data
+                stats_df = stats_df[['Plot Values','Left Outlier Values','Right Outlier Values','Column Name','Datatype','DataCount','Mean','Std','Min Value','25%','50%','75%','Max Value','Null Values','Non-Null Values','open','close']]
             except KeyError:
-                try:
-                    #? Dataset Contains only Continuous Data
-                    stats_df = stats_df[['Plot Values','Left Outlier Values','Right Outlier Values','Column Name','Datatype','DataCount','Mean','Std','Min Value','25%','50%','75%','Max Value','Null Values','Non-Null Values','open','close']]
-                except KeyError:
-                    #? Dataset Contains only Categorical Data
-                    stats_df = stats_df[['Plot Values','Left Outlier Values','Right Outlier Values','Column Name','Datatype','DataCount','Most Frequent','Most Frequency','Least Frequent','Least Frequency','Unique Values','Null Values','Non-Null Values']]
-        except:
-            return 2
+                #? Dataset Contains only Categorical Data
+                stats_df = stats_df[['Plot Values','Left Outlier Values','Right Outlier Values','Column Name','Datatype','DataCount','Most Frequent','Most Frequency','Least Frequent','Least Frequency','Unique Values','Null Values','Non-Null Values']]
+        # except:
+        #     return 2
         
         return stats_df     
     
@@ -301,10 +300,10 @@ class ExploreClass:
         
 
     def get_outlier_hist(self,hist,bin_edges,upper_limit,lower_limit):    
-        lower_edges = list(filter(lambda x: x<lower_limit,bin_edges[:-1]))
+        lower_edges = list(filter(lambda x: x<lower_limit,bin_edges))
         lower_hist = hist[:len(lower_edges)]
 
-        upper_edges = list(filter(lambda x: x>upper_limit,bin_edges[:-1]))
+        upper_edges = list(filter(lambda x: x>upper_limit,bin_edges))
         if len(upper_edges) == 0:
             upper_hist = []
         else:
