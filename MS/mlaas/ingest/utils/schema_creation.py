@@ -231,22 +231,20 @@ class SchemaClass(dt.DatasetClass):
         logging.info("data ingestion : SchemaClass : is_existing_schema : execution start")
         table_name,*_ = self.get_schema()  #get the table name from schema
         sql_command = "select project_id from "+ table_name +" where table_name='"+table_name+"'"
-        logging.info(str(sql_command)+"=========")####
+        
         data=DBObject.select_records(connection,sql_command) #execute the query string,if record exist return dataframe else None 
-        logging.info("=========out")####
+        
         if data is None: 
-            logging.info("=========")####
             return False
         logging.info("data ingestion : SchemaClass : is_existing_schema : execution stop")
         if len(data) > 0 : #check if record found return True else False
-            logging.info("=====+++++++++++++++====")####
+            
             if old_table_name!=None:
                 sql_command = "delete from mlaas.schema_tbl where table_name='"+old_table_name+"'"
-                logging.info(str(sql_command)+"=========")
                 status = DBObject.delete_records(connection,sql_command)
             return False
         else:
-            logging.info("=========out1")####
+            
             return False
     
     def get_attribute_datatype(self,connection,DBObject,table_name,column_name_list,no_of_rows):
@@ -308,10 +306,8 @@ class SchemaClass(dt.DatasetClass):
             column_datatype_list = [] #get column datatype list
             change_column_name = [] # get change column name
             for index in range(len(schema_data)):
-                if schema_data[index]["change_column_name"] == "":
-                    change_column_name.append(schema_data[index]["column_name"])
-                else:
-                    change_column_name.append(schema_data[index]["change_column_name"])
+                
+                change_column_name.append(schema_data[index]["change_column_name"])
                 column_datatype_list.append(schema_data[index]["data_type"])
                 column_name_list.append(schema_data[index]["column_name"])
                 column_attribute_list.append(schema_data[index]["column_attribute"])
@@ -321,6 +317,7 @@ class SchemaClass(dt.DatasetClass):
             if check_attribute_type == True :
                 raise IgnoreAttributeClass(500)
             select_query = self.get_query_string(column_name_list,change_column_name,column_attribute_list)
+            logging.info(str(select_query))
             dataframe = DBObject.get_project_detail(DBObject,connection,project_id)
             
             if method_name=='Save':
@@ -332,7 +329,7 @@ class SchemaClass(dt.DatasetClass):
                 old_table_name=None
                 dataset_status,original_dataset_id,table_name = self.create_dataset(DBObject,connection,connection_string,select_query,original_dataset_id,dataset_name,dataset_desc,visibility)
             if dataset_status ==0:
-                # delete_status = self.is_exist_save_dataset('')
+                
                 schema_status = self.update_dataset_schema(DBObject,connection,project_id,original_dataset_id,table_name,column_name_list,change_column_name,column_datatype_list,column_attribute_list,old_table_name)
                 if schema_status ==True:
                     # timeline_status = self.update_timeline(project_id,original_dataset_id,column_name_list,column_attribute_list,change_column_name,method_name,dataset_name)
@@ -365,7 +362,11 @@ class SchemaClass(dt.DatasetClass):
         query = ""
         for index in range(len(column_attribute_list)):
             if column_attribute_list[index] !='ignore':
-                query +='"'+column_name_list[index]+'" as '+change_column_name[index]+',' # append the string
+                if change_column_name[index] == '':
+                    change_column_name[index] = column_name_list[index]
+                
+
+                query +='"'+column_name_list[index]+'" as "'+change_column_name[index] +'",' # append the string
         logging.info("data ingestion : SchemaClass : get_query_string : execution stop")       
         return query[0:len(query)-1]
 
@@ -541,7 +542,7 @@ class SchemaClass(dt.DatasetClass):
         try:
             logging.info("data ingestion : SchemaClass : update_save_dataset : execution start")
             sql_command = "SELECT dataset_table_name,user_name,dataset_visibility from mlaas.dataset_tbl where parent_dataset_id='"+str(original_dataset_id)+"' and page_name='schema mapping'"
-            logging.info(str(sql_command)+"++++++++++++++++++++")
+            
             dataframe = DBObject.select_records(connection,sql_command)
             dataframe = dataframe.to_records(index=False) # convert dataframe to a NumPy record
             
@@ -554,7 +555,7 @@ class SchemaClass(dt.DatasetClass):
             
             old_table_name = table_name
             sql_command = "SELECT "+select_query+" from "+str(table_name) # sql_query
-
+            
             file_data_df = DBObject.select_records(connection,sql_command) # execute the sql command and get the dataframe
             no_of_rows = file_data_df.shape[0]
             table_name = DBObject.get_table_name(connection,dataset_table_name)
