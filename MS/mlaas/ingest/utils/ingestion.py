@@ -36,7 +36,6 @@ LogObject.log_setting()
 logger = logging.getLogger('ingestion')
 
 
-
 class IngestClass(pj.ProjectClass,dt.DatasetClass):
 
     def __init__(self,database,user,password,host,port):
@@ -159,6 +158,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 else:
                     # update number of rows into dataset.
                     sql_command = "UPDATE mlaas.dataset_tbl set no_of_rows="+str(no_of_rows)+" where dataset_id="+str(dataset_id)
+                    logger.info("sql_command++++"+sql_command)
                     update_status = DBObject.update_records(connection,sql_command)
 
             
