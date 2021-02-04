@@ -99,6 +99,9 @@ class ExploreClass:
             stats_df['Left Outlier Values'] = stats_df['Left Outlier Values'].astype('object')
             data_df = data_df.dropna()
             
+            #? Getting OutliersTreatment Object
+            ot_obj = ot.OutliersTreatmentClass()
+            
             #? Merging the Column Names
             i = 0
             axislist =[]
@@ -106,7 +109,6 @@ class ExploreClass:
             upperaxislist = []
             datatype = []
             # datacount = []
-            
             
             for col in data_df.columns:
                 #? Merging Column Names
@@ -118,12 +120,14 @@ class ExploreClass:
                 
                 if col in numerical_columns:    
                     bin_edges,hist = self.get_histogram_values(data_df[col])
-                    ot_obj = ot.OutliersTreatmentClass()
-                    upper_limit,upper_limit_extreme,lower_limit,lower_limit_extreme = ot_obj.extreme_value_analysis(data_df[col])
+                    upper_limit,upper_limit_extreme,lower_limit,lower_limit_extreme = ot_obj.extreme_value_analysis(data_df[col],False)
                     lower_outliers, upper_outliers = self.get_outlier_hist(hist,bin_edges,upper_limit,lower_limit)
                     
                     upperaxislist.append(upper_outliers)
                     loweraxislist.append(lower_outliers)
+                else:
+                    upperaxislist.append(list())
+                    loweraxislist.append(list())
                 
                 #? Getting Least Frequent Values & Count
                 if datatype[-1].startswith("Ca"):
