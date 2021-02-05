@@ -125,7 +125,6 @@
                 <li [ngbNavItem]="1">
                     <a ngbNavLink>
                         <span class="font-size-14">Histogram</span>
-                        <!-- <span class="d-none d-sm-block"><i class=""></i></span> -->
                     </a>
                     <ng-template ngbNavContent>
 
@@ -137,20 +136,14 @@
 
                     </ng-template>
                 </li>
-                <li [ngbNavItem]="2">
+                <li [ngbNavItem]="2" *ngIf="!hideboxplot">
                     <a ngbNavLink>
                         <span class="font-size-14">Box plot</span>
-                        <!-- <span class="d-none d-sm-block"><i class=""></i></span> -->
                     </a>
                     <ng-template ngbNavContent>
-                        <h4>Box Plot</h4>
-                        <!-- <div [hidden]="hideboxplot">
-                            <apx-chart class="apex-charts"  dir="ltr" [series]="boxplotChartexpand.series" [chart]="boxplotChartexpand.chart" [title]="boxplotChartexpand.title" [xaxis]="boxplotChartexpand.xaxis" [yaxis]="boxplotChartexpand.yaxis">
-                            </apx-chart>
-                        </div>
-                        <div [hidden]="!hideboxplot"></div> -->
-
-
+                        <div [chart]="chart" id="highchhart"></div>
+                        <!-- <apx-chart class="apex-charts" dir="ltr" [series]="boxplotChartexpand.series" [chart]="boxplotChartexpand.chart" [title]="boxplotChartexpand.title" [xaxis]="boxplotChartexpand.xaxis" [yaxis]="boxplotChartexpand.yaxis">
+                            </apx-chart> -->
                     </ng-template>
                 </li>
 
