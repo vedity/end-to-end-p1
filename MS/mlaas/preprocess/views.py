@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from .utils.Exploration import dataset_exploration
 #from .utils.Visual import data_visualization
 from .utils import preprocessing
-from .utils import data_visualization as dv
+# from .utils import data_visualization as dv
 from common.utils.database import db
 from database import *
 from .utils import schema_creation 
@@ -70,7 +70,7 @@ class DatasetExplorationClass(APIView):
         except Exception as e:
             return Response({"status_code":"500","error_msg":str(e),"response":"false"})
 
-class DataVisualizationClass(APIView):
+# class DataVisualizationClass(APIView):
 
     def get(self,request,format=None):
         try:
@@ -189,3 +189,18 @@ class SchemaClass(APIView):
                         logging.error("data ingestion : DataDetailClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
                             
+#     def get(self,request,format=None):
+#         try:
+#             graph = request.query_params.get('graph')
+#             datasetid = request.query_params.get('dataset_id')
+#             column_name = request.query_params.get('column_name')
+#             visual_df = dv.VisualizationClass(database,user,password,host,port)
+#             if graph == 'histogram':
+#                 visual_df = visual_df.get_hist_visualization(DBObject,connection,datasetid,column_name)
+#             elif graph == 'countplot':
+#                 visual_df =visual_df.get_countplot_visualization(DBObject,connection,datasetid,column_name)
+#             elif graph == 'boxplot':
+#                 visual_df =visual_df.get_boxplot_visualization(DBObject,connection,datasetid,column_name)
+#             return Response({"status_code":"200","error_msg":"successfull retrival","response":visual_df}) 
+#         except Exception as e:
+#            return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 

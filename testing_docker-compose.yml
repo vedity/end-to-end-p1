@@ -1,6 +1,5 @@
 #This compose file is specifically built for the Automation testing purpose. 
 # To reduce the running time of the automation testing pipeline, We have removed the anguler image, which isn't needed in the testing script.
-
 version: '3'
 services:
   web:
@@ -10,9 +9,12 @@ services:
       - "./MS/mlaas:/mlaas" 
     ports:
       - "8000:8000"
+      - "8080:8080"
+      - "7077:7077"
+      - "8081:8081"
     depends_on:
       - postgresql
-
+ 
   postgresql:
     build: ./DB
     hostname: postgresql
@@ -25,16 +27,7 @@ services:
       POSTGRES_PASSWORD: admin
 volumes:
   postgres_data:
-  app:
   
-
 networks:
   backend:
     driver: "bridge"
-  
-    
- 
-
-
-  
-    

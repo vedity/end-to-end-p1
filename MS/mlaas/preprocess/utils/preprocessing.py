@@ -18,9 +18,6 @@ from common.utils.logger_handler import custom_logger as cl
 import logging
 import traceback
 
-import logging
-import traceback
-
 user_name = 'admin'
 log_enable = True
 
