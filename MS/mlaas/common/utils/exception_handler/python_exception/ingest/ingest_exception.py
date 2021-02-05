@@ -122,7 +122,7 @@ class LoadCSVDataFailed(Exception):
 class SameColumnName(Exception):
     """  Value of column name and change column name cannot be same"""
     def __init__(self,status_code):
-        self.msg = "Column name same"
+        self.msg = "Same column name are not allowed"
         self.status_code = status_code
         self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
      
@@ -181,7 +181,7 @@ class TableCreationFailed(Exception):
 class IgnoreAttributeClass(Exception):
     """  """
     def __init__(self,status_code):
-        self.msg = "All attribute type are Ignore"
+        self.msg = "All attribute type column are Ignore"
         self.status_code = status_code
         self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
      
