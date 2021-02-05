@@ -278,7 +278,7 @@ class DatasetClass:
         # Prepare select sql command to fetch dataset id from dataset table for particular user.
         dataset_name=str(dataset_name).replace("'","''")
         if file_name == None:
-            sql_command = "SELECT original_dataset_id from "+ table_name + " Where dataset_name ='" + dataset_name + "' and user_name = '"+ user_name + "' and page_name in ('Create dataset','Create Project')"
+            sql_command = "SELECT original_dataset_id from "+ table_name + " Where dataset_name ='" + dataset_name + "' and user_name = '"+ user_name + "' and page_name in ('Create dataset','Create Project','schema save')"
         else:
             sql_command = "SELECT original_dataset_id from "+ table_name + " Where dataset_table_name ='" + str(file_name) + "' "
         logging.info("original_dataset_id"+str(sql_command))
@@ -306,7 +306,7 @@ class DatasetClass:
         
         logging.debug("data ingestion : DatasetClass : show_dataset_details : this will excute select query on table name : "+str(table_name) +" based on user name : "+str(user_name))
         # This command is used to get dataset details from dataset table of database.
-        sql_command = "SELECT * FROM "+ table_name + " WHERE (USER_NAME ='"+ user_name +"' OR dataset_visibility='public') and page_name in ('Create dataset','Create Project')"
+        sql_command = "SELECT * FROM "+ table_name + " WHERE (USER_NAME ='"+ user_name +"' OR dataset_visibility='public') and page_name in ('Create dataset','Create Project','schema save')"
         logger.info(str(sql_command)+"-----------------------------------")
         data=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         logging.info("data ingestion : DatasetClass : show_dataset_details : execution end")
@@ -493,18 +493,18 @@ class DatasetClass:
             dataset_name=str(dataset_name).replace("'","''")
             if dataset_visibility == 'public':
                 #? Is there any(public & private) dataset with same name?
-                sql_command = f"SELECT original_dataset_id FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' and page_name in ('Create dataset','Create Project')"
+                sql_command = f"SELECT original_dataset_id FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' and page_name in ('Create dataset','Create Project','schema save')"
                 #! Possible Security Issue: User will get to know that some other user has private dataset with same name
             else:
                 #? Is there any public dataset with same name?
-                sql_command = f"SELECT original_dataset_id FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND DATASET_VISIBILITY = 'public' and page_name in ('Create dataset','Create Project')"
+                sql_command = f"SELECT original_dataset_id FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND DATASET_VISIBILITY = 'public' and page_name in ('Create dataset','Create Project','schema save')"
                 data_df=DBObject.select_records(connection,sql_command)
                 data=len(data_df)
 
                 if data == 0:
                     #? No public dataset with same name
                     #? Is there any private dataset from you with same name?
-                    sql_command = f"SELECT original_dataset_id FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND USER_NAME = '{user_name}' and page_name in ('Create dataset','Create Project')"
+                    sql_command = f"SELECT original_dataset_id FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND USER_NAME = '{user_name}' and page_name in ('Create dataset','Create Project','schema save')"
                 else:
                     #! There is a public dataset with your name
                     logging.debug(f"data ingestion  :  DatasetClass  :  dataset_exist  :  A public dataset with the same dataset_name exists at original_dataset_id = {int(data_df['original_dataset_id'][0])}")

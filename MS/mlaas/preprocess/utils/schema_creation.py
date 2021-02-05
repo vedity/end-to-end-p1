@@ -20,10 +20,9 @@ from common.utils.json_format.json_formater import *
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.ingest.ingest_exception import *
 from common.utils.activity_timeline import activity_timeline
-from .dataset.dataset_creation import *
-from .dataset import dataset_creation
+from ingest.utils.dataset.dataset_creation import *
 from dateutil.parser import parse
-from .dataset import dataset_creation as dt
+from ingest.utils.dataset import dataset_creation as dt
 
 user_name = 'admin'
 log_enable = True
@@ -31,6 +30,7 @@ LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
 logger = logging.getLogger('view')
 timeline_Obj=activity_timeline.ActivityTimelineClass(database,user,password,host,port)
+json_obj = JsonFormatClass()
 
 class SchemaClass(dt.DatasetClass):
     def __init__(self,database,user,password,host,port):
@@ -82,7 +82,7 @@ class SchemaClass(dt.DatasetClass):
             if connection == None:
                 raise DatabaseConnectionFailed(500)
             
-            sql_command = "SELECT project_id,original_dataset_id from mlaas.schema_tbl where project_id='"+str(project_id)+"' and original_dataset_id='"+str(original_dataset_id)+"'" 
+            sql_command = "SELECT project_id,original_dataset_id from mlaas.schema_tbl where project_id='"+str(project_id)+"' and dataset_id='"+str(original_dataset_id)+"'" 
             logging.info("sql_command"+sql_command )
             dataset_df = DBObject.select_records(connection,sql_command)
             if dataset_df is None or len(dataset_df)==0 :
@@ -109,7 +109,7 @@ class SchemaClass(dt.DatasetClass):
                         raise DataNotFound(500)
                     column_name = data_details_df.columns.values.tolist() # covert the dataframe into list
                     predicted_datatype = self.get_attribute_datatype(connection,DBObject,table_name,column_name ,no_of_rows)
-                    schema_data = get_schema_format(column_name,predicted_datatype) #call get_schema_format to get json format data
+                    schema_data = json_obj.get_schema_format(column_name,predicted_datatype) #call get_schema_format to get json format data
                     
             else:
                     sql_command = "SELECT column_name,changed_column_name,data_type,column_attribute from mlaas.schema_tbl where project_id='"+str(project_id)+"' and original_dataset_id='"+str(original_dataset_id)+"'"
@@ -118,7 +118,7 @@ class SchemaClass(dt.DatasetClass):
                     if dataset_df is None or len(dataset_df)==0:
                         raise DataNotFound(500)
                     column_name,changed_column_name,data_type,column_attribute = dataset_df['column_name'],dataset_df['changed_column_name'],dataset_df['data_type'],dataset_df['column_attribute']
-                    schema_data= get_updated_schema_format(column_name,changed_column_name,data_type,column_attribute)
+                    schema_data= json_obj.get_updated_schema_format(column_name,changed_column_name,data_type,column_attribute)
 
             logging.info("data ingestion : SchemaClass :get_dataset_schema : execution stop")
             return schema_data
@@ -225,12 +225,12 @@ class SchemaClass(dt.DatasetClass):
                 [Boolean] : [return True if record exists else False]
         """ 
         if old_table_name==None:
-            table_name=dataset_table_name
+            dataset_table_name = dataset_table_name
         else:
-            table_name=old_table_name
+            dataset_table_name = old_table_name
         logging.info("data ingestion : SchemaClass : is_existing_schema : execution start")
         table_name,*_ = self.get_schema()  #get the table name from schema
-        sql_command = "select project_id from "+ table_name +" where table_name='"+table_name+"'"
+        sql_command = "select project_id from "+ table_name +" where table_name='"+dataset_table_name+"'"
         
         data=DBObject.select_records(connection,sql_command) #execute the query string,if record exist return dataframe else None 
         
@@ -241,6 +241,7 @@ class SchemaClass(dt.DatasetClass):
             
             if old_table_name!=None:
                 sql_command = "delete from mlaas.schema_tbl where table_name='"+old_table_name+"'"
+                
                 status = DBObject.delete_records(connection,sql_command)
             return False
         else:
@@ -325,11 +326,10 @@ class SchemaClass(dt.DatasetClass):
                 logging.info(str(original_dataset_id))
                 dataset_status,table_name,old_table_name,original_dataset_id = self.update_save_dataset(DBObject,connection,connection_string,select_query,original_dataset_id)
             else:
-                original_dataset_id = dataframe['original_dataset_id'][0]
+                original_dataset_id = dataframe['dataset_id'][0]
                 old_table_name=None
                 dataset_status,original_dataset_id,table_name = self.create_dataset(DBObject,connection,connection_string,select_query,original_dataset_id,dataset_name,dataset_desc,visibility)
             if dataset_status ==0:
-                
                 schema_status = self.update_dataset_schema(DBObject,connection,project_id,original_dataset_id,table_name,column_name_list,change_column_name,column_datatype_list,column_attribute_list,old_table_name)
                 if schema_status ==True:
                     # timeline_status = self.update_timeline(project_id,original_dataset_id,column_name_list,column_attribute_list,change_column_name,method_name,dataset_name)
@@ -572,6 +572,14 @@ class SchemaClass(dt.DatasetClass):
                 #command will drop the old table
                 sql_command = "drop table "+old_table_name
                 status = DBObject.delete_records(connection,sql_command)
+
+                #get dataset_id
+                sql_command = "SELECT original_dataset_id from mlaas.dataset_tbl where dataset_table_name='"+table_name+"'"
+                dataframe = DBObject.select_records(connection,sql_command)
+
+                #get the original dataset id from dataset table
+                original_dataset_id = dataframe['original_dataset_id'][0]
+
             logging.info("data ingestion : SchemaClass : update_save_dataset : execution stop")
             return update_status,table_name,dataset_table_name,original_dataset_id
         except(LoadCSVDataFailed)as exc:

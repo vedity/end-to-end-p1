@@ -21,14 +21,7 @@ urlpatterns = [
     #URL For delete data Detail
     path('mlaas/ingest/delete/data_detail/',DeleteDataDetailClass.as_view()),
 
-    #URL For dataset Schema
-    path('mlaas/ingest/dataset_schema/',SchemaClass.as_view()),
 
-    #URL For dataset Schema Save option
-    path('mlaas/ingest/dataset_schema/save/',SchemaSaveClass.as_view()),
-
-    #URL For dataset Schema Save As option
-    path('mlaas/ingest/dataset_schema/save_as/',SchemaSaveAsClass.as_view()),
 
     #URL For project exist
     path('mlaas/ingest/project_exist/',ProjectExistClass.as_view()),
