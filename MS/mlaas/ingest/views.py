@@ -289,7 +289,7 @@ class DataDetailClass(APIView):
                         customefilter=request_body['customfilter']     
                         dataset_id = request.query_params.get('dataset_id') #get dataset_id
                         row_count=DBObject.get_row_count(connection,dataset_id) #get the row count
-                        dataset_df=IngestionObj.show_data_details(dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter) #call show_data_details and it will return dataset detail data in dataframe
+                        dataset_df,count=IngestionObj.show_data_details(dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter) #call show_data_details and it will return dataset detail data in dataframe
                         if isinstance(dataset_df,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(dataset_df) # extract the status_code and error_msg  from dataset_df
                                 logging.info("data ingestion : DataDetailClass : POST Method : execution stop : status_code :"+status_code)
@@ -297,7 +297,7 @@ class DataDetailClass(APIView):
                         else:
                                 logging.info("data ingestion : DataDetailClass : POST Method : execution stop : status_code :200")
                                 # return Response({​​​​​"draw":draw,"recordsTotal":RowCount,"recordsFiltered":RowCount,"data":data}​​​​​)
-                                return Response({"draw":draw,"recordsTotal":row_count,"recordsFiltered":row_count,"data":dataset_df})  #return Data             
+                                return Response({"draw":draw,"recordsTotal":row_count,"recordsFiltered":count,"data":dataset_df})  #return Data             
                 except Exception as e:
                         logging.error("data ingestion : DataDetailClass : GET Method : Exception :" + str(e))
                         logging.error("data ingestion : DataDetailClass : GET Method : " +traceback.format_exc())
