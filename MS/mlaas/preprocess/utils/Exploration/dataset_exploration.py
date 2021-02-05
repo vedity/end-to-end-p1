@@ -23,8 +23,6 @@ from ingest.utils.dataset import dataset_creation
 from ingest.utils.dataset import dataset_creation
 from preprocess.utils.cleaning import outliers_treatment as ot
 
-pd.options.display.float_format = '{:,.2f}'.format
-
 dc = dataset_creation.DatasetClass()
 
 class ExploreClass:
@@ -83,6 +81,14 @@ class ExploreClass:
         stats_df.rename(columns = {'top':'Most Frequent'}, inplace = True) 
         stats_df.rename(columns = {'freq':'Most Frequency'}, inplace = True)    
 
+        stats_df['Mean'] = stats_df['Mean'].astype(float)
+        stats_df['Std'] = stats_df['Std'].astype(float)
+        stats_df['Min Value'] = stats_df['Min Value'].astype(float)
+        stats_df['Max Value'] = stats_df['Max Value'].astype(float)
+        stats_df['25%'] = stats_df['25%'].astype(float)
+        stats_df['50%'] = stats_df['50%'].astype(float)
+        stats_df['75%'] = stats_df['75%'].astype(float)
+        
         stats_df["Null Values"] = len(data_df) - stats_df['Non-Null Values']
         stats_df["Null Values"] = stats_df['Null Values'].astype(int)
         stats_df["Non-Null Values"] = stats_df['Non-Null Values'].astype(int)
@@ -145,6 +151,9 @@ class ExploreClass:
         stats_df['open'] = stats_df['25%']-1.5 * IQR
         stats_df['close'] = stats_df['75%']+1.5 * IQR
         
+        stats_df['open'] = stats_df['open'].astype(float)
+        stats_df['close'] = stats_df['close'].astype(float)
+        
         #? Dataset Contains both Categorical & Continuous Data
         try:
             stats_df = stats_df[['Plot Values','Left Outlier Values','Right Outlier Values','Column Name','Datatype','DataCount','Mean','Std','Min Value','25%','50%','75%','Max Value','Most Frequent','Most Frequency','Least Frequent','Least Frequency','Unique Values','Null Values','Non-Null Values','open','close']]
@@ -159,7 +168,7 @@ class ExploreClass:
         # except:
         #     return 2
         
-        return stats_df     
+        return stats_df.round(2)    
     
     def iqr(self,arr):
         '''
