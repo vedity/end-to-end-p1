@@ -34,6 +34,7 @@ DBObject=db.DBClass()     #Get DBClass object
 connection,connection_string=DBObject.database_connection(database,user,password,host,port)      #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 IngestionObj=ingestion.IngestClass(database,user,password,host,port)
 timeline_Obj=activity_timeline.ActivityTimelineClass(database,user,password,host,port)
+json_obj = JsonFormatClass()
 class UserLoginClass(APIView):
         
         def get(self,request,format=None):
@@ -65,7 +66,7 @@ class UserLoginClass(APIView):
                                 status=DBObject.load_csv_into_db(connection_string,'activity_master_tbl',activity_df,'mlaas')
                         user_status = IngestionObj.user_authentication(DBObject,connection,user_name,password)
                         if user_status != True:
-                                status_code,error_msg=get_Status_code(user_status)
+                                status_code,error_msg=json_obj.get_Status_code(user_status)
                                 logging.info("data ingestion : UserLoginClass : GET Method : execution : status_code :"+ status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else: 
@@ -141,7 +142,7 @@ class MenuClass(APIView):
                         dataset_df2=DBObject.select_records(connection,sql_command2) #call show_data_details and it will return dataset detail data in dataframe
                         dataset_json2=json.loads(dataset_df2.to_json(orient='records'))  # convert datafreame into json
                 
-                        json_data=menu_nested_format(dataset_json1,dataset_json2)   
+                        json_data=json_obj.menu_nested_format(dataset_json1,dataset_json2)   
                         return Response({"status_code":"200","error_msg":"Menu Data","response":json_data})
                 except Exception as e:
                                 logging.error("data ingestion : MenuClass : POST Method : Exception :" + str(e))
@@ -314,7 +315,7 @@ class ActivityTimelineClass(APIView):
                         activity_df = timeline_Obj.get_user_activity(user_name)
 
                         if isinstance(activity_df,str): #check the instance of activity_df
-                                status_code,error_msg=get_Status_code(activity_df) # extract the status_code and error_msg from activity_df
+                                status_code,error_msg=json_obj.get_Status_code(activity_df) # extract the status_code and error_msg from activity_df
                                 logging.info("data ingestion : ActivityTimelineClass : GET Method : execution : status_code :"+ status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                 

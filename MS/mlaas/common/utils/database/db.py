@@ -195,8 +195,6 @@ class DBClass:
         
        
 
-    
-
     def delete_records(self,connection,sql_command):
         """This function is used to delete data from database table.
 
