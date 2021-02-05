@@ -21,16 +21,29 @@
                         <div [hidden]="!contentloaded">
                             <a href="javascript:void(0)" class="filter-btn" id="filter" (click)="displayfilter()"><i
                   class="dripicons-experiment"></i></a>
-                            <table datatable *ngIf="columnlist" [dtOptions]="dtOptions" (keyup)="onFilterchange($event);" class="table table-centered  table-nowrap" style="width: 100%;">
+                            <table datatable *ngIf="columnlist" [dtOptions]="dtOptions" class="table table-centered  table-nowrap" style="width: 100%;">
                                 <thead>
                                     <tr class="thead-light">
                                         <th *ngFor="let item of columnlist;let colindex=index">
                                             {{item.data}}
-                                            <input class="form-control filter" type="text" [hidden]="filter" name="search-{{item.data}}" id="col-{{colindex}}" />
+                                            <!-- <input class="form-control filter" type="text" [hidden]="filter" (keyup)="onFilterchange($event);" name="search-{{item.data}}" id="col-{{colindex}}" /> -->
                                         </th>
                                     </tr>
+
                                 </thead>
+                                <tbody *ngIf="!filter">
+                                    <tr class="thead-light">
+                                        <td *ngFor="let item of columnlist;let colindex=index">
+                                            <input class="form-control filter" type="text" (keyup)="onFilterchange($event);" name="search-{{item.data}}" id="col-{{colindex}}" />
+                                        </td>
+                                    </tr>
+                                </tbody>
                                 <tbody>
+                                    <tr class="thead-light">
+                                        <td *ngFor="let item of columnlist;let colindex=index">
+                                            <input class="form-control filter" type="text" [hidden]="filter" (keyup)="onFilterchange($event);" name="search-{{item.data}}" id="col-{{colindex}}" />
+                                        </td>
+                                    </tr>
                                     <tr *ngFor="let data of transactions;">
                                         <td *ngFor="let item of columnlist">{{data[item.data]}}</td>
                                     </tr>
