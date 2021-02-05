@@ -4,7 +4,7 @@ from common.utils.exception_handler.python_exception.preprocessing.preprocess_ex
 from common.utils.database import db
 from common.utils.database.db import DBClass
 from ingest.utils.dataset import dataset_creation
-from .Exploration import dataset_exploration as de
+from .exploration import dataset_exploration as de
 from common.utils.logger_handler import custom_logger as cl
 from common.utils.json_format.json_formater import *
 from common.utils.exception_handler.python_exception.ingest.ingest_exception import *

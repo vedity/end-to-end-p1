@@ -12,7 +12,7 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .utils.Exploration import dataset_exploration
+from .utils.exploration import dataset_exploration
 #from .utils.Visual import data_visualization
 from .utils import preprocessing
 from .utils import data_visualization as dv
