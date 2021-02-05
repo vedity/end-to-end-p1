@@ -97,27 +97,27 @@ export class CreateSchemaMappingComponent implements OnInit {
       this.datasetSchema.forEach((element,index) => {
         var txt_column_name=$("#columnname_"+index).val().toString();
         var txt_column_attribute=$("#selectattr_"+index+" :selected").val().toString();
-        if(txt_column_name=="" && txt_column_attribute==""){
+        // if(txt_column_name=="" && txt_column_attribute==""){
 
-        }
-        else{
-          if(txt_column_name!=element.column_name){
+        // }
+        // else{
+        //   if(txt_column_name!=element.column_name){
             var schema= {change_column_name:txt_column_name,
             column_name:element.column_name,
             data_type:element.data_type,
             column_attribute:txt_column_attribute}
             savedata.push(schema);
-          }
-        }
+        //   }
+        // }
      
       });
-      if(savedata.length>0)
+      // if(savedata.length>0)
       this.apiService.saveDatasetSchema(this.dataset_id,this.project_id,{data:savedata}).subscribe(logs=>this.savesuccessHandler(logs),error=>this.errorHandler(error));
-      else{
-     this.loaderdiv=false;
-        this.toaster.error('Please enter valid input', 'Error');
+    //   else{
+    //  this.loaderdiv=false;
+    //     this.toaster.error('Please enter valid input', 'Error');
 
-      }
+    //   }
     }
   }
 
