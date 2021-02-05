@@ -6,7 +6,7 @@
  Vipul Prajapati          08-DEC-2020           1.1           Modification for Business Rule
  Jay Shukla               14-DEC-2020           1.3           Added Atomicity in the case where dataset_tbl creation fails.
  Abishek Negi             18-Dec-2020           1.4           need to Check the code not working fine
- Abishek Negi             18-Dec-2020           1.4           Added dataset_id into the arguments 
+ Abishek Negi             18-Dec-2020           1.4           Added original_dataset_id into the arguments 
 
 */
 '''
@@ -41,7 +41,7 @@ class ProjectClass:
         # Project table name
         table_name = 'mlaas.project_tbl'
         # Columns for project table
-        cols = 'project_name,project_desc,user_name,dataset_id,link_dataset_id' 
+        cols = 'project_name,project_desc,user_name,original_dataset_id,dataset_id' 
         # Schema for project table.
         schema ="project_id bigserial,"\
                 "project_name  text,"\
@@ -50,14 +50,14 @@ class ProjectClass:
                 "model_status integer NOT NULL DEFAULT -1,"\
                 "deployment_status integer NOT NULL DEFAULT -1,"\
                 "user_name  text,"\
-                "dataset_id  bigint,"\
-                "link_dataset_id bigint,"\
+                "original_dataset_id  bigint,"\
+                "dataset_id bigint,"\
                 "created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()" 
                 
         logging.info("data ingestion : ProjectClass : make_project_schema : execution end")
         return table_name,schema,cols
 
-    def  make_project_records(self,project_name,project_desc,user_name,dataset_id,link_dataset_id):
+    def  make_project_records(self,project_name,project_desc,user_name,original_dataset_id,dataset_id):
         """This function is used to make records for inserting data into project table.
            E.g. column_name_1,column_name_2 .......,column_name_n.
 
@@ -65,19 +65,19 @@ class ProjectClass:
             project_name ([string]): [name of the project.],
             project_desc ([string]): [descriptions of the project.],
             user_name ([string]): [name of the user.],
-            dataset_id ([integer]): [dataset id of the created dataset.]
+            original_dataset_id ([integer]): [dataset id of the created dataset.]
 
         Returns:
             [tuple]: [it will return records in the form of tuple.]
         """
         logging.info("data ingestion : ProjectClass : make_project_records : execution start")
-        row = project_name,project_desc,user_name,dataset_id,link_dataset_id
+        row = project_name,project_desc,user_name,original_dataset_id,dataset_id
         row_tuples = [tuple(row)] # Make record for project table.
         logging.info("data ingestion : ProjectClass : make_project_records : execution end")
         return row_tuples
         
 
-    def make_project(self,DBObject,connection,connection_string,project_name,project_desc,page_name,dataset_desc,dataset_name,dataset_visibility,file_name ,dataset_id,user_name):
+    def make_project(self,DBObject,connection,connection_string,project_name,project_desc,page_name,dataset_desc,dataset_name,dataset_visibility,file_name ,original_dataset_id,user_name):
         """This function is used to make project and it will create main project table and also
            load project details into database main project table.
            E.g. project name : sales forecast, travel time prediction etc.
@@ -91,7 +91,7 @@ class ProjectClass:
             dataset_name ([string]): [name of the dataset.],
             dataset_visibility ([string]): [visibility of the dataset.],
             file_name ([string]): [name of the file.],
-            dataset_id ([integer]): [dataset id of the selected dataset.],
+            original_dataset_id ([integer]): [dataset id of the selected dataset.],
             user_name ([string]): [name of the user.]
 
         Returns:
@@ -109,14 +109,14 @@ class ProjectClass:
          
         DatasetObject = dataset_creation.DatasetClass()
 
-        if dataset_id == None:
-            _,dataset_id = DatasetObject.make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name)
+        if original_dataset_id == None:
+            _,original_dataset_id = DatasetObject.make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name)
         else:
-            dataset_id = dataset_id
+            original_dataset_id = original_dataset_id
         
-        link_dataset_id = dataset_id
+        dataset_id = original_dataset_id
         # Get row for project table.
-        row_tuples = self.make_project_records(project_name,project_desc,user_name,dataset_id,link_dataset_id) 
+        row_tuples = self.make_project_records(project_name,project_desc,user_name,original_dataset_id,dataset_id) 
         # Get status about inserting records into project table. if successful then 0 else 1. 
         insert_status = DBObject.insert_records(connection,table_name,row_tuples,cols) 
         # This condition is used to check project table and data is successfully stored into project table or not.if successful then 0 else 1. 
@@ -128,7 +128,7 @@ class ProjectClass:
             project_id = None
             
         logging.info("data ingestion : ProjectClass : make_project : execution end")
-        return status,project_id,dataset_id
+        return status,project_id,original_dataset_id
 
     def get_project_id(self,DBObject,connection,row_tuples,user_name):
         """This function is used to get project id of created project.
@@ -195,7 +195,7 @@ class ProjectClass:
         
         logging.debug("data ingestion : ProjectClass : show_project_details : this will excute select query on table name : "+table_name +" based on user name : "+user_name)
         
-        sql_command = "SELECT p.*,d.dataset_name FROM "+ table_name + " p,mlaas.dataset_tbl d WHERE p.USER_NAME ='"+ user_name +"' and p.dataset_id = d.dataset_id"
+        sql_command = "SELECT p.*,d.dataset_name FROM "+ table_name + " p,mlaas.dataset_tbl d WHERE p.USER_NAME ='"+ user_name +"' and p.original_dataset_id = d.original_dataset_id"
         project_df=DBObject.select_records(connection,sql_command) # Get project details in the form of dataframe.
         logging.info("data ingestion : ProjectClass : show_project_details : execution end")
         return project_df
@@ -220,7 +220,7 @@ class ProjectClass:
             table_name,_,_ = self.make_project_schema()
 
             #? Fetching original user from the table
-            sql_command = f"SELECT USER_NAME,PROJECT_NAME,DATASET_ID FROM {table_name} WHERE PROJECT_ID = '{project_id}'"
+            sql_command = f"SELECT USER_NAME,PROJECT_NAME,original_dataset_id FROM {table_name} WHERE PROJECT_ID = '{project_id}'"
             user_name_df = DBObject.select_records(connection,sql_command) 
             if len(user_name_df) == 0:
                 logging.debug(f"data ingestion  :  ProjectClass  :  delete_project_details  :  Entry not found for the project_id = {project_id}")
@@ -228,7 +228,7 @@ class ProjectClass:
             
             user_name_from_table = user_name_df['user_name'][0]
             project_name = user_name_df['project_name'][0]
-            dataset_id = user_name_df['dataset_id'][0]
+            original_dataset_id = user_name_df['original_dataset_id'][0]
             #? Authenticating the user    
             if user_name == user_name_from_table:
 
@@ -241,7 +241,7 @@ class ProjectClass:
                 project_status = 2
             
             logging.info("data ingestion : ProjectClass : delete_project_details : execution end")
-            return project_status,dataset_id,project_name
+            return project_status,original_dataset_id,project_name
         
         except:
             return 1,None,None
