@@ -227,7 +227,7 @@ class ScheamColumnListClass(APIView):
                 """
                 try :
                                 logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
-                                column_attribute = {"column_attribute":["ignore","target"] }
+                                column_attribute = {"column_attribute":["ignore","target","select"] }
                                 return Response({"status_code":"200","error_msg":"Successfull retrival","response":column_attribute})
                 except Exception as e:
                                 logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
