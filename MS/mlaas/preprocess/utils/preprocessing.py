@@ -8,8 +8,8 @@
 '''
 
 from common.utils.exception_handler.python_exception.common.common_exception import EntryNotFound
-from preprocess.utils.exploration.dataset_exploration import ExploreClass
-from .exploration import dataset_exploration as de
+from preprocess.utils.Exploration.dataset_exploration import ExploreClass
+from .Exploration import dataset_exploration as de
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
 from common.utils.database import db
