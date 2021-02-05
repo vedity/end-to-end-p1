@@ -419,20 +419,23 @@ class DBClass:
             if str(sort_index) != "0" or global_search_value!="" or customefilter_clause!="":  
                 if start_index==0:
                     if customefilter_clause !="":
-                       sql_command = f'select * from (SELECT * From {table_name} {global_search_clause} {order_clause}) as dt {customefilter_clause} {order_clause} limit {length}'                  
+                       sql_command = f'select * from (SELECT * From {table_name} {global_search_clause} {order_clause}) as dt {customefilter_clause} {order_clause} limit {length}'   
+                       sql_command1 = f'select count(*) from (SELECT * From {table_name} {global_search_clause} ) as dt {customefilter_clause}  '                                 
                     else:
-                        sql_command = f'SELECT * From {table_name} {global_search_clause} {order_clause} limit {length}'                 
+                        sql_command = f'SELECT * From {table_name} {global_search_clause} {order_clause} limit {length}'   
+                        sql_command1 = f'SELECT count(*) From {table_name} {global_search_clause}'   
                 else:
                     if customefilter_clause !="":
-                        sql_command = f'select * from (SELECT * From {table_name} {global_search_clause} {order_clause} limit {limit_index} offset {start_index}) as dt {customefilter_clause} {order_clause} limit {length}'                 
+                        sql_command = f'select * from (SELECT * From {table_name} {global_search_clause} {order_clause} limit {limit_index} offset {start_index}) as dt {customefilter_clause} {order_clause} limit {length}' 
+                        sql_command1 = f'select count(*) from (SELECT * From {table_name} {global_search_clause}) as dt {customefilter_clause}'                                 
                     else:   
-                        sql_command = f'select * from (SELECT * From {table_name} {global_search_clause} {order_clause} limit {limit_index} offset {start_index}) as dt limit {length}'                 
-                logger.info("sql_command1: "+sql_command)
+                        sql_command = f'select * from (SELECT * From {table_name} {global_search_clause} {order_clause} limit {limit_index} offset {start_index}) as dt limit {length}' 
+                        sql_command1 = f'select count(*) from (SELECT * From {table_name} {global_search_clause}) as dt'                                 
             
             else:
                 sql_command = f'SELECT * From {table_name} where "{columns_list[0]}" between {start_index} and {end_index}  {order_clause}'
-                logger.info("sql_command2: "+sql_command)            
-            return sql_command
+                sql_command1 = f'SELECT count(*) From {table_name}'
+            return sql_command,sql_command1
         except Exception as exc:
             return str(exc) 
 

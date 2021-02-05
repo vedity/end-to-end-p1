@@ -217,7 +217,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             if connection == None :
                 raise DatabaseConnectionFailed(500) 
             
-            data_details_df = super(IngestClass,self).show_data_details(DBObject,connection,original_dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter) # Get dataframe of loaded csv.
+            data_details_df,count = super(IngestClass,self).show_data_details(DBObject,connection,original_dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter) # Get dataframe of loaded csv.
             if data_details_df is None :
                 raise DataNotFound(500)
             data_details_df=data_details_df.to_json(orient='records',date_format='iso')
@@ -231,7 +231,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             return exc.msg
         
         logging.info("data ingestion : ingestclass : show_data_details : execution end")
-        return data_details_df
+        return data_details_df,count
 
     def show_project_details(self,user_name):
         """This function is used to show project details.
