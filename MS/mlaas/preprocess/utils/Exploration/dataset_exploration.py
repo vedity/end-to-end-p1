@@ -43,7 +43,7 @@ class ExploreClass:
         table_name,_,_ = dc.make_dataset_schema()
         
         #? Getting user_name and dataset_vaisibility
-        sql_command = f"SELECT USER_NAME,DATASET_VISIBILITY,DATASET_TABLE_NAME,no_of_rows FROM {table_name} WHERE DATASET_ID = '{dataset_id}'"
+        sql_command = f"SELECT USER_NAME,DATASET_VISIBILITY,DATASET_TABLE_NAME,no_of_rows FROM {table_name} WHERE ORIGINAL_DATASET_ID = '{dataset_id}'"
         visibility_df = DBObject.select_records(connection,sql_command) 
         
         if len(visibility_df) != 0: 
