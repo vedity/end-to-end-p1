@@ -179,7 +179,7 @@ class ExploreClass:
         except:
             return 2
         
-        return stats_df.round(2)    
+        return stats_df.iloc[1:].round(2)    
     
     def iqr(self,arr):
         '''
