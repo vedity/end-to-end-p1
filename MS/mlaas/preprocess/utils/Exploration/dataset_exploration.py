@@ -263,7 +263,7 @@ class ExploreClass:
         #? If there are more than 50 bins than the count plot is not suitable
         #? Resizing the countplot
         if len(values) > 50:
-            stepsize = int(np.ceil(len(values)/50))
+            stepsize = int(np.ceil(len(values)/20))
             classes = classes[::stepsize]
             values = values[::stepsize]
         
