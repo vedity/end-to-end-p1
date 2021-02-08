@@ -56,7 +56,7 @@ Highcharts.setOptions({
     minorGridLineColor: '#505053',
     tickColor: '#32394e',
     tickWidth: 1,
-    
+
   },
   yAxis: {
     gridLineColor: '#32394e',
@@ -69,7 +69,7 @@ Highcharts.setOptions({
     minorGridLineColor: '#505053',
     tickColor: '#707073',
     tickWidth: 0,
-    
+
   },
 });
 
@@ -217,7 +217,9 @@ export class DataExplorationComponent implements OnInit {
 
   modeltitle: any;
   hideboxplot = true;
+  modalobj: any;
   centerModal(centerDataModal: any, obj) {
+    this.modalobj = obj;
     this.modeltitle = obj["Column Name"];
     this.columnlabelChartexpand = {
       chart: {
@@ -231,10 +233,17 @@ export class DataExplorationComponent implements OnInit {
       dataLabels: {
         enabled: false
       },
-      colors: ['#34c38f'],
+      colors: ['#34c38f', 'red', 'red'],
       series: [{
         data: obj["Plot Values"][1]
-      }],
+      }
+        // ,{
+        //   data:obj["Left Outlier Values"][1]
+        // },
+        // {
+        //   data:obj["Right Outlier Values"][1]
+        // }
+      ],
       xaxis: {
         categories: obj["Plot Values"][0],
         position: 'bottom',
@@ -251,6 +260,29 @@ export class DataExplorationComponent implements OnInit {
         offsetY: 0,
       }
     };
+
+
+
+    let outliers = [];
+    if (obj["Left Outlier Values"].length > 0) {
+      if (obj["Left Outlier Values"][0].length > 0) {
+        let leftoutlier = obj["Left Outlier Values"][0];
+        leftoutlier.forEach(element => {
+          outliers.push([0, element])
+        });
+      }
+    }
+
+    if (obj["Right Outlier Values"].length > 0) {
+      if (obj["Right Outlier Values"][0].length > 0) {
+        let rightoutlier = obj["Right Outlier Values"][0];
+        rightoutlier.forEach(element => {
+          outliers.push([0, element])
+        });
+      }
+    }
+
+console.log(outliers);
 
     if (obj["open"] != null) {
       let chart = new Chart({
@@ -280,7 +312,7 @@ export class DataExplorationComponent implements OnInit {
           }
         },
         exporting: {
-            enabled: false
+          enabled: false
         },
         series: [{
           name: 'Observations',
@@ -288,21 +320,22 @@ export class DataExplorationComponent implements OnInit {
           color: "#34c38f",
           data: [
             // [-102, 51, 102, 153, 306]
-            [obj["open"], obj["25%"],obj["50%"], obj["75%"], obj["close"]]
+            [obj["open"], obj["25%"], obj["50%"], obj["75%"], obj["close"]]
           ],
           tooltip: {
             headerFormat: ''
             // headerFormat: '<em>Experiment No {point.key}</em><br/>'
           }
-        }, 
+        },
         {
           name: 'Outliers',
           color: "#34c38f",
           type: 'scatter',
-          data: [ // x, y positions where 0 is the first category
-            [obj["Column Name"], obj["close"]+10],
+          data: outliers,
+          // [ // x, y positions where 0 is the first category
+          //   [obj["Column Name"], obj["close"]+10],
 
-          ],
+          // ],
           marker: {
             fillColor: '#34c38f',
             lineWidth: 1,
