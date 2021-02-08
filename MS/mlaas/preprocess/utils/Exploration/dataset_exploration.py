@@ -26,6 +26,44 @@ dc = dataset_creation.DatasetClass()
 
 class ExploreClass:
 
+    def get_attribute_datatype(self,csv_data,column_name_list,no_of_rows):
+        """
+        this function used to get proper attribute type for the column in csv file.
+
+        Args : 
+            [(data_df)] : [Pandas.DataFrame containing the data],
+            [(column_name_list)] : [List of the column name],
+            [(no_of_rows)] : [No of rows in csv data].
+
+        Return :
+            [List] : [List of the predicted type attribute for columns]
+
+        """
+        
+        attribute_type = [] #empty list to append attribute type
+        for column_name in column_name_list: #iterate column name list 
+            column_data = csv_data[column_name].tolist() #get the specified column data convert into list
+            unique_values = list(set(column_data)) #get the set of unique values convert into list
+            if (len(unique_values)/no_of_rows) < 0.2 :
+                if "," in str(column_data[1]): #check if the comma value present
+                    value = "categorical list"
+                else :
+                    value = "Categorical"
+            else:
+                value =  "false" #check condition if condition true then set as categorical else false
+            if value =="false": 
+                datatype_value = csv_data.dtypes.to_dict()[column_name] #get datatype specified for perticular column name
+                if datatype_value in ['float64','float32','int32','int64']: #check if int,float,double present then set it "numerical"
+                    value = "Continuous"
+                elif datatype_value in ['datetime64[ns]']: #check if datetime value present then set it "timestamp"
+                    value = "Timestamp"
+                elif datatype_value in ['object']:  #check if object type value present then set it "text"
+                        value = "Text"
+            attribute_type.append(value) #append type attribute value into list 
+        
+        logging.info("data preprocessing : ExploreClass : get_attribute_datatype : execution stop")    
+        return attribute_type
+    
     def get_dataset_statistics(self,DBObject,connection,dataset_id):
         """
             This class returns all the statistics for the given dataset.
@@ -71,6 +109,11 @@ class ExploreClass:
             #? Getting Categorical & Continuous Columns
             num_cols = data_df._get_numeric_data().columns
             numerical_columns = list(num_cols)
+            predicted_datatypes = self.get_attribute_datatype(data_df,data_df.columns,len(data_df))
+            for i,col in enumerate(data_df.columns):
+                if (col in numerical_columns) and (predicted_datatypes[i].startswith('Ca')):
+                    numerical_columns.remove(col)
+        
             stats_df = stats_df.T
             
             #? Changing The Column Names
@@ -113,25 +156,30 @@ class ExploreClass:
             #? Getting Column Names, Plotting Values of the histogram & Lest Frequent Values
             i = 0
             axislist =[]
-            datatype = []
             
             for col in data_df.columns:
                 #? Merging Column Names
                 stats_df.iloc[i,-5] = col
                 #? Getting Histogram/CountPlot Values
                 axislist.append(self.get_values(data_df[col],numerical_columns,col))
-                #? Getting Datatypes
-                datatype.append(self.get_datatype(numerical_columns,col))  
-                
+        
                 #? Getting Least Frequent Values & Count, only for the categorical columns
-                if datatype[-1].startswith("Ca"):
-                    value_count = data_df[col].value_counts()
-                    stats_df.iloc[i,-6] = value_count.index[-1]
-                    stats_df.iloc[i,-7] = int(value_count[-1])
+                if self.get_datatype(numerical_columns,col).startswith("Ca"):
+                    try:
+                        value_count = data_df[col].value_counts()
+                        stats_df.iloc[i,2] = value_count.index[0]
+                        stats_df.iloc[i,3] = value_count.iloc[0]
+                        stats_df.iloc[i,-6] = value_count.index[-1]
+                        stats_df.iloc[i,-7] = value_count.iloc[-1]
+                    except:
+                        stats_df.iloc[i,2] = np.NaN
+                        stats_df.iloc[i,3] = np.NaN
+                        stats_df.iloc[i,-6] = np.NaN
+                        stats_df.iloc[i,-7] = np.NaN
                 i += 1
 
             stats_df['Plot Values'] = axislist
-            stats_df['Datatype'] = datatype
+            stats_df['Datatype'] = predicted_datatypes
             
             IQR = stats_df['75%']-stats_df['25%']
             stats_df['open'] = stats_df['25%']-1.5 * IQR
