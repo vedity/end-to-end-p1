@@ -12,6 +12,7 @@ COPY package.json ./
  
 # Install dependecies
 RUN npm install
+RUN npm add dropzone
 #RUN npm install -g @angular/cli@10.2.0
  
 #RUN npm run build --prod

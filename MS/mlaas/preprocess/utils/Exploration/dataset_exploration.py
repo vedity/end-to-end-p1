@@ -31,7 +31,7 @@ class ExploreClass:
         this function used to get proper attribute type for the column in csv file.
 
         Args : 
-            [(data_df)] : [Pandas.DataFrame containing the data],
+            [(csv_data)] : [Pandas.DataFrame containing the data],
             [(column_name_list)] : [List of the column name],
             [(no_of_rows)] : [No of rows in csv data].
 
@@ -213,17 +213,20 @@ class ExploreClass:
             stats_df['Left Outlier Values'] = lower_outliers_list
             stats_df['Outliers'] = outliers_list
             
+            #? Adding a column needed for the frontend
+            stats_df['IsinContinuous'] = [True if stats_df.loc[i,'Datatype'] == 'Continuous' else False for i in stats_df.index]
+            
             #? Dataset Contains both Categorical & Continuous Data
             try:
-                stats_df = stats_df[['Plot Values','Left Outlier Values','Right Outlier Values','Outliers','Column Name','Datatype','DataCount','Mean','Std','Min Value','25%','50%','75%','Max Value','Most Frequent','Most Frequency','Least Frequent','Least Frequency','Unique Values','Null Values','Non-Null Values','open','close']]
+                stats_df = stats_df[['Plot Values','Left Outlier Values','Right Outlier Values','Outliers','IsinContinuous','Column Name','Datatype','DataCount','Mean','Std','Min Value','25%','50%','75%','Max Value','Most Frequent','Most Frequency','Least Frequent','Least Frequency','Unique Values','Null Values','Non-Null Values','open','close']]
             
             except KeyError:
                 try:
                     #? Dataset Contains only Continuous Data
-                    stats_df = stats_df[['Plot Values','Left Outlier Values','Right Outlier Values','Outliers','Column Name','Datatype','DataCount','Mean','Std','Min Value','25%','50%','75%','Max Value','Null Values','Non-Null Values','open','close']]
+                    stats_df = stats_df[['Plot Values','Left Outlier Values','Right Outlier Values','Outliers','IsinContinuous','Column Name','Datatype','DataCount','Mean','Std','Min Value','25%','50%','75%','Max Value','Null Values','Non-Null Values','open','close']]
                 except KeyError:
                     #? Dataset Contains only Categorical Data
-                    stats_df = stats_df[['Plot Values','Left Outlier Values','Right Outlier Values','Outliers','Column Name','Datatype','DataCount','Most Frequent','Most Frequency','Least Frequent','Least Frequency','Unique Values','Null Values','Non-Null Values']]
+                    stats_df = stats_df[['Plot Values','Left Outlier Values','Right Outlier Values','Outliers','IsinContinuous','Column Name','Datatype','DataCount','Most Frequent','Most Frequency','Least Frequent','Least Frequency','Unique Values','Null Values','Non-Null Values']]
         except:
             return 2
         
@@ -258,8 +261,6 @@ class ExploreClass:
         '''
         
         if sort: arr.sort()
-        #minimum = arr[0]
-        #maximum = arr[-1]
         i_q_r = self.iqr(arr)
         n = len(arr)
         
@@ -267,11 +268,8 @@ class ExploreClass:
         number_of_bins = (2*(i_q_r/(n**(1/3))))
         number_of_bins = math.ceil(number_of_bins)
         if number_of_bins < 10: number_of_bins = 10
-        #? Getting optimal bin width
-        #bin_width = ((maximum-minimum)/number_of_bins)
-        #bin_width = math.ceil(bin_width)
         
-        return number_of_bins  #, bin_width 
+        return number_of_bins
     
     def get_histogram_values(self,arr):
         '''
