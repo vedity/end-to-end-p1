@@ -108,7 +108,8 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 else:
                     #v1.3
                     # update number of rows into dataset.
-                    sql_command = "UPDATE mlaas.dataset_tbl SET no_of_rows="+str(no_of_rows)+" where original_dataset_id="+str(load_dataset_id)
+                    sql_command = "UPDATE mlaas.dataset_tbl SET no_of_rows="+str(no_of_rows)+" where dataset_id="+str(load_dataset_id)
+                    logging.info(str(sql_command)+"rows updated query")
                     update_status = DBObject.update_records(connection,sql_command)
                 
                 status = super(IngestClass,self).update_dataset_status(DBObject,connection,project_id,load_data_status)
@@ -125,7 +126,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         return project_status,project_id,load_dataset_id
 
         
-    def create_dataset(self,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,recursive_flag=0):
+    def create_dataset(self,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name):
         """This function is used to create dataset.
            E.g. sales , traveltime etc.
            
@@ -144,7 +145,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
             if connection == None:
                 raise DatabaseConnectionFailed(500)
-            dataset_status,original_dataset_id = super(IngestClass,self).make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name) # Get Status about dataset creation,if successfully then 0 else 1.
+            dataset_status,dataset_id,_ = super(IngestClass,self).make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name) # Get Status about dataset creation,if successfully then 0 else 1.
             if dataset_status == 2:
                 raise DatasetAlreadyExist(500)
             
@@ -157,7 +158,8 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                     raise LoadCSVDataFailed(500)
                 else:
                     # update number of rows into dataset.
-                    sql_command = "UPDATE mlaas.dataset_tbl set no_of_rows="+str(no_of_rows)+" where original_dataset_id="+str(original_dataset_id)
+                    sql_command = "UPDATE mlaas.dataset_tbl set no_of_rows="+str(no_of_rows)+" where dataset_id="+str(dataset_id)
+                    logging.info(str(sql_command)+" no_of_rows dataset")
                     update_status = DBObject.update_records(connection,sql_command)
 
             
@@ -167,7 +169,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             return exc.msg,None
         
         logging.info("data ingestion : ingestclass : create_dataset : execution end")
-        return dataset_status,original_dataset_id
+        return dataset_status,dataset_id
         
     def show_dataset_details(self,user_name):
         """This function is used to show dataset details.
@@ -601,8 +603,8 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         else:
             file_path += dataset_visibility
         fs = FileSystemStorage(location=file_path)
-        check_squence = DBObject.is_exist_sequence(connection,seq_name="dataset_sequence")
-        if check_squence =="True":
+        check_sequence = DBObject.is_exist_sequence(connection,seq_name="dataset_sequence")
+        if check_sequence =="True":
             seq = DBObject.get_sequence(connection) 
         file_name = file.name.split(".")[0]+"_"+ str(seq['nextval'][0]) + '.csv'
         fs.save(file_name, file)
