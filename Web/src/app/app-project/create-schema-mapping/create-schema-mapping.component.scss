@@ -47,5 +47,29 @@ td.errorstatus {
 }
 
 .schemamapping-row {
-    height: calc(100vh - 310px);
+    height: calc(100vh - 400px);
+}
+
+.headertable {
+    margin-bottom: 0px !important;
+}
+
+.button-items {
+    margin-top: 15px;
+}
+
+// .schemamappingtable {
+//     thead {
+//         tr {
+//             th {
+//                 position: sticky !important;
+//             }
+//         }
+//     }
+//     tbody {
+//         overflow-y: scroll;
+//     }
+// }
+.dataTables_wrapper.no-footer .dataTables_scrollBody {
+    border-bottom: none !important;
 }

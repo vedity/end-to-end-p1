@@ -20,7 +20,7 @@
                                     <span class="d-none d-sm-block">Continous</span>
                                 </a>
                                 <ng-template ngbNavContent>
-                                    <table class="table">
+                                    <table datatable [dtOptions]="dtOptions" class="table table-centered table-nowrap">
                                         <thead>
                                             <tr>
                                                 <th>No</th>
@@ -66,7 +66,7 @@
                                     <span class="d-none d-sm-block">Categorical</span>
                                 </a>
                                 <ng-template ngbNavContent>
-                                    <table class="table">
+                                    <table datatable [dtOptions]="dtOptions" class="table table-centered table-nowrap">
                                         <thead>
                                             <tr>
                                                 <th>No</th>
@@ -106,9 +106,9 @@
                             </li>
                         </ul>
                     </div>
-                    <perfect-scrollbar class="exploration-row">
-                        <div [ngbNavOutlet]="customNav"></div>
-                    </perfect-scrollbar>
+                    <!-- <perfect-scrollbar class="exploration-row"> -->
+                    <div [ngbNavOutlet]="customNav"></div>
+                    <!-- </perfect-scrollbar> -->
                 </div>
             </div>
         </div>

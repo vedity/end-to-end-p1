@@ -1,9 +1,10 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { DataExplorationApiService } from '../data-exploration.service';
 import { Chart } from 'angular-highcharts';
 import * as Highcharts from 'highcharts';
+import { DataTableDirective } from 'angular-datatables';
 // require('highcharts/themes/dark-unica')(Highcharts);
 Highcharts.setOptions({
   colors: ['#058DC7', '#50B432', '#ED561B', '#DDDF00', '#24CBE5', '#64E572',
@@ -87,6 +88,9 @@ export class DataExplorationComponent implements OnInit {
 
 
   constructor(public apiService: DataExplorationApiService, public toaster: ToastrService, private modalService: NgbModal,) { }
+  @ViewChild(DataTableDirective, { static: false })
+  datatableElement: DataTableDirective;
+  dtOptions: DataTables.Settings = {};
   @Input() public dataset_id: any;
   @Input() public title: any;
   @Input() public project_id: any
@@ -109,6 +113,15 @@ export class DataExplorationComponent implements OnInit {
   displayselectedtitle = "Continous";
 
   ngOnInit(): void {
+    this.dtOptions={
+      paging:false,
+      ordering:false,
+      scrollCollapse: true,
+      info:false,
+      searching:false,
+      // scrollX: true,
+     scrollY: "calc(100vh - 365px)",
+    }
     this.loaderdiv = true;
     this.columnlabelChart = {
       chart: {
@@ -189,6 +202,8 @@ export class DataExplorationComponent implements OnInit {
     if (logs.status_code == "200") {
       this.exploredData = logs.response;
       var data = this.groupBy(this.exploredData, "Datatype");
+      console.log(data);
+      
       this.continuousexploredata = data["Continuous"];
       this.categoricalexploredata = data["Categorical"];
       this.loaderdiv = false;
@@ -264,23 +279,21 @@ export class DataExplorationComponent implements OnInit {
 
 
     let outliers = [];
-    if (obj["Left Outlier Values"].length > 0) {
-      if (obj["Left Outlier Values"][0].length > 0) {
-        let leftoutlier = obj["Left Outlier Values"][0];
+    if (obj["Outliers"].length > 0) {
+        let leftoutlier = obj["Outliers"];
         leftoutlier.forEach(element => {
           outliers.push([0, element])
         });
-      }
     }
 
-    if (obj["Right Outlier Values"].length > 0) {
-      if (obj["Right Outlier Values"][0].length > 0) {
-        let rightoutlier = obj["Right Outlier Values"][0];
-        rightoutlier.forEach(element => {
-          outliers.push([0, element])
-        });
-      }
-    }
+    // if (obj["Right Outlier Values"].length > 0) {
+    //   if (obj["Right Outlier Values"][0].length > 0) {
+    //     let rightoutlier = obj["Right Outlier Values"][0];
+    //     rightoutlier.forEach(element => {
+    //       outliers.push([0, element])
+    //     });
+    //   }
+    // }
 
 console.log(outliers);
 
