@@ -8,7 +8,7 @@ FROM node:12.18.1-alpine as build-step
 WORKDIR /app
  
 # Copy dependency definitions
-# COPY package.json ./
+COPY package.json ./
  
 # Install dependecies
 RUN npm install
