@@ -1,5 +1,6 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { DataTableDirective } from 'angular-datatables';
 import { ToastrService } from 'ngx-toastr';
 import { SchemaMappingApiService } from '../schema-mapping-api.service';
 @Component({
@@ -8,7 +9,9 @@ import { SchemaMappingApiService } from '../schema-mapping-api.service';
   styleUrls: ['./create-schema-mapping.component.scss']
 })
 export class CreateSchemaMappingComponent implements OnInit {
-
+  @ViewChild(DataTableDirective, { static: false })
+  datatableElement: DataTableDirective;
+  dtOptions: DataTables.Settings = {};
   constructor(public apiService: SchemaMappingApiService, public toaster: ToastrService,private modalService: NgbModal) { }
   @Input() public dataset_id: any;
   @Input() public title: any;
@@ -36,6 +39,15 @@ export class CreateSchemaMappingComponent implements OnInit {
  };
 
   ngOnInit(): void {
+    this.dtOptions={
+      paging:false,
+      ordering:false,
+      scrollCollapse: true,
+      info:false,
+      searching:false,
+      // scrollX: true,
+     scrollY: "calc(100vh - 395px)",
+    }
     this.displaydiv=true;
     this.getColumnAttributeList();
     console.log(this.project_id,this.dataset_id);

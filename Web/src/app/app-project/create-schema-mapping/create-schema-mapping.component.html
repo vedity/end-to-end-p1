@@ -9,61 +9,57 @@
                 <ngx-skeleton-loader *ngIf="displaydiv" count="7" [animation]="animation" [theme]="theme">
                 </ngx-skeleton-loader>
                 <div *ngIf="!displaydiv">
-                    <perfect-scrollbar class="schemamapping-row">
-                        <table class="table table-centered table-nowrap">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th>
-                                        Column Name
-                                    </th>
-                                    <th>
-                                        Data Type
-                                    </th>
-                                    <th>Column Attributes</th>
-                                    <th>Change Column Name</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-
-                                <tr *ngFor="let data of datasetSchema;let i= index" id="tr_{{i}}" class="{{data.column_attribute}}-selected">
-                                    <td>
-                                        {{data.column_name}}
-                                    </td>
-                                    <td>
-                                        <!-- <select class="form-control" >
+                    <!-- <perfect-scrollbar class="schemamapping-row"> -->
+                    <table datatable [dtOptions]="dtOptions" class="table table-centered table-nowrap schemamappingtable">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>
+                                    Column Name
+                                </th>
+                                <th>
+                                    Data Type
+                                </th>
+                                <th>Column Attributes</th>
+                                <th>Change Column Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let data of datasetSchema;let i= index" id="tr_{{i}}" class="{{data.column_attribute}}-selected">
+                                <td>
+                                    {{data.column_name}}
+                                </td>
+                                <td>
+                                    <!-- <select class="form-control" >
                     <option value="">Select Option</option>
                     <option *ngFor="let item of datatypeList" value="{{item}}">{{item}}</option>
                 </select> -->
-                                        {{data.data_type}}
+                                    {{data.data_type}}
 
-                                    </td>
-                                    <td>
-                                        <select class="form-control selectattr" id="selectattr_{{i}}" [(ngModel)]="data.column_attribute" (change)="changeattrinute($event.target.value,i)">
-                                            <option value="">Select Option</option>
+                                </td>
+                                <td>
+                                    <select class="form-control selectattr" id="selectattr_{{i}}" [(ngModel)]="data.column_attribute" (change)="changeattrinute($event.target.value,i)">
+                                            <!-- <option value="">Select Option</option> -->
                                             <option *ngFor="let item of columnattrList" value="{{item}}">{{item}}
                                             </option>
                                         </select>
-                                    </td>
-                                    <td id="td_{{i}}" [ngClass]="{'errorstatus': data.change_column_name == data.column_name}">
-                                        <input class="form-control columnname" type="text" id="columnname_{{i}}" [value]="data.change_column_name" (keydown)="checksame(data.column_name,$event.target.value,i)" maxlength="100">
-                                        <div class="invalid-feedback">
-                                            <span class="text-red">Change column name must be different from column
+                                </td>
+                                <td id="td_{{i}}" [ngClass]="{'errorstatus': data.change_column_name == data.column_name}">
+                                    <input class="form-control columnname" type="text" id="columnname_{{i}}" [value]="data.change_column_name" (keydown)="checksame(data.column_name,$event.target.value,i)" (keyup)="checksame(data.column_name,$event.target.value,i)" maxlength="100">
+                                    <div class="invalid-feedback">
+                                        <span class="text-red">Change column name must be different from column
                                                 name</span>
-                                        </div>
-
-
-                                    </td>
-                                </tr>
-
-                            </tbody>
-                        </table>
-                        <div class="button-items text-center">
-                            <button type="button" class="btn btn-secondary" (click)="reset()">Reset</button>
-                            <button type="button" class="btn btn-success" (click)="save()">Save</button>
-                            <button type="button" class="btn btn-secondary" (click)="smallModal(smallDataModal)">Save
-                                As</button>
-                        </div>
-                    </perfect-scrollbar>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- </perfect-scrollbar> -->
+                    <div class="button-items text-center">
+                        <button type="button" class="btn btn-secondary" (click)="reset()">Reset</button>
+                        <button type="button" class="btn btn-success" (click)="save()">Save</button>
+                        <!-- <button type="button" class="btn btn-secondary" (click)="smallModal(smallDataModal)">Save
+                            As</button> -->
+                    </div>
                 </div>
             </div>
         </div>
