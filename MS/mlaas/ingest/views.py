@@ -101,8 +101,8 @@ class CreateProjectClass(APIView):
                         logging.info("data ingestion : CreateProjectClass : POST Method : execution start")
                         user_name=request.POST.get('user_name')  #get Username
                         project_name=request.POST.get('project_name') #get project_name
-                        project_desc=request.POST.get('project_desc') #get description
-                        dataset_desc=request.POST.get('dataset_desc') #get description
+                        project_desc=request.POST.get('description') #get project description
+                        dataset_desc=request.POST.get('dataset_desc') #get dataset description
                         dataset_name = request.POST.get('dataset_name')#get dataset name
                         page_name = "Create Project"
                         dataset_visibility = request.POST.get('visibility') #get Visibility
@@ -288,7 +288,8 @@ class DataDetailClass(APIView):
                         global_value=request_body['search']['value']  #get String value for global search
                         customefilter=request_body['customfilter']     
                         dataset_id = request.query_params.get('dataset_id') #get dataset_id
-                        row_count=DBObject.get_row_count(connection,dataset_id) #get the row count
+                        # row_count=DBObject.get_row_count(connection,dataset_id) #get the row count
+                        row_count=5
                         dataset_df,count=IngestionObj.show_data_details(dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter) #call show_data_details and it will return dataset detail data in dataframe
                         if isinstance(dataset_df,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(dataset_df) # extract the status_code and error_msg  from dataset_df

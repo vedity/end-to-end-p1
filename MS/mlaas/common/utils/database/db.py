@@ -172,6 +172,7 @@ class DBClass:
         except (Exception, psycopg2.DatabaseError) as error:
             connection.rollback() # Rollback the changes.
             cursor.close() # Close the cursor.
+            logging.info(str(error))
             return 1 # If failed.
 
     
@@ -189,6 +190,7 @@ class DBClass:
         sql_command = sql_command # Get sql command.
         try :
             data = pd.read_sql(sql_command, connection) # Read data from database table.
+            self.update_records(connection,'commit')
             return data   
         except(Exception, psycopg2.DatabaseError) as error:
             return None
@@ -228,17 +230,21 @@ class DBClass:
         Returns:
             [integer]: [status of updated records. if successfully then 1 else 0.]
         """
+        logging.info("call")
         cursor = connection.cursor() # Open the cursor.
         sql_command = sql_command # Get update query
         try:
             cursor.execute(sql_command) # Execute the update query.
             connection.commit() # Commit the changes.
+            cursor.close() # Close the cursor.
             status = 0 # If Successfully.
+            logging.info("in")
         except (Exception, psycopg2.DatabaseError) as error:
             connection.rollback() # Rollback the changes.
             cursor.close() # Close the cursor.
             status = 1 # If failed
-
+            logging.info("out")
+            logging.info(str(error))
         return status
 
     def column_rename(self,file_data_df):
@@ -272,7 +278,7 @@ class DBClass:
                  
         return df_columns_new ,df_columns # it returns list of changed and unchanged column name
 
-    def load_csv_into_db(self,connection_string,table_name,file_data_df,user_name):
+    def load_df_into_db(self,connection_string,table_name,file_data_df,user_name):
         """This function is used to load csv data  into database table.
 
         Args:
@@ -394,7 +400,7 @@ class DBClass:
                 sort_type[(String)] : [value of sort_type ascending or descending]
                 sort_index[(Integer)] : [index value of the column to perform sorting]
                 global_value[(String)] : [value that need be search in table]
-                original_dataset_id[(Integer)] : [Id of the dataset table]
+                
         Return : 
             [String] : [return the sql query string]
         """
@@ -456,29 +462,29 @@ class DBClass:
         else:
             return "True"
     
-    def get_row_count(self,connection,original_dataset_id):
+    def get_row_count(self,connection,dataset_id):
         """ function used to get the row count of the table
 
         Args:
-                original_dataset_id[(Integer)] : [Id of the dataset table]
+                dataset_id[(Integer)] : [Id of the dataset table]
         Return : 
             [Interger] : [return the row count]
         """
-        sql_command = "SELECT no_of_rows FROM mlaas.dataset_tbl WHERE original_dataset_id ="+str(original_dataset_id)
+        sql_command = "SELECT no_of_rows FROM mlaas.dataset_tbl WHERE dataset_id ="+str(dataset_id)
         row_data=self.select_records(connection,sql_command) #get the record for specific dataset id
         no_of_rows=row_data["no_of_rows"] # get the row count
         return no_of_rows
     
-    def get_column_list(self,connection,original_dataset_id):
+    def get_column_list(self,connection,dataset_id):
         """ function used to get the column name list of the table
 
         Args:
-                original_dataset_id[(Integer)] : [Id of the dataset table]
+                dataset_id[(Integer)] : [Id of the dataset table]
         Return : 
             [List] : [return the list of column name]
         """
         
-        sql_command = 'SELECT dataset_table_name,dataset_visibility,user_name FROM mlaas.dataset_tbl  Where original_dataset_id='+ str(original_dataset_id)
+        sql_command = 'SELECT dataset_table_name,dataset_visibility,user_name FROM mlaas.dataset_tbl  Where dataset_id='+ str(dataset_id)
         logging.info("++++++"+str(sql_command))
         dataset_df = self.select_records(connection,sql_command) #get the dataframe for that perticular dataset id if present ortherwise None 
         if len(dataset_df) == 0 or dataset_df is None:
@@ -494,6 +500,7 @@ class DBClass:
             user_name = 'public'
     
         sql_command = 'SELECT * FROM '+ user_name +'."' + dataset_table_name +'"' 
+        logging.info("++++++"+str(sql_command))
         data_details_df = self.select_records(connection,sql_command)
         data_details_df=data_details_df.to_json(orient='records') # transform dataframe based on record
         data_details_df = json.loads(data_details_df)  #convert data_details_df into dictonery
@@ -501,14 +508,14 @@ class DBClass:
     
 
     
-    def get_dataset_detail(self,DBObject,connection,original_dataset_id):
+    def get_dataset_detail(self,DBObject,connection,dataset_id):
         '''This function is used to get dataset table name from datasetid
         Args:
-                original_dataset_id[(Integer)] : [Id of the dataset table]
+                dataset_id[(Integer)] : [Id of the dataset table]
         Return : 
                 [Dataframe] : [return the dataframe of dataset table ]
         '''
-        sql_command = "SELECT dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows,dataset_desc from mlaas.dataset_tbl Where original_dataset_id =" + str(original_dataset_id)
+        sql_command = "SELECT dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows,dataset_desc from mlaas.dataset_tbl Where dataset_id =" + str(dataset_id)
         dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         return dataset_df 
     
@@ -519,7 +526,8 @@ class DBClass:
         Return : 
                 [Dataframe] : [return the dataframe of project table]
         '''
-        sql_command = "SELECT original_dataset_id,dataset_id from mlaas.project_tbl where project_id='"+ project_id +"'"
+        sql_command = "SELECT original_dataset_id,dataset_id from mlaas.project_tbl where project_id='"+str(project_id)+"'"
+        logging.info(str(sql_command)+" get_project_detail")
         dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         return dataset_df
     

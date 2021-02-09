@@ -71,7 +71,7 @@ class DatasetExplorationClass(APIView):
             return Response({"status_code":"500","error_msg":str(e),"response":"false"})
 
 # class DataVisualizationClass(APIView):
-
+                            
 #     def get(self,request,format=None):
 #         try:
 #             graph = request.query_params.get('graph')
@@ -106,8 +106,8 @@ class SchemaSaveClass(APIView):
                         update_schema_data=json.loads(request.body) #convert the data into dictonery
                         schema_data = update_schema_data["data"] #access "data" key value from the schema_data dict
                         project_id=request.query_params.get('project_id')
-                        method_name = 'Save'
-                        schema_status=schema_obj.save_schema(DBObject,connection,connection_string,schema_data,project_id,method_name)
+                        dataset_id =request.query_params.get('dataset_id')
+                        schema_status=schema_obj.save_schema(DBObject,connection,connection_string,schema_data,project_id,dataset_id)
                         if isinstance(schema_status,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(schema_status) # extract the status_code and error_msg from schema_status
                                 logging.info("data ingestion : SchemaSaveClass : POST Method : execution stop : status_code :"+status_code)
@@ -120,37 +120,7 @@ class SchemaSaveClass(APIView):
                         logging.error("data ingestion : SchemaSaveClass : POST Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
                         
-class SchemaSaveAsClass(APIView):
 
-        def post(self,request,format=None):
-                """ 
-                Args :
-                Return :
-                        status_code(500 or 200),
-                        error_msg(Error message for  insertions failed or successfull),
-                        Response(return false if failed otherwise false) 
-                """
-                try:
-                        logging.info("data ingestion : SchemaSaveAsClass : POST Method : execution start")
-                        update_schema_data=json.loads(request.body) #convert the data into dictonery
-                        schema_data = update_schema_data["data"] #access "data" key value from the schema_data dict
-                        project_id=request.query_params.get('project_id')
-                        dataset_name = request.query_params.get('dataset_name')
-                        dataset_desc = request.query_params.get('description')
-                        visibility = request.query_params.get('visibility')
-                        method_name = 'Save as'
-                        schema_status=schema_obj.save_schema(DBObject,connection,connection_string,schema_data,project_id,method_name,dataset_name,dataset_desc,visibility)
-                        if isinstance(schema_status,str): #check the instance of dataset_df
-                                status_code,error_msg=json_obj.get_Status_code(schema_status) # extract the status_code and error_msg from schema_status
-                                logging.info("data ingestion : SchemaSaveAsClass : POST Method : execution stop : status_code :"+status_code)
-                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
-                        else:
-                                logging.info("data ingestion : SchemaSaveAsClass : POST Method : execution stop : status_code :200")
-                                return Response({"status_code":"200","error_msg":"Successfully save","response":"true"})           
-                except Exception as e:
-                        logging.error("data ingestion : SchemaSaveAsClass : POST Method : Exception :" + str(e))
-                        logging.error("data ingestion : SchemaSaveAsClass : POST Method : " +traceback.format_exc())
-                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
 
 
 
