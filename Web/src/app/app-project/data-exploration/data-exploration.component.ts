@@ -201,11 +201,11 @@ export class DataExplorationComponent implements OnInit {
   successHandler(logs) {
     if (logs.status_code == "200") {
       this.exploredData = logs.response;
-      var data = this.groupBy(this.exploredData, "Datatype");
+      var data = this.groupBy(this.exploredData, "IsinContinuous");
       console.log(data);
       
-      this.continuousexploredata = data["Continuous"];
-      this.categoricalexploredata = data["Categorical"];
+      this.continuousexploredata = data["true"];
+      this.categoricalexploredata = data["false"];
       this.loaderdiv = false;
       this.finaldata = logs.response;
     }

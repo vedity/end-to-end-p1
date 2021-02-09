@@ -238,3 +238,7 @@ canvas {
 .headertable {
     margin-bottom: 0px !important;
 }
+
+.dataTables_wrapper.no-footer .dataTables_scrollBody {
+    border-bottom: 1px solid #2a3042 !important;
+}
