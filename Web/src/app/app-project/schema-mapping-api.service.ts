@@ -37,7 +37,7 @@ export class SchemaMappingApiService {
 
   saveDatasetSchema(dataset_id, project_id, obj): Observable<any> {
     var params = new HttpParams().append("project_id", project_id)
-    // .append("dataset_id", dataset_id)
+     .append("dataset_id", dataset_id)
     return this.httpClient.post(this.baseUrl + "ingest/dataset_schema/save/", obj, { headers: this.headers, params });
   }
 
