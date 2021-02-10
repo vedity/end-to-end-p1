@@ -80,7 +80,7 @@ class ExploreClass:
         #? getting the name of the dataset_tbl
         table_name,_,_ = dc.make_dataset_schema()
         
-        #? Getting user_name and dataset_vaisibility
+        #? Getting user_name and dataset_visibility
         sql_command = f"SELECT USER_NAME,DATASET_VISIBILITY,DATASET_TABLE_NAME,no_of_rows FROM {table_name} WHERE dataset_id = '{dataset_id}'"
         visibility_df = DBObject.select_records(connection,sql_command) 
         
@@ -206,12 +206,14 @@ class ExploreClass:
                 #? Getting All the outlier values
                 outliers_list.append(self.get_outliers(data_df,col,upper_limit,lower_limit))
                 
-                data  = stats_df.iloc[i,-7]
+                #? Pulling plot values
+                data  = stats_df.iloc[i]['Plot Values']
                 x_axis_values = data[0]
                 y_axis_values = data[1]
                 if col in numerical_columns:
                     #? Adjusting plot values only for the continuous values, because outlier bins will only be seen in the continuous columns
                     try:
+                        #? Removing outlier bins from the plot bins
                         if upper_clip != 0:
                             x_axis_values = x_axis_values[lower_clip:-upper_clip]
                             y_axis_values = y_axis_values[lower_clip:-upper_clip]
@@ -219,7 +221,7 @@ class ExploreClass:
                             x_axis_values = x_axis_values[lower_clip:]
                             y_axis_values = y_axis_values[lower_clip:]
                     except:
-                        #? NaN values will raise exceptions
+                        #? NaN values of lower clip & upper clip will raise exceptions
                         pass 
                     lower_outliers_list.append(lower_outliers)
                     upper_outliers_list.append(upper_outliers)
