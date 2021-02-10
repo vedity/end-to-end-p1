@@ -11,12 +11,9 @@
             <div class="col-lg-6">
                 <div class="form-group">
                     <label class="col-form-label">Project Name <span class="required-label">&nbsp;*</span></label>
-                    <input class="form-control" (change)="checkuniqueprojectname($event)" required type="text"
-                        [(ngModel)]="data.projectname" name="projectname" #projectname="ngModel" maxlength="200">
-                    <div class="invalid-feedback"
-                        *ngIf="projectname.errors?.required && (projectname.dirty || projectname.touched)">
-                        <span *ngIf="projectname.errors?.required && (projectname.dirty || projectname.touched)"
-                            class="text-red">Please enter project name</span>
+                    <input class="form-control" (change)="checkuniqueprojectname($event)" required type="text" [(ngModel)]="data.projectname" name="projectname" #projectname="ngModel" maxlength="200">
+                    <div class="invalid-feedback" *ngIf="projectname.errors?.required && (projectname.dirty || projectname.touched)">
+                        <span *ngIf="projectname.errors?.required && (projectname.dirty || projectname.touched)" class="text-red">Please enter project name</span>
                     </div>
                     <div class="invalid-feedback" *ngIf="projectnameuniqueerror">
                         <span class="text-red">Project name already exist</span>
@@ -24,24 +21,17 @@
                 </div>
                 <div class="form-group">
                     <label class="col-form-label">Description<span class="required-label">&nbsp;*</span></label>
-                    <textarea class="form-control" maxlength="500" [(ngModel)]="data.description" name="description"
-                        #description="ngModel" required></textarea>
-                    <div class="invalid-feedback"
-                        *ngIf="description.errors?.required && (description.dirty || description.touched)">
-                        <span *ngIf="description.errors?.required && (description.dirty || description.touched)"
-                            class="text-red">Please enter description</span>
+                    <textarea class="form-control" maxlength="500" [(ngModel)]="data.description" name="description" #description="ngModel" required></textarea>
+                    <div class="invalid-feedback" *ngIf="description.errors?.required && (description.dirty || description.touched)">
+                        <span *ngIf="description.errors?.required && (description.dirty || description.touched)" class="text-red">Please enter description</span>
                     </div>
                 </div>
                 <div class="form-group row">
                     <div class="col-md-6">
                         <label class="col-form-label">Dataset Name</label>
-                        <input class="form-control" maxlength="200" [disabled]="selectchangedisablevalidation"
-                            (change)="checkuniquedatasetname($event)" [(ngModel)]="data.datasetname" name="datasetname"
-                            #datasetname="ngModel" type="text">
-                        <div class="invalid-feedback"
-                            *ngIf="datasetname.errors?.required && (datasetname.dirty || datasetname.touched)">
-                            <span *ngIf="datasetname.errors?.required && (datasetname.dirty || datasetname.touched)"
-                                class="text-red">Please enter dataset name</span>
+                        <input class="form-control" maxlength="200" [disabled]="selectchangedisablevalidation" (change)="checkuniquedatasetname($event)" [(ngModel)]="data.datasetname" name="datasetname" #datasetname="ngModel" type="text">
+                        <div class="invalid-feedback" *ngIf="datasetname.errors?.required && (datasetname.dirty || datasetname.touched)">
+                            <span *ngIf="datasetname.errors?.required && (datasetname.dirty || datasetname.touched)" class="text-red">Please enter dataset name</span>
                         </div>
                         <div class="invalid-feedback" *ngIf="datasetnameuniqueerror">
                             <span class="text-red">Dataset name already exist</span>
@@ -51,28 +41,23 @@
                         <label class="col-form-label">Upload Dataset</label>
                         <div class="custom-file ">
                             <label class="custom-file-label ">Choose file</label>
-                            <input type="file" (change)="handleFileInput($event.target.files)" [(ngModel)]="data.file"
-                                accept=".csv" name="file" [disabled]="selectchangedisablevalidation" #file="ngModel"
-                                class="custom-file-input">
+                            <input type="file" (change)="handleFileInput($event.target.files)" [(ngModel)]="data.file" accept=".csv" name="file" [disabled]="selectchangedisablevalidation" #file="ngModel" class="custom-file-input">
                             <div class="invalid-feedback" *ngIf="file.errors?.required && (file.dirty || file.touched)">
-                                <span *ngIf="file.errors?.required && (file.dirty || file.touched)"
-                                    class="text-red">Please select .csv file</span>
+                                <span *ngIf="file.errors?.required && (file.dirty || file.touched)" class="text-red">Please select .csv file</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="custom-control custom-checkbox mb-3">
-                        <input type="checkbox" class="custom-control-input"
-                            (change)="data.isprivate=$event.target.checked" checked name="isprivate" id="customCheck1">
+                        <input type="checkbox" class="custom-control-input" (change)="data.isprivate=$event.target.checked" checked name="isprivate" id="customCheck1">
                         <label class="custom-control-label" for="customCheck1">Keep Dataset private</label>
                     </div>
                 </div>
                 <label class="txt-center">OR</label>
                 <div class="form-group">
                     <label class="col-form-label">Select Dataset</label>
-                    <select class="form-control" [disabled]="datasetdisablevalidation" [(ngModel)]="data.datsetid"
-                        name="datsetid" #datsetid="ngModel" (change)="selectchange()">
+                    <select class="form-control" [disabled]="datasetdisablevalidation" [(ngModel)]="data.datsetid" name="datsetid" #datsetid="ngModel" (change)="selectchange()">
                         <option value="">Select Dataset</option>
                         <option *ngFor="let item of datasetlist" value="{{item.dataset_id}}"> {{item.dataset_name}}
                         </option>
@@ -85,8 +70,8 @@
                     {{errorMessage}}
                 </div>
                 <div class="button-items txt-center">
-                    <button type="submit" class="btn btn-success">Create Project</button>
-                    <button type="button" (click)="reset()" class="btn btn-success">Reset</button>
+                    <button type="submit" id="btnsubmit" class="btn btn-success">Create Project</button>
+                    <button type="button" id="btnreset" (click)="reset()" class="btn btn-success">Reset</button>
                 </div>
             </div>
         </div>
