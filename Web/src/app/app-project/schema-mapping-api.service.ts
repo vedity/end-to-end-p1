@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class SchemaMappingApiService {
-  baseUrl = 'http://127.0.0.1:8000/mlaas/'
+  baseUrl = 'http://127.0.0.1:8000/mlaas/'           
   headers = new HttpHeaders({
     'Content-type': 'application/json',
   });
