@@ -193,7 +193,8 @@ class ExploreClass:
             outliers_list = []
             lower_outliers_list = []
             upper_outliers_list = []
-            
+            updated_plot_list = []
+        
             for col in data_df.columns:
                 #? Getting Lower & Upper Limits for the Histogram
                 lower_limit = stats_df.iloc[i]['open']
@@ -201,17 +202,40 @@ class ExploreClass:
                 #? Getting Edges of the Bins and Values of Each Bins
                 bin_edges, hists = stats_df.iloc[i]['Plot Values']
                 #? Getting Arrays of the Outliers to be plotted
-                lower_outliers, upper_outliers = self.get_outlier_hist(hists, bin_edges, upper_limit, lower_limit)
-                lower_outliers_list.append(lower_outliers)
-                upper_outliers_list.append(upper_outliers)
+                lower_outliers, upper_outliers, lower_clip, upper_clip = self.get_outlier_hist(hists, bin_edges, upper_limit, lower_limit)
                 #? Getting All the outlier values
                 outliers_list.append(self.get_outliers(data_df,col,upper_limit,lower_limit))
+                
+                data  = stats_df.iloc[i,-7]
+                x_axis_values = data[0]
+                y_axis_values = data[1]
+                if col in numerical_columns:
+                    #? Adjusting plot values only for the continuous values, because outlier bins will only be seen in the continuous columns
+                    try:
+                        if upper_clip != 0:
+                            x_axis_values = x_axis_values[lower_clip:-upper_clip]
+                            y_axis_values = y_axis_values[lower_clip:-upper_clip]
+                        else:
+                            x_axis_values = x_axis_values[lower_clip:]
+                            y_axis_values = y_axis_values[lower_clip:]
+                    except:
+                        #? NaN values will raise exceptions
+                        pass 
+                    lower_outliers_list.append(lower_outliers)
+                    upper_outliers_list.append(upper_outliers)
+                else:
+                    #? Count plots of the categorical columns does not need the outlier bins
+                    lower_outliers_list.append([[],[]])
+                    upper_outliers_list.append([[],[]])
+
+                updated_plot_list.append([x_axis_values,y_axis_values])
                 i += 1 
             
             #? Storing the Values in the dataframe, so that tey can be sent
             stats_df['Right Outlier Values'] = upper_outliers_list
             stats_df['Left Outlier Values'] = lower_outliers_list
             stats_df['Outliers'] = outliers_list
+            stats_df['Plot Values'] = updated_plot_list
             
             #? Adding a column needed for the frontend
             stats_df['IsinContinuous'] = [True if stats_df.loc[i,'Datatype'] == 'Continuous' else False for i in stats_df.index]
@@ -379,6 +403,8 @@ class ExploreClass:
             Returns:
                 lower_outliers[(List of Lists)]: Histogram Values for Lower Outliers.
                 upper_outliers[(List of Lists)]: Histogram Values for Upper Outliers.
+                lower_edges_length[(Intiger)]: How many left side outlier bins (lower outlier bins) are there in the histogram.
+                upper_edges_length[(Intiger)]: How many right side outlier bins (upper outlier bins) are there in the histogram.
         '''
         try:
             lower_edges = list(filter(lambda x: x<lower_limit,bin_edges))
@@ -392,9 +418,9 @@ class ExploreClass:
             upper_outliers = [upper_edges,upper_hist]
             lower_outliers = [lower_edges,lower_hist]
 
-            return lower_outliers, upper_outliers
+            return lower_outliers, upper_outliers, len(lower_edges), len(upper_edges)
         except:
-            return [[],[]],[[],[]]
+            return [[],[]],[[],[]], np.NaN, np.NaN
         
     def get_outliers(self,df,col,upper_limit,lower_limit):
         '''
