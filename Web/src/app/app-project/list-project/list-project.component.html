@@ -3,7 +3,7 @@
         <div class="card table-card">
             <div class="card-body">
                 <div class="main-datatable">
-                    <a href="javascript:void(0)" (click)="displayfilter()" class="filter-btn"><i class="dripicons-experiment"></i></a>
+                    <a href="javascript:void(0)" (click)="displayfilter()" id="filter-btn" class="filter-btn"><i class="dripicons-experiment"></i></a>
                     <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table table-centered table-nowrap">
                         <thead class="thead-light">
                             <tr>
@@ -71,10 +71,10 @@
                                 </td>
                                 <td>{{data.created_on | date}}</td>
                                 <td style="font-size: 20px;font-weight: 700;" class="text-center">
-                                    <a href="javascript:void(0);" title="Data Detail" [routerLink]="['/schema']" [state]="{dataset_id: data.dataset_id ,project_id:data.project_id,dataset_name:data.dataset_name,navigate_to:'/project'}">
+                                    <a href="javascript:void(0);" title="Data Detail" id="detail_{{data.project_id}}" [routerLink]="['/schema']" [state]="{dataset_id: data.dataset_id ,project_id:data.project_id,dataset_name:data.dataset_name,navigate_to:'/project'}">
                                         <i class=" bx bx-file"></i></a>
-                                    <a href="javascript:void(0);" id="sa-warning" title="Delete Project" (click)="confirm(data.project_id)"> <i class=" bx bx-trash"></i></a>
-                                    <a href="javascript:void(0);" [routerLink]="['/schema']" title="Schema Mapping" [state]="{dataset_id: data.dataset_id ,project_id:data.project_id,dataset_name:data.dataset_name,navigate_to:''}"> <i class="bx bx-message-square-add"></i></a>
+                                    <a href="javascript:void(0);" class="sa-warning" id="delete_{{data.project_id}}" title="Delete Project" (click)="confirm(data.project_id)"> <i class=" bx bx-trash"></i></a>
+                                    <a href="javascript:void(0);" [routerLink]="['/schema']" id="schema_{{data.project_id}}" title="Schema Mapping" [state]="{dataset_id: data.dataset_id ,project_id:data.project_id,dataset_name:data.dataset_name,navigate_to:''}"> <i class="bx bx-message-square-add"></i></a>
                                 </td>
                             </tr>
                         </tbody>

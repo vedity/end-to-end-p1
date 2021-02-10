@@ -39,7 +39,7 @@
             </div>
             <div class="col-md-2">
                 <div class="button-items">
-                    <button type="submit" class="btn btn-success upload-btn">Upload Dataset</button>
+                    <button type="submit" id="btnsubmit" class="btn btn-success upload-btn">Upload Dataset</button>
                 </div>
             </div>
         </div>
@@ -50,7 +50,7 @@
                 <div class="card-body">
                     <h4 class="card-title mb-4">Dataset List</h4>
                     <div class="main-datatable">
-                        <a href="javascript:void(0)" (click)="displayfilter()" class="filter-btn"><i
+                        <a href="javascript:void(0)" (click)="displayfilter()" id="filter_btn" class="filter-btn"><i
                                 class="dripicons-experiment"></i></a>
                         <table datatable [dtTrigger]="dtTrigger" [dtOptions]="dtOptions" class="table table-centered table-nowrap">
                             <thead class="thead-light">
@@ -119,9 +119,9 @@
                                         {{data.created_on|date}}
                                     </td>
                                     <td class="text-center" style="font-size: 20px;font-weight: 700;">
-                                        <a href="javascript:void(0);" [routerLink]="['/schema']" [state]="{dataset_id: data.dataset_id ,dataset_name:data.dataset_name,navigate_to:'/dataset' }">
+                                        <a href="javascript:void(0);" [routerLink]="['/schema']" id="detail_{{data.dataset_id}}" [state]="{dataset_id: data.dataset_id ,dataset_name:data.dataset_name,navigate_to:'/dataset' }">
                                             <i class=" bx bx-file"></i></a>
-                                        <a href="javascript:void(0);" id="sa-warning" (click)="confirm(data.dataset_id)"> <i class=" bx bx-trash"></i></a>
+                                        <a href="javascript:void(0);" class="sa-warning" id="delete_{{data.dataset_id}}" (click)="confirm(data.dataset_id)"> <i class=" bx bx-trash"></i></a>
                                     </td>
                                 </tr>
                             </tbody>
