@@ -126,7 +126,7 @@ class SchemaClass(dt.DatasetClass):
                 change_column_name[(List)] : [change column values]
                 data_type_lst [(List)]  : [Existing table column datatype value]
                 column_datatype_list[(List)]  : [column datatype list(numeric,test,categorical)]
-                column_attribute_list [(List)]  : [names of type attribute(ignore,target,select)]
+                column_attribute_list [(List)]  : [names of type attribute(Ignore,target,select)]
                 
         Return:
             [(integer)] : [return 0 if successfully inserted other wise return 1]
@@ -149,7 +149,7 @@ class SchemaClass(dt.DatasetClass):
                     raise SchemaUpdateFailed(500)
                 else:
                     for prev_col,new_col,new_dtype,col_attr in zip(prev_cols_lst,new_cols_lst,prev_dtype_lst,cols_attribute_lst):
-                        if str(col_attr) !='ignore': 
+                        if str(col_attr) !='Ignore': 
                                 row = project_id,str(dataset_id),table_name,prev_col,new_col,new_dtype,col_attr
                                 row_tuples = [tuple(row)] # Make record for project table
                                 logger.info(str(row_tuples) + "row tuple")
@@ -269,8 +269,8 @@ class SchemaClass(dt.DatasetClass):
             logging.info(str(column_datatype_list)+"  column_datatype_list")
             logging.info(str(change_column_name)+"  change_column_name")
 
-            #check For all column if attribute type are ignore then return True and raise error else False
-            check_attribute_type = True if len(column_attribute_list) == column_attribute_list.count("ignore") else False
+            #check For all column if attribute type are Ignore then return True and raise error else False
+            check_attribute_type = True if len(column_attribute_list) == column_attribute_list.count("Ignore") else False
             if check_attribute_type == True :
                 raise IgnoreAttributeClass(500)
             
@@ -320,7 +320,7 @@ class SchemaClass(dt.DatasetClass):
             logging.info("alter_table_data")
             status = 0
             for index in range(len(column_name_list)):
-                if column_attribute_list[index]=='ignore':
+                if column_attribute_list[index]=='Ignore':
                     logging.info("call_ignore")
                     sql_command = 'ALTER TABLE '+table_name+' DROP COLUMN "'+str(column_name_list[index])+'";'
                     logging.info(str(sql_command)+"  Ignore ")
@@ -342,7 +342,7 @@ class SchemaClass(dt.DatasetClass):
     #     """
     #     function used to insert record all the changes done in schema mapping into activity timeline table that performed by user.
     #     1)For the column been selected and target , 
-    #     2)For the column been ignore
+    #     2)For the column been Ignore
     #     3)For the column name updated
     #     4)For "Save as" option Updated dataset name inserted by user
 
@@ -353,7 +353,7 @@ class SchemaClass(dt.DatasetClass):
     #             dataset_name[(String)]:[Updated dataset name uploaded  by user]
     #             column_name_list[(List)]  : [Existing table column name value]
     #             change_column_name[(List)] : [Change column name values]
-    #             column_attribute_list [(List)]  : [name of type attribute(select,ignore,target)]
+    #             column_attribute_list [(List)]  : [name of type attribute(select,Ignore,target)]
     #     Return :
     #             [(Boolean)] : [return True if successfully updated record else return False]
     #     """
