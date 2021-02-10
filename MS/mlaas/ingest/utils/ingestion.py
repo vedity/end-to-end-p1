@@ -219,7 +219,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             if connection == None :
                 raise DatabaseConnectionFailed(500) 
             
-            data_details_df,count = super(IngestClass,self).show_data_details(DBObject,connection,original_dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter) # Get dataframe of loaded csv.
+            data_details_df,filtercount = super(IngestClass,self).show_data_details(DBObject,connection,original_dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter) # Get dataframe of loaded csv.
             if data_details_df is None :
                 raise DataNotFound(500)
             data_details_df=data_details_df.to_json(orient='records',date_format='iso')
@@ -233,7 +233,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             return exc.msg
         
         logging.info("data ingestion : ingestclass : show_data_details : execution end")
-        return data_details_df,count
+        return data_details_df,filtercount
 
     def show_project_details(self,user_name):
         """This function is used to show project details.
@@ -569,21 +569,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             return ALL_SET
         except (InvalidCsvFormat,InvalidColumnName,RowsColumnRequired,NumericColumnfound) as exc:
             return exc.msg
-    
-    def user_authentication(self,DBObject,connection,user_name,password):
-        try:
-            sql_command = "SELECT user_name from mlaas.user_auth_tbl where user_name='"+ str(user_name) +"' and password='"+ str(password) +"'"
-            user_df = DBObject.select_records(connection,sql_command)
-            if user_df is None:
-                raise UserAuthenticationFailed(500)
-            
-            if len(user_df) > 0 :
-                return True
-            else:
-                raise UserAuthenticationFailed(500)
 
-        except UserAuthenticationFailed as exc:
-            return exc.msg
 
    
     def save_file(self,DBObject,connection,user_name,dataset_visibility,file,file_path):

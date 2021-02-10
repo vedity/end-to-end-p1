@@ -15,7 +15,7 @@ from sqlalchemy import create_engine
 import json
 import logging
 from common.utils.logger_handler import custom_logger as cl
-
+from common.utils.exception_handler.python_exception.common.common_exception import *
 user_name = 'admin'
 log_enable = True
 
@@ -381,6 +381,12 @@ class DBClass:
         return global_search_clause
     
     def get_customfilter(self,customefilter):
+        """ function used to get customfilter clause
+        Args:
+            customefilter ([type]): [dictionary]
+        Returns:
+            [String]: [retun the custom filter string]
+        """
         dict=customefilter
         empty_string=""
         for x in dict:
@@ -402,46 +408,42 @@ class DBClass:
                 global_value[(String)] : [value that need be search in table]
                 
         Return : 
-            [String] : [return the sql query string]
+            [String] : [return the sql query string for data]
+            [String] : [return the sql query string for filter row count]
         """
         try: 
             end_index = (start_index + length)-1 #get total length
-            limit_index=start_index+length
+            limit_index=start_index+length #calculate limit
             order_clause,columns_list=self.get_order_clause(connection,table_name,sort_type,sort_index) #call get_order_clause function and get order by string and column list            
-            order_clause,columns_list=self.get_order_clause(connection,table_name,sort_type,sort_index) #call get_order_clause function and get order by string and column list            
-            columns=columns_list[1:]
-            global_search_clause=""
+            columns=columns_list[1:] #remove first column
+            global_search_clause="" #initialize global_search_clause
             if global_search_value!="":
                 global_search_clause=self.get_global_search_clause(columns,global_search_value)  #call get_global_search_clause function and get search query string
-                global_search_clause= "where "+global_search_clause  
-            customefilter=self.get_customfilter(customefilter)
-            customefilter_clause=""
+                global_search_clause= "where "+global_search_clause  #add where to global_search_clause
+            customefilter=self.get_customfilter(customefilter) #call get_customfilter value
+            customefilter_clause="" #initialize customefilter_clause
             if customefilter!='()':
-                customefilter_clause="where "+customefilter
-                # if global_search_value=="":
-                #     customefilter_clause="where "+customefilter_clause  
-            logging.info("customefilter_clause: "+customefilter_clause)         
-            
+                customefilter_clause="where "+customefilter #add where to customefilter_clause 
             if str(sort_index) != "0" or global_search_value!="" or customefilter_clause!="":  
-                if start_index==0:
+                if start_index==0:                              #checking column
                     if customefilter_clause !="":
-                       sql_command = f'select * from (SELECT * From {table_name} {global_search_clause} {order_clause}) as dt {customefilter_clause} {order_clause} limit {length}'   
-                       sql_command1 = f'select count(*) from (SELECT * From {table_name} {global_search_clause} ) as dt {customefilter_clause}  '                                 
+                       sql_data = f'select * from (SELECT * From {table_name} {global_search_clause} {order_clause}) as dt {customefilter_clause} {order_clause} limit {length}'   #sql Query with customefilter_clause
+                       sql_filtercount = f'select count(*) from (SELECT * From {table_name} {global_search_clause} ) as dt {customefilter_clause} ' #sql Query for filter row count                             
                     else:
-                        sql_command = f'SELECT * From {table_name} {global_search_clause} {order_clause} limit {length}'   
-                        sql_command1 = f'SELECT count(*) From {table_name} {global_search_clause}'   
+                        sql_data = f'SELECT * From {table_name} {global_search_clause} {order_clause} limit {length}'  #sql Query without customefilter_clause 
+                        sql_filtercount = f'SELECT count(*) From {table_name} {global_search_clause}'   #sql Query for filter row count                             
                 else:
                     if customefilter_clause !="":
-                        sql_command = f'select * from (SELECT * From {table_name} {global_search_clause} {order_clause} limit {limit_index} offset {start_index}) as dt {customefilter_clause} {order_clause} limit {length}' 
-                        sql_command1 = f'select count(*) from (SELECT * From {table_name} {global_search_clause}) as dt {customefilter_clause}'                                 
+                        sql_data = f'select * from (SELECT * From {table_name} {global_search_clause} {order_clause} limit {limit_index} offset {start_index}) as dt {customefilter_clause} {order_clause} limit {length}'  #sql Query with customefilter_clause
+                        sql_filtercount = f'select count(*) from (SELECT * From {table_name} {global_search_clause}) as dt {customefilter_clause}'#sql Query for filter row count                              
                     else:   
-                        sql_command = f'select * from (SELECT * From {table_name} {global_search_clause} {order_clause} limit {limit_index} offset {start_index}) as dt limit {length}' 
-                        sql_command1 = f'select count(*) from (SELECT * From {table_name} {global_search_clause}) as dt'                                 
+                        sql_data = f'select * from (SELECT * From {table_name} {global_search_clause} {order_clause} limit {limit_index} offset {start_index}) as dt limit {length}' #sql Query for filter row count  
+                        sql_filtercount = f'select count(*) from (SELECT * From {table_name} {global_search_clause}) as dt'  #sql Query for filter row count                                 
             
             else:
-                sql_command = f'SELECT * From {table_name} where "{columns_list[0]}" between {start_index} and {end_index}  {order_clause}'
-                sql_command1 = f'SELECT count(*) From {table_name}'
-            return sql_command,sql_command1
+                sql_data = f'SELECT * From {table_name} where "{columns_list[0]}" between {start_index} and {end_index}  {order_clause}' # sql Query without any filter and clause
+                sql_filtercount = f'SELECT count(*) From {table_name}' #sql Query with customefilter_clause
+            return sql_data,sql_filtercount
         except Exception as exc:
             return str(exc) 
 
@@ -546,7 +548,31 @@ class DBClass:
         table_name = table_name[0]+str(seq['nextval'][0])+table_name[1] #create table name by joining sequence
         logging.info("data ingestion : SchemaClass : get_table_name : execution stop")
         return table_name
+    
+    def user_authentication(self,connection,user_name,password):
+        """[summary]
 
+        Args:
+            connection ([String]): [connection String]
+            user_name ([String]): [User Name]
+            password ([String]): [password]
+
+        Raises:
+            UserAuthenticationFailed: [User authentication failed]
+        Returns:
+            [String]: [if user authenticated then it return True]
+        """
+        try:
+            sql_command = "SELECT user_name from mlaas.user_auth_tbl where user_name='"+ str(user_name) +"' and password='"+ str(password) +"'"
+            user_df = self.select_records(connection,sql_command)
+            if user_df is None:
+                raise UserAuthenticationFailed(500)          
+            if len(user_df) > 0 :
+                return True
+            else:
+                raise UserAuthenticationFailed(500)
+        except UserAuthenticationFailed as exc:
+            return exc.msg
   
 
 
