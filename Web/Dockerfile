@@ -11,22 +11,22 @@ WORKDIR /app
 
 
 
+ 
+# Copy dependency definitions
+COPY package.json ./
+ 
+# Install dependecies
+RUN npm install
+#RUN npm install -g @angular/cli@10.2.0
+ 
+#RUN npm run build --prod
 
-# # Copy dependency definitions
-# COPY package.json ./
+# Get all the code needed to run the app
+COPY . .
  
-# # Install dependecies
-# RUN npm install
-# #RUN npm install -g @angular/cli@10.2.0
+# Expose the port the app runs in
+EXPOSE 4200
  
-# #RUN npm run build --prod
-
-# # Get all the code needed to run the app
-# COPY . .
- 
-# # Expose the port the app runs in
-# EXPOSE 4200
- 
-# # Serve the app
-# #CMD ["npm", "start"]
-# CMD npm run start
+# Serve the app
+#CMD ["npm", "start"]
+CMD npm run start
