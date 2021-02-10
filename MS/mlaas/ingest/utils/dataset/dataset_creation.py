@@ -174,7 +174,7 @@ class DatasetClass:
         #? Checking if the same dataset is there for the same user in the dataset table? If yes, then it will not insert a new row in the table
             dataset_exist = self.dataset_exists(DBObject,connection,table_name,dataset_visibility,dataset_name,user_name)
             if dataset_exist == False: pass #? No dataset with same name exists so creating the new one
-            else: return 2,dataset_exist #? dataset_exists() function returns id of the dataset if dataset with same name exists
+            else: return 2,dataset_exist,None #? dataset_exists() function returns id of the dataset if dataset with same name exists
         
         create_status = DBObject.create_table(connection,table_name,schema) # Get status about dataset tableis created or not.if created then 0 else 1.
         row_tuples = self.make_dataset_records(dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,flag) # Get record for dataset table.
