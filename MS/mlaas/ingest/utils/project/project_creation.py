@@ -102,7 +102,7 @@ class ProjectClass:
         schema_status = DBObject.create_schema(connection)
         # Get table name,schema and columns from dataset class.
         table_name,schema,cols = self.make_project_schema() 
-        if self.project_exists(DBObject,connection,table_name,project_name,user_name) : return 2,1
+        if self.project_exists(DBObject,connection,table_name,project_name,user_name) : return 2,1,None
         
         # Get status about create table. if successful then 0 else 1.
         create_status = DBObject.create_table(connection,table_name,schema)
