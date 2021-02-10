@@ -42,6 +42,16 @@ class NullValue(Exception):
     def __str__(self):
         return (self.msg)
 
+class UserAuthenticationFailed(Exception):
+    """User Authentication Failed Exception"""
+    def __init__(self,status_code):
+        self.msg = "User authentication failed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+
+    def __str__(self):
+        return (self.msg)
+
 class ArrayIndexOutOfBound(Exception):
     """ Array Index Out Of Bound Exception """
     def __init__(self,status_code):

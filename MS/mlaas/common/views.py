@@ -50,21 +50,21 @@ class UserLoginClass(APIView):
                 """
                 try:
                         logging.info("data ingestion : UserLoginClass : GET Method : execution start")
-                        user_name = request.query_params.get('user_name')
-                        password = request.query_params.get('password')
-                        check_user_auth_tbl=DBObject.is_existing_table(connection,'user_auth_tbl','mlaas')
+                        user_name = request.query_params.get('user_name') #get user_name
+                        password = request.query_params.get('password') #get password
+                        check_user_auth_tbl=DBObject.is_existing_table(connection,'user_auth_tbl','mlaas') #check user_auth_tbl exists
                         if check_user_auth_tbl == "False":
-                                user_df=DBObject.read_data('common/user_registration_tbl.csv')
-                                status=DBObject.load_df_into_db(connection_string,'user_auth_tbl',user_df,'mlaas')        
-                        check_menu_tbl=DBObject.is_existing_table(connection,'menu_tbl','mlaas')
+                                user_df=DBObject.read_data('common/user_registration_tbl.csv') #read user_registration_tbl.csv
+                                status=DBObject.load_df_into_db(connection_string,'user_auth_tbl',user_df,'mlaas')   #creare table user_auth_tbl    
+                        check_menu_tbl=DBObject.is_existing_table(connection,'menu_tbl','mlaas')#check menu_tbl exists
                         if check_menu_tbl == "False":
-                                menu_df=DBObject.read_data('common/Menu.csv')
-                                status=DBObject.load_df_into_db(connection_string,'menu_tbl',menu_df,'mlaas')           
-                        check_activity_master_tbl=DBObject.is_existing_table(connection,'activity_master_tbl','mlaas')
+                                menu_df=DBObject.read_data('common/Menu.csv') #read Menu.csv
+                                status=DBObject.load_df_into_db(connection_string,'menu_tbl',menu_df,'mlaas') #creare table menu_tbl         
+                        check_activity_master_tbl=DBObject.is_existing_table(connection,'activity_master_tbl','mlaas')#check activity_master_tbl exists
                         if check_activity_master_tbl == "False":
-                                activity_df=DBObject.read_data('common/activity_master_tbl.csv')
-                                status=DBObject.load_df_into_db(connection_string,'activity_master_tbl',activity_df,'mlaas')
-                        user_status = IngestionObj.user_authentication(DBObject,connection,user_name,password)
+                                activity_df=DBObject.read_data('common/activity_master_tbl.csv')#read activity_master_tbl.csv
+                                status=DBObject.load_df_into_db(connection_string,'activity_master_tbl',activity_df,'mlaas') #creare table activity_master_tbl         
+                        user_status = DBObject.user_authentication(connection,user_name,password) #check the user user authenticated or not
                         if user_status != True:
                                 status_code,error_msg=json_obj.get_Status_code(user_status)
                                 logging.info("data ingestion : UserLoginClass : GET Method : execution : status_code :"+ status_code)

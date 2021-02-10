@@ -367,14 +367,13 @@ class DatasetClass:
         
         logging.debug("data ingestion : DatasetClass : show_data_details : this will excute select query on table name : "+ user_name +'.' + dataset_table_name )
         dataset_table_name=user_name +'."' + dataset_table_name +'"'
-        sql_command,sql_command1=DBObject.pagination(connection,dataset_table_name,start_index,length,sort_type,sort_index,global_value,customefilter)
-        # sql_command = 'SELECT * FROM '
+        sql_data,sql_filtercount=DBObject.pagination(connection,dataset_table_name,start_index,length,sort_type,sort_index,global_value,customefilter)
         # Get dataframe of loaded csv.
-        data_details_df = DBObject.select_records(connection,sql_command) 
-        data_details_count_df = DBObject.select_records(connection,sql_command1) 
-        count=data_details_count_df["count"]
+        data_details_df = DBObject.select_records(connection,sql_data) 
+        data_details_count_df = DBObject.select_records(connection,sql_filtercount) 
+        filtercount=data_details_count_df["count"]
         logging.info("data ingestion : DatasetClass : show_data_details : execution end")
-        return data_details_df,count
+        return data_details_df,filtercount
 
     #* Version 1.2
     def delete_dataset_details(self,DBObject,connection,dataset_id,user_name,skip_check = False):
