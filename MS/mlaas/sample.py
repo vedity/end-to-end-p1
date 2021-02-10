@@ -1,7 +1,7 @@
 from selenium import webdriver  
 import time  
 from selenium.webdriver.common.keys import Keys  
-
+import os
 print("sample test case started")  
 #driver = webdriver.Chrome()  
 #driver=webdriver.firefox()  
@@ -32,6 +32,11 @@ driver.find_element_by_name("description").send_keys("auto discription test")
 
 driver.find_element_by_name("datasetname").clear()
 driver.find_element_by_name("datasetname").send_keys("autodatasetname")
+# files = '../ingest/dataset/CarPrice_Assignment.csv'
+# file = {'inputfile': open(files, 'rb')}
+driver.find_element_by_name("file").clear()
+driver.find_element_by_xpath("//input[@type='file']").send_keys("C:\\Users\\nbarad\\Desktop\\selenium_mlaas\\end-to-end-p1\\MS\\mlaas\\CarPrice_Assignment.csv")
+driver.find_element_by_id("createprj").click()
 time.sleep(3)  
 time.sleep(3)
 
