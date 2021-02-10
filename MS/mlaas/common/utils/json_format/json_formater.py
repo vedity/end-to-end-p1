@@ -120,7 +120,7 @@ class JsonFormatClass:
             [list] :[return the list of column name]
         """
         json_list=[]
-        column_list = list(column_name[0].keys())[1:]
+        column_list = list(column_name[0].keys())
         for i in column_list:
             temp_dict ={
                 "data" : i
