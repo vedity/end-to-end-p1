@@ -101,8 +101,8 @@ class CreateProjectClass(APIView):
                         logging.info("data ingestion : CreateProjectClass : POST Method : execution start")
                         user_name=request.POST.get('user_name')  #get Username
                         project_name=request.POST.get('project_name') #get project_name
-                        project_desc=request.POST.get('project_desc') #get description
-                        dataset_desc=request.POST.get('dataset_desc') #get description
+                        project_desc=request.POST.get('description') #get project description
+                        dataset_desc=request.POST.get('dataset_desc') #get dataset description
                         dataset_name = request.POST.get('dataset_name')#get dataset name
                         page_name = "Create Project"
                         dataset_visibility = request.POST.get('visibility') #get Visibility
@@ -275,29 +275,28 @@ class DataDetailClass(APIView):
                         error_msg(Error message for retrival & insertions failed or successfull),
                         Response(return false if failed otherwise json data)
                 """
-                data = json.dumps(request.data)
+                data = json.dumps(request.data) #get all the request body parameter
                 request_body = json.loads(data) #get all the request body parameter and convert into dictonery
-                draw=request_body["draw"]
+                draw=request_body["draw"]  #get the draw
                 try:
                         logging.info("data ingestion : DataDetailClass : POST Method : execution start")
                         start_index=request_body["start"] #get the start index
                         length=request_body["length"] #get the length
-                        order_values=request_body['order'] 
+                        order_values=request_body['order'] #get the order values
                         sort_type=order_values[0]['dir'] # get the sort type value(asc or desc)
                         sort_index=order_values[0]['column'] # get the sort_index column value
                         global_value=request_body['search']['value']  #get String value for global search
-                        customefilter=request_body['customfilter']     
+                        customefilter=request_body['customfilter']  #get customfilter values   
                         dataset_id = request.query_params.get('dataset_id') #get dataset_id
-                        row_count=DBObject.get_row_count(connection,dataset_id) #get the row count
-                        dataset_df,count=IngestionObj.show_data_details(dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter) #call show_data_details and it will return dataset detail data in dataframe
+                        rowcount=DBObject.get_row_count(connection,dataset_id) #get the row count
+                        dataset_df,filtercount=IngestionObj.show_data_details(dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter) #call show_data_details and it will return dataset detail data in dataframe
                         if isinstance(dataset_df,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(dataset_df) # extract the status_code and error_msg  from dataset_df
                                 logging.info("data ingestion : DataDetailClass : POST Method : execution stop : status_code :"+status_code)
                                 return Response({"draw":draw,"recordsTotal":0,"recordsFiltered":0,"data":[]})  #return Data
                         else:
                                 logging.info("data ingestion : DataDetailClass : POST Method : execution stop : status_code :200")
-                                # return Response({​​​​​"draw":draw,"recordsTotal":RowCount,"recordsFiltered":RowCount,"data":data}​​​​​)
-                                return Response({"draw":draw,"recordsTotal":row_count,"recordsFiltered":count,"data":dataset_df})  #return Data             
+                                return Response({"draw":draw,"recordsTotal":rowcount,"recordsFiltered":filtercount,"data":dataset_df})  #return Data             
                 except Exception as e:
                         logging.error("data ingestion : DataDetailClass : GET Method : Exception :" + str(e))
                         logging.error("data ingestion : DataDetailClass : GET Method : " +traceback.format_exc())

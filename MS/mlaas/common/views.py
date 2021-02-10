@@ -50,21 +50,21 @@ class UserLoginClass(APIView):
                 """
                 try:
                         logging.info("data ingestion : UserLoginClass : GET Method : execution start")
-                        user_name = request.query_params.get('user_name')
-                        password = request.query_params.get('password')
-                        check_user_auth_tbl=DBObject.is_existing_table(connection,'user_auth_tbl','mlaas')
+                        user_name = request.query_params.get('user_name') #get user_name
+                        password = request.query_params.get('password') #get password
+                        check_user_auth_tbl=DBObject.is_existing_table(connection,'user_auth_tbl','mlaas') #check user_auth_tbl exists
                         if check_user_auth_tbl == "False":
-                                user_df=DBObject.read_data('common/user_registration_tbl.csv')
-                                status=DBObject.load_csv_into_db(connection_string,'user_auth_tbl',user_df,'mlaas')        
-                        check_menu_tbl=DBObject.is_existing_table(connection,'menu_tbl','mlaas')
+                                user_df=DBObject.read_data('common/user_registration_tbl.csv') #read user_registration_tbl.csv
+                                status=DBObject.load_df_into_db(connection_string,'user_auth_tbl',user_df,'mlaas')   #creare table user_auth_tbl    
+                        check_menu_tbl=DBObject.is_existing_table(connection,'menu_tbl','mlaas')#check menu_tbl exists
                         if check_menu_tbl == "False":
-                                menu_df=DBObject.read_data('common/Menu.csv')
-                                status=DBObject.load_csv_into_db(connection_string,'menu_tbl',menu_df,'mlaas')           
-                        check_activity_master_tbl=DBObject.is_existing_table(connection,'activity_master_tbl','mlaas')
+                                menu_df=DBObject.read_data('common/Menu.csv') #read Menu.csv
+                                status=DBObject.load_df_into_db(connection_string,'menu_tbl',menu_df,'mlaas') #creare table menu_tbl         
+                        check_activity_master_tbl=DBObject.is_existing_table(connection,'activity_master_tbl','mlaas')#check activity_master_tbl exists
                         if check_activity_master_tbl == "False":
-                                activity_df=DBObject.read_data('common/activity_master_tbl.csv')
-                                status=DBObject.load_csv_into_db(connection_string,'activity_master_tbl',activity_df,'mlaas')
-                        user_status = IngestionObj.user_authentication(DBObject,connection,user_name,password)
+                                activity_df=DBObject.read_data('common/activity_master_tbl.csv')#read activity_master_tbl.csv
+                                status=DBObject.load_df_into_db(connection_string,'activity_master_tbl',activity_df,'mlaas') #creare table activity_master_tbl         
+                        user_status = DBObject.user_authentication(connection,user_name,password) #check the user user authenticated or not
                         if user_status != True:
                                 status_code,error_msg=json_obj.get_Status_code(user_status)
                                 logging.info("data ingestion : UserLoginClass : GET Method : execution : status_code :"+ status_code)
@@ -89,7 +89,7 @@ class UserLoginClass(APIView):
                 try:
                         logging.info("data ingestion : UserLoginClass : POST Method : execution start")
                         user_df=DBObject.read_data('ingest/user_registration_tbl.csv') #read the data from csv file store into dataframe variable
-                        status=DBObject.load_csv_into_db(connection_string,'user_auth_tbl',user_df,'mlaas') # this function will insert the csv data into  user_auth table
+                        status=DBObject.load_df_into_db(connection_string,'user_auth_tbl',user_df,'mlaas') # this function will insert the csv data into  user_auth table
                         return Response({"Status":status})
                 except Exception as e:
                         logging.error("data ingestion : UserLoginClass : POST Method : Exception :" + str(e))
@@ -111,7 +111,7 @@ class MenuClass(APIView):
                         logging.info("data ingestion : MenuClass : POST Method : execution start")
                         menu_df=DBObject.read_data('common/Menu.csv')
                         DBObject.create_schema(connection)
-                        status=DBObject.load_csv_into_db(connection_string,'menu_tbl',menu_df,'mlaas')
+                        status=DBObject.load_df_into_db(connection_string,'menu_tbl',menu_df,'mlaas')
                         if status != 0:
                                 logging.info("data ingestion : MenuClass : POST Method : execution stop : status_code :500")
                                 return Response({"status_code":"500","error_msg":"Insertion Failed","response":"false"})
@@ -196,7 +196,7 @@ class ScheamDatatypeListClass(APIView):
                 try :
                                 logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
                                 schema_df=DBObject.read_data('common/attribute_list.csv') #read the data from csv file store into dataframe variable
-                                status=DBObject.load_csv_into_db(connection_string,'attribute_types',schema_df,'mlaas') # this function will insert the csv data into  attribute_types table
+                                status=DBObject.load_df_into_db(connection_string,'attribute_types',schema_df,'mlaas') # this function will insert the csv data into  attribute_types table
                                 return Response({"status_code":"200","error_msg":"Successfull insertion","response":"true"})
                 except Exception as e:
                                 logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
@@ -257,7 +257,7 @@ class ScheamColumnListClass(APIView):
                 try :
                                 logging.info("data ingestion : ScheamAttributeListClass : POST Method : execution start")
                                 schema_df=DBObject.read_data('common/attribute_list.csv') #read the data from csv file store into dataframe variable
-                                status=DBObject.load_csv_into_db(connection_string,'attribute_types',schema_df,'mlaas') # this function will insert the csv data into  attribute_types table
+                                status=DBObject.load_df_into_db(connection_string,'attribute_types',schema_df,'mlaas') # this function will insert the csv data into  attribute_types table
                                 return Response({"status_code":"200","error_msg":"Successfull insertion","response":"true"})
                 except Exception as e:
                                 logging.error("data ingestion : ScheamAttributeListClass : POST Method : Exception :" + str(e))
@@ -283,7 +283,7 @@ class ActivityTimelineClass(APIView):
                 try:
                         logging.info("activity table ingestion : ActivityTimeLine : POST Method : execution start")
                         activity_df=DBObject.read_data('common/activity_master_tbl.csv')
-                        status=DBObject.load_csv_into_db(connection_string,'activity_master_tbl',activity_df,'mlaas')
+                        status=DBObject.load_df_into_db(connection_string,'activity_master_tbl',activity_df,'mlaas')
                         if status != 0:
                                 logging.info("activity table ingestion : ActivityTimeLine : POST Method : execution stops: status_code :500")
                                 return Response({"status_code":"500","error_msg":"Insertion Failed","response":"false"})

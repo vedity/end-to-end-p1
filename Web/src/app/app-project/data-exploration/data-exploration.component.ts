@@ -1,9 +1,10 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { DataExplorationApiService } from '../data-exploration.service';
 import { Chart } from 'angular-highcharts';
 import * as Highcharts from 'highcharts';
+import { DataTableDirective } from 'angular-datatables';
 // require('highcharts/themes/dark-unica')(Highcharts);
 Highcharts.setOptions({
   colors: ['#058DC7', '#50B432', '#ED561B', '#DDDF00', '#24CBE5', '#64E572',
@@ -56,7 +57,7 @@ Highcharts.setOptions({
     minorGridLineColor: '#505053',
     tickColor: '#32394e',
     tickWidth: 1,
-    
+
   },
   yAxis: {
     gridLineColor: '#32394e',
@@ -69,7 +70,7 @@ Highcharts.setOptions({
     minorGridLineColor: '#505053',
     tickColor: '#707073',
     tickWidth: 0,
-    
+
   },
 });
 
@@ -87,6 +88,9 @@ export class DataExplorationComponent implements OnInit {
 
 
   constructor(public apiService: DataExplorationApiService, public toaster: ToastrService, private modalService: NgbModal,) { }
+  @ViewChild(DataTableDirective, { static: false })
+  datatableElement: DataTableDirective;
+  dtOptions: DataTables.Settings = {};
   @Input() public dataset_id: any;
   @Input() public title: any;
   @Input() public project_id: any
@@ -109,6 +113,15 @@ export class DataExplorationComponent implements OnInit {
   displayselectedtitle = "Continous";
 
   ngOnInit(): void {
+    this.dtOptions={
+      paging:false,
+      ordering:false,
+      scrollCollapse: true,
+      info:false,
+      searching:false,
+      // scrollX: true,
+     scrollY: "calc(100vh - 365px)",
+    }
     this.loaderdiv = true;
     this.columnlabelChart = {
       chart: {
@@ -188,9 +201,11 @@ export class DataExplorationComponent implements OnInit {
   successHandler(logs) {
     if (logs.status_code == "200") {
       this.exploredData = logs.response;
-      var data = this.groupBy(this.exploredData, "Datatype");
-      this.continuousexploredata = data["Continuous"];
-      this.categoricalexploredata = data["Categorical"];
+      var data = this.groupBy(this.exploredData, "IsinContinuous");
+      console.log(data);
+      
+      this.continuousexploredata = data["true"];
+      this.categoricalexploredata = data["false"];
       this.loaderdiv = false;
       this.finaldata = logs.response;
     }
@@ -217,7 +232,9 @@ export class DataExplorationComponent implements OnInit {
 
   modeltitle: any;
   hideboxplot = true;
+  modalobj: any;
   centerModal(centerDataModal: any, obj) {
+    this.modalobj = obj;
     this.modeltitle = obj["Column Name"];
     this.columnlabelChartexpand = {
       chart: {
@@ -231,10 +248,17 @@ export class DataExplorationComponent implements OnInit {
       dataLabels: {
         enabled: false
       },
-      colors: ['#34c38f'],
+      colors: ['#34c38f', 'red', 'red'],
       series: [{
         data: obj["Plot Values"][1]
-      }],
+      }
+        // ,{
+        //   data:obj["Left Outlier Values"][1]
+        // },
+        // {
+        //   data:obj["Right Outlier Values"][1]
+        // }
+      ],
       xaxis: {
         categories: obj["Plot Values"][0],
         position: 'bottom',
@@ -251,6 +275,27 @@ export class DataExplorationComponent implements OnInit {
         offsetY: 0,
       }
     };
+
+
+
+    let outliers = [];
+    if (obj["Outliers"].length > 0) {
+        let leftoutlier = obj["Outliers"];
+        leftoutlier.forEach(element => {
+          outliers.push([0, element])
+        });
+    }
+
+    // if (obj["Right Outlier Values"].length > 0) {
+    //   if (obj["Right Outlier Values"][0].length > 0) {
+    //     let rightoutlier = obj["Right Outlier Values"][0];
+    //     rightoutlier.forEach(element => {
+    //       outliers.push([0, element])
+    //     });
+    //   }
+    // }
+
+console.log(outliers);
 
     if (obj["open"] != null) {
       let chart = new Chart({
@@ -280,7 +325,7 @@ export class DataExplorationComponent implements OnInit {
           }
         },
         exporting: {
-            enabled: false
+          enabled: false
         },
         series: [{
           name: 'Observations',
@@ -288,21 +333,22 @@ export class DataExplorationComponent implements OnInit {
           color: "#34c38f",
           data: [
             // [-102, 51, 102, 153, 306]
-            [obj["open"], obj["25%"],obj["50%"], obj["75%"], obj["close"]]
+            [obj["open"], obj["25%"], obj["50%"], obj["75%"], obj["close"]]
           ],
           tooltip: {
             headerFormat: ''
             // headerFormat: '<em>Experiment No {point.key}</em><br/>'
           }
-        }, 
+        },
         {
           name: 'Outliers',
           color: "#34c38f",
           type: 'scatter',
-          data: [ // x, y positions where 0 is the first category
-            [obj["Column Name"], obj["close"]+10],
+          data: outliers,
+          // [ // x, y positions where 0 is the first category
+          //   [obj["Column Name"], obj["close"]+10],
 
-          ],
+          // ],
           marker: {
             fillColor: '#34c38f',
             lineWidth: 1,

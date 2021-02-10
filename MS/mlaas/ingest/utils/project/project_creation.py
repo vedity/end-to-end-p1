@@ -110,11 +110,18 @@ class ProjectClass:
         DatasetObject = dataset_creation.DatasetClass()
 
         if original_dataset_id == None:
-            _,original_dataset_id = DatasetObject.make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name)
+            _,original_dataset_id,schema_dataset_id = DatasetObject.make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name)
+            dataset_id = schema_dataset_id
         else:
             original_dataset_id = original_dataset_id
+
+            #required to change
+            schema_dataset_id = original_dataset_id+1 #####
+            dataset_id = int(schema_dataset_id) #####
         
-        dataset_id = original_dataset_id
+        
+
+        
         # Get row for project table.
         row_tuples = self.make_project_records(project_name,project_desc,user_name,original_dataset_id,dataset_id) 
         # Get status about inserting records into project table. if successful then 0 else 1. 
@@ -195,7 +202,8 @@ class ProjectClass:
         
         logging.debug("data ingestion : ProjectClass : show_project_details : this will excute select query on table name : "+table_name +" based on user name : "+user_name)
         
-        sql_command = "SELECT p.*,d.dataset_name FROM "+ table_name + " p,mlaas.dataset_tbl d WHERE p.USER_NAME ='"+ user_name +"' and p.original_dataset_id = d.original_dataset_id"
+        sql_command = "SELECT p.*,d.dataset_name FROM "+ table_name + " p,mlaas.dataset_tbl d WHERE p.USER_NAME ='"+ user_name +"' and p.dataset_id = d.dataset_id"
+        logging.info(str(sql_command)+"  command")
         project_df=DBObject.select_records(connection,sql_command) # Get project details in the form of dataframe.
         logging.info("data ingestion : ProjectClass : show_project_details : execution end")
         return project_df

@@ -25,6 +25,6 @@ RUN pip install -r requirements.txt
 # CMD sh start-all.sh
 #EXPOSE 5000
 EXPOSE 8000
-EXPOSE 7000
+#EXPOSE 7000
 COPY mlaas /mlaas
 WORKDIR /mlaas
