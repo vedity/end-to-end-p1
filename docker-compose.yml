@@ -3,9 +3,12 @@ services:
   web:
     build: ./MS
     command: python manage.py runserver 0.0.0.0:8000
+    #command: bash -c "mlflow server --backend-store-uri postgresql://postgres:admin@postgresql:5432/postgres --default-artifact-root file:///mlaas/mlruns --host 0.0.0.0 --port 5400 && python manage.py runserver 0.0.0.0:8000"
+
     volumes: 
       - "./MS/mlaas:/mlaas" 
     ports:
+      - "5400:5400"
       - "8000:8000"
       #- "8080:8080"
       #- "7077:7077"
