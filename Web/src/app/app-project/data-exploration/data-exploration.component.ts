@@ -5,14 +5,12 @@ import { DataExplorationApiService } from '../data-exploration.service';
 import { Chart } from 'angular-highcharts';
 import * as Highcharts from 'highcharts';
 import { DataTableDirective } from 'angular-datatables';
-// require('highcharts/themes/dark-unica')(Highcharts);
+
 Highcharts.setOptions({
   colors: ['#058DC7', '#50B432', '#ED561B', '#DDDF00', '#24CBE5', '#64E572',
     '#FF9655', '#FFF263', '#6AF9C4'],
   chart: {
     backgroundColor: {
-      // linearGradient: [0, 0, 500, 500],
-
       stops: [
         [0, 'rgb(255, 255, 255)'],
         [1, 'rgb(240, 240, 255)']
@@ -57,7 +55,6 @@ Highcharts.setOptions({
     minorGridLineColor: '#505053',
     tickColor: '#32394e',
     tickWidth: 1,
-
   },
   yAxis: {
     gridLineColor: '#32394e',
@@ -70,13 +67,8 @@ Highcharts.setOptions({
     minorGridLineColor: '#505053',
     tickColor: '#707073',
     tickWidth: 0,
-
   },
 });
-
-
-
-// import * as Highcharts from 'angular-highcharts';
 @Component({
   selector: 'app-data-exploration',
   templateUrl: './data-exploration.component.html',
@@ -84,8 +76,6 @@ Highcharts.setOptions({
 })
 
 export class DataExplorationComponent implements OnInit {
-
-
 
   constructor(public apiService: DataExplorationApiService, public toaster: ToastrService, private modalService: NgbModal,) { }
   @ViewChild(DataTableDirective, { static: false })
@@ -111,16 +101,17 @@ export class DataExplorationComponent implements OnInit {
     'animation-duration': '20s'
   };
   displayselectedtitle = "Continous";
+  displayrightoutliers: any = false;
+  displayleftoutliers: any = false;
 
   ngOnInit(): void {
-    this.dtOptions={
-      paging:false,
-      ordering:false,
+    this.dtOptions = {
+      paging: false,
+      ordering: false,
       scrollCollapse: true,
-      info:false,
-      searching:false,
-      // scrollX: true,
-     scrollY: "calc(100vh - 365px)",
+      info: false,
+      searching: false,
+      scrollY: "calc(100vh - 365px)",
     }
     this.loaderdiv = true;
     this.columnlabelChart = {
@@ -202,8 +193,6 @@ export class DataExplorationComponent implements OnInit {
     if (logs.status_code == "200") {
       this.exploredData = logs.response;
       var data = this.groupBy(this.exploredData, "IsinContinuous");
-      console.log(data);
-      
       this.continuousexploredata = data["true"];
       this.categoricalexploredata = data["false"];
       this.loaderdiv = false;
@@ -233,90 +222,105 @@ export class DataExplorationComponent implements OnInit {
   modeltitle: any;
   hideboxplot = true;
   modalobj: any;
-  centerModal(centerDataModal: any, obj) {
+width="100%";
+  centerModal(exlargeModal: any, obj) {
+    this.classname="one-box";
     this.modalobj = obj;
+    let category: any = [];
+    let plotarray: any = [];
+    let colorarray: any = [];
+    if (obj["Left Outlier Values"][1].length > 0) {
+      obj["Left Outlier Values"][0].forEach((element, index) => {
+        category.push(element);
+        plotarray.push(obj["Left Outlier Values"][1][index]);
+        colorarray.push('#f74242')
+      });
+    }
+    obj["Plot Values"][0].forEach((element, index) => {
+      category.push(element);
+      plotarray.push(obj["Plot Values"][1][index]);
+      colorarray.push('#34c38f')
+    });
+    if (obj["Right Outlier Values"][1].length > 0) {
+      obj["Right Outlier Values"][0].forEach((element, index) => {
+        category.push(element);
+        plotarray.push(obj["Right Outlier Values"][1][index]);
+        colorarray.push('#f74242')
+      });
+    }
     this.modeltitle = obj["Column Name"];
     this.columnlabelChartexpand = {
       chart: {
         height: '500px',
-        width: '100%',
+         width: '100%',
         type: 'bar',
+      
         toolbar: {
-          show: true
-        },
+          show: false
+      },
+      selection: {
+        enabled: true
+      }
+      },
+      plotOptions: {
+        bar: {
+          distributed: true
+        }
       },
       dataLabels: {
         enabled: false
       },
-      colors: ['#34c38f', 'red', 'red'],
-      series: [{
-        data: obj["Plot Values"][1]
-      }
-        // ,{
-        //   data:obj["Left Outlier Values"][1]
-        // },
-        // {
-        //   data:obj["Right Outlier Values"][1]
-        // }
+      colors: colorarray,
+      series: [
+        {
+          data: plotarray
+        }
       ],
       xaxis: {
-        categories: obj["Plot Values"][0],
+        categories: category,
         position: 'bottom',
+        title: {
+          text: 'Histogarm'
+        }
       },
       yaxis: {
+        categories: plotarray,
         position: 'left',
         labels: {
-          show: true,
+            show: true,
           align: 'right',
           minWidth: 0,
           maxWidth: 160,
         },
         offsetX: 0,
         offsetY: 0,
+  
+    },
+      legend: {
+        show: false
       }
+
     };
 
-
-
-    let outliers = [];
-    if (obj["Outliers"].length > 0) {
+    if (obj["open"] != null) {
+      let outliers = [];
+      if (obj["Outliers"].length > 0) {
         let leftoutlier = obj["Outliers"];
         leftoutlier.forEach(element => {
           outliers.push([0, element])
         });
-    }
+      }
 
-    // if (obj["Right Outlier Values"].length > 0) {
-    //   if (obj["Right Outlier Values"][0].length > 0) {
-    //     let rightoutlier = obj["Right Outlier Values"][0];
-    //     rightoutlier.forEach(element => {
-    //       outliers.push([0, element])
-    //     });
-    //   }
-    // }
-
-console.log(outliers);
-
-    if (obj["open"] != null) {
       let chart = new Chart({
-
         chart: {
           type: 'boxplot'
-
         },
-
-        // title: {
-        //    text: 'Highcharts Box Plot Example'
-        // },
-
         legend: {
           enabled: false
         },
-
         xAxis: {
           categories: [obj["Column Name"]],
           title: {
-            //   text: 'Experiment No.'
           }
         },
         yAxis: {
@@ -332,12 +336,10 @@ console.log(outliers);
           type: 'boxplot',
           color: "#34c38f",
           data: [
-            // [-102, 51, 102, 153, 306]
             [obj["open"], obj["25%"], obj["50%"], obj["75%"], obj["close"]]
           ],
           tooltip: {
             headerFormat: ''
-            // headerFormat: '<em>Experiment No {point.key}</em><br/>'
           }
         },
         {
@@ -345,10 +347,6 @@ console.log(outliers);
           color: "#34c38f",
           type: 'scatter',
           data: outliers,
-          // [ // x, y positions where 0 is the first category
-          //   [obj["Column Name"], obj["close"]+10],
-
-          // ],
           marker: {
             fillColor: '#34c38f',
             lineWidth: 1,
@@ -356,65 +354,50 @@ console.log(outliers);
           },
           tooltip: {
             pointFormat: '{point.y}'
-            // pointFormat: 'Observation: {point.y}'
           },
-
         }]
-
       });
       this.chart = chart;
-
-
-      // this.boxplotChartexpand = {
-      //   series: [
-      //     {
-      //       name: "candle",
-      //       data: 
-      //       [
-      //         {
-      //           x: new Date(1538778600000),
-      //           y: [obj["open"], obj["25%"], obj["75%"], obj["close"]]
-      //         },
-      //         {
-      //           x: new Date(1538780400000),
-      //           y: [obj["open"], obj["25%"], obj["50%"], obj["75%"]]
-      //         },
-      //         {
-      //           x:new Date(1538780400000),
-      //           y: [obj["close"], obj["25%"], obj["50%"], obj["75%"]]
-      //         },
-      //         {
-      //           x: new Date(1538784000000),
-      //           y: [obj["25%"], obj["open"], obj["close"], obj["75%"]]
-      //         }
-
-
-      //       ]
-      //     }
-      //   ],
-      //   chart: {
-      //     type: "candlestick",
-      //     height: '500px'
-      //   },
-      //   title: {
-      //     text: "CandleStick Chart",
-      //     align: "left"
-      //   },
-      //   xaxis: {
-      //     type: "datetime"
-      //   },
-      //   yaxis: {
-      //     tooltip: {
-      //       enabled: true
-      //     }
-      //   }
-      // };
-
       this.hideboxplot = false
     }
     else {
       this.hideboxplot = true;
     }
-    this.modalService.open(centerDataModal, { centered: true, windowClass: 'modal-holder' });
+    
+    this.modalService.open(exlargeModal, { size: 'xl', windowClass: 'modal-holder', centered: true });
+    setTimeout(() => {
+      this.displayleftoutliers =true;
+      this.displayrightoutliers =true;
+    }, 10);
+
   }
+
+  classname:any="one-box";
+  displayoutliers(id) {
+    if (id == "left") {
+      this.displayleftoutliers = !this.displayleftoutliers;
+    }
+    else {
+      this.displayrightoutliers = !this.displayrightoutliers;
+    }
+   if(this.displayleftoutliers && this.displayrightoutliers ){
+     this.classname="one-box";
+     this.width='100%'
+   }
+   else if((!this.displayleftoutliers && this.displayrightoutliers )||(this.displayleftoutliers && !this.displayrightoutliers )){
+    this.classname="two-box";
+    this.width='50%';
+   }
+   else if(!this.displayleftoutliers && !this.displayrightoutliers ){
+    this.classname="three-box";
+    this.width="33.3%";
+   }
+
+  //  setTimeout(() => {
+    window.dispatchEvent(new Event('resize'));
+  //  }, 0);
+  }
+
+
+  
 }
