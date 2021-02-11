@@ -144,7 +144,7 @@ class JsonFormatClass:
             temp_dict = {
                 "column_name": column_name[x],
                 "data_type": predicted_datatype[x],
-                "column_attribute":"select",
+                "column_attribute":"Select",
                 "change_column_name":"",
             }
             json_data.append(temp_dict)
