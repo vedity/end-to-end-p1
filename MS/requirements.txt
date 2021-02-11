@@ -7,4 +7,6 @@ sqlalchemy
 djangorestframework
 requests
 django-cors-headers
+mlflow
+sklearn
 #pyspark
