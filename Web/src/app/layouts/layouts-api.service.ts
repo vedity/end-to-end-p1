@@ -14,7 +14,7 @@ export class LayoutApiService {
   constructor( private httpClient : HttpClient) { }
   
   getMenu():Observable<any>{
-    return this.httpClient.get(this.baseUrl+"menu/",{headers:this.headers});
+    return this.httpClient.get(this.baseUrl+"common/menu/",{headers:this.headers});
   }
 
   
