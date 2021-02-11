@@ -206,6 +206,7 @@ class DatasetClass:
 
                 row_tuples = self.make_dataset_records(dataset_name,str(updated_table_name),str(dataset_visibility),str(user_name),dataset_desc,page_name,flag=1)
                 insert_status = DBObject.insert_records(connection,table_name,row_tuples,cols) # Get status about inserting records into dataset table. if successful then 0 else 1.
+                
                 # if dataset_visibility=='private':
                 #     new_table_name = user_name+"."+updated_table_name
                 #     copy_table_name = user_name+"."+old_table_name
