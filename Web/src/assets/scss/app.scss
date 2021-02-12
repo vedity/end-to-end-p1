@@ -382,8 +382,10 @@ table {
     }
 }
 
-.nobordertable.dataTables_wrapper.no-footer .dataTables_scrollBody {
-    border-bottom: none !important;
+.nobordertable {
+    .dataTables_wrapper.no-footer .dataTables_scrollBody {
+        border-bottom: none !important;
+    }
 }
 
 .graph-box {
