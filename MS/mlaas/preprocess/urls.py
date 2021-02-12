@@ -3,6 +3,20 @@ from .views import *
 
 urlpatterns = [
 
-    path('mlaas/preprocess/test',TestingClass.as_view())
-  
+    
+    #URL for Dataset Statistics
+    path('mlaas/preprocess/exploredata/get_data_statistics',DatasetExplorationClass.as_view()),
+
+    # #URL for Data Visualization
+    # path('mlaas/preprocess/visualize/get_visualization',DataVisualizationClass.as_view()),
+
+    #URL For dataset Schema
+    path('mlaas/preprocess/schema/detail/',SchemaClass.as_view()),
+
+    #URL For Save functionality in schema
+    path('mlaas/preprocess/schema/save/',SchemaSaveClass.as_view()),
+
+    #url for schema column attribute
+    path('mlaas/preprocess/schema/attribute/list/',ScheamColumnListClass.as_view()),
+    
 ]

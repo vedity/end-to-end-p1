@@ -1,111 +1,87 @@
 <div class="row">
-  <div class="col-lg-12">
-    <div class="card table-card">
-      <div class="card-body">
-        <div class="main-datatable">
-          <a href="javascript:void()" (click)="displayfilter()" class="filter-btn"><i
-              class="dripicons-experiment"></i></a>
-          <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table table-centered table-nowrap">
-            <thead class="thead-light">
-              <tr>
-                <th>Project Name
-                  <img class="sort-icon" src="sort_both.png">
-                  <img class="desc-icon" src="sort_desc.png">
-                  <img class="asc-icon" src="sort_asc.png">
-                  <input class="form-control filter" max="10" maxlength="10" type="text" [hidden]="filter"
-                    placeholder="Project Name" name="search-project-name" />
-                </th>
-                <th>Datasets
-                  <img class="sort-icon" src="sort_both.png">
-                  <img class="desc-icon" src="sort_desc.png">
-                  <img class="asc-icon" src="sort_asc.png">
-                  <input class="form-control filter" type="text" [hidden]="filter" placeholder="Datasets"
-                    name="search-dataset-name" /></th>
-                <th class="text-center">Models
-                  <img class="sort-icon" src="sort_both.png">
-                  <img class="desc-icon" src="sort_desc.png">
-                  <img class="asc-icon" src="sort_asc.png">
-                  <!-- <input class="form-control filter" type="text" [hidden]="filter" placeholder="Models"
-                                          name="search-model-status" /> -->
-                  <select [hidden]="filter" class="form-control filter" name="search-model-status">
-                    <option value="">None</option>
-                    <option value="0">Success</option>
-                    <option value="-1">Pending</option>
-                    <option value="1">Failed</option>
-                    <option value="2">In Progress</option>
-                  </select>
-                </th>
-                <th class="text-center">Deployment
-                  <img class="sort-icon" src="sort_both.png">
-                  <img class="desc-icon" src="sort_desc.png">
-                  <img class="asc-icon" src="sort_asc.png">
-                  <!-- <input class="form-control filter" type="text" [hidden]="filter"
-                                          placeholder="Deployment" name="search-deployment-status" /> -->
-                  <select [hidden]="filter" class="form-control filter" name="search-deployment-status">
-                    <option value="">None</option>
-                    <option value="-1">Pending</option>
-                    <option value="0">Active</option>
-                    <option value="1">Suspended</option>
-                  </select>
-                </th>
-                <th>Created
-                  <img class="sort-icon" src="sort_both.png">
-                  <img class="desc-icon" src="sort_desc.png">
-                  <img class="asc-icon" src="sort_asc.png">
-                  <!-- <input class="form-control filter" type="text" [hidden]="filter"
-                                          placeholder="Search last name" name="Created" /> -->
-                </th>
-                <th class="text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="tbody">
-              <tr *ngFor="let data of transactions">
-                <td>{{data.project_name}}</td>
-                <td>
-                  <span style="display:none;">{{data.dataset_status}}</span>
-                  <!-- <i *ngIf="data.dataset_status==0" style="color: #34c38f;" class="dripicons-stack"></i> -->
-                  <!-- <i *ngIf="data.dataset_status==1" style="color: #f14646;" class="dripicons-stack"></i> -->
-                  {{data.dataset_name}}
-                </td>
-                <td class="status-icon" class="text-center">
-                  <span style="display:none;">{{data.model_status}}</span>
-                  <i *ngIf="data.model_status==0" style="color: #34c38f;" class="dripicons-browser-upload"></i>
-                  <i *ngIf="data.model_status==1" style="color: #f14646;" class="dripicons-browser-upload"></i>
-                  <i *ngIf="data.model_status==-1" style="color: #a6b0cf;" class="dripicons-browser-upload"></i>
-                  <i *ngIf="data.model_status==2" style="color: #3e6aec;" class="dripicons-browser-upload"></i>
-                </td>
-                <td class="text-center">
-                  <span style="display:none;">{{data.deployment_status}}</span>
-
-                  <span *ngIf="data.deployment_status==-1"
-                    class="badge badge-pill badge-pill badge-soft-dark ml-1 font-size-12">Pending</span>
-                  <span *ngIf="data.deployment_status==1"
-                    class="badge badge-pill badge-soft-danger ml-1 font-size-12">Suspended</span>
-                  <span *ngIf="data.deployment_status==0"
-                    class="badge badge-pill badge-soft-success ml-1 font-size-12">Active</span>
-                </td>
-                <td>{{data.created_on | date}}</td>
-                <td style="font-size: 20px;font-weight: 700;" class="text-center">
-                  <!-- <a href="javascript:void(0);" [routerLink]="['/datadetail']"
-                    [state]="{dataset_id: data.dataset_id ,dataset_name:data.dataset_name,navigate_to:'/project'}">
-                    <i class=" bx bx-file"></i></a> -->
-
-                    <a href="javascript:void(0);">
-                    <i class=" bx bx-file"></i></a>
-
-                  <a href="javascript:void(0);" id="sa-warning" (click)="confirm(data.project_id)"> <i
-                      class=" bx bx-trash"></i></a>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-
+    <div class="col-lg-12">
+        <div class="card table-card">
+            <div class="card-body">
+                <div class="main-datatable">
+                    <a href="javascript:void(0)" (click)="displayfilter()" id="filter-btn" class="filter-btn"><i id="filtericon" class="dripicons-experiment"></i></a>
+                    <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table table-centered table-nowrap">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Project Name
+                                    <img class="sort-icon" src="sort_both.png">
+                                    <img class="desc-icon" src="sort_desc.png">
+                                    <img class="asc-icon" src="sort_asc.png">
+                                    <input class="form-control filter" type="text" [hidden]="filter" placeholder="Project Name" name="search-project-name" />
+                                </th>
+                                <th>Datasets
+                                    <img class="sort-icon" src="sort_both.png">
+                                    <img class="desc-icon" src="sort_desc.png">
+                                    <img class="asc-icon" src="sort_asc.png">
+                                    <input class="form-control filter" type="text" [hidden]="filter" placeholder="Datasets" name="search-dataset-name" />
+                                </th>
+                                <th class="text-center">Models
+                                    <img class="sort-icon" src="sort_both.png">
+                                    <img class="desc-icon" src="sort_desc.png">
+                                    <img class="asc-icon" src="sort_asc.png">
+                                    <select [hidden]="filter" class="form-control filter" name="search-model-status">
+                                      <option value="">None</option>
+                                      <option value="0">Success</option>
+                                      <option value="-1">Pending</option>
+                                      <option value="1">Failed</option>
+                                      <option value="2">In Progress</option>
+                                    </select>
+                                </th>
+                                <th class="text-center">Deployment
+                                    <img class="sort-icon" src="sort_both.png">
+                                    <img class="desc-icon" src="sort_desc.png">
+                                    <img class="asc-icon" src="sort_asc.png">
+                                    <select [hidden]="filter" class="form-control filter" name="search-deployment-status">
+                                      <option value="">None</option>
+                                      <option value="-1">Pending</option>
+                                      <option value="0">Active</option>
+                                      <option value="1">Suspended</option>
+                                    </select>
+                                </th>
+                                <th>Created
+                                    <img class="sort-icon" src="sort_both.png">
+                                    <img class="desc-icon" src="sort_desc.png">
+                                    <img class="asc-icon" src="sort_asc.png">
+                                </th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="tbody">
+                            <tr *ngFor="let data of transactions">
+                                <td title="{{data.project_name}}">{{data.project_name}}</td>
+                                <td>
+                                    <span style="display:none;">{{data.dataset_status}}</span> {{data.dataset_name}}
+                                </td>
+                                <td class="status-icon" class="text-center">
+                                    <span style="display:none;">{{data.model_status}}</span>
+                                    <i *ngIf="data.model_status==0" style="color: #34c38f;" class="dripicons-browser-upload"></i>
+                                    <i *ngIf="data.model_status==1" style="color: #f14646;" class="dripicons-browser-upload"></i>
+                                    <i *ngIf="data.model_status==-1" style="color: #a6b0cf;" class="dripicons-browser-upload"></i>
+                                    <i *ngIf="data.model_status==2" style="color: #3e6aec;" class="dripicons-browser-upload"></i>
+                                </td>
+                                <td class="text-center">
+                                    <span style="display:none;">{{data.deployment_status}}</span>
+                                    <span *ngIf="data.deployment_status==-1" class="badge badge-pill badge-pill badge-soft-dark ml-1 font-size-12">Pending</span>
+                                    <span *ngIf="data.deployment_status==1" class="badge badge-pill badge-soft-danger ml-1 font-size-12">Suspended</span>
+                                    <span *ngIf="data.deployment_status==0" class="badge badge-pill badge-soft-success ml-1 font-size-12">Active</span>
+                                </td>
+                                <td>{{data.created_on | date}}</td>
+                                <td style="font-size: 20px;font-weight: 700;" class="text-center">
+                                    <a href="javascript:void(0);" title="Data Detail" id="detail_{{data.project_id}}" [routerLink]="['/schema']" [state]="{dataset_id: data.dataset_id ,project_id:data.project_id,dataset_name:data.dataset_name,navigate_to:'/project',schema_id:data.schema_id}">
+                                        <i id="detailicon" class=" bx bx-file"></i></a>
+                                    <a href="javascript:void(0);" class="sa-warning" id="delete_{{data.project_id}}" title="Delete Project" (click)="confirm(data.project_id)"> <i id="deleteicon" class=" bx bx-trash"></i></a>
+                                    <a href="javascript:void(0);" [routerLink]="['/schema']" id="schema_{{data.project_id}}" title="Schema Mapping" [state]="{dataset_id: data.dataset_id ,project_id:data.project_id,dataset_name:data.dataset_name,navigate_to:'',schema_id:data.schema_id}">
+                                        <i id="schemaicon" class="bx bx-message-square-add"></i></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-
-
-        <!-- end table -->
-      </div>
     </div>
-  </div>
 </div>

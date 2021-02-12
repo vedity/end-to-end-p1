@@ -4,9 +4,10 @@
 --CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
  Vipul Prajapati          07-DEC-2020           1.0           Initial Version. 
  Vipul Prajapati          08-DEC-2020           1.1           Modification for Business Rule. 
- Vipul Prajapati          04-JAN-2021           1.2           File Check Mechanism Added.
- Vipul Prajapati          05-JAN-2021           1.3           no_of_rows field added into dataset tbl.
- Abhishek Negi            11-JAN-2021           1.4           Added Save file mechanism
+ Jay Shukla               01-Jay-2021           1.2           Added Deletion Functionality
+ Vipul Prajapati          04-JAN-2021           1.3           File Check Mechanism Added.
+ Vipul Prajapati          05-JAN-2021           1.4           no_of_rows field added into dataset tbl.
+ Abhishek Negi            11-JAN-2021           1.5           Added Save file mechanism
 */
 '''
 import pandas as pd 
@@ -15,6 +16,8 @@ import re
 import logging
 import traceback
 import datetime
+
+
 from common.utils.database import db
 from .project.project_creation import *
 from .dataset import dataset_creation as dt
@@ -31,7 +34,6 @@ LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
 
 logger = logging.getLogger('ingestion')
-
 
 
 class IngestClass(pj.ProjectClass,dt.DatasetClass):
@@ -66,7 +68,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         logging.info("data ingestion : ingestclass : get_db_connection : execution end")
         return DBObject,connection,connection_string
     
-    def create_project(self,project_name,project_desc,dataset_name = None,dataset_visibility = None,file_name = None,dataset_id = None,user_name = None):
+    def create_project(self,project_name,project_desc,page_name,dataset_desc=None,dataset_name = None,dataset_visibility = None,file_name = None,original_dataset_id = None,user_name = None):
         """This function is used to create project.
            E.g. sales forecast , travel time predictions etc.
            
@@ -76,7 +78,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             dataset_name ([string], optional): [name of the dataset]. Defaults to None.
             dataset_visibility ([string], optional): [visibility of the dataset]. Defaults to None.
             file_name ([string], optional): [name of the csv file]. Defaults to None.
-            dataset_id ([integer], optional): [dataset id of the selected dataset name]. Defaults to None.
+            original_dataset_id ([integer], optional): [dataset id of the selected dataset name]. Defaults to None.
             user_name ([string], optional): [name of the user]. Defaults to None.
 
         Returns:
@@ -90,23 +92,24 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise DatabaseConnectionFailed(500)  
             
             
-            project_status,project_id,load_dataset_id = super(IngestClass,self).make_project(DBObject,connection,project_name,project_desc,dataset_name,dataset_visibility,file_name ,dataset_id,user_name)
-            logging.debug("data ingestion : ingestclass : create_project : we get status of project : "+str(project_status)+ " and Project id : "+str(project_id)+" and dataset_id : "+str(dataset_id))
+            project_status,project_id,load_dataset_id = super(IngestClass,self).make_project(DBObject,connection,connection_string,project_name,project_desc,page_name,dataset_desc,dataset_name,dataset_visibility,file_name ,original_dataset_id,user_name)
+            logging.debug("data ingestion : ingestclass : create_project : we get status of project : "+str(project_status)+ " and Project id : "+str(project_id)+" and original_dataset_id : "+str(original_dataset_id))
             if project_status == 2:
                 raise ProjectAlreadyExist(500)
                 
             elif project_status == 1:
                 raise ProjectCreationFailed(500) # If Failed.
                 
-            elif project_status == 0 and dataset_id == None:
+            elif project_status == 0 and original_dataset_id == None:
                 load_data_status,no_of_rows = super(IngestClass,self).load_dataset(DBObject,connection,connection_string,file_name,dataset_visibility,user_name)
-                logging.debug("data ingestion : ingestclass : create_project : we get status of load_dataset : "+str(load_data_status)+ " and no of records in dataset : "+str(no_of_rows)+" and dataset_id : "+str(load_dataset_id))
+                logging.debug("data ingestion : ingestclass : create_project : we get status of load_dataset : "+str(load_data_status)+ " and no of records in dataset : "+str(no_of_rows)+" and original_dataset_id : "+str(load_dataset_id))
                 if load_data_status == 1:
                     raise LoadCSVDataFailed(500)
                 else:
                     #v1.3
                     # update number of rows into dataset.
                     sql_command = "UPDATE mlaas.dataset_tbl SET no_of_rows="+str(no_of_rows)+" where dataset_id="+str(load_dataset_id)
+                    logging.info(str(sql_command)+"rows updated query")
                     update_status = DBObject.update_records(connection,sql_command)
                 
                 status = super(IngestClass,self).update_dataset_status(DBObject,connection,project_id,load_data_status)
@@ -118,12 +121,12 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         except (DatabaseConnectionFailed,ProjectAlreadyExist,LoadCSVDataFailed,ProjectCreationFailed,Exception) as exc:
             logging.error("data ingestion : ingestclass : create_project : Exception " + str(exc.msg))
             logging.error("data ingestion : ingestclass : create_project : " +traceback.format_exc())
-            return exc.msg
+            return exc.msg,None,None
         logging.info("data ingestion : ingestclass : create_project : execution end")
-        return project_status
+        return project_status,project_id,load_dataset_id
 
         
-    def create_dataset(self,dataset_name,file_name,dataset_visibility,user_name):
+    def create_dataset(self,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name):
         """This function is used to create dataset.
            E.g. sales , traveltime etc.
            
@@ -138,11 +141,11 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         """
         logging.info("data ingestion : ingestclass : create_dataset : execution start")
         try:
+            
             DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
             if connection == None:
                 raise DatabaseConnectionFailed(500)
-            dataset_status,dataset_id = super(IngestClass,self).make_dataset(DBObject,connection,dataset_name,file_name,dataset_visibility,user_name) # Get Status about dataset creation,if successfully then 0 else 1.
-            
+            dataset_status,dataset_id,_ = super(IngestClass,self).make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name) # Get Status about dataset creation,if successfully then 0 else 1.
             if dataset_status == 2:
                 raise DatasetAlreadyExist(500)
             
@@ -156,15 +159,17 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 else:
                     # update number of rows into dataset.
                     sql_command = "UPDATE mlaas.dataset_tbl set no_of_rows="+str(no_of_rows)+" where dataset_id="+str(dataset_id)
+                    logging.info(str(sql_command)+" no_of_rows dataset")
                     update_status = DBObject.update_records(connection,sql_command)
 
+            
         except (DatabaseConnectionFailed,DatasetAlreadyExist,DatasetCreationFailed,LoadCSVDataFailed) as exc:
             logging.error("data ingestion : ingestclass : create_dataset : Exception " + str(exc.msg))
             logging.error("data ingestion : ingestclass : create_dataset : " +traceback.format_exc())
-            return exc.msg
+            return exc.msg,None
         
         logging.info("data ingestion : ingestclass : create_dataset : execution end")
-        return dataset_status
+        return dataset_status,dataset_id
         
     def show_dataset_details(self,user_name):
         """This function is used to show dataset details.
@@ -184,7 +189,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             dataset_df = super(IngestClass,self).show_dataset_details(DBObject,connection,user_name) # Get dataframe of dataset created.
             if dataset_df is None:
                 raise DatasetDataNotFound(500)
-            dataset_df = dataset_df.to_json(orient='records')
+            dataset_df = dataset_df.to_json(orient='records',date_format='iso')
             dataset_df = json.loads(dataset_df)
             if len(dataset_df) == 0 :
                 raise DatasetDataNotFound(500) 
@@ -197,7 +202,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         logging.info("data ingestion : ingestclass : show_dataset_details : execution end")
         return dataset_df
 
-    def show_data_details(self,dataset_id,start_index,length,sort_type,sort_index,global_value):
+    def show_data_details(self,original_dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter):
         """This function is used to show data details.
            It will show all the columns and rows from uploaded csv files.
 
@@ -214,10 +219,10 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             if connection == None :
                 raise DatabaseConnectionFailed(500) 
             
-            data_details_df = super(IngestClass,self).show_data_details(DBObject,connection,dataset_id,start_index,length,sort_type,sort_index,global_value) # Get dataframe of loaded csv.
+            data_details_df,filtercount = super(IngestClass,self).show_data_details(DBObject,connection,original_dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter) # Get dataframe of loaded csv.
             if data_details_df is None :
                 raise DataNotFound(500)
-            data_details_df=data_details_df.to_json(orient='records')
+            data_details_df=data_details_df.to_json(orient='records',date_format='iso')
             data_details_df = json.loads(data_details_df)
             if len(data_details_df) == 0 :
                 raise DataNotFound(500)
@@ -228,7 +233,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             return exc.msg
         
         logging.info("data ingestion : ingestclass : show_data_details : execution end")
-        return data_details_df
+        return data_details_df,filtercount
 
     def show_project_details(self,user_name):
         """This function is used to show project details.
@@ -279,7 +284,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             if connection == None:
                 raise DatabaseConnectionFailed(500)
             
-            deletion_status = super(IngestClass, self).delete_project_details(DBObject,connection,project_id,user_name)
+            deletion_status,original_dataset_id,project_name = super(IngestClass, self).delete_project_details(DBObject,connection,project_id,user_name)
             if deletion_status == 1:
                 raise ProjectDeletionFailed(500)
             elif deletion_status == 2:
@@ -288,19 +293,19 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise EntryNotFound(500)
             
             logging.info("data ingestion : ingestclass : delete_project_details : execution end")
-            return deletion_status
+            return deletion_status,original_dataset_id,project_name
         
         except (DatabaseConnectionFailed,ProjectDeletionFailed,UserAuthenticationFailed,EntryNotFound) as exc:
             logging.error("data ingestion : ingestclass : delete_project_details : Exception " + str(exc.msg))
             logging.error("data ingestion : ingestclass : delete_project_details : " +traceback.format_exc())
-            return exc.msg
+            return exc.msg,None,None
         
-    def delete_dataset_detail(self, dataset_id, user_name):
+    def delete_dataset_detail(self, original_dataset_id, user_name):
         '''
         This function is used to delete an entry in the project_tbl
         
         Args:
-            dataset_id ([integer]): [id of the dataset entry which you want to delete.],
+            original_dataset_id ([integer]): [id of the dataset entry which you want to delete.],
             user_name ([string]): [Name of the user.]
             
         Returns:
@@ -312,7 +317,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             if connection == None:
                 raise DatabaseConnectionFailed(500)
             
-            deletion_status = super(IngestClass, self).delete_dataset_details(DBObject,connection,dataset_id,user_name)
+            deletion_status,dataset_name = super(IngestClass, self).delete_dataset_details(DBObject,connection,original_dataset_id,user_name)
             if deletion_status == 1:
                 raise DatasetDeletionFailed(500)
             elif deletion_status == 2:
@@ -324,12 +329,12 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             elif deletion_status == 5:
                 raise EntryNotFound(500)
             logging.info("data ingestion : ingestclass : delete_dataset_details : execution end")
-            return deletion_status
+            return deletion_status,dataset_name
         
         except (DatabaseConnectionFailed,DatasetDeletionFailed,DataDeletionFailed,UserAuthenticationFailed,DatasetInUse,EntryNotFound) as exc:
             logging.error("data ingestion : ingestclass : delete_dataset_details : Exception " + str(exc.msg))
             logging.error("data ingestion : ingestclass : delete_dataset_details : " +traceback.format_exc())
-            return exc.msg
+            return exc.msg,None
         
     def delete_data_detail(self,table_name,user_name):
         """
@@ -488,14 +493,14 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             
             file_data_df = file_data
             original_file_name = str(my_file)
-            ALL_SET = False
             
+            ALL_SET =False  
             if file_data_df is None:
                 # it will check file extension.
                 if str(my_file).lower().endswith(('.csv')):
                     check_file_name = original_file_name[:-4]
                     # it will check file name 
-                    if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',check_file_name))==True):
+                    if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_0-9]*$',check_file_name))==True):
                         ALL_SET = True
             else:       
                 #* Below code is updated by Jay
@@ -504,38 +509,44 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 
                 #Todo: Below condition will need to be updated when we will be supporting more file formates
                 if str(my_file).lower().endswith(('.csv')):
-                    check_file_name = original_file_name[:-4]
-                    # it will check file name 
-                    if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',check_file_name))==True):
-                        
                         #? File Name is valid so checking for column names.
                         # get column names.
                         logging.debug("data ingestion : ingestclass : check_file : rows =="+str(file_data_df.shape[0]) + " columns =="+ str(file_data_df.shape[1]))
-                        if file_data_df.shape[0] > 0 and file_data_df.shape[1] >= 2:
+                        if file_data_df.shape[0] > 1 and file_data_df.shape[1] >= 2:
                             All_SET_Count = 0
                             logging.debug("data ingestion : ingestclass : check_file : column list value =="+str(file_data_df.columns.to_list()))   
                             col_names = file_data_df.columns.to_list()
+                            
                             for col in col_names:
                                 # it will check column names into the files.
-                                if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',col))==True):
-                                    
+                                col_name=str(col)
+                                if col_name.find('(') == col_name.find('(') == col_name.find('%')== -1:
+                                    if col_name.isnumeric()==True:
+                                        raise NumericColumnfound(500)
+                                    else:
+                                        ALL_SET=True
                                     All_SET_Count = All_SET_Count + 1
                                 else:
+                                    logger.info("get")
                                     #All_SET_Count = All_SET_Count - 1  #Vipul
                                     #* Below 4 lines are added by Jay
                                     #? Once this loop executes, ALL_SET_Count will never match len(col_names)
                                     #? No need to run the loop forward if the All_SET_Count is never going to match
                                     #? - the len(col_names), breaking the loop right here will save time
+                                    ALL_SET=False
+                                if ALL_SET==False:
                                     break
-                                    
+                                   
                             logging.debug("data ingestion : ingestclass : check_file : count value =="+str(All_SET_Count))        
-                            if All_SET_Count == len(col_names):
-                                ALL_SET = True
-                            else: pass
-                        else: pass
-                    else: pass
-                else: pass
+                        else: 
+                            logging.info("column : "+str(file_data_df.shape[0])+"rows : "+str(file_data_df.shape[1]))
+                            if file_data_df.shape[0] < 2 or file_data_df.shape[1] < 2 :
+                                raise RowsColumnRequired(500)    
+                else: 
+                    raise InvalidCsvFormat(500)
                 
+                if ALL_SET == False:
+                    raise InvalidColumnName(500)
                 # logging.debug("data ingestion : ingestclass : check_file : rows =="+str(file_data_df.shape[0]) + " columns =="+ str(file_data_df.shape[1]))
                 # if file_data_df.shape[0] > 0 and file_data_df.shape[1] >= 2:
                 #     All_SET_Count = 0
@@ -552,31 +563,16 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 #     if All_SET_Count == len(col_names):
                 #         ALL_SET = True
                 
-            if ALL_SET == False:
-                raise InvalidCsvFormat(500)             
+                         
             logging.debug("data ingestion : ingestclass : check_file : return value =="+str(ALL_SET))        
             logging.info("data ingestion : ingestclass : check_file : execution end")          
             return ALL_SET
-        except InvalidCsvFormat as exc:
+        except (InvalidCsvFormat,InvalidColumnName,RowsColumnRequired,NumericColumnfound) as exc:
             return exc.msg
-    
-    def user_authentication(self,DBObject,connection,user_name,password):
-        try:
-            sql_command = "SELECT user_name from mlaas.user_auth_tbl where user_name='"+ str(user_name) +"' and password='"+ str(password) +"'"
-            user_df = DBObject.select_records(connection,sql_command)
-            if user_df is None:
-                raise UserAuthenticationFailed(500)
-            
-            if len(user_df) > 0 :
-                return True
-            else:
-                raise UserAuthenticationFailed(500)
 
-        except UserAuthenticationFailed as exc:
-            return exc.msg
 
    
-    def save_file(self,user_name,dataset_visibility,file,file_path):
+    def save_file(self,DBObject,connection,user_name,dataset_visibility,file,file_path):
         """this function used to save the file uploaded by the user.file name will be append by the timestamp and 
         if the dataset_visibility is private save into user specific folder,else save into public folder. 
 
@@ -593,9 +589,16 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         else:
             file_path += dataset_visibility
         fs = FileSystemStorage(location=file_path)
-        file_name = file.name.split(".")[0]+ str(datetime.datetime.now().strftime('_%Y_%m_%d_%H_%M_%S')) + '.csv'
+        check_sequence = DBObject.is_exist_sequence(connection,seq_name="dataset_sequence")
+        if check_sequence =="True":
+            seq = DBObject.get_sequence(connection) 
+        file_name = file.name.split(".")[0]+"_"+ str(seq['nextval'][0]) + '.csv'
         fs.save(file_name, file)
         logging.info("data ingestion : ingestclass : save_file : execution ")
         return file_name
+    
+    
+
+
             
 

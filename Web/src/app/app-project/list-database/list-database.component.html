@@ -1,28 +1,19 @@
 <div class="container-fluid">
-    <!-- start page title -->
     <div class="row">
         <div class="col-12">
             <div class="page-title-box d-flex align-items-center justify-content-between">
                 <h4 class="mb-0 font-size-18">Create Dataset</h4>
-                <!-- <div class="page-title-right">
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item active">Welcome to Dataset</li>
-                    </ol>
-                </div> -->
             </div>
         </div>
     </div>
-    <form #f="ngForm" (ngSubmit)="f.form.valid?save():errorStatus=!errorStatus">
+    <form #f="ngForm" (ngSubmit)="!f.form.valid?errorStatus=!errorStatus:save();f.reset();">
         <div class="row">
             <div class="col-md-4 form-group">
                 <label for="example-text-input" class="col-form-label">Dataset Name<span
                         class="required-label">&nbsp;*</span></label>
-                <input class="form-control" maxlength="200" (change)="checkuniquedatasetname($event)" type="text" required
-                    [(ngModel)]="data.datasetname" name="datasetname" #datasetname="ngModel">
-                <div class="invalid-feedback"
-                    *ngIf="datasetname.errors?.required && (datasetname.dirty || datasetname.touched)">
-                    <span *ngIf="datasetname.errors?.required && (datasetname.dirty || datasetname.touched)"
-                        class="text-red">please enter dataset name.</span>
+                <input class="form-control" maxlength="150" (change)="checkuniquedatasetname($event)" type="text" required [(ngModel)]="data.datasetname" name="datasetname" #datasetname="ngModel">
+                <div class="invalid-feedback" *ngIf="datasetname.errors?.required && (datasetname.dirty || datasetname.touched)">
+                    <span *ngIf="datasetname.errors?.required && (datasetname.dirty || datasetname.touched)" class="text-red">please enter dataset name.</span>
                 </div>
                 <div class="invalid-feedback" *ngIf="datasetnameuniqueerror">
                     <span class="text-red">Dataset name already exist</span>
@@ -33,30 +24,24 @@
                         class="required-label">&nbsp;*</span></label>
                 <div class="custom-file">
                     <label class="custom-file-label" for="customFile">Choose file</label>
-                    <input type="file" (change)="handleFileInput($event.target.files)" [(ngModel)]="data.file"
-                        accept=".csv" name="file" #file="ngModel" class="custom-file-input" required>
+                    <input type="file" (change)="handleFileInput($event.target.files)" [(ngModel)]="data.file" accept=".csv" name="file" #file="ngModel" class="custom-file-input" required>
                     <div class="invalid-feedback" *ngIf="file.errors?.required && (file.dirty || file.touched)">
-                        <span *ngIf="file.errors?.required && (file.dirty || file.touched)" class="text-red">Please
+                        <span *ngIf="file.errors?.required && (file.dirty || file.touched)" class="text-red"> Please
                             select .csv file</span>
                     </div>
                 </div>
             </div>
             <div class="col-md-2 form-group">
                 <div class="custom-control custom-checkbox mb-3">
-                    <input type="checkbox" class="custom-control-input" (change)="data.isprivate=$event.target.checked"
-                        checked name="isprivate" id="customCheck1">
+                    <input type="checkbox" class="custom-control-input" (change)="data.isprivate=$event.target.checked" checked name="isprivate" id="customCheck1">
                     <label class="custom-control-label" for="customCheck1">Keep Dataset private</label>
                 </div>
             </div>
             <div class="col-md-2">
-
                 <div class="button-items">
-                    <button type="submit" class="btn btn-success upload-btn">Upload Dataset</button>
+                    <button type="submit" id="btnsubmit" class="btn btn-success upload-btn">Upload Dataset</button>
                 </div>
             </div>
-            <!-- <div *ngIf="!errorStatus"  class="invalid-feedback">
-            All required fields are compulsory to fill.
-        </div> -->
         </div>
     </form>
     <div class="row">
@@ -64,35 +49,29 @@
             <div class="card table-card">
                 <div class="card-body">
                     <h4 class="card-title mb-4">Dataset List</h4>
-
                     <div class="main-datatable">
-                        <a href="javascript:void()" (click)="displayfilter()" class="filter-btn"><i
-                                class="dripicons-experiment"></i></a>
-                        <table datatable [dtTrigger]="dtTrigger" class="table table-centered table-nowrap">
+                        <a href="javascript:void(0)" (click)="displayfilter()" id="filter_btn" class="filter-btn"><i
+                                class="dripicons-experiment" id="filtericon"></i></a>
+                        <table datatable [dtTrigger]="dtTrigger" [dtOptions]="dtOptions" class="table table-centered table-nowrap">
                             <thead class="thead-light">
                                 <tr>
-
                                     <th>Dataset
                                         <img class="sort-icon" src="sort_both.png">
                                         <img class="desc-icon" src="sort_desc.png">
                                         <img class="asc-icon" src="sort_asc.png">
-                                        <input class="form-control filter" type="text" [hidden]="filter"
-                                            placeholder="Dataset Name" name="search-dataset-name" />
+                                        <input class="form-control filter" type="text" [hidden]="filter" placeholder="Dataset Name" name="search-dataset-name" />
                                     </th>
-
                                     <th>Size
                                         <img class="sort-icon" src="sort_both.png">
                                         <img class="desc-icon" src="sort_desc.png">
                                         <img class="asc-icon" src="sort_asc.png">
-                                        <input class="form-control filter" type="text" [hidden]="filter"
-                                            placeholder="Size" name="search-size" />
+                                        <input class="form-control filter" type="text" [hidden]="filter" placeholder="Size" name="search-size" />
                                     </th>
                                     <th>No. of rows
                                         <img class="sort-icon" src="sort_both.png">
                                         <img class="desc-icon" src="sort_desc.png">
                                         <img class="asc-icon" src="sort_asc.png">
-                                        <input class="form-control filter" type="text" [hidden]="filter"
-                                            placeholder="No. of rows" name="search-total_rows" />
+                                        <input class="form-control filter" type="text" [hidden]="filter" placeholder="No. of rows" name="search-total_rows" />
                                     </th>
                                     <th class="text-center">Visibility
                                         <img class="sort-icon" src="sort_both.png">
@@ -108,18 +87,13 @@
                                         <img class="sort-icon" src="sort_both.png">
                                         <img class="desc-icon" src="sort_desc.png">
                                         <img class="asc-icon" src="sort_asc.png">
-                                        <input class="form-control filter" type="text" [hidden]="filter"
-                                            placeholder="Created By" name="search-created-by" />
+                                        <input class="form-control filter" type="text" [hidden]="filter" placeholder="Created By" name="search-created-by" />
                                     </th>
-
                                     <th>Created On
                                         <img class="sort-icon" src="sort_both.png">
                                         <img class="desc-icon" src="sort_desc.png">
                                         <img class="asc-icon" src="sort_asc.png">
-                                        <!-- <input class="form-control filter" type="text" [hidden]="filter"
-                                            placeholder="Createdd On" name="search-created-on" /> -->
                                     </th>
-
                                     <th class="text-center">
                                         Actions
                                     </th>
@@ -127,7 +101,7 @@
                             </thead>
                             <tbody class="tbody">
                                 <tr *ngFor="let data of transactions">
-                                    <td>{{data.dataset_name}}</td>
+                                    <td title="{{data.dataset_name}}">{{data.dataset_name}}</td>
                                     <td>{{data.file_size}}
                                     </td>
                                     <td>{{data.no_of_rows}}
@@ -140,29 +114,30 @@
                                     </td>
                                     <td>
                                         {{data.user_name}}
-
                                     </td>
                                     <td>
                                         {{data.created_on|date}}
                                     </td>
                                     <td class="text-center" style="font-size: 20px;font-weight: 700;">
-                                        <!-- <a href="javascript:void(0);" [routerLink]="['/datadetail']"
-                                            [state]="{dataset_id: data.dataset_id ,dataset_name:data.dataset_name,navigate_to:'/dataset' }"> <i
-                                                class=" bx bx-file"></i></a> -->
-                                                <a href="javascript:void(0);"> <i
-                                                    class=" bx bx-file"></i></a>
-
-                                        <a href="javascript:void(0);" id="sa-warning"
-                                            (click)="confirm(data.dataset_id)"> <i class=" bx bx-trash"></i></a>
+                                        <a href="javascript:void(0);" [routerLink]="['/schema']" id="detail_{{data.dataset_id}}" [state]="{dataset_id: data.dataset_id ,project_id:data.project_id,dataset_name:data.dataset_name,navigate_to:'/dataset',schema_id:data.schema_id }">
+                                            <i class=" bx bx-file" id="detailicon"></i></a>
+                                        <a href="javascript:void(0);" class="sa-warning" id="delete_{{data.dataset_id}}" (click)="confirm(data.dataset_id)"> <i class=" bx bx-trash" id="deleteicon"></i></a>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-
-                    <!-- end table -->
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<div class="loader-box" [hidden]="!loaderdiv">
+    <div class="inner-loader-box">
+        <div class="spinner-border text-warning m-1" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <p>Loading...</p>
     </div>
 </div>

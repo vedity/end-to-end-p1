@@ -1,0 +1,253 @@
+.module-main {
+    position: relative;
+}
+
+.tab-menu {
+    position: absolute;
+    right: 15px;
+    top: -12px;
+    .nav-pills .nav-link {
+        border-radius: 0 !important;
+        padding: 0.5rem 0.8rem !important;
+        border-right: 1px solid #32394e;
+    }
+    .nav {
+        border: 1px solid #32394e;
+    }
+}
+
+.target-selected {
+    background: #4c546c;
+    td:first-child {
+        color: #fff;
+    }
+}
+
+.float-right {
+    width: 225px;
+    .nav-tabs-custom .nav-item .nav-link.active {
+        color: #34c38f;
+    }
+    .nav-tabs-custom .nav-item .nav-link::after {
+        background: #34c38f;
+    }
+    label {
+        display: block;
+    }
+}
+
+table {
+    tr {
+        td {
+            border-top: 1px solid #32394e !important;
+            vertical-align: middle;
+        }
+    }
+}
+
+.col {
+    display: inline-block;
+    padding: 10px;
+    width: 10%;
+    vertical-align: top;
+    span {
+        font-size: 10px;
+    }
+    p {
+        margin-bottom: 0px;
+    }
+}
+
+.col-no {
+    width: 70px !important;
+}
+
+.col-name {
+    width: 15% !important;
+}
+
+.col-graph {
+    height: 50px;
+    width: 150px;
+    padding-right: 20px;
+    position: relative;
+}
+
+// .apexcharts-graphical{transform:translate(0px,10px) !important;}
+.row-box {
+    margin-bottom: 15px;
+}
+
+.graph-td {
+    position: relative;
+    width: 175px;
+}
+
+.expand-graph {
+    position: absolute;
+    right: 6px;
+    color: #9a9ca3;
+    top: 3px;
+    z-index: 99;
+}
+
+.modal-body {
+    .apexcharts-canvas {
+        padding-left: 30px;
+    }
+}
+
+canvas {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+.card-body {
+    position: relative;
+}
+
+.visualization-box {
+    width: 100%;
+    padding-right: 280px;
+    display: inline-block;
+    margin-right: -4px;
+}
+
+.visualization-right {
+    width: 270px;
+    background: #222736;
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    padding: 20px;
+    box-shadow: 9px 0px 12px -12px #525c7c;
+    h4 {
+        font-size: 16px;
+        font-weight: 400;
+    }
+}
+
+.demo {
+    width: 100%;
+    height: 100px;
+}
+
+.map-option {
+    width: 30px;
+    height: 30px;
+    background: #32ad84;
+    text-align: center;
+    display: block;
+    padding: 2px;
+    font-size: 18px;
+    color: #fff;
+    position: absolute;
+    left: -30px;
+    top: 0;
+}
+
+.left-box {
+    width: 380px;
+    height: 62vh;
+    display: inline-block;
+    .handling {
+        p {
+            width: 90%;
+            display: inline-block;
+            vertical-align: top;
+        }
+        a {
+            width: 10%;
+            display: inline-block;
+            vertical-align: top;
+            color: #a6b0cf;
+        }
+    }
+    .handling:last-child p {
+        margin-bottom: 0;
+    }
+    .active-row {
+        background: #222736;
+    }
+    tr:hover {
+        background: #222736;
+    }
+}
+
+.right-box {
+    width: calc(100% - 380px);
+    display: inline-block;
+    vertical-align: top;
+    margin-right: -5px;
+    h4 {
+        font-size: 1rem !important;
+    }
+    .right-inner {
+        background: #222736;
+        padding: 20px;
+    }
+    // .row{margin-left:0px; margin-right:0px;}
+    .button-items {
+        margin-top: 10px;
+    }
+}
+
+// table{
+//      tbody{height:calc(100vh - 400px); overflow-y: scroll;}
+// }
+.custom-control-input:checked~.custom-control-label::before {
+    color: #fff;
+    border-color: #34c38f !important;
+    background-color: #34c38f !important;
+}
+
+.modeling-btn {
+    position: absolute;
+    right: 260px;
+    margin-top: 5px;
+}
+
+.modal-body {
+    ul {
+        border: 2px solid #34c38f;
+        width: 198px;
+        float: right;
+        margin-bottom: 15px;
+    }
+    .nav-pills .nav-link.active,
+    .nav-pills .show>.nav-link {
+        color: #fff;
+        background-color: rgba(52, 195, 143, 0.5);
+        border-radius: 0px !important;
+        font-weight: normal;
+    }
+    a {
+        font-size: 14px;
+    }
+    .nav-tabs-custom .nav-item .nav-link::after {
+        display: none !important;
+    }
+}
+
+.dataTables_wrapper.no-footer .dataTables_scrollBody {
+    border-bottom: 1px solid #2a3042 !important;
+}
+
+.col-two {
+    position: relative;
+    padding: 0px 20px;
+    .left {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    .right {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+}

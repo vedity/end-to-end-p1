@@ -1,0 +1,50 @@
+<div class="module-main">
+    <div class="tab-menu" [hidden]="displaytitle">
+        <ul ngbNav #justifiednav="ngbNav" [activeId]="activeId" class="nav-pills nav-justified">
+            <li [ngbNavItem]="1">
+                <a ngbNavLink title="Data Detail">
+                    <span class="font-size-18"><i class="bx bx-spreadsheet"></i></span>
+                </a>
+                <ng-template ngbNavContent>
+                    <app-list-datadetail [title]="title" [dataset_id]="dataset_id" [schema_id]="schema_id" [navigate_to]="navigate_to" [displaytitle]="displaytitle"></app-list-datadetail>
+                </ng-template>
+            </li>
+            <li [ngbNavItem]="2">
+                <a ngbNavLink title="Schema Mapping">
+                    <span class="font-size-18"><i class="bx bx-message-square-add"></i></span>
+                </a>
+                <ng-template ngbNavContent>
+                    <app-create-schema-mapping [dataset_id]="dataset_id" [project_id]="project_id" [schema_id]="schema_id" [title]="title">
+                    </app-create-schema-mapping>
+                </ng-template>
+            </li>
+            <li [ngbNavItem]="3">
+                <a ngbNavLink title="Data Exploration">
+                    <span class="font-size-18"><i class="bx bx-screenshot"></i></span>
+                </a>
+                <ng-template ngbNavContent>
+                    <app-data-exploration [dataset_id]="dataset_id" [schema_id]="schema_id" [project_id]="project_id" [title]="title">
+                    </app-data-exploration>
+                </ng-template>
+            </li>
+            <!-- <li [ngbNavItem]="4">
+                <a ngbNavLink title="Visualization">
+                    <span class="font-size-18"><i class="bx bx-bar-chart"></i></span>
+                </a>
+                <ng-template ngbNavContent>
+                    <app-data-visualization [dataset_id]="dataset_id" [project_id]="project_id" [title]="title">
+                    </app-data-visualization>
+                </ng-template>
+            </li> -->
+            <li [ngbNavItem]="5">
+                <a ngbNavLink title="Data Cleanup">
+                    <span class="font-size-18"><i class="bx bx-brush"></i></span>
+                </a>
+                <ng-template ngbNavContent>
+                    <app-data-cleanup [dataset_id]="dataset_id" [project_id]="project_id" [title]="title"></app-data-cleanup>
+                </ng-template>
+            </li>
+        </ul>
+    </div>
+    <div [ngbNavOutlet]="justifiednav"></div>
+</div>

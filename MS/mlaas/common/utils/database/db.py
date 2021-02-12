@@ -15,7 +15,7 @@ from sqlalchemy import create_engine
 import json
 import logging
 from common.utils.logger_handler import custom_logger as cl
-
+from common.utils.exception_handler.python_exception.common.common_exception import *
 user_name = 'admin'
 log_enable = True
 
@@ -35,7 +35,13 @@ class DBClass:
         Returns:
             [dataframe]: [it will return read csv file data in the form of dataframe.]
         """
-        read_df=pd.read_csv(file_path) #  Read csv file and load data into dataframe.
+        read_df=pd.read_csv(file_path, na_filter= False) #  Read csv file and load data into dataframe.
+        column_name_list = read_df.columns.values.tolist()
+        column_list = []
+        for name in column_name_list:
+            if read_df.dtypes.to_dict()[name] == 'object':
+                column_list.append(name)
+        read_df=pd.read_csv(file_path,na_filter= False,parse_dates=column_list) #  Read csv file and load data into dataframe.
         return read_df
 
 
@@ -59,6 +65,37 @@ class DBClass:
             return None,None
             
         return connection,connection_string
+
+    def create_sequence(self,connection):
+        cursor = connection.cursor()
+        try:
+            sql_command = 'CREATE SEQUENCE dataset_sequence INCREMENT 1 START 1;'
+            cursor.execute(sql_command)
+            connection.commit()
+            cursor.close()
+            return 0
+        except (Exception,psycopg2.DatabaseError) as error:
+            connection.rollback() # Rollback the changes.
+            cursor.close() # Close the cursor
+            return 1 # If failed.
+
+    def get_sequence(self,connection):
+        sql_command = "select nextval('dataset_sequence')"
+        data = self.select_records(connection, sql_command)
+        return data
+
+    def is_exist_sequence(self,connection,seq_name):
+        sql_command = "SELECT * FROM information_schema.sequences where sequence_name ='"+ seq_name +"'"
+        data=self.select_records(connection,sql_command) #call select_records which return data if found else None
+        if len(data) == 0: # check whether length of data is empty or not
+            data = self.create_sequence(connection)
+            if data == 0:
+                return "True"
+            else :
+                return "False"
+        else:
+            return "True"
+
     #v1.3
     def create_schema(self,connection,user_name = None):
         """This function is used to create schema.
@@ -123,15 +160,19 @@ class DBClass:
         
         cols = cols # Get columns name for database insert query.
         tuples = row_tuples # Get record for database insert query.
+        logging.info("cols"+str(cols))
         query = "INSERT INTO %s(%s) VALUES %%s" % (table_name, cols) # Make query
+        
         cursor = connection.cursor() # Open cursor for database.
         try:
             extras.execute_values(cursor, query, tuples) # Excute insert query.
             connection.commit() # Commit the changes.
+            cursor.close()
             return 0 # If successfully inserted.
         except (Exception, psycopg2.DatabaseError) as error:
             connection.rollback() # Rollback the changes.
             cursor.close() # Close the cursor.
+            logging.info(str(error))
             return 1 # If failed.
 
     
@@ -149,13 +190,12 @@ class DBClass:
         sql_command = sql_command # Get sql command.
         try :
             data = pd.read_sql(sql_command, connection) # Read data from database table.
+            self.update_records(connection,'commit')
             return data   
         except(Exception, psycopg2.DatabaseError) as error:
             return None
         
        
-
-    
 
     def delete_records(self,connection,sql_command):
         """This function is used to delete data from database table.
@@ -190,21 +230,55 @@ class DBClass:
         Returns:
             [integer]: [status of updated records. if successfully then 1 else 0.]
         """
+        logging.info("call")
         cursor = connection.cursor() # Open the cursor.
         sql_command = sql_command # Get update query
         try:
             cursor.execute(sql_command) # Execute the update query.
             connection.commit() # Commit the changes.
+            cursor.close() # Close the cursor.
             status = 0 # If Successfully.
+            logging.info("in")
         except (Exception, psycopg2.DatabaseError) as error:
             connection.rollback() # Rollback the changes.
             cursor.close() # Close the cursor.
             status = 1 # If failed
-
+            logging.info("out")
+            logging.info(str(error))
         return status
 
+    def column_rename(self,file_data_df):
+        """This function is used to rename column of dataframe for % , ( , ) this special characters.
 
-    def load_csv_into_db(self,connection_string,table_name,file_data_df,user_name):
+        Args:
+            file_data_df ([dataframe]): [dataframe of the file data.]
+
+        Returns:
+            columns [List of renamed column]: [List of unchanged column]
+        """
+        df_columns=file_data_df.columns.values
+        df_columns_new =[]
+        
+        for i in df_columns: # this loop check a column name
+            str1 =""
+            for x in i: # this loop check each character column name
+                if '%' in x:
+                    str1 += x.replace('%','percent_isg') #It will replace column name when column name contains % 
+
+                elif '(' in x:
+                    str1 += x.replace('(','open_Bracket_isg') #It will replace column name when column name contains ( 
+
+                elif ')' in x:
+                    str1 += x.replace(')','close_Bracket_isg') #It will replace column name when column name contains )
+                    
+                else:
+                    str1 += x
+            df_columns_new.append(str1) # it append the renamed column name
+
+                 
+        return df_columns_new ,df_columns # it returns list of changed and unchanged column name
+
+    def load_df_into_db(self,connection_string,table_name,file_data_df,user_name):
         """This function is used to load csv data  into database table.
 
         Args:
@@ -216,12 +290,14 @@ class DBClass:
         Returns:
             [integer]: [it will return status of loaded data into database table. if successfully then 0 else 1.]
         """
+    
         engine = create_engine(connection_string) # Create database engine.
         schema_name = user_name.lower()
         try :
-            file_data_df.to_sql(table_name,engine,schema=schema_name) # Load data into database with table structure.
+            file_data_df.to_sql(table_name,engine,schema=schema_name,) # Load data into database with table structure.
             status = 0 # If successfully.
-        except :
+        except Exception as e:
+            logging.info("Exception: "+str(e))
             status = 1 # If failed.
             
         return status
@@ -277,13 +353,14 @@ class DBClass:
         Return : 
             [String,List] : [return the Order clause,list of column name]
         """ 
-        if sort_type == sort_index == "":  #check if value sort_type and sort_index is empty
-            order_clause="ORDER BY index"
+        
+        col_table_name=table_name.partition(".")[2] #trim from the string and get the table name
+        col_table_name=col_table_name[1:-1]
+        columns_list=self.get_column_names(connection,col_table_name) #get the column list    
+        if sort_type =="asc" and  str(sort_index) == "0":  #check if value sort_type and sort_index is empty
+            order_clause=f'ORDER BY "{columns_list[0]}"'
         else:
-            col_table_name=table_name.partition(".")[2] #trim from the string and get the table name
-            columns_list=self.get_column_names(connection,col_table_name) #get the column list 
-            columns_list=columns_list[1:] #get all index value accept index 0 
-            order_clause=f'ORDER BY "{columns_list[int(sort_index)]}" {sort_type}' #formated string for order By clause
+            order_clause=f'ORDER BY "{columns_list[int(sort_index)]}" {sort_type}' #formated string for order By clause 
         return order_clause,columns_list
     
     def get_global_search_clause(self,columns,global_value):
@@ -303,8 +380,24 @@ class DBClass:
         global_search_clause="("+empty_string[:len(empty_string)-3]+")" # remove the "or" string appended at last 
         return global_search_clause
     
+    def get_customfilter(self,customefilter):
+        """ function used to get customfilter clause
+        Args:
+            customefilter ([type]): [dictionary]
+        Returns:
+            [String]: [retun the custom filter string]
+        """
+        dict=customefilter
+        empty_string=""
+        for x in dict:
+            if dict[x]!="":
+                dict[x]=dict[x].replace("'","''")
+                empty_string+="cast(\""+x+"\" as varchar) like '%"+dict[x]+"%' or "
+        customefilter="("+empty_string[:len(empty_string)-3]+")" # remove the "or" string appended at last 
+        return customefilter
     
-    def pagination(self,connection,table_name,start_index,length,sort_type,sort_index,global_search_value):
+    
+    def pagination(self,connection,table_name,start_index,length,sort_type,sort_index,global_search_value,customefilter):
         """ function used to create Sql query string
 
         Args:
@@ -313,24 +406,47 @@ class DBClass:
                 sort_type[(String)] : [value of sort_type ascending or descending]
                 sort_index[(Integer)] : [index value of the column to perform sorting]
                 global_value[(String)] : [value that need be search in table]
-                dataset_id[(Integer)] : [Id of the dataset table]
+                
         Return : 
-            [String] : [return the sql query string]
+            [String] : [return the sql query string for data]
+            [String] : [return the sql query string for filter row count]
         """
         try: 
             end_index = (start_index + length)-1 #get total length
-            order_clause,columns=self.get_order_clause(connection,table_name,sort_type,sort_index) #call get_order_clause function and get order by string and column list
-            columns_str = '","'.join(columns) # create string that join comma(,) with column name list sequential manner
-            columns_str = "\""+columns_str+"\"" 
-            global_search_clause=""
+            limit_index=start_index+length #calculate limit
+            order_clause,columns_list=self.get_order_clause(connection,table_name,sort_type,sort_index) #call get_order_clause function and get order by string and column list            
+            columns=columns_list[1:] #remove first column
+            global_search_clause="" #initialize global_search_clause
             if global_search_value!="":
                 global_search_clause=self.get_global_search_clause(columns,global_search_value)  #call get_global_search_clause function and get search query string
-                global_search_clause= "and "+global_search_clause
-            sql_command = f'SELECT {columns_str} From {table_name} where index between {start_index} and {end_index} {global_search_clause} {order_clause}' 
-            return sql_command
+                global_search_clause= "where "+global_search_clause  #add where to global_search_clause
+            customefilter=self.get_customfilter(customefilter) #call get_customfilter value
+            customefilter_clause="" #initialize customefilter_clause
+            if customefilter!='()':
+                customefilter_clause="where "+customefilter #add where to customefilter_clause 
+            if str(sort_index) != "0" or global_search_value!="" or customefilter_clause!="":  
+                if start_index==0:                              #checking column
+                    if customefilter_clause !="":
+                       sql_data = f'select * from (SELECT * From {table_name} {global_search_clause} {order_clause}) as dt {customefilter_clause} {order_clause} limit {length}'   #sql Query with customefilter_clause
+                       sql_filtercount = f'select count(*) from (SELECT * From {table_name} {global_search_clause} ) as dt {customefilter_clause} ' #sql Query for filter row count                             
+                    else:
+                        sql_data = f'SELECT * From {table_name} {global_search_clause} {order_clause} limit {length}'  #sql Query without customefilter_clause 
+                        sql_filtercount = f'SELECT count(*) From {table_name} {global_search_clause}'   #sql Query for filter row count                             
+                else:
+                    if customefilter_clause !="":
+                        sql_data = f'select * from (SELECT * From {table_name} {global_search_clause} {order_clause} limit {limit_index} offset {start_index}) as dt {customefilter_clause} {order_clause} limit {length}'  #sql Query with customefilter_clause
+                        sql_filtercount = f'select count(*) from (SELECT * From {table_name} {global_search_clause}) as dt {customefilter_clause}'#sql Query for filter row count                              
+                    else:   
+                        sql_data = f'select * from (SELECT * From {table_name} {global_search_clause} {order_clause} limit {limit_index} offset {start_index}) as dt limit {length}' #sql Query for filter row count  
+                        sql_filtercount = f'select count(*) from (SELECT * From {table_name} {global_search_clause}) as dt'  #sql Query for filter row count                                 
+            
+            else:
+                sql_data = f'SELECT * From {table_name} where "{columns_list[0]}" between {start_index} and {end_index}  {order_clause}' # sql Query without any filter and clause
+                sql_filtercount = f'SELECT count(*) From {table_name}' #sql Query with customefilter_clause
+            return sql_data,sql_filtercount
         except Exception as exc:
             return str(exc) 
-    
+
     def is_existing_table(self,connection,table_name,schema):
         """ function used to check the table is Exists or Not in database
 
@@ -343,6 +459,7 @@ class DBClass:
         sql_command = "SELECT 1 FROM information_schema.tables WHERE table_schema ='"+schema+"' AND table_name = '"+table_name+"'"
         data=self.select_records(connection,sql_command) #call select_records which return data if found else None
         if len(data) == 0: # check whether length of data is empty or not
+            self.create_schema(connection)
             return "False"
         else:
             return "True"
@@ -356,7 +473,6 @@ class DBClass:
             [Interger] : [return the row count]
         """
         sql_command = "SELECT no_of_rows FROM mlaas.dataset_tbl WHERE dataset_id ="+str(dataset_id)
-        logger.info("sql_command"+ sql_command)
         row_data=self.select_records(connection,sql_command) #get the record for specific dataset id
         no_of_rows=row_data["no_of_rows"] # get the row count
         return no_of_rows
@@ -379,19 +495,78 @@ class DBClass:
         
         dataset_table_name,dataset_visibility,user_name = dataset_records[0]  #get 0 index records
         dataset_table_name,dataset_visibility,user_name = str(dataset_table_name),str(dataset_visibility),str(user_name) #convert variable  type into string
-         
-        if dataset_visibility.lower() == 'public':
-            user_name = 'public'
+
+        column_list=self.get_column_names(connection,dataset_table_name)
+
+
+        return column_list
     
-        sql_command = 'SELECT * FROM '+ user_name +'.' + dataset_table_name 
-        data_details_df = self.select_records(connection,sql_command)
-        data_details_df=data_details_df.to_json(orient='records') # transform dataframe based on record
-        data_details_df = json.loads(data_details_df)  #convert data_details_df into dictonery
-        return data_details_df
 
+    
+    def get_dataset_detail(self,DBObject,connection,dataset_id):
+        '''This function is used to get dataset table name from datasetid
+        Args:
+                dataset_id[(Integer)] : [Id of the dataset table]
+        Return : 
+                [Dataframe] : [return the dataframe of dataset table ]
+        '''
+        sql_command = "SELECT dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows,dataset_desc from mlaas.dataset_tbl Where dataset_id =" + str(dataset_id)
+        dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+        return dataset_df 
+    
+    def get_project_detail(self,DBObject,connection,project_id):
+        '''This function is used to get details for project table.
+        Args:
+                project_id[(Integer)] : [Id of the project table]
+        Return : 
+                [Dataframe] : [return the dataframe of project table]
+        '''
+        sql_command = "SELECT original_dataset_id,dataset_id from mlaas.project_tbl where project_id='"+str(project_id)+"'"
+        logging.info(str(sql_command)+" get_project_detail")
+        dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+        return dataset_df
+    
+    def get_table_name(self,connection,table_name):
+        """
+        function used to create table name by adding unique sequence number init.
+        Args :
+                table_name[(String)] : [Name of old table]
+        Return :
+                [String] : [return the table name]
+        """
+        logging.info("data ingestion : SchemaClass : get_table_name : execution start")
+        split_value = table_name.split('_tbl')[0].split('_')[-1] # Extract the sequence number
+        table_name = table_name.split(split_value) # split with the sequence number
+        seq = self.get_sequence(connection) #get the sequence number
+        table_name = table_name[0]+str(seq['nextval'][0])+table_name[1] #create table name by joining sequence
+        logging.info("data ingestion : SchemaClass : get_table_name : execution stop")
+        return table_name
+    
+    def user_authentication(self,connection,user_name,password):
+        """[summary]
 
-        
+        Args:
+            connection ([String]): [connection String]
+            user_name ([String]): [User Name]
+            password ([String]): [password]
 
+        Raises:
+            UserAuthenticationFailed: [User authentication failed]
+        Returns:
+            [String]: [if user authenticated then it return True]
+        """
+        try:
+            sql_command = "SELECT user_name from mlaas.user_auth_tbl where user_name='"+ str(user_name) +"' and password='"+ str(password) +"'"
+            user_df = self.select_records(connection,sql_command)
+            if user_df is None:
+                raise UserAuthenticationFailed(500)          
+            if len(user_df) > 0 :
+                return True
+            else:
+                raise UserAuthenticationFailed(500)
+        except UserAuthenticationFailed as exc:
+            return exc.msg
+  
 
 
 

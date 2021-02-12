@@ -1,0 +1,100 @@
+<div class="page-title-box d-flex align-items-center justify-content-between">
+    <h4 class="mb-0 font-size-18">Schema Mapping</h4>
+</div>
+<div class="row schema-mapping">
+    <div class="col-md-12">
+        <div class="card table-card">
+            <div class="card-body">
+                <h4 class="card-title mb-4">{{title}}</h4>
+                <ngx-skeleton-loader *ngIf="displaydiv" count="7" [animation]="animation" [theme]="theme">
+                </ngx-skeleton-loader>
+                <div *ngIf="!displaydiv" class="nobordertable">
+                    <!-- <perfect-scrollbar class="schemamapping-row"> -->
+                    <table datatable [dtOptions]="dtOptions" class="table table-centered table-nowrap ">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>
+                                    Column Name
+                                </th>
+                                <th>
+                                    Data Type
+                                </th>
+                                <th>Column Attributes</th>
+                                <th>Change Column Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let data of datasetSchema;let i= index" id="tr_{{i}}" class="{{data.column_attribute}}-selected" [hidden]="i==0">
+                                <td>
+                                    {{data.column_name}}
+                                </td>
+                                <td>
+                                    <!-- <select class="form-control" >
+                    <option value="">Select Option</option>
+                    <option *ngFor="let item of datatypeList" value="{{item}}">{{item}}</option>
+                </select> -->
+                                    {{data.data_type}}
+
+                                </td>
+                                <td>
+                                    <select class="form-control selectattr" id="selectattr_{{i}}" (change)="changeattrinute($event.target.value,i)">
+                                            <!-- <option value="">Select Option</option> -->
+                                            <option *ngFor="let item of columnattrList" value="{{item}}"  [selected]="item==data.column_attribute" >{{item}}
+                                            </option>
+                                        </select>
+                                </td>
+                                <td id="td_{{i}}" [ngClass]="{'errorstatus': data.change_column_name == data.column_name}">
+                                    <input class="form-control columnname" type="text" id="columnname_{{i}}" [value]="data.change_column_name" (keydown)="checksame(data.column_name,$event.target.value,i)" (keyup)="checksame(data.column_name,$event.target.value,i)" maxlength="100">
+                                    <div class="invalid-feedback">
+                                        <span class="text-red">Change column name must be different from column
+                                                name</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- </perfect-scrollbar> -->
+                    <div class="button-items text-center">
+                        <button type="button" class="btn btn-secondary" (click)="reset()">Reset</button>
+                        <button type="button" class="btn btn-success" (click)="save()">Save</button>
+                        <!-- <button type="button" class="btn btn-secondary" (click)="smallModal(smallDataModal)">Save
+                            As</button> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="loader-box" [hidden]="!loaderdiv">
+    <div class="inner-loader-box">
+        <div class="spinner-border text-warning m-1" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <p>Loading...</p>
+    </div>
+</div>
+<ng-template #smallDataModal let-modal>
+    <div class="modal-header">
+        <h5 class="modal-title mt-0">Save the Dataset</h5>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-hidden="true">×</button>
+    </div>
+    <div class="modal-body">
+        <div class="form-group">
+            <div class="custom-control custom-checkbox mb-3">
+                <input type="checkbox" class="custom-control-input" [(ngModel)]="saveAs.isPrivate" id="customCheck1">
+                <label class="custom-control-label" for="customCheck1">Keep private</label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="example-text-input" class="col-form-label">Dataset Name</label>
+            <input class="form-control" type="text" id="example-text-input" [(ngModel)]="saveAs.dataset_name">
+        </div>
+        <div class="form-group">
+            <label for="example-text-input" class="col-form-label">Description</label>
+            <textarea class="form-control" id="example-text-input" [(ngModel)]="saveAs.description"></textarea>
+        </div>
+        <div class="button-items text-center">
+            <button type="button" class="btn btn-success" (click)="savaAs()">Submit</button>
+        </div>
+    </div>
+</ng-template>

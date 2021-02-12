@@ -1,17 +1,16 @@
-<div class="container-fluid">
+<div class="container-fluid {{classname}}">
     <div class="row">
         <div class="col-12">
             <div class="page-title-box d-flex align-items-center justify-content-between">
                 <h4 class="mb-0 font-size-18">All Projects</h4>
                 <div class="page-title-right">
                     <div class="tab-menu">
-                        <ul ngbNav #justifiednav="ngbNav" [(activeId)]="active"  class="nav-pills nav-justified">
+                        <ul ngbNav #justifiednav="ngbNav" [(activeId)]="active" class="nav-pills nav-justified">
                             <li [ngbNavItem]="1">
                                 <a ngbNavLink>
                                     <span class=""><i class="fas fa-bars"></i></span>
                                 </a>
                                 <ng-template ngbNavContent>
-
                                     <app-list-project></app-list-project>
                                 </ng-template>
                             </li>
@@ -25,17 +24,44 @@
                             </li>
                         </ul>
                     </div>
-
-                    <button type="button" (click)="create()" class="btn btn-success">Create Project</button>
+                    <button type="button" (click)="create()" id="create" class="btn btn-success">Create Project</button>
                 </div>
             </div>
         </div>
     </div>
-
     <div class="row">
         <div class="col-md-12">
             <div [ngbNavOutlet]="justifiednav"></div>
         </div>
     </div>
-
+    <a href="javascript:void(0);" title="Timeline" id="timeline" (click)="toggleTimeline()" class="timer-btn text-center"><i
+      class="bx bx-time font-size-20 color-light "></i></a>
+    <div class="right-panel-timeline">
+        <h4>Timeline</h4>
+        <perfect-scrollbar style="height: calc(100vh - 185px);">
+            <div class="box" *ngFor="let item of keys;let i=index">
+                <p *ngIf="(currentDate | date:'yMMdd') == (item | date:'yMMdd')">Today <span class="badge badge-pill badge-soft-dark ml-1 ">{{transactions[item].length}} Activities</span></p>
+                <p *ngIf="(currentDate | date:'yMMdd') != (item | date:'yMMdd')">{{item | date}} <span class="badge badge-pill badge-soft-dark ml-1 ">{{transactions[item].length}} Activities</span></p>
+                <div class="card">
+                    <div class="card-body">
+                        <ul class="verti-timeline list-unstyled">
+                            <li class="event-list" *ngFor="let activity of transactions[item]">
+                                <div class="event-timeline-dot  ">
+                                    <i class="bx font-size-20 {{activity.operation | lowercase}}"></i>
+                                </div>
+                                <div class="media">
+                                    <div class="media-body">
+                                        <div>
+                                            <h5>{{activity.activity_name}} <span>{{activity.timestamp |date :'shortTime'}}</span></h5>
+                                            <p>{{activity.activity_description}} </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </perfect-scrollbar>
+    </div>
 </div>

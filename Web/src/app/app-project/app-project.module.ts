@@ -1,23 +1,17 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
 import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
 import { PERFECT_SCROLLBAR_CONFIG } from 'ngx-perfect-scrollbar';
 import { PerfectScrollbarConfigInterface } from 'ngx-perfect-scrollbar';
-
 import { NgbNavModule, NgbDropdownModule, NgbModalModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { NgxChartistModule } from 'ngx-chartist';
-
 import { ChartsModule } from 'ng2-charts';
 import { NgxEchartsModule } from 'ngx-echarts';
-
 import { WidgetModule } from '../shared/widget/widget.module';
 import { UIModule } from '../shared/ui/ui.module';
-
 import { FullCalendarModule } from '@fullcalendar/angular';
-
 import { LoaderService } from '../core/services/loader.service';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { LoaderInterceptorService } from '../core/services/interceptors/loader-interceptor.service';
@@ -28,19 +22,36 @@ import { ListProjectComponent } from './list-project/list-project.component';
 import { CreateProjectComponent } from './create-project/create-project.component';
 import { ManageProjectComponent } from './manage-project/manage-project.component';
 import { DetailviewProjectComponent } from './detailview-project/detailview-project.component';
- import { DataTablesModule } from 'angular-datatables';
+import { DataTablesModule } from 'angular-datatables';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
-import { DatadetailListComponent } from './datadetail-ist/datadetail-list.component';
+import { CreateSchemaMappingComponent } from './create-schema-mapping/create-schema-mapping.component';
+import { ManageSchemaMappingComponent } from './manage-schema-mapping/manage-schema-mapping.component';
+import { DataExplorationComponent } from './data-exploration/data-exploration.component';
+import { DataVisualizationComponent } from './data-visualization/data-visualization.component';
+import { NgSelectModule } from '@ng-select/ng-select';
+import { DataCleanupComponent } from './data-cleanup/data-cleanup.component';
+import { ChartModule,HIGHCHARTS_MODULES } from 'angular-highcharts';
+import * as more from 'highcharts/highcharts-more.src';
+import * as exporting from 'highcharts/modules/exporting.src';
+import * as theme from 'highcharts/themes/dark-unica.src';
+
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   suppressScrollX: true,
   wheelSpeed: 0.3
 };
-
 @NgModule({
   declarations: [ListDatabaseComponent,
-     ListDatadetailComponent, 
-     DatadetailListComponent,
-     ListProjectComponent, CreateProjectComponent, ManageProjectComponent, DetailviewProjectComponent],
+    ListDatadetailComponent,
+    ListProjectComponent, 
+    CreateProjectComponent, 
+    ManageProjectComponent, 
+    DetailviewProjectComponent,
+    CreateSchemaMappingComponent, 
+    DataExplorationComponent, 
+    DataVisualizationComponent,
+    DataCleanupComponent,
+    ManageSchemaMappingComponent,
+  ],
   imports: [
     CommonModule,
     FormsModule,
@@ -50,10 +61,14 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     NgApexchartsModule,
     ChartsModule,
     NgxChartistModule,
+    NgxEchartsModule,
+    NgSelectModule,
     ReactiveFormsModule,
-     DataTablesModule,
+    DataTablesModule,
     UIModule,
     WidgetModule,
+    ChartModule,
+    
     FullCalendarModule,
     NgbNavModule,
     NgbTooltipModule,
@@ -64,8 +79,9 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   providers: [
     {
       provide: PERFECT_SCROLLBAR_CONFIG,
-      useValue: DEFAULT_PERFECT_SCROLLBAR_CONFIG
-    },
+      useValue: DEFAULT_PERFECT_SCROLLBAR_CONFIG,
+      
+    },  { provide: HIGHCHARTS_MODULES, useFactory: () => [ more, exporting ,theme] },
     LoaderService,
     { provide: HTTP_INTERCEPTORS, useClass: LoaderInterceptorService, multi: true }
   ]

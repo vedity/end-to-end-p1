@@ -1,17 +1,13 @@
-.txt-center{
-    text-align: center; width:100%;
+.txt-center {
+    text-align: center;
+    width: 100%;
 }
 
-.ng-dirty.ng-invalid,.ng-touched.ng-invalid{
+.ng-dirty.ng-invalid,
+.ng-touched.ng-invalid {
     border-color: #f46a6a !important;
 }
 
-.invalid-feedback{
+.invalid-feedback {
     display: block !important;
 }
-
-
-// .text-red{
-//  color: red !important;
-//  font-size:10px;
-// }
