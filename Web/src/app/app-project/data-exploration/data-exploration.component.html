@@ -20,7 +20,8 @@
                                     <span class="d-none d-sm-block">Continous</span>
                                 </a>
                                 <ng-template ngbNavContent>
-                                    <table datatable [dtOptions]="dtOptions" class="table table-centered table-nowrap">
+
+                                    <table datatable [dtOptions]="dtOptions" class="table table-centered table-nowrap   nobordertable">
                                         <thead>
                                             <tr>
                                                 <th>No</th>
@@ -41,7 +42,7 @@
                                                 <td>{{item["Column Name"]}}</td>
                                                 <td>{{item["Datatype"]}}</td>
                                                 <td class="graph-td">
-                                                    <a href="javascript:void(0);" class="expand-graph" (click)="centerModal(centerDataModal,item)"><i
+                                                    <a href="javascript:void(0);" class="expand-graph" (click)="centerModal(exlargeModal,item)"><i
                                                             class="mdi mdi-arrow-expand"></i></a>
                                                     <div class="col-graph">
                                                         <apx-chart class="apex-charts" dir="ltr" [series]="[{data:item['Plot Values'][1]}]" [chart]="columnlabelChart.chart" [plotOptions]="columnlabelChart.plotOptions" [yaxis]="columnlabelChart.yaxis" [title]="columnlabelChart.title" [stroke]="columnlabelChart.stroke"
@@ -58,6 +59,8 @@
                                             </tr>
                                         </tbody>
                                     </table>
+
+
                                 </ng-template>
                             </li>
                             <li [ngbNavItem]="2">
@@ -66,7 +69,8 @@
                                     <span class="d-none d-sm-block">Categorical</span>
                                 </a>
                                 <ng-template ngbNavContent>
-                                    <table datatable [dtOptions]="dtOptions" class="table table-centered table-nowrap">
+
+                                    <table datatable [dtOptions]="dtOptions" class="table table-centered table-nowrap nobordertable">
                                         <thead>
                                             <tr>
                                                 <th>No</th>
@@ -86,7 +90,7 @@
                                                 <td>{{item["Column Name"]}}</td>
                                                 <td>{{item["Datatype"]}}</td>
                                                 <td class="graph-td">
-                                                    <a href="javascript:void(0);" class="expand-graph" (click)="centerModal(centerDataModal,item)"><i
+                                                    <a href="javascript:void(0);" class="expand-graph" (click)="centerModal(exlargeModal,item)"><i
                                                             class="mdi mdi-arrow-expand"></i></a>
                                                     <div class="col-graph">
                                                         <apx-chart class="apex-charts" dir="ltr" [series]="[{data:item['Plot Values'][1]}]" [chart]="columnlabelChart.chart" [plotOptions]="columnlabelChart.plotOptions" [yaxis]="columnlabelChart.yaxis" [title]="columnlabelChart.title" [stroke]="columnlabelChart.stroke"
@@ -106,15 +110,13 @@
                             </li>
                         </ul>
                     </div>
-                    <!-- <perfect-scrollbar class="exploration-row"> -->
                     <div [ngbNavOutlet]="customNav"></div>
-                    <!-- </perfect-scrollbar> -->
                 </div>
             </div>
         </div>
     </div>
 </div>
-<ng-template #centerDataModal let-modal>
+<ng-template #exlargeModal let-modal>
     <div class="modal-header">
         <h5 class="modal-title mt-0">{{modeltitle}}</h5>
         <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-hidden="true">×</button>
@@ -128,16 +130,44 @@
                     </a>
                     <ng-template ngbNavContent>
 
-                        <apx-chart class="apex-charts" dir="ltr" [series]="columnlabelChartexpand.series" [chart]="columnlabelChartexpand.chart" [plotOptions]="columnlabelChartexpand.plotOptions" [yaxis]="columnlabelChartexpand.yaxis" [title]="columnlabelChartexpand.title" [stroke]="columnlabelChartexpand.stroke"
-                            [dataLabels]="columnlabelChartexpand.dataLabels" [xaxis]="columnlabelChartexpand.xaxis" [yaxis]="columnlabelChartexpand.xaxis" [legend]="columnlabelChartexpand.legend" [colors]="columnlabelChartexpand.colors" [fill]="columnlabelChartexpand.fill"
-                            [grid]="columnlabelChartexpand.grid">
-                        </apx-chart>
+
+                        <div class="graph-box {{classname}}">
+
+                            <div class="col-one box" [hidden]="displayleftoutliers" *ngIf="modalobj['Left Outlier Values'][1].length>0">
+                                <apx-chart class="apex-charts" dir="ltr" [series]="[{data:modalobj['Left Outlier Values'][1]}]" [chart]="columnlabelChartexpand.chart" [plotOptions]="columnlabelChartexpand.plotOptions" [yaxis]="columnlabelChartexpand.yaxis" [title]="columnlabelChartexpand.title"
+                                    [stroke]="columnlabelChartexpand.stroke" [dataLabels]="columnlabelChartexpand.dataLabels" [xaxis]="{
+                            categories: modalobj['Left Outlier Values'][0], title: {
+                               text: 'Left Outlier'
+                            }
+                          }" [yaxis]="columnlabelChartexpand.yaxis" [legend]="columnlabelChartexpand.legend" [colors]="['#f74242']" [fill]="columnlabelChartexpand.fill" [grid]="columnlabelChartexpand.grid">
+                                </apx-chart>
+                            </div>
+                            <div class="col-two box">
+                                <a class="font-size-22 left" (click)="displayoutliers('left')" *ngIf="modalobj['Left Outlier Values'][1].length>0" href="javascript:void(0);"><i
+                                        class="bx bx-left-arrow-circle"></i></a>
+                                <apx-chart class="apex-charts" dir="ltr" [series]="columnlabelChartexpand.series" [chart]="columnlabelChartexpand.chart" [plotOptions]="columnlabelChartexpand.plotOptions" [yaxis]="columnlabelChartexpand.yaxis" [title]="columnlabelChartexpand.title" [stroke]="columnlabelChartexpand.stroke"
+                                    [dataLabels]="columnlabelChartexpand.dataLabels" [xaxis]="columnlabelChartexpand.xaxis" [yaxis]="columnlabelChartexpand.yaxis" [legend]="columnlabelChartexpand.legend" [colors]="columnlabelChartexpand.colors" [fill]="columnlabelChartexpand.fill"
+                                    [grid]="columnlabelChartexpand.grid">
+                                </apx-chart>
+                                <a class="font-size-22 right" (click)="displayoutliers('right')" *ngIf="modalobj['Right Outlier Values'][1].length>0" href="javascript:void(0);"><i
+                                        class="bx bx-right-arrow-circle"></i></a>
+                            </div>
+                            <div class="col-three box" [hidden]="displayrightoutliers" *ngIf="modalobj['Right Outlier Values'][1].length>0">
+                                <apx-chart class="apex-charts" dir="ltr" [series]="[{data:modalobj['Right Outlier Values'][1]}]" [chart]="columnlabelChartexpand.chart" [plotOptions]="columnlabelChartexpand.plotOptions" [yaxis]="columnlabelChartexpand.yaxis" [title]="columnlabelChartexpand.title"
+                                    [stroke]="columnlabelChartexpand.stroke" [dataLabels]="columnlabelChartexpand.dataLabels" [xaxis]="{
+                            categories: modalobj['Right Outlier Values'][0], title: {
+                               text: 'Right Outlier'
+                            }
+                          }" [yaxis]="columnlabelChartexpand.yaxis" [legend]="columnlabelChartexpand.legend" [colors]="['#f74242']" [fill]="columnlabelChartexpand.fill" [grid]="columnlabelChartexpand.grid">
+                                </apx-chart>
+                            </div>
+
+                        </div>
 
 
-                        <!-- <apx-chart *ngIf="modelobj['Right Outlier Values'][1].length>0" class="apex-charts" dir="ltr" [series]="columnlabelChartexpand.series" [chart]="columnlabelChartexpand.chart" [plotOptions]="columnlabelChartexpand.plotOptions" [yaxis]="columnlabelChartexpand.yaxis" [title]="columnlabelChartexpand.title" [stroke]="columnlabelChartexpand.stroke"
-                    [dataLabels]="columnlabelChartexpand.dataLabels" [xaxis]="columnlabelChartexpand.xaxis" [yaxis]="columnlabelChartexpand.xaxis" [legend]="columnlabelChartexpand.legend" [colors]="columnlabelChartexpand.colors" [fill]="columnlabelChartexpand.fill"
-                    [grid]="columnlabelChartexpand.grid">
-                </apx-chart> -->
+
+
+
 
                     </ng-template>
                 </li>

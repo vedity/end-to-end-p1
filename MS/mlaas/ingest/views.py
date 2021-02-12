@@ -17,8 +17,6 @@ import datetime
 from database import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
-
 from .utils import ingestion
 from .utils.ingestion import *
 from common.utils.exception_handler.python_exception.common.common_exception import *
@@ -28,33 +26,29 @@ from common.utils.exception_handler.python_exception import *
 from common.utils.json_format.json_formater import *
 from common.utils.activity_timeline import *
 from common.utils.activity_timeline import activity_timeline
-json_obj = JsonFormatClass()
+
+
 
 user_name = 'admin'
 log_enable = True
-
 LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
+logger = logging.getLogger('ingest_view')
 
-logger = logging.getLogger('view')
-
-DBObject=db.DBClass()     #Get DBClass object
-connection,connection_string=DBObject.database_connection(database,user,password,host,port)      #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
-IngestionObj=ingestion.IngestClass(database,user,password,host,port)
-
-timeline_Obj=activity_timeline.ActivityTimelineClass(database,user,password,host,port)
-
+DBObject=db.DBClass() #Get DBClass object
+connection,connection_string=DBObject.database_connection(database,user,password,host,port) #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
+IngestionObj=ingestion.IngestClass(database,user,password,host,port) #initialize the Ingest Class 
+timeline_Obj=activity_timeline.ActivityTimelineClass(database,user,password,host,port) #initialize the ActivityTimeline Class
+json_obj = JsonFormatClass() #initialize the JsonFormat Class 
 
 
 # Class for Project to retrive & insert 
 #It will take url string as mlaas/ingest/create_project/.
-
-
 class CreateProjectClass(APIView):
 
         def get(self, request, format=None):
                 """
-                This function is used to get Project details uploaded by te user.
+                This function is used to get Project details uploaded by the user.
         
                 Args  : 
                         User_name[(String)]   :[Name of user]
@@ -106,12 +100,11 @@ class CreateProjectClass(APIView):
                         dataset_name = request.POST.get('dataset_name')#get dataset name
                         page_name = "Create Project"
                         dataset_visibility = request.POST.get('visibility') #get Visibility
-                        dataset_id = request.POST.get('dataset_id') # get dataset_id, if selected the dataset from dropdown menu otherwise None 
+                        dataset_id = request.POST.get('dataset_id') # get dataset_id, if selected the dataset from dropdown menu otherwise it will be blank 
                         file_name = None
                         if dataset_id == "":
                                 dataset_id = None
-                        else:
-                                dataset_id = dataset_id               
+        
                         if dataset_id == None :
                                 exists_project_status = IngestionObj.does_project_exists(project_name,user_name) 
                                 if exists_project_status == False:
@@ -127,8 +120,7 @@ class CreateProjectClass(APIView):
                                                  
                                 else:
                                         return Response({"status_code":"500","error_msg":"Project already exist","response":"false"})
-                        else:
-                                dataset_id = int(dataset_id)
+                        
                                                 
                         datasetexist_status=IngestionObj.does_dataset_exists(dataset_name,user_name) #get the status if dataset exist or not 
                         if datasetexist_status != False:
@@ -222,13 +214,14 @@ class CreateDatasetClass(APIView):
                                         return Response({"status_code":500,"error_msg":"Invalid CSV Format","response":"false"})
                                         
                                                                     
-                                # file_check_status = IngestionObj.check_file(file,file_data)  # call check_file function to verify csv file data
+                                file_check_status = IngestionObj.check_file(file,file_data)  # call check_file function to verify csv file data
                                 
-                                # if file_check_status !=True:
-                                #         status_code,error_msg=json_obj.get_Status_code(file_check_status) # extract the status_code and error_msg from file_check_status
-                                #         logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+error_msg)
-                                #         return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
-                                file_path="static/server/"
+                                if file_check_status !=True:
+                                        status_code,error_msg=json_obj.get_Status_code(file_check_status) # extract the status_code and error_msg from file_check_status
+                                        logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+error_msg)
+                                        return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+
+                                file_path="static/server/" #server path where all the dataset will store
                                 file_name =IngestionObj.save_file(DBObject,connection,user_name,dataset_visibility,file,file_path)
                         else:
                                 return Response({"status_code":"500","error_msg":"Dataset name exists","response":"false"})
@@ -320,15 +313,15 @@ class DataDetailColumnListClass(APIView):
                 try:
                         logging.info("data ingestion : DataDetailClass : GET Method : execution start")
                         dataset_id = request.query_params.get('dataset_id') #get dataset_id
-                        dataset_df=DBObject.get_column_list(connection,dataset_id) #call show_data_details and it will return dataset detail data in dataframe
-                        if isinstance(dataset_df,str): #check the instance of dataset_df
-                                status_code,error_msg=json_obj.get_Status_code(dataset_df) # extract the status_code and error_msg  from dataset_df
+                        column_list=DBObject.get_column_list(connection,dataset_id) #call show_data_details and it will return dataset detail data in dataframe
+                        if isinstance(column_list,str): #check the instance of dataset_df
+                                status_code,error_msg=json_obj.get_Status_code(column_list) # extract the status_code and error_msg  from column_list
                                 logging.info("data ingestion : DataDetailClass : GET Method : execution stop : status_code :"+status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
                                 # column_name = DBObject.get_column_name(dataset_df) #Extract column name from dict and return list column name except index column
                                 logging.info("data ingestion : DataDetailClass : GET Method : execution stop : status_code :200")
-                                getcolumn = json_obj.get_column_name(dataset_df)
+                                getcolumn = json_obj.get_column_name(column_list)
                                 return Response({"status_code":"200","error_msg":"successfull retrival","response":getcolumn})  #return Data             
                 except Exception as e:
                         logging.error("data ingestion : DataDetailClass : GET Method : Exception :" + str(e))

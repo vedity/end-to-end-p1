@@ -10,10 +10,12 @@
 from common.utils.exception_handler.python_exception.common.common_exception import EntryNotFound
 from preprocess.utils.Exploration.dataset_exploration import ExploreClass
 from .Exploration import dataset_exploration as de
+from . import schema_creation as sc
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
 from common.utils.database import db
 from common.utils.logger_handler import custom_logger as cl
+
 
 import logging
 import traceback
@@ -27,7 +29,7 @@ LogObject.log_setting()
 logger = logging.getLogger('preprocessing')
 
 
-class PreprocessingClass(de.ExploreClass):
+class PreprocessingClass(sc.SchemaClass,de.ExploreClass):
     def __init__(self,database,user,password,host,port):
         """This constructor is used to initialize database credentials.
            It will initialize when object of this class is created with below parameter.
@@ -89,3 +91,41 @@ class PreprocessingClass(de.ExploreClass):
             
         logging.info("data preprocessing : PreprocessingClass : get_exploration_data : execution end")
         return stats_df
+    
+    def save_schema_data(self,schema_data,schema_id):
+        try:
+            logging.info("data preprocessing : PreprocessingClass : save_schema_data : execution start")
+
+            DBObject,connection,connection_string = self.get_db_connection()
+            if connection == None :
+                raise DatabaseConnectionFailed(500)
+
+            status = super(PreprocessingClass,self).save_schema(DBObject,connection,schema_data,schema_id)
+
+            logging.info("data preprocessing : PreprocessingClass : save_schema_data : execution start")
+            return status
+        except (DatabaseConnectionFailed) as exc:
+            logging.error("data preprocessing : PreprocessingClass : save_schema_data : Exception " + str(exc.msg))
+            logging.error("data preprocessing : PreprocessingClass : save_schema_data : " +traceback.format_exc())
+            return exc.msg
+
+    def get_schema_details(self,schema_id):
+        try:
+            logging.info("data preprocessing : PreprocessingClass : get_schema_details : execution start")
+            DBObject,connection,connection_string = self.get_db_connection()
+            if connection == None :
+                raise DatabaseConnectionFailed(500)
+
+            status = super(PreprocessingClass,self).get_schema_data(DBObject,connection,schema_id)
+            
+            logging.info("data preprocessing : PreprocessingClass : get_schema_details : execution stop")
+            return status
+        except (DatabaseConnectionFailed) as exc:
+            logging.error("data preprocessing : PreprocessingClass : get_schema_details : Exception " + str(exc.msg))
+            logging.error("data preprocessing : PreprocessingClass : get_schema_details : " +traceback.format_exc())
+            return exc.msg
+
+
+
+
+

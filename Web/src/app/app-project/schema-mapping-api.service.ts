@@ -14,16 +14,16 @@ export class SchemaMappingApiService {
 
   getDataDetails(obj, dataset_id): Observable<any> {
     var params = new HttpParams().append("dataset_id", dataset_id)
-    return this.httpClient.post(this.baseUrl + "ingest/data_detail/", obj, { headers: this.headers, params });
+    return this.httpClient.post(this.baseUrl + "ingest/dataset/detail/", obj, { headers: this.headers, params });
   }
 
   getColumnList(dataset_id): Observable<any> {
     var params = new HttpParams().append("dataset_id", dataset_id)
-    return this.httpClient.get(this.baseUrl + "ingest/data_detail/column_list/", { headers: this.headers, params });
+    return this.httpClient.get(this.baseUrl + "ingest/dataset/columns/", { headers: this.headers, params });
   }
 
   getColumnAttributes(): Observable<any> {
-    return this.httpClient.get(this.baseUrl + "dataset_schema/column_attribute_list/", { headers: this.headers });
+    return this.httpClient.get(this.baseUrl + "preprocess/schema/attribute/list/", { headers: this.headers });
   }
 
   getDatatypeList(): Observable<any> {
@@ -32,13 +32,15 @@ export class SchemaMappingApiService {
 
   getDatasetSchema(project_id,dataset_id): Observable<any> {
     var params = new HttpParams().append("project_id", project_id).append("dataset_id",dataset_id);
-    return this.httpClient.get(this.baseUrl + "ingest/dataset_schema/", { headers: this.headers, params });
+    return this.httpClient.get(this.baseUrl + "ingest/preprocess/schema/detail/", { headers: this.headers, params });
+    // return this.httpClient.get(this.baseUrl + "preprocess/schema/detail/", { headers: this.headers, params });
+
   }
 
   saveDatasetSchema(dataset_id, project_id, obj): Observable<any> {
     var params = new HttpParams().append("project_id", project_id)
      .append("dataset_id", dataset_id)
-    return this.httpClient.post(this.baseUrl + "ingest/dataset_schema/save/", obj, { headers: this.headers, params });
+    return this.httpClient.post(this.baseUrl + "ingest/preprocess/schema/save/", obj, { headers: this.headers, params });
   }
 
   saveasDatasetSchema(project_id,dataset_name,dataset_desc,visibility,method_name, obj): Observable<any> {

@@ -231,14 +231,23 @@ canvas {
     }
 }
 
-.exploration-row {
-    height: calc(100vh - 365px)
-}
-
-.headertable {
-    margin-bottom: 0px !important;
-}
-
 .dataTables_wrapper.no-footer .dataTables_scrollBody {
     border-bottom: 1px solid #2a3042 !important;
+}
+
+.col-two {
+    position: relative;
+    padding: 0px 20px;
+    .left {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    .right {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+    }
 }
