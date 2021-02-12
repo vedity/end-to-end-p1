@@ -96,7 +96,7 @@ class CreateProjectClass(APIView):
                         user_name=request.POST.get('user_name')  #get Username
                         project_name=request.POST.get('project_name') #get project_name
                         project_desc=request.POST.get('description') #get project description
-                        dataset_desc=request.POST.get('dataset_desc') #get dataset description
+                        dataset_desc=request.POST.get('dataset_description') #get dataset description
                         dataset_name = request.POST.get('dataset_name')#get dataset name
                         page_name = "Create Project"
                         dataset_visibility = request.POST.get('visibility') #get Visibility
@@ -203,7 +203,7 @@ class CreateDatasetClass(APIView):
                         user_name=str(request.POST.get('user_name'))  #get Username
                         dataset_name=request.POST.get('dataset_name') #get dataset name
                         dataset_visibility= request.POST.get('visibility') #get the visibility
-                        dataset_desc = request.POST.get('description') #get the description
+                        dataset_desc = request.POST.get('dataset_description') #get the description
                         page_name = "Create dataset"
                         exists_dataset_status=IngestionObj.does_dataset_exists(dataset_name,user_name) #call does_dataset_exists, check if dataset name exist for that perticular user name return false if not,otherwise true
                         if exists_dataset_status == False:

@@ -60,7 +60,7 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass):
         logging.info("data preprocessing : PreprocessingClass : get_db_connection : execution end")
         return DBObject,connection,connection_string
     
-    def get_exploration_data(self,dataset_id):
+    def get_exploration_data(self,dataset_id,schema_id):
         """
             This class returns all the statistics for the given dataset.
             
@@ -77,7 +77,7 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass):
             if connection == None :
                 raise DatabaseConnectionFailed(500)  
             
-            stats_df = super(PreprocessingClass,self).get_dataset_statistics(DBObject,connection,dataset_id)
+            stats_df = super(PreprocessingClass,self).get_dataset_statistics(DBObject,connection,dataset_id,schema_id)
             if isinstance(stats_df, int):
                 if stats_df == 1:
                     return EntryNotFound(500)
@@ -123,6 +123,22 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass):
         except (DatabaseConnectionFailed) as exc:
             logging.error("data preprocessing : PreprocessingClass : get_schema_details : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_schema_details : " +traceback.format_exc())
+            return exc.msg
+    
+    def get_sql_query_string(self,schema_id):
+        try:
+            logging.info("data preprocessing : PreprocessingClass : get_sql_query_string : execution start")
+            DBObject,connection,connection_string = self.get_db_connection()
+            if connection == None :
+                raise DatabaseConnectionFailed(500)
+
+            query = super(PreprocessingClass,self).get_query_string(DBObject,connection,schema_id)
+            
+            logging.info("data preprocessing : PreprocessingClass : get_sql_query_string : execution stop")
+            return query
+        except (DatabaseConnectionFailed) as exc:
+            logging.error("data preprocessing : PreprocessingClass : get_sql_query_string : Exception " + str(exc.msg))
+            logging.error("data preprocessing : PreprocessingClass : get_sql_query_string : " +traceback.format_exc())
             return exc.msg
 
 
