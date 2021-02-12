@@ -83,7 +83,8 @@ export class DataExplorationComponent implements OnInit {
   dtOptions: DataTables.Settings = {};
   @Input() public dataset_id: any;
   @Input() public title: any;
-  @Input() public project_id: any
+  @Input() public project_id: any;
+  @Input() public schema_id: any;
   chart: Chart;
   loaderdiv = false;
   displaytitle = "false";
@@ -177,11 +178,11 @@ export class DataExplorationComponent implements OnInit {
     };
 
 
-    this.getExplorationData(this.dataset_id);
+    this.getExplorationData(this.dataset_id,this.schema_id);
   }
 
-  getExplorationData(datasetid) {
-    this.apiService.getExplorationData(datasetid).subscribe(
+  getExplorationData(datasetid,schemaid) {
+    this.apiService.getExplorationData(datasetid,schemaid).subscribe(
       logs => this.successHandler(logs),
       error => this.errorHandler(error)
     )
