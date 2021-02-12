@@ -17,6 +17,7 @@ export class ManageSchemaMappingComponent implements OnInit {
   dataset_id: any;
   columnlist: any = [];
   project_id: any;
+  schema_id:any;
   async ngOnInit() {
     var params = history.state;
     if (params.dataset_id != undefined)
@@ -38,5 +39,6 @@ export class ManageSchemaMappingComponent implements OnInit {
       this.activeId=2
     }
     this.dataset_id = params.dataset_id;
+    this.schema_id=params.schema_id;
   }
 }

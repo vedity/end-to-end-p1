@@ -17,8 +17,9 @@ export class SchemaMappingApiService {
     return this.httpClient.post(this.baseUrl + "ingest/dataset/detail/", obj, { headers: this.headers, params });
   }
 
-  getColumnList(dataset_id): Observable<any> {
+  getColumnList(dataset_id,schema_id): Observable<any> {
     var params = new HttpParams().append("dataset_id", dataset_id)
+    .append("schema_id", schema_id)
     return this.httpClient.get(this.baseUrl + "ingest/dataset/columns/", { headers: this.headers, params });
   }
 
@@ -30,16 +31,17 @@ export class SchemaMappingApiService {
     return this.httpClient.get(this.baseUrl + "dataset_schema/datatype_list/", { headers: this.headers });
   }
 
-  getDatasetSchema(project_id,dataset_id): Observable<any> {
-    var params = new HttpParams().append("project_id", project_id).append("dataset_id",dataset_id);
-    return this.httpClient.get(this.baseUrl + "ingest/preprocess/schema/detail/", { headers: this.headers, params });
-    // return this.httpClient.get(this.baseUrl + "preprocess/schema/detail/", { headers: this.headers, params });
+  getDatasetSchema(project_id,dataset_id,schema_id): Observable<any> {
+    var params = new HttpParams().append("project_id", project_id).append("dataset_id",dataset_id).append("schema_id",schema_id);
+    //return this.httpClient.get(this.baseUrl + "ingest/preprocess/schema/detail/", { headers: this.headers, params });
+    return this.httpClient.get(this.baseUrl + "preprocess/schema/detail/", { headers: this.headers, params });
 
   }
 
-  saveDatasetSchema(dataset_id, project_id, obj): Observable<any> {
+  saveDatasetSchema(dataset_id, project_id,schema_id, obj): Observable<any> {
     var params = new HttpParams().append("project_id", project_id)
      .append("dataset_id", dataset_id)
+     .append("schema_id", schema_id)
     return this.httpClient.post(this.baseUrl + "ingest/preprocess/schema/save/", obj, { headers: this.headers, params });
   }
 

@@ -6,7 +6,7 @@
                     <span class="font-size-18"><i class="bx bx-spreadsheet"></i></span>
                 </a>
                 <ng-template ngbNavContent>
-                    <app-list-datadetail [title]="title" [dataset_id]="dataset_id" [navigate_to]="navigate_to" [displaytitle]="displaytitle"></app-list-datadetail>
+                    <app-list-datadetail [title]="title" [dataset_id]="dataset_id" [schema_id]="schema_id" [navigate_to]="navigate_to" [displaytitle]="displaytitle"></app-list-datadetail>
                 </ng-template>
             </li>
             <li [ngbNavItem]="2">
@@ -14,7 +14,7 @@
                     <span class="font-size-18"><i class="bx bx-message-square-add"></i></span>
                 </a>
                 <ng-template ngbNavContent>
-                    <app-create-schema-mapping [dataset_id]="dataset_id" [project_id]="project_id" [title]="title">
+                    <app-create-schema-mapping [dataset_id]="dataset_id" [project_id]="project_id" [schema_id]="schema_id" [title]="title">
                     </app-create-schema-mapping>
                 </ng-template>
             </li>
@@ -23,7 +23,7 @@
                     <span class="font-size-18"><i class="bx bx-screenshot"></i></span>
                 </a>
                 <ng-template ngbNavContent>
-                    <app-data-exploration [dataset_id]="dataset_id" [project_id]="project_id" [title]="title">
+                    <app-data-exploration [dataset_id]="dataset_id" [schema_id]="schema_id" [project_id]="project_id" [title]="title">
                     </app-data-exploration>
                 </ng-template>
             </li>
