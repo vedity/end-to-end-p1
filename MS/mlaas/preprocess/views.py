@@ -54,8 +54,10 @@ class DatasetExplorationClass(APIView):
 
         try:
             logging.info("data preprocess : DatasetExplorationClass : GET Method : execution start")
-            dataset_id = request.query_params.get('dataset_id') #get datasetid       
-            statics_df =  ExploreObj.get_exploration_data(dataset_id) #pass datasetid in function
+            dataset_id = request.query_params.get('dataset_id') #get datasetid     
+            schema_id =request.query_params.get('schema_id') #get the schema id  
+            statics_df =  ExploreObj.get_exploration_data(dataset_id,schema_id) #pass datasetid in function
+            
             if isinstance(statics_df,str): #check the instance of statics_df
                 status_code,error_msg=json_obj.get_Status_code(statics_df) # extract the status_code and error_msg from statics_df
                 logging.info("data preprocessing : DatasetExplorationClass : GET Method : execution : status_code :"+ status_code)
@@ -154,7 +156,6 @@ class SchemaClass(APIView):
                         
                         #get the schema detail,if exist then return data else return string with error_msg and status code
                         schema_data=ExploreObj.get_schema_details(schema_id) 
-
                         if isinstance(schema_data,list):  
                                 logging.info("data preprocess : DatasetSchemaClass : GET Method : execution stop")
                                 return Response({"status_code":"200","error_msg":"Successfull retrival","response":schema_data})

@@ -123,14 +123,13 @@ class ProjectClass:
             
             #sql command to get dataset_name based on original dataset id
             sql_Command = "SELECT dataset_name from mlaas.dataset_tbl where dataset_id ='"+str(original_dataset_id)+"' "
-            
- 
+
             #execute the sql command and get te dataframe if found else None
             dataframe = DBObject.select_records(connection,sql_Command)
  
             #get the dataset_name
             dataset_name = dataframe['dataset_name'][0]
- 
+
             #sql command to get Raw dataset id based on the dataset_name and page_name 
             sql_Command = "SELECT dataset_id from mlaas.dataset_tbl where dataset_name='"+str(dataset_name)+"' and page_name ='schema mapping'"
             
@@ -139,10 +138,7 @@ class ProjectClass:
  
             #get the dataset id
             dataset_id = int(dataframe['dataset_id'][0])
-            
-        
-        
-        
+           
         
         # Get row for project table.
         row_tuples = self.make_project_records(project_name,project_desc,user_name,original_dataset_id,dataset_id) 

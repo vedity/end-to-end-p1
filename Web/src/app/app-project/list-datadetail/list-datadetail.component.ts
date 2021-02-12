@@ -57,7 +57,7 @@ export class ListDatadetailComponent implements OnInit {
                     filtercolumns[element.data] = $("#col-" + index).val();
                 });
                 dataTablesParameters.customfilter = filtercolumns;
-                this.apiService.getDataDetails(dataTablesParameters, this.dataset_id)
+                this.apiService.getDataDetails(dataTablesParameters, this.dataset_id,this.schema_id)
                     .subscribe(resp => {
                         this.transactions = resp.data;
                         if (this.transactions.length == 0) {

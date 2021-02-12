@@ -325,7 +325,7 @@ class SchemaClass:
             table_name,_,_ = self.get_schema()
             
             # sql command to get details from schema table  based on  schema id 
-            sql_command = " SELECT * FROM "+table_name+" WHERE schema_id ='"+str(schema_id)+"'"
+            sql_command = " SELECT * FROM "+table_name+" WHERE schema_id ='"+str(schema_id)+"' order by index"
         
             #execute sql commnad if data exist then return dataframe else return None
             schema_df = DBObject.select_records(connection,sql_command) 
@@ -345,6 +345,34 @@ class SchemaClass:
             logging.error("data preprocess : SchemaClass : get_schema_data : Exception " + str(exc.msg))
             logging.error("data preprocess : SchemaClass : get_schema_data : " +traceback.format_exc())
             return exc.msg
+    
+    def get_query_string(self,DBObject,connection,schema_id):
+        try:
+            logging.info("data preprocess : SchemaClass : get_query_string : execution start")
+            # sql command to get details from schema table  based on  schema id 
+            sql_command = "select column_name,case when changed_column_name = '' then column_name else changed_column_name end column_list  from mlaas.schema_tbl where schema_id ="+str(schema_id)+"order by index"
+            
+            #execute sql commnad if data exist then return dataframe else return None
+            schema_df = DBObject.select_records(connection,sql_command) 
+
+            #extract the column name and column_list
+            column_name,column_list = schema_df['column_name'],schema_df['column_list']
+
+            string_query = ""
+            for count in range(1,len(column_name)):
+                #append string column name as alias  column list name
+                string_query +='"'+column_name[count]+'" as '+column_list[count]+','
+            
+            logging.info("data preprocess : SchemaClass : get_query_string : execution stop")
+            return string_query[:len(string_query)-1]
+        except  Exception as exc:
+            logging.error("data preprocess : SchemaClass : get_query_string : Exception " + str(exc))
+            logging.error("data preprocess : SchemaClass : get_query_string : " +traceback.format_exc())
+            return exc
+        
+
+
+
 
     
 
