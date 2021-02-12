@@ -422,7 +422,7 @@ class DatasetClass:
                 
                 #? Getting csv table name
                 logging.debug(f"data ingestion  :  DatasetClass  :  delete_dataset_details  :  getting data_table_name for the dataset_id = {dataset_id}")
-                sql_command = "SELECT DATASET_TABLE_NAME,dataset_name FROM "+ table_name + " WHERE dataset_id ='"+ dataset_id +"'"
+                sql_command = "SELECT DATASET_TABLE_NAME,dataset_name FROM "+ table_name + " WHERE original_dataset_id ='"+ dataset_id +"'"
                 dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
                 
                 if len(dataset_df) == 0:
