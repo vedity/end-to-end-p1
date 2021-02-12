@@ -18,6 +18,10 @@ from common.utils.database import db
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.ingest.ingest_exception import *
 from common.utils.logger_handler import custom_logger as cl
+from preprocess.utils.schema_creation import *
+from database import *
+
+schema_obj=SchemaClass() #initialize Schema object from schema class
 
 user_name = 'admin'
 log_enable = True
@@ -52,6 +56,7 @@ class ProjectClass:
                 "user_name  text,"\
                 "original_dataset_id  bigint,"\
                 "dataset_id bigint,"\
+                "schema_id bigserial ,"\
                 "created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()" 
                 
         logging.info("data ingestion : ProjectClass : make_project_schema : execution end")
@@ -99,7 +104,9 @@ class ProjectClass:
             also return project id of the created project.]
         """
         logging.info("data ingestion : ProjectClass : make_project : execution start")
+
         schema_status = DBObject.create_schema(connection)
+        
         # Get table name,schema and columns from dataset class.
         table_name,schema,cols = self.make_project_schema() 
         if self.project_exists(DBObject,connection,table_name,project_name,user_name) : return 2,1,None
@@ -113,23 +120,48 @@ class ProjectClass:
             _,original_dataset_id,schema_dataset_id = DatasetObject.make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name)
             dataset_id = schema_dataset_id
         else:
-            original_dataset_id = original_dataset_id
+            
+            #sql command to get dataset_name based on original dataset id
+            sql_Command = "SELECT dataset_name from mlaas.dataset_tbl where dataset_id ='"+str(original_dataset_id)+"' "
 
-            #required to change
-            schema_dataset_id = original_dataset_id+1 #####
-            dataset_id = int(schema_dataset_id) #####
+            #execute the sql command and get te dataframe if found else None
+            dataframe = DBObject.select_records(connection,sql_Command)
+
+            #get the dataset_name
+            dataset_name = dataframe['dataset_name'] 
+
+            #sql command to get Raw dataset id based on the dataset_name and page_name 
+            sql_Command = "SELECT dataset_id  from mlaas.dataset_tbl where dataset_name ='"+str(dataset_name)+"' and page_name ='schema mapping' "
+
+            #execute the sql command and get te dataframe if found else None
+            dataframe = DBObject.select_records(connection,sql_Command)
+
+            #get the dataset id
+            dataset_id = dataframe['dataset_id'] 
         
         
-
+        
         
         # Get row for project table.
         row_tuples = self.make_project_records(project_name,project_desc,user_name,original_dataset_id,dataset_id) 
+
         # Get status about inserting records into project table. if successful then 0 else 1. 
         insert_status = DBObject.insert_records(connection,table_name,row_tuples,cols) 
+
         # This condition is used to check project table and data is successfully stored into project table or not.if successful then 0 else 1. 
         if schema_status in [0,1] and create_status in [0,1] and insert_status == 0 :
+
             status = 0 # Successfully Created
-            project_id = self.get_project_id(DBObject,connection,row_tuples,user_name)
+
+            #function will get the schema_id and project_id from the project table
+            project_id,schema_id = self.get_project_id(DBObject,connection,row_tuples,user_name) 
+            
+            #get the schema mapping details with column name and datatype
+            column_name_list,column_datatype_list = schema_obj.get_dataset_schema(DBObject,connection,dataset_id) 
+
+            # column name and datatype will be inserted into schema table with schema id
+            status=schema_obj.update_dataset_schema(DBObject,connection,schema_id,column_name_list,column_datatype_list)
+            
         else :
             status = 1 # Failed
             project_id = None
@@ -148,6 +180,7 @@ class ProjectClass:
 
         Returns:
             [integer]: [it will return the project id of the created project.]
+            [integer]: [it will return the schema id of the created project.]
         """
         
         logging.info("data ingestion : ProjectClass : get_project_id : execution start")
@@ -156,12 +189,12 @@ class ProjectClass:
         
         logging.debug("data ingestion : ProjectClass : get_project_id : this will excute select query on table name : "+table_name + " based on project name :"+project_name + " and user name :"+user_name)
         project_name=str(project_name).replace("'","''")
-        sql_command = "SELECT project_id from "+ table_name + " Where project_name ='"+ project_name + "' and user_name = '"+ user_name + "'"
+        sql_command = "SELECT project_id,schema_id from "+ table_name + " Where project_name ='"+ project_name + "' and user_name = '"+ user_name + "'"
         project_df = DBObject.select_records(connection,sql_command)
         project_id = int(project_df['project_id'][0])
-        
+        schema_id = int(project_df['schema_id'][0])
         logging.info("data ingestion : ProjectClass : get_project_id : execution end")
-        return project_id
+        return project_id,schema_id
     
     def update_dataset_status(self,DBObject,connection,project_id,load_data_status = 0):
         """This function is used to update dataset status field in project table.
@@ -290,5 +323,6 @@ class ProjectClass:
                 return True
         except:
             return False
-        
-        
+
+    
+ 

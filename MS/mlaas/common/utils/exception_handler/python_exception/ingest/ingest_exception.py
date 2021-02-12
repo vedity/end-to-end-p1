@@ -118,16 +118,6 @@ class LoadCSVDataFailed(Exception):
     def __str__(self):
         return (self.msg)
     
-#v1.1
-class SameColumnName(Exception):
-    """  Value of column name and change column name cannot be same"""
-    def __init__(self,status_code):
-        self.msg = "Same column name are not allowed"
-        self.status_code = status_code
-        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
-     
-    def __str__(self):
-        return (self.msg)
 
 class InvalidColumnName(Exception):
     """  Value of column name and change column name cannot be same"""
@@ -138,15 +128,7 @@ class InvalidColumnName(Exception):
      
     def __str__(self):
         return (self.msg)
-class SchemaUpdateFailed(Exception):
-    """  updating schema table failed"""
-    def __init__(self,status_code):
-        self.msg = "Schema update failed"
-        self.status_code = status_code
-        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
-     
-    def __str__(self):
-        return (self.msg)
+
 
 class SchemaCreationFailed(Exception):
     """  Schema creation failed"""
@@ -168,25 +150,8 @@ class SchemaInsertionFailed(Exception):
     def __str__(self):
         return (self.msg)
 
-class TableCreationFailed(Exception):
-    """  Table Creation Failed"""
-    def __init__(self,status_code):
-        self.msg = "Table creation failed"
-        self.status_code = status_code
-        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
-     
-    def __str__(self):
-        return (self.msg)
 
-class IgnoreAttributeClass(Exception):
-    """  """
-    def __init__(self,status_code):
-        self.msg = "All attribute type column are Ignore"
-        self.status_code = status_code
-        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
-     
-    def __str__(self):
-        return (self.msg)
+
 
 class RowsColumnRequired(Exception):
     """  """

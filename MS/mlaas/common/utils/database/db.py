@@ -487,7 +487,6 @@ class DBClass:
         """
         
         sql_command = 'SELECT dataset_table_name,dataset_visibility,user_name FROM mlaas.dataset_tbl  Where dataset_id='+ str(dataset_id)
-        logging.info("++++++"+str(sql_command))
         dataset_df = self.select_records(connection,sql_command) #get the dataframe for that perticular dataset id if present ortherwise None 
         if len(dataset_df) == 0 or dataset_df is None:
             return None
@@ -497,16 +496,10 @@ class DBClass:
         dataset_table_name,dataset_visibility,user_name = dataset_records[0]  #get 0 index records
         dataset_table_name,dataset_visibility,user_name = str(dataset_table_name),str(dataset_visibility),str(user_name) #convert variable  type into string
 
+        column_list=self.get_column_names(connection,dataset_table_name)
 
-        if dataset_visibility.lower() == 'public':
-            user_name = 'public'
-    
-        sql_command = 'SELECT * FROM '+ user_name +'."' + dataset_table_name +'"' 
-        logging.info("++++++"+str(sql_command))
-        data_details_df = self.select_records(connection,sql_command)
-        data_details_df=data_details_df.to_json(orient='records') # transform dataframe based on record
-        data_details_df = json.loads(data_details_df)  #convert data_details_df into dictonery
-        return data_details_df
+
+        return column_list
     
 
     
