@@ -11,7 +11,12 @@ urlpatterns = [
     # path('mlaas/preprocess/visualize/get_visualization',DataVisualizationClass.as_view()),
 
     #URL For dataset Schema
-    path('mlaas/ingest/dataset_schema/',SchemaClass.as_view()),
+    path('mlaas/preprocess/schema/detail/',SchemaClass.as_view()),
 
-    path('mlaas/ingest/dataset_schema/save/',SchemaSaveClass.as_view()),
+    #URL For Save functionality in schema
+    path('mlaas/preprocess/schema/save/',SchemaSaveClass.as_view()),
+
+    #url for schema column attribute
+    path('mlaas/preprocess/schema/attribute/list/',ScheamColumnListClass.as_view()),
+    
 ]
