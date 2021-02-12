@@ -15,7 +15,8 @@ export class CreateSchemaMappingComponent implements OnInit {
   constructor(public apiService: SchemaMappingApiService, public toaster: ToastrService,private modalService: NgbModal) { }
   @Input() public dataset_id: any;
   @Input() public title: any;
-  @Input() public project_id: any
+  @Input() public project_id: any;
+  @Input() public schema_id:any;
   loaderdiv=false;
   saveAs:any={
     isPrivate:false,
@@ -27,7 +28,7 @@ export class CreateSchemaMappingComponent implements OnInit {
   columnattrList: any = [];
   datatypeList: any = [];
   datasetSchema: any = [];
-  finaldata:any=[];
+  Originaldata:any=[];
   displaydiv=false;
   animation = "progress-dark";
  theme = {
@@ -52,11 +53,11 @@ export class CreateSchemaMappingComponent implements OnInit {
     this.getColumnAttributeList();
     console.log(this.project_id,this.dataset_id);
     
-    this.getSchema(this.project_id,this.dataset_id);
+    this.getSchema(this.project_id,this.dataset_id,this.schema_id);
   }
 
-  getSchema(projectid,datasetid) {
-    this.apiService.getDatasetSchema(projectid,datasetid).subscribe(
+  getSchema(projectid,datasetid,schemaid) {
+    this.apiService.getDatasetSchema(projectid,datasetid,schemaid).subscribe(
       logs => this.successHandler(logs),
       error => this.errorHandler(error)
     )
@@ -65,7 +66,7 @@ export class CreateSchemaMappingComponent implements OnInit {
   successHandler(logs) {
     this.displaydiv=false;
     this.datasetSchema = logs.response;
-    this.finaldata=logs.response;
+    this.Originaldata=logs.response;
   }
 
   getColumnAttributeList() {
@@ -109,27 +110,31 @@ export class CreateSchemaMappingComponent implements OnInit {
       this.datasetSchema.forEach((element,index) => {
         var txt_column_name=$("#columnname_"+index).val().toString();
         var txt_column_attribute=$("#selectattr_"+index+" :selected").val().toString();
-        // if(txt_column_name=="" && txt_column_attribute==""){
+        if(txt_column_name==this.Originaldata[index].change_column_name && txt_column_attribute==this.Originaldata[index].column_attribute){
 
-        // }
-        // else{
-        //   if(txt_column_name!=element.column_name){
+        }
+        else{
+          if(txt_column_name!=element.column_name){
             var schema= {change_column_name:txt_column_name,
+              index:element.index,
             column_name:element.column_name,
             data_type:element.data_type,
             column_attribute:txt_column_attribute}
             savedata.push(schema);
-        //   }
-        // }
-     
+          }
+        }
       });
-      // if(savedata.length>0)
-      this.apiService.saveDatasetSchema(this.dataset_id,this.project_id,{data:savedata}).subscribe(logs=>this.savesuccessHandler(logs),error=>this.errorHandler(error));
-    //   else{
-    //  this.loaderdiv=false;
-    //     this.toaster.error('Please enter valid input', 'Error');
+      if(savedata.length>0){
+      savedata.push(this.datasetSchema[0]);
+      console.log(savedata);
+      
+      this.apiService.saveDatasetSchema(this.dataset_id,this.project_id,this.schema_id,{data:savedata}).subscribe(logs=>this.savesuccessHandler(logs),error=>this.errorHandler(error));
+    
+        }  else{
+     this.loaderdiv=false;
+        this.toaster.error('Please enter valid input', 'Error');
 
-    //   }
+      }
     }
   }
 
@@ -166,7 +171,7 @@ export class CreateSchemaMappingComponent implements OnInit {
     this.loaderdiv=false;
     if (data.status_code == "200"){
       this.toaster.success(data.error_msg,"Success");
-      this.getSchema(this.project_id,this.dataset_id);
+      this.getSchema(this.project_id,this.dataset_id,this.schema_id);
 
     }
     else
@@ -174,7 +179,7 @@ export class CreateSchemaMappingComponent implements OnInit {
   }
 
   reset(){
-    this.getSchema(this.project_id,this.dataset_id);
+    this.getSchema(this.project_id,this.dataset_id,this.schema_id);
 
   }
 
