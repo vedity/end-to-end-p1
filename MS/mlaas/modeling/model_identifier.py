@@ -16,12 +16,13 @@ import logging
 import traceback
 import datetime
 from .utils.supervised.supervised_model import SupervisedClass as SC
+from .utils.model_experiments.model_experiment import ExperimentClass as EC
 # from utils.unsupervised.unsupervised_model import UnSupervisedClass as USC
 from .split_data import SplitData
 from common.utils.database import db
+from .algorithm_detector import AlgorithmDetector
 
-
-class ModelClass(SC, SplitData):
+class ModelClass(SC, EC, SplitData):
     
     def __init__(self,Model_Mode = None,input_features_list=None,target_features_list=None,
                  project_id = None,dataset_id = None, user_id = None, DBObject=None,
@@ -29,7 +30,7 @@ class ModelClass(SC, SplitData):
         
         """This is used to initialise the basic input parameter for the model. 
         """
-        
+        print('ModelClass:- ', input_features_list)
         self.Model_Mode = Model_Mode
         self.input_features_list = input_features_list
         self.target_features_list = target_features_list
@@ -38,7 +39,8 @@ class ModelClass(SC, SplitData):
         self.user_id = user_id
         # self.split_data_object 
         self.DBObject, self.connection, self.connection_string = DBObject,connection,connection_string
-        self.algorithm_type, self.model_type = self.get_model_type(self.get_scaled_data()[1])
+        # self.algorithm_type, self.model_type = self.get_model_type(self.get_scaled_data()[1])
+        self.algorithm_detector = AlgorithmDetector(self.get_scaled_data()[1], self.DBObject, self.connection)
 
 
     def algorithm_identifier(self,split_data_object):
@@ -84,6 +86,9 @@ class ModelClass(SC, SplitData):
                                                        input_df,
                                                        target_df,
                                                        split_data_object,
+                                                       self.DBObject, 
+                                                       self.connection, 
+                                                       self.connection_string,
                                                        self.project_id,
                                                        self.dataset_id,
                                                        self.user_id)
@@ -100,6 +105,9 @@ class ModelClass(SC, SplitData):
                                                        input_df,
                                                        target_df,
                                                        split_data_object,
+                                                       self.DBObject, 
+                                                       self.connection, 
+                                                       self.connection_string,
                                                        self.project_id,
                                                        self.dataset_id,
                                                        self.user_id)
@@ -121,6 +129,9 @@ class ModelClass(SC, SplitData):
                                                     input_df,
                                                     target_df,
                                                     split_data_object,
+                                                    self.DBObject, 
+                                                    self.connection, 
+                                                    self.connection_string,
                                                     self.project_id,
                                                     self.dataset_id,
                                                     self.user_id)
@@ -163,16 +174,14 @@ class ModelClass(SC, SplitData):
 
 
     def get_scaled_data(self):
-        # DBObject, connection, _ = self.get_db_connection()
         dataset_name_command = 'select scaled_data_table from mlaas.cleaned_ref_tbl where dataset_id = ' + str(self.dataset_id)
         dataset_table_name = self.DBObject.select_records(self.connection, dataset_name_command)['scaled_data_table'][0]
 
         scaled_df_get_command = 'select * from ' +'mlaas.' + dataset_table_name# doubt 
         scaled_df = self.DBObject.select_records(self.connection, scaled_df_get_command)
-
+        print('get_scaled_data:- ', self.target_features_list)
         input_features_df= scaled_df[self.input_features_list]  # by using self.input_features_list. must include unique seq id
         target_features_df = scaled_df[self.target_features_list]  # by using self.target_features_list .must include unique seq id
-         
         return input_features_df,target_features_df
 
     
@@ -185,35 +194,42 @@ class ModelClass(SC, SplitData):
         Returns:
             [string, string]: [algorithm type, model type]
         """
-        algorithm_type = None
-        model_type = None
-        if len(target_df) == 0: 
-            algorithm_type = 'unsupervised'
-            return algorithm_type, model_type
-        else:
-            target_shape = target_df.shape
-            if target_shape[1] == 2:
-                algorithm_type = 'Single_target'
-            elif target_shape[1] > 2:
-                algorithm_type = 'Multi_target'
-            total_length = target_shape[0]
-            unq_length = len(target_df.iloc[:,1].unique())
+        # algorithm_type = None
+        # model_type = None
+        # if len(target_df) == 0: 
+        #     algorithm_type = 'unsupervised'
+        #     return algorithm_type, model_type
+        # else:
+        #     target_shape = target_df.shape
+        #     if target_shape[1] == 2:
+        #         algorithm_type = 'Single_target'
+        #     elif target_shape[1] > 2:
+        #         algorithm_type = 'Multi_target'
+        #     total_length = target_shape[0]
+        #     unq_length = len(target_df.iloc[:,1].unique())
 
-            threshold = int((total_length * 20) / 100)
+        #     threshold = int((total_length * 20) / 100)
 
-            if threshold < unq_length :
-                model_type = 'Regression'
-            else:
-                if unq_length == 2:
-                    model_type = 'Binary_Classification'
-                elif unq_length > 2:
-                    model_type = 'MultiClass_Classification'
-            return algorithm_type, model_type
+        #     if threshold < unq_length :
+        #         model_type = 'Regression'
+        #     else:
+        #         if unq_length == 2:
+        #             model_type = 'Binary_Classification'
+        #         elif unq_length > 2:
+        #             model_type = 'MultiClass_Classification'
+        #     return algorithm_type, model_type
+        return self.algorithm_detector.get_model_types()
 
     def show_model_list(self):
-        DBObject, connection, _ = self.get_db_connection()
-        sql_command = 'select * from model_master where model_type='+self.model_type+' and algorithm_type='+self.algorithm_type
-        return DBObject.select_records(connection, sql_command)
+        # DBObject, connection, _ = self.get_db_connection()
+        # sql_command = 'select * from model_master where model_type='+self.model_type+' and algorithm_type='+self.algorithm_type
+        # return DBObject.select_records(connection, sql_command)
+        models_list = self.algorithm_detector.show_models_list()
+        return models_list
+
+    def get_hyperparameters_list(self, model_name):
+        hyperparameters_list = self.algorithm_detector.get_hyperparameters_list(model_name)
+        return hyperparameters_list
 
 
 

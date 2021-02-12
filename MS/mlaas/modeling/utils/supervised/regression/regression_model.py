@@ -20,8 +20,8 @@ from sklearn.model_selection import train_test_split
 class RegressionClass:
 
   
-    def regression_model(self,Model_Mode,input_features_list,target_features_list,
-                         X_train, X_valid, X_test, Y_train, Y_valid, Y_test,split_data_object,
+    def regression_model(self,Model_Mode,input_features_list,target_features_list, X_train, X_valid, 
+                    X_test, Y_train, Y_valid, Y_test,split_data_object, DBObject, connection, connection_string,
                          project_id,dataset_id,user_id):
         
         """This function is used to run regression type model.
@@ -32,14 +32,14 @@ class RegressionClass:
         print("******************** IN Regression Class  ***************************")
         
         # Call private method of the current class .
-        self.all_regression_model(Model_Mode,input_features_list,target_features_list,
-                                  project_id,dataset_id,user_id,
-                                  X_train, X_valid, X_test, Y_train, Y_valid, Y_test, split_data_object, model_type)
+        self.all_regression_model(Model_Mode,input_features_list,target_features_list, project_id,dataset_id,
+                user_id, X_train, X_valid, X_test, Y_train, Y_valid, Y_test, split_data_object, 
+                DBObject, connection, connection_string, model_type)
     
     # This is for auto model run   
-    def all_regression_model(self,Model_Mode,input_features_list,target_features_list,
-                             project_id,dataset_id,user_id,
-                             X_train, X_valid, X_test, Y_train, Y_valid, Y_test, split_data_object, model_type):
+    def all_regression_model(self,Model_Mode,input_features_list,target_features_list, project_id,dataset_id,
+                            user_id, X_train, X_valid, X_test, Y_train, Y_valid, Y_test, split_data_object, 
+                            DBObject, connection, connection_string, model_type):
         
         """This function is used to run all regression type model.
         """
@@ -50,8 +50,8 @@ class RegressionClass:
         
         # Algorithm First
         self.linear_regression_sklearn(Model_Mode,input_features_list,target_features_list,
-                             project_id,dataset_id,user_id,
-                             X_train, X_valid, X_test, Y_train, Y_valid, Y_test, split_data_object, model_type)
+                             project_id,dataset_id,user_id, X_train, X_valid, X_test, Y_train, Y_valid, 
+                             Y_test, split_data_object, DBObject, connection, connection_string, model_type)
         
         # # Algorithm Second
         # self.linear_regression_keras(Model_Mode,input_features_list,target_features_list,
@@ -66,7 +66,7 @@ class RegressionClass:
     def run_regression_model(self,model_id,model_name,model_type,Model_Mode,
                              input_features_list,target_features_list,
                              X_train, X_valid, X_test, Y_train, Y_valid, Y_test,split_data_object,
-                             project_id,dataset_id,user_id):
+                             DBObject, connection, connection_string, project_id,dataset_id,user_id):
         
         """This function is used to run model directly when model mode is in manual.
            it will run model based on model name or id and model type.
@@ -108,8 +108,8 @@ class RegressionClass:
             run_uuid = run.info.run_id
             experiment_id = experiment.experiment_id
             # Add Experiment 
-            ExpObject = model_experiment.ExperimentClass(experiment_id,experiment_name,run_uuid,project_id,dataset_id,user_id,model_id,Model_Mode)
-            experiment_status = ExpObject.add_experiments()
+            ExpObject = model_experiment.ExperimentClass(experiment_id,experiment_name,run_uuid,project_id,dataset_id,user_id,model_id,Model_Mode, DBObject, connection, connection_string)
+            experiment_status = ExpObject.add_experiments(DBObject, connection, connection_string)
             
             print("experiment_status == ",experiment_status)
             
@@ -119,8 +119,8 @@ class RegressionClass:
 
 
     def linear_regression_sklearn(self,Model_Mode,input_features_list,target_features_list,
-                             project_id,dataset_id,user_id,
-                             X_train, X_valid, X_test, Y_train, Y_valid, Y_test, split_data_object, model_type):
+                             project_id,dataset_id,user_id, X_train, X_valid, X_test, Y_train, Y_valid, 
+                             Y_test, split_data_object, DBObject, connection, connection_string, model_type):
         
         ## TODO : we have to get class file also based on model type. 
         # Get model id and model name based on model type.
@@ -154,14 +154,14 @@ class RegressionClass:
         experiment_id = experiment.experiment_id
         
         # Add Experiment into database
-        ExpObject = model_experiment.ExperimentClass(experiment_id,experiment_name,run_uuid,project_id,dataset_id,user_id,model_id,Model_Mode)
-        experiment_status = ExpObject.add_experiments()
+        ExpObject = model_experiment.ExperimentClass(experiment_id,experiment_name,run_uuid,project_id,dataset_id,user_id,model_id,Model_Mode, DBObject, connection, connection_string)
+        experiment_status = ExpObject.add_experiments(DBObject, connection, connection_string)
         
         print("experiment_status == ",experiment_status)
     
-    def linear_regression_keras(self,Model_Mode,input_features_list,target_features_list,
-                             project_id,dataset_id,user_id,
-                             X_train, X_valid, X_test, Y_train, Y_valid, Y_test, split_data_object, model_type):
+    def linear_regression_keras(self,Model_Mode,input_features_list,target_features_list, project_id,dataset_id,
+                    user_id, X_train, X_valid, X_test, Y_train, Y_valid, Y_test, split_data_object, 
+                    DBObject, connection, connection_string, model_type):
         
         ## TODO : we have to get class file also based on model type. 
         # Get model id and model name based on model type.
@@ -195,8 +195,8 @@ class RegressionClass:
         experiment_id = experiment.experiment_id
         
         # Add Experiment into database
-        ExpObject = model_experiment.ExperimentClass(experiment_id,experiment_name,run_uuid,project_id,dataset_id,user_id,model_id,Model_Mode)
-        experiment_status = ExpObject.add_experiments()
+        ExpObject = model_experiment.ExperimentClass(experiment_id,experiment_name,run_uuid,project_id,dataset_id,user_id,model_id,Model_Mode, DBObject, connection, connection_string)
+        experiment_status = ExpObject.add_experiments(DBObject, connection, connection_string)
         
         print("experiment_status == ",experiment_status)
                  

@@ -41,8 +41,10 @@ class LinearRegressionClass:
         self.input_features_list = input_features_list
         self.target_features_list = target_features_list
         self.split_data_object = split_data_object
-        self.input_features_list.remove('index')
-        self.target_features_list.remove('index')
+        # self.input_features_list.remove('index')
+        self.input_features_list = input_features_list[1:]
+        self.target_features_list = target_features_list[1:]
+        # self.input_features_list.remove('index')
         self.X_train = X_train
         self.X_test = X_test
         self.X_valid = X_valid
@@ -345,6 +347,7 @@ class LinearRegressionClass:
         mlflow.log_dict(features_impact_dict,"features_importance.json")
         mlflow.log_dict(model_summary,"model_summary.json")
         mlflow.log_dict(final_result_dict,"predictions.json")
+        print('This is done')
         
         
         

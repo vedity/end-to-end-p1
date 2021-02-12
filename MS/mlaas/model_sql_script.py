@@ -87,7 +87,7 @@ class ModelSqlClass:
         file_data_df = pd.read_csv('house_prediction.csv')
         user_name = "mlaas"
         table_name = "house_prediction"
-        load_status = self.DBObject.load_csv_into_db(self.connection_string,table_name,file_data_df,user_name)
+        load_status = self.DBObject.load_df_into_db(self.connection_string,table_name,file_data_df,user_name)
         return load_status
     
     def add_ref_record(self):

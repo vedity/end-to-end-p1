@@ -28,7 +28,11 @@ class SplitData:
             self.test_size = 0.2
             self.cv = 5
             self.random_state = 0
+        
 
+    # def get_auto_split_data_object(self, model_name, DBObject, connection):
+    #     sql_command = 'select split_method,cv,valid_size,test_size,random_state from mlaas.split_data_tbl where model_name='+model_name
+    #     split_dataset = 
 
     # def get_split_params(self):
     #     if self.split_method == 'cross_validation':
