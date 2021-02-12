@@ -25,6 +25,8 @@ export class AuthfakeauthenticationService {
 
     login(email: string, password: string) {
         var params=new HttpParams().append("user_name",email).append("password",password);
+      //  return this.http.get<any>(this.baseUrl+`common/user/login/`,{headers:this.headers,params})
+
         return this.http.get<any>(this.baseUrl+`ingest/common/user/login/`,{headers:this.headers,params})
             .pipe(map(user => {
                 // login successful if there's a jwt token in the response
