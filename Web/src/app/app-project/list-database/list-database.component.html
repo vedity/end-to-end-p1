@@ -51,7 +51,7 @@
                     <h4 class="card-title mb-4">Dataset List</h4>
                     <div class="main-datatable">
                         <a href="javascript:void(0)" (click)="displayfilter()" id="filter_btn" class="filter-btn"><i
-                                class="dripicons-experiment"></i></a>
+                                class="dripicons-experiment" id="filtericon"></i></a>
                         <table datatable [dtTrigger]="dtTrigger" [dtOptions]="dtOptions" class="table table-centered table-nowrap">
                             <thead class="thead-light">
                                 <tr>
@@ -120,8 +120,8 @@
                                     </td>
                                     <td class="text-center" style="font-size: 20px;font-weight: 700;">
                                         <a href="javascript:void(0);" [routerLink]="['/schema']" id="detail_{{data.dataset_id}}" [state]="{dataset_id: data.dataset_id ,dataset_name:data.dataset_name,navigate_to:'/dataset' }">
-                                            <i class=" bx bx-file"></i></a>
-                                        <a href="javascript:void(0);" class="sa-warning" id="delete_{{data.dataset_id}}" (click)="confirm(data.dataset_id)"> <i class=" bx bx-trash"></i></a>
+                                            <i class=" bx bx-file" id="detailicon"></i></a>
+                                        <a href="javascript:void(0);" class="sa-warning" id="delete_{{data.dataset_id}}" (click)="confirm(data.dataset_id)"> <i class=" bx bx-trash" id="deleteicon"></i></a>
                                     </td>
                                 </tr>
                             </tbody>
