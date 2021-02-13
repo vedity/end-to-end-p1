@@ -21,6 +21,9 @@ from common.utils.database import db
 from common.utils.database.db import DBClass
 from ingest.utils.dataset import dataset_creation
 from ingest.utils.dataset import dataset_creation
+from ..schema_creation import *
+
+schemaObj = SchemaClass()
 
 dc = dataset_creation.DatasetClass()
 
@@ -64,7 +67,7 @@ class ExploreClass:
         logging.info("data preprocessing : ExploreClass : get_attribute_datatype : execution stop")    
         return attribute_type
     
-    def get_dataset_statistics(self,DBObject,connection,dataset_id):
+    def get_dataset_statistics(self,DBObject,connection,dataset_id,schema_id):
         """
             This class returns all the statistics for the given dataset.
             
@@ -97,8 +100,11 @@ class ExploreClass:
         if dataset_visibility == 'public':
             user_name = 'public'
         
+
+        query = schemaObj.get_query_string(DBObject,connection,schema_id)
         #? Getting all the data
-        sql_command = f"SELECT * FROM {user_name}.{dataset_table_name}"
+        sql_command = f"SELECT {str(query)} FROM {user_name}.{dataset_table_name}"
+        logging.info(str(sql_command)+"  -------")
         data_df = DBObject.select_records(connection,sql_command)    
         
         #? Logical Code Begins
