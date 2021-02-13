@@ -45,8 +45,8 @@
                                                         <a href="javascript:void(0);" class="expand-graph" (click)="centerModal(exlargeModal,item)"><i
                             class="mdi mdi-arrow-expand"></i></a>
                                                         <div class="col-graph">
-                                                            <apx-chart class="apex-charts" dir="ltr" [series]="[{data:item['Plot Values'][1]}]" [chart]="columnlabelChart.chart" [plotOptions]="columnlabelChart.plotOptions" [yaxis]="columnlabelChart.yaxis" [title]="columnlabelChart.title" [stroke]="columnlabelChart.stroke"
-                                                                [dataLabels]="columnlabelChart.dataLabels" [xaxis]="columnlabelChart.xaxis" [legend]="columnlabelChart.legend" [colors]="columnlabelChart.colors" [fill]="columnlabelChart.fill" [grid]="columnlabelChart.grid">
+                                                            <apx-chart class="apex-charts" dir="ltr" [series]="[{data:item['plotarray']}]" [chart]="columnlabelChart.chart" [plotOptions]="columnlabelChart.plotOptions" [yaxis]="columnlabelChart.yaxis" [title]="columnlabelChart.title" [stroke]="columnlabelChart.stroke"
+                                                                [dataLabels]="columnlabelChart.dataLabels" [xaxis]="columnlabelChart.xaxis" [legend]="columnlabelChart.legend" [colors]="item['colorarray']" [fill]="columnlabelChart.fill" [grid]="columnlabelChart.grid">
                                                             </apx-chart>
                                                         </div>
                                                     </td>
@@ -95,9 +95,12 @@
                                                         <a href="javascript:void(0);" class="expand-graph" (click)="centerModal(exlargeModal,item)"><i
                                                             class="mdi mdi-arrow-expand"></i></a>
                                                         <div class="col-graph">
-                                                            <apx-chart class="apex-charts" dir="ltr" [series]="[{data:item['Plot Values'][1]}]" [chart]="columnlabelChart.chart" [plotOptions]="columnlabelChart.plotOptions" [yaxis]="columnlabelChart.yaxis" [title]="columnlabelChart.title" [stroke]="columnlabelChart.stroke"
-                                                                [dataLabels]="columnlabelChart.dataLabels" [xaxis]="columnlabelChart.xaxis" [legend]="columnlabelChart.legend" [colors]="columnlabelChart.colors" [fill]="columnlabelChart.fill" [grid]="columnlabelChart.grid">
+                                                            <apx-chart class="apex-charts" dir="ltr" [series]="[{data:item['plotarray']}]" [chart]="columnlabelChart.chart" [plotOptions]="columnlabelChart.plotOptions" [yaxis]="columnlabelChart.yaxis" [title]="columnlabelChart.title" [stroke]="columnlabelChart.stroke"
+                                                                [dataLabels]="columnlabelChart.dataLabels" [xaxis]="columnlabelChart.xaxis" [legend]="columnlabelChart.legend" [colors]="item['colorarray']" [fill]="columnlabelChart.fill" [grid]="columnlabelChart.grid">
                                                             </apx-chart>
+                                                            <!-- <apx-chart class="apex-charts" dir="ltr" [series]="[{data:item['Plot Values'][1]}]" [chart]="columnlabelChart.chart" [plotOptions]="columnlabelChart.plotOptions" [yaxis]="columnlabelChart.yaxis" [title]="columnlabelChart.title" [stroke]="columnlabelChart.stroke"
+                                                                [dataLabels]="columnlabelChart.dataLabels" [xaxis]="columnlabelChart.xaxis" [legend]="columnlabelChart.legend" [colors]="columnlabelChart.colors" [fill]="columnlabelChart.fill" [grid]="columnlabelChart.grid">
+                                                            </apx-chart> -->
                                                         </div>
                                                     </td>
                                                     <td>{{item["DataCount"]==null?'-':item["DataCount"]}}</td>

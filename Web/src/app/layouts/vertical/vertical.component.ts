@@ -1,5 +1,7 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
+import { LayoutApiService } from '../layouts-api.service';
 
 
 @Component({
@@ -15,7 +17,11 @@ export class VerticalComponent implements OnInit, AfterViewInit {
 
   isCondensed = false;
   menuItem:any=[];
-  constructor(private router: Router) {
+  classname = "";
+  transactions: any;
+  keys: any = [];
+  currentDate: any;
+  constructor(private router: Router,public apiService:LayoutApiService,public toaster:ToastrService) {
     
     router.events.forEach((event) => {
      
@@ -33,7 +39,48 @@ export class VerticalComponent implements OnInit, AfterViewInit {
     document.body.classList.remove('vertical-collpsed');
     document.body.removeAttribute('data-sidebar-size');
     
+    this.currentDate = new Date();
+    this.getactivivtyTimeline();
+  }
 
+
+  getactivivtyTimeline() {
+    this.apiService.getActivityTimeline().subscribe(
+      logs => this.successHandler(logs),
+      error => this.errorHandler(error)
+    );
+  }
+
+  successHandler(data) {
+    if (data.status_code == "200") {
+      this.transactions = this.groupBy(data.response, 'date');
+      this.keys = Object.keys(this.transactions);
+    }
+    else {
+      this.transactions = []
+    }
+  }
+
+  groupBy(xs, key) {
+    return xs.reduce(function (rv, x) {
+      (rv[x[key]] = rv[x[key]] || []).push(x);
+      return rv;
+    }, {});
+  };
+
+  errorHandler(error) {
+    if (error.error_msg)
+      this.toaster.error(error.error_msg, 'Error');
+    else {
+      this.toaster.error('Something went wrong', 'Error');
+    }
+  }
+
+  toggleTimeline() {
+    if (this.classname == "")
+      this.classname = "open";
+    else
+      this.classname = "";
   }
 
   isMobile() {

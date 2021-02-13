@@ -13,8 +13,7 @@ export class SchemaMappingApiService {
   constructor(private httpClient: HttpClient) { }
 
   getDataDetails(obj, dataset_id,schema_id): Observable<any> {
-    var params = new HttpParams().append("dataset_id", dataset_id).append("schema_id",schema_id);
-
+    var params = new HttpParams().append("dataset_id", dataset_id).append("schema_id", schema_id)
     return this.httpClient.post(this.baseUrl + "ingest/dataset/detail/", obj, { headers: this.headers, params });
   }
 

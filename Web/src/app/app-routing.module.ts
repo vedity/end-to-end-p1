@@ -8,6 +8,7 @@ import { CyptolandingComponent } from './cyptolanding/cyptolanding.component';
 const routes: Routes = [
   { path: 'account', loadChildren: () => import('./account/account.module').then(m => m.AccountModule) },
   { path: '', component: LayoutComponent, loadChildren: () => import('./app-project/app-project-routing.module').then(m => m.AppProjectRoutingModule), canActivate: [AuthGuard]},
+  { path: 'modeling', component: LayoutComponent, loadChildren: () => import('./app-modeling/app-modeling-routing.module').then(m => m.AppModelingRoutingModule), canActivate: [AuthGuard]},
   { path: 'crypto-ico-landing', component: CyptolandingComponent }
 ];
 
