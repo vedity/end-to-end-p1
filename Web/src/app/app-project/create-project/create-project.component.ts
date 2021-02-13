@@ -133,6 +133,7 @@ export class CreateProjectComponent implements OnInit {
       savedata.append('dataset_name', this.data.datasetname);
       savedata.append('project_name', this.data.projectname);
       savedata.append('description', this.data.description);
+      savedata.append('dataset_description', this.data.datasetdescription);
       if (this.data.isprivate)
         savedata.append('visibility', "private");
       else

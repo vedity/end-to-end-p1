@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 import bsCustomFileInput from 'bs-custom-file-input';
 import { createdataset } from './dataset.model'
 import { NgForm } from '@angular/forms';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 @Component({
   selector: 'app-list-database',
   templateUrl: './list-database.component.html',
@@ -25,7 +26,7 @@ export class ListDatabaseComponent implements OnInit {
   filter: boolean = true;
   loaderdiv = false;
   f: NgForm;
-  constructor(public apiService: ProjectApiService, public toaster: ToastrService) { }
+  constructor(public apiService: ProjectApiService, public toaster: ToastrService,private modalService: NgbModal) { }
   transactions: any = [];
   ngOnInit(): void {
     this.data.isprivate = true;
@@ -189,6 +190,7 @@ export class ListDatabaseComponent implements OnInit {
       savedata.append('visibility', "public");
 
     savedata.append('inputfile', this.datasetfile);
+    savedata.append('dataset_description', this.data.datasetdescription);
     this.loaderdiv = true;
     this.apiService.savedataset(savedata).subscribe(
       logs => this.savesuccess(logs),
@@ -206,5 +208,9 @@ export class ListDatabaseComponent implements OnInit {
     }
     else
       this.errorHandler(data);
+  }
+
+  smallModal(smallDataModal: any) {
+    this.modalService.open(smallDataModal, { size: 'sm',windowClass:'modal-holder', centered: true });
   }
 }
