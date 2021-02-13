@@ -5,4 +5,5 @@ export class createdataset{
     file:string;
     inputfile:File;
     isprivate:boolean;
+    datasetdescription:string;
 }
