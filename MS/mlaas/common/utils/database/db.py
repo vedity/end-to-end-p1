@@ -375,7 +375,7 @@ class DBClass:
     
 
     
-    def get_order_clause(self,connection,schema_id,sort_type,sort_index):    
+    def get_order_clause(self,connection,schema_id,table_name,sort_type,sort_index):    
         """ function used to get ORDER by clause string
 
         Args:
@@ -385,18 +385,19 @@ class DBClass:
         Return : 
             [String,List] : [return the Order clause,list of column name]
         """ 
-        
-        # col_table_name=table_name.partition(".")[2] #trim from the string and get the table name
-        # col_table_name=col_table_name[1:-1]
-        # columns_list=self.get_column_names(connection,col_table_name) #get the column list    
-        columns_list=self.get_schema_columnlist(connection,schema_id,type="ab") #get the column list   
+        if schema_id != None:
+            columns_list=self.get_schema_columnlist(connection,schema_id,type="ab") #get the column list   
+        else:
+            col_table_name=table_name.partition(".")[2] #trim from the string and get the table name
+            col_table_name=col_table_name[1:-1]
+            columns_list=self.get_column_names(connection,col_table_name) #get the column list    
         if sort_type =="asc" and  str(sort_index) == "0":  #check if value sort_type and sort_index is empty
             order_clause=f'ORDER BY "{columns_list[0]}"'
         else:
             order_clause=f'ORDER BY "{columns_list[int(sort_index)]}" {sort_type}' #formated string for order By clause 
         return order_clause,columns_list
     
-    def get_global_search_clause(self,connection,schema_id,global_value):
+    def get_global_search_clause(self,connection,schema_id,columns,global_value):
         """ function used to create search  string for sql command
 
         Args:
@@ -406,29 +407,24 @@ class DBClass:
         Return : 
             [String] : [return the search pattern string]
         """ 
-        columns_list=self.get_schema_columnlist(connection,schema_id,type="schema") 
-        columns=columns_list[1:]
+        if schema_id != None:
+            columns_list=self.get_schema_columnlist(connection,schema_id,type="schema") 
+            columns=columns_list[1:]
+        else:
+            columns=columns     
         empty_string=""
         for i in range(len(columns)):
             empty_string+="cast(\""+str(columns[i])+"\" as varchar) like '%"+str(global_value)+"%' or "   # create the string with Like operator  
         global_search_clause="("+empty_string[:len(empty_string)-3]+")" # remove the "or" string appended at last 
         return global_search_clause
     
-    def get_customfilter(self,connection,schema_id,customefilter):
+    def get_customfilter(self,connection,customefilter):
         """ function used to get customfilter clause
         Args:
             customefilter ([type]): [dictionary]
         Returns:
             [String]: [retun the custom filter string]
         """
-        # dict=customefilter
-        # empty_string=""
-        # for x in dict:
-        #     if dict[x]!="":
-        #         dict[x]=dict[x].replace("'","''")
-        #         empty_string+="cast(\""+x+"\" as varchar) like '%"+dict[x]+"%' or "
-        # customefilter="("+empty_string[:len(empty_string)-3]+")" # remove the "or" string appended at last 
-        # return customefilter
         dict=customefilter
         empty_string=""
         for x in dict:
@@ -477,44 +473,43 @@ class DBClass:
             [String] : [return the sql query string for filter row count]
         """
         try: 
-            logger.info("pagination start")
-            query = self.get_query_string(connection,schema_id)
-            sql_command = f"SELECT {str(query)} FROM {table_name}"
-            logger.info("sql_command========"+sql_command)
             end_index = (start_index + length)-1 #get total length
             limit_index=start_index+length #calculate limit
-            order_clause,columns_list=self.get_order_clause(connection,schema_id,sort_type,sort_index) #call get_order_clause function and get order by string and column list            
+            order_clause,columns_list=self.get_order_clause(connection,schema_id,table_name,sort_type,sort_index) #call get_order_clause function and get order by string and column list            
             columns=columns_list[1:] #remove first column
             global_search_clause="" #initialize global_search_clause
             if global_search_value!="":
-                global_search_clause=self.get_global_search_clause(connection,schema_id,global_search_value)  #call get_global_search_clause function and get search query string
+                global_search_clause=self.get_global_search_clause(connection,schema_id,columns,global_search_value)  #call get_global_search_clause function and get search query string
                 global_search_clause= "where "+global_search_clause  #add where to global_search_clause
-            customefilter=self.get_customfilter(connection,schema_id,customefilter) #call get_customfilter value
+            customefilter=self.get_customfilter(connection,customefilter) #call get_customfilter value
             customefilter_clause="" #initialize customefilter_clause
+            if schema_id == None:
+                select_clause="*"
+            else:
+                query = self.get_query_string(connection,schema_id)
+                select_clause=str(columns_list[0])+","+str(query)
             if customefilter!='()':
                 customefilter_clause="where "+customefilter #add where to customefilter_clause 
             if str(sort_index) != "0" or global_search_value!="" or customefilter_clause!="":  
                 if start_index==0:                              #checking column
                     if customefilter_clause !="":
-                       sql_data = f'select * from (SELECT {str(columns_list[0])},{str(query)} From {table_name} {global_search_clause} {order_clause}) as dt {customefilter_clause} {order_clause} limit {length}'   #sql Query with customefilter_clause
-                       sql_filtercount = f'select count(*) from (SELECT {str(columns_list[0])},{str(query)} From {table_name} {global_search_clause} ) as dt {customefilter_clause} ' #sql Query for filter row count                             
+                       sql_data = f'select * from (SELECT {str(select_clause)} From {table_name} {global_search_clause} {order_clause}) as dt {customefilter_clause} {order_clause} limit {length}'   #sql Query with customefilter_clause
+                       sql_filtercount = f'select count(*) from (SELECT {str(select_clause)} From {table_name} {global_search_clause} ) as dt {customefilter_clause} ' #sql Query for filter row count                             
                     else:
-                        sql_data = f'SELECT {str(columns_list[0])},{str(query)} From {table_name} {global_search_clause} {order_clause} limit {length}'  #sql Query without customefilter_clause 
+                        sql_data = f'SELECT {str(select_clause)} From {table_name} {global_search_clause} {order_clause} limit {length}'  #sql Query without customefilter_clause 
                         sql_filtercount = f'SELECT count(*) From {table_name} {global_search_clause}'   #sql Query for filter row count                             
                 else:
                     if customefilter_clause !="":
-                        sql_data = f'select {str(columns_list[0])},{str(query)} from (SELECT * From {table_name} {global_search_clause} {order_clause} limit {limit_index} offset {start_index}) as dt {customefilter_clause} {order_clause} limit {length}'  #sql Query with customefilter_clause
-                        sql_filtercount = f'select count(*) from (SELECT {str(columns_list[0])},{str(query)} From {table_name} {global_search_clause}) as dt {customefilter_clause}'#sql Query for filter row count                              
+                        sql_data = f'select {str(select_clause)} from (SELECT * From {table_name} {global_search_clause} {order_clause} limit {limit_index} offset {start_index}) as dt {customefilter_clause} {order_clause} limit {length}'  #sql Query with customefilter_clause
+                        sql_filtercount = f'select count(*) from (SELECT {str(select_clause)} From {table_name} {global_search_clause}) as dt {customefilter_clause}'#sql Query for filter row count                              
                     else:   
-                        sql_data = f'select {str(columns_list[0])},{str(query)} from (SELECT * From {table_name} {global_search_clause} {order_clause} limit {limit_index} offset {start_index}) as dt limit {length}' #sql Query for filter row count  
-                        sql_filtercount = f'select count(*) from (SELECT {str(columns_list[0])},{str(query)} From {table_name} {global_search_clause}) as dt'  #sql Query for filter row count                                 
+                        sql_data = f'select {str(select_clause)} from (SELECT * From {table_name} {global_search_clause} {order_clause} limit {limit_index} offset {start_index}) as dt limit {length}' #sql Query for filter row count  
+                        sql_filtercount = f'select count(*) from (SELECT {str(select_clause)} From {table_name} {global_search_clause}) as dt'  #sql Query for filter row count                                 
             
             else:
-                sql_data = f'SELECT {str(columns_list[0])},{str(query)} From {table_name} where "{columns_list[0]}" between {start_index} and {end_index}  {order_clause}' # sql Query without any filter and clause
+                sql_data = f'SELECT {str(select_clause)} From {table_name} where "{columns_list[0]}" between {start_index} and {end_index}  {order_clause}' # sql Query without any filter and clause
                 sql_filtercount = f'SELECT count(*) From {table_name}' #sql Query with customefilter_clause
-                
-            logger.info("sql_data  ++++++ "+str(sql_data))
-            logger.info("sql_filtercount  ++++++ "+str(sql_filtercount))
+
             return sql_data,sql_filtercount
         except Exception as exc:
             return str(exc) 
