@@ -282,6 +282,8 @@ class DataDetailClass(APIView):
                         customefilter=request_body['customfilter']  #get customfilter values   
                         dataset_id = request.query_params.get('dataset_id') #get dataset_id
                         schema_id = request.query_params.get('schema_id') #get dataset_id
+                        if schema_id=="undefined":
+                                schema_id=None
                         rowcount=DBObject.get_row_count(connection,dataset_id) #get the row count
                         dataset_df,filtercount=IngestionObj.show_data_details(dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter,schema_id) #call show_data_details and it will return dataset detail data in dataframe
                         if isinstance(dataset_df,str): #check the instance of dataset_df
@@ -315,8 +317,11 @@ class DataDetailColumnListClass(APIView):
                         logging.info("data ingestion : DataDetailClass : GET Method : execution start")
                         schema_id = request.query_params.get('schema_id') #get dataset_id
                         dataset_id = request.query_params.get('dataset_id') #get dataset_id
-                        column_list=DBObject.get_schema_columnlist(connection,schema_id,type="None") #call show_data_details and it will return dataset detail data in dataframe
-                        # column_list=DBObject.get_column_list(connection,dataset_id) #call show_data_details and it will return dataset detail data in dataframe
+                        logger.info("test"+schema_id)
+                        if schema_id !="undefined":
+                                column_list=DBObject.get_schema_columnlist(connection,schema_id,type="None") #call show_data_details and it will return dataset detail data in dataframe
+                        else:
+                                column_list=DBObject.get_column_list(connection,dataset_id) #call show_data_details and it will return dataset detail data in dataframe
                         if isinstance(column_list,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(column_list) # extract the status_code and error_msg  from column_list
                                 logging.info("data ingestion : DataDetailClass : GET Method : execution stop : status_code :"+status_code)
