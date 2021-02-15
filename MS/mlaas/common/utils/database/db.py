@@ -16,6 +16,7 @@ import json
 import logging
 from common.utils.logger_handler import custom_logger as cl
 from common.utils.exception_handler.python_exception.common.common_exception import *
+
 user_name = 'admin'
 log_enable = True
 

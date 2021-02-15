@@ -1,0 +1,12 @@
+{
+  "features_name": [
+    "house_size",
+    "bathrooms",
+    "bedrooms"
+  ],
+  "norm_importance": [
+    4.341747553974378,
+    34.458943566920105,
+    100.0
+  ]
+}

@@ -28,17 +28,18 @@ logger = logging.getLogger('view')
 DBObject=db.DBClass()     #Get DBClass object
 connection,connection_string=DBObject.database_connection(database,user,password,host,port)      #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 
-input_features_list = ['index','house_size','bedrooms','bathrooms']
-target_features_list = ['index','price']   
+# input_features_list = ['index','house_size','bedrooms','bathrooms']
+# target_features_list = ['index','price'] 
 
-project_id = 1
-dataset_id = 1
-user_id = 1
+input_features_list = ['index','bedrooms','bathrooms','sqft_living','sqft_lot','floors','waterfront','view','condition','grade','sqft_above','sqft_basement','yr_built','yr_renovated','zipcode','lat','long','sqft_living15','sqft_lot15']  
+target_features_list = ['index','price'] 
+
+
+project_id = 2
+dataset_id = 2
+user_id = 2
 
 Model_Mode ="auto"
-ModelObject = ModelClass(Model_Mode,input_features_list,
-                         target_features_list,project_id,dataset_id,user_id,
-                         DBObject,connection,connection_string)
 
 #ModelObject = ModelClass(Model_Mode,input_features_list,target_features_list,project_id,dataset_id, user_id)
 # Create your views here.
@@ -140,16 +141,10 @@ class SplitDataClass(APIView):
                         
                         Model_Mode = "Auto"
 
-                        input_features_list = ['index','house_size','bedrooms','bathrooms']
-                        target_features_list = ['index','price']   
-
-                        project_id = 1
-                        dataset_id = 1
-                        user_id = 1
-                        
-                        
                         ModelObject = ModelClass(Model_Mode,input_features_list,target_features_list,project_id,
                                                  dataset_id, user_id, DBObject, connection, connection_string)
+                        
+                        
                         model_mode = request.POST.get('model_mode')
                         if model_mode == 'manual': 
                                 split_method = request.POST.get('split_method')
@@ -209,7 +204,12 @@ class StartModelClass(APIView):
                         status_code(500 or 200),
                         error_msg(Error message for deletion failed or successfull),
                         Response(false or true)
+                        
                 """
+                ModelObject = ModelClass(Model_Mode,input_features_list,target_features_list,
+                                         project_id,dataset_id,user_id,
+                                         DBObject,connection,connection_string)
+
                 try:
                         logging.info(": : POST Method : execution start")
                         # model_mode =request.query_params.get('model_mode')
