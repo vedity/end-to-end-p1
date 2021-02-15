@@ -222,6 +222,12 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             data_details_df,filtercount = super(IngestClass,self).show_data_details(DBObject,connection,original_dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter,schema_id) # Get dataframe of loaded csv.
             if data_details_df is None :
                 raise DataNotFound(500)
+            # data_type = data_details_df.dtypes.to_dict()
+            # for k,v in data_type.items():
+            #     if v in ['datetime64[ns]']:
+            #         for c in data_details_df[k]:
+            #             data_details_df[k]=datetime.datetime.date(c)
+            #         logging.info(data_details_df[k])
             data_details_df=data_details_df.to_json(orient='records',date_format='iso')
             data_details_df = json.loads(data_details_df)
             if len(data_details_df) == 0 :
