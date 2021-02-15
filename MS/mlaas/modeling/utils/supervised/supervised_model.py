@@ -15,8 +15,8 @@ class SupervisedClass(RC,PC):
     
 
     def supervised_algorithm(self,Model_Mode,input_features_list,target_features_list,
-                             input_df,target_df, split_data_object,
-                             project_id,dataset_id,user_id):
+                             input_df,target_df, basic_split_parameters, DBObject, connection, 
+                             connection_string, project_id,dataset_id,user_id):
         
         """This function is used to call supervised algorithm.
         """
@@ -36,20 +36,18 @@ class SupervisedClass(RC,PC):
             else:
                 cls_type = 1
 
-        X_train, X_valid, X_test, Y_train, Y_valid, Y_test = split_data_object.get_split_data(input_df, target_df)
         # It will check whether target is regressor or classifier.
         if reg_type > 0 and cls_type == 0 :
             # Call Regression Class's method
             super(SupervisedClass,self).regression_model(Model_Mode,
                                                          input_features_list,
                                                          target_features_list,
-                                                         X_train,
-                                                         X_valid,
-                                                         X_test,
-                                                         Y_train,
-                                                         Y_valid,
-                                                         Y_test, 
-                                                         split_data_object,
+                                                         input_df,
+                                                         target_df,
+                                                         basic_split_parameters,
+                                                         DBObject, 
+                                                         connection, 
+                                                         connection_string,
                                                          project_id,
                                                          dataset_id,
                                                          user_id)
@@ -66,6 +64,9 @@ class SupervisedClass(RC,PC):
                                                          Y_valid, 
                                                          Y_test,
                                                          split_data_object, 
+                                                         DBObject, 
+                                                         connection, 
+                                                         connection_string,
                                                          project_id,
                                                          dataset_id,
                                                          user_id)
@@ -74,9 +75,9 @@ class SupervisedClass(RC,PC):
             print("please select appropriate target")
         
         
-    def run_regression_model(self,model_id,model_name,model_type,Model_Mode,
-                             input_features_list,target_features_list,input_df,target_df,split_data_object,
-                             project_id,dataset_id,user_id):
+    def run_regression_model(self,model_id,model_name,model_type,Model_Mode, input_features_list,
+                target_features_list,input_df,target_df,split_data_object, DBObject, connection, 
+                connection_string,project_id,dataset_id,user_id):
         
         """This function is used to run model when it is in manual mode.
 
@@ -96,17 +97,17 @@ class SupervisedClass(RC,PC):
         """
          
         # Call the super class method.
-        X_train, X_valid, X_test, Y_train, Y_valid, Y_test = self.get_split_data(input_df, target_df)
+        X_train, X_valid, X_test, Y_train, Y_valid, Y_test = split_data_object.get_split_data(input_df, target_df)
         super(SupervisedClass,self).run_regression_model(model_id,model_name,model_type,
                                                         Model_Mode, input_features_list, target_features_list, 
-                                                        X_train, X_valid, X_test, Y_train, Y_valid, Y_test, split_data_object,
-                                                        project_id,dataset_id,user_id)
+                                                        X_train, X_valid, X_test, Y_train, Y_valid, Y_test, split_data_object,DBObject, 
+                                                        connection, connection_string, project_id,dataset_id,user_id)
          
          
         
-    def run_classification_model(self,model_id,model_name,model_type,Model_Mode,
-                             input_features_list,target_features_list,input_df,target_df,split_data_object,
-                             project_id,dataset_id,user_id):
+    def run_classification_model(self,model_id,model_name,model_type,Model_Mode,input_features_list,
+                target_features_list,input_df,target_df,split_data_object,DBObject, connection, 
+                connection_string,project_id,dataset_id,user_id):
         
         """This function is used to run model when it is in manual mode.
 
@@ -125,7 +126,7 @@ class SupervisedClass(RC,PC):
             user_id ([integer]): [unique id of the user.]
         """
         # Call super class's method.
-        X_train, X_valid, X_test, Y_train, Y_valid, Y_test = self.get_split_data(input_df, target_df)
+        X_train, X_valid, X_test, Y_train, Y_valid, Y_test = split_data_object.get_split_data(input_df, target_df)
         super(SupervisedClass,self).run_classification_model(model_id,model_name,model_type,split_data_object,
                                                           Model_Mode,input_features_list,target_features_list,
                                                           X_train, X_valid, X_test, Y_train, Y_valid, Y_test,

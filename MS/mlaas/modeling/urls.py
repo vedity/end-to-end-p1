@@ -14,7 +14,21 @@ urlpatterns = [
     
     path('mlaas/modeling/startmodel/',StartModelClass.as_view()),
 
-    
+    path('mlaas/modeling/learning_curve/',LearningCurveClass.as_view()),
+ 
+    path('mlaas/modeling/featureimportance/',FeatureImportanceClass.as_view()),
+ 
+    path('mlaas/modeling/performancemetrics/',PerformanceMetricsClass.as_view()),
+ 
+    path('mlaas/modeling/modelsummary/',ModelSummaryClass.as_view()),
+
+    path('mlaas/modeling/actualvsprediction/',ActualVsPredictionClass.as_view()),
+
+    path('mlaas/modeling/finalmodeldescription/', FinalModelDescriptionClass.as_view()),
+
+    path('mlaas/modeling/selectalgorithm/', SelectAlgorithmClass.as_view()),
+
+    path('mlaas/modeling/hyperparameters/', HyperParametersClass.as_view())
 
   
 

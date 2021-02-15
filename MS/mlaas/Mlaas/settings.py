@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'motaadmin',
     'corsheaders',
     'rest_framework',
+    'modeling',
 ]
 
 MIDDLEWARE = [
