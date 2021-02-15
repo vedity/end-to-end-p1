@@ -426,6 +426,12 @@ class DatasetClass:
                 if len(dataset_df) == 0:
                     return 5,_
                 
+
+                row_dataset_status = self.delete_row_dataset(DBObject,connection,dataset_id,dataset_visibility,user_name)
+
+                if row_dataset_status==1:
+                    return 6,_
+
                 dataset_table_name = dataset_df['dataset_table_name'][0] 
                 #v 1.4
                 dataset_name = dataset_df['dataset_name'][0]
@@ -442,6 +448,8 @@ class DatasetClass:
                 table_name = dataset_table_name
                 user_name = user_name.lower()
                 
+                
+
                 logging.debug(f"data ingestion  :  DatasetClass  :  delete_dataset_details  :  Dataset_tbl entry deleted, Now dropping {user_name}.{dataset_table_name} table")
                 data_status = self.delete_data_details(DBObject,connection,table_name,user_name)
                 
@@ -562,9 +570,41 @@ class DatasetClass:
         logging.info("data ingestion : DatasetClass : show_dataset_names : execution end")
         return dataset_df
 
+    def delete_row_dataset(self,DBObject,connection,dataset_id,dataset_visibility,user_name):
+        """
+        function used to delete the raw dataset record from the dataset table.
 
+        Args :
+                dataset_id[(Integer)] : [Id of the dataset table]
+                dataset_visibility[(String)] : [Name of the visibility(Private, public)]
+                user_name[(String)] : [Name of the user]
+        Return:
+                [Integer] : [return 0 if successfully deleted else return 1 ]
+        """
+        try:
+            # Get table name,schema and columns from dataset class.
+            table_name,_,_ = self.make_dataset_schema() 
 
+            #get the  dataset id and table name of the raw dataset
+            raw_dataset_id,raw_dataset_table = DBObject.get_raw_dataset_detail(connection,dataset_id)
 
+            #sql query to delete raw dataset for given dataset id
+            sql_command = f"DELETE FROM {table_name} WHERE dataset_id = '{raw_dataset_id}'"
+            logging.info(str(sql_command) + "    ---")
+
+            #execute the sql query
+            dataset_status = DBObject.delete_records(connection,sql_command)
+
+            #? Deleting the CSV Table
+            if dataset_visibility == 'public':
+                user_name = 'public'
+
+            #delete the raw dataset table 
+            raw_dataset_status = self.delete_data_details(DBObject,connection,str(raw_dataset_table),str(user_name))
+
+            return raw_dataset_status
+        except Exception as exc:
+            return exc
     
 
 

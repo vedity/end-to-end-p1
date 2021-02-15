@@ -348,8 +348,11 @@ class DBClass:
         # sql_command = "select case when changed_column_name='' then column_name else changed_column_name end column_list  from mlaas.schema_tbl where schema_id =1 and column_attribute!='Ignore' order by index" 
         if type=="schema":
             sql_command = "select column_name column_list  from mlaas.schema_tbl where schema_id ="+str(schema_id)+" and column_attribute!='Ignore' order by index"           
+        elif type=="Select":
+            sql_command = "select case when changed_column_name='' then column_name else changed_column_name end column_list  from mlaas.schema_tbl where schema_id="+str(schema_id)+" and column_attribute='Select' order by index"           
         else:
             sql_command = "select case when changed_column_name='' then column_name else changed_column_name end column_list  from mlaas.schema_tbl where schema_id="+str(schema_id)+" and column_attribute!='Ignore' order by index"           
+        
         logger.info(sql_command)
         try:
             # execute the SQL string to get list with col names in a tuple
@@ -570,7 +573,7 @@ class DBClass:
 
     
     def get_dataset_detail(self,DBObject,connection,dataset_id):
-        '''This function is used to get dataset table name from datasetid
+        '''This function is used to get dataset table name from dataset id
         Args:
                 dataset_id[(Integer)] : [Id of the dataset table]
         Return : 
@@ -633,6 +636,42 @@ class DBClass:
         except UserAuthenticationFailed as exc:
             return exc.msg
   
+    def get_raw_dataset_detail(self,connection,original_dataset_id):
+        """
+        function used to get the row dataset details based on  original dataset id where dataset name are equal but
+        page name is "schema mapping".
+
+        Args:
+                original_dataset_id[(Integer)] : [Id on dataset table]
+        return :
+                dataset_id[Integer] : [Id of the raw dataset]
+                dataset_table_name[String] : [Name of the table ] 
+
+        """
+        logging.info("call")
+        try:
+            #sql command to get dataset_name based on original dataset id
+            sql_Command = "SELECT dataset_name from mlaas.dataset_tbl where dataset_id ='"+str(original_dataset_id)+"' "
+
+            #execute the sql command and get te dataframe if found else None
+            dataframe = self.select_records(connection,sql_Command)
+
+            #get the dataset_name
+            dataset_name = dataframe['dataset_name'][0]
+            
+            #sql command to get Raw dataset id based on the dataset_name and page_name 
+            sql_Command = "SELECT dataset_id,dataset_table_name from mlaas.dataset_tbl where dataset_name='"+str(dataset_name)+"' and page_name ='schema mapping'"
+            
+            #execute the sql command and get te dataframe if found else None
+            dataframe = self.select_records(connection,sql_Command)
+            
+            #get the dataset id
+            dataset_id = int(dataframe['dataset_id'][0])
+            table_name = str(dataframe['dataset_table_name'][0])
+
+            return dataset_id,table_name
+        except Exception as exc:
+            return exc,None
 
 
 

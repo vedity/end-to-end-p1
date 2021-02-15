@@ -10,7 +10,7 @@
 from common.utils.exception_handler.python_exception.common.common_exception import EntryNotFound
 from preprocess.utils.Exploration.dataset_exploration import ExploreClass
 from .Exploration import dataset_exploration as de
-from . import schema_creation as sc
+from .schema import schema_creation as sc
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
 from common.utils.database import db
@@ -92,7 +92,7 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass):
         logging.info("data preprocessing : PreprocessingClass : get_exploration_data : execution end")
         return stats_df
     
-    def save_schema_data(self,schema_data,schema_id):
+    def save_schema_data(self,schema_data,project_id,dataset_id,schema_id):
         try:
             logging.info("data preprocessing : PreprocessingClass : save_schema_data : execution start")
 
@@ -100,7 +100,7 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass):
             if connection == None :
                 raise DatabaseConnectionFailed(500)
 
-            status = super(PreprocessingClass,self).save_schema(DBObject,connection,schema_data,schema_id)
+            status = super(PreprocessingClass,self).save_schema(DBObject,connection,schema_data,project_id,dataset_id,schema_id)
 
             logging.info("data preprocessing : PreprocessingClass : save_schema_data : execution start")
             return status
@@ -125,21 +125,7 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass):
             logging.error("data preprocessing : PreprocessingClass : get_schema_details : " +traceback.format_exc())
             return exc.msg
     
-    def get_sql_query_string(self,schema_id):
-        try:
-            logging.info("data preprocessing : PreprocessingClass : get_sql_query_string : execution start")
-            DBObject,connection,connection_string = self.get_db_connection()
-            if connection == None :
-                raise DatabaseConnectionFailed(500)
-
-            query = super(PreprocessingClass,self).get_query_string(DBObject,connection,schema_id)
-            
-            logging.info("data preprocessing : PreprocessingClass : get_sql_query_string : execution stop")
-            return query
-        except (DatabaseConnectionFailed) as exc:
-            logging.error("data preprocessing : PreprocessingClass : get_sql_query_string : Exception " + str(exc.msg))
-            logging.error("data preprocessing : PreprocessingClass : get_sql_query_string : " +traceback.format_exc())
-            return exc.msg
+    
 
 
 
