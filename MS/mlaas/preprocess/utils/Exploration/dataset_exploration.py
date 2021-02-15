@@ -104,7 +104,6 @@ class ExploreClass:
         query = schemaObj.get_query_string(DBObject,connection,schema_id)
         #? Getting all the data
         sql_command = f"SELECT {str(query)} FROM {user_name}.{dataset_table_name}"
-        logging.info(str(sql_command)+"  -------")
         data_df = DBObject.select_records(connection,sql_command)    
         
         #? Logical Code Begins
@@ -262,7 +261,7 @@ class ExploreClass:
         except:
             return 2
         
-        return stats_df.iloc[1:].round(2)    
+        return stats_df.round(2)    
     
     def iqr(self,arr):
         '''
