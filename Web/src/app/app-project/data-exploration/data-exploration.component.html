@@ -74,7 +74,7 @@
                                     <div class="nobordertable">
                                         <table datatable [dtOptions]="dtOptions" class="table table-centered table-nowrap ">
                                             <thead>
-                                                <tr>
+                                                <tr class="thead-light">
                                                     <th>No</th>
                                                     <th>Column Name</th>
                                                     <th>Data Type</th>
@@ -98,9 +98,7 @@
                                                             <apx-chart class="apex-charts" dir="ltr" [series]="[{data:item['plotarray']}]" [chart]="columnlabelChart.chart" [plotOptions]="columnlabelChart.plotOptions" [yaxis]="columnlabelChart.yaxis" [title]="columnlabelChart.title" [stroke]="columnlabelChart.stroke"
                                                                 [dataLabels]="columnlabelChart.dataLabels" [xaxis]="columnlabelChart.xaxis" [legend]="columnlabelChart.legend" [colors]="item['colorarray']" [fill]="columnlabelChart.fill" [grid]="columnlabelChart.grid">
                                                             </apx-chart>
-                                                            <!-- <apx-chart class="apex-charts" dir="ltr" [series]="[{data:item['Plot Values'][1]}]" [chart]="columnlabelChart.chart" [plotOptions]="columnlabelChart.plotOptions" [yaxis]="columnlabelChart.yaxis" [title]="columnlabelChart.title" [stroke]="columnlabelChart.stroke"
-                                                                [dataLabels]="columnlabelChart.dataLabels" [xaxis]="columnlabelChart.xaxis" [legend]="columnlabelChart.legend" [colors]="columnlabelChart.colors" [fill]="columnlabelChart.fill" [grid]="columnlabelChart.grid">
-                                                            </apx-chart> -->
+
                                                         </div>
                                                     </td>
                                                     <td>{{item["DataCount"]==null?'-':item["DataCount"]}}</td>

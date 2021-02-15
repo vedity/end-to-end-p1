@@ -101,11 +101,11 @@
                                 </tr>
                             </tbody>
                             <tbody>
-                                <tr class="thead-light">
+                                <!-- <tr class="thead-light">
                                     <td *ngFor="let item of columnlist;let colindex=index">
                                         <input class="form-control filter" type="text" [hidden]="filter" (keyup)="onFilterchange($event);" name="search-{{item.data}}" id="col-{{colindex}}" />
                                     </td>
-                                </tr>
+                                </tr> -->
                                 <tr *ngFor="let data of transactions;">
                                     <td *ngFor="let item of columnlist">{{data[item.data]}}</td>
                                 </tr>
