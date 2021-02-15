@@ -15,6 +15,7 @@ export class ListDatadetailComponent implements OnInit {
     @Input() public dataset_id: any;
     @Input() public navigate_to: any;
     @Input() public displaytitle: any;
+    @Input() public schema_id:any;
     @ViewChild(DataTableDirective, { static: false })
     datatableElement: DataTableDirective;
     dtOptions: DataTables.Settings = {};
@@ -38,7 +39,7 @@ export class ListDatadetailComponent implements OnInit {
     dtRendered = false;
     ngOnInit(): void {
         const that = this;
-        this.apiService.getColumnList(this.dataset_id).subscribe(
+        this.apiService.getColumnList(this.dataset_id,this.schema_id).subscribe(
             logs => {
                 this.columnlist = logs.response;
             }
@@ -56,7 +57,7 @@ export class ListDatadetailComponent implements OnInit {
                     filtercolumns[element.data] = $("#col-" + index).val();
                 });
                 dataTablesParameters.customfilter = filtercolumns;
-                this.apiService.getDataDetails(dataTablesParameters, this.dataset_id)
+                this.apiService.getDataDetails(dataTablesParameters, this.dataset_id,this.schema_id)
                     .subscribe(resp => {
                         this.transactions = resp.data;
                         if (this.transactions.length == 0) {

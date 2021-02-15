@@ -41,8 +41,10 @@ class LinearRegressionClass:
         self.input_features_list = input_features_list
         self.target_features_list = target_features_list
         self.split_data_object = split_data_object
-        self.input_features_list.remove('index')
-        self.target_features_list.remove('index')
+        # self.input_features_list.remove('index')
+        self.input_features_list = input_features_list[1:]
+        self.target_features_list = target_features_list[1:]
+        # self.input_features_list.remove('index')
         self.X_train = X_train
         self.X_test = X_test
         self.X_valid = X_valid
@@ -237,15 +239,21 @@ class LinearRegressionClass:
             
         train_size = X_train.shape[0]
         test_size = X_test.shape[0]
+        print('split_data_object:- ', self.split_data_object)
+        # print(self.valid
         
+        # print('Type of cv:- ', type(self.split_data_object.cv))
+
+        # json does not recognize NumPy data types. 
+        # Convert the number to a Python int before serializing the object:
         model_summary = {"Model Name":"linear Regression",
                          "Input Features":self.input_features_list,
                          "Target Features":self.target_features_list,
-                         "Train Size":train_size,"Test Size":test_size,
-                         "Train Split":1-self.split_data_object.test_size,"Test Split":self.split_data_object.test_size,
-                         "Random State":self.split_data_object.random_state,
-                         "CV (K-Fold )":self.split_data_object.cv}
-        
+                         "Train Size":int(train_size),"Test Size":int(test_size),
+                         "Train Split":1-float(self.split_data_object.test_size),"Test Split":float(self.split_data_object.test_size),
+                         "Random State":int(self.split_data_object.random_state),
+                         "CV (K-Fold )":int(self.split_data_object.cv)}
+        print(model_summary)
         return model_summary
       
       
@@ -273,6 +281,8 @@ class LinearRegressionClass:
                                 cv=shuffle,
                                 scoring='r2')
         cv_score_mean = cv_scores.mean()
+
+        return cv_score_mean
         
         
         
@@ -294,7 +304,9 @@ class LinearRegressionClass:
         actual = y_test[self.target_features_list]
         
         prediction = model.predict(X_test)
-        ho_score = r2_score(actual,prediction)
+        holdout_score = r2_score(actual,prediction)
+
+        return holdout_score
 
         
         
@@ -316,9 +328,9 @@ class LinearRegressionClass:
         # all evaluation matrix
         r2score,mse,mae,mape = self.get_evaluation_matrix(actual_lst,prediction_lst)  
         # get cv score
-        self.cv_score(self.X_train,self.y_train) # default k-fold with 5 (r2-score)
+        cv_score = self.cv_score(self.X_train,self.y_train) # default k-fold with 5 (r2-score)
         # get holdout score
-        self.holdout_score(model,self.X_test,self.y_test) # default 80:20 splits (r2-score)
+        holdout_score = self.holdout_score(model,self.X_test,self.y_test) # default 80:20 splits (r2-score)
         # get model summary
         model_summary = self.model_summary(self.X_train,self.X_test,self.y_train) # high level model summary
         # get model learning curve
@@ -338,6 +350,8 @@ class LinearRegressionClass:
         mlflow.log_metric("mse", mse)
         mlflow.log_metric("mae", mae)
         mlflow.log_metric("mape", mape)
+        mlflow.log_metric("holdout_score", holdout_score)
+        mlflow.log_metric("cv_score", cv_score)
        
         # log artifacts (output files)
         mlflow.sklearn.log_model(model,"Linear_Regressor_Model")
@@ -345,6 +359,7 @@ class LinearRegressionClass:
         mlflow.log_dict(features_impact_dict,"features_importance.json")
         mlflow.log_dict(model_summary,"model_summary.json")
         mlflow.log_dict(final_result_dict,"predictions.json")
+        print('This is done')
         
         
         

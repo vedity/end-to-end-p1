@@ -22,6 +22,7 @@ from common.utils.database.db import DBClass
 from ingest.utils.dataset import dataset_creation
 from ingest.utils.dataset import dataset_creation
 
+db_obj = db.DBClass()
 dc = dataset_creation.DatasetClass()
 
 class ExploreClass:
@@ -64,7 +65,7 @@ class ExploreClass:
         logging.info("data preprocessing : ExploreClass : get_attribute_datatype : execution stop")    
         return attribute_type
     
-    def get_dataset_statistics(self,DBObject,connection,dataset_id):
+    def get_dataset_statistics(self,DBObject,connection,dataset_id,schema_id):
         """
             This class returns all the statistics for the given dataset.
             
@@ -96,9 +97,11 @@ class ExploreClass:
         #? changing the database schema for the public databases
         if dataset_visibility == 'public':
             user_name = 'public'
+        
 
+        query = db_obj.get_query_string(connection,schema_id)
         #? Getting all the data
-        sql_command = f"SELECT * FROM {user_name}.{dataset_table_name}"
+        sql_command = f"SELECT {str(query)} FROM {user_name}.{dataset_table_name}"
         data_df = DBObject.select_records(connection,sql_command)    
         #? Logical Code Begins
         try:
@@ -255,7 +258,7 @@ class ExploreClass:
         except:
             return 2
         
-        return stats_df.iloc[1:].round(2)    
+        return stats_df.round(2)    
     
     def iqr(self,arr):
         '''

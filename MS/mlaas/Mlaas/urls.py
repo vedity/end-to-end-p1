@@ -22,5 +22,6 @@ urlpatterns = [
     path('',include('common.urls')),
     path('',include('motaadmin.urls')),
     path('',include('preprocess.urls')),
+    path('',include('modeling.urls')),
     path('admin/', admin.site.urls),
 ]

@@ -83,7 +83,8 @@ export class DataExplorationComponent implements OnInit {
   dtOptions: DataTables.Settings = {};
   @Input() public dataset_id: any;
   @Input() public title: any;
-  @Input() public project_id: any
+  @Input() public project_id: any;
+  @Input() public schema_id: any;
   chart: Chart;
   loaderdiv = false;
   displaytitle = "false";
@@ -114,74 +115,135 @@ export class DataExplorationComponent implements OnInit {
       scrollY: "calc(100vh - 365px)",
     }
     this.loaderdiv = true;
-    this.columnlabelChart = {
+    this.columnlabelChart={
       chart: {
-        width: '100%',
+        //height: '500px',
+         width: '100%',
         type: 'bar',
         offsetX: 0,
         offsetY: -26,
         toolbar: {
           show: false
-        },
       },
-      grid: {
-        xaxis: {
-          lines: {
-            show: false
-          }
-        },
-        yaxis: {
-          lines: {
-            show: false
-          }
-        },
-        padding: {
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: 0
-        },
+      selection: {
+        enabled: true
+      }
       },
-      colors: ['#34c38f'],
+      plotOptions: {
+        bar: {
+          distributed: true
+        }
+      },
+     
       dataLabels: {
-        enabled: false
-      },
-      yaxis: {
-        axisBorder: {
-          show: false
-        },
-        axisTicks: {
-          show: false,
-        },
-        labels: {
-          show: false,
-          formatter: (val) => {
-            return val;
-          }
-        }
-      },
-      xaxis: {
-        axisBorder: {
-          show: false
-        },
-        axisTicks: {
-          show: false,
-        },
-        labels: {
-          show: false,
-          formatter: (val) => {
-            return val;
-          }
-        }
-      },
+            enabled: false
+          },
+          yaxis: {
+            axisBorder: {
+              show: false
+            },
+            axisTicks: {
+              show: false,
+            },
+            labels: {
+              show: false,
+              formatter: (val) => {
+                return val;
+              }
+            }
+          },
+          xaxis: {
+            axisBorder: {
+              show: false
+            },
+            axisTicks: {
+              show: false,
+            },
+            labels: {
+              show: false,
+              formatter: (val) => {
+                return val;
+              }
+            }
+          },
+      legend: {
+        show: false
+      }
+
     };
+    // this.columnlabelChart = {
+    //   chart: {
+    //     width: '100%',
+    //     type: 'bar',
+    //     offsetX: 0,
+    //     offsetY: -26,
+    //     toolbar: {
+    //       show: false
+    //     },
+    //   },
+    //   plotOptions: {
+    //     bar: {
+    //       distributed: true
+    //     }
+    //   },
+    //   grid: {
+    //     xaxis: {
+    //       lines: {
+    //         show: false
+    //       }
+    //     },
+    //     yaxis: {
+    //       lines: {
+    //         show: false
+    //       }
+    //     },
+    //     padding: {
+    //       left: 0,
+    //       right: 0,
+    //       top: 0,
+    //       bottom: 0
+    //     },
+    //   },
+    //   colors: ['#34c38f'],
+    //   dataLabels: {
+    //     enabled: false
+    //   },
+    //   yaxis: {
+    //     axisBorder: {
+    //       show: false
+    //     },
+    //     axisTicks: {
+    //       show: false,
+    //     },
+    //     labels: {
+    //       show: false,
+    //       formatter: (val) => {
+    //         return val;
+    //       }
+    //     }
+    //   },
+    //   xaxis: {
+    //     axisBorder: {
+    //       show: false
+    //     },
+    //     axisTicks: {
+    //       show: false,
+    //     },
+    //     labels: {
+    //       show: false,
+    //       formatter: (val) => {
+    //         return val;
+    //       }
+    //     }
+    //   },
+    // };
 
 
-    this.getExplorationData(this.dataset_id);
+    this.getExplorationData(this.dataset_id,this.schema_id);
   }
 
-  getExplorationData(datasetid) {
-    this.apiService.getExplorationData(datasetid).subscribe(
+  getExplorationData(datasetid,schemaid) {
+    this.apiService.getExplorationData(datasetid,schemaid).subscribe(
       logs => this.successHandler(logs),
       error => this.errorHandler(error)
     )
@@ -192,6 +254,36 @@ export class DataExplorationComponent implements OnInit {
   successHandler(logs) {
     if (logs.status_code == "200") {
       this.exploredData = logs.response;
+      this.exploredData.forEach(obj => {
+        let category: any = [];
+    let plotarray: any = [];
+    let colorarray: any = [];
+    if (obj["Left Outlier Values"][1].length > 0) {
+      obj["Left Outlier Values"][0].forEach((element, index) => {
+        category.push(element);
+        plotarray.push(obj["Left Outlier Values"][1][index]);
+        colorarray.push('#f74242')
+      });
+    }
+    obj["Plot Values"][0].forEach((element, index) => {
+      category.push(element);
+      plotarray.push(obj["Plot Values"][1][index]);
+      colorarray.push('#34c38f')
+    });
+    if (obj["Right Outlier Values"][1].length > 0) {
+      obj["Right Outlier Values"][0].forEach((element, index) => {
+        category.push(element);
+        plotarray.push(obj["Right Outlier Values"][1][index]);
+        colorarray.push('#f74242')
+      });
+    }
+obj.category=category;
+obj.plotarray=plotarray;
+obj.colorarray=colorarray;
+
+      });
+console.log(this.exploredData );
+
       var data = this.groupBy(this.exploredData, "IsinContinuous");
       this.continuousexploredata = data["true"];
       this.categoricalexploredata = data["false"];

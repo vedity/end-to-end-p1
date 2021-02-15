@@ -96,7 +96,7 @@ class CreateProjectClass(APIView):
                         user_name=request.POST.get('user_name')  #get Username
                         project_name=request.POST.get('project_name') #get project_name
                         project_desc=request.POST.get('description') #get project description
-                        dataset_desc=request.POST.get('dataset_desc') #get dataset description
+                        dataset_desc=request.POST.get('dataset_description') #get dataset description
                         dataset_name = request.POST.get('dataset_name')#get dataset name
                         page_name = "Create Project"
                         dataset_visibility = request.POST.get('visibility') #get Visibility
@@ -203,7 +203,7 @@ class CreateDatasetClass(APIView):
                         user_name=str(request.POST.get('user_name'))  #get Username
                         dataset_name=request.POST.get('dataset_name') #get dataset name
                         dataset_visibility= request.POST.get('visibility') #get the visibility
-                        dataset_desc = request.POST.get('description') #get the description
+                        dataset_desc = request.POST.get('dataset_description') #get the description
                         page_name = "Create dataset"
                         exists_dataset_status=IngestionObj.does_dataset_exists(dataset_name,user_name) #call does_dataset_exists, check if dataset name exist for that perticular user name return false if not,otherwise true
                         if exists_dataset_status == False:
@@ -281,8 +281,11 @@ class DataDetailClass(APIView):
                         global_value=request_body['search']['value']  #get String value for global search
                         customefilter=request_body['customfilter']  #get customfilter values   
                         dataset_id = request.query_params.get('dataset_id') #get dataset_id
+                        schema_id = request.query_params.get('schema_id') #get dataset_id
+                        if schema_id=="undefined":
+                                schema_id=None
                         rowcount=DBObject.get_row_count(connection,dataset_id) #get the row count
-                        dataset_df,filtercount=IngestionObj.show_data_details(dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter) #call show_data_details and it will return dataset detail data in dataframe
+                        dataset_df,filtercount=IngestionObj.show_data_details(dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter,schema_id) #call show_data_details and it will return dataset detail data in dataframe
                         if isinstance(dataset_df,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(dataset_df) # extract the status_code and error_msg  from dataset_df
                                 logging.info("data ingestion : DataDetailClass : POST Method : execution stop : status_code :"+status_code)
@@ -312,8 +315,13 @@ class DataDetailColumnListClass(APIView):
                 """
                 try:
                         logging.info("data ingestion : DataDetailClass : GET Method : execution start")
+                        schema_id = request.query_params.get('schema_id') #get dataset_id
                         dataset_id = request.query_params.get('dataset_id') #get dataset_id
-                        column_list=DBObject.get_column_list(connection,dataset_id) #call show_data_details and it will return dataset detail data in dataframe
+                        logger.info("test"+schema_id)
+                        if schema_id !="undefined":
+                                column_list=DBObject.get_schema_columnlist(connection,schema_id,type="None") #call show_data_details and it will return dataset detail data in dataframe
+                        else:
+                                column_list=DBObject.get_column_list(connection,dataset_id) #call show_data_details and it will return dataset detail data in dataframe
                         if isinstance(column_list,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(column_list) # extract the status_code and error_msg  from column_list
                                 logging.info("data ingestion : DataDetailClass : GET Method : execution stop : status_code :"+status_code)

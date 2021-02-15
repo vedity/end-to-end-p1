@@ -382,8 +382,10 @@ table {
     }
 }
 
-.nobordertable.dataTables_wrapper.no-footer .dataTables_scrollBody {
-    border-bottom: none !important;
+.nobordertable {
+    .dataTables_wrapper.no-footer .dataTables_scrollBody {
+        border-bottom: none !important;
+    }
 }
 
 .graph-box {
@@ -408,4 +410,8 @@ table {
         width: 33.33%;
         display: inline-block;
     }
+}
+
+.modal-sm {
+    max-width: 700px !important;
 }
