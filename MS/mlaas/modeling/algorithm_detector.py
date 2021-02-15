@@ -1,5 +1,6 @@
 class AlgorithmDetector:
-
+    """Maintains the track and data for algorithms and their respective hyperparameters.
+    """
     def __init__(self, target_df, DBObject, connection):
         # self.target_df = target_df
         self.DBObject = DBObject
@@ -27,9 +28,9 @@ class AlgorithmDetector:
         else:
             target_shape = target_df.shape
             if target_shape[1] == 2:
-                algorithm_type = 'Single_target'
+                algorithm_type = 'Single_Target'
             elif target_shape[1] > 2:
-                algorithm_type = 'Multi_target'
+                algorithm_type = 'Multi_Target'
             total_length = target_shape[0]
             # print(target_shape)
             print('Algorithm Detector:- ', target_shape)
@@ -49,17 +50,39 @@ class AlgorithmDetector:
 
 
     def get_model_types(self):
+        """This function returns the algorithm and model type on the basis of target_df.
+
+        Returns:
+            tuple: algorithm_type (single_target, multi_target, unseupervised, and more), model_type (Regression, Classification, and more)
+        """
         return self.algorithm_type, self.model_type
     
     def show_models_list(self):
-        sql_command = 'select * from mlaas.model_master where model_type='+self.model_type+' and algorithm_type='+self.algorithm_type
+        """Returns the compatible list of model on the basis of algorithm_type and model_type.
+
+        Returns:
+            list: models_list, contains list of all the ML/DL models derived from the algorithm and model type.
+        """
+        print('In show models_list')
+        sql_command = "select model_name from mlaas.model_master_tbl where model_type='"+self.model_type+"'"+" and algorithm_type='"+self.algorithm_type+"'"
         self.models_list = self.DBObject.select_records(self.connection, sql_command)
         return self.models_list
 
 
     def get_hyperparameters_list(self, model_name):
-        sql_command = 'select model_parameter from mlaas.model_master_tbl where model_name='+model_name
-        hyperparameters_list = self.DBObject.select_records(self.connection, sql_command).to_json()
+        """Returns the appropriate list of hyperparameters associated with the model_name argument.
+
+        Args:
+            model_name (string): name of the ML/DL model.
+
+        Returns:
+            list: list of hyperparameters of the model 'model_name'.
+        """
+        print('Model_name:- ', model_name)
+        sql_command = "select model_parameter from mlaas.model_master_tbl where model_name='"+model_name+"'"
+        print('SQL Command:- ', sql_command)
+        hyperparameters_list = self.DBObject.select_records(self.connection, sql_command)
+        print(hyperparameters_list)
         return hyperparameters_list
 
 

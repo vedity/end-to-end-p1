@@ -15,7 +15,7 @@ class SupervisedClass(RC,PC):
     
 
     def supervised_algorithm(self,Model_Mode,input_features_list,target_features_list,
-                             input_df,target_df, split_data_object, DBObject, connection, 
+                             input_df,target_df, basic_split_parameters, DBObject, connection, 
                              connection_string, project_id,dataset_id,user_id):
         
         """This function is used to call supervised algorithm.
@@ -36,20 +36,15 @@ class SupervisedClass(RC,PC):
             else:
                 cls_type = 1
 
-        X_train, X_valid, X_test, Y_train, Y_valid, Y_test = split_data_object.get_split_data(input_df, target_df)
         # It will check whether target is regressor or classifier.
         if reg_type > 0 and cls_type == 0 :
             # Call Regression Class's method
             super(SupervisedClass,self).regression_model(Model_Mode,
                                                          input_features_list,
                                                          target_features_list,
-                                                         X_train,
-                                                         X_valid,
-                                                         X_test,
-                                                         Y_train,
-                                                         Y_valid,
-                                                         Y_test, 
-                                                         split_data_object,
+                                                         input_df,
+                                                         target_df,
+                                                         basic_split_parameters,
                                                          DBObject, 
                                                          connection, 
                                                          connection_string,

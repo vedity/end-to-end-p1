@@ -8,10 +8,9 @@
 '''
 
 
-import pandas as pd
+# import pandas as pd
 from .db import DBClass
 import json
-import re
 
 class ExperimentClass:
     
@@ -57,7 +56,8 @@ class ExperimentClass:
         
         experiment_status = DBObject.insert_records(connection,table_name,row_tuples,cols)
         
-        return experiment_status   
+        return experiment_status
+           
             
     def learning_curve(self, experiment_id, DBObject, connection):
         # DbObject,connection,connection_string = self.get_db_connection()
@@ -105,10 +105,83 @@ class ExperimentClass:
         run_uuid = DBObject.select_records(connection, sql_command).iloc[0, 0]
         
         sql_command = "select key, value from metrics where run_uuid='"+str(run_uuid) +"'"
-        metrics = DBObject.select_records(connection, sql_command)
-        metrics_json = metrics.to_json()
+        metrics_df = DBObject.select_records(connection, sql_command).set_index('key') 
+        metrics_df.index.name = None
+        metrics_json = metrics_df.iloc[:, 0].to_json()
         print(metrics_json)
         return metrics_json
+
+    def accuracy_metrics(self, experiment_id, DBObject, connection):
+        from pandas import DataFrame
+
+        sql_command = 'select run_uuid from runs where experiment_id='+str(experiment_id)
+        run_uuid = DBObject.select_records(connection, sql_command).iloc[0, 0]
+        
+        sql_command = "select key,value from metrics where run_uuid='"+str(run_uuid)+"' and (key='cv_score' or key='holdout_score')"
+        accuracy_df = DBObject.select_records(connection, sql_command).set_index('key') 
+        # accuracy_dict = {}
+        # if 'cross_validation' in accuracy_df.index:
+        #     accuracy_dict['cross_validation'] = [accuracy_df.loc['cross_validation', 'value']]
+        # else:
+        #     accuracy_dict['cross_validation'] = [None]
+        
+        # if 'holdout' in accuracy_df.index:
+        #     accuracy_dict['holdout'] = [accuracy_df.loc['holdout', 'value']]
+        # else:
+        #     accuracy_dict['holdout'] = [None]
+        
+        accuracy_json = accuracy_df.to_json()
+        # metrics_json = metrics_df.loc[['c']]
+        return accuracy_json
+
+    def model_name_desc(self, experiment_id, DBObject, connection):
+        sql_command = 'select model_id from mlaas.model_experiment_tbl where experiment_id='+str(experiment_id)
+        model_id = DBObject.select_records(connection, sql_command)['model_id'][0]
+        # print('Model_ID', model_id)
+        sql_command = 'select model_name,model_desc from mlaas.model_master_tbl where model_id='+str(model_id)
+        df = DBObject.select_records(connection, sql_command)
+        # print(df)
+        model_name = df['model_name'][0]
+        model_desc = df['model_desc'][0]
+
+        return model_name, model_desc
+
+
+    def final_model_desc(self, experiment_id, DBObject, connection):
+        sql_command = 'select model_id from mlaas.model_experiment_tbl where experiment_id='+str(experiment_id)
+        model_id = DBObject.select_records(connection, sql_command)['model_id'][0]
+        # print('Model_ID', model_id)
+        sql_command = 'select model_name,model_desc from mlaas.model_master_tbl where model_id='+str(model_id)
+        df = DBObject.select_records(connection, sql_command)
+        # print(df)
+        model_name = df['model_name'][0]
+        model_desc = df['model_desc'][0]
+
+        # from pandas import DataFrame
+        sql_command = 'select run_uuid from runs where experiment_id='+str(experiment_id)
+        run_uuid = DBObject.select_records(connection, sql_command).iloc[0, 0]
+        
+        sql_command = "select key,value from metrics where run_uuid='"+str(run_uuid)+"' and (key='cv_score' or key='holdout_score')"
+        accuracy_df = DBObject.select_records(connection, sql_command).set_index('key') 
+        # accuracy_dict = {}
+        # if 'cross_validation' in accuracy_df.index:
+        #     accuracy_dict['cross_validation'] = [accuracy_df.loc['cross_validation', 'value']]
+        # else:
+        #     accuracy_dict['cross_validation'] = [None]
+        
+        # if 'holdout' in accuracy_df.index:
+        #     accuracy_dict['holdout'] = [accuracy_df.loc['holdout', 'value']]
+        # else:
+        #     accuracy_dict['holdout'] = [None]
+        
+        accuracy_json = accuracy_df.to_json()
+
+        return model_id, experiment_id, model_name, model_desc, accuracy_json
+
+
+
+
+
 
     # def get_hyperparameters_values(self, experiment_id, DBObject, connection):
     #     # DbObject,connection,connection_string = self.get_db_connection()

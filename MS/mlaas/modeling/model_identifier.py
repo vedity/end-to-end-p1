@@ -41,9 +41,9 @@ class ModelClass(SC, EC, SplitData):
         self.DBObject, self.connection, self.connection_string = DBObject,connection,connection_string
         # self.algorithm_type, self.model_type = self.get_model_type(self.get_scaled_data()[1])
         self.algorithm_detector = AlgorithmDetector(self.get_scaled_data()[1], self.DBObject, self.connection)
+        # self.model_name = None
 
-
-    def algorithm_identifier(self,split_data_object):
+    def algorithm_identifier(self,basic_split_parameters):
         
         """This function is used to identify the algorithm based on target selected.
             if target is selected then call superived algorithm.
@@ -51,7 +51,7 @@ class ModelClass(SC, EC, SplitData):
         """
         if len(self.target_features_list) > 0:
              # call  supervised class
-            self.supervised_algorithm(split_data_object)
+            self.supervised_algorithm(basic_split_parameters)
             
         else:
             # call  unsupervised class
@@ -113,7 +113,7 @@ class ModelClass(SC, EC, SplitData):
                                                        self.user_id)
 
     
-    def supervised_algorithm(self,split_data_object):
+    def supervised_algorithm(self,basic_split_parameters):
         """This function is used to call supervised algorithm.
         """
         
@@ -128,7 +128,7 @@ class ModelClass(SC, EC, SplitData):
                                                     self.target_features_list,
                                                     input_df,
                                                     target_df,
-                                                    split_data_object,
+                                                    basic_split_parameters,
                                                     self.DBObject, 
                                                     self.connection, 
                                                     self.connection_string,
@@ -146,25 +146,29 @@ class ModelClass(SC, EC, SplitData):
         print("yet not implemented")
     
     
-    def split_dataset(self, basic_split_parameters):
+    def split_dataset(self, basic_split_parameters, model_id):
         '''
         Input: split_dataset, a dictionary which contains key value pairs where keys are the train,test,
         validation ratios, split_method and cv value.
             
         This function creates an object of the Class SplitData and returns this object.
         '''
-        split_data_object = SplitData(basic_split_parameters) 
+        split_data_object = SplitData(basic_split_parameters, model_id, self.DBObject, self.connection)
         return split_data_object
 
 
     def get_dataset_info(self):
-       
+        """Returns the project name, dataset name and the target column names
 
-        sql_command = 'select project_name from mlaas.project_tbl where project_id = ' + str(self.project_id)
+        Returns:
+            [tuple]: [project's name, dataset's name, target column names]
+        """
+
+        sql_command = 'select project_name from mlaas.project_tbl where project_id=' + str(self.project_id)
         project_df = self.DBObject.select_records(self.connection, sql_command)
         project_name = project_df['project_name'][0]
 
-        sql_command = 'select dataset_name from mlaas.dataset_tbl where dataset_id = ' + str(self.dataset_id)
+        sql_command = 'select dataset_name from mlaas.dataset_tbl where dataset_id=' + str(self.dataset_id)
         dataset_df = self.DBObject.select_records(self.connection, sql_command)
         dataset_name = dataset_df['dataset_name'][0]
 
@@ -174,6 +178,11 @@ class ModelClass(SC, EC, SplitData):
 
 
     def get_scaled_data(self):
+        """Returns the data that will be preprocessed by the user in the preprocessing stage.
+
+        Returns:
+            [Dataframes]: [input_features_df:- the df used to predict target features, target_features_df:- the target/dependent data]
+        """
         dataset_name_command = 'select scaled_data_table from mlaas.cleaned_ref_tbl where dataset_id = ' + str(self.dataset_id)
         dataset_table_name = self.DBObject.select_records(self.connection, dataset_name_command)['scaled_data_table'][0]
 
@@ -194,42 +203,19 @@ class ModelClass(SC, EC, SplitData):
         Returns:
             [string, string]: [algorithm type, model type]
         """
-        # algorithm_type = None
-        # model_type = None
-        # if len(target_df) == 0: 
-        #     algorithm_type = 'unsupervised'
-        #     return algorithm_type, model_type
-        # else:
-        #     target_shape = target_df.shape
-        #     if target_shape[1] == 2:
-        #         algorithm_type = 'Single_target'
-        #     elif target_shape[1] > 2:
-        #         algorithm_type = 'Multi_target'
-        #     total_length = target_shape[0]
-        #     unq_length = len(target_df.iloc[:,1].unique())
-
-        #     threshold = int((total_length * 20) / 100)
-
-        #     if threshold < unq_length :
-        #         model_type = 'Regression'
-        #     else:
-        #         if unq_length == 2:
-        #             model_type = 'Binary_Classification'
-        #         elif unq_length > 2:
-        #             model_type = 'MultiClass_Classification'
-        #     return algorithm_type, model_type
         return self.algorithm_detector.get_model_types()
 
     def show_model_list(self):
-        # DBObject, connection, _ = self.get_db_connection()
-        # sql_command = 'select * from model_master where model_type='+self.model_type+' and algorithm_type='+self.algorithm_type
-        # return DBObject.select_records(connection, sql_command)
         models_list = self.algorithm_detector.show_models_list()
         return models_list
 
     def get_hyperparameters_list(self, model_name):
+        self.model_name = model_name
         hyperparameters_list = self.algorithm_detector.get_hyperparameters_list(model_name)
         return hyperparameters_list
+
+
+    # def 
 
 
 

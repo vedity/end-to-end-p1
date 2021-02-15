@@ -29,7 +29,6 @@ target_features_list = ['index','price']
 
 DBObject=db.DBClass()     #Get DBClass object
 connection,connection_string=DBObject.database_connection(database,user,password,host,port)      #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
-   
 
 project_id = 1
 dataset_id = 1
@@ -39,14 +38,16 @@ Model_Mode ="auto"
 
 #ModelObject = ModelClass(Model_Mode,input_features_list,target_features_list,project_id,dataset_id, user_id)
 # Create your views here.
-#class to get project name,dataset name,target column list
+
+
+#class to show project name,dataset name,target column list
 #It will take url string as mlaas/modeling/showdatasetinfo/.
 
 class ShowDatasetInfoClass(APIView):
         
         def get(self,request,format=None):
                 """
-                This function is used to get Project Name, Dataset name and List of Target Columns which are uploaded user.
+                This function is used to show Project Name, Dataset name and List of Target Columns which are uploaded user.
 
                 Args  : 
                         project_id[(String)] :[Id of project]
@@ -102,94 +103,18 @@ class ShowDatasetInfoClass(APIView):
                         show_dataset_info_dictionary['target_columns']=target_columns
                         
                         if show_dataset_info_dictionary:
-                                logging.info(": : POST Method : execution stop : status_code :200")
+                                logging.info("modeling : ModelClass : GET Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully updated","response":show_dataset_info_dictionary})
                         else:
-                                #status_code,error_msg=get_Status_code(schema_status) # extract the status_code and error_msg from schema_status
-                                logging.info("data ingestion : DatasetSchemaClass : POST Method : execution stop : status_code :"+500)
-                                #return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})           
+                                logging.info("modeling : ModelClass : GET Method : execution stop : status_code :"+500)
                                 return Response({"status_code":"500","error_msg":"Error","response":"false"})           
                 except Exception as e:
-                        logging.error(": : POST Method : Exception :" + str(e))
-                        logging.error(": : POST Method : " +traceback.format_exc())
+                        logging.error("modeling : ModelClass : GET Method : Exception :" + str(e))
+                        logging.error("modeling : ModelClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
 
-
-# Start And End
-class SplitDataClass(APIView):
-        def post(self,request,format=None):
-                """
-                This function is used to get Project Name, Dataset name and List of Target Columns which are uploaded user.
-
-                Args  : 
-                        project_id[(Integer)] :[ID of project]
-                        dataset_id[(Integer)] :[ID of dataset]
-                        user_id[(Integer)] :[ID of user]
-                        split_data_dictionary[(Dictionary)] : [Dictionary of Split Data]
-
-                Return : 
-                        status_code(500 or 200),
-                        error_msg(Error message for deletion failed or successfull),
-                        Response(false or true)
-                """
-                try:
-                        logging.info(": : POST Method : execution start")
-                        
-                        Model_Mode = "Auto"
-
-                        project_id = 1
-                        dataset_id = 1
-                        user_id = 1
-                        
-                        
-                        ModelObject = ModelClass(Model_Mode,input_features_list,target_features_list,project_id,
-                                                 dataset_id, user_id, DBObject, connection, connection_string)
-                        model_mode = request.POST.get('model_mode')
-                        if model_mode == 'manual': 
-                                split_method = request.POST.get('split_method')
-                                cv = request.POST.get('cv')
-                                valid_size = request.POST.get('valid_size')
-                                test_size = request.POST.get('test_size')
-                                random_state = request.POST.get('random_state')
-                                model_id = request.POST.get('model_id')
-                                model_name = request.POST.get('model_name')
-                                model_type = request.POST.get('model_type')
-                                basic_split_parameters = {}
-                                basic_split_parameters['model_mode']=model_mode
-                                basic_split_parameters['split_method']=split_method
-                                basic_split_parameters['cv']=cv
-                                basic_split_parameters['valid_size']= valid_size
-                                basic_split_parameters['test_size']= test_size
-                                basic_split_parameters['random_state']= random_state
-                                split_data_object = ModelObject.split_dataset(basic_split_parameters)
-
-                        elif model_mode == 'auto':
-                                
-                                basic_split_parameters = {'model_mode': model_mode}
-                                split_data_object = ModelObject.split_dataset(basic_split_parameters)
-                                
-                                
-                        
-
-                        
-                        #split_data_dictionary=json.loads(request.body) #convert the data into dictonery
-                        # split_data_object = ModelObject.get_split_data_object(split_data_dictionary)
-                        #run_model_status=
-                        ModelObject.run_model(model_id,model_name,model_type,split_data_object)
-                        if run_model_status !=True:
-                                status_code,error_msg=get_Status_code(run_model_status) # extract the status_code and error_msg from schema_status
-                                logging.info(" :  : POST Method : execution stop : status_code :"+status_code)
-                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
-                        else:
-                                logging.info(": : POST Method : execution stop : status_code :200")
-                                return Response({"status_code":"200","error_msg":"Successfully updated","response":"true"})           
-                except Exception as e:
-                        logging.error(": : POST Method : Exception :" + str(e))
-                        logging.error(": : POST Method : " +traceback.format_exc())
-                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
-                
-                
-                
+#class to start and stop model
+#It will take url string as mlaas/modeling/startmodel/.
 class StartModelClass(APIView):
         def get(self,request,format=None):
                 """
@@ -212,15 +137,15 @@ class StartModelClass(APIView):
                         ModelObject = ModelClass(Model_Mode,input_features_list,
                                                 target_features_list,project_id,dataset_id,user_id,
                                                 DBObject,connection,connection_string)
-                        logging.info(": : POST Method : execution start")
+                        logging.info("modeling : ExperimentClass : GET Method : execution start")
                         # model_mode =request.query_params.get('model_mode')
                         model_mode = 'auto'
                         if model_mode == 'auto':
                                 
                                 basic_split_parameters = {'model_mode': 'auto'}
-                                split_data_object = ModelObject.split_dataset((basic_split_parameters))
+                                split_data_object = ModelObject.split_dataset((basic_split_parameters,model_mode))
                                 ModelObject.algorithm_identifier(split_data_object)
-                                logging.info(": : POST Method : execution stop : status_code :200")
+                                logging.info("modeling : ModelClass : GET Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully updated","response":"True"})
                         else:
                                 
@@ -245,44 +170,12 @@ class StartModelClass(APIView):
                                 
                                 
                 except Exception as e:
-                        logging.error(": : POST Method : Exception :" + str(e))
-                        logging.error(": : POST Method : " +traceback.format_exc())
+                        logging.error("mdeling : ModelClass : GET Method : Exception :" + str(e))
+                        logging.error(": : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
 
-        
-# class SelectAlgorithmClass(APIView):
-
-#         def get(self, request, format=None):
-#                 """
-#                 This function is used to get Learning Curve of project uploaded uploaded by te user.
-        
-#                 Args  : 
-#                         algorithm_name[(String)]   :[Name of Algorithm]
-#                 Return : 
-#                         status_code(500 or 200),
-#                         error_msg(Error message for retrival & insertions failed or successfull),
-#                         Response(return false if failed otherwise json data)
-#                 """
-#                 try:
-#                         logging.info(" : ModelClass : GET Method : execution start")
-#                         algorithm_name  = request.query_params.get('algorithm_name') #get Username
-#                         project_df = IngestionObj.show_project_details(user_name) #call show_project_details to retrive project detail data and it will return dataframe
-#                         if isinstance(project_df,str): #check the instance of dataset_df
-#                                 status_code,error_msg=get_Status_code(project_df) # extract the status_code and error_msg from project_df
-#                                 logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code :"+ status_code)
-#                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
-#                         else:
-#                                 logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code : 200")
-#                                 return Response({"status_code":"200","error_msg":"successfull retrival","response":project_df})  
-
-#                 except Exception as e:
-#                         logging.error(" modeling : ModelingClass : GET Method : " + str(e))
-#                         logging.error("data ingestion : ModelingClass : GET Method : " +traceback.format_exc())
-#                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
-                
-                
-               
-
+#class to get learning curve
+#It will take url string as mlaas/modeling/learning_curve/.
 class LearningCurveClass(APIView):
 
         def get(self, request, format=None):
@@ -302,24 +195,25 @@ class LearningCurveClass(APIView):
                         ModelObject = ModelClass(Model_Mode,input_features_list,
                                                 target_features_list,project_id,dataset_id,user_id,
                                                 DBObject,connection,connection_string)
-                        logging.info(" : ModelClass : GET Method : execution start")
+                        logging.info(" modeling : ExperimentClass : GET Method : execution start")
                         experiment_id  = request.query_params.get('experiment_id') #get Username
                         learning_curve_json =ModelObject.learning_curve(experiment_id, DBObject, connection)
-                        logging.info(": : POST Method : execution stop : status_code :200")
+                        logging.info("modeling : ExperimentClass : GET Method : execution stop : status_code :200")
                         # print(learning_curve_json)
                         return Response({"status_code":"200","error_msg":"Successfully updated","response":learning_curve_json})
 
                 except Exception as e:
-                        logging.error(" modeling : ModelingClass : GET Method : " + str(e))
-                        logging.error("data ingestion : ModelingClass : GET Method : " +traceback.format_exc())
-                        return Response({"status_code":"500","error_msg":str(e),"response":target_features_list})  
+                        logging.error(" modeling : ExperimentClass : GET Method : " + str(e))
+                        logging.error(" modeling : ExperimentClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
                 
-                
+#class to get feature importance
+#It will take url string as mlaas/modeling/featureimportance/.                
 class FeatureImportanceClass(APIView):
 
         def get(self, request, format=None):
                 """
-                This function is used to get FeatuImportance of project uploaded uploaded by te user.
+                This function is used to get FeatuImportance of particular experiment.
         
                 Args  : 
                         experiment_id[(Integer)]   :[Id of Experiment]
@@ -333,19 +227,118 @@ class FeatureImportanceClass(APIView):
                                                 target_features_list,project_id,dataset_id,user_id,
                                                 DBObject,connection,connection_string)
                         
-                        logging.info(" : ModelClass : GET Method : execution start")
+                        logging.info(" modeling : ExperimentClass : GET Method : execution start")
                         experiment_id  = request.query_params.get('experiment_id') #get Username
                         feature_importance_json =ModelObject.features_importance(experiment_id, DBObject, connection)
-                        logging.info(": : POST Method : execution stop : status_code :200")
+                        logging.info(" modeling : ExperimentClass : GET Method : execution stop : status_code :200")
                         # print(learning_curve_json)
                         return Response({"status_code":"200","error_msg":"Successfully updated","response":feature_importance_json})
                         
                 except Exception as e:
-                        logging.error(" modeling : ModelingClass : GET Method : " + str(e))
-                        logging.error("data ingestion : ModelingClass : GET Method : " +traceback.format_exc())
+                        logging.error(" modeling : ExperimentClass : GET Method : " + str(e))
+                        logging.error("data ingestion : ExperimentClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
 
+#class to get performance metrics
+#It will take url string as mlaas/modeling/performancemetrics/. 
 class PerformanceMetricsClass(APIView):
+
+        def get(self, request, format=None):
+                """
+                This function is used to get PerformanceMetrics of particular experiment.
+        
+                Args  : 
+                        experiment_id[(Integer)]   :[Id of Experiment]
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival & insertions failed or successfull),
+                        Response(return false if failed otherwise json data)
+                """
+                try:
+                        
+                        input_features_list = ['index','house_size','bedrooms','bathrooms']
+                        target_features_list = ['index','price']
+                        ModelObject = ModelClass(Model_Mode,input_features_list,
+                                                target_features_list,project_id,dataset_id,user_id,
+                                                DBObject,connection,connection_string)
+                        
+                        logging.info(" modeling : ExperimentClass : GET Method : execution start")
+                        experiment_id  = request.query_params.get('experiment_id') #get Username
+                        performance_metrics_json =ModelObject.performance_metrics(experiment_id, DBObject, connection)
+                        logging.info("modeling : ExperimentClass : GET Method : execution stop : status_code :200")
+                        # print(learning_curve_json)
+                        return Response({"status_code":"200","error_msg":"Successfully updated","response":performance_metrics_json})
+                        
+                except Exception as e:
+                        logging.error(" modeling : ExperimentClass : GET Method : " + str(e))
+                        logging.error(" modeling : ExperimentClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
+
+#class to get model summary
+#It will take url string as mlaas/modeling/modelsummary/.                 
+class ModelSummaryClass(APIView):
+
+        def get(self, request, format=None):
+                """
+                This function is used to get model summary of particular experiment.
+        
+                Args  : 
+                        experiment_id[(Integer)]   :[Id of Experiment]
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival & insertions failed or successfull),
+                        Response(return false if failed otherwise json data)
+                """
+                try:
+                        ModelObject = ModelClass(Model_Mode,input_features_list,
+                                                target_features_list,project_id,dataset_id,user_id,
+                                                DBObject,connection,connection_string)
+                        
+                        logging.info(" modeling : ExperimentClass : GET Method : execution start")
+                        experiment_id = request.query_params.get('experiment_id') #get Username
+                        model_summary_json =ModelObject.features_importance(experiment_id, DBObject, connection)
+                        logging.info("modeling : ExperimentClass : GET Method : execution stop : status_code :200")
+                        # print(learning_curve_json)
+                        return Response({"status_code":"200","error_msg":"Successfully updated","response":model_summary_json})
+                        
+                except Exception as e:
+                        logging.error(" modeling : ExperimentClass : GET Method : " + str(e))
+                        logging.error(" modeling : ExperimentClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
+
+#class to get actual vs prediction 
+#It will take url string as mlaas/modeling/actualvsprediction/. 
+class ActualVsPredictionClass(APIView):
+
+        def get(self, request, format=None):
+                """
+                This function is used to get Actual VS Predicated value of particular experience
+        
+                Args  : 
+                        experiment_id[(Integer)]   :[Id of Experiment]
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival & insertions failed or successfull),
+                        Response(return false if failed otherwise json data)
+                """
+                try:
+                        ModelObject = ModelClass(Model_Mode,input_features_list,
+                                                target_features_list,project_id,dataset_id,user_id,
+                                                DBObject,connection,connection_string)
+                        
+                        logging.info(" modeling : ExperimentClass : GET Method : execution start")
+                        experiment_id = request.query_params.get('experiment_id') #get Username
+                        actual_vs_prediction_json =ModelObject.actual_vs_prediction(experiment_id, DBObject, connection)
+                        logging.info(" modeling : ExperimentClass : GET Method : execution stop : status_code :200")
+                        return Response({"status_code":"200","error_msg":"Successfully updated","response":actual_vs_prediction_json})
+                        
+
+                except Exception as e:
+                        logging.error(" modeling : ExperimentClass : GET Method : " + str(e))
+                        logging.error(" modeling : ExperimentClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
+
+class FinalModelDescriptionClass(APIView):
 
         def get(self, request, format=None):
                 """
@@ -368,77 +361,53 @@ class PerformanceMetricsClass(APIView):
                         
                         logging.info(" : ModelClass : GET Method : execution start")
                         experiment_id  = request.query_params.get('experiment_id') #get Username
-                        performance_metrics_json =ModelObject.performance_metrics(experiment_id, DBObject, connection)
+                        model_id, experiment_id, model_name, model_desc,accuracy_metrics =ModelObject.final_model_desc(experiment_id, DBObject, connection)
                         logging.info(": : POST Method : execution stop : status_code :200")
                         # print(learning_curve_json)
-                        return Response({"status_code":"200","error_msg":"Successfully updated","response":performance_metrics_json})
+                        return Response({"status_code":"200","error_msg":"Successfully updated","response":(model_id, experiment_id, model_name, model_desc,accuracy_metrics)})
                         
                 except Exception as e:
                         logging.error(" modeling : ModelingClass : GET Method : " + str(e))
                         logging.error("data ingestion : ModelingClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
-                
-class ModelSummaryClass(APIView):
+
+
+class SelectAlgorithmClass(APIView):
 
         def get(self, request, format=None):
                 """
-                This function is used to get model summary of project uploaded uploaded by te user.
+                This function is used to get Learning Curve of project uploaded uploaded by te user.
         
                 Args  : 
-                        experiment_id[(Integer)]   :[Id of Experiment]
+                        algorithm_name[(String)]   :[Name of Algorithm]
                 Return : 
                         status_code(500 or 200),
                         error_msg(Error message for retrival & insertions failed or successfull),
                         Response(return false if failed otherwise json data)
                 """
                 try:
+                        
+                        input_features_list = ['index','house_size','bedrooms','bathrooms']
+                        target_features_list = ['index','price']
                         ModelObject = ModelClass(Model_Mode,input_features_list,
                                                 target_features_list,project_id,dataset_id,user_id,
                                                 DBObject,connection,connection_string)
                         
                         logging.info(" : ModelClass : GET Method : execution start")
-                        experiment_id = request.query_params.get('experiment_id') #get Username
-                        model_summary_json =ModelObject.features_importance(experiment_id, DBObject, connection)
+                        # experiment_id = request.query_params.get('experiment_id') #get Username
+                        models_list = ModelObject.show_model_list()
                         logging.info(": : POST Method : execution stop : status_code :200")
                         # print(learning_curve_json)
-                        return Response({"status_code":"200","error_msg":"Successfully updated","response":model_summary_json})
+                        return Response({"status_code":"200","error_msg":"Successfully updated","response":models_list})
                         
                 except Exception as e:
                         logging.error(" modeling : ModelingClass : GET Method : " + str(e))
                         logging.error("data ingestion : ModelingClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
 
-class ActualVsPredictionClass(APIView):
 
-        def get(self, request, format=None):
-                """
-                This function is used to get Actual and Predicated value of project uploaded uploaded by te user.
-        
-                Args  : 
-                        experiment_id[(Integer)]   :[Id of Experiment]
-                Return : 
-                        status_code(500 or 200),
-                        error_msg(Error message for retrival & insertions failed or successfull),
-                        Response(return false if failed otherwise json data)
-                """
-                try:
-                        ModelObject = ModelClass(Model_Mode,input_features_list,
-                                                target_features_list,project_id,dataset_id,user_id,
-                                                DBObject,connection,connection_string)
-                        
-                        logging.info(" : ModelClass : GET Method : execution start")
-                        experiment_id = request.query_params.get('experiment_id') #get Username
-                        actual_vs_prediction_json =ModelObject.actual_vs_prediction(experiment_id, DBObject, connection)
-                        logging.info(": : POST Method : execution stop : status_code :200")
-                        # print(learning_curve_json)
-                        return Response({"status_code":"200","error_msg":"Successfully updated","response":actual_vs_prediction_json})
-                        
-
-                except Exception as e:
-                        logging.error(" modeling : ModelingClass : GET Method : " + str(e))
-                        logging.error("data ingestion : ModelingClass : GET Method : " +traceback.format_exc())
-                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
-                                
+#class to start and stop model
+#It will take url string as mlaas/modeling/featureimportance/.                                 
 class HyperParametersClass(APIView):
 
         def get(self, request, format=None):
@@ -458,14 +427,13 @@ class HyperParametersClass(APIView):
                                                 DBObject,connection,connection_string)
                         
                         logging.info(" : ModelClass : GET Method : execution start")
-                        model_name  = request.query_params.get('model_name') #get Username
-                        hyperparameters_json =ModelObject.get_hyperparameters_list(experiment_id)
-                        logging.info("  :  : GET Method : execution : status_code :"+ status_code)
-                        return Response({"status_code":status_code,"error_msg":error_msg,"response":hyperparameters_json})
+                        model_name  = request.query_params.get('model_name') #get Username 
+                        hyperparameters_json = ModelObject.get_hyperparameters_list(model_name)
+                        logging.info(": : POST Method : execution stop : status_code :200")
+                        return Response({"status_code":"200","error_msg":"Successfully updated","response":hyperparameters_json})
                         
 
                 except Exception as e:
                         logging.error(" modeling : ModelingClass : GET Method : " + str(e))
                         logging.error("data ingestion : ModelingClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
-                                
