@@ -21,10 +21,8 @@ from common.utils.database import db
 from common.utils.database.db import DBClass
 from ingest.utils.dataset import dataset_creation
 from ingest.utils.dataset import dataset_creation
-from ..schema_creation import *
 
-schemaObj = SchemaClass()
-
+db_obj = db.DBClass()
 dc = dataset_creation.DatasetClass()
 
 class ExploreClass:
@@ -86,7 +84,7 @@ class ExploreClass:
         #? Getting user_name and dataset_visibility
         sql_command = f"SELECT USER_NAME,DATASET_VISIBILITY,DATASET_TABLE_NAME,no_of_rows FROM {table_name} WHERE dataset_id = '{dataset_id}'"
         visibility_df = DBObject.select_records(connection,sql_command) 
-        
+        logging.info("--->"+str(visibility_df))
         if len(visibility_df) != 0: 
             user_name,dataset_visibility = visibility_df['user_name'][0],visibility_df['dataset_visibility'][0]
         #? No entry for the given dataset_id        
@@ -101,12 +99,10 @@ class ExploreClass:
             user_name = 'public'
         
 
-        query = schemaObj.get_query_string(DBObject,connection,schema_id)
+        query = db_obj.get_query_string(connection,schema_id)
         #? Getting all the data
         sql_command = f"SELECT {str(query)} FROM {user_name}.{dataset_table_name}"
-        logging.info(str(sql_command)+"  -------")
         data_df = DBObject.select_records(connection,sql_command)    
-        
         #? Logical Code Begins
         try:
             #? Getting Statistics
@@ -119,7 +115,7 @@ class ExploreClass:
             for i,col in enumerate(data_df.columns):
                 if (col in numerical_columns) and (predicted_datatypes[i].startswith('Ca')):
                     numerical_columns.remove(col)
-        
+            logging.info("stats_df---->"+str(stats_df.T))
             stats_df = stats_df.T
             
             #? Changing The Column Names
@@ -262,7 +258,7 @@ class ExploreClass:
         except:
             return 2
         
-        return stats_df.iloc[1:].round(2)    
+        return stats_df.round(2)    
     
     def iqr(self,arr):
         '''

@@ -276,7 +276,6 @@ class DBClass:
                     str1 += x
             df_columns_new.append(str1) # it append the renamed column name
 
-                 
         return df_columns_new ,df_columns # it returns list of changed and unchanged column name
 
     def load_df_into_db(self,connection_string,table_name,file_data_df,user_name):
@@ -438,7 +437,7 @@ class DBClass:
         try:
             logging.info("data preprocess : SchemaClass : get_query_string : execution start")
             # sql command to get details from schema table  based on  schema id 
-            sql_command = "select column_name,case when changed_column_name = '' then column_name else changed_column_name end column_list  from mlaas.schema_tbl where schema_id ="+str(schema_id)+"order by index"
+            sql_command = "select column_name,case when changed_column_name = '' then column_name else changed_column_name end column_list  from mlaas.schema_tbl where schema_id ="+str(schema_id)+"and column_attribute !='Ignore' order by index"
             
             #execute sql commnad if data exist then return dataframe else return None
             schema_df = self.select_records(connection,sql_command) 
