@@ -32,7 +32,7 @@ class ATestIngestDataDeletion(unittest.TestCase):
             user_name ([string]): [name of the user.]
             dataset_id ([integer]):[id of the dataset.]
         """
-        files = 'ingest/dataset/CarPrice_Assignment.csv'
+        files = '../ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser_valid","dataset_name":"auto_dataset_name_valid","visibility":"private"}
         response = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
@@ -64,7 +64,7 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
     
         """
         time.sleep(1)
-        files = 'ingest/dataset/CarPrice_Assignment.csv'
+        files = '../ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser","dataset_name":"auto_dataset_name","visibility":"public"}
         response = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
@@ -73,6 +73,7 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
         self.assertEqual(status,"200")
 
     def testAA_dataset_creationactivity(self):
+        time.sleep(2)
         response = requests.post("http://localhost:8000/mlaas/common/activity/")
         info ={"user_name":"autouser"}
         response = requests.get("http://localhost:8000/mlaas/common/activity/",params=info)
@@ -113,7 +114,7 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
     
         """
         time.sleep(1)
-        files = 'ingest/dataset/pima_indians_diabetes.csv'
+        files = '../ingest/dataset/pima_indians_diabetes.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser","dataset_name":"auto_dataset_name","visibility":"public"}
         response = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
@@ -133,13 +134,14 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
     
         """
         time.sleep(1)
-        files = 'ingest/dataset/empty.csv'
+        files = '../ingest/dataset/empty.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser","dataset_name":"auto_dataset_name3","visibility":"public"}
         response = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
         json_response = response.json()
         status = json_response["status_code"]
         self.assertEqual(status,200)
+
     @unittest.expectedFailure
     def testE_scenario1_insert_invalid_dataset(self):
         """This function is used to test the CreateDataset POST Method With Invalid Data Inputs .
@@ -154,7 +156,7 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
     
         """
         time.sleep(1)
-        files = 'ingest/dataset/one_column.csv'
+        files = '../ingest/dataset/one_column.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser","dataset_name":"auto_dataset_name3","visibility":"public"}
         response = requests.post("http://localhost:8000/mlaas/ingest/create_dataset/",data = info,files = file)
@@ -208,7 +210,7 @@ class TestIngestDatasetDeletion(unittest.TestCase):
             dataset_id ([integer]):[id of the dataset.]
             
         """
-        files = 'ingest/dataset/CarPrice_Assignment.csv'
+        files = '../ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser_four","dataset_name":"auto_dataset_name_four","visibility":"private"}
         response = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
@@ -229,7 +231,7 @@ class TestIngestDatasetDeletion(unittest.TestCase):
             dataset_id ([integer]):[id of the dataset.]
 
         """
-        files = 'ingest/dataset/CarPrice_Assignment.csv'
+        files = '../ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser_six","dataset_name":"autouser_six","visibility":"private"}
         response_private_datset = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
@@ -259,7 +261,7 @@ class TestCIngestPostProject(unittest.TestCase):
     
         """
         time.sleep(2)
-        files = 'ingest/dataset/CarPrice_Assignment.csv'
+        files = '../ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser_2","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_datasetname","visibility":"private"}
         response = requests.post("http://localhost:8000/mlaas/ingest/project/create/",data = info,files = file)
@@ -268,6 +270,7 @@ class TestCIngestPostProject(unittest.TestCase):
         self.assertEqual(status,"200")
 
     def testAA_project_creationactivity(self):
+        time.sleep(2)
         info ={"user_name":"autouser"}
         response = requests.get("http://localhost:8000/mlaas/common/activity/",params=info)
         json_response = response.json()
@@ -310,7 +313,7 @@ class TestCIngestPostProject(unittest.TestCase):
     
         """
         time.sleep(2)
-        files = 'ingest/dataset/CarPrice_Assignment.csv'
+        files = '../ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser_second","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_dataset_name","visibility":"public"}
         response = requests.post("http://localhost:8000/mlaas/ingest/project/create/",data = info,files = file)
@@ -366,6 +369,7 @@ class TestEIngestProjectDeletion(unittest.TestCase):
         self.assertEqual(status,"200")
         
     def testAA_project_deleteactivity(self):
+        time.sleep(2)
         response = requests.post("http://localhost:8000/mlaas/common/activity/")
         info ={"user_name":"autouser"}
         response = requests.get("http://localhost:8000/mlaas/common/activity/",params=info)
