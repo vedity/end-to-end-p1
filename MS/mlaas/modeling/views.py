@@ -30,9 +30,9 @@ target_features_list = ['index','price']
 DBObject=db.DBClass()     #Get DBClass object
 connection,connection_string=DBObject.database_connection(database,user,password,host,port)      #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 
-project_id = 1
-dataset_id = 1
-user_id = 1
+# project_id = 1
+# dataset_id = 1
+# user_id = 1
 
 Model_Mode ="auto"
 
@@ -66,15 +66,6 @@ class ShowDatasetInfoClass(APIView):
                         
 
                         # Call The Model Class
-                        ModelObject = ModelClass(Model_Mode,
-                                                input_features_list,
-                                                target_features_list,
-                                                project_id,
-                                                dataset_id, 
-                                                user_id,
-                                                DBObject,
-                                                connection, 
-                                                connection_string)
 
 
                         # If Manual Mode Then Give Below Details #########
@@ -86,16 +77,25 @@ class ShowDatasetInfoClass(APIView):
                         
                         ####################################################
                         logging.info(": : POST Method : execution start")
-                        # project_id =request.query_params.get('project_id')
+                        project_id =request.query_params.get('project_id')
 
-                        # dataset_id =request.query_params.get('dataset_id')
-                        # user_id=request.query_params.get('user_id')
+                        dataset_id =request.query_params.get('dataset_id')
+                        user_id=request.query_params.get('user_id')
                         
                         
+                        ModelObject = ModelClass(Model_Mode,
+                                                input_features_list,
+                                                target_features_list,
+                                                project_id,
+                                                dataset_id, 
+                                                user_id,
+                                                DBObject,
+                                                connection, 
+                                                connection_string)
                         
 
                         
-                        project_name, dataset_name, target_columns =ModelObject.get_dataset_info()
+                        project_name, dataset_name, target_columns = ModelObject.get_dataset_info()
                         
                         show_dataset_info_dictionary = {}
                         show_dataset_info_dictionary['project_name']=project_name
@@ -132,8 +132,8 @@ class StartModelClass(APIView):
                 try:
 
                         
-                        input_features_list = ['index','house_size','bedrooms','bathrooms']
-                        target_features_list = ['index','price']
+                        # input_features_list = ['index','house_size','bedrooms','bathrooms']
+                        # target_features_list = ['index','price']
                         ModelObject = ModelClass(Model_Mode,input_features_list,
                                                 target_features_list,project_id,dataset_id,user_id,
                                                 DBObject,connection,connection_string)
@@ -143,7 +143,7 @@ class StartModelClass(APIView):
                         if model_mode == 'auto':
                                 
                                 basic_split_parameters = {'model_mode': 'auto'}
-                                split_data_object = ModelObject.split_dataset((basic_split_parameters,model_mode))
+                                split_data_object = ModelObject.split_dataset(basic_split_parameters,model_id)
                                 ModelObject.algorithm_identifier(split_data_object)
                                 logging.info("modeling : ModelClass : GET Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully updated","response":"True"})
@@ -353,6 +353,12 @@ class FinalModelDescriptionClass(APIView):
                 """
                 try:
                         
+                        project_id =request.query_params.get('project_id')
+
+                        dataset_id =request.query_params.get('dataset_id')
+                        user_id=request.query_params.get('user_id')
+                        
+
                         input_features_list = ['index','house_size','bedrooms','bathrooms']
                         target_features_list = ['index','price']
                         ModelObject = ModelClass(Model_Mode,input_features_list,
@@ -387,6 +393,8 @@ class SelectAlgorithmClass(APIView):
                 """
                 try:
                         
+                        
+
                         input_features_list = ['index','house_size','bedrooms','bathrooms']
                         target_features_list = ['index','price']
                         ModelObject = ModelClass(Model_Mode,input_features_list,
