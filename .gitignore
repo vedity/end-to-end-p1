@@ -8,6 +8,7 @@ db.sqlite3
 db.sqlite3-journal
 MS/mlaas/static/server/*
 __pycache__
+mlruns
 
 ### Angular ###
 # compiled output

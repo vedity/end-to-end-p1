@@ -20,44 +20,49 @@
                                     <span class="d-none d-sm-block">Continous</span>
                                 </a>
                                 <ng-template ngbNavContent>
-                                    <table datatable [dtOptions]="dtOptions" class="table table-centered table-nowrap">
-                                        <thead>
-                                            <tr>
-                                                <th>No</th>
-                                                <th>Column Name</th>
-                                                <th>Data Type</th>
-                                                <th>Graph</th>
-                                                <th>Data Count</th>
-                                                <th>Missing Data</th>
-                                                <th>Unique Data</th>
-                                                <th>Min Value</th>
-                                                <th>Max Value</th>
-                                                <th>Mean Value</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr *ngFor="let item of continuousexploredata;let i=index">
-                                                <td>{{i+1}}</td>
-                                                <td>{{item["Column Name"]}}</td>
-                                                <td>{{item["Datatype"]}}</td>
-                                                <td class="graph-td">
-                                                    <a href="javascript:void(0);" class="expand-graph" (click)="centerModal(centerDataModal,item)"><i
-                                                            class="mdi mdi-arrow-expand"></i></a>
-                                                    <div class="col-graph">
-                                                        <apx-chart class="apex-charts" dir="ltr" [series]="[{data:item['Plot Values'][1]}]" [chart]="columnlabelChart.chart" [plotOptions]="columnlabelChart.plotOptions" [yaxis]="columnlabelChart.yaxis" [title]="columnlabelChart.title" [stroke]="columnlabelChart.stroke"
-                                                            [dataLabels]="columnlabelChart.dataLabels" [xaxis]="columnlabelChart.xaxis" [legend]="columnlabelChart.legend" [colors]="columnlabelChart.colors" [fill]="columnlabelChart.fill" [grid]="columnlabelChart.grid">
-                                                        </apx-chart>
-                                                    </div>
-                                                </td>
-                                                <td>{{item["DataCount"]==null?'-':item["DataCount"]}}</td>
-                                                <td>{{item["Null Values"]==null?'-':item["Null Values"]}}</td>
-                                                <td>{{item["Unique Values"]==null?'-':item["Unique Values"]}}</td>
-                                                <td>{{item["Min Value"]==null?'-':item["Min Value"]}}</td>
-                                                <td>{{item["Max Value"]==null?'-':item["Max Value"]}}</td>
-                                                <td>{{item["Mean"]==null?'-':item["Mean"]}}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                    <div class="nobordertable">
+                                        <table datatable [dtOptions]="dtOptions" class="table table-centered table-nowrap   ">
+                                            <thead>
+                                                <tr>
+                                                    <th>No</th>
+                                                    <th>Column Name</th>
+                                                    <th>Data Type</th>
+                                                    <th>Graph</th>
+                                                    <th>Data Count</th>
+                                                    <th>Missing Data</th>
+                                                    <th>Unique Data</th>
+                                                    <th>Min Value</th>
+                                                    <th>Max Value</th>
+                                                    <th>Mean Value</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let item of continuousexploredata;let i=index">
+                                                    <td>{{i+1}}</td>
+                                                    <td>{{item["Column Name"]}}</td>
+                                                    <td>{{item["Datatype"]}}</td>
+                                                    <td class="graph-td">
+                                                        <a href="javascript:void(0);" class="expand-graph" (click)="centerModal(exlargeModal,item)"><i
+                            class="mdi mdi-arrow-expand"></i></a>
+                                                        <div class="col-graph">
+                                                            <apx-chart class="apex-charts" dir="ltr" [series]="[{data:item['plotarray']}]" [chart]="columnlabelChart.chart" [plotOptions]="columnlabelChart.plotOptions" [yaxis]="columnlabelChart.yaxis" [title]="columnlabelChart.title" [stroke]="columnlabelChart.stroke"
+                                                                [dataLabels]="columnlabelChart.dataLabels" [xaxis]="columnlabelChart.xaxis" [legend]="columnlabelChart.legend" [colors]="item['colorarray']" [fill]="columnlabelChart.fill" [grid]="columnlabelChart.grid">
+                                                            </apx-chart>
+                                                        </div>
+                                                    </td>
+                                                    <td>{{item["DataCount"]==null?'-':item["DataCount"]}}</td>
+                                                    <td>{{item["Null Values"]==null?'-':item["Null Values"]}}</td>
+                                                    <td>{{item["Unique Values"]==null?'-':item["Unique Values"]}}</td>
+                                                    <td>{{item["Min Value"]==null?'-':item["Min Value"]}}</td>
+                                                    <td>{{item["Max Value"]==null?'-':item["Max Value"]}}</td>
+                                                    <td>{{item["Mean"]==null?'-':item["Mean"]}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+
+
                                 </ng-template>
                             </li>
                             <li [ngbNavItem]="2">
@@ -66,55 +71,58 @@
                                     <span class="d-none d-sm-block">Categorical</span>
                                 </a>
                                 <ng-template ngbNavContent>
-                                    <table datatable [dtOptions]="dtOptions" class="table table-centered table-nowrap">
-                                        <thead>
-                                            <tr>
-                                                <th>No</th>
-                                                <th>Column Name</th>
-                                                <th>Data Type</th>
-                                                <th>Graph</th>
-                                                <th>Data Count</th>
-                                                <th>Missing Data</th>
-                                                <th>Most Occuring</th>
-                                                <th>Least Occurring</th>
-                                                <th>Unique Data</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr *ngFor="let item of categoricalexploredata;let i=index">
-                                                <td>{{i+1}}</td>
-                                                <td>{{item["Column Name"]}}</td>
-                                                <td>{{item["Datatype"]}}</td>
-                                                <td class="graph-td">
-                                                    <a href="javascript:void(0);" class="expand-graph" (click)="centerModal(centerDataModal,item)"><i
+                                    <div class="nobordertable">
+                                        <table datatable [dtOptions]="dtOptions" class="table table-centered table-nowrap ">
+                                            <thead>
+                                                <tr>
+                                                    <th>No</th>
+                                                    <th>Column Name</th>
+                                                    <th>Data Type</th>
+                                                    <th>Graph</th>
+                                                    <th>Data Count</th>
+                                                    <th>Missing Data</th>
+                                                    <th>Most Occuring</th>
+                                                    <th>Least Occurring</th>
+                                                    <th>Unique Data</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let item of categoricalexploredata;let i=index">
+                                                    <td>{{i+1}}</td>
+                                                    <td>{{item["Column Name"]}}</td>
+                                                    <td>{{item["Datatype"]}}</td>
+                                                    <td class="graph-td">
+                                                        <a href="javascript:void(0);" class="expand-graph" (click)="centerModal(exlargeModal,item)"><i
                                                             class="mdi mdi-arrow-expand"></i></a>
-                                                    <div class="col-graph">
-                                                        <apx-chart class="apex-charts" dir="ltr" [series]="[{data:item['Plot Values'][1]}]" [chart]="columnlabelChart.chart" [plotOptions]="columnlabelChart.plotOptions" [yaxis]="columnlabelChart.yaxis" [title]="columnlabelChart.title" [stroke]="columnlabelChart.stroke"
-                                                            [dataLabels]="columnlabelChart.dataLabels" [xaxis]="columnlabelChart.xaxis" [legend]="columnlabelChart.legend" [colors]="columnlabelChart.colors" [fill]="columnlabelChart.fill" [grid]="columnlabelChart.grid">
-                                                        </apx-chart>
-                                                    </div>
-                                                </td>
-                                                <td>{{item["DataCount"]==null?'-':item["DataCount"]}}</td>
-                                                <td>{{item["Null Values"]==null?'-':item["Null Values"]}}</td>
-                                                <td>{{item["Most Frequent"]==null?'-':item["Most Frequent"]}}</td>
-                                                <td>{{item["Least Frequent"]==null?'-':item["Least Frequent"]}}</td>
-                                                <td>{{item["Unique Values"]==null?'-':item["Unique Values"]}}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                                        <div class="col-graph">
+                                                            <apx-chart class="apex-charts" dir="ltr" [series]="[{data:item['plotarray']}]" [chart]="columnlabelChart.chart" [plotOptions]="columnlabelChart.plotOptions" [yaxis]="columnlabelChart.yaxis" [title]="columnlabelChart.title" [stroke]="columnlabelChart.stroke"
+                                                                [dataLabels]="columnlabelChart.dataLabels" [xaxis]="columnlabelChart.xaxis" [legend]="columnlabelChart.legend" [colors]="item['colorarray']" [fill]="columnlabelChart.fill" [grid]="columnlabelChart.grid">
+                                                            </apx-chart>
+                                                            <!-- <apx-chart class="apex-charts" dir="ltr" [series]="[{data:item['Plot Values'][1]}]" [chart]="columnlabelChart.chart" [plotOptions]="columnlabelChart.plotOptions" [yaxis]="columnlabelChart.yaxis" [title]="columnlabelChart.title" [stroke]="columnlabelChart.stroke"
+                                                                [dataLabels]="columnlabelChart.dataLabels" [xaxis]="columnlabelChart.xaxis" [legend]="columnlabelChart.legend" [colors]="columnlabelChart.colors" [fill]="columnlabelChart.fill" [grid]="columnlabelChart.grid">
+                                                            </apx-chart> -->
+                                                        </div>
+                                                    </td>
+                                                    <td>{{item["DataCount"]==null?'-':item["DataCount"]}}</td>
+                                                    <td>{{item["Null Values"]==null?'-':item["Null Values"]}}</td>
+                                                    <td>{{item["Most Frequent"]==null?'-':item["Most Frequent"]}}</td>
+                                                    <td>{{item["Least Frequent"]==null?'-':item["Least Frequent"]}}</td>
+                                                    <td>{{item["Unique Values"]==null?'-':item["Unique Values"]}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </ng-template>
                             </li>
                         </ul>
                     </div>
-                    <!-- <perfect-scrollbar class="exploration-row"> -->
                     <div [ngbNavOutlet]="customNav"></div>
-                    <!-- </perfect-scrollbar> -->
                 </div>
             </div>
         </div>
     </div>
 </div>
-<ng-template #centerDataModal let-modal>
+<ng-template #exlargeModal let-modal>
     <div class="modal-header">
         <h5 class="modal-title mt-0">{{modeltitle}}</h5>
         <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-hidden="true">×</button>
@@ -128,16 +136,44 @@
                     </a>
                     <ng-template ngbNavContent>
 
-                        <apx-chart class="apex-charts" dir="ltr" [series]="columnlabelChartexpand.series" [chart]="columnlabelChartexpand.chart" [plotOptions]="columnlabelChartexpand.plotOptions" [yaxis]="columnlabelChartexpand.yaxis" [title]="columnlabelChartexpand.title" [stroke]="columnlabelChartexpand.stroke"
-                            [dataLabels]="columnlabelChartexpand.dataLabels" [xaxis]="columnlabelChartexpand.xaxis" [yaxis]="columnlabelChartexpand.xaxis" [legend]="columnlabelChartexpand.legend" [colors]="columnlabelChartexpand.colors" [fill]="columnlabelChartexpand.fill"
-                            [grid]="columnlabelChartexpand.grid">
-                        </apx-chart>
+
+                        <div class="graph-box {{classname}}">
+
+                            <div class="col-one box" [hidden]="displayleftoutliers" *ngIf="modalobj['Left Outlier Values'][1].length>0">
+                                <apx-chart class="apex-charts" dir="ltr" [series]="[{data:modalobj['Left Outlier Values'][1]}]" [chart]="columnlabelChartexpand.chart" [plotOptions]="columnlabelChartexpand.plotOptions" [yaxis]="columnlabelChartexpand.yaxis" [title]="columnlabelChartexpand.title"
+                                    [stroke]="columnlabelChartexpand.stroke" [dataLabels]="columnlabelChartexpand.dataLabels" [xaxis]="{
+                            categories: modalobj['Left Outlier Values'][0], title: {
+                               text: 'Left Outlier'
+                            }
+                          }" [yaxis]="columnlabelChartexpand.yaxis" [legend]="columnlabelChartexpand.legend" [colors]="['#f74242']" [fill]="columnlabelChartexpand.fill" [grid]="columnlabelChartexpand.grid">
+                                </apx-chart>
+                            </div>
+                            <div class="col-two box">
+                                <a class="font-size-22 left" (click)="displayoutliers('left')" *ngIf="modalobj['Left Outlier Values'][1].length>0" href="javascript:void(0);"><i
+                                        class="bx bx-left-arrow-circle"></i></a>
+                                <apx-chart class="apex-charts" dir="ltr" [series]="columnlabelChartexpand.series" [chart]="columnlabelChartexpand.chart" [plotOptions]="columnlabelChartexpand.plotOptions" [yaxis]="columnlabelChartexpand.yaxis" [title]="columnlabelChartexpand.title" [stroke]="columnlabelChartexpand.stroke"
+                                    [dataLabels]="columnlabelChartexpand.dataLabels" [xaxis]="columnlabelChartexpand.xaxis" [yaxis]="columnlabelChartexpand.yaxis" [legend]="columnlabelChartexpand.legend" [colors]="columnlabelChartexpand.colors" [fill]="columnlabelChartexpand.fill"
+                                    [grid]="columnlabelChartexpand.grid">
+                                </apx-chart>
+                                <a class="font-size-22 right" (click)="displayoutliers('right')" *ngIf="modalobj['Right Outlier Values'][1].length>0" href="javascript:void(0);"><i
+                                        class="bx bx-right-arrow-circle"></i></a>
+                            </div>
+                            <div class="col-three box" [hidden]="displayrightoutliers" *ngIf="modalobj['Right Outlier Values'][1].length>0">
+                                <apx-chart class="apex-charts" dir="ltr" [series]="[{data:modalobj['Right Outlier Values'][1]}]" [chart]="columnlabelChartexpand.chart" [plotOptions]="columnlabelChartexpand.plotOptions" [yaxis]="columnlabelChartexpand.yaxis" [title]="columnlabelChartexpand.title"
+                                    [stroke]="columnlabelChartexpand.stroke" [dataLabels]="columnlabelChartexpand.dataLabels" [xaxis]="{
+                            categories: modalobj['Right Outlier Values'][0], title: {
+                               text: 'Right Outlier'
+                            }
+                          }" [yaxis]="columnlabelChartexpand.yaxis" [legend]="columnlabelChartexpand.legend" [colors]="['#f74242']" [fill]="columnlabelChartexpand.fill" [grid]="columnlabelChartexpand.grid">
+                                </apx-chart>
+                            </div>
+
+                        </div>
 
 
-                        <!-- <apx-chart *ngIf="modelobj['Right Outlier Values'][1].length>0" class="apex-charts" dir="ltr" [series]="columnlabelChartexpand.series" [chart]="columnlabelChartexpand.chart" [plotOptions]="columnlabelChartexpand.plotOptions" [yaxis]="columnlabelChartexpand.yaxis" [title]="columnlabelChartexpand.title" [stroke]="columnlabelChartexpand.stroke"
-                    [dataLabels]="columnlabelChartexpand.dataLabels" [xaxis]="columnlabelChartexpand.xaxis" [yaxis]="columnlabelChartexpand.xaxis" [legend]="columnlabelChartexpand.legend" [colors]="columnlabelChartexpand.colors" [fill]="columnlabelChartexpand.fill"
-                    [grid]="columnlabelChartexpand.grid">
-                </apx-chart> -->
+
+
+
 
                     </ng-template>
                 </li>

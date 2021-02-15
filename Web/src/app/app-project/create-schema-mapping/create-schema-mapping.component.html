@@ -8,9 +8,9 @@
                 <h4 class="card-title mb-4">{{title}}</h4>
                 <ngx-skeleton-loader *ngIf="displaydiv" count="7" [animation]="animation" [theme]="theme">
                 </ngx-skeleton-loader>
-                <div *ngIf="!displaydiv">
+                <div *ngIf="!displaydiv" class="nobordertable">
                     <!-- <perfect-scrollbar class="schemamapping-row"> -->
-                    <table datatable [dtOptions]="dtOptions" class="table table-centered table-nowrap schemamappingtable">
+                    <table datatable [dtOptions]="dtOptions" class="table table-centered table-nowrap ">
                         <thead class="thead-light">
                             <tr>
                                 <th>
@@ -24,7 +24,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngFor="let data of datasetSchema;let i= index" id="tr_{{i}}" class="{{data.column_attribute}}-selected">
+                            <tr *ngFor="let data of datasetSchema;let i= index" id="tr_{{i}}" class="{{data.column_attribute}}-selected" [hidden]="i==0">
                                 <td>
                                     {{data.column_name}}
                                 </td>
@@ -37,9 +37,9 @@
 
                                 </td>
                                 <td>
-                                    <select class="form-control selectattr" id="selectattr_{{i}}" [(ngModel)]="data.column_attribute" (change)="changeattrinute($event.target.value,i)">
+                                    <select class="form-control selectattr" id="selectattr_{{i}}" (change)="changeattrinute($event.target.value,i)">
                                             <!-- <option value="">Select Option</option> -->
-                                            <option *ngFor="let item of columnattrList" value="{{item}}">{{item}}
+                                            <option *ngFor="let item of columnattrList" value="{{item}}"  [selected]="item==data.column_attribute" >{{item}}
                                             </option>
                                         </select>
                                 </td>

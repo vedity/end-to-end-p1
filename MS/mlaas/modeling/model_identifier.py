@@ -16,6 +16,7 @@ import logging
 import traceback
 import datetime
 from .utils.supervised.supervised_model import SupervisedClass as SC
+from .utils.model_experiments.model_experiment import ExperimentClass as EC
 # from utils.unsupervised.unsupervised_model import UnSupervisedClass as USC
 from .split_data import SplitData
 from common.utils.database import db
@@ -29,8 +30,7 @@ LogObject.log_setting()
 
 logger = logging.getLogger('model_identifier')
 
-
-class ModelClass(SC, SplitData):
+class ModelClass(SC, EC, SplitData):
     
     def __init__(self,Model_Mode = None,input_features_list=None,target_features_list=None,
                  project_id = None,dataset_id = None, user_id = None, DBObject=None,
@@ -47,10 +47,11 @@ class ModelClass(SC, SplitData):
         self.user_id = user_id # Get User Id
         # Get Database Object,Connection And Connection String
         self.DBObject, self.connection, self.connection_string = DBObject,connection,connection_string
-        self.algorithm_type, self.model_type = self.get_model_type(self.get_scaled_data()[1])
+        # self.algorithm_type, self.model_type = self.get_model_type(self.get_scaled_data()[1])
+        self.algorithm_detector = AlgorithmDetector(self.get_scaled_data()[1], self.DBObject, self.connection)
+        # self.model_name = None
 
-
-    def algorithm_identifier(self,split_data_object):
+    def algorithm_identifier(self,basic_split_parameters):
         
         logging.info("modeling : ModelClass : algorithm_identifier : execution start")
         
@@ -98,6 +99,9 @@ class ModelClass(SC, SplitData):
                                                        input_df,
                                                        target_df,
                                                        split_data_object,
+                                                       self.DBObject, 
+                                                       self.connection, 
+                                                       self.connection_string,
                                                        self.project_id,
                                                        self.dataset_id,
                                                        self.user_id)
@@ -114,6 +118,9 @@ class ModelClass(SC, SplitData):
                                                        input_df,
                                                        target_df,
                                                        split_data_object,
+                                                       self.DBObject, 
+                                                       self.connection, 
+                                                       self.connection_string,
                                                        self.project_id,
                                                        self.dataset_id,
                                                        self.user_id)
@@ -121,7 +128,7 @@ class ModelClass(SC, SplitData):
         logging.info("modeling : ModelClass : run_model : execution end")
 
     
-    def supervised_algorithm(self,split_data_object):
+    def supervised_algorithm(self,basic_split_parameters):
         """This function is used to call supervised algorithm.
         """
         logging.info("modeling : ModelClass : supervised_algorithm : execution start")
@@ -133,7 +140,10 @@ class ModelClass(SC, SplitData):
                                                     self.target_features_list,
                                                     input_df,
                                                     target_df,
-                                                    split_data_object,
+                                                    basic_split_parameters,
+                                                    self.DBObject, 
+                                                    self.connection, 
+                                                    self.connection_string,
                                                     self.project_id,
                                                     self.dataset_id,
                                                     self.user_id)
@@ -152,7 +162,7 @@ class ModelClass(SC, SplitData):
         
     
     
-    def split_dataset(self, basic_split_parameters):
+    def split_dataset(self, basic_split_parameters, model_id):
         '''
         Input: split_dataset, a dictionary which contains key value pairs where keys are the train,test,
         validation ratios, split_method and cv value.
@@ -161,7 +171,7 @@ class ModelClass(SC, SplitData):
         '''
         logging.info("modeling : ModelClass : split_dataset : execution start")
         # Get Split Data Object
-        split_data_object = SplitData(basic_split_parameters) 
+        split_data_object = SplitData(basic_split_parameters,model_id,self.DBObject,self.Connection) 
         logging.info("modeling : ModelClass : split_dataset : execution end")
         return split_data_object
 
@@ -171,11 +181,11 @@ class ModelClass(SC, SplitData):
         logging.info("modeling : ModelClass : get_dataset_info : execution start")
        
 
-        sql_command = 'select project_name from mlaas.project_tbl where project_id = ' + str(self.project_id)
+        sql_command = 'select project_name from mlaas.project_tbl where project_id=' + str(self.project_id)
         project_df = self.DBObject.select_records(self.connection, sql_command)
         project_name = project_df['project_name'][0]
 
-        sql_command = 'select dataset_name from mlaas.dataset_tbl where dataset_id = ' + str(self.dataset_id)
+        sql_command = 'select dataset_name from mlaas.dataset_tbl where dataset_id=' + str(self.dataset_id)
         dataset_df = self.DBObject.select_records(self.connection, sql_command)
         dataset_name = dataset_df['dataset_name'][0]
 
@@ -189,12 +199,17 @@ class ModelClass(SC, SplitData):
     def get_scaled_data(self):
         logging.info("modeling : ModelClass : get_scaled_data : execution start")
         # DBObject, connection, _ = self.get_db_connection()
+        """Returns the data that will be preprocessed by the user in the preprocessing stage.
+
+        Returns:
+            [Dataframes]: [input_features_df:- the df used to predict target features, target_features_df:- the target/dependent data]
+        """
         dataset_name_command = 'select scaled_data_table from mlaas.cleaned_ref_tbl where dataset_id = ' + str(self.dataset_id)
         dataset_table_name = self.DBObject.select_records(self.connection, dataset_name_command)['scaled_data_table'][0]
 
         scaled_df_get_command = 'select * from ' +'mlaas.' + dataset_table_name# doubt 
         scaled_df = self.DBObject.select_records(self.connection, scaled_df_get_command)
-
+        print('get_scaled_data:- ', self.target_features_list)
         input_features_df= scaled_df[self.input_features_list]  # by using self.input_features_list. must include unique seq id
         target_features_df = scaled_df[self.target_features_list]  # by using self.target_features_list .must include unique seq id
         logging.info("modeling : ModelClass : get_scaled_data : execution end")
@@ -210,40 +225,19 @@ class ModelClass(SC, SplitData):
         Returns:
             [string, string]: [algorithm type, model type]
         """
-        logging.info("modeling : ModelClass : get_model_type : execution start")
-        algorithm_type = None
-        model_type = None
-        if len(target_df) == 0: 
-            algorithm_type = 'unsupervised'
-            return algorithm_type, model_type
-        else:
-            target_shape = target_df.shape
-            if target_shape[1] == 2:
-                algorithm_type = 'Single_target'
-            elif target_shape[1] > 2:
-                algorithm_type = 'Multi_target'
-            total_length = target_shape[0]
-            unq_length = len(target_df.iloc[:,1].unique())
-
-            threshold = int((total_length * 20) / 100)
-
-            if threshold < unq_length :
-                model_type = 'Regression'
-            else:
-                if unq_length == 2:
-                    model_type = 'Binary_Classification'
-                elif unq_length > 2:
-                    model_type = 'MultiClass_Classification'
-                    
-            logging.info("modeling : ModelClass : get_model_type : execution end")
-            return algorithm_type, model_type
+        return self.algorithm_detector.get_model_types()
 
     def show_model_list(self):
-        logging.info("modeling : ModelClass : show_model_list : execution start")
-        DBObject, connection, _ = self.get_db_connection()
-        sql_command = 'select * from model_master where model_type='+self.model_type+' and algorithm_type='+self.algorithm_type
-        logging.info("modeling : ModelClass : show_model_list : execution end")
-        return DBObject.select_records(connection, sql_command)
+        models_list = self.algorithm_detector.show_models_list()
+        return models_list
+
+    def get_hyperparameters_list(self, model_name):
+        self.model_name = model_name
+        hyperparameters_list = self.algorithm_detector.get_hyperparameters_list(model_name)
+        return hyperparameters_list
+
+
+    # def 
 
 
 

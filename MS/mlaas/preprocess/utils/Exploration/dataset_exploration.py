@@ -21,12 +21,15 @@ from common.utils.database import db
 from common.utils.database.db import DBClass
 from ingest.utils.dataset import dataset_creation
 from ingest.utils.dataset import dataset_creation
+from ..schema_creation import *
+
+schemaObj = SchemaClass()
 
 dc = dataset_creation.DatasetClass()
 
 class ExploreClass:
 
-    def get_attribute_datatype(self,csv_data,column_name_list,no_of_rows):
+    def get_attrbt_datatype(self,csv_data,column_name_list,no_of_rows):
         """
         this function used to get proper attribute type for the column in csv file.
 
@@ -64,7 +67,7 @@ class ExploreClass:
         logging.info("data preprocessing : ExploreClass : get_attribute_datatype : execution stop")    
         return attribute_type
     
-    def get_dataset_statistics(self,DBObject,connection,dataset_id):
+    def get_dataset_statistics(self,DBObject,connection,dataset_id,schema_id):
         """
             This class returns all the statistics for the given dataset.
             
@@ -97,8 +100,11 @@ class ExploreClass:
         if dataset_visibility == 'public':
             user_name = 'public'
         
+
+        query = schemaObj.get_query_string(DBObject,connection,schema_id)
         #? Getting all the data
-        sql_command = f"SELECT * FROM {user_name}.{dataset_table_name}"
+        sql_command = f"SELECT {str(query)} FROM {user_name}.{dataset_table_name}"
+        logging.info(str(sql_command)+"  -------")
         data_df = DBObject.select_records(connection,sql_command)    
         
         #? Logical Code Begins
@@ -109,7 +115,7 @@ class ExploreClass:
             #? Getting Categorical & Continuous Columns
             num_cols = data_df._get_numeric_data().columns
             numerical_columns = list(num_cols)
-            predicted_datatypes = self.get_attribute_datatype(data_df,data_df.columns,len(data_df))
+            predicted_datatypes = self.get_attrbt_datatype(data_df,data_df.columns,len(data_df))
             for i,col in enumerate(data_df.columns):
                 if (col in numerical_columns) and (predicted_datatypes[i].startswith('Ca')):
                     numerical_columns.remove(col)

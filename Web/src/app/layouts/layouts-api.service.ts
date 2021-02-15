@@ -14,7 +14,14 @@ export class LayoutApiService {
   constructor( private httpClient : HttpClient) { }
   
   getMenu():Observable<any>{
-    return this.httpClient.get(this.baseUrl+"menu/",{headers:this.headers});
+    return this.httpClient.get(this.baseUrl+"common/menu/",{headers:this.headers});
+  }
+
+
+  getActivityTimeline(): Observable<any> {
+    let user = JSON.parse(localStorage.getItem("currentUser"));
+    var params = new HttpParams().set("user_name", user.username);
+    return this.httpClient.get(this.baseUrl + "common/activity/", { headers: this.headers, params });
   }
 
   

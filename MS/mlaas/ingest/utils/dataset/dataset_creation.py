@@ -206,6 +206,7 @@ class DatasetClass:
 
                 row_tuples = self.make_dataset_records(dataset_name,str(updated_table_name),str(dataset_visibility),str(user_name),dataset_desc,page_name,flag=1)
                 insert_status = DBObject.insert_records(connection,table_name,row_tuples,cols) # Get status about inserting records into dataset table. if successful then 0 else 1.
+                
                 # if dataset_visibility=='private':
                 #     new_table_name = user_name+"."+updated_table_name
                 #     copy_table_name = user_name+"."+old_table_name
@@ -331,7 +332,7 @@ class DatasetClass:
         logging.info("data ingestion : DatasetClass : show_dataset_details : execution end")
         return data
 
-    def show_data_details(self,DBObject,connection,dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter):
+    def show_data_details(self,DBObject,connection,dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter,schema_id):
         """This function is used to show details about loaded dataset.
  
         Args:
@@ -349,7 +350,6 @@ class DatasetClass:
         logging.debug("data ingestion : DatasetClass : show_data_details : this will excute select query on table name : "+table_name +" based on dataset id : "+str(dataset_id))
         
         sql_command = 'SELECT dataset_table_name,dataset_visibility,user_name FROM ' + table_name + ' Where dataset_id='+ str(dataset_id)
-
         # Get dataframe of loaded csv.
         dataset_df = DBObject.select_records(connection,sql_command) 
         if len(dataset_df) == 0 or dataset_df is None:
@@ -364,10 +364,9 @@ class DatasetClass:
             user_name = 'public'
         # This command is used to get data details (i.e. loaded csv file data) from database.
         
-        
         logging.debug("data ingestion : DatasetClass : show_data_details : this will excute select query on table name : "+ user_name +'.' + dataset_table_name )
         dataset_table_name=user_name +'."' + dataset_table_name +'"'
-        sql_data,sql_filtercount=DBObject.pagination(connection,dataset_table_name,start_index,length,sort_type,sort_index,global_value,customefilter)
+        sql_data,sql_filtercount=DBObject.pagination(connection,dataset_table_name,start_index,length,sort_type,sort_index,global_value,customefilter,schema_id)
         # Get dataframe of loaded csv.
         data_details_df = DBObject.select_records(connection,sql_data) 
         data_details_count_df = DBObject.select_records(connection,sql_filtercount) 
@@ -411,7 +410,7 @@ class DatasetClass:
 
                 project_table_name,_,_ = ProjectObject.make_project_schema()
                 
-                sql_command = f"SELECT PROJECT_ID FROM {project_table_name} WHERE dataset_id = '{dataset_id}'"
+                sql_command = f"SELECT PROJECT_ID FROM {project_table_name} WHERE original_dataset_id = '{dataset_id}'"
                 dataset_ids_df = DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
                 id_count = len(dataset_ids_df)
             else:

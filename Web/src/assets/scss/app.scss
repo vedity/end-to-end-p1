@@ -381,3 +381,37 @@ table {
         }
     }
 }
+
+.nobordertable {
+    .dataTables_wrapper.no-footer .dataTables_scrollBody {
+        border-bottom: none !important;
+    }
+}
+
+.graph-box {
+    width: 100%;
+}
+
+.one-box {
+    .box {
+        width: 100%;
+    }
+}
+
+.two-box {
+    .box {
+        width: 50%;
+        display: inline-block;
+    }
+}
+
+.three-box {
+    .box {
+        width: 33.33%;
+        display: inline-block;
+    }
+}
+
+.modal-sm {
+    max-width: 700px !important;
+}
