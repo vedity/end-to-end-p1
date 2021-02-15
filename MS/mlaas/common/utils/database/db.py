@@ -275,7 +275,6 @@ class DBClass:
                     str1 += x
             df_columns_new.append(str1) # it append the renamed column name
 
-                 
         return df_columns_new ,df_columns # it returns list of changed and unchanged column name
 
     def load_df_into_db(self,connection_string,table_name,file_data_df,user_name):

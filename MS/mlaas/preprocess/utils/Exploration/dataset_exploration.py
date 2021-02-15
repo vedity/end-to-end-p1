@@ -26,7 +26,7 @@ dc = dataset_creation.DatasetClass()
 
 class ExploreClass:
 
-    def get_attribute_datatype(self,csv_data,column_name_list,no_of_rows):
+    def get_attrbt_datatype(self,csv_data,column_name_list,no_of_rows):
         """
         this function used to get proper attribute type for the column in csv file.
 
@@ -83,7 +83,7 @@ class ExploreClass:
         #? Getting user_name and dataset_visibility
         sql_command = f"SELECT USER_NAME,DATASET_VISIBILITY,DATASET_TABLE_NAME,no_of_rows FROM {table_name} WHERE dataset_id = '{dataset_id}'"
         visibility_df = DBObject.select_records(connection,sql_command) 
-        
+        logging.info("--->"+str(visibility_df))
         if len(visibility_df) != 0: 
             user_name,dataset_visibility = visibility_df['user_name'][0],visibility_df['dataset_visibility'][0]
         #? No entry for the given dataset_id        
@@ -96,11 +96,10 @@ class ExploreClass:
         #? changing the database schema for the public databases
         if dataset_visibility == 'public':
             user_name = 'public'
-        
+
         #? Getting all the data
         sql_command = f"SELECT * FROM {user_name}.{dataset_table_name}"
         data_df = DBObject.select_records(connection,sql_command)    
-        
         #? Logical Code Begins
         try:
             #? Getting Statistics
@@ -109,11 +108,11 @@ class ExploreClass:
             #? Getting Categorical & Continuous Columns
             num_cols = data_df._get_numeric_data().columns
             numerical_columns = list(num_cols)
-            predicted_datatypes = self.get_attribute_datatype(data_df,data_df.columns,len(data_df))
+            predicted_datatypes = self.get_attrbt_datatype(data_df,data_df.columns,len(data_df))
             for i,col in enumerate(data_df.columns):
                 if (col in numerical_columns) and (predicted_datatypes[i].startswith('Ca')):
                     numerical_columns.remove(col)
-        
+            logging.info("stats_df---->"+str(stats_df.T))
             stats_df = stats_df.T
             
             #? Changing The Column Names
