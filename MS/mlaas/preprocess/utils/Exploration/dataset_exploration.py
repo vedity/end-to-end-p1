@@ -21,10 +21,8 @@ from common.utils.database import db
 from common.utils.database.db import DBClass
 from ingest.utils.dataset import dataset_creation
 from ingest.utils.dataset import dataset_creation
-from ..schema_creation import *
 
-schemaObj = SchemaClass()
-
+db_obj = db.DBClass()
 dc = dataset_creation.DatasetClass()
 
 class ExploreClass:
@@ -101,10 +99,9 @@ class ExploreClass:
             user_name = 'public'
         
 
-        query = schemaObj.get_query_string(DBObject,connection,schema_id)
+        query = db_obj.get_query_string(connection,schema_id)
         #? Getting all the data
         sql_command = f"SELECT {str(query)} FROM {user_name}.{dataset_table_name}"
-        logging.info(str(sql_command)+"  -------")
         data_df = DBObject.select_records(connection,sql_command)    
         
         #? Logical Code Begins
@@ -262,7 +259,7 @@ class ExploreClass:
         except:
             return 2
         
-        return stats_df.iloc[1:].round(2)    
+        return stats_df.round(2)    
     
     def iqr(self,arr):
         '''
