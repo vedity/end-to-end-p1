@@ -334,10 +334,12 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise UserAuthenticationFailed(500)
             elif deletion_status == 5:
                 raise EntryNotFound(500)
+            elif deletion_status == 6:
+                raise RawDatasetDeletionFailed(500)
             logging.info("data ingestion : ingestclass : delete_dataset_details : execution end")
             return deletion_status,dataset_name
         
-        except (DatabaseConnectionFailed,DatasetDeletionFailed,DataDeletionFailed,UserAuthenticationFailed,DatasetInUse,EntryNotFound) as exc:
+        except (DatabaseConnectionFailed,DatasetDeletionFailed,DataDeletionFailed,UserAuthenticationFailed,DatasetInUse,EntryNotFound,RawDatasetDeletionFailed) as exc:
             logging.error("data ingestion : ingestclass : delete_dataset_details : Exception " + str(exc.msg))
             logging.error("data ingestion : ingestclass : delete_dataset_details : " +traceback.format_exc())
             return exc.msg,None
