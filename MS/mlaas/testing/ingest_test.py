@@ -32,7 +32,7 @@ class ATestIngestDataDeletion(unittest.TestCase):
             user_name ([string]): [name of the user.]
             dataset_id ([integer]):[id of the dataset.]
         """
-        files = 'ingest/dataset/CarPrice_Assignment.csv'
+        files = '../ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser_valid","dataset_name":"auto_dataset_name_valid","visibility":"private"}
         response = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
@@ -73,6 +73,7 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
         self.assertEqual(status,"200")
 
     def testAA_dataset_creationactivity(self):
+        time.sleep(2)
         response = requests.post("http://localhost:8000/mlaas/common/activity/")
         info ={"user_name":"autouser"}
         response = requests.get("http://localhost:8000/mlaas/common/activity/",params=info)
@@ -140,6 +141,7 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
         json_response = response.json()
         status = json_response["status_code"]
         self.assertEqual(status,200)
+
     @unittest.expectedFailure
     def testE_scenario1_insert_invalid_dataset(self):
         """This function is used to test the CreateDataset POST Method With Invalid Data Inputs .
@@ -268,6 +270,7 @@ class TestCIngestPostProject(unittest.TestCase):
         self.assertEqual(status,"200")
 
     def testAA_project_creationactivity(self):
+        time.sleep(2)
         info ={"user_name":"autouser"}
         response = requests.get("http://localhost:8000/mlaas/common/activity/",params=info)
         json_response = response.json()
@@ -366,6 +369,7 @@ class TestEIngestProjectDeletion(unittest.TestCase):
         self.assertEqual(status,"200")
         
     def testAA_project_deleteactivity(self):
+        time.sleep(2)
         response = requests.post("http://localhost:8000/mlaas/common/activity/")
         info ={"user_name":"autouser"}
         response = requests.get("http://localhost:8000/mlaas/common/activity/",params=info)
