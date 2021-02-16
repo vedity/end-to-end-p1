@@ -1,249 +1,280 @@
-
 <div class="container-fluid w3-animate-right">
     <!-- start page title -->
     <div class="row">
-      <div class="col-12">
-        <div class="page-title-box d-flex align-items-center justify-content-between">
-          <h4 class="mb-0 font-size-18">Modeling</h4>
-          <a href="javascrip:void(0);" title="back" class="back-btn">Back</a>
-          <div class="page-title-right">
-            <div class="tab-menu">
+        <div class="col-12">
+            <div class="page-title-box d-flex align-items-center justify-content-between">
+                <h4 class="mb-0 font-size-18">Modeling</h4>
+                <a href="javascript:void(0);" [routerLink]="['/schema']" title="back" class="back-btn">Back</a>
+                <div class="page-title-right">
+                    <div class="tab-menu">
 
-<ul ngbNav #justifiednav="ngbNav" [activeId]="1" class="nav-tabs nav-tabs-custom nav-justified nav">
-    <li [ngbNavItem]="1">
-      <a ngbNavLink>
-        <span class="d-block d-sm-none"><i class="fas fa-home"></i></span>
-        <span class="d-none d-sm-block">Modelling</span>
-      </a>
-      <ng-template ngbNavContent>
-        <div class="row">
-          <div class="col-md-6">
-              <div class="card start-box ">
-                  <div class="card-body">
-                     <div class="left-box ">
-                      <div class="loader">Loading...</div>
-                       <button type="submit" class="btn btn-success">Start</button>
-                     </div>
-                     <div class="right-box">
-                       <h4 class="card-title">Experiment Name</h4>
-                       <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry</p>
-                       <!-- <button type="submit" class="btn btn-success">Manual</button>
+                        <ul ngbNav #justifiednav="ngbNav" [activeId]="1" class="nav-tabs nav-tabs-custom nav-justified nav">
+                            <li [ngbNavItem]="1">
+                                <a ngbNavLink>
+                                    <span class="d-block d-sm-none"><i class="fas fa-home"></i></span>
+                                    <span class="d-none d-sm-block">Modelling</span>
+                                </a>
+                                <ng-template ngbNavContent>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="card start-box ">
+                                                <div class="card-body">
+                                                    <div class="left-box ">
+                                                        <div class="loader">Loading...</div>
+                                                        <button type="submit" class="btn btn-success">Start</button>
+                                                    </div>
+                                                    <div class="right-box">
+                                                        <h4 class="card-title">{{params.experiment_name}}</h4>
+                                                        <p>{{params.experiment_desc}}</p>
+                                                        <!-- <button type="submit" class="btn btn-success">Manual</button>
                        <button type="submit" class="btn primary-btn">Automatic</button> -->
 
-                       <!-- <label class="switch">
+                                                        <!-- <label class="switch">
                         <input type="checkbox" checked>
                         <span class="slider round"><span>Manual</span>  <span>Automatic</span> </span>
                       </label> -->
-                      <div class="box">
-                      <span class="switcher switcher-1">
+                                                        <div class="box">
+                                                            <span class="switcher switcher-1">
                         <input type="checkbox" id="switcher-1">
                         <label for="switcher-1"></label>
                      </span>
-                    
-                    </div>
-                      </div>
-  
-                  </div>
-              </div>
-          </div>
-          <div class="col-md-6">
-            <div class="card project-detail">
-                <div class="card-body">
-                  <div class="left">
-                    <div class="line">
-                      <label>Project Name</label> <p>Car Price Assignment </p>
-                      </div>
-                        <div class="line">
-                          <label>Dataset Name</label> <p>Car Price Assignment </p>
-                        </div>
-                  </div>
-                  <div class="right">
-                    <div class="line">
-                      <label>Target Column Name</label> <p>Car Price <br/> Car Name <br/> Car ID<br/></p>
-                    </div>
-                  </div>
-                  
 
-                        
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card project-detail" *ngIf="datasetdata">
+                                                <div class="card-body">
+                                                    <div class="left">
+                                                        <div class="line">
+                                                            <label>Project Name</label>
+                                                            <p>{{datasetdata.project_name}} </p>
+                                                        </div>
+                                                        <div class="line">
+                                                            <label>Dataset Name</label>
+                                                            <p>{{datasetdata.dataset_name}}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="right">
+                                                        <div class="line">
+                                                            <label>Target Column Name</label>
+                                                            <p class="target_column" *ngFor="let item of datasetdata.target_columns">{{item}}</p>
+                                                            <!-- <p>Car Price <br/> Car Name <br/> Car ID<br/></p> -->
+                                                        </div>
+                                                    </div>
+
+
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12 model-detail-main">
+                                            <h4 class="mb-4"> Model Name And Description</h4>
+                                            <ul ngbNav #justifiednavnew="ngbNav" [activeId]="1" class="nav-pills nav-justified">
+                                                <li [ngbNavItem]="1">
+                                                    <a ngbNavLink>
+                                                        <span class="d-block"><i class="fas fa-border-all"></i></span>
+
+                                                    </a>
+                                                    <ng-template ngbNavContent>
+
+                                                        <div class="row">
+                                                            <div class="col-md-4">
+                                                                <div class="card">
+                                                                    <div class="card-body">
+                                                                        <h4 class="card-title mb-4">Model Name</h4>
+                                                                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry</p>
+                                                                        <div class="detail-line">
+                                                                            <label>Informative Features</label>
+                                                                            <p>100.00%</p>
+                                                                        </div>
+
+                                                                        <div class="detail-line">
+                                                                            <label>Validation</label>
+                                                                            <p>0.1234</p>
+                                                                        </div>
+
+                                                                        <div class="detail-line">
+                                                                            <label>Holdout</label>
+                                                                            <p>0.1054</p>
+                                                                        </div>
+
+                                                                        <div class="detail-line">
+                                                                            <label>Cross Validation</label>
+                                                                            <p>0.0087</p>
+                                                                        </div>
+
+                                                                        <div class="right-align">
+                                                                            <button class="btn btn-outline-success" (click)="extraLarge(exlargeModal)">View Detail </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <div class="card">
+                                                                    <div class="card-body">
+                                                                        <h4 class="card-title mb-4">Model Name</h4>
+                                                                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry</p>
+                                                                        <div class="detail-line">
+                                                                            <label>Informative Features</label>
+                                                                            <p>100.00%</p>
+                                                                        </div>
+
+                                                                        <div class="detail-line">
+                                                                            <label>Validation</label>
+                                                                            <p>0.1234</p>
+                                                                        </div>
+
+                                                                        <div class="detail-line">
+                                                                            <label>Holdout</label>
+                                                                            <p>0.1054</p>
+                                                                        </div>
+
+                                                                        <div class="detail-line">
+                                                                            <label>Cross Validation</label>
+                                                                            <p>0.0087</p>
+                                                                        </div>
+
+                                                                        <div class="right-align">
+                                                                            <button class="btn btn-outline-success">View Detail </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <div class="card">
+                                                                    <div class="card-body">
+                                                                        <h4 class="card-title mb-4">Model Name</h4>
+                                                                        <p>Lrem Iposum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry</p>
+                                                                        <div class="detail-line">
+                                                                            <label>Informative Features</label>
+                                                                            <p>100.00%</p>
+                                                                        </div>
+
+                                                                        <div class="detail-line">
+                                                                            <label>Validation</label>
+                                                                            <p>0.1234</p>
+                                                                        </div>
+
+                                                                        <div class="detail-line">
+                                                                            <label>Holdout</label>
+                                                                            <p>0.1054</p>
+                                                                        </div>
+
+                                                                        <div class="detail-line">
+                                                                            <label>Cross Validation</label>
+                                                                            <p>0.0087</p>
+                                                                        </div>
+
+                                                                        <div class="right-align">
+                                                                            <button class="btn btn-outline-success">View Detail </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    </ng-template>
+                                                </li>
+                                                <li [ngbNavItem]="2">
+                                                    <a ngbNavLink>
+                                                        <span class="d-block "><i class="fas fa-bars"></i></span>
+
+                                                    </a>
+                                                    <ng-template ngbNavContent>
+                                                        <div class="row">
+                                                            <div class="col-md-12">
+                                                                <div class="card list-view">
+                                                                    <div class="card-body">
+                                                                        <table class="table table-centered">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th>Model Name And Discription</th>
+                                                                                    <th>Informative Features</th>
+                                                                                    <th>Validation</th>
+                                                                                    <th>Holdout</th>
+                                                                                    <th>Cross Validation</th>
+                                                                                    <th>Detail</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <p>Model Name</p>
+                                                                                        <p class="discription">Lrem Iposum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry</p>
+                                                                                    </td>
+                                                                                    <td>100.00%</td>
+                                                                                    <td>0.1234</td>
+                                                                                    <td>0.1234</td>
+                                                                                    <td>0.1234</td>
+                                                                                    <td><a href="javascript:void(0);" title="View Detail">View Detail</a></td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <p>Model Name</p>
+                                                                                        <p class="discription">Lrem Iposum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry</p>
+                                                                                    </td>
+                                                                                    <td>100.00%</td>
+                                                                                    <td>0.1234</td>
+                                                                                    <td>0.1234</td>
+                                                                                    <td>0.1234</td>
+                                                                                    <td><a href="javascript:void(0);" title="View Detail">View Detail</a></td>
+                                                                                </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    </ng-template>
+                                                </li>
+
+                                            </ul>
+                                            <div [ngbNavOutlet]="justifiednavnew"></div>
+                                        </div>
+                                    </div>
+
+                                </ng-template>
+                            </li>
+                            <li [ngbNavItem]="2">
+                                <a ngbNavLink>
+                                    <span class="d-block d-sm-none"><i class="far fa-user"></i></span>
+                                    <span class="d-none d-sm-block">Experiment List</span>
+                                </a>
+                                <ng-template ngbNavContent>
+                                    <h4>One111</h4>
+                                </ng-template>
+                            </li>
+
+                        </ul>
+
+                    </div>
                 </div>
             </div>
         </div>
-      </div>
-      <div class="row">
-        <div class="col-md-12 model-detail-main">
-          <h4 class="mb-4"> Model Name And Description</h4>
-          <ul ngbNav #justifiednavnew="ngbNav" [activeId]="1" class="nav-pills nav-justified">
-            <li [ngbNavItem]="1">
-              <a ngbNavLink>
-                <span class="d-block"><i class="fas fa-border-all"></i></span>
-                
-              </a>
-              <ng-template ngbNavContent>
-                
-                <div class="row">
-                  <div class="col-md-4">
-                    <div class="card">
-                      <div class="card-body">
-                            <h4 class="card-title mb-4">Model Name</h4>
-                            <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry</p>
-                          <div class="detail-line">
-                            <label>Informative Features</label>  <p>100.00%</p>
-                          </div>
-
-                          <div class="detail-line">
-                            <label>Validation</label>  <p>0.1234</p>
-                          </div>
-                          
-                          <div class="detail-line">
-                            <label>Holdout</label>  <p>0.1054</p>
-                          </div>
-
-                          <div class="detail-line">
-                            <label>Cross Validation</label>  <p>0.0087</p>
-                          </div>
-
-                          <div class="right-align">
-                            <button class="btn btn-outline-success">View Detail </button>
-                          </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="card">
-                      <div class="card-body">
-                        <h4 class="card-title mb-4">Model Name</h4>
-                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry</p>
-                      <div class="detail-line">
-                        <label>Informative Features</label>  <p>100.00%</p>
-                      </div>
-
-                      <div class="detail-line">
-                        <label>Validation</label>  <p>0.1234</p>
-                      </div>
-                      
-                      <div class="detail-line">
-                        <label>Holdout</label>  <p>0.1054</p>
-                      </div>
-
-                      <div class="detail-line">
-                        <label>Cross Validation</label>  <p>0.0087</p>
-                      </div>
-
-                      <div class="right-align">
-                        <button class="btn btn-outline-success">View Detail </button>
-                      </div>
-                  </div>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="card">
-                      <div class="card-body">
-                        <h4 class="card-title mb-4">Model Name</h4>
-                        <p>Lrem Iposum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry</p>
-                      <div class="detail-line">
-                        <label>Informative Features</label>  <p>100.00%</p>
-                      </div>
-
-                      <div class="detail-line">
-                        <label>Validation</label>  <p>0.1234</p>
-                      </div>
-                      
-                      <div class="detail-line">
-                        <label>Holdout</label>  <p>0.1054</p>
-                      </div>
-
-                      <div class="detail-line">
-                        <label>Cross Validation</label>  <p>0.0087</p>
-                      </div>
-
-                      <div class="right-align">
-                        <button class="btn btn-outline-success">View Detail </button>
-                      </div>
-                  </div>
-                    </div>
-                  </div>
-                </div>
-             
-              </ng-template>
-            </li>
-            <li [ngbNavItem]="2">
-              <a ngbNavLink>
-                <span class="d-block "><i class="fas fa-bars"></i></span>
-                
-              </a>
-              <ng-template ngbNavContent>
-                <div class="row">
-                  <div class="col-md-12">
-                    <div class="card list-view">
-                      <div class="card-body">
-                        <table class="table table-centered">
-                          <thead>
-                            <tr>
-                              <th>Model Name And Discription</th>
-                              <th>Informative Features</th>
-                              <th>Validation</th>
-                              <th>Holdout</th>
-                              <th>Cross Validation</th>
-                              <th>Detail</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                             <tr>
-                               <td><p>Model Name</p>
-                                   <p class="discription">Lrem Iposum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry</p>
-                               </td>
-                               <td>100.00%</td>
-                               <td>0.1234</td>
-                               <td>0.1234</td>
-                               <td>0.1234</td>
-                               <td><a href="javascript:void(0);" title="View Detail">View Detail</a></td>
-                             </tr>
-                             <tr>
-                              <td><p>Model Name</p>
-                                  <p class="discription">Lrem Iposum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry</p>
-                              </td>
-                              <td>100.00%</td>
-                              <td>0.1234</td>
-                              <td>0.1234</td>
-                              <td>0.1234</td>
-                              <td><a href="javascript:void(0);" title="View Detail">View Detail</a></td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-             
-              </ng-template>
-            </li>
-           
-          </ul>
-          <div [ngbNavOutlet]="justifiednavnew"></div>
-        </div>
-      </div>
-       
-      </ng-template>
-    </li>
-    <li [ngbNavItem]="2">
-      <a ngbNavLink>
-        <span class="d-block d-sm-none"><i class="far fa-user"></i></span>
-        <span class="d-none d-sm-block">Experiment List</span>
-      </a>
-      <ng-template ngbNavContent>
-        <h4>One111</h4>
-      </ng-template>
-    </li>
-   
-  </ul>
-  
-</div>
-</div>
-</div>
     </div>
-    </div>
-  
+
     <div [ngbNavOutlet]="justifiednav">
 
     </div>
+</div>
+
+
+
+<ng-template #exlargeModal let-modal class="model-detail">
+    <div class="modal-header">
+        <h5> Model Name </h5>
+        <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Close click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
     </div>
+    <div class="modal-body">
+        <app-modeling-view-detail></app-modeling-view-detail>
+    </div>
+</ng-template>

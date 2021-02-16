@@ -117,11 +117,11 @@ export class DataExplorationComponent implements OnInit {
     this.loaderdiv = true;
     this.columnlabelChart={
       chart: {
-        //height: '500px',
+        height: '80px',
          width: '100%',
         type: 'bar',
-        offsetX: 0,
-        offsetY: -26,
+        offsetX: -25,
+        offsetY: -25,
         toolbar: {
           show: false
       },

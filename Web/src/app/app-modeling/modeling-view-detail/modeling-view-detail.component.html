@@ -1,0 +1,170 @@
+<ul ngbNav #justifiednavnew="ngbNav" [activeId]="1" class="nav-pills nav-tabs-custom nav-justified nav">
+    <li [ngbNavItem]="1">
+        <a ngbNavLink>
+            <span class="font-size-12">Learning Curves</span>
+
+        </a>
+        <ng-template ngbNavContent>
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Loss</h4>
+
+                    <apx-chart class="apex-charts" dir="ltr" [series]="lineColumAreaChart.series" [chart]="lineColumAreaChart.chart" [tooltip]="lineColumAreaChart.tooltip" [yaxis]="lineColumAreaChart.yaxis" [legend]="lineColumAreaChart.legend" [plotOptions]="lineColumAreaChart.plotOptions"
+                        [grid]="lineColumAreaChart.grid" [stroke]="lineColumAreaChart.stroke" [xaxis]="lineColumAreaChart.xaxis" [colors]="lineColumAreaChart.colors" [fill]="lineColumAreaChart.fill" [labels]="lineColumAreaChart.labels" [markers]="lineColumAreaChart.markers">
+                    </apx-chart>
+                </div>
+                <div class="col-md-6">
+                    <h4>Accuracy</h4>
+                    <apx-chart class="apex-charts" dir="ltr" [series]="lineColumAreaChart.series" [chart]="lineColumAreaChart.chart" [tooltip]="lineColumAreaChart.tooltip" [yaxis]="lineColumAreaChart.yaxis" [legend]="lineColumAreaChart.legend" [plotOptions]="lineColumAreaChart.plotOptions"
+                        [grid]="lineColumAreaChart.grid" [stroke]="lineColumAreaChart.stroke" [xaxis]="lineColumAreaChart.xaxis" [colors]="lineColumAreaChart.colors" [fill]="lineColumAreaChart.fill" [labels]="lineColumAreaChart.labels" [markers]="lineColumAreaChart.markers">
+                    </apx-chart>
+                </div>
+
+            </div>
+        </ng-template>
+    </li>
+    <li [ngbNavItem]="2">
+        <a ngbNavLink>
+            <span class="font-size-12">Feature Importance</span>
+
+        </a>
+        <ng-template ngbNavContent>
+
+            <apx-chart class="apex-charts" dir="ltr" [series]="barChart.series" [chart]="barChart.chart" [plotOptions]="barChart.plotOptions" [dataLabels]="barChart.dataLabels" [xaxis]="barChart.xaxis" [colors]="barChart.colors" [grid]="barChart.grid"></apx-chart>
+        </ng-template>
+    </li>
+    <li [ngbNavItem]="3">
+        <a ngbNavLink>
+            <span class="font-size-12">Performance Metrics</span>
+
+        </a>
+        <ng-template ngbNavContent>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <td>Name</td>
+                        <td>Started</td>
+                        <td>R2score</td>
+                        <td>Mean Squared Error (MSE)</td>
+                        <td>RMSE</td>
+                        <td>Mean Absolute Error (MAE)</td>
+                        <td>Mean Average Perecentage Error (MAPE)</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>GLM(Lasso)</td>
+                        <td>2021-15-02 <br/>12:33:02</td>
+                        <td>23.09</td>
+                        <td>0.712</td>
+                        <td>0.2135</td>
+                        <td>0.2134</td>
+                        <td>0.12334</td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </ng-template>
+    </li>
+    <li [ngbNavItem]="4">
+        <a ngbNavLink>
+            <span class="font-size-12">Modal Summary</span>
+
+        </a>
+        <ng-template ngbNavContent>
+
+            <div class="row modal-summary">
+                <div class="col-md-12">
+                    <div class="line">
+                        <label>Name :</label> <span>Dummy text</span>
+                    </div>
+                    <div class="line">
+                        <label>Size :</label> <span>1.23kb</span>
+                    </div>
+                    <div class="line">
+                        <label>Version :</label> <span>1.2345</span>
+                    </div>
+                    <div class="line">
+                        <label>Validation Data :</label> <span>22</span>
+                    </div>
+                    <div class="line">
+                        <label>Max Memory Usage :</label> <span>13.6mb</span>
+                    </div>
+                </div>
+            </div>
+
+        </ng-template>
+    </li>
+    <li [ngbNavItem]="5">
+        <a ngbNavLink>
+            <span class="font-size-12">Actual Vs Prediction</span>
+
+        </a>
+        <ng-template ngbNavContent>
+            <div class="actual  {{classname}}">
+
+                <div class="left-box">
+                    <a href="javascript:void(0);" title="expand" (click)="allowExpand()" class="expand-btn"><i class="bx bx-expand"></i></a>
+                    <apx-chart class="apex-charts" dir="ltr" [series]="simpleline.series" [chart]="simpleline.chart" [plotOptions]="simpleline.plotOptions" [yaxis]="simpleline.yaxis" [title]="simpleline.title" [stroke]="simpleline.stroke" [dataLabels]="simpleline.dataLabels"
+                        [xaxis]="simpleline.xaxis" [yaxis]="simpleline.yaxis" [legend]="simpleline.legend" [colors]="simpleline.colors" [fill]="simpleline.fill">
+                    </apx-chart>
+                </div>
+                <div class="right-box">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <td>Input Column1</td>
+                                <td>Input Column2</td>
+                                <td>Target column</td>
+                                <td>Prediction</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Car Name</td>
+                                <td>Car Color</td>
+                                <td>Car Price</td>
+                                <td>New Price</td>
+                            </tr>
+                            <tr>
+                                <td>Car Name</td>
+                                <td>Car Color</td>
+                                <td>Car Price</td>
+                                <td>New Price</td>
+                            </tr>
+                            <tr>
+                                <td>Car Name</td>
+                                <td>Car Color</td>
+                                <td>Car Price</td>
+                                <td>New Price</td>
+                            </tr>
+                            <tr>
+                                <td>Car Name</td>
+                                <td>Car Color</td>
+                                <td>Car Price</td>
+                                <td>New Price</td>
+                            </tr>
+                            <tr>
+                                <td>Car Name</td>
+                                <td>Car Color</td>
+                                <td>Car Price</td>
+                                <td>New Price</td>
+                            </tr>
+                            <tr>
+                                <td>Car Name</td>
+                                <td>Car Color</td>
+                                <td>Car Price</td>
+                                <td>New Price</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+        </ng-template>
+    </li>
+
+</ul>
+<div [ngbNavOutlet]="justifiednavnew"></div>
