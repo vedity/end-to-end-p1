@@ -78,7 +78,7 @@ class ShowDatasetInfoClass(APIView):
                                         connection, 
                                         connection_string)
                         
-                        project_name, dataset_name, target_columns =ModelObject.get_dataset_info()
+                        project_name, dataset_name, target_columns = ModelObject.get_dataset_info()
                         
                         show_dataset_info_dictionary = {"project_name":project_name,
                                                         "dataset_name":dataset_name,

@@ -21,10 +21,8 @@ from common.utils.database import db
 from common.utils.database.db import DBClass
 from ingest.utils.dataset import dataset_creation
 from ingest.utils.dataset import dataset_creation
-from ..schema_creation import *
 
-schemaObj = SchemaClass()
-
+db_obj = db.DBClass()
 dc = dataset_creation.DatasetClass()
 
 class ExploreClass:
@@ -86,7 +84,6 @@ class ExploreClass:
         #? Getting user_name and dataset_visibility
         sql_command = f"SELECT USER_NAME,DATASET_VISIBILITY,DATASET_TABLE_NAME,no_of_rows FROM {table_name} WHERE dataset_id = '{dataset_id}'"
         visibility_df = DBObject.select_records(connection,sql_command) 
-        
         if len(visibility_df) != 0: 
             user_name,dataset_visibility = visibility_df['user_name'][0],visibility_df['dataset_visibility'][0]
         #? No entry for the given dataset_id        
@@ -101,12 +98,10 @@ class ExploreClass:
             user_name = 'public'
         
 
-        query = schemaObj.get_query_string(DBObject,connection,schema_id)
+        query = db_obj.get_query_string(connection,schema_id)
         #? Getting all the data
         sql_command = f"SELECT {str(query)} FROM {user_name}.{dataset_table_name}"
-        logging.info(str(sql_command)+"  -------")
         data_df = DBObject.select_records(connection,sql_command)    
-        
         #? Logical Code Begins
         try:
             #? Getting Statistics
@@ -119,7 +114,6 @@ class ExploreClass:
             for i,col in enumerate(data_df.columns):
                 if (col in numerical_columns) and (predicted_datatypes[i].startswith('Ca')):
                     numerical_columns.remove(col)
-        
             stats_df = stats_df.T
             
             #? Changing The Column Names
@@ -200,6 +194,7 @@ class ExploreClass:
             lower_outliers_list = []
             upper_outliers_list = []
             updated_plot_list = []
+            unique_list = []
         
             for col in data_df.columns:
                 #? Getting Lower & Upper Limits for the Histogram
@@ -231,10 +226,12 @@ class ExploreClass:
                         pass 
                     lower_outliers_list.append(lower_outliers)
                     upper_outliers_list.append(upper_outliers)
+                    unique_list.append(np.NaN)
                 else:
                     #? Count plots of the categorical columns does not need the outlier bins
                     lower_outliers_list.append([[],[]])
                     upper_outliers_list.append([[],[]])
+                    unique_list.append(len(data_df[col].unique()))
 
                 updated_plot_list.append([x_axis_values,y_axis_values])
                 i += 1 
@@ -244,6 +241,7 @@ class ExploreClass:
             stats_df['Left Outlier Values'] = lower_outliers_list
             stats_df['Outliers'] = outliers_list
             stats_df['Plot Values'] = updated_plot_list
+            stats_df['Unique Values'] = unique_list
             
             #? Adding a column needed for the frontend
             stats_df['IsinContinuous'] = [True if stats_df.loc[i,'Datatype'] == 'Continuous' else False for i in stats_df.index]
@@ -262,7 +260,7 @@ class ExploreClass:
         except:
             return 2
         
-        return stats_df.iloc[1:].round(2)    
+        return stats_df.round(2)    
     
     def iqr(self,arr):
         '''
@@ -352,7 +350,7 @@ class ExploreClass:
         #? If there are more than 50 bins than the count plot is not suitable
         #? Resizing the countplot
         if len(values) > 50:
-            stepsize = int(np.ceil(len(values)/20))
+            stepsize = int(np.ceil(len(values)/50))
             classes = classes[::stepsize]
             values = values[::stepsize]
         

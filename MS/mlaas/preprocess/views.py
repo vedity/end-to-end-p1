@@ -17,7 +17,7 @@ from rest_framework.response import Response
 from .utils.Exploration import dataset_exploration
 from .utils import preprocessing
 
-from .utils.schema_creation import *
+from .utils.schema.schema_creation import *
 from common.utils.json_format.json_formater import *
 from common.utils.database import db
 from database import *
@@ -110,9 +110,11 @@ class SchemaSaveClass(APIView):
 
                         update_schema_data=json.loads(request.body) #convert the data into dictonery
                         schema_data = update_schema_data["data"] #access "data" key value from the schema_data dict
-                        schema_id =request.query_params.get('schema_id') #get the schema id
-
-                        schema_status=ExploreObj.save_schema_data(schema_data,schema_id)
+                        schema_id = request.query_params.get('schema_id') #get the schema id
+                        dataset_id = request.query_params.get('dataset_id') #get the dataset id
+                        project_id = request.query_params.get('project_id') #get the project id
+                        
+                        schema_status=ExploreObj.save_schema_data(schema_data,project_id,dataset_id,schema_id)
 
                         if isinstance(schema_status,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(schema_status) # extract the status_code and error_msg from schema_status

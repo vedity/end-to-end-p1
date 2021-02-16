@@ -363,7 +363,7 @@ class DeleteProjectDetailClass(APIView):
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                         else:
                                 
-                                activity_df = timeline_Obj.get_activity(1,"US")
+                                activity_df = timeline_Obj.get_activity(4,"US")
                                 activity_name = activity_df[0]["activity_name"]
                                 activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= project_name)
                                 timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
