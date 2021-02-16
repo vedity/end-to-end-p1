@@ -8,21 +8,21 @@ logger = logging.getLogger('django')
 
 
 
-# class TestLogin(unittest.TestCase):
-#     def testA_validlogin(self):
-#         response = requests.post("http://localhost:8000/mlaas/ingest/common/user/login")
-#         info = {"user_name":"nisha","password":"nisha"}
-#         response1 = requests.get("http://localhost:8000/mlaas/ingest/common/user/login",params=info)
-#         json_response = response1.json()
-#         status = json_response["status_code"]
-#         self.assertEqual(status,"200")
+class TestLogin(unittest.TestCase):
+    def testA_validlogin(self):
+        response = requests.post("http://localhost:8000/mlaas/ingest/common/user/login")
+        info = {"user_name":"nisha","password":"nisha"}
+        response1 = requests.get("http://localhost:8000/mlaas/ingest/common/user/login",params=info)
+        json_response = response1.json()
+        status = json_response["status_code"]
+        self.assertEqual(status,"200")
 
-#     def testB_invalidlogin(self):
-#         info = {"user_name":"abc","password":"xyz"}
-#         response1 = requests.get("http://localhost:8000/mlaas/ingest/common/user/login",params=info)
-#         json_response = response1.json()
-#         status = json_response["status_code"]
-#         self.assertEqual(status,"500")
+    def testB_invalidlogin(self):
+        info = {"user_name":"abc","password":"xyz"}
+        response1 = requests.get("http://localhost:8000/mlaas/ingest/common/user/login",params=info)
+        json_response = response1.json()
+        status = json_response["status_code"]
+        self.assertEqual(status,"500")
 
 # class ATestIngestDataDeletion(unittest.TestCase):
 #     def testA_scenario1_delete_dataset(self):
