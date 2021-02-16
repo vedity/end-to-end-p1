@@ -46,9 +46,9 @@ export class ProjectApiService {
     return this.httpClient.post<any>(this.baseUrl + "dataset/create/", obj);
   }
 
-  deletedataset(id): Observable<any> {
+  deletedataset(id,name): Observable<any> {
     this.user = JSON.parse(localStorage.getItem("currentUser"));
-    var params = new HttpParams().append("user_name", this.user.username).append('dataset_id', id);
+    var params = new HttpParams().append("user_name", this.user.username).append('dataset_id', id).append('dataset_name', name);
     return this.httpClient.delete(this.baseUrl + "dataset/delete/", { headers: this.headers, params });
   }
 

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { ModelingTypeApiService } from '../modeling-type.service';
 
@@ -10,7 +11,7 @@ import { ModelingTypeApiService } from '../modeling-type.service';
 })
 export class ModelingTypeComponent implements OnInit {
 
-  constructor(public router: Router,public apiservice:ModelingTypeApiService,public toaster:ToastrService) { }
+  constructor(public router: Router,public apiservice:ModelingTypeApiService,public toaster:ToastrService,private modalService: NgbModal) { }
   public params: any;
   public datasetInfo:any;
   public modelDescription:any;
@@ -20,6 +21,7 @@ export class ModelingTypeComponent implements OnInit {
     if (data) {
       this.params = JSON.parse(data);
     }
+    this.getDatasetInfo();
   }
 
   getDatasetInfo(){
@@ -51,9 +53,11 @@ export class ModelingTypeComponent implements OnInit {
 
   }
 
+  datasetdata:any;
   successHandler(data) {
     if (data.status_code == "200") {
-      this.toaster.success(data.error_msg, 'Success');
+      this.datasetdata=data.response;
+      // this.toaster.success(data.error_msg, 'Success');
     }
     else{
       this.errorHandler(data);
@@ -67,4 +71,9 @@ export class ModelingTypeComponent implements OnInit {
       this.toaster.error('Something went wrong', 'Error');
     }
   }
+
+  extraLarge (exlargeModal: any) 
+  {
+    this.modalService.open(exlargeModal, { size: 'xl',windowClass:'modal-holder', centered: true });
+  };
 }

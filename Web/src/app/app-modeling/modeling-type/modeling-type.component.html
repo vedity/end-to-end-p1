@@ -46,22 +46,23 @@
                                             </div>
                                         </div>
                                         <div class="col-md-6">
-                                            <div class="card project-detail">
+                                            <div class="card project-detail" *ngIf="datasetdata">
                                                 <div class="card-body">
                                                     <div class="left">
                                                         <div class="line">
                                                             <label>Project Name</label>
-                                                            <p>Car Price Assignment </p>
+                                                            <p>{{datasetdata.project_name}} </p>
                                                         </div>
                                                         <div class="line">
                                                             <label>Dataset Name</label>
-                                                            <p>Car Price Assignment </p>
+                                                            <p>{{datasetdata.dataset_name}}</p>
                                                         </div>
                                                     </div>
                                                     <div class="right">
                                                         <div class="line">
                                                             <label>Target Column Name</label>
-                                                            <p>Car Price <br/> Car Name <br/> Car ID<br/></p>
+                                                            <p class="target_column" *ngFor="let item of datasetdata.target_columns">{{item}}</p>
+                                                            <!-- <p>Car Price <br/> Car Name <br/> Car ID<br/></p> -->
                                                         </div>
                                                     </div>
 
@@ -109,7 +110,7 @@
                                                                         </div>
 
                                                                         <div class="right-align">
-                                                                            <button class="btn btn-outline-success">View Detail </button>
+                                                                            <button class="btn btn-outline-success" (click)="extraLarge(exlargeModal)">View Detail </button>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -263,3 +264,17 @@
 
     </div>
 </div>
+
+
+
+<ng-template #exlargeModal let-modal class="model-detail">
+    <div class="modal-header">
+        <h5> Model Name </h5>
+        <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Close click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+        <app-modeling-view-detail></app-modeling-view-detail>
+    </div>
+</ng-template>

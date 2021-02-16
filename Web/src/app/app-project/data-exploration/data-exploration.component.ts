@@ -120,8 +120,8 @@ export class DataExplorationComponent implements OnInit {
         height: '80px',
          width: '100%',
         type: 'bar',
-        offsetX: 0,
-        offsetY: -20,
+        offsetX: -25,
+        offsetY: -25,
         toolbar: {
           show: false
       },

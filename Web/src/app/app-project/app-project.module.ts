@@ -34,6 +34,7 @@ import { ChartModule,HIGHCHARTS_MODULES } from 'angular-highcharts';
 import * as more from 'highcharts/highcharts-more.src';
 import * as exporting from 'highcharts/modules/exporting.src';
 import * as theme from 'highcharts/themes/dark-unica.src';
+import { CreateDatasetComponent } from './create-dataset/create-dataset.component';
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   suppressScrollX: true,
@@ -51,6 +52,7 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     DataVisualizationComponent,
     DataCleanupComponent,
     ManageSchemaMappingComponent,
+    CreateDatasetComponent
   ],
   imports: [
     CommonModule,
