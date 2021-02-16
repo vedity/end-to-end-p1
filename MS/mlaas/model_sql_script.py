@@ -19,8 +19,6 @@ class ModelSqlClass:
         
         schema = "exp_unq_id bigserial,"\
                  "experiment_id  integer,"\
-                 "experiment_name  text,"\
-                 "experiment_desc text,"\
                  "run_uuid text,"\
                  "project_id bigint,"\
                  "dataset_id bigint,"\
@@ -52,12 +50,14 @@ class ModelSqlClass:
 
     def clean_up_reference(self):
         
-        project_id = 1
-        dataset_id = 1
-        user_id = 1
-        input_features = "['index','house_size','bedrooms','bathrooms']"
-        target_features = "['index','price']" 
-        scaled_data_table = "house_prediction"  
+        project_id = 2
+        dataset_id = 2
+        user_id = 2
+        
+        input_features = "['index','bedrooms','bathrooms','sqft_living','sqft_lot','floors','waterfront','view','condition','grade','sqft_above','sqft_basement','yr_built','yr_renovated','zipcode','lat','long','sqft_living15','sqft_lot15']"
+        target_features = "['index','price']"
+        
+        scaled_data_table = "kc_house_data"  
         
         row=project_id,dataset_id,user_id,input_features,target_features,scaled_data_table 
         row_tuples = [tuple(row)] 
@@ -84,9 +84,9 @@ class ModelSqlClass:
                         
     def load_scaled_data(self):
         
-        file_data_df = pd.read_csv('house_prediction.csv')
+        file_data_df = pd.read_csv('kc_house_data.csv')
         user_name = "mlaas"
-        table_name = "house_prediction"
+        table_name = "kc_house_data"
         load_status = self.DBObject.load_df_into_db(self.connection_string,table_name,file_data_df,user_name)
         return load_status
     
@@ -118,7 +118,7 @@ class ModelSqlClass:
         
         # Second Model
         
-        model_id = 1
+        model_id = 2
         model_name = "Linear Regression With Keras"
         model_desc = "this is simple linear model with keras"
         model_parameter = "['lr','batch_size','epoch','optimizer','loss','activation']"

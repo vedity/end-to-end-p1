@@ -87,7 +87,7 @@ class UserLoginClass(APIView):
                 """
                 try:
                         logging.info("Common  : UserLoginClass : POST Method : execution start")
-                        user_df=DBObject.read_data('ingest/user_registration_tbl.csv') #read the data from csv file store into dataframe variable
+                        user_df=DBObject.read_data('common/user_registration_tbl.csv') #read the data from csv file store into dataframe variable
                         status=DBObject.load_df_into_db(connection_string,'user_auth_tbl',user_df,'mlaas') # this function will insert the csv data into  user_auth table
                         return Response({"Status":status})
                 except Exception as e:

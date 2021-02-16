@@ -167,7 +167,7 @@ class JsonFormatClass:
             logging.error("data preprocess : SchemaClass : get_column_name : " +traceback.format_exc())
             return str(exc)
 
-    def get_schema_format(self,index,column_name,changed_column_name,data_type,column_attribute):
+    def get_schema_format(self,index,column_name,data_type,column_attribute):
         """
         function will get all updated column name and column list which are available in the dataset.
         Args : 
@@ -179,15 +179,9 @@ class JsonFormatClass:
             logging.info("Common : JsonFormatClass : get_schema_format : execution start")
             json_data = []
             for x in range(len(index)):
-                if column_attribute[x]!='Ignore':
-                    if changed_column_name[x]=='':
-                        name = column_name[x]
-                    else:
-                        name = changed_column_name[x]
-
                     temp_dict = {
                         "index" : index[x],
-                        "column_name":name,
+                        "column_name":column_name[x],
                         "data_type":data_type[x],
                         "column_attribute":column_attribute[x],
                         "change_column_name":"",
