@@ -34,7 +34,7 @@ logger = logging.getLogger('preprocess_view')
 
 DBObject=db.DBClass() #Get DBClass object
 connection,connection_string=DBObject.database_connection(database,user,password,host,port) #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
-ExploreObj =  preprocessing.PreprocessingClass(database,user,password,host,port) #initialize Preprocess class object
+preprocessObj =  preprocessing.PreprocessingClass(database,user,password,host,port) #initialize Preprocess class object
 
 
 class DatasetExplorationClass(APIView):
@@ -56,7 +56,7 @@ class DatasetExplorationClass(APIView):
             logging.info("data preprocess : DatasetExplorationClass : GET Method : execution start")
             dataset_id = request.query_params.get('dataset_id') #get datasetid     
             schema_id =request.query_params.get('schema_id') #get the schema id  
-            statics_df =  ExploreObj.get_exploration_data(dataset_id,schema_id) #pass datasetid in function
+            statics_df =  preprocessObj.get_exploration_data(dataset_id,schema_id) #pass datasetid in function
             
             if isinstance(statics_df,str): #check the instance of statics_df
                 status_code,error_msg=json_obj.get_Status_code(statics_df) # extract the status_code and error_msg from statics_df
@@ -114,7 +114,7 @@ class SchemaSaveClass(APIView):
                         dataset_id = request.query_params.get('dataset_id') #get the dataset id
                         project_id = request.query_params.get('project_id') #get the project id
                         
-                        schema_status=ExploreObj.save_schema_data(schema_data,project_id,dataset_id,schema_id)
+                        schema_status=preprocessObj.save_schema_data(schema_data,project_id,dataset_id,schema_id)
 
                         if isinstance(schema_status,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(schema_status) # extract the status_code and error_msg from schema_status
@@ -157,7 +157,7 @@ class SchemaClass(APIView):
                         schema_id=request.query_params.get('schema_id') #get schema id
                         
                         #get the schema detail,if exist then return data else return string with error_msg and status code
-                        schema_data=ExploreObj.get_schema_details(schema_id) 
+                        schema_data=preprocessObj.get_schema_details(schema_id) 
                         if isinstance(schema_data,list):  
                                 logging.info("data preprocess : DatasetSchemaClass : GET Method : execution stop")
                                 return Response({"status_code":"200","error_msg":"Successfull retrival","response":schema_data})

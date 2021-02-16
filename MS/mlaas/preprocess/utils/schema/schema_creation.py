@@ -112,12 +112,13 @@ class SchemaClass:
             sql_command = "SELECT * FROM "+table_name #sql query
 
             csv_data = DBObject.select_records(connection,sql_command) #execute sql commnad if data exist then return data else return None
+            
             if csv_data is None or len(csv_data) == 0:
                 raise TableDataNotFound(500)
 
             column_name_list = csv_data.columns.values.tolist() # covert the dataframe into list
 
-            no_of_rows = csv_data.shape[1]
+            no_of_rows = csv_data.shape[0]
 
             attribute_type = [] #empty list to append attribute type
             
@@ -126,7 +127,8 @@ class SchemaClass:
                 column_data = csv_data[column_name].tolist() #get the specified column data convert into list
 
                 unique_values = list(set(column_data)) #get the set of unique values convert into list
-
+                
+                
                 if (len(unique_values)/no_of_rows) < 0.2 :
                     if "," in str(column_data[1]): #check if the comma value present
                         value = "categorical list"
@@ -138,8 +140,10 @@ class SchemaClass:
                     datatype_value = csv_data.dtypes.to_dict()[column_name] #get datatype specified for perticular column name
                     if datatype_value in ['float64','float32','int32','int64']: #check if int,float,double present then set it "numerical"
                         value = "numerical"
+
                     elif datatype_value in ['datetime64[ns]']: #check if datetime value present then set it "timestamp"
                         value = "timestamp"
+
                     elif datatype_value in ['object']:  #check if object type value present then set it "text"
                             value = "text"
                 attribute_type.append(value) #append type attribute value into list 
@@ -179,7 +183,9 @@ class SchemaClass:
                     #check if change column and  prev column are same or not
                     if schema_data[count]["change_column_name"] == schema_data[count]["column_name"]: 
                         raise SameColumnNameFound(500)
+
                     change_col_name = str(schema_data[count]["change_column_name"])
+
                     if change_col_name.find('(') !=-1 or  change_col_name.find(')') !=-1 or change_col_name.find('%')!=-1:
                         raise InvalidColumnName(500)
 
@@ -228,7 +234,6 @@ class SchemaClass:
         1)For the column been selected and target , 
         2)For the column been ignore
         3)For the column name updated
-        4)For "Save as" option Updated dataset name inserted by user
 
         Args:
                 project_id[(Integer)]:[Id of the project]
@@ -262,9 +267,6 @@ class SchemaClass:
                 #get the activity dataframe based on id
                 activity_df = timeline_Obj.get_activity(id,"US")
 
-                #extract the activity name from dataframe
-                activity_name = activity_df[0]["activity_name"]
-
                 #extract the activity description from dataframe
                 activity_description = "{x}".format(x=activity_df[0]["activity_description"])
 
@@ -297,11 +299,9 @@ class SchemaClass:
                 #get the time stamp
                 timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
 
-                #extract the operation from the dataframe
-                operation = activity_df[0]["operation"]
 
                 #insert data into activity table
-                status = timeline_Obj.insert_user_activity(user_name,project_id,dataset_id,activity_name,activity_description,timestamp,operation)
+                status = timeline_Obj.insert_user_activity(id,user_name,project_id,dataset_id,activity_description,timestamp)
                 
                 #return 1 if insertion failed 
                 if status==False:
@@ -485,7 +485,7 @@ class SchemaClass:
             table_name,_,_ = self.get_schema()
             
             # sql command to get details from schema table  based on  schema id 
-            sql_command = " SELECT * FROM "+table_name+" WHERE schema_id ='"+str(schema_id)+"' order by index"
+            sql_command = "select case when changed_column_name='' then column_name else changed_column_name end column_list,index,data_type,column_attribute  from mlaas.schema_tbl where schema_id="+str(schema_id)+" and column_attribute !='Ignore' order by index"           
         
             #execute sql commnad if data exist then return dataframe else return None
             schema_df = DBObject.select_records(connection,sql_command) 
@@ -494,10 +494,10 @@ class SchemaClass:
                 raise SchemaDataNotFound(500)
 
             #store all the schema table data into 
-            index,column_name,changed_column_name,data_type,column_attribute = schema_df['index'],schema_df['column_name'],schema_df['changed_column_name'],schema_df['data_type'],schema_df['column_attribute']
+            index,column_name,data_type,column_attribute = schema_df['index'],schema_df['column_list'],schema_df['data_type'],schema_df['column_attribute']
             
             #get the appropriate structure format  
-            schema_data=json_obj.get_schema_format(index,column_name,changed_column_name,data_type,column_attribute)
+            schema_data=json_obj.get_schema_format(index,column_name,data_type,column_attribute)
             
             logging.info("data preprocess : SchemaClass : get_schema_data : execution stop")
             return schema_data
