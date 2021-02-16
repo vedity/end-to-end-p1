@@ -15,15 +15,6 @@ from sqlalchemy import create_engine
 import json
 import logging
 
-# # from common.utils.logger_handler import custom_logger as cl
-
-# user_name = 'admin'
-# log_enable = True
-
-# LogObject = cl.LogClass(user_name,log_enable)
-# LogObject.log_setting()
-
-# logger = logging.getLogger('dataset_creation')
 
 class DBClass:
 

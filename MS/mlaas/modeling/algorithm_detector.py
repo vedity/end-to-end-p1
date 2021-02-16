@@ -6,7 +6,7 @@ class AlgorithmDetector:
         self.DBObject = DBObject
         self.connection = connection
         self.algorithm_type, self.model_type = self.set_model_type(target_df)
-        self.models_list = self.show_models_list()
+        # self.models_list = self.show_models_list()
         
 
 
@@ -21,32 +21,30 @@ class AlgorithmDetector:
         """
         algorithm_type = None
         model_type = None
-        if len(target_df) == 0:
-            algorithm_type = 'unsupervised'
-            self.algorithm_type, self.model_type = algorithm_type, model_type
-            return algorithm_type, model_type
-        else:
-            target_shape = target_df.shape
+        
+        target_shape = target_df.shape
+        total_length = target_shape[0]
+        unq_length = len(target_df.iloc[:,1].unique())
+        threshold = int((total_length * 10) / 100)
+
+        if threshold < unq_length :
+            model_type = 'Regression'
+            
             if target_shape[1] == 2:
                 algorithm_type = 'Single_Target'
             elif target_shape[1] > 2:
                 algorithm_type = 'Multi_Target'
-            total_length = target_shape[0]
-            # print(target_shape)
-            print('Algorithm Detector:- ', target_shape)
-            unq_length = len(target_df.iloc[:,1].unique())
-
-            threshold = int((total_length * 20) / 100)
-
-            if threshold < unq_length :
-                model_type = 'Regression'
-            else:
-                if unq_length == 2:
-                    model_type = 'Binary_Classification'
-                elif unq_length > 2:
-                    model_type = 'MultiClass_Classification'
-            self.algorithm_type, self.model_type = algorithm_type, model_type
-            return algorithm_type, model_type
+            
+        else:
+            model_type = 'Classification'
+            if unq_length == 2:
+                algorithm_type = 'Binary_Classification'
+            elif unq_length > 2:
+                algorithm_type = 'MultiClass_Classification'
+                
+        self.algorithm_type, self.model_type = algorithm_type, model_type
+        
+        return algorithm_type, model_type
 
 
     def get_model_types(self):

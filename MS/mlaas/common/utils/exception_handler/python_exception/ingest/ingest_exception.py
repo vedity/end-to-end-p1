@@ -150,9 +150,6 @@ class SchemaInsertionFailed(Exception):
     def __str__(self):
         return (self.msg)
 
-
-
-
 class RowsColumnRequired(Exception):
     """  """
     def __init__(self,status_code):
@@ -163,3 +160,12 @@ class RowsColumnRequired(Exception):
     def __str__(self):
         return (self.msg)
 
+class RawDatasetDeletionFailed(Exception):
+    """Dataset Deletion Failed Exception"""
+    def __init__(self,status_code):
+        self.msg = " Raw dataset deletion failed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+
+    def __str__(self):
+        return (self.msg)
