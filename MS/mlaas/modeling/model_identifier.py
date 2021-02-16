@@ -15,12 +15,22 @@ import re
 import logging
 import traceback
 import datetime
+from .algorithm_detector import AlgorithmDetector
 from .utils.supervised.supervised_model import SupervisedClass as SC
 from .utils.model_experiments.model_experiment import ExperimentClass as EC
+from .algorithm_detector import AlgorithmDetector
 # from utils.unsupervised.unsupervised_model import UnSupervisedClass as USC
 from .split_data import SplitData
 from common.utils.database import db
-from .algorithm_detector import AlgorithmDetector
+from common.utils.logger_handler import custom_logger as cl
+
+user_name = 'admin'
+log_enable = True
+
+LogObject = cl.LogClass(user_name,log_enable)
+LogObject.log_setting()
+
+logger = logging.getLogger('model_identifier')
 
 class ModelClass(SC, EC, SplitData):
     
@@ -30,38 +40,44 @@ class ModelClass(SC, EC, SplitData):
         
         """This is used to initialise the basic input parameter for the model. 
         """
-        print('ModelClass:- ', input_features_list)
-        self.Model_Mode = Model_Mode
-        self.input_features_list = input_features_list
-        self.target_features_list = target_features_list
-        self.project_id = project_id
-        self.dataset_id = dataset_id
-        self.user_id = user_id
-        # self.split_data_object 
+        
+        self.Model_Mode = Model_Mode # Get Mode Mode
+        self.input_features_list = input_features_list # Get Input Features List
+        self.target_features_list = target_features_list # Get Target Features List
+        self.project_id = project_id # Get Project Id
+        self.dataset_id = dataset_id # Get Datset Id
+        self.user_id = user_id # Get User Id
+        # Get Database Object,Connection And Connection String
         self.DBObject, self.connection, self.connection_string = DBObject,connection,connection_string
         # self.algorithm_type, self.model_type = self.get_model_type(self.get_scaled_data()[1])
-        self.algorithm_detector = AlgorithmDetector(self.get_scaled_data()[1], self.DBObject, self.connection)
+        # self.algorithm_detector = AlgorithmDetector(self.get_scaled_data()[1], self.DBObject, self.connection)
         # self.model_name = None
 
     def algorithm_identifier(self,basic_split_parameters):
+        
+        logging.info("modeling : ModelClass : algorithm_identifier : execution start")
         
         """This function is used to identify the algorithm based on target selected.
             if target is selected then call superived algorithm.
             else call the unsupervised algorithm. 
         """
+        # It will check wheather it is supervised algorithm or not.
         if len(self.target_features_list) > 0:
-             # call  supervised class
-            self.supervised_algorithm(basic_split_parameters)
+            SplitDataObject = self.split_dataset(basic_split_parameters)
+             # call  supervised algorithm method
+            self.supervised_algorithm(SplitDataObject)
             
         else:
-            # call  unsupervised class
+            # call  unsupervised algorithm method
             self.unsupervised_algorithm()
+            
+        logging.info("modeling : ModelClass : algorithm_identifier : execution end")
            
             
     
-        # Get Model Id,Model Name and Model Hyper Parameter
+       
         
-    def run_model(self,model_id,model_name,model_type, split_data_object):
+    def run_model(self,model_id,model_name,model_type, SplitDataObject):
         """This function is used to run model when model mode is in manual. 
 
         Args:
@@ -70,13 +86,13 @@ class ModelClass(SC, EC, SplitData):
             model_type ([string]): [type of the model.]
             split_data_object ([Object of Class SplitData]): [Train-Test splitting parameters for the model.]
         """
-        
-        # Get scaled data
+        logging.info("modeling : ModelClass : run_model : execution start")
+        # Get Scaled Data With Input And Target 
         input_df,target_df = self.get_scaled_data()
         
-        # check whether model type is regression or classification.
+        # Check Whether Model Type Is Regression Or Classification.
         if model_type == 'Regression_Model':
-            # call the super class (SupervisedClass) method's. 
+            # Call The Super Class (SupervisedClass) Method's. 
             super(ModelClass,self).run_regression_model(model_id,
                                                        model_name,
                                                        model_type,
@@ -85,7 +101,7 @@ class ModelClass(SC, EC, SplitData):
                                                        self.target_features_list,
                                                        input_df,
                                                        target_df,
-                                                       split_data_object,
+                                                       SplitDataObject,
                                                        self.DBObject, 
                                                        self.connection, 
                                                        self.connection_string,
@@ -95,7 +111,7 @@ class ModelClass(SC, EC, SplitData):
             
             
         else:
-            # call the super class (SupervisedClass) method's. 
+            # Call The Super Class (SupervisedClass) Method's. 
             super(ModelClass,self).run_classification_model(model_id,
                                                        model_name,
                                                        model_type,
@@ -104,31 +120,35 @@ class ModelClass(SC, EC, SplitData):
                                                        self.target_features_list,
                                                        input_df,
                                                        target_df,
-                                                       split_data_object,
+                                                       SplitDataObject,
                                                        self.DBObject, 
                                                        self.connection, 
                                                        self.connection_string,
                                                        self.project_id,
                                                        self.dataset_id,
                                                        self.user_id)
+            
+        logging.info("modeling : ModelClass : run_model : execution end")
 
     
-    def supervised_algorithm(self,basic_split_parameters):
+    def supervised_algorithm(self,SplitDataObject):
         """This function is used to call supervised algorithm.
         """
-        
-        # Get scaled data
+        logging.info("modeling : ModelClass : supervised_algorithm : execution start")
+        # Get Scaled Data With Input And Target
         input_df,target_df = self.get_scaled_data()
-         
-        print("******************** IN Model Identifier Class ***************************") 
         
-        # call the super class (SupervisedClass) method's.                                                                                                                            
+        AlgorithmDetectObject = AlgorithmDetector(target_df, self.DBObject, self.connection)
+        
+        # Call The Super Class (SupervisedClass) Method's.                                                                                                                           
         super(ModelClass,self).supervised_algorithm(self.Model_Mode,
                                                     self.input_features_list,
                                                     self.target_features_list,
                                                     input_df,
                                                     target_df,
-                                                    basic_split_parameters,
+                                                    SplitDataObject,
+                                                    AlgorithmDetectObject.model_type,
+                                                    AlgorithmDetectObject.algorithm_type,
                                                     self.DBObject, 
                                                     self.connection, 
                                                     self.connection_string,
@@ -136,33 +156,38 @@ class ModelClass(SC, EC, SplitData):
                                                     self.dataset_id,
                                                     self.user_id)
         
+        logging.info("modeling : ModelClass : supervised_algorithm : execution end")
+        
         
     
     def unsupervised_algorithm(self):
         """This function is used to call unsupervised algorithm.
         """
-        # Get Scaled Data
+        logging.info("modeling : ModelClass : unsupervised_algorithm : execution start")
+        # Get Scaled Data With Input And Target.
         input_df,_ = self.get_scaled_data()
-        print("yet not implemented")
+        logging.info("modeling : ModelClass : unsupervised_algorithm : execution end")
+        
     
     
-    def split_dataset(self, basic_split_parameters, model_id):
+    def split_dataset(self, basic_split_parameters):
         '''
         Input: split_dataset, a dictionary which contains key value pairs where keys are the train,test,
         validation ratios, split_method and cv value.
             
         This function creates an object of the Class SplitData and returns this object.
         '''
-        split_data_object = SplitData(basic_split_parameters, model_id, self.DBObject, self.connection)
+        logging.info("modeling : ModelClass : split_dataset : execution start")
+        # Get Split Data Object
+        split_data_object = SplitData(basic_split_parameters,self.DBObject,self.connection) 
+        logging.info("modeling : ModelClass : split_dataset : execution end")
         return split_data_object
 
 
     def get_dataset_info(self):
-        """Returns the project name, dataset name and the target column names
-
-        Returns:
-            [tuple]: [project's name, dataset's name, target column names]
-        """
+        
+        logging.info("modeling : ModelClass : get_dataset_info : execution start")
+       
 
         sql_command = 'select project_name from mlaas.project_tbl where project_id=' + str(self.project_id)
         project_df = self.DBObject.select_records(self.connection, sql_command)
@@ -173,11 +198,15 @@ class ModelClass(SC, EC, SplitData):
         dataset_name = dataset_df['dataset_name'][0]
 
         target_columns = self.target_features_list
+        
+        logging.info("modeling : ModelClass : get_dataset_info : execution end")
 
         return project_name, dataset_name, target_columns[1:]
 
 
     def get_scaled_data(self):
+        logging.info("modeling : ModelClass : get_scaled_data : execution start")
+        # DBObject, connection, _ = self.get_db_connection()
         """Returns the data that will be preprocessed by the user in the preprocessing stage.
 
         Returns:
@@ -191,6 +220,7 @@ class ModelClass(SC, EC, SplitData):
         print('get_scaled_data:- ', self.target_features_list)
         input_features_df= scaled_df[self.input_features_list]  # by using self.input_features_list. must include unique seq id
         target_features_df = scaled_df[self.target_features_list]  # by using self.target_features_list .must include unique seq id
+        logging.info("modeling : ModelClass : get_scaled_data : execution end")
         return input_features_df,target_features_df
 
     
@@ -221,64 +251,3 @@ class ModelClass(SC, EC, SplitData):
 
 
 
-# Basic Parameters
-
-# Model_Mode = 'Auto' # 'Manual'
-
-# input_features_list = ['seq_id','house_size','bedrooms','bathrooms']
-# target_features_list = ['seq_id','price']   
-
-# # input_features_list = ['seq_id','attendence','assignment','marks']
-# # target_features_list = ['seq_id','results']   
-
-# project_id = 2
-# dataset_id = 2
-# user_id = 1
-
-
-# # Call The Model Class
-# ModelObject = ModelClass(Model_Mode,
-#                             input_features_list,
-#                             target_features_list,
-#                             project_id,
-#                             dataset_id, 
-#                             user_id)
-
-
-# # If Manual Mode Then Give Below Details #########
-
-# if Model_Mode == 'Auto':
-
-#     basic_split_parameters = {'model_mode': 'auto'}
-
-#     split_data_object = ModelObject.get_split_data_object(basic_split_parameters)
-#     ModelObject.algorithm_identifier(split_data_object)
-# else:
-#     model_id = 1
-#     model_name = 'linear regression'
-#     model_type = 'Regression_Model'
-#     model_parameters = {None}
-
-#     basic_split_parameters = {'model_mode': 'manual', 'split_method': 'cross_validation',
-#     'cv': 5, 'valid_size': None, 'test_size': 0.2, 'random_state': 0}
-
-    # split_data_object = ModelObject.get_split_data_object(basic_split_parameters)
-    
-#     ModelObject.run_model(model_id, model_name, model_type, split_data_object)
-
-
-
-
-
-
-
-    # ASK ABOUT RANDOM_STATE.
-
-    # ADD RANDOM_STATE IN UI, AND ASK THE REST PEOPLE TO GET IT'S VALUE.
-    
-    # ModelObject-> MO
-
-    # MO(constructor)
-    # split_data_object = MO.split_data_object(split_dictionary)
-    # MO.run_model(...., split_data_object)
-    # MO.get_dataset_info()

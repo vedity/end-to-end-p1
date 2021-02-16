@@ -16,8 +16,6 @@ CREATE TABLE mlaas.user_auth_table (
 CREATE TABLE mlaas.model_experiment_tbl (
  	exp_unq_id bigserial,
     experiment_id  integer,
-    experiment_name  text,
-    experiment_desc text,
     run_uuid text,
     project_id bigint,
     dataset_id bigint,
