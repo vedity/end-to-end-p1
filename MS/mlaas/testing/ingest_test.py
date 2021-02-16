@@ -8,14 +8,14 @@ logger = logging.getLogger('django')
 
 
 
-# class TestLogin(unittest.TestCase):
-#     def testA_validlogin(self):
-#         response = requests.post("http://localhost:8000/mlaas/ingest/common/user/login")
-#         info = {"user_name":"nisha","password":"nisha"}
-#         response1 = requests.get("http://localhost:8000/mlaas/ingest/common/user/login",params=info)
-#         json_response = response1.json()
-#         status = json_response["status_code"]
-#         self.assertEqual(status,"200")
+class TestLogin(unittest.TestCase):
+    def testA_validlogin(self):
+        response = requests.post("http://localhost:8000/mlaas/ingest/common/user/login")
+        info = {"user_name":"nisha","password":"nisha"}
+        response1 = requests.get("http://localhost:8000/mlaas/ingest/common/user/login",params=info)
+        json_response = response1.json()
+        status = json_response["status_code"]
+        self.assertEqual(status,"200")
 
 #     def testB_invalidlogin(self):
 #         info = {"user_name":"abc","password":"xyz"}
@@ -44,25 +44,25 @@ logger = logging.getLogger('django')
 #         status = json_response["status_code"]
 #         self.assertEqual(status,"200")
 
-class TestAIngestPostDatasetClass(unittest.TestCase):
-    def testA_scenario1_insert_dataset(self):
-        """This function is used to test the CreateDataset POST Method With valid Data Inputs .
+# class TestAIngestPostDatasetClass(unittest.TestCase):
+#     def testA_scenario1_insert_dataset(self):
+#         """This function is used to test the CreateDataset POST Method With valid Data Inputs .
 
-        Args:
-            user_name ([string]): [name of the user.]
-            dataset_name ([string]): [name of the dataset.],
-            visibility ([string]): [name of the visibility(public or private)]
-            inputfile([file]): [CSV file]
+#         Args:
+#             user_name ([string]): [name of the user.]
+#             dataset_name ([string]): [name of the dataset.],
+#             visibility ([string]): [name of the visibility(public or private)]
+#             inputfile([file]): [CSV file]
     
-        """
+#         """
         
-        files = '../ingest/dataset/CarPrice_Assignment.csv'
-        file = {'inputfile': open(files, 'rb')}
-        info = {"user_name":"nisha","dataset_name":"auto_dataset_name","visibility":"public"}
-        response = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
-        json_response = response.json()
-        status = json_response["status_code"]
-        self.assertEqual(status,"200")
+#         files = '../ingest/dataset/CarPrice_Assignment.csv'
+#         file = {'inputfile': open(files, 'rb')}
+#         info = {"user_name":"nisha","dataset_name":"auto_dataset_name","visibility":"public"}
+#         response = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
+#         json_response = response.json()
+#         status = json_response["status_code"]
+#         self.assertEqual(status,"200")
 
     # def testAB_dataset_creationactivity(self):
     #     time.sleep(2)
