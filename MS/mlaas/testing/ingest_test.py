@@ -72,7 +72,7 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
         status = json_response["status_code"]
         self.assertEqual(status,"200")
 
-    def testAA_dataset_creationactivity(self):
+    def testAB_dataset_creationactivity(self):
         time.sleep(2)
         response = requests.post("http://localhost:8000/mlaas/common/activity/")
         info ={"user_name":"autouser"}
