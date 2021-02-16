@@ -20,7 +20,7 @@ import uuid
 from ...model_utils.sklearn_regression import linear_regressor
 from ...model_experiments import model_experiment
 from sklearn.model_selection import train_test_split
-from ....split_data import SplitData
+# from ....split_data import SplitData
 
 
 from common.utils.logger_handler import custom_logger as cl
@@ -36,25 +36,25 @@ logger = logging.getLogger('model_identifier')
 class RegressionClass:
 
   
-    def regression_model(self,Model_Mode,input_features_list,target_features_list, input_df, target_df, 
-                    basic_split_parameters, DBObject, connection, connection_string, project_id,dataset_id,user_id):
+    def regression_model(self,Model_Mode,input_features_list,target_features_list, X_train, X_valid, X_test, y_train, y_valid, y_test,
+                    SplitDataObject, model_type, algorithm_type, DBObject, connection, connection_string, project_id,dataset_id,user_id):
         
         """This function is used to run regression type model.
         """
         logging.info("modeling : RegressionClass : regression_model : execution start")
-        
-        model_type = 'Regression_Model'
-    
+
         # Call private method of the current class .
         self.all_regression_model(Model_Mode,input_features_list,target_features_list,
                                   project_id,dataset_id,user_id,
-                                  X_train, X_valid, X_test, Y_train, Y_valid, Y_test, split_data_object, model_type)
+                                  X_train, X_valid, X_test, y_train, y_valid, y_test, SplitDataObject, 
+                                  model_type, algorithm_type, DBObject, connection, connection_string)
         
         logging.info("modeling : RegressionClass : regression_model : execution end")
     
     # This is for auto model run   
     def all_regression_model(self,Model_Mode,input_features_list,target_features_list, project_id,dataset_id,
-                            user_id, input_df, target_df, basic_split_parameters, DBObject, connection, connection_string, model_type):
+                            user_id, X_train, X_valid, X_test, y_train, y_valid, y_test, SplitDataObject, model_type, algorithm_type, 
+                            DBObject, connection, connection_string):
         
         """This function is used to run all regression type model.
         """
@@ -63,9 +63,10 @@ class RegressionClass:
         mlflow.set_tracking_uri("postgresql+psycopg2://postgres:admin@postgresql:5432/postgres")
         
         # First Algorithm
-        self.linear_regression_sklearn(Model_Mode,input_features_list,target_features_list,
-                             project_id,dataset_id,user_id, input_df, target_df, basic_split_parameters, DBObject, 
-                             connection, connection_string, model_type)
+        if algorithm_type == 'Single_Target':
+            self.linear_regression_sklearn(Model_Mode,input_features_list,target_features_list,
+                                project_id,dataset_id,user_id, X_train, X_valid, X_test, y_train, y_valid, y_test, 
+                                SplitDataObject, DBObject, connection, connection_string)
         
         logging.info("modeling : RegressionClass : all_regression_model : execution end")
         
@@ -127,7 +128,8 @@ class RegressionClass:
 
 
     def linear_regression_sklearn(self,Model_Mode,input_features_list,target_features_list,
-                             project_id,dataset_id,user_id, input_df, target_df, basic_split_parameters, DBObject, connection, connection_string, model_type):
+                             project_id,dataset_id,user_id, X_train, X_valid, X_test, y_train, y_valid, y_test, SplitDataObject, 
+                             DBObject, connection, connection_string):
         
         logging.info("modeling : RegressionClass : linear_regression_sklearn : execution start")
         ## TODO : we have to get class file also based on model type. 
@@ -136,12 +138,21 @@ class RegressionClass:
         # model_name = 'Linear_Regression_With_Sklearn'
 
 
-        split_data_object = SplitData(basic_split_parameters, model_id, DBObject, connection)
-        X_train, X_valid, X_test, Y_train, Y_valid, Y_test = split_data_object.get_split_data(input_df, target_df)
+        # split_data_object = SplitData(basic_split_parameters, model_id, DBObject, connection)
+        # X_train, X_valid, X_test, Y_train, Y_valid, Y_test = split_data_object.get_split_data(input_df, target_df)
 
         # Create an experiment name, which must be unique and case sensitive
+        exp_name = "my first"
+        # Get from database
+        sql_command = "select experiment_id from experiments order by experiment_id desc limit 1"
+        counter = DBObject.select_records(connection, sql_command).iloc[0, 0]
+        if counter is None:
+            counter = 0
+        else:
+            counter += 1
+        
         id = uuid.uuid1() 
-        experiment_name = "EXP_"+ str(id.time)+"_"+str(project_id)+'_'+str(dataset_id)
+        experiment_name = SplitDataObject.model_mode.upper()+"_"+exp_name.upper() + "_" + str(counter)
         
         ## Below Basic Parameter Changes Based On Model
         # test_size = 0.20 # holdout
@@ -156,8 +167,8 @@ class RegressionClass:
         with mlflow.start_run(experiment_id=experiment_id) as run:
             ## Declare Object
             LRObject = linear_regressor.LinearRegressionClass(input_features_list, target_features_list, 
-                                                            X_train, X_valid, X_test, Y_train, Y_valid, 
-                                                            Y_test, split_data_object)
+                                                            X_train, X_valid, X_test, y_train, y_valid, 
+                                                            y_test, SplitDataObject)
             LRObject.run_pipeline()
         
         

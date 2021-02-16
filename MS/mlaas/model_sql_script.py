@@ -53,11 +53,12 @@ class ModelSqlClass:
         project_id = 2
         dataset_id = 2
         user_id = 2
-        # input_features = "['index','house_size','bedrooms','bathrooms']"
-        # target_features = "['index','price']" 
+        
         input_features = "['index','bedrooms','bathrooms','sqft_living','sqft_lot','floors','waterfront','view','condition','grade','sqft_above','sqft_basement','yr_built','yr_renovated','zipcode','lat','long','sqft_living15','sqft_lot15']"
         target_features = "['index','price']"
+        
         scaled_data_table = "kc_house_data"  
+        
         row=project_id,dataset_id,user_id,input_features,target_features,scaled_data_table 
         row_tuples = [tuple(row)] 
         
@@ -117,7 +118,7 @@ class ModelSqlClass:
         
         # Second Model
         
-        model_id = 1
+        model_id = 2
         model_name = "Linear Regression With Keras"
         model_desc = "this is simple linear model with keras"
         model_parameter = "['lr','batch_size','epoch','optimizer','loss','activation']"

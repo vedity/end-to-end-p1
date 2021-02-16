@@ -15,8 +15,10 @@ import re
 import logging
 import traceback
 import datetime
+from .algorithm_detector import AlgorithmDetector
 from .utils.supervised.supervised_model import SupervisedClass as SC
 from .utils.model_experiments.model_experiment import ExperimentClass as EC
+from .algorithm_detector import AlgorithmDetector
 # from utils.unsupervised.unsupervised_model import UnSupervisedClass as USC
 from .split_data import SplitData
 from common.utils.database import db
@@ -48,7 +50,7 @@ class ModelClass(SC, EC, SplitData):
         # Get Database Object,Connection And Connection String
         self.DBObject, self.connection, self.connection_string = DBObject,connection,connection_string
         # self.algorithm_type, self.model_type = self.get_model_type(self.get_scaled_data()[1])
-        self.algorithm_detector = AlgorithmDetector(self.get_scaled_data()[1], self.DBObject, self.connection)
+        # self.algorithm_detector = AlgorithmDetector(self.get_scaled_data()[1], self.DBObject, self.connection)
         # self.model_name = None
 
     def algorithm_identifier(self,basic_split_parameters):
@@ -61,8 +63,9 @@ class ModelClass(SC, EC, SplitData):
         """
         # It will check wheather it is supervised algorithm or not.
         if len(self.target_features_list) > 0:
+            SplitDataObject = self.split_dataset(basic_split_parameters)
              # call  supervised algorithm method
-            self.supervised_algorithm(split_data_object)
+            self.supervised_algorithm(SplitDataObject)
             
         else:
             # call  unsupervised algorithm method
@@ -74,7 +77,7 @@ class ModelClass(SC, EC, SplitData):
     
        
         
-    def run_model(self,model_id,model_name,model_type, split_data_object):
+    def run_model(self,model_id,model_name,model_type, SplitDataObject):
         """This function is used to run model when model mode is in manual. 
 
         Args:
@@ -98,7 +101,7 @@ class ModelClass(SC, EC, SplitData):
                                                        self.target_features_list,
                                                        input_df,
                                                        target_df,
-                                                       split_data_object,
+                                                       SplitDataObject,
                                                        self.DBObject, 
                                                        self.connection, 
                                                        self.connection_string,
@@ -117,7 +120,7 @@ class ModelClass(SC, EC, SplitData):
                                                        self.target_features_list,
                                                        input_df,
                                                        target_df,
-                                                       split_data_object,
+                                                       SplitDataObject,
                                                        self.DBObject, 
                                                        self.connection, 
                                                        self.connection_string,
@@ -128,19 +131,24 @@ class ModelClass(SC, EC, SplitData):
         logging.info("modeling : ModelClass : run_model : execution end")
 
     
-    def supervised_algorithm(self,basic_split_parameters):
+    def supervised_algorithm(self,SplitDataObject):
         """This function is used to call supervised algorithm.
         """
         logging.info("modeling : ModelClass : supervised_algorithm : execution start")
         # Get Scaled Data With Input And Target
         input_df,target_df = self.get_scaled_data()
+        
+        AlgorithmDetectObject = AlgorithmDetector(target_df, self.DBObject, self.connection)
+        
         # Call The Super Class (SupervisedClass) Method's.                                                                                                                           
         super(ModelClass,self).supervised_algorithm(self.Model_Mode,
                                                     self.input_features_list,
                                                     self.target_features_list,
                                                     input_df,
                                                     target_df,
-                                                    basic_split_parameters,
+                                                    SplitDataObject,
+                                                    AlgorithmDetectObject.model_type,
+                                                    AlgorithmDetectObject.algorithm_type,
                                                     self.DBObject, 
                                                     self.connection, 
                                                     self.connection_string,
@@ -162,7 +170,7 @@ class ModelClass(SC, EC, SplitData):
         
     
     
-    def split_dataset(self, basic_split_parameters, model_id):
+    def split_dataset(self, basic_split_parameters):
         '''
         Input: split_dataset, a dictionary which contains key value pairs where keys are the train,test,
         validation ratios, split_method and cv value.
@@ -171,7 +179,7 @@ class ModelClass(SC, EC, SplitData):
         '''
         logging.info("modeling : ModelClass : split_dataset : execution start")
         # Get Split Data Object
-        split_data_object = SplitData(basic_split_parameters,model_id,self.DBObject,self.Connection) 
+        split_data_object = SplitData(basic_split_parameters,self.DBObject,self.connection) 
         logging.info("modeling : ModelClass : split_dataset : execution end")
         return split_data_object
 

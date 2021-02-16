@@ -28,43 +28,53 @@ class SupervisedClass(RC,PC):
     
 
     def supervised_algorithm(self,Model_Mode,input_features_list,target_features_list,
-                             input_df,target_df, basic_split_parameters, DBObject, connection, 
+                             input_df,target_df, SplitDataObject, model_type, algorithm_type, DBObject, connection, 
                              connection_string, project_id,dataset_id,user_id):
         
         """This function is used to call supervised algorithm.
         """
         logging.info("modeling : SupervisedClass : supervised_algorithm : execution start")
     
-        reg_type = 0
-        cls_type = 0
-        for i in range(1,len(target_df.columns)):
-            Total_Length = len(target_df.iloc[:,i])
-            Unq_Length = len(target_df.iloc[:,i].unique())
+        # reg_type = 0
+        # cls_type = 0
+        
+        # for i in range(1,len(target_df.columns)):
+        #     Total_Length = len(target_df.iloc[:,i])
+        #     Unq_Length = len(target_df.iloc[:,i].unique())
             
-            Thresh_Hold = int((Total_Length * 10) / 100)
+        #     Thresh_Hold = int((Total_Length * 10) / 100)
             
-            if Thresh_Hold < Unq_Length :
-                reg_type = 1
-            else:
-                cls_type = 1
+        #     if Thresh_Hold < Unq_Length :
+        #         reg_type = 1
+        #     else:
+        #         cls_type = 1
 
         # It will check whether target is regressor or classifier.
-        if reg_type > 0 and cls_type == 0 :
+        X_train, X_valid, X_test, y_train, y_valid, y_test = SplitDataObject.get_split_data(input_df, target_df)
+        
+        if model_type == "Regression" :
             # Call Regression Class's method
             super(SupervisedClass,self).regression_model(Model_Mode,
-                                                         input_features_list,
-                                                         target_features_list,
-                                                         input_df,
-                                                         target_df,
-                                                         basic_split_parameters,
-                                                         DBObject, 
-                                                         connection, 
-                                                         connection_string,
-                                                         project_id,
-                                                         dataset_id,
-                                                         user_id)
-                                            
-        elif cls_type > 0 and reg_type == 0  :
+                                                        input_features_list,
+                                                        target_features_list,
+                                                        X_train, 
+                                                        X_valid,
+                                                        X_test, 
+                                                        y_train, 
+                                                        y_valid, 
+                                                        y_test,
+                                                        SplitDataObject,
+                                                        model_type,
+                                                        algorithm_type,
+                                                        DBObject, 
+                                                        connection, 
+                                                        connection_string,
+                                                        project_id,
+                                                        dataset_id,
+                                                        user_id)
+                
+                                                
+        elif model_type == "Classification" :
             
             # Call Probabilistic Class's method
             super(SupervisedClass,self).classification_model(Model_Mode,
@@ -73,10 +83,10 @@ class SupervisedClass(RC,PC):
                                                          X_train, 
                                                          X_valid,
                                                          X_test, 
-                                                         Y_train, 
-                                                         Y_valid, 
-                                                         Y_test,
-                                                         split_data_object, 
+                                                         y_train, 
+                                                         y_valid, 
+                                                         y_test,
+                                                         SplitDataObject, 
                                                          DBObject, 
                                                          connection, 
                                                          connection_string,
@@ -86,6 +96,7 @@ class SupervisedClass(RC,PC):
         
         else:
             print("please select appropriate target")
+            
         logging.info("modeling : SupervisedClass : supervised_algorithm : execution end")
         
         
