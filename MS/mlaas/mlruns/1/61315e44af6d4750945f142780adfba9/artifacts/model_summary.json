@@ -1,0 +1,17 @@
+{
+  "Model Name": "linear Regression",
+  "Input Features": [
+    "house_size",
+    "bedrooms",
+    "bathrooms"
+  ],
+  "Target Features": [
+    "price"
+  ],
+  "Train Size": 16,
+  "Test Size": 4,
+  "Train Split": 0.8,
+  "Test Split": 0.2,
+  "Random State": 0,
+  "CV (K-Fold )": 5
+}

@@ -26,6 +26,7 @@ from sklearn.model_selection import ( train_test_split,
 from sklearn.metrics import ( mean_squared_error,
                              mean_absolute_error,
                              r2_score )
+# from MS.mlaas.modeling.views import SplitDataClass
 
 
 
@@ -33,14 +34,14 @@ from sklearn.metrics import ( mean_squared_error,
 class LinearRegressionClass:
     
     def __init__(self, input_features_list, target_features_list, X_train, X_valid, X_test, 
-                Y_train, Y_valid, Y_test, split_data_object):
+                y_train, y_valid, y_test, SplitDataObject):
         
         """This is used to initialise the model input parameter when model class is called.
         """
 
         self.input_features_list = input_features_list
         self.target_features_list = target_features_list
-        self.split_data_object = split_data_object
+        self.SplitDataObject = SplitDataObject
         # self.input_features_list.remove('index')
         self.input_features_list = input_features_list[1:]
         self.target_features_list = target_features_list[1:]
@@ -48,9 +49,9 @@ class LinearRegressionClass:
         self.X_train = X_train
         self.X_test = X_test
         self.X_valid = X_valid
-        self.y_train = Y_train
-        self.y_test = Y_test
-        self.y_valid = Y_valid
+        self.y_train = y_train
+        self.y_test = y_test
+        self.y_valid = y_valid
         
      
     
@@ -239,7 +240,7 @@ class LinearRegressionClass:
             
         train_size = X_train.shape[0]
         test_size = X_test.shape[0]
-        print('split_data_object:- ', self.split_data_object)
+        print('SplitDataObject:- ', self.SplitDataObject)
         # print(self.valid
         
         # print('Type of cv:- ', type(self.split_data_object.cv))
@@ -250,9 +251,9 @@ class LinearRegressionClass:
                          "Input Features":self.input_features_list,
                          "Target Features":self.target_features_list,
                          "Train Size":int(train_size),"Test Size":int(test_size),
-                         "Train Split":1-float(self.split_data_object.test_size),"Test Split":float(self.split_data_object.test_size),
-                         "Random State":int(self.split_data_object.random_state),
-                         "CV (K-Fold )":int(self.split_data_object.cv)}
+                         "Train Split":1-float(self.SplitDataObject.test_size),"Test Split":float(self.SplitDataObject.test_size),
+                         "Random State":int(self.SplitDataObject.random_state),
+                         "CV (K-Fold )":int(self.SplitDataObject.cv)}
         print(model_summary)
         return model_summary
       
@@ -271,9 +272,9 @@ class LinearRegressionClass:
         X_train = X_train[self.input_features_list]
         y_train = y_train[self.target_features_list]
         
-        shuffle = KFold(n_splits=self.split_data_object.cv,
+        shuffle = KFold(n_splits=self.SplitDataObject.cv,
                     shuffle=True,
-                    random_state=self.split_data_object.cv)
+                    random_state=self.SplitDataObject.cv)
         
         cv_scores = cross_val_score(estimator=LinearRegression(),
                                 X=X_train,
@@ -340,10 +341,10 @@ class LinearRegressionClass:
         
         
         # log mlflow parameter
-        mlflow.log_param("random state", self.split_data_object.random_state)
-        mlflow.log_param("train size", 1-self.split_data_object.test_size)
-        mlflow.log_param("test size", self.split_data_object.test_size)
-        mlflow.log_param("k-fold", self.split_data_object.cv)
+        mlflow.log_param("random state", self.SplitDataObject.random_state)
+        mlflow.log_param("train size", 1-self.SplitDataObject.test_size)
+        mlflow.log_param("test size", self.SplitDataObject.test_size)
+        mlflow.log_param("k-fold", self.SplitDataObject.cv)
         
         # log mlflow matrix
         mlflow.log_metric("r2 score", r2score)
