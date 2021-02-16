@@ -1,6 +1,6 @@
 # DataBase Credintials 
-database="postgres"
-user = "postgres" 
-password = "admin"
+database="airflow"
+user = "airflow" 
+password = "airflow"
 host = "postgresql"
 port = "5432"
