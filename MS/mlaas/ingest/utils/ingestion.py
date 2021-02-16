@@ -26,7 +26,7 @@ from common.utils.exception_handler.python_exception.common.common_exception imp
 from common.utils.exception_handler.python_exception.ingest.ingest_exception import *
 from common.utils.logger_handler import custom_logger as cl
 from django.core.files.storage import FileSystemStorage
-
+from dateutil.parser import parse
 user_name = 'admin'
 log_enable = True
 
@@ -222,13 +222,19 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             data_details_df,filtercount = super(IngestClass,self).show_data_details(DBObject,connection,original_dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter,schema_id) # Get dataframe of loaded csv.
             if data_details_df is None :
                 raise DataNotFound(500)
-            # data_type = data_details_df.dtypes.to_dict()
+            data_type = data_details_df.dtypes.to_dict()
+            logging.info(data_details_df)  
             # for k,v in data_type.items():
             #     if v in ['datetime64[ns]']:
-            #         for c in data_details_df[k]:
-            #             data_details_df[k]=datetime.datetime.date(c)
+                   
+            #         data_details_df[k]=data_details_df[k].dt.date
             #         logging.info(data_details_df[k])
+            #         # for c in data_details_df[k]:
+            #         #     #logging.info(datetime.datetime.date(c))
+            #         #     c = ""
+            
             data_details_df=data_details_df.to_json(orient='records',date_format='iso')
+            logging.info(data_details_df)
             data_details_df = json.loads(data_details_df)
             if len(data_details_df) == 0 :
                 raise DataNotFound(500)
