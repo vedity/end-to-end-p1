@@ -18,7 +18,7 @@ export class DataCleanupComponent implements OnInit {
   displaytitle = "false";
   errorStatus = true;
   data: any={
-    experment_name:"",
+    experiment_name:"",
     experiment_desc:""
   };
   animation = "progress-dark";
@@ -57,7 +57,7 @@ export class DataCleanupComponent implements OnInit {
     this.data.dataset_id=this.dataset_id;
     this.data.user_id=JSON.parse(user).id;
     console.log(this.data);
-    localStorage.setItem("Modeling",this.data);
+    localStorage.setItem("Modeling",JSON.stringify(this.data));
    // this.data.model_mode="auto";
     this.router.navigate(["modeling"]);
 

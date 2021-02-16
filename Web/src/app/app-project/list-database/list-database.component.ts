@@ -53,14 +53,22 @@ export class ListDatabaseComponent implements OnInit {
       this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
         dtInstance.columns().every(function () {
           const that = this;
-          $('input', this.header()).on('keyup change', function () {
-            if (that.search() !== this['value']) {
-              that
-                .search(this['value'])
-                .draw();
-            }
-          });
-          $('select', this.header()).on('change', function () {
+          // $('input', this.header()).on('keyup change', function () {
+          //   if (that.search() !== this['value']) {
+          //     that
+          //       .search(this['value'])
+          //       .draw();
+          //   }
+          // });
+          // $('select', this.header()).on('change', function () {
+          //   if (that.search() !== this['value']) {
+          //     that
+          //       .search(this['value'])
+          //       .draw();
+          //   }
+          // });
+
+          $('#input_'+ this.index("visible")).on('keyup change', function () {
             if (that.search() !== this['value']) {
               that
                 .search(this['value'])
@@ -159,20 +167,27 @@ export class ListDatabaseComponent implements OnInit {
     this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
       dtInstance.columns().every(function () {
         const that = this;
-        $('input', this.header()).on('keyup change', function () {
+        $('#input_'+ this.index("visible")).on('keyup change', function () {
           if (that.search() !== this['value']) {
             that
               .search(this['value'])
               .draw();
           }
         });
-        $('select', this.header()).on('change', function () {
-          if (that.search() !== this['value']) {
-            that
-              .search(this['value'])
-              .draw();
-          }
-        });
+        // $('input', this.header()).on('keyup change', function () {
+        //   if (that.search() !== this['value']) {
+        //     that
+        //       .search(this['value'])
+        //       .draw();
+        //   }
+        // });
+        // $('select', this.header()).on('change', function () {
+        //   if (that.search() !== this['value']) {
+        //     that
+        //       .search(this['value'])
+        //       .draw();
+        //   }
+        // });
       });
       dtInstance.destroy();
     });
