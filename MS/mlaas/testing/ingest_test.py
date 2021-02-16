@@ -44,25 +44,25 @@ class TestLogin(unittest.TestCase):
 #         status = json_response["status_code"]
 #         self.assertEqual(status,"200")
 
-class TestAIngestPostDatasetClass(unittest.TestCase):
-    def testA_scenario1_insert_dataset(self):
-        """This function is used to test the CreateDataset POST Method With valid Data Inputs .
+# class TestAIngestPostDatasetClass(unittest.TestCase):
+#     def testA_scenario1_insert_dataset(self):
+#         """This function is used to test the CreateDataset POST Method With valid Data Inputs .
 
-        Args:
-            user_name ([string]): [name of the user.]
-            dataset_name ([string]): [name of the dataset.],
-            visibility ([string]): [name of the visibility(public or private)]
-            inputfile([file]): [CSV file]
+#         Args:
+#             user_name ([string]): [name of the user.]
+#             dataset_name ([string]): [name of the dataset.],
+#             visibility ([string]): [name of the visibility(public or private)]
+#             inputfile([file]): [CSV file]
     
-        """
-        time.sleep(1)
-        files = '../ingest/dataset/CarPrice_Assignment.csv'
-        file = {'inputfile': open(files, 'rb')}
-        info = {"user_name":"autouser","dataset_name":"auto_dataset_name","visibility":"public"}
-        response = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
-        json_response = response.json()
-        status = json_response["status_code"]
-        self.assertEqual(status,"200")
+#         """
+        
+#         files = '../ingest/dataset/CarPrice_Assignment.csv'
+#         file = {'inputfile': open(files, 'rb')}
+#         info = {"user_name":"nisha","dataset_name":"auto_dataset_name","visibility":"public"}
+#         response = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
+#         json_response = response.json()
+#         status = json_response["status_code"]
+#         self.assertEqual(status,"200")
 
     # def testAB_dataset_creationactivity(self):
     #     time.sleep(2)

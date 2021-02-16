@@ -140,6 +140,7 @@ class DBClass:
             connection.commit() # Commit the changes.
             return 0 # If successfully created.
         except (Exception, psycopg2.DatabaseError) as error:
+            logging.info(str(error))
             connection.rollback() # Rollback the changes.
             cursor.close() # Close the cursor
             return 1 # If failed.
