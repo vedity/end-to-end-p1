@@ -132,3 +132,9 @@ class RemoveNoiseClass:
                     valid_str = True
 
             return noisy, cleanable, valid_str
+        
+    def remove_noise(self, series, noisy_cols = None):
+        pass
+    
+    def replace_noise(self, series, noisy_cols = None, operation_type = 0, val = None):
+        pass
