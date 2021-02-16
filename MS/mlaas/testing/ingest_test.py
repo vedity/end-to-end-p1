@@ -53,7 +53,7 @@ class ATestIngestDataDeletion(unittest.TestCase):
         self.assertEqual(status,"200")      
 
 class TestAIngestPostDatasetClass(unittest.TestCase):
-    def testA_scenario1_insert_dataset(self):
+    def testAAA_scenario1_insert_dataset(self):
         """This function is used to test the CreateDataset POST Method With valid Data Inputs .
 
         Args:
@@ -141,6 +141,7 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
         json_response = response.json()
         status = json_response["status_code"]
         self.assertEqual(status,200)
+
     @unittest.expectedFailure
     def testE_scenario1_insert_invalid_dataset(self):
         """This function is used to test the CreateDataset POST Method With Invalid Data Inputs .

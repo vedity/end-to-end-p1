@@ -18,7 +18,7 @@ from common.utils.database import db
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.ingest.ingest_exception import *
 from common.utils.logger_handler import custom_logger as cl
-from preprocess.utils.schema_creation import *
+from preprocess.utils.schema.schema_creation import *
 from database import *
 
 schema_obj=SchemaClass() #initialize Schema object from schema class
@@ -121,23 +121,7 @@ class ProjectClass:
             dataset_id = schema_dataset_id
         else:
             
-            #sql command to get dataset_name based on original dataset id
-            sql_Command = "SELECT dataset_name from mlaas.dataset_tbl where dataset_id ='"+str(original_dataset_id)+"' "
-
-            #execute the sql command and get te dataframe if found else None
-            dataframe = DBObject.select_records(connection,sql_Command)
- 
-            #get the dataset_name
-            dataset_name = dataframe['dataset_name'][0]
-
-            #sql command to get Raw dataset id based on the dataset_name and page_name 
-            sql_Command = "SELECT dataset_id from mlaas.dataset_tbl where dataset_name='"+str(dataset_name)+"' and page_name ='schema mapping'"
-            
-            #execute the sql command and get te dataframe if found else None
-            dataframe = DBObject.select_records(connection,sql_Command)
- 
-            #get the dataset id
-            dataset_id = int(dataframe['dataset_id'][0])
+            dataset_id,_ = DBObject.get_raw_dataset_detail(connection,original_dataset_id)
            
         
         # Get row for project table.
@@ -156,7 +140,7 @@ class ProjectClass:
             
             #get the schema mapping details with column name and datatype
             column_name_list,column_datatype_list = schema_obj.get_dataset_schema(DBObject,connection,dataset_id) 
-
+            
             # column name and datatype will be inserted into schema table with schema id
             status=schema_obj.update_dataset_schema(DBObject,connection,schema_id,column_name_list,column_datatype_list)
             
