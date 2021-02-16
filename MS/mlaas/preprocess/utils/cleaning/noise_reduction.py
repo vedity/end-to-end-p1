@@ -138,3 +138,9 @@ class RemoveNoiseClass:
     
     def replace_noise(self, series, noisy_cols = None, operation_type = 0, val = None):
         pass
+    
+    def to_numeric_col(self, Series, string_cols):
+        pass
+    
+    def to_string_col(self, Series, cols):
+        pass
