@@ -5,24 +5,31 @@ import time
 unittest.TestLoader.sortTestMethodsUsing = None
 import logging
 logger = logging.getLogger('django')
+from common.utils.database import db
+from database import *
+from ingest.utils import ingestion
+from ingest.utils.ingestion import *
+
+DBObject=db.DBClass() #Get DBClass object
+connection,connection_string=DBObject.database_connection(database,user,password,host,port) #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
+IngestionObj=ingestion.IngestClass(database,user,password,host,port) #initialize the Ingest Class 
 
 
+# class TestLogin(unittest.TestCase):
+#     def testA_validlogin(self):
+#         response = requests.post("http://localhost:8000/mlaas/ingest/common/user/login")
+#         info = {"user_name":"nisha","password":"nisha"}
+#         response1 = requests.get("http://localhost:8000/mlaas/ingest/common/user/login",params=info)
+#         json_response = response1.json()
+#         status = json_response["status_code"]
+#         self.assertEqual(status,"200")
 
-class TestLogin(unittest.TestCase):
-    def testA_validlogin(self):
-        response = requests.post("http://localhost:8000/mlaas/ingest/common/user/login")
-        info = {"user_name":"nisha","password":"nisha"}
-        response1 = requests.get("http://localhost:8000/mlaas/ingest/common/user/login",params=info)
-        json_response = response1.json()
-        status = json_response["status_code"]
-        self.assertEqual(status,"200")
-
-    def testB_invalidlogin(self):
-        info = {"user_name":"abc","password":"xyz"}
-        response1 = requests.get("http://localhost:8000/mlaas/ingest/common/user/login",params=info)
-        json_response = response1.json()
-        status = json_response["status_code"]
-        self.assertEqual(status,"500")
+#     def testB_invalidlogin(self):
+#         info = {"user_name":"abc","password":"xyz"}
+#         response1 = requests.get("http://localhost:8000/mlaas/ingest/common/user/login",params=info)
+#         json_response = response1.json()
+#         status = json_response["status_code"]
+#         self.assertEqual(status,"500")
 
 # class ATestIngestDataDeletion(unittest.TestCase):
 #     def testA_scenario1_delete_dataset(self):
@@ -56,12 +63,17 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
     
         """
         
-        files = '../ingest/dataset/CarPrice_Assignment.csv'
+        
+        files = 'ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"nisha","dataset_name":"auto_dataset_name","visibility":"public","dataset_description":"dataset description"}
         response = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
         json_response = response.json()
         status = json_response["status_code"]
+        DBObject,connection,connection_string = IngestionObj.get_db_connection()
+        sql_cmd = "select * from mlaas.dataset_tbl"
+        record = DBObject.select_records(connection,sql_cmd)
+        print(record)
         self.assertEqual(json_response,"200")
 
     # def testAB_dataset_creationactivity(self):
