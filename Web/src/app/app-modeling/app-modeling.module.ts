@@ -24,6 +24,7 @@ import * as more from 'highcharts/highcharts-more.src';
 import * as exporting from 'highcharts/modules/exporting.src';
 import * as theme from 'highcharts/themes/dark-unica.src';
 import { ModelingTypeComponent } from './modeling-type/modeling-type.component';
+import { ModelingViewDetailComponent } from './modeling-view-detail/modeling-view-detail.component';
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   suppressScrollX: true,
@@ -31,7 +32,8 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
 };
 @NgModule({
   declarations: [
-    ModelingTypeComponent
+    ModelingTypeComponent,
+    ModelingViewDetailComponent
   ],
   imports: [
     CommonModule,

@@ -70,35 +70,31 @@
                                         <img class="sort-icon" src="sort_both.png">
                                         <img class="desc-icon" src="sort_desc.png">
                                         <img class="asc-icon" src="sort_asc.png">
-                                        <input class="form-control filter" type="text" [hidden]="filter" placeholder="Dataset Name" name="search-dataset-name" />
+
                                     </th>
                                     <th>Size
                                         <img class="sort-icon" src="sort_both.png">
                                         <img class="desc-icon" src="sort_desc.png">
                                         <img class="asc-icon" src="sort_asc.png">
-                                        <input class="form-control filter" type="text" [hidden]="filter" placeholder="Size" name="search-size" />
+
                                     </th>
                                     <th>No. of rows
                                         <img class="sort-icon" src="sort_both.png">
                                         <img class="desc-icon" src="sort_desc.png">
                                         <img class="asc-icon" src="sort_asc.png">
-                                        <input class="form-control filter" type="text" [hidden]="filter" placeholder="No. of rows" name="search-total_rows" />
+
                                     </th>
                                     <th class="text-center">Visibility
                                         <img class="sort-icon" src="sort_both.png">
                                         <img class="desc-icon" src="sort_desc.png">
                                         <img class="asc-icon" src="sort_asc.png">
-                                        <select [hidden]="filter" class="form-control filter" name="search-visibility">
-                                            <option value="">None</option>
-                                            <option value="public">Public</option>
-                                            <option value="private">Private</option>
-                                        </select>
+
                                     </th>
                                     <th>Created By
                                         <img class="sort-icon" src="sort_both.png">
                                         <img class="desc-icon" src="sort_desc.png">
                                         <img class="asc-icon" src="sort_asc.png">
-                                        <input class="form-control filter" type="text" [hidden]="filter" placeholder="Created By" name="search-created-by" />
+
                                     </th>
                                     <th>Created On
                                         <img class="sort-icon" src="sort_both.png">
@@ -108,6 +104,30 @@
                                     <th class="text-center">
                                         Actions
                                     </th>
+                                </tr>
+                            </thead>
+                            <thead>
+                                <tr class="thead-light" [hidden]="filter">
+                                    <td>
+                                        <input class="form-control filter" id="input_0" type="text" name="search-dataset-name" />
+                                    </td>
+                                    <td>
+                                        <input class="form-control filter" id="input_1" type="text" name="search-size" />
+                                    </td>
+                                    <td>
+                                        <input class="form-control filter" id="input_2" type="text" name="search-total_rows" />
+
+                                    </td>
+                                    <td>
+                                        <select class="form-control filter" id="input_4" name="search-visibility">
+                                            <option value="">None</option>
+                                            <option value="public">Public</option>
+                                            <option value="private">Private</option>
+                                        </select>
+                                    </td>
+                                    <td><input class="form-control filter" type="text" id="input_5" name="search-created-by" /></td>
+                                    <td></td>
+                                    <td></td>
                                 </tr>
                             </thead>
                             <tbody class="tbody">
@@ -132,7 +152,7 @@
                                     <td class="text-center" style="font-size: 20px;font-weight: 700;">
                                         <a href="javascript:void(0);" [routerLink]="['/schema']" id="detail_{{data.dataset_id}}" [state]="{dataset_id: data.dataset_id ,project_id:data.project_id,dataset_name:data.dataset_name,navigate_to:'/dataset',schema_id:data.schema_id }">
                                             <i class=" bx bx-file" id="detailicon"></i></a>
-                                        <a href="javascript:void(0);" class="sa-warning" id="delete_{{data.dataset_id}}" (click)="confirm(data.dataset_id)"> <i class=" bx bx-trash" id="deleteicon"></i></a>
+                                        <a href="javascript:void(0);" class="sa-warning" id="delete_{{data.dataset_id}}" (click)="confirm(data.dataset_id,data.dataset_name)"> <i class=" bx bx-trash" id="deleteicon"></i></a>
                                     </td>
                                 </tr>
                             </tbody>
@@ -176,12 +196,12 @@
                 <div class="col-md-12 form-group">
                     <label for="example-text-input" class="col-form-label">Upload Dataset<span
                             class="required-label">&nbsp;*</span></label>
-                    <div class="custom-file">
-                        <label class="custom-file-label" for="customFile">Choose file</label>
-                        <input type="file" (change)="handleFileInput($event.target.files)" [(ngModel)]="data.file" accept=".csv" name="file" #file="ngModel" class="custom-file-input" required>
+
+                    <div class="custom-file ">
+                        <label class="custom-file-label ">Choose file</label>
+                        <input type="file" (change)="handleFileInput($event.target.files)" [(ngModel)]="data.file" accept=".csv" name="file" #file="ngModel" class="custom-file-input">
                         <div class="invalid-feedback" *ngIf="file.errors?.required && (file.dirty || file.touched)">
-                            <span *ngIf="file.errors?.required && (file.dirty || file.touched)" class="text-red"> Please
-                                select .csv file</span>
+                            <span *ngIf="file.errors?.required && (file.dirty || file.touched)" class="text-red">Please select .csv file</span>
                         </div>
                     </div>
                 </div>
