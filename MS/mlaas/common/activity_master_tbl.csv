@@ -1,9 +1,9 @@
-id,activity_name,activity_description,language,operation
+activity_id,activity_name,activity_description,language,operation
 1,Create Dataset,You have created dataset,US,Create
 2,Delete Dataset,You have deleted dataset,US,Delete
 3,Create Project,You have created project,US,Create
 4,Delete Project,You have deleted project,US,Delete
-5,Column name updated,Column name * is updated to **,US,Update
-6,Selected Target Column,You have selected columns * and ** as Target Columns,US,Select
+5,Column name updated,You have updated the name of Column * of  dataset  $  to ?,US,Update
+6,Selected Target Column,You have selected Columns  *  of dataset $ as Target Columns,US,Select
 7,Ignored Column,You have ignored Columns *,US,Ignore
 8,Created new dataset,You have saved new dataset,US,Create
