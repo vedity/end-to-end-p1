@@ -44,16 +44,8 @@ class ATestIngestDataDeletion(unittest.TestCase):
         status = json_response["status_code"]
         self.assertEqual(status,"200")
 
-    def testAA_dataset_deleteactivity(self):
-        response = requests.post("http://localhost:8000/mlaas/common/activity/")
-        info ={"user_name":"autouser_valid"}
-        response = requests.get("http://localhost:8000/mlaas/common/activity/",params=info)
-        json_response = response.json()
-        status = json_response["status_code"]
-        self.assertEqual(status,"200")      
-
 class TestAIngestPostDatasetClass(unittest.TestCase):
-    def testAAA_scenario1_insert_dataset(self):
+    def testA_scenario1_insert_dataset(self):
         """This function is used to test the CreateDataset POST Method With valid Data Inputs .
 
         Args:
@@ -269,13 +261,13 @@ class TestCIngestPostProject(unittest.TestCase):
         status = json_response["status_code"]
         self.assertEqual(status,"200")
 
-    def testAA_project_creationactivity(self):
-        time.sleep(2)
-        info ={"user_name":"autouser"}
-        response = requests.get("http://localhost:8000/mlaas/common/activity/",params=info)
-        json_response = response.json()
-        status = json_response["status_code"]
-        self.assertEqual(status,"200")      
+    # def testAA_project_creationactivity(self):
+    #     time.sleep(2)
+    #     info ={"user_name":"autouser"}
+    #     response = requests.get("http://localhost:8000/mlaas/common/activity/",params=info)
+    #     json_response = response.json()
+    #     status = json_response["status_code"]
+    #     self.assertEqual(status,"200")      
 
 
     # def testB_scenario2_insert_project(self):
@@ -368,14 +360,14 @@ class TestEIngestProjectDeletion(unittest.TestCase):
         status = json_response["status_code"]
         self.assertEqual(status,"200")
         
-    def testAA_project_deleteactivity(self):
-        time.sleep(2)
-        response = requests.post("http://localhost:8000/mlaas/common/activity/")
-        info ={"user_name":"autouser"}
-        response = requests.get("http://localhost:8000/mlaas/common/activity/",params=info)
-        json_response = response.json()
-        status = json_response["status_code"]
-        self.assertEqual(status,"200")      
+    # def testAA_project_deleteactivity(self):
+    #     time.sleep(2)
+    #     response = requests.post("http://localhost:8000/mlaas/common/activity/")
+    #     info ={"user_name":"autouser"}
+    #     response = requests.get("http://localhost:8000/mlaas/common/activity/",params=info)
+    #     json_response = response.json()
+    #     status = json_response["status_code"]
+    #     self.assertEqual(status,"200")      
 
 
 
