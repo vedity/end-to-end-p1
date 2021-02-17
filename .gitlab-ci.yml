@@ -12,6 +12,8 @@ Automation Testing:
     - docker volume prune -f
     - docker-compose build web 
     - docker-compose build postgres 
+    - docker-compose build airflow 
+    - docker-compose build mlflow 
     - docker-compose -f testing_docker-compose.yml up -d &
     #- docker-compose up &
     - sleep 12s
