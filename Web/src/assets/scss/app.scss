@@ -415,3 +415,8 @@ table {
 .modal-sm {
     max-width: 700px !important;
 }
+
+table.dataTable thead th,
+table.dataTable thead td {
+    border-bottom: none;
+}

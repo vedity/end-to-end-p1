@@ -282,10 +282,58 @@ a {
     color: #34c38f;
 }
 
-.modal-body {
-    height: 550px;
+ul {
+    margin-bottom: 20px;
 }
 
-.target_column {
-    margin-bottom: 0 !important;
+.nav-pills .nav-link.active,
+.nav-pills .show>.nav-link {
+    background-color: transparent !important;
+}
+
+.nav-tabs-custom .nav-item .nav-link.active {
+    color: #34c38f;
+}
+
+.nav-tabs-custom .nav-item .nav-link::after {
+    background: #34c38f;
+}
+
+.modal-summary {
+    label {
+        margin-left: 10px;
+        margin-right: 10px;
+        color: #a6b0cf;
+    }
+}
+
+.actual {
+    width: 100%;
+    .left-box {
+        width: 40%;
+        display: inline-block;
+        vertical-align: top;
+        position: relative;
+    }
+    .right-box {
+        display: inline-block;
+        width: 60%;
+        vertical-align: top;
+    }
+    .expand-btn {
+        position: absolute;
+        right: 35px;
+        top: 1px;
+        font-size: 18px;
+        z-index: 9;
+    }
+}
+
+.expand-block {
+    .left-box {
+        width: 100%;
+    }
+    .right-box {
+        display: none;
+    }
 }
