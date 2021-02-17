@@ -16,7 +16,7 @@ Automation Testing:
     - docker volume prune -f
     - docker-compose -f testing_docker-compose.yml up -d &
     #- docker-compose up &
-    - sleep 12s
+    - sleep 24s
   script:
     #- docker ps
     #- docker images
