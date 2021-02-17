@@ -20,7 +20,7 @@ Automation Testing:
   script:
     #- docker ps
     #- docker images
-    - docker exec end-to-end-p1_web_1 sh -c "cd testing && python -m unittest ingest_test"
+    - docker exec ms_container sh -c "cd testing && python -m unittest ingest_test"
   only:
     - development
     # - uat
