@@ -11,7 +11,7 @@ Automation Testing:
   before_script:
     - docker volume prune -f
     - docker-compose build web 
-    - docker-compose build postgresql 
+    - docker-compose build postgres 
     - docker-compose -f testing_docker-compose.yml up -d &
     #- docker-compose up &
     - sleep 12s

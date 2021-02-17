@@ -56,21 +56,43 @@ class ModelStatisticsClass:
         print(metrics_json)
         return metrics_json
 
-    def accuracy_metrics(self, experiment_id):
+    # def accuracy_metrics(self, experiment_ids):
         
-        sql_command = 'select run_uuid from runs where experiment_id='+str(experiment_id)
-        run_uuid = self.DBObject.select_records(self.connection, sql_command).iloc[0, 0]
+
+    #     sql_command = 'select run_uuid from runs where experiment_id in'+str(experiment_ids)
+    #     run_uuids = tuple(self.DBObject.select_records(self.connection, sql_command)['run_uuid'])
         
-        sql_command = "select key,value from metrics where run_uuid='"+str(run_uuid)+"' and (key='cv_score' or key='holdout_score')"
-        accuracy_df = self.DBObject.select_records(self.connection, sql_command).set_index('key') 
+    #     sql_command = "select key,value from metrics where run_uuid in"+str(run_uuids)+" and (key='cv_score' or key='holdout_score')"
+    #     accuracy_df = self.DBObject.select_records(self.connection, sql_command).set_index('key') 
+        
+    #     return accuracy_df
+    
+    # def show_model_details(self, project_id):
+    #     sql_command = 'select ms.model_id,ms.model_name,ms.model_desc,exp.experiment_id from mlaas.model_experiment_tbl exp,mlaas.model_master_tbl ms where exp.model_id = ms.model_id and exp.project_id ='+str(project_id)
+    #     model_details_df = self.DBObject.select_records(self.connection, sql_command)
+        
+    #     experiment_ids = tuple(model_details_df['experiment_id'])
+    #     accuracy_df = self.accuracy_metrics(experiment_ids)
+        
+    #     model_details_json = model_details_df.to_json()
+    #     accuracy_json = accuracy_df.to_json()
+       
+    #     return model_details_json,accuracy_json
+
+
+    def accuracy_metrics(self, project_id):
+        
+        sql_command = "select key,value from metrics where run_uuid in (select run_uuid from runs where experiment_id in (select experiment_id from mlaas.model_experiment_tbl where project_id = " + str(project_id ) + ")) and (key='cv_score' or key='holdout_score')"
+        accuracy_df = self.DBObject.select_records(self.connection, sql_command)
         
         return accuracy_df
     
-    def show_model_details(self, experiment_id):
-        sql_command = 'select ms.model_id,ms.model_name,ms.model_desc,exp.experiment_id from mlaas.model_experiment_tbl exp,mlaas.model_master_tbl ms where exp.model_id = ms.model_id and exp.experiment_id ='+str(experiment_id)
+    def show_model_details(self, project_id):
+        
+        sql_command = 'select ms.model_id,ms.model_name,ms.model_desc,exp.experiment_id from mlaas.model_experiment_tbl exp,mlaas.model_master_tbl ms where exp.model_id = ms.model_id and exp.project_id ='+str(project_id)
         model_details_df = self.DBObject.select_records(self.connection, sql_command)
         
-        accuracy_df = self.accuracy_metrics(experiment_id)
+        accuracy_df = self.accuracy_metrics(project_id)
         
         model_details_json = model_details_df.to_json()
         accuracy_json = accuracy_df.to_json()

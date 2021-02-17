@@ -60,7 +60,7 @@ class RegressionClass:
         """
         logging.info("modeling : RegressionClass : all_regression_model : execution start")
         # it will set mlflow tracking uri where all the parameters and matrices gets stored experiment wise.
-        mlflow.set_tracking_uri("postgresql+psycopg2://postgres:admin@postgresql:5432/postgres")
+        mlflow.set_tracking_uri("postgresql+psycopg2://airflow:airflow@postgresql:5432/airflow")
         
         # First Algorithm
         if algorithm_type == 'Single_Target':
@@ -88,7 +88,7 @@ class RegressionClass:
         # it will set mlflow tracking uri where all the parameters and matrices gets stored experiment wise.
         if model_id == 1:
             
-            mlflow.set_tracking_uri("postgresql+psycopg2://postgres:admin@postgresql:5432/postgres")
+            mlflow.set_tracking_uri("postgresql+psycopg2://airflow:airflow@postgresql:5432/airflow")
             
             # TODO : we will used parameter class will take these parameters  from users.
             # Get model id and model name and model type from the user.
