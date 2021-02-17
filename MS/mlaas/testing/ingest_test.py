@@ -8,7 +8,8 @@ import time
 unittest.TestLoader.sortTestMethodsUsing = None
 import logging
 logger = logging.getLogger('django')
-#from common.utils.database import db
+from . import db
+#from mlaas.database import *
 from database import *
 from ingest.utils import ingestion
 from ingest.utils.ingestion import *
