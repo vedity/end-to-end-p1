@@ -40,7 +40,9 @@ Creating Testing Docker Images:
     MS_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:ms-latest
     WEB_IMAGE: $CI_REGISTRY_IMAGE:web-$CI_COMMIT_SHORT_SHA
     WEB_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:web-latest
-
+    AF_IMAGE: $CI_REGISTRY_IMAGE:af-$CI_COMMIT_SHORT_SHA
+    AF_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:af-latest
+    
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
@@ -74,6 +76,14 @@ Creating Testing Docker Images:
     - docker push $WEB_RELEASE_IMAGE
     - cd ..
 
+    # Building Airflow Image
+    - echo "Building Airflow Image"
+    - cd airflow
+    - docker build --tag $AF_IMAGE --tag $AF_RELEASE_IMAGE .
+    - docker push $AF_IMAGE
+    - docker push $AF_RELEASE_IMAGE
+    - cd ..
+
   only:
     - uat
 
@@ -88,6 +98,7 @@ Creating Production Docker Images:
     DB_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:db-production
     MS_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:ms-production
     WEB_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:web-production
+    AF_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:af-production
 
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
@@ -111,6 +122,13 @@ Creating Production Docker Images:
     - cd Web
     - docker build --tag $WEB_RELEASE_IMAGE .
     - docker push $WEB_RELEASE_IMAGE
+    - cd ..
+
+    # Building Airflow Image
+    - echo "Building Airflow Image"
+    - cd airflow
+    - docker build --tag $AF_RELEASE_IMAGE .
+    - docker push $AF_RELEASE_IMAGE
     - cd ..
 
   only:
