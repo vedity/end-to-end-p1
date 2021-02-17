@@ -212,16 +212,12 @@ class ModelClass(SC, EC, SplitData):
         Returns:
             [Dataframes]: [input_features_df:- the df used to predict target features, target_features_df:- the target/dependent data]
         """
-        print('Firstt')
         dataset_name_command = 'select scaled_data_table from mlaas.cleaned_ref_tbl where dataset_id = ' + str(self.dataset_id)
         dataset_table_name = self.DBObject.select_records(self.connection, dataset_name_command)['scaled_data_table'][0]
-        print('Secondd')
-        scaled_df_get_command = 'select * from ' +'mlaas.' + dataset_table_name# doubt 
+        scaled_df_get_command = 'select * from ' +'mlaas.' + dataset_table_name
         scaled_df = self.DBObject.select_records(self.connection, scaled_df_get_command)
-        print('Thirdddd')
         input_features_df= scaled_df[self.input_features_list]  # by using self.input_features_list. must include unique seq id
         target_features_df = scaled_df[self.target_features_list]  # by using self.target_features_list .must include unique seq id
-        print('Lasttt')
         logging.info("modeling : ModelClass : get_scaled_data : execution end")
         return input_features_df,target_features_df
 
