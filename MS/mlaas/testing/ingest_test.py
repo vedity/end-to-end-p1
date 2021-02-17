@@ -64,7 +64,7 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
         """
         
         
-        files = 'ingest/dataset/CarPrice_Assignment.csv'
+        files = '../ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"nisha","dataset_name":"amlass","visibility":"public","dataset_description":"dataset description"}
         response = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
