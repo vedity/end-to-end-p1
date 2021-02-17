@@ -389,11 +389,11 @@ class FinalModelDescriptionClass(APIView):
                         
                         project_id = request.query_params.get('project_id') #get Username
                         
-                        model_details_json,accuracy_json =ModelStatObject.show_model_details(project_id)
+                        final_model_data =ModelStatObject.show_model_details(project_id)
                         
                         logging.info(": : POST Method : execution stop : status_code :200")
                         # print(learning_curve_json)
-                        return Response({"status_code":"200","error_msg":"Successfully updated","response":(model_details_json,accuracy_json)})
+                        return Response({"status_code":"200","error_msg":"Successfully updated","response":final_model_data})
                         
                 except Exception as e:
                         logging.error(" modeling : ModelingClass : GET Method : " + str(e))
