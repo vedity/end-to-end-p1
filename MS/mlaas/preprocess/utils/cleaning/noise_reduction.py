@@ -119,7 +119,7 @@ class RemoveNoiseClass:
             valid_str = False
             cleanable = False
 
-            is_string_col,is_val_str_col,is_string_minority = self.check_string_col(series)
+            is_string_col,is_val_str_col,is_string_minority = self._check_string_col(series)
             #? if the column is not string column then the column is noisy
             if not is_string_col:
                 noisy = True
