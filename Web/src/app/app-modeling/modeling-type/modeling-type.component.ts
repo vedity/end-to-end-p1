@@ -1,4 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ToastrService } from 'ngx-toastr';
+import { ModelingTypeApiService } from '../modeling-type.service';
 
 @Component({
   selector: 'app-modeling-type',
@@ -7,9 +11,69 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ModelingTypeComponent implements OnInit {
 
-  constructor() { }
-
+  constructor(public router: Router,public apiservice:ModelingTypeApiService,public toaster:ToastrService,private modalService: NgbModal) { }
+  public params: any;
+  public datasetInfo:any;
+  public modelDescription:any;
+  
   ngOnInit(): void {
+    var data = localStorage.getItem("Modeling")
+    if (data) {
+      this.params = JSON.parse(data);
+    }
+    this.getDatasetInfo();
   }
 
+  getDatasetInfo(){
+    this.apiservice.getDatasetInfo(this.params.dataset_id,this.params.project_id,this.params.user_id).subscribe(
+      logs => this.successHandler(logs),
+      error => this.errorHandler(error));
+    
+  }
+
+  getModelDescription(){
+    this.apiservice.getModelDescription(this.params.dataset_id,this.params.project_id,this.params.user_id).subscribe(
+      logs => this.successHandler(logs),
+      error => this.errorHandler(error));
+    
+  }
+
+  startModel() {
+    let obj = {
+      user_id: this.params.user_id,
+      dataset_id: this.params.dataset_id,
+      project_id: this.params.project_id,
+      model_mode: "auto",
+      experiment_name: this.params.experiment_name,
+      experiment_desc: this.params.experiment_desc
+    }
+    this.apiservice.startModeling(obj).subscribe( 
+      logs => this.successHandler(logs),
+    error => this.errorHandler(error));
+
+  }
+
+  datasetdata:any;
+  successHandler(data) {
+    if (data.status_code == "200") {
+      this.datasetdata=data.response;
+      // this.toaster.success(data.error_msg, 'Success');
+    }
+    else{
+      this.errorHandler(data);
+    }
+  }
+
+  errorHandler(error) {
+    if (error.error_msg)
+      this.toaster.error(error.error_msg, 'Error');
+    else {
+      this.toaster.error('Something went wrong', 'Error');
+    }
+  }
+
+  extraLarge (exlargeModal: any) 
+  {
+    this.modalService.open(exlargeModal, { size: 'xl',windowClass:'modal-holder', centered: true });
+  };
 }

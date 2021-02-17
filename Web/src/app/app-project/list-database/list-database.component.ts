@@ -53,14 +53,22 @@ export class ListDatabaseComponent implements OnInit {
       this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
         dtInstance.columns().every(function () {
           const that = this;
-          $('input', this.header()).on('keyup change', function () {
-            if (that.search() !== this['value']) {
-              that
-                .search(this['value'])
-                .draw();
-            }
-          });
-          $('select', this.header()).on('change', function () {
+          // $('input', this.header()).on('keyup change', function () {
+          //   if (that.search() !== this['value']) {
+          //     that
+          //       .search(this['value'])
+          //       .draw();
+          //   }
+          // });
+          // $('select', this.header()).on('change', function () {
+          //   if (that.search() !== this['value']) {
+          //     that
+          //       .search(this['value'])
+          //       .draw();
+          //   }
+          // });
+
+          $('#input_'+ this.index("visible")).on('keyup change', function () {
             if (that.search() !== this['value']) {
               that
                 .search(this['value'])
@@ -124,7 +132,7 @@ export class ListDatabaseComponent implements OnInit {
     $('.filter').val('').trigger('change');
   }
 
-  confirm(id) {
+  confirm(id,name) {
     Swal.fire({
       title: 'Are you sure?',
       text: 'You won\'t be able to revert this!',
@@ -136,7 +144,7 @@ export class ListDatabaseComponent implements OnInit {
     }).then(result => {
       if (result.value) {
         this.loaderdiv = true;
-        this.apiService.deletedataset(id).subscribe(
+        this.apiService.deletedataset(id,name).subscribe(
           logs => {
             this.loaderdiv = false;
             if (logs.status_code == "200") {
@@ -159,20 +167,27 @@ export class ListDatabaseComponent implements OnInit {
     this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
       dtInstance.columns().every(function () {
         const that = this;
-        $('input', this.header()).on('keyup change', function () {
+        $('#input_'+ this.index("visible")).on('keyup change', function () {
           if (that.search() !== this['value']) {
             that
               .search(this['value'])
               .draw();
           }
         });
-        $('select', this.header()).on('change', function () {
-          if (that.search() !== this['value']) {
-            that
-              .search(this['value'])
-              .draw();
-          }
-        });
+        // $('input', this.header()).on('keyup change', function () {
+        //   if (that.search() !== this['value']) {
+        //     that
+        //       .search(this['value'])
+        //       .draw();
+        //   }
+        // });
+        // $('select', this.header()).on('change', function () {
+        //   if (that.search() !== this['value']) {
+        //     that
+        //       .search(this['value'])
+        //       .draw();
+        //   }
+        // });
       });
       dtInstance.destroy();
     });
@@ -192,6 +207,7 @@ export class ListDatabaseComponent implements OnInit {
     savedata.append('inputfile', this.datasetfile);
     savedata.append('dataset_description', this.data.datasetdescription);
     this.loaderdiv = true;
+    this.modalService.dismissAll();
     this.apiService.savedataset(savedata).subscribe(
       logs => this.savesuccess(logs),
       error => this.errorHandler(error)
@@ -200,10 +216,9 @@ export class ListDatabaseComponent implements OnInit {
 
   savesuccess(data) {
     if (data.status_code == "200") {
+
       this.loaderdiv = false;
-      this.data = new createdataset();
-      this.data.isprivate=true;
-      $(".custom-file-label").text("Choose file");
+     // $(".custom-file-label").text("Choose file");
       this.getdataset();
     }
     else
@@ -211,6 +226,12 @@ export class ListDatabaseComponent implements OnInit {
   }
 
   smallModal(smallDataModal: any) {
+    this.data = new createdataset();
+    this.data.isprivate=true;
+    this.datasetnameuniqueerror = false;
+    this.errorStatus=true;
     this.modalService.open(smallDataModal, { size: 'sm',windowClass:'modal-holder', centered: true });
+    bsCustomFileInput.init();
+
   }
 }

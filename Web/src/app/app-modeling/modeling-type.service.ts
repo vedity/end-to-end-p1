@@ -12,8 +12,17 @@ export class ModelingTypeApiService {
   user: any;
   constructor(private httpClient: HttpClient) { }
 
-  // getExplorationData(dataset_id,schema_id): Observable<any> {
-  //   var params = new HttpParams().append("dataset_id", dataset_id).append("schema_id", schema_id)
-  //   return this.httpClient.get(this.baseUrl + "preprocess/exploredata/get_data_statistics", { headers: this.headers, params });
-  // }
+  getDatasetInfo(dataset_id,project_id,user_id): Observable<any> {
+    var params = new HttpParams().append("dataset_id", dataset_id).append("project_id", project_id).append("user_id",user_id);
+    return this.httpClient.get(this.baseUrl + "modeling/showdatasetinfo/", { headers: this.headers, params });
+  }
+
+  getModelDescription(dataset_id,project_id,user_id): Observable<any> {
+    var params = new HttpParams().append("dataset_id", dataset_id).append("project_id", project_id).append("user_id",user_id);
+    return this.httpClient.get(this.baseUrl + "modeling/finalmodeldescription/", { headers: this.headers, params });
+  }
+
+  startModeling(obj):Observable<any>{
+    return this.httpClient.post(this.baseUrl + "modeling/startmodel/",obj, { headers: this.headers });
+  }
 }

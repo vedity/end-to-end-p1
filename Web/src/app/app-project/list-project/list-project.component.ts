@@ -17,6 +17,7 @@ export class ListProjectComponent implements OnInit {
   dtOptions: DataTables.Settings = {
     scrollCollapse: true,
     scrollY: "calc(100vh - 420px)",
+    
   };
   dtTrigger: Subject<any> = new Subject<any>();
   filter: boolean = true;
@@ -45,20 +46,24 @@ export class ListProjectComponent implements OnInit {
       this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
         dtInstance.columns().every(function () {
           const that = this;
-          $('input', this.header()).on('keyup change', function () {
+         
+          console.log( );
+          
+          $('#input_'+ this.index("visible")).on('keyup change', function () {
             if (that.search() !== this['value']) {
               that
                 .search(this['value'])
                 .draw();
             }
           });
-          $('select', this.header()).on('change', function () {
-            if (that.search() !== this['value']) {
-              that
-                .search(this['value'])
-                .draw();
-            }
-          });
+
+          // $('select_'+this.index("visible")).on('change', function () {
+          //   if (that.search() !== this['value']) {
+          //     that
+          //       .search(this['value'])
+          //       .draw();
+          //   }
+          // });
         });
       });
     }
@@ -80,20 +85,20 @@ export class ListProjectComponent implements OnInit {
     this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
       dtInstance.columns().every(function () {
         const that = this;
-        $('input', this.header()).on('keyup change', function () {
+        $('#input_'+ this.index("visible")).on('keyup change', function () {
           if (that.search() !== this['value']) {
             that
               .search(this['value'])
               .draw();
           }
         });
-        $('select', this.header()).on('change', function () {
-          if (that.search() !== this['value']) {
-            that
-              .search(this['value'])
-              .draw();
-          }
-        });
+        // $('select', this.header()).on('change', function () {
+        //   if (that.search() !== this['value']) {
+        //     that
+        //       .search(this['value'])
+        //       .draw();
+        //   }
+        // });
       });
       dtInstance.destroy();
     });
