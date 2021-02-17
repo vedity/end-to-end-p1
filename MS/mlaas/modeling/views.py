@@ -387,9 +387,9 @@ class FinalModelDescriptionClass(APIView):
                 try:
                         logging.info(" : ModelClass : GET Method : execution start")
                         
-                        experiment_id = request.query_params.get('experiment_id') #get Username
+                        project_id = request.query_params.get('project_id') #get Username
                         
-                        model_details_json,accuracy_json =ModelStatObject.show_model_details(experiment_id)
+                        model_details_json,accuracy_json =ModelStatObject.show_model_details(project_id)
                         
                         logging.info(": : POST Method : execution stop : status_code :200")
                         # print(learning_curve_json)
