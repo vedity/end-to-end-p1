@@ -304,7 +304,7 @@ class TestCIngestPostProject(unittest.TestCase):
         time.sleep(2)
         files = '../ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
-        info = {"user_name":"autouser_second","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_dataset_name","visibility":"public"}
+        info = {"user_name":"autouser_2","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_dataset_name","visibility":"public"}
         response = requests.post("http://localhost:8000/mlaas/ingest/project/create/",data = info,files = file)
         json_response = response.json()
         status = json_response["status_code"]
