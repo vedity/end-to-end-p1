@@ -8,11 +8,11 @@ import time
 unittest.TestLoader.sortTestMethodsUsing = None
 import logging
 logger = logging.getLogger('django')
-import db
+# from . import db
 #from mlaas.database import *
-from database import *
-from ingest.utils import ingestion
-from ingest.utils.ingestion import *
+# from database import *
+# from ingest.utils import ingestion
+# from ingest.utils.ingestion import *
 
 # DBObject=db.DBClass() #Get DBClass object
 # connection,connection_string=DBObject.database_connection(database,user,password,host,port) #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)

@@ -207,7 +207,7 @@ class CreateDatasetClass(APIView):
                         if exists_dataset_status == False:
                                 file=request.FILES['inputfile'] #get inputfile Name
                                 try:
-                                        file_data = pd.read_csv(request.FILES['inputfile'])   # read the csv file and store into dataframe variable 
+                                        file_data = pd.read_csv(request.FILES['inputfile'],encoding="UTF-8")   # read the csv file and store into dataframe variable 
                                 except:
                                         return Response({"status_code":500,"error_msg":"Invalid CSV Format","response":"false"})
                                         
@@ -222,7 +222,7 @@ class CreateDatasetClass(APIView):
                                 file_path="static/server/" #server path where all the dataset will store
                                 file_name =IngestionObj.save_file(DBObject,connection,user_name,dataset_visibility,file,file_path)
                         else:
-                                return Response({"status_code":"500","error_msg":"Dataset name exists","response":"false"})
+                                return Response({"status_code":"501","error_msg":"Dataset name exists","response":"false"})
 
                         dataset_Status,dataset_id=IngestionObj.create_dataset(dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name) #call create_dataset method to create dataset and insert csv data into table
                         if dataset_Status != 0:
@@ -242,7 +242,7 @@ class CreateDatasetClass(APIView):
                 except Exception as e:
                                 logging.error("data ingestion : CreateDatasetClass : POST Method : Exception : " + str(e))
                                 logging.error("data ingestion : CreateDatasetClass : POST Method : "+traceback.format_exc())
-                                return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
+                                return Response({"status_code":"502","error_msg":str(e),"response":"false"}) 
 
 
 #class for retrive csv data 
