@@ -230,12 +230,12 @@ class CreateDatasetClass(APIView):
                         logging.info("data ingestion : CreateDatasetClass : POST Method : execution stop : status_code :"+status_code)
                         return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                 else:
-                        activity_id = 1
-                        activity_df = timeline_Obj.get_activity(activity_id,"US")
-                        activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= dataset_name)
-                        project_id=0
-                        timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
-                        status = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,timestamp)
+                        # activity_id = 1
+                        # activity_df = timeline_Obj.get_activity(activity_id,"US")
+                        # activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= dataset_name)
+                        # project_id=0
+                        # timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                        # status = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,timestamp)
                         logging.info("data ingestion : CreateDatasetClass : POST Method : execution stop : status_code : 200")
                         return Response({"status_code":"200","error_msg":"Successfully Inserted","response":"true"})
                         
