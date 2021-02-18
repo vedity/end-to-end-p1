@@ -72,8 +72,8 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"nisha","dataset_name":"amlass","visibility":"public","dataset_description":"dataset"}
         response = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
-        json_response = response.json()
-        status = json_response["status_code"]
+        # json_response = response.json()
+        # status = json_response["status_code"]
         # DBObject,connection,connection_string = IngestionObj.get_db_connection()
         # sql_cmd = "select * from mlaas.dataset_tbl"
         # record = DBObject.select_records(connection,sql_cmd)
