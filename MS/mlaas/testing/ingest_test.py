@@ -44,7 +44,7 @@ class ATestIngestDataDeletion(unittest.TestCase):
         self.assertEqual(status,"200")
 
 class TestAIngestPostDatasetClass(unittest.TestCase):
-    def testAA_scenario1_insert_dataset(self):
+    def testA_scenario1_insert_dataset(self):
         """This function is used to test the CreateDataset POST Method With valid Data Inputs .
 
         Args:
