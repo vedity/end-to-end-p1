@@ -31,7 +31,7 @@ class ATestIngestDataDeletion(unittest.TestCase):
             user_name ([string]): [name of the user.]
             dataset_id ([integer]):[id of the dataset.]
         """
-        files = '../ingest/dataset/CarPrice_Assignment.csv'
+        files = 'ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser_valid","dataset_name":"auto_dataset_name_valid","visibility":"private","dataset_description":"dataset description"}
         response = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
@@ -56,9 +56,9 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
         """
         
         response_activity = requests.post("http://localhost:8000/mlaas/common/activity/")
-        files = '../ingest/dataset/CarPrice_Assignment.csv'
+        files = 'ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
-        info = {"user_name":"nisha","dataset_name":"amlass","visibility":"public","dataset_description":"dataset"}
+        info = {"user_name":"autouser","dataset_name":"auto_dataset_user","visibility":"public","dataset_description":"dataset"}
         response = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
         json_response = response.json()
         status = json_response["status_code"]
@@ -66,7 +66,6 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
 
     def testAB_dataset_creationactivity(self):
         time.sleep(2)
-        response = requests.post("http://localhost:8000/mlaas/common/activity/")
         info ={"user_name":"autouser"}
         response = requests.get("http://localhost:8000/mlaas/common/activity/",params=info)
         json_response = response.json()
@@ -106,7 +105,7 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
     
         """
         time.sleep(1)
-        files = '../ingest/dataset/pima_indians_diabetes.csv'
+        files = 'ingest/dataset/pima_indians_diabetes.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser","dataset_name":"auto_dataset_name","visibility":"public","dataset_description":"dataset description"}
         response = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
@@ -126,7 +125,7 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
     
         """
         time.sleep(1)
-        files = '../ingest/dataset/empty.csv'
+        files = 'ingest/dataset/empty.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser","dataset_name":"auto_dataset_name3","visibility":"public","dataset_description":"dataset description"}
         response = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
@@ -148,7 +147,7 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
     
         """
         time.sleep(1)
-        files = '../ingest/dataset/one_column.csv'
+        files = 'ingest/dataset/one_column.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser","dataset_name":"auto_dataset_name3","visibility":"public"}
         response = requests.post("http://localhost:8000/mlaas/ingest/create_dataset/",data = info,files = file)
@@ -202,7 +201,7 @@ class TestIngestDatasetDeletion(unittest.TestCase):
             dataset_id ([integer]):[id of the dataset.]
             
         """
-        files = '../ingest/dataset/CarPrice_Assignment.csv'
+        files = 'ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser_four","dataset_name":"auto_dataset_name_four","visibility":"private","dataset_description":"dataset description"}
         response = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
@@ -223,7 +222,7 @@ class TestIngestDatasetDeletion(unittest.TestCase):
             dataset_id ([integer]):[id of the dataset.]
 
         """
-        files = '../ingest/dataset/CarPrice_Assignment.csv'
+        files = 'ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser_six","dataset_name":"autouser_six","visibility":"private","dataset_description":"dataset description"}
         response_private_datset = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
