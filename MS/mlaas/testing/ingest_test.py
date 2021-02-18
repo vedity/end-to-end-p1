@@ -78,7 +78,7 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
         # sql_cmd = "select * from mlaas.dataset_tbl"
         # record = DBObject.select_records(connection,sql_cmd)
         # print(record)
-        self.assertEqual(status,"200")
+        self.assertEqual(response,"200")
 
     # def testAB_dataset_creationactivity(self):
     #     time.sleep(2)
