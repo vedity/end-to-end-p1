@@ -327,7 +327,7 @@ class ModelSummaryClass(APIView):
                 Return : 
                         status_code(500 or 200),
                         error_msg(Error message for retrival & insertions failed or successfull),
-                        Response(return false if failed otherwise json data)
+                        Response(return false if failed otherwise json data).
                 """
                 try:
                        

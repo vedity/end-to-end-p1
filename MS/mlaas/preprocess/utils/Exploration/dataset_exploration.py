@@ -17,12 +17,8 @@ import json
 from ingest.utils.dataset import dataset_creation
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
-from common.utils.database import db
-from common.utils.database.db import DBClass
-from ingest.utils.dataset import dataset_creation
 from ingest.utils.dataset import dataset_creation
 
-db_obj = db.DBClass()
 dc = dataset_creation.DatasetClass()
 
 class ExploreClass:
@@ -98,7 +94,7 @@ class ExploreClass:
             user_name = 'public'
         
 
-        query = db_obj.get_query_string(connection,schema_id)
+        query = DBObject.get_query_string(connection,schema_id)
         #? Getting all the data
         sql_command = f"SELECT {str(query)} FROM {user_name}.{dataset_table_name}"
         data_df = DBObject.select_records(connection,sql_command)    
