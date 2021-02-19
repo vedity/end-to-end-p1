@@ -13,12 +13,12 @@ from src.models.airflow_demo import linear_regression_keras
 
 yesterday_date = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')
 
-# default_args = {
-#     'owner': 'Airflow',
-#     'start_date': datetime(2019, 12, 9),
-#     'retries': 1,
-#     'retry_delay': timedelta(seconds=5)
-# }
+default_args = {
+    'owner': 'Airflow',
+    'start_date': datetime(2019, 12, 9),
+    'retries': 1,
+    'retry_delay': timedelta(seconds=5)
+}
 
 args = {
     'owner': 'airflow',
@@ -33,7 +33,7 @@ dag = DAG(
 	catchup=False,                          # indicate whether or not Airflow should do any runs for intervals between the start_date and the current date that haven't been run thus far
 )
 
-#with DAG('store_dag',default_args=default_args,schedule_interval='@daily',catchup=True) as dag:
+# with DAG('store_dag',default_args=default_args,schedule_interval='@daily',catchup=True) as dag:
 
 
 t1 = DummyOperator(
@@ -54,3 +54,33 @@ t3 = PythonOperator(
 )
     
 t1 >> [t2,t3] 
+
+# def get_hello():
+#     return "hello"
+
+# def get_world():
+#     return "world"
+# import datetime
+# default_args = {
+#     'owner': 'airflow',
+#     'start_date': datetime.datetime.now(),
+#     'email_on_failure': False,
+#     'retries': 1,
+#     'max_active_runs': 1
+# }
+
+# dag = airflow.DAG('first', default_args=default_args, description='First ever airflow DAG run')
+
+# hello = PythonOperator(task_id='hello', python_callable=get_hello, dag=dag)
+
+# world = PythonOperator(task_id='world', python_callable=get_world, dag=dag)
+
+# bash_op = BashOperator(
+#     task_id='sleep',
+#     depends_on_past=False,
+#     bash_command='sleep 10',
+#     retries=0,
+#     dag=dag,
+# )
+
+# hello >> bash_op >> world
