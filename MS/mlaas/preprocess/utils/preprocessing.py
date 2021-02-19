@@ -174,7 +174,6 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
             #? Getting all the data
             sql_command = f"SELECT {str(query)} FROM {user_name}.{dataset_table_name}"
             data_df = DBObject.select_records(connection,sql_command)    
-            
             num_cols = data_df._get_numeric_data().columns
             numerical_columns = list(num_cols)
             predicted_datatypes = self.get_attrbt_datatype(data_df,data_df.columns,len(data_df))
@@ -253,7 +252,7 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
                 final_op_list.sort()
                 
                 logging.info("data preprocessing : PreprocessingClass : get_possible_operations : execution End")
-            
+                
                 return final_op_list    
             
             except Exception as exc:
