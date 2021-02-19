@@ -131,7 +131,7 @@ class ModelStatisticsClass:
 
     def show_experiments_list(self, project_id):
         # Get the necessary values from the mlaas.model_experiment_tbl
-        sql_command = 'select experiment_id, model_mode, exp_created_on from mlaas.model_experiment_tbl where project_id='+str(project_id)
+        sql_command = "select experiment_id, model_mode, exp_created_on, 'completed' status from mlaas.model_experiment_tbl where project_id="+str(project_id)
         model_experiment_tbl_data = self.DBObject.select_records(self.connection, sql_command)
 
         # Get the name of the experiments
@@ -156,8 +156,12 @@ class ModelStatisticsClass:
         # Get the model mode
         model_modes = model_experiment_tbl_data['model_mode']
 
+        status_df = model_experiment_tbl_data['status']
+
+
+        experiment_series = model_experiment_tbl_data['experiment_id']
         # Merging all the Dataframes and Series to get the final Df.
-        final_df = pd.DataFrame([exp_names, model_names, dataset_names, exp_creation_dates, model_modes, accuracy_df['cv_score'], accuracy_df['holdout_score']]).T
+        final_df = pd.DataFrame([experiment_series, status_df, exp_names, model_names, dataset_names, exp_creation_dates, model_modes, accuracy_df['cv_score'], accuracy_df['holdout_score']]).T
 
         # Converting final_df to json
         json_data = final_df.to_json(orient='records',date_format='iso')
