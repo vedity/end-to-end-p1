@@ -201,3 +201,14 @@ class ScheamColumnListClass(APIView):
                                 logging.error("data preprocess : ScheamAttributeListClass : POST Method : Exception :" + str(e))
                                 logging.error("data preprocess : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
                                 return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+
+class OperationClass(APIView):
+
+        def post(self, request, format=None):
+
+                dataset_id = request.query_params.get('dataset_id') #get dataset id
+                schema_id = request.query_params.get('schema_id') #get schema id
+                column_ids = request.query_params.get('column_ids') #get column_id
+
+                operation = preprocessObj.get_possible_operations(dataset_id,schema_id,column_ids)
+                return Response({"status_code":"200","error_msg":"Successfull Send","response":operation})
