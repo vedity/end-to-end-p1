@@ -419,11 +419,11 @@ class ShowExperimentsListClass(APIView):
                         
                         project_id = request.query_params.get('project_id') #get Username
                         
-                        data =ModelStatObject.show_experiments_list(project_id)
+                        experiment_data =ModelStatObject.show_experiments_list(project_id)
                         
                         logging.info(": : POST Method : execution stop : status_code :200")
                         # print(learning_curve_json)
-                        return Response({"status_code":"200","error_msg":"Successfully updated","response":data})
+                        return Response({"status_code":"200","error_msg":"Successfully updated","response":experiment_data})
                         
                 except Exception as e:
                         logging.error(" modeling : ModelingClass : GET Method : " + str(e))
