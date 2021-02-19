@@ -18,11 +18,15 @@ export class ModelingTypeApiService {
   }
 
   getModelDescription(dataset_id,project_id,user_id): Observable<any> {
-    var params = new HttpParams().append("dataset_id", dataset_id).append("project_id", project_id).append("user_id",user_id);
+    project_id=2;
+    var params = new HttpParams().append("project_id", project_id);
+    //.append("dataset_id", dataset_id).append("project_id", project_id).append("user_id",user_id);
     return this.httpClient.get(this.baseUrl + "modeling/finalmodeldescription/", { headers: this.headers, params });
   }
 
   startModeling(obj):Observable<any>{
-    return this.httpClient.post(this.baseUrl + "modeling/startmodel/",obj, { headers: this.headers });
+    var params = new HttpParams().append("model_mode", obj.model_mode);
+
+    return this.httpClient.post(this.baseUrl + "modeling/startmodel/",obj, { headers: this.headers ,params});
   }
 }

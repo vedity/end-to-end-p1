@@ -168,7 +168,7 @@ class SplitDataClass(APIView):
                 
                 
 class StartModelClass(APIView):
-        def get(self,request,format=None):
+        def post(self,request,format=None):
                 """
                 This function is used to get  model mode selected by user
  
@@ -183,13 +183,13 @@ class StartModelClass(APIView):
                         
                 """
                 try:
-
+                        model_mode =request.query_params.get('model_mode')
                         ModelObject = ModelClass(Model_Mode,input_features_list,
                                                 target_features_list,project_id,dataset_id,user_id,
                                                 DBObject,connection,connection_string)
                         
                         logging.info("modeling : ExperimentClass : GET Method : execution start")
-                        # model_mode =request.query_params.get('model_mode')
+                        
                         
                         
                         if Model_Mode == 'auto':
@@ -373,7 +373,7 @@ class ActualVsPredictionClass(APIView):
 
 class FinalModelDescriptionClass(APIView):
 
-        def post(self, request, format=None):
+        def get(self, request, format=None):
                 """
                 This function is used to get PerformanceMetrics of project uploaded uploaded by te user.
         

@@ -10,6 +10,7 @@ import { SchemaMappingApiService } from '../schema-mapping-api.service';
 })
 export class ManageSchemaMappingComponent implements OnInit {
   displaytitle = false;
+  schemamapping=false;
   navigate_to = "";
   activeId=1;
   constructor(public apiService: SchemaMappingApiService, public router: Router, private toaster: ToastrService, private http: HttpClient) { }
@@ -35,7 +36,8 @@ export class ManageSchemaMappingComponent implements OnInit {
       this.displaytitle = true;
     }
     if(this.navigate_to==""){
-      this.displaytitle=true;
+    //  this.displaytitle=true;
+      this.schemamapping=true;
       this.activeId=2
     }
     this.dataset_id = params.dataset_id;
