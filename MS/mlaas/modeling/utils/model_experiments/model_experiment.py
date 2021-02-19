@@ -96,25 +96,25 @@ class ExperimentClass:
 
 
 
-    def accuracy_metrics(self, experiment_id, DBObject, connection):
+    # def accuracy_metrics(self, experiment_id, DBObject, connection):
         
-        sql_command = 'select run_uuid from runs where experiment_id='+str(experiment_id)
-        run_uuid = DBObject.select_records(connection, sql_command).iloc[0, 0]
+    #     sql_command = 'select run_uuid from runs where experiment_id='+str(experiment_id)
+    #     run_uuid = DBObject.select_records(connection, sql_command).iloc[0, 0]
         
-        sql_command = "select key,value from metrics where run_uuid='"+str(run_uuid)+"' and (key='cv_score' or key='holdout_score')"
-        accuracy_df = DBObject.select_records(connection, sql_command).set_index('key') 
-        return accuracy_df
+    #     sql_command = "select key,value from metrics where run_uuid='"+str(run_uuid)+"' and (key='cv_score' or key='holdout_score')"
+    #     accuracy_df = DBObject.select_records(connection, sql_command).set_index('key') 
+    #     return accuracy_df
     
-    def show_model_details(self, experiment_id, DBObject, connection):
-        sql_command = 'select ms.model_id,ms.model_name,ms.model_desc,exp.experiment_id from mlaas.model_experiment_tbl exp,mlaas.model_master_tbl ms where exp.model_id = ms.model_id and exp.experiment_id ='+str(experiment_id)
-        model_details_df = DBObject.select_records(connection, sql_command)
+    # def show_model_details(self, experiment_id, DBObject, connection):
+    #     sql_command = 'select ms.model_id,ms.model_name,ms.model_desc,exp.experiment_id from mlaas.model_experiment_tbl exp,mlaas.model_master_tbl ms where exp.model_id = ms.model_id and exp.experiment_id ='+str(experiment_id)
+    #     model_details_df = DBObject.select_records(connection, sql_command)
         
-        accuracy_df = self.accuracy_metrics(experiment_id, DBObject, connection)
+    #     accuracy_df = self.accuracy_metrics(experiment_id, DBObject, connection)
         
-        model_details_json = model_details_df.to_json()
-        accuracy_json = accuracy_df.to_json()
+    #     model_details_json = model_details_df.to_json()
+    #     accuracy_json = accuracy_df.to_json()
        
-        return model_details_json,accuracy_json
+    #     return model_details_json,accuracy_json
 
 
 
