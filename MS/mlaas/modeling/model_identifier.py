@@ -32,8 +32,13 @@ LogObject.log_setting()
 
 logger = logging.getLogger('model_identifier')
 
-class ModelClass(SC, EC, SplitData):
-    
+class ModelClass(SC, SplitData):
+    """This is the main class from which stores the methods for fetching data and implementing ML algorithms.
+
+    Args:
+        SC (Class): Supervised Algorithm Class, which stores all the supervised algorithms.
+        SplitData ([Class]): [Stores the variables required at the time of splitting the train,test, validation data]
+    """
     def __init__(self,Model_Mode = None,input_features_list=None,target_features_list=None,
                  project_id = None,dataset_id = None, user_id = None, DBObject=None,
                  connection=None,connection_string=None):
@@ -50,7 +55,6 @@ class ModelClass(SC, EC, SplitData):
         # Get Database Object,Connection And Connection String
         self.DBObject, self.connection, self.connection_string = DBObject,connection,connection_string
         # self.algorithm_type, self.model_type = self.get_model_type(self.get_scaled_data()[1])
-        # self.algorithm_detector = AlgorithmDetector(self.get_scaled_data()[1], self.DBObject, self.connection)
         # self.model_name = None
 
     def algorithm_identifier(self,basic_split_parameters):
@@ -138,8 +142,9 @@ class ModelClass(SC, EC, SplitData):
         # Get Scaled Data With Input And Target
         input_df,target_df = self.get_scaled_data()
         
-        AlgorithmDetectObject = AlgorithmDetector(target_df, self.DBObject, self.connection)
-        
+        AlgorithmDetectObject = AlgorithmDetector(self.DBObject, self.connection)
+        # Used to detect the ML algorithm and model types based on target_df
+        algorithm_type, model_type = AlgorithmDetectObject.get_model_types(target_df) 
         # Call The Super Class (SupervisedClass) Method's.                                                                                                                           
         super(ModelClass,self).supervised_algorithm(self.Model_Mode,
                                                     self.input_features_list,
@@ -147,8 +152,8 @@ class ModelClass(SC, EC, SplitData):
                                                     input_df,
                                                     target_df,
                                                     SplitDataObject,
-                                                    AlgorithmDetectObject.model_type,
-                                                    AlgorithmDetectObject.algorithm_type,
+                                                    model_type,
+                                                    algorithm_type,
                                                     self.DBObject, 
                                                     self.connection, 
                                                     self.connection_string,
@@ -178,25 +183,31 @@ class ModelClass(SC, EC, SplitData):
         This function creates an object of the Class SplitData and returns this object.
         '''
         logging.info("modeling : ModelClass : split_dataset : execution start")
-        # Get Split Data Object
+        # Get Split Data Object. This object stores the variables for splitting train,test data.
         split_data_object = SplitData(basic_split_parameters,self.DBObject,self.connection) 
         logging.info("modeling : ModelClass : split_dataset : execution end")
         return split_data_object
 
 
     def get_dataset_info(self):
-        
+        """This function returns the project_name, dataset_name and the target columns for the associated dataset.
+
+        Returns:
+            Tuple: project_name, dataset_name, target_columns:- name of target feature/s associated to the dataset.
+        """
         logging.info("modeling : ModelClass : get_dataset_info : execution start")
        
-
+        # SQL query to get the project_name
         sql_command = 'select project_name from mlaas.project_tbl where project_id=' + str(self.project_id)
         project_df = self.DBObject.select_records(self.connection, sql_command)
         project_name = project_df['project_name'][0]
 
+        # SQL query to get the dataset_name
         sql_command = 'select dataset_name from mlaas.dataset_tbl where dataset_id=' + str(self.dataset_id)
         dataset_df = self.DBObject.select_records(self.connection, sql_command)
         dataset_name = dataset_df['dataset_name'][0]
 
+        # SQL Query to get the target_features_list
         target_columns = self.target_features_list
         
         logging.info("modeling : ModelClass : get_dataset_info : execution end")
@@ -231,21 +242,35 @@ class ModelClass(SC, EC, SplitData):
         Returns:
             [string, string]: [algorithm type, model type]
         """
-        return self.algorithm_detector.get_model_types()
+        
+        AlgorithmDetectorObject = AlgorithmDetector(self.DBObject, self.connection)
+        # Used to detect the ML algorithm and model types based on target_df
+        return AlgorithmDetectorObject.get_model_types(target_df)
 
-    def show_model_list(self):
-        models_list = self.algorithm_detector.show_models_list()
-        return models_list
+    def show_model_list(self, target_df):
+        """Returns the compatible list of model on the basis of target_df, using which we identify
+        algorithm_type and model_type.
+
+        Returns:
+            list: models_list, contains list of all the ML/DL models derived from the algorithm and model type.
+        """
+        AlgorithmDetectorObject = AlgorithmDetector(self.DBObject, self.connection)
+        # Used to detect the ML algorithm and model types based on target_df
+        algorithm_type, model_type = AlgorithmDetectorObject.get_model_types(target_df)
+        # Used to get all the model names compatible with the algorithm and model type
+        return AlgorithmDetectorObject.show_models_list(algorithm_type, model_type)
 
     def get_hyperparameters_list(self, model_name):
-        self.model_name = model_name
-        hyperparameters_list = self.algorithm_detector.get_hyperparameters_list(model_name)
+        """Returns the appropriate list of hyperparameters associated with the model_name argument.
+
+        Args:
+            model_name (string): name of the ML/DL model.
+
+        Returns:
+            list: list of hyperparameters of the model 'model_name'.
+        """
+        
+        AlgorithmDetectorObject = AlgorithmDetector(self.DBObject, self.connection)
+        # 
+        hyperparameters_list = AlgorithmDetectorObject.get_hyperparameters_list(model_name)
         return hyperparameters_list
-
-
-    # def 
-
-
-
-
-

@@ -39,14 +39,14 @@ class LinearRegressionClass:
         """This is used to initialise the model input parameter when model class is called.
         """
 
-        self.input_features_list = input_features_list
-        self.target_features_list = target_features_list
-        self.SplitDataObject = SplitDataObject
+        # self.input_features_list = input_features_list # List of input features(which are used to train the model)
+        # self.target_features_list = target_features_list # list of target features (features to be predicted)
+        self.SplitDataObject = SplitDataObject # This object stores the variables used to split the data.
         # self.input_features_list.remove('index')
-        self.input_features_list = input_features_list[1:]
-        self.target_features_list = target_features_list[1:]
+        self.input_features_list = input_features_list[1:] # List of input features(which are used to train the model)
+        self.target_features_list = target_features_list[1:] # list of target features (features to be predicted)
         # self.input_features_list.remove('index')
-        self.X_train = X_train
+        self.X_train = X_train 
         self.X_test = X_test
         self.X_valid = X_valid
         self.y_train = y_train
@@ -93,7 +93,7 @@ class LinearRegressionClass:
     
     def get_learning_curve(self,model,X_train,y_train):
         
-        """This function is get learning curve.
+        """This function gets learning curve generated while training the data.
 
         Args:
             model ([object]): [train model object]
@@ -104,15 +104,18 @@ class LinearRegressionClass:
         X_train = X_train[self.input_features_list]
         y_train = y_train[self.target_features_list]
         
+        # Dividing train data size into bins.
         train_sizes=np.linspace(0.10, 1.0, 5)
         train_sizes, train_scores, test_scores, fit_times, _ = \
         learning_curve(estimator = model, X=X_train, y=y_train, cv=None, scoring='r2',n_jobs=None,
                        train_sizes=train_sizes,
                        return_times=True)
         
+        # Average of train score(accuracy).
         train_mean = train_scores.mean(axis=1)
+        # Average of train score(accuracy).
         test_mean = test_scores.mean(axis=1)
-        
+        # Create the learning curve dictionary.
         learning_curve_dict = {"train_size":train_sizes.tolist(),"train_score":train_mean.tolist(),"test_score":test_mean.tolist()}
         
         return learning_curve_dict

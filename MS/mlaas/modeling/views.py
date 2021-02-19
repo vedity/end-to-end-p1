@@ -398,7 +398,41 @@ class FinalModelDescriptionClass(APIView):
                 except Exception as e:
                         logging.error(" modeling : ModelingClass : GET Method : " + str(e))
                         logging.error("data ingestion : ModelingClass : GET Method : " +traceback.format_exc())
-                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+
+class ShowExperimentsListClass(APIView):
+
+        def get(self, request, format=None):
+                """
+                This function is used to get PerformanceMetrics of project uploaded uploaded by te user.
+        
+                Args  : 
+                        experiment_id[(Integer)]   :[Id of Experiment]
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival & insertions failed or successfull),
+                        Response(return false if failed otherwise json data)
+                """
+                try:
+                        logging.info(" : ModelClass : GET Method : execution start")
+                        
+                        project_id = request.query_params.get('project_id') #get Username
+                        
+                        experiment_data =ModelStatObject.show_experiments_list(project_id)
+                        
+                        logging.info(": : POST Method : execution stop : status_code :200")
+                        # print(learning_curve_json)
+                        return Response({"status_code":"200","error_msg":"Successfully updated","response":experiment_data})
+                        
+                except Exception as e:
+                        logging.error(" modeling : ModelingClass : GET Method : " + str(e))
+                        logging.error("data ingestion : ModelingClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+
+
+
+
+
 
 
 class SelectAlgorithmClass(APIView):

@@ -6,12 +6,14 @@ import time
 scenario1 ={
 
    "data" : [{
+       "index":29,
        "column_name": "index",
-        "data_type": "numerical",
-        "column_attribute":"target",
-        "change_column_name":"index_col "
+       "data_type": "numerical",
+       "column_attribute":"target",
+       "change_column_name":"index_col "
     },
     {
+        "index":29,
         "column_name": "uid",
         "data_type": "categorical",
         "column_attribute":"target",
@@ -22,12 +24,14 @@ scenario1 ={
 scenario2 ={
 
    "data" : [{
+       "index":29,
        "column_name": "index",
         "data_type": "numerical",
         "column_attribute":"target",
         "change_column_name":"index"
     },
     {
+        "index":29,
         "column_name": "uid",
         "data_type": "categorical",
         "column_attribute":"target",
@@ -37,12 +41,14 @@ scenario2 ={
 
 scenario3 = {
      "data" : [{
+        "index":29,
        "column_name": "index",
         "data_type": "numerical",
         "column_attribute":"ignore",
         "change_column_name":"index_change"
     },
     {
+        "index":29,
         "column_name": "uid",
         "data_type": "categorical",
         "column_attribute":"ignore",
@@ -52,12 +58,14 @@ scenario3 = {
 
 scenario4 = {
      "data" : [{
+       "index":29,
        "column_name": "index",
         "data_type": "numerical",
         "column_attribute":"",
         "change_column_name":"index_change"
     },
     {
+        "index":29,
         "column_name": "uid",
         "data_type": "categorical",
         "column_attribute":"",
@@ -75,10 +83,11 @@ class TestADataExplorationClass(unittest.TestCase):
             dataset_id ([integer]):[id of the dataset.]
         """
         time.sleep(1)
-        responsedataset = requests.get("http://localhost:8000/mlaas/ingest/create_dataset/",params = {"user_name":"autouser"}) #get dataset_id
-        json_response = responsedataset.json() #get json formate
+        responseproject = requests.get("http://localhost:8000/mlaas/ingest/project/create/",params = {"user_name":"autouser"}) #get project_id
+        json_response = responseproject.json() #get json formate
         dataset_id=json_response["response"][0]["dataset_id"] #fetch dataset id from json
-        info = {"dataset_id" : dataset_id} #pass as dictionary in params
+        schema_id=json_response["response"][0]["schema_id"]
+        info = {"dataset_id" : dataset_id,"schema_id":schema_id} #pass as dictionary in params
         response = requests.get("http://localhost:8000/mlaas/preprocess/exploredata/get_data_statistics",params = info) #send request on base of datasetid
         json_response = response.json() #get json response
         status = json_response["status_code"] #get status code
@@ -94,11 +103,13 @@ class testBDataSchemaClass(unittest.TestCase):
             Json : [json as scenario1](define in above code)
         """
         time.sleep(1)
-        projectid_response = requests.get("http://localhost:8000/mlaas/ingest/create_project/",params ={"user_name":"autouser_second"}) #get projectid
-        projectid_json_response = projectid_response.json() #projectid in json formate
-        project_id = projectid_json_response["response"][0]["project_id"] #fetch projectid from json
-        info = {"project_id" : project_id} #request parameter as projectid
-        response = requests.post("http://localhost:8000/mlaas/ingest/dataset_schema/",params= info,json = scenario1) #get response
+        project_response = requests.get("http://localhost:8000/mlaas/ingest/project/create/",params ={"user_name":"autouser_2"}) #get projectid
+        projectjson_response = project_response.json() #projectid in json formate
+        project_id = projectjson_response["response"][0]["project_id"] #fetch projectid from json
+        dataset_id = projectjson_response["response"][0]["dataset_id"] #fetch dataset_id from json
+        schema_id = projectjson_response["response"][0]["schema_id"] #fetch schemaid from json
+        info = {"project_id" : project_id,"dataset_id":dataset_id,"schema_id":schema_id} #request parameter as projectid
+        response = requests.post("http://localhost:8000/mlaas/ingest/preprocess/schema/save/",params= info,json = scenario1) #get response
         json_response = response.json() # response to json
         status = json_response["status_code"] #fetch response status
         self.assertEqual(status,"200") #compare status
@@ -112,32 +123,36 @@ class testBDataSchemaClass(unittest.TestCase):
             Json : [json as scenario2](define in above code)
         """      
         time.sleep(1)
-        projectid_response = requests.get("http://localhost:8000/mlaas/ingest/create_project/",params ={"user_name":"autouser_second"})
-        projectid_json_response = projectid_response.json()
-        project_id = projectid_json_response["response"][0]["project_id"]
-        info = {"project_id" : project_id}
-        response = requests.post("http://localhost:8000/mlaas/ingest/dataset_schema/",params= info,json = scenario2)
+        project_response = requests.get("http://localhost:8000/mlaas/ingest/project/create/",params ={"user_name":"autouser_2"}) #get projectid
+        projectjson_response = project_response.json() #projectid in json formate
+        project_id = projectjson_response["response"][0]["project_id"] #fetch projectid from json
+        dataset_id = projectjson_response["response"][0]["dataset_id"] #fetch dataset_id from json
+        schema_id = projectjson_response["response"][0]["schema_id"] #fetch schemaid from json
+        info = {"project_id" : project_id,"dataset_id":dataset_id,"schema_id":schema_id} #request parameter as projectid
+        response = requests.post("http://localhost:8000/mlaas/ingest/preprocess/schema/save/",params= info,json = scenario2)
         json_response = response.json()
         status = json_response["Status"]
         self.assertEqual(status,"200")
 
-    @unittest.expectedFailure
-    def testC_scenario3(self):
-        """ This function is used to test that  Application should not allow to choose each column as ignore.
-            This is negative test.
-        Args:
-            project_id ([integer]):[id of the project.]
-            Json : [json as scenario3](define in above code)
-        """
-        time.sleep(1)
-        projectid_response = requests.get("http://localhost:8000/mlaas/ingest/create_project/",params ={"user_name":"autouser_second"})
-        projectid_json_response = projectid_response.json()
-        project_id = projectid_json_response["response"][0]["project_id"]
-        info = {"project_id" : project_id}
-        response = requests.post("http://localhost:8000/mlaas/ingest/dataset_schema/",params= info,json = scenario3)
-        json_response = response.json()
-        status = json_response["status_code"]
-        self.assertEqual(status,"200")
+    # @unittest.expectedFailure
+    # def testC_scenario3(self):
+    #     """ This function is used to test that  Application should not allow to choose each column as ignore.
+    #         This is negative test.
+    #     Args:
+    #         project_id ([integer]):[id of the project.]
+    #         Json : [json as scenario3](define in above code)
+    #     """
+    #     time.sleep(1)
+    #     project_response = requests.get("http://localhost:8000/mlaas/ingest/project/create/",params ={"user_name":"autouser_2"}) #get projectid
+    #     projectjson_response = project_response.json() #projectid in json formate
+    #     project_id = projectjson_response["response"][0]["project_id"] #fetch projectid from json
+    #     dataset_id = projectjson_response["response"][0]["dataset_id"] #fetch dataset_id from json
+    #     schema_id = projectjson_response["response"][0]["schema_id"] #fetch schemaid from json
+    #     info = {"project_id" : project_id,"dataset_id":dataset_id,"schema_id":schema_id} #request parameter as projectid
+    #     response = requests.post("http://localhost:8000/mlaas/ingest/preprocess/schema/save/",params= info,json = scenario3)
+    #     json_response = response.json()
+    #     status = json_response["status_code"]
+    #     self.assertEqual(status,"200")
 
     def testD_scenario4(self):
         """ This function is used to test that application should allow to insert multiple column as target column
@@ -147,11 +162,13 @@ class testBDataSchemaClass(unittest.TestCase):
             Json : [json as scenario1](define in above code)
         """
         time.sleep(1)
-        projectid_response = requests.get("http://localhost:8000/mlaas/ingest/create_project/",params ={"user_name":"autouser_second"})
-        projectid_json_response = projectid_response.json()
-        project_id = projectid_json_response["response"][0]["project_id"]
-        info = {"project_id" : project_id}
-        response = requests.post("http://localhost:8000/mlaas/ingest/dataset_schema/",params= info,json = scenario1)
+        project_response = requests.get("http://localhost:8000/mlaas/ingest/project/create/",params ={"user_name":"autouser_2"}) #get projectid
+        projectjson_response = project_response.json() #projectid in json formate
+        project_id = projectjson_response["response"][0]["project_id"] #fetch projectid from json
+        dataset_id = projectjson_response["response"][0]["dataset_id"] #fetch dataset_id from json
+        schema_id = projectjson_response["response"][0]["schema_id"] #fetch schemaid from json
+        info = {"project_id" : project_id,"dataset_id":dataset_id,"schema_id":schema_id} #request parameter as projectid
+        response = requests.post("http://localhost:8000/mlaas/ingest/preprocess/schema/save/",params= info,json = scenario1)
         json_response = response.json()
         status = json_response["status_code"]
         self.assertEqual(status,"200")
@@ -165,11 +182,13 @@ class testBDataSchemaClass(unittest.TestCase):
         """
 
         time.sleep(1)
-        projectid_response = requests.get("http://localhost:8000/mlaas/ingest/create_project/",params ={"user_name":"autouser_second"})
-        projectid_json_response = projectid_response.json()
-        project_id = projectid_json_response["response"][0]["project_id"]
-        info = {"project_id" : project_id}
-        response = requests.post("http://localhost:8000/mlaas/ingest/dataset_schema/",params= info,json = scenario4)
+        project_response = requests.get("http://localhost:8000/mlaas/ingest/project/create/",params ={"user_name":"autouser_2"}) #get projectid
+        projectjson_response = project_response.json() #projectid in json formate
+        project_id = projectjson_response["response"][0]["project_id"] #fetch projectid from json
+        dataset_id = projectjson_response["response"][0]["dataset_id"] #fetch dataset_id from json
+        schema_id = projectjson_response["response"][0]["schema_id"] #fetch schemaid from json
+        info = {"project_id" : project_id,"dataset_id":dataset_id,"schema_id":schema_id} #request parameter as projectid
+        response = requests.post("http://localhost:8000/mlaas/ingest/preprocess/schema/save/",params= info,json = scenario4)
         json_response = response.json()
         status = json_response["status_code"]
         self.assertEqual(status,"200")
