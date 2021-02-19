@@ -10,7 +10,7 @@ from .linear_regressor_sklearn import LinearRegressorSklearnClass
 from .model_experiment import ExperimentClass
 
 def start_pipeline(**kwargs):
-    mlflow.set_tracking_uri("postgresql+psycopg2://postgres:admin@postgresql:5432/postgres")
+    mlflow.set_tracking_uri("postgresql+psycopg2://airflow:airflow@postgresql:5432/airflow")
     print(" pipeline start ")
     
 def linear_regression_sklearn(**kwargs):
@@ -55,6 +55,7 @@ def linear_regression_sklearn(**kwargs):
     run_uuid = run.info.run_id
     experiment_id = experiment_id
     # Add Experiment 
+    Model_Mode = 'auto'
     ExpObject = ExperimentClass(experiment_id,experiment_name,run_uuid,project_id,dataset_id,user_id,model_id,Model_Mode)
     experiment_status = ExpObject.add_experiments()
     

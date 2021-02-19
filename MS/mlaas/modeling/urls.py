@@ -28,9 +28,8 @@ urlpatterns = [
 
     path('mlaas/modeling/selectalgorithm/', SelectAlgorithmClass.as_view()),
 
-    path('mlaas/modeling/hyperparameters/', HyperParametersClass.as_view())
+    path('mlaas/modeling/hyperparameters/', HyperParametersClass.as_view()),
 
-  
-
+    path('mlaas/modeling/showexperimentslist/', ShowExperimentsListClass.as_view())
 
 ]

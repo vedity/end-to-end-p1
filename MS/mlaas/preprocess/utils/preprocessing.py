@@ -19,6 +19,7 @@ from common.utils.logger_handler import custom_logger as cl
 from ingest.utils.dataset import dataset_creation
 from .Exploration import dataset_exploration as de
 from .schema import schema_creation as sc
+from .cleaning import noise_reduction as nr
 
 #* Library Imports
 import logging
@@ -34,7 +35,7 @@ logger = logging.getLogger('preprocessing')
 
 dc = dataset_creation.DatasetClass()
 
-class PreprocessingClass(sc.SchemaClass,de.ExploreClass):
+class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
     def __init__(self,database,user,password,host,port):
         """This constructor is used to initialize database credentials.
            It will initialize when object of this class is created with below parameter.
@@ -180,13 +181,14 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass):
             
             #? Logical function starts
             try:
+                #? Logical function starts
                 all_col_operations = []
-                
+
                 for id in column_ids:
                     col = data_df.columns[id]
                     series = data_df[col]
-                    operations = [1,2,3,4,5,6,7,8,9,10]
-                    
+                    operations = [1,2,3,6,10]
+
                     #? Column is both numerical & categorical
                     if (col in numerical_columns) and (predicted_datatypes[id].startswith('Ca')):
                         col_type = 0
@@ -198,15 +200,65 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass):
                         col_type = 2
                     else:
                         col_type = 3
-                        
+
                     #? Column is text column
                     if col_type == 3:
                         all_col_operations.append(operations)
                         continue
                     
-            except:
-                pass
+                    #? Adding Missing Value Operations
+                    if col_type == 0:
+                        operations += [4,5,7,8,9]
+                    elif col_type == 1:
+                        operations += [4,5,7]
+                    elif col_type == 2:
+                        operations += [8,9]
                     
+                    missing_values = data_df[col].isnull().any()
+                    if missing_values == False:
+                        noisy,_,_ = self.detect_noise(series)
+                    
+                    #? Adding Noise Reduction Operations
+                    if not missing_values:
+                        operations += [11,14,15]
+                        if col_type == 0 or col_type == 1:
+                            operations += [12,13]
+                    
+                    #? Outlier Removal & Scaling Operations for numeric; Encoding ops for Categorical
+                    if not missing_values and not noisy:
+                        if col_type == 0 or col_type == 1:
+                            operations += [16,17,18,19,20,21,22,23,24,25,26]
+                        if col_type == 0 or col_type == 2:
+                            operations += [27,28,29]
+                        
+                    #? Math operations
+                    if not noisy:
+                        if col_type == 0 or col_type == 1:
+                            operations += [30,31,32,33]
+                            
+                    all_col_operations.append(operations)
+                
+                #? Getting Final Common Operation List
+                final_op_list = []
+                for ops in all_col_operations:
+                    for op in ops:
+                        flag = True
+                        for other_ops in all_col_operations:
+                            if op not in other_ops:
+                                flag = False
+                                break
+                        if flag == True:
+                            final_op_list.append(op)
+                final_op_list = list(set(final_op_list))
+                final_op_list.sort()
+                
+                logging.info("data preprocessing : PreprocessingClass : get_possible_operations : execution End")
+            
+                return final_op_list    
+            
+            except Exception as exc:
+                logging.info(f"data preprocessing : PreprocessingClass : get_possible_operations : Function failed : {str(exc)}")
+                return exc
                 
         except (DatabaseConnectionFailed,EntryNotFound) as exc:
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
