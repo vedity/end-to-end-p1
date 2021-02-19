@@ -18,5 +18,8 @@ urlpatterns = [
 
     #url for schema column attribute
     path('mlaas/preprocess/schema/attribute/list/',ScheamColumnListClass.as_view()),
+
+    #url for possible operation for cleanup
+    path('mlaas/preprocess/cleanup/operation/',OperationListClass.as_view())
     
 ]
