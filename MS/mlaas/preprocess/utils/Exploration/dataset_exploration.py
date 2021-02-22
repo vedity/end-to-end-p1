@@ -98,6 +98,7 @@ class ExploreClass:
         #? Getting all the data
         sql_command = f"SELECT {str(query)} FROM {user_name}.{dataset_table_name}"
         data_df = DBObject.select_records(connection,sql_command)    
+        logging.info("--------->"+str(data_df.dtypes))
         #? Logical Code Begins
         try:
             #? Getting Statistics
@@ -107,9 +108,9 @@ class ExploreClass:
             num_cols = data_df._get_numeric_data().columns
             numerical_columns = list(num_cols)
             predicted_datatypes = self.get_attrbt_datatype(data_df,data_df.columns,len(data_df))
-            for i,col in enumerate(data_df.columns):
-                if (col in numerical_columns) and (predicted_datatypes[i].startswith('Ca')):
-                    numerical_columns.remove(col)
+            # for i,col in enumerate(data_df.columns):
+            #     if (col in numerical_columns) and (predicted_datatypes[i].startswith('Ca')):
+            #         numerical_columns.remove(col)
             stats_df = stats_df.T
             
             #? Changing The Column Names
@@ -133,6 +134,7 @@ class ExploreClass:
             
             #? Defining All the Columns that are not in the DataFrame.describe() method but are needed for the exploration page
             stats_df["Null Values"] = len(data_df) - stats_df['Non-Null Values']
+            logging.info(data_df.isnull().sum())
             stats_df["Null Values"] = stats_df['Null Values'].astype(int)
             stats_df["Non-Null Values"] = stats_df['Non-Null Values'].astype(int)
             stats_df["DataCount"] = len(data_df)
