@@ -217,4 +217,3 @@ class ActivityTimelineClass(APIView):
                         logging.error("Common  : ActivityTimelineClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
  
-        

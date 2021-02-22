@@ -14,6 +14,7 @@ import pandas as pd
 import logging
 import traceback
 from ..dataset import dataset_creation 
+
 from common.utils.database import db
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.ingest.ingest_exception import *
@@ -117,8 +118,9 @@ class ProjectClass:
         DatasetObject = dataset_creation.DatasetClass()
 
         if original_dataset_id == None:
-            _,original_dataset_id,schema_dataset_id = DatasetObject.make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name)
-            dataset_id = schema_dataset_id
+            _,original_dataset_id,raw_dataset_id  = DatasetObject.make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name)
+            dataset_id = raw_dataset_id
+            
         else:
             
             dataset_id,_ = DBObject.get_raw_dataset_detail(connection,original_dataset_id)
@@ -128,7 +130,7 @@ class ProjectClass:
         row_tuples = self.make_project_records(project_name,project_desc,user_name,original_dataset_id,dataset_id) 
 
         # Get status about inserting records into project table. if successful then 0 else 1. 
-        insert_status = DBObject.insert_records(connection,table_name,row_tuples,cols) 
+        insert_status,_ = DBObject.insert_records(connection,table_name,row_tuples,cols) 
 
         # This condition is used to check project table and data is successfully stored into project table or not.if successful then 0 else 1. 
         if schema_status in [0,1] and create_status in [0,1] and insert_status == 0 :
@@ -147,8 +149,9 @@ class ProjectClass:
         else :
             status = 1 # Failed
             project_id = None
+            original_dataset_id = None
             
-        logging.info("data ingestion : ProjectClass : make_project : execution end")
+        
         return status,project_id,original_dataset_id
 
     def get_project_id(self,DBObject,connection,row_tuples,user_name):

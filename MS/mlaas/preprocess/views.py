@@ -109,13 +109,14 @@ class SchemaSaveClass(APIView):
                         logging.info("data preprocess : SchemaSaveClass : POST Method : execution start")
 
                         update_schema_data=json.loads(request.body) #convert the data into dictonery
+                        
                         schema_data = update_schema_data["data"] #access "data" key value from the schema_data dict
                         schema_id = request.query_params.get('schema_id') #get the schema id
                         dataset_id = request.query_params.get('dataset_id') #get the dataset id
                         project_id = request.query_params.get('project_id') #get the project id
                         
                         schema_status=preprocessObj.save_schema_data(schema_data,project_id,dataset_id,schema_id)
-
+                        logging.info(str(schema_status)+" stauts type "+str(type(schema_status)))
                         if isinstance(schema_status,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(schema_status) # extract the status_code and error_msg from schema_status
                                 logging.info("data preprocess : SchemaSaveClass : POST Method : execution stop : status_code :"+status_code)
