@@ -57,7 +57,7 @@ class DatasetClass:
         logging.info("data ingestion : DatasetClass : make_dataset_schema : execution end")          
         return table_name,schema,cols
 
-    def  make_dataset_records(self,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,flag):
+    def  make_dataset_records(self,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name):
         """This function is used to make records for inserting data into table based on input dataframe.
            E.g. column_name_1,column_name_2 .......,column_name_n.
 
@@ -71,15 +71,10 @@ class DatasetClass:
             [tuple]: [it will return records in the form of tuple.]
         """
         logging.info("data ingestion : DatasetClass : make_dataset_records : execution start")
-        #if falg is None
-        if flag == None:
-            file_path = self.get_file_path(file_name,dataset_visibility,user_name)
-            file_size = self.get_file_size(file_path)# Get size of uploaded file.
-            dataset_table_name = self.get_dataset_table_name(file_name) # Make table name for loaded csv.
-        else:
-            file_size = 'null' 
-            dataset_table_name = file_name
-            file_name = 'null'
+        
+        file_path = self.get_file_path(file_name,dataset_visibility,user_name)
+        file_size = self.get_file_size(file_path)# Get size of uploaded file.
+        dataset_table_name = self.get_dataset_table_name(file_name) # Make table name for loaded csv.
         row=dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name,dataset_desc,page_name # Make record for dataset table.
         logging.info("row error"+str(row))
         row_tuples = [tuple(row)] # Convert row record into list of tuple.
@@ -149,7 +144,7 @@ class DatasetClass:
         
  
 
-    def make_dataset(self,DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,flag=None,schema_flag=0):
+    def make_dataset(self,DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,flag=True,row_creation_flag=True):
         """This function is used to main dataset table and also load main dataset details into database table.
            E.g. dataset details : dataset_name,file_name,file_size,dataset_table_name,user_name.
 
@@ -169,67 +164,54 @@ class DatasetClass:
         
         schema_status = DBObject.create_schema(connection)
         table_name,schema,cols = self.make_dataset_schema() # Get table name,schema and columns from dataset class.
-        schema_dataset_id=None
-        if flag==None:
-        #? Checking if the same dataset is there for the same user in the dataset table? If yes, then it will not insert a new row in the table
+        original_dataset_id = 0
+        if flag == True:
+            #? Checking if the same dataset is there for the same user in the dataset table? If yes, then it will not insert a new row in the table
             dataset_exist = self.dataset_exists(DBObject,connection,table_name,dataset_visibility,dataset_name,user_name)
             if dataset_exist == False: pass #? No dataset with same name exists so creating the new one
             else: return 2,dataset_exist,None #? dataset_exists() function returns id of the dataset if dataset with same name exists
         
         create_status = DBObject.create_table(connection,table_name,schema) # Get status about dataset tableis created or not.if created then 0 else 1.
-        row_tuples = self.make_dataset_records(dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,flag) # Get record for dataset table.
-        insert_status = DBObject.insert_records(connection,table_name,row_tuples,cols) # Get status about inserting records into dataset table. if successful then 0 else 1.
+        row_tuples = self.make_dataset_records(dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name) # Get record for dataset table.
+        insert_status,_ = DBObject.insert_records(connection,table_name,row_tuples,cols) # Get status about inserting records into dataset table. if successful then 0 else 1.
 
-        
-        schema_file_name = file_name
-        logging.info(str(schema_file_name)+" schema_file_name ")
 
         # Condition will check dataset table created and data is successfully stored into project table or not.if both successful then 0 else 1. 
         if schema_status in [0,1] and create_status in [0,1] and insert_status == 0 :
-            
-            dataset_id = self.get_dataset_id(DBObject,connection,row_tuples,user_name,file_name)
+            if flag == True:
+                original_dataset_id = self.get_dataset_id(DBObject,connection,row_tuples,user_name,flag)
+                
+            else:
+                raw_dataset_id = self.get_dataset_id(DBObject,connection,row_tuples,user_name,flag)
+
             status = 0 # If Successfully.
-
-            if schema_flag==0:
-                page_name='schema mapping'
+            if row_creation_flag == True:
+                load_data_status,no_of_rows = self.load_dataset(DBObject,connection,connection_string,file_name,dataset_visibility,user_name)
+            else:
+                load_data_status = self.insert_raw_dataset(DBObject,connection,raw_dataset_id,user_name,file_name,dataset_visibility)
                 
-                old_table_name = self.get_dataset_table_name(schema_file_name)
-                logging.info(str(old_table_name)+" old_table_name ")
+            if load_data_status == 1:
+                return 1,None,None
+            else:
+                if row_creation_flag == True:
+                    sql_command = "UPDATE "+str(table_name)+" set no_of_rows="+str(no_of_rows)+" where dataset_id="+str(original_dataset_id)
+                    update_status = DBObject.update_records(connection,sql_command)
 
-                schema_table_name = DBObject.get_table_name(connection,schema_file_name)
-                logging.info(str(schema_table_name)+" schema_table_name ")
-
-                updated_table_name = self.get_dataset_table_name(schema_table_name)
-                logging.info(str(updated_table_name)+" update table name ")
+            if flag == True:
+                if row_creation_flag == True:
+                    page_name='schema mapping'
                 
-                
-
-                row_tuples = self.make_dataset_records(dataset_name,str(updated_table_name),str(dataset_visibility),str(user_name),dataset_desc,page_name,flag=1)
-                insert_status = DBObject.insert_records(connection,table_name,row_tuples,cols) # Get status about inserting records into dataset table. if successful then 0 else 1.
-                
-                # if dataset_visibility=='private':
-                #     new_table_name = user_name+"."+updated_table_name
-                #     copy_table_name = user_name+"."+old_table_name
-                # else:
-                #     new_table_name = updated_table_name
-                #     copy_table_name = old_table_name
-
-                # sql_command = 'CREATE TABLE '+new_table_name+' AS SELECT * FROM '+copy_table_name
-                # logging.info(str(sql_command)+"   command")
-                # create_status = DBObject.update_records(connection,sql_command)
-
-                
-                load_dataset_status,no_of_rows = self.load_dataset(DBObject,connection,connection_string,schema_file_name,dataset_visibility,user_name,updated_table_name)
-                schema_dataset_id = self.get_dataset_id(DBObject,connection,row_tuples,user_name,updated_table_name,schema_flag=1)
-                
+                    status,_,raw_dataset_id=self.make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,flag=False,row_creation_flag=False)
+                    
         else :
             status = 1 # If Failed.
-            dataset_id = None
-            
+            original_dataset_id = None
+            raw_dataset_id = None
+
         logging.info("data ingestion : DatasetClass : make_dataset : execution end")
-        return status,dataset_id,schema_dataset_id
+        return status,original_dataset_id,raw_dataset_id
     
-    def load_dataset(self,DBObject,connection,connection_string,file_name,dataset_visibility,user_name,updated_table_name=None):
+    def load_dataset(self,DBObject,connection,connection_string,file_name,dataset_visibility,user_name):
         """This function is used to load csv file data into database table.
 
         Args:
@@ -254,10 +236,9 @@ class DatasetClass:
         no_of_rows = file_data_df.shape[0]
         logger.info("no_of_rows:===="+str(no_of_rows))
         # Get table name.
-        if updated_table_name==None:
-            table_name = self.get_dataset_table_name(file_name)
-        else:
-            table_name = updated_table_name
+        
+        table_name = self.get_dataset_table_name(file_name)
+        
             
         if dataset_visibility.lower() == "public" :
             user_name = "public"
@@ -271,7 +252,7 @@ class DatasetClass:
         logging.info("data ingestion : DatasetClass : load_dataset : execution end")
         return load_dataset_status,no_of_rows
     
-    def get_dataset_id(self,DBObject,connection,row_tuples,user_name,file_name,schema_flag=None):
+    def get_dataset_id(self,DBObject,connection,row_tuples,user_name,page_name=True):
         """This function is used to get dataset id of the created dataset.
 
         Args:
@@ -294,12 +275,12 @@ class DatasetClass:
         
         # Prepare select sql command to fetch dataset id from dataset table for particular user.
         dataset_name=str(dataset_name).replace("'","''")
-
-        if schema_flag == None:
-            sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_name ='" + dataset_name + "' and user_name = '"+ user_name + "'"
+        if page_name == False:
+            sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_name ='" + dataset_name + "' and user_name = '"+ user_name + "' and page_name='schema mapping'"
+            
         else:
-            sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_table_name ='" + str(file_name) + "' "
-        
+            sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_name ='" + dataset_name + "' and user_name = '"+ user_name + "'"
+
         # Get dataframe of dataset id. 
         dataset_df = DBObject.select_records(connection,sql_command)
 
@@ -606,6 +587,33 @@ class DatasetClass:
         except Exception as exc:
             return exc
     
+    def insert_raw_dataset(self,DBObject,connection,dataset_id,user_name,file_name,dataset_visibility):
+        try:
+            #get the formated table name of the actual dataset
+            original_table_name = self.get_dataset_table_name(file_name)
+            
+            #get the updated table name for te raw dataset
+            raw_table_name = DBObject.get_table_name(connection,original_table_name)
+           
+            #check the visibility 
+            if dataset_visibility=='private':
+                new_table_name = user_name+'."'+raw_table_name+'"'
+                copy_table_name = user_name+'."'+original_table_name+'"'
+            else:
+                new_table_name = raw_table_name
+                copy_table_name = original_table_name
+
+            #form the new table based on te existing table 
+            sql_command = 'CREATE TABLE '+str(new_table_name)+' AS SELECT * FROM '+str(copy_table_name)
+            create_status = DBObject.update_records(connection,sql_command)
+
+            #update the dataset table name of the raw dataset
+            sql_command = "UPDATE mlaas.dataset_tbl SET dataset_table_name='"+str(raw_table_name)+"' where dataset_id ='"+str(dataset_id)+"'"
+            create_status = DBObject.update_records(connection,sql_command)
+            
+            return create_status
+        except Exception as exc:
+            return exc
 
 
 
