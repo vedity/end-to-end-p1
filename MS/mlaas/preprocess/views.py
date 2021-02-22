@@ -207,7 +207,7 @@ class OperationListClass(APIView):
         
         def post(self, request, format=None):
                 '''
-                This class is used retrive all the possible operation for data cleanup.
+                This class is used retrive all the possible operations for the selected column(s).
                 Args  : 
                         datasetid : dataset id from project table
                         schemaid : schema id from project table
@@ -238,4 +238,32 @@ class OperationListClass(APIView):
                 except Exception as e:
                                 logging.error("data preprocess : OperationListClass : POST Method : Exception :" + str(e))
                                 logging.error("data preprocess : OperationListClass : POST Method : "+ traceback.format_exc())
+                                return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+
+class MasterOperationListClass(APIView):
+        
+        def get(self, request, format=None):
+                '''
+                This class is used retrive all the possible operation for data cleanup.
+                Args  : 
+                        None
+                        
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival failed or successfull),
+                        Response(return false if failed otherwise json data)
+                '''
+                try:
+                        operations = preprocessObj.get_all_operations() #call get_possible_operation class
+                        if isinstance(operations,list):  
+                                        response = json.dumps(operations)
+                                        logging.info("data preprocess : MasterOperationListClass : GET Method : execution stop")
+                                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":response})
+                        else:
+                                        status_code,error_msg=json_obj.get_Status_code(operations) # extract the status_code and error_msg from schema_data
+                                        logging.info("data preprocess : MasterOperationListClass : GET Method : execution stop : status_code :"+status_code)
+                                        return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                except Exception as e:
+                                logging.error("data preprocess : MasterOperationListClass : GET Method : Exception :" + str(e))
+                                logging.error("data preprocess : MasterOperationListClass : GET Method : "+ traceback.format_exc())
                                 return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
