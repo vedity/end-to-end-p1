@@ -201,3 +201,40 @@ class ScheamColumnListClass(APIView):
                                 logging.error("data preprocess : ScheamAttributeListClass : POST Method : Exception :" + str(e))
                                 logging.error("data preprocess : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
                                 return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+
+class OperationListClass(APIView):
+        
+        def post(self, request, format=None):
+                '''
+                This class is used retrive all the possible operation for data cleanup.
+                Args  : 
+                        datasetid : dataset id from project table
+                        schemaid : schema id from project table
+                        columnids : get selected column ids
+                        
+                        
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival failed or successfull),
+                        Response(return false if failed otherwise json data)
+
+                '''
+                try:
+                        dataset_id = request.query_params.get('dataset_id') #get dataset id
+                        schema_id = request.query_params.get('schema_id') #get schema id
+                        column_ids = request.query_params.get('column_ids') #get column_id
+                        column_ids = column_ids[1:-1].split(",") #split columnids by comma sepration
+                        column_ids = [int(i) for i in column_ids] #convert all ids to int
+
+                        operation = preprocessObj.get_possible_operations(dataset_id,schema_id,column_ids) #call get_possible_operation class
+                        if isinstance(operation,list):  
+                                        logging.info("data preprocess : OperationListClass : POST Method : execution stop")
+                                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":operation})
+                        else:
+                                        status_code,error_msg=json_obj.get_Status_code(operation) # extract the status_code and error_msg from schema_data
+                                        logging.info("data preprocess : OperationListClass : POST Method : execution stop : status_code :"+status_code)
+                                        return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                except Exception as e:
+                                logging.error("data preprocess : OperationListClass : POST Method : Exception :" + str(e))
+                                logging.error("data preprocess : OperationListClass : POST Method : "+ traceback.format_exc())
+                                return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
