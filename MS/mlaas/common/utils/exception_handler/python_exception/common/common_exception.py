@@ -194,3 +194,45 @@ class RowsAndColumnsRequired(Exception):
     
     def __str__(self):
         return (self.msg)
+
+class ActivityInsertionFailed(Exception):
+    """  Activity Insertion Failed Exception"""
+    def __init__(self,status_code):
+        self.msg = "Activity insertion failed"
+        self.status_code = status_code
+        self.msg = self.msg
+    
+    def __str__(self):
+        return (self.msg)
+
+class TableCreationFailed(Exception):
+    """  Table Creation Failed Exception"""
+    def __init__(self,status_code):
+        self.msg = "Activity table creation failed"
+        self.status_code = status_code
+        self.msg = self.msg
+    
+    def __str__(self):
+        return (self.msg)
+
+class ActivityTableNotFound(Exception):
+    """  Activity Table Not Found Exception"""
+    def __init__(self,status_code):
+        self.msg = "Activity table not found"
+        self.status_code = status_code
+        self.msg = self.msg
+    
+    def __str__(self):
+        return (self.msg)
+
+        
+
+class ActivityUpdateFailed(Exception):
+    """  Activity Update Failed Exception"""
+    def __init__(self,status_code):
+        self.msg = "Activity update failed"
+        self.status_code = status_code
+        self.msg = self.msg
+    
+    def __str__(self):
+        return (self.msg)
