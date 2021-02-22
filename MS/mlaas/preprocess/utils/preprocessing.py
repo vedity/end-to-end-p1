@@ -139,7 +139,7 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
                 None
                 
             Returns:
-                all_operations[List]: List of all operations.
+                all_operations[List]: List of dictionaries containing all operations.
         '''
         
         try:
@@ -195,6 +195,68 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
             logging.error("data preprocessing : PreprocessingClass : get_all_operations : " +traceback.format_exc())
             return exc.msg
             
+        
+    def get_preprocess_cache(self, dataset_id):
+        '''
+            This function is used to return Missing value & Noise status for all the columns
+            
+            Args:
+                dataset_id(Intiger): id of the dataset.
+                
+            Returns:
+                missing_value_status(List of Booleans): List containing missing value statuses for all the columns.
+                noise_status(List of Booleans): List containing noise statuses for all the columns.
+        '''
+        try:
+            logging.info("data preprocessing : PreprocessingClass : get_preprocess_cache : execution start")
+            
+            DBObject,connection,connection_string = self.get_db_connection()
+            if connection == None :
+                raise DatabaseConnectionFailed(500)  
+                
+            #? getting the name of the dataset_tbl
+            table_name,_,_ = dc.make_dataset_schema()
+            
+            #? Getting user_name and dataset_visibility
+            sql_command = f"SELECT USER_NAME,DATASET_VISIBILITY,DATASET_TABLE_NAME,no_of_rows FROM {table_name} WHERE dataset_id = '{dataset_id}'"
+            visibility_df = DBObject.select_records(connection,sql_command) 
+            if len(visibility_df) != 0: 
+                user_name,dataset_visibility = visibility_df['user_name'][0],visibility_df['dataset_visibility'][0]
+            #? No entry for the given dataset_id        
+            else: raise EntryNotFound(500)
+            
+            #? Getting CSV table name
+            dataset_table_name = visibility_df['dataset_table_name'][0]
+            dataset_table_name = '"'+ dataset_table_name+'"'
+            
+            #? changing the database schema for the public databases
+            if dataset_visibility == 'public':
+                user_name = 'public'
+            
+            #? Getting all the data
+            sql_command = f"SELECT * FROM {user_name}.{dataset_table_name}"
+            data_df = DBObject.select_records(connection,sql_command)    
+            
+            missing_value_status = []
+            noise_status = []
+            for col in data_df.columns:
+                series = data_df[col]
+                
+                #? Checking if there are missing values in the column
+                is_missing_value = series.isnull().any()
+                missing_value_status.append(is_missing_value)
+                
+                #? Checking if there is noise in the column
+                noisy,_,_ = self.detect_noise(series)
+                noise_status.append(noisy)
+            
+            logging.info("data preprocessing : PreprocessingClass : get_preprocess_cache : execution stop")
+            return missing_value_status,noise_status
+            
+        except (DatabaseConnectionFailed,EntryNotFound) as exc:
+            logging.error("data preprocessing : PreprocessingClass : get_preprocess_cache : Exception " + str(exc.msg))
+            logging.error("data preprocessing : PreprocessingClass : get_preprocess_cache : " +traceback.format_exc())
+            return exc.msg
         
     def get_possible_operations(self, dataset_id, schema_id, column_ids):
         '''
