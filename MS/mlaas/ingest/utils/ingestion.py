@@ -19,7 +19,6 @@ import datetime
 
 
 from common.utils.database import db
-from .project.project_creation import *
 from .dataset import dataset_creation as dt
 from .project import project_creation as pj
 from common.utils.exception_handler.python_exception.common.common_exception import *
@@ -93,6 +92,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             
             
             project_status,project_id,load_dataset_id = super(IngestClass,self).make_project(DBObject,connection,connection_string,project_name,project_desc,page_name,dataset_desc,dataset_name,dataset_visibility,file_name ,original_dataset_id,user_name)
+
             logging.debug("data ingestion : ingestclass : create_project : we get status of project : "+str(project_status)+ " and Project id : "+str(project_id)+" and original_dataset_id : "+str(original_dataset_id))
             if project_status == 2:
                 raise ProjectAlreadyExist(500)
@@ -100,19 +100,8 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             elif project_status == 1:
                 raise ProjectCreationFailed(500) # If Failed.
                 
-            elif project_status == 0 and original_dataset_id == None:
-                load_data_status,no_of_rows = super(IngestClass,self).load_dataset(DBObject,connection,connection_string,file_name,dataset_visibility,user_name)
-                logging.debug("data ingestion : ingestclass : create_project : we get status of load_dataset : "+str(load_data_status)+ " and no of records in dataset : "+str(no_of_rows)+" and original_dataset_id : "+str(load_dataset_id))
-                if load_data_status == 1:
-                    raise LoadCSVDataFailed(500)
-                else:
-                    #v1.3
-                    # update number of rows into dataset.
-                    sql_command = "UPDATE mlaas.dataset_tbl SET no_of_rows="+str(no_of_rows)+" where dataset_id="+str(load_dataset_id)
-                    logging.info(str(sql_command)+"rows updated query")
-                    update_status = DBObject.update_records(connection,sql_command)
-                
-                status = super(IngestClass,self).update_dataset_status(DBObject,connection,project_id,load_data_status)
+            elif project_status == 0 and load_dataset_id == None:
+                status = super(IngestClass,self).update_dataset_status(DBObject,connection,project_id,load_data_status=1)
                      
             elif project_status == 0:
                 status = super(IngestClass,self).update_dataset_status(DBObject,connection,project_id)
@@ -145,31 +134,24 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
             if connection == None:
                 raise DatabaseConnectionFailed(500)
-            dataset_status,dataset_id,_ = super(IngestClass,self).make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name) # Get Status about dataset creation,if successfully then 0 else 1.
+            dataset_status,original_dataset_id,raw_dataset_id = super(IngestClass,self).make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name) # Get Status about dataset creation,if successfully then 0 else 1.
+
             if dataset_status == 2:
                 raise DatasetAlreadyExist(500)
             
             elif dataset_status == 1 :
                 raise DatasetCreationFailed(500)
-            # Condition will check dataset successfully created or not. if successfully then 0 else 1.
-            elif dataset_status == 0 :
-                load_data_status,no_of_rows = super(IngestClass,self).load_dataset(DBObject,connection,connection_string,file_name,dataset_visibility,user_name)
-                if load_data_status == 1:
-                    raise LoadCSVDataFailed(500)
-                else:
-                    # update number of rows into dataset.
-                    sql_command = "UPDATE mlaas.dataset_tbl set no_of_rows="+str(no_of_rows)+" where dataset_id="+str(dataset_id)
-                    logging.info(str(sql_command)+" no_of_rows dataset")
-                    update_status = DBObject.update_records(connection,sql_command)
-
             
+            # Condition will check dataset successfully created or not. if successfully then 0 else 1.
+            
+                         
         except (DatabaseConnectionFailed,DatasetAlreadyExist,DatasetCreationFailed,LoadCSVDataFailed) as exc:
             logging.error("data ingestion : ingestclass : create_dataset : Exception " + str(exc.msg))
             logging.error("data ingestion : ingestclass : create_dataset : " +traceback.format_exc())
             return exc.msg,None
         
         logging.info("data ingestion : ingestclass : create_dataset : execution end")
-        return dataset_status,dataset_id
+        return dataset_status,original_dataset_id
         
     def show_dataset_details(self,user_name):
         """This function is used to show dataset details.

@@ -13,6 +13,7 @@ import psycopg2.extras as extras
 import pandas as pd 
 from sqlalchemy import create_engine
 import json
+from database import *
 import logging
 from common.utils.logger_handler import custom_logger as cl
 from common.utils.exception_handler.python_exception.common.common_exception import *
@@ -38,6 +39,7 @@ class DBClass:
         """
         read_df=pd.read_csv(file_path, na_filter= False) #  Read csv file and load data into dataframe.
         column_name_list = read_df.columns.values.tolist()
+    
         column_list = []
         for name in column_name_list:
             if read_df.dtypes.to_dict()[name] == 'object':
@@ -147,7 +149,7 @@ class DBClass:
         
     
     
-    def insert_records(self,connection,table_name,row_tuples,cols):
+    def insert_records(self,connection,table_name,row_tuples,cols,Flag=0):
         """This function is used to insert data into database table.
 
         Args:
@@ -160,22 +162,31 @@ class DBClass:
             [integer]: [it will return status of the data insertion. if successfully then 0 else 1.]
         """
         
+
+
         cols = cols # Get columns name for database insert query.
         tuples = row_tuples # Get record for database insert query.
-        logging.info("cols"+str(cols))
-        query = "INSERT INTO %s(%s) VALUES %%s" % (table_name, cols) # Make query
-        
+
         cursor = connection.cursor() # Open cursor for database.
         try:
-            extras.execute_values(cursor, query, tuples) # Excute insert query.
+            if Flag == 0 :
+                query = "INSERT INTO %s(%s) VALUES %%s " % (table_name, cols) # Make query
+                extras.execute_values(cursor, query, tuples) # Excute insert query.
+                index = 0
+            else:
+                query = "INSERT INTO %s(%s) VALUES %%s RETURNING index" % (table_name, cols) # Make query
+                extras.execute_values(cursor, query, tuples) # Excute insert query.
+                index = [row[0] for row in cursor.fetchall()][0]
+            
+            status = 0
             connection.commit() # Commit the changes.
             cursor.close()
-            return 0 # If successfully inserted.
+            return status,index # If successfully inserted.
         except (Exception, psycopg2.DatabaseError) as error:
             connection.rollback() # Rollback the changes.
             cursor.close() # Close the cursor.
             logging.info(str(error))
-            return 1 # If failed.
+            return 1,None # If failed.
 
     
     def select_records(self,connection,sql_command):
@@ -188,12 +199,13 @@ class DBClass:
         Returns:
             [dataframe]: [it will return dataframe of the selected data from the database table.]
         """
-        
-        cursor = connection.cursor() # Open the cursor.
         sql_command = sql_command # Get sql command.
         try :
-            data = pd.read_sql(sql_command, connection) # Read data from database table.
-            self.update_records(connection,'commit')
+           
+            connection_string = "postgresql://" + user + ":" + password + "@" + host + ":" + port + "/" + database # Make database connection string.
+            engine = create_engine(connection_string) # Create database engine.
+            data = pd.read_sql_query(sql_command, engine) #method of sqlalchemy
+    
             return data   
         except(Exception, psycopg2.DatabaseError) as error:
             return None
@@ -583,6 +595,7 @@ class DBClass:
                 [Dataframe] : [return the dataframe of dataset table ]
         '''
         sql_command = "SELECT dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows,dataset_desc from mlaas.dataset_tbl Where dataset_id =" + str(dataset_id)
+        logging.info(str(sql_command) + " command")
         dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         return dataset_df 
     

@@ -74,11 +74,12 @@ class SchemaClass:
             #check the dataset visibility if private append the user name with  dataset table name 
             #dataset visibility if public assign table name as  dataset table name we get
             if dataset_visibility =="private":
-                table_name=user_name+"."+dataset_table_name
+                table_name=user_name+'."'+dataset_table_name+'"'
             else:
                 
                 table_name = dataset_table_name
             
+            logging.info(table_name + " xyz")
             #get the column list and datatype  based on given table name
             column_name_list,predicted_datatype = self.get_attribute_datatype(connection,DBObject,table_name)
 
@@ -110,7 +111,7 @@ class SchemaClass:
             logging.info("data preprocess : SchemaClass : get_attribute_datatype : execution start")
 
             sql_command = "SELECT * FROM "+table_name #sql query
-
+            logging.info(str(sql_command)+ "command")
             csv_data = DBObject.select_records(connection,sql_command) #execute sql commnad if data exist then return data else return None
             
             if csv_data is None or len(csv_data) == 0:
@@ -128,7 +129,6 @@ class SchemaClass:
 
                 unique_values = list(set(column_data)) #get the set of unique values convert into list
                 
-                
                 if (len(unique_values)/no_of_rows) < 0.2 :
                     if "," in str(column_data[1]): #check if the comma value present
                         value = "categorical list"
@@ -137,7 +137,9 @@ class SchemaClass:
                 else:
                     value =  "false" #check condition if condition true then set as categorical else false
                 if value =="false": 
+                    
                     datatype_value = csv_data.dtypes.to_dict()[column_name] #get datatype specified for perticular column name
+                   
                     if datatype_value in ['float64','float32','int32','int64']: #check if int,float,double present then set it "numerical"
                         value = "numerical"
 
@@ -187,7 +189,7 @@ class SchemaClass:
                     change_col_name = str(schema_data[count]["change_column_name"])
 
                     if change_col_name.find('(') !=-1 or  change_col_name.find(')') !=-1 or change_col_name.find('%')!=-1:
-                        raise InvalidColumnName(500)
+                        raise InvalidColumnNames(500)
 
                     index_list.append(schema_data[count]["index"]) #append  index 
 
@@ -223,7 +225,7 @@ class SchemaClass:
             logging.info("data preprocess : SchemaClass : save_schema : execution stop")
             return schema_status
 
-        except (SchemaUpdateFailed,TableCreationFailed,SameColumnNameFound,InvalidColumnName) as exc:
+        except (SchemaUpdateFailed,TableCreationFailed,SameColumnNameFound,InvalidColumnNames) as exc:
             logging.error("data preprocess : ingestclass : save_schema : Exception " + str(exc.msg))
             logging.error("data preprocess : ingestclass : save_schema : " +traceback.format_exc())
             return exc.msg
@@ -296,12 +298,8 @@ class SchemaClass:
                 # length will minus from the string to avoid comma(,)
                 activity_description = activity[0:len(activity)-1]
 
-                #get the time stamp
-                timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
-
-
                 #insert data into activity table
-                status = timeline_Obj.insert_user_activity(id,user_name,project_id,dataset_id,activity_description,timestamp)
+                status = timeline_Obj.insert_user_activity(id,user_name,project_id,dataset_id,activity_description)
                 
                 #return 1 if insertion failed 
                 if status==False:
@@ -419,7 +417,7 @@ class SchemaClass:
                         row_tuples = [tuple(row)] 
                         
                         #insert the records into schema table
-                        status = DBObject.insert_records(connection,schema_table_name,row_tuples,cols) 
+                        status,_ = DBObject.insert_records(connection,schema_table_name,row_tuples,cols) 
                         if status ==1:
                             raise SchemaInsertionFailed(500)
 
@@ -485,7 +483,7 @@ class SchemaClass:
             table_name,_,_ = self.get_schema()
             
             # sql command to get details from schema table  based on  schema id 
-            sql_command = "select case when changed_column_name='' then column_name else changed_column_name end column_list,index,data_type,column_attribute  from mlaas.schema_tbl where schema_id="+str(schema_id)+" and column_attribute !='Ignore' order by index"           
+            sql_command = "select case when changed_column_name='' then column_name else changed_column_name end column_list,index,data_type,column_attribute  from "+str(table_name)+" where schema_id="+str(schema_id)+" and column_attribute !='Ignore' order by index"           
         
             #execute sql commnad if data exist then return dataframe else return None
             schema_df = DBObject.select_records(connection,sql_command) 
