@@ -131,6 +131,70 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
             logging.error("data preprocessing : PreprocessingClass : get_schema_details : " +traceback.format_exc())
             return exc.msg
         
+    def get_all_operations(self):
+        '''
+            This function returns all operations. It is used by the data cleanup as master api responce when the data_cleanup page is called.
+            
+            Args:
+                None
+                
+            Returns:
+                all_operations[List]: List of all operations.
+        '''
+        
+        try:
+            logging.info("data preprocessing : PreprocessingClass : get_all_operations : execution start")
+            
+            DBObject,connection,connection_string = self.get_db_connection()
+            if connection == None :
+                raise DatabaseConnectionFailed(500)  
+                
+            sql_command = f"select amt.activity_id,amt.activity_name,pat.parent_activity_name from mlaas.activity_master_tbl amt , mlaas.parent_activity_tbl pat where amt.code = '0' and amt.parent_activity_id = pat.parent_activity_id"
+            operations_df = DBObject.select_records(connection,sql_command) 
+            
+            #? Logical Function Starts
+            try:
+                master_response = []
+                i = 1
+                
+                #? Getting all operations based on the parent activities
+                for dfs in operations_df.groupby('parent_activity_name'):
+                    
+                    #? Dictionary to store different operation classes
+                    operation_class_dict = {}
+                    operation_class_dict['id'] = i
+                    i+=1
+                    #? Name of Parent Activity
+                    operation_class_dict['title'] = dfs[0]
+                    
+                    #? Adding all the operations that comes under the Parent activity
+                    handlers = []
+                    j = 1
+                    for index,data in dfs[1].iterrows():
+                        #? Dictionary for each operations
+                        operation_dict = {}
+                        operation_dict['id'] = j
+                        operation_dict['name'] = data['activity_name']
+                        operation_dict['operation_id'] = index
+                        handlers.append(operation_dict)
+                        j += 1
+                    
+                    operation_class_dict['operations'] = handlers
+                    master_response.append(operation_class_dict)
+                    
+                logging.info("data preprocessing : PreprocessingClass : get_all_operations : execution stop")
+                return master_response
+            
+            except Exception as exc:
+                logging.info(f"data preprocessing : PreprocessingClass : get_all_operations : Function failed : {str(exc)}")
+                return exc
+            
+        except (DatabaseConnectionFailed,EntryNotFound) as exc:
+            logging.error("data preprocessing : PreprocessingClass : get_all_operations : Exception " + str(exc.msg))
+            logging.error("data preprocessing : PreprocessingClass : get_all_operations : " +traceback.format_exc())
+            return exc.msg
+            
+        
     def get_possible_operations(self, dataset_id, schema_id, column_ids):
         '''
             This function returns all possible operations for given columns.
@@ -169,11 +233,11 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
             if dataset_visibility == 'public':
                 user_name = 'public'
             
-
             query = DBObject.get_query_string(connection,schema_id)
             #? Getting all the data
             sql_command = f"SELECT {str(query)} FROM {user_name}.{dataset_table_name}"
             data_df = DBObject.select_records(connection,sql_command)    
+            
             num_cols = data_df._get_numeric_data().columns
             numerical_columns = list(num_cols)
             predicted_datatypes = self.get_attrbt_datatype(data_df,data_df.columns,len(data_df))
