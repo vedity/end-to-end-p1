@@ -247,13 +247,14 @@ class ModelClass(SC, SplitData):
         # Used to detect the ML algorithm and model types based on target_df
         return AlgorithmDetectorObject.get_model_types(target_df)
 
-    def show_model_list(self, target_df):
+    def show_model_list(self):
         """Returns the compatible list of model on the basis of target_df, using which we identify
         algorithm_type and model_type.
 
         Returns:
             list: models_list, contains list of all the ML/DL models derived from the algorithm and model type.
         """
+        target_df = self.get_scaled_data()[1]
         AlgorithmDetectorObject = AlgorithmDetector(self.DBObject, self.connection)
         # Used to detect the ML algorithm and model types based on target_df
         algorithm_type, model_type = AlgorithmDetectorObject.get_model_types(target_df)
