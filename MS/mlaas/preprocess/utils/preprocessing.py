@@ -179,6 +179,7 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
                         handlers.append(operation_dict)
                         j += 1
                     
+                    #? All possible operations within the class
                     operation_class_dict['operations'] = handlers
                     master_response.append(operation_class_dict)
                     

@@ -393,7 +393,12 @@ class DatasetClass:
                 
                 sql_command = f"SELECT PROJECT_ID FROM {project_table_name} WHERE original_dataset_id = '{dataset_id}'"
                 dataset_ids_df = DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
-                id_count = len(dataset_ids_df)
+                
+                #? No project table
+                if dataset_ids_df is None:
+                    id_count = 0
+                else:
+                    id_count = len(dataset_ids_df)
             else:
                 id_count = 0
                 

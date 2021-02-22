@@ -106,4 +106,3 @@ activity_id,activity_name,activity_description,language,operation,code,parent_ac
 41,Multiply into column,operation on column(s) * pending,US,Operation,0,6
 41,Multiply into column,operation on column(s) * in process,US,Operation,1,6
 41,Multiply into column,operation on column(s) * completed,US,Operation,2,6
-
