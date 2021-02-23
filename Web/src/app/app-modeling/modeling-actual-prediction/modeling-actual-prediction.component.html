@@ -1,0 +1,63 @@
+<div class="actual  {{classname}}">
+
+    <div class="left-box" *ngIf="responsedata">
+        <!-- <a href="javascript:void(0);" title="expand" (click)="allowExpand()" class="expand-btn"><i class="bx bx-expand"></i></a> -->
+        <!-- <apx-chart *ngIf="responsedata" class="apex-charts" dir="ltr" [series]="simpleline.series" [chart]="simpleline.chart" [plotOptions]="simpleline.plotOptions" [yaxis]="simpleline.yaxis" [title]="simpleline.title" [stroke]="simpleline.stroke" [dataLabels]="simpleline.dataLabels"
+            [xaxis]="simpleline.xaxis" [yaxis]="simpleline.yaxis" [legend]="simpleline.legend" [colors]="simpleline.colors" [fill]="simpleline.fill">
+        </apx-chart> -->
+        <div id="chart-line">
+            <apx-chart [series]="chartOptions1.series" [chart]="chartOptions1.chart" [xaxis]="chartOptions1.xaxis" [dataLabels]="chartOptions1.dataLabels" [colors]="chartOptions1.colors" [fill]="chartOptions1.fill" [markers]="chartOptions1.markers" [stroke]="chartOptions1.stroke"></apx-chart>
+        </div>
+
+    </div>
+    <div class="right-box">
+        <table class="table">
+            <thead>
+                <tr>
+                    <td>Input Column1</td>
+                    <td>Input Column2</td>
+                    <td>Target column</td>
+                    <td>Prediction</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Car Name</td>
+                    <td>Car Color</td>
+                    <td>Car Price</td>
+                    <td>New Price</td>
+                </tr>
+                <tr>
+                    <td>Car Name</td>
+                    <td>Car Color</td>
+                    <td>Car Price</td>
+                    <td>New Price</td>
+                </tr>
+                <tr>
+                    <td>Car Name</td>
+                    <td>Car Color</td>
+                    <td>Car Price</td>
+                    <td>New Price</td>
+                </tr>
+                <tr>
+                    <td>Car Name</td>
+                    <td>Car Color</td>
+                    <td>Car Price</td>
+                    <td>New Price</td>
+                </tr>
+                <tr>
+                    <td>Car Name</td>
+                    <td>Car Color</td>
+                    <td>Car Price</td>
+                    <td>New Price</td>
+                </tr>
+                <tr>
+                    <td>Car Name</td>
+                    <td>Car Color</td>
+                    <td>Car Price</td>
+                    <td>New Price</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

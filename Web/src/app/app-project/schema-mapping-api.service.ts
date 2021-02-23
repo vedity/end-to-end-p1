@@ -45,6 +45,13 @@ export class SchemaMappingApiService {
     return this.httpClient.post(this.baseUrl + "ingest/preprocess/schema/save/", obj, { headers: this.headers, params });
   }
 
+  checkuniqueColumnName(column_name,schema_id){
+    var params = new HttpParams()
+     .append("column_name", column_name)
+     .append("schema_id", schema_id)
+    return this.httpClient.get(this.baseUrl + "preprocess/schema/column/name/exist/", { headers: this.headers, params });
+  }
+
   saveasDatasetSchema(project_id,dataset_name,dataset_desc,visibility,method_name, obj): Observable<any> {
     var params = new HttpParams()
     .append("project_id", project_id)

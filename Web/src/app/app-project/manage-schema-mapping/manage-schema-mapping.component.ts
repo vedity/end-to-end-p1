@@ -21,6 +21,8 @@ export class ManageSchemaMappingComponent implements OnInit {
   schema_id:any;
   async ngOnInit() {
     var params = history.state;
+    let navigate=params.navigate_to;
+    
     if (params.dataset_id != undefined)
       localStorage.setItem("params", JSON.stringify(params));
     else {
@@ -39,6 +41,9 @@ export class ManageSchemaMappingComponent implements OnInit {
     //  this.displaytitle=true;
       this.schemamapping=true;
       this.activeId=2
+    }
+    if(navigate=="modeling"){
+      this.activeId=5;
     }
     this.dataset_id = params.dataset_id;
     this.schema_id=params.schema_id;

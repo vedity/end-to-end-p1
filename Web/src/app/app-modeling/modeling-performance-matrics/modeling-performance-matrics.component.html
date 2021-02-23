@@ -1,0 +1,24 @@
+<table class="table" *ngIf="responsedata">
+    <thead>
+        <tr>
+            <td>Name</td>
+            <td>Started</td>
+            <td>R2score</td>
+            <td>Mean Squared Error (MSE)</td>
+            <td>RMSE</td>
+            <td>Mean Absolute Error (MAE)</td>
+            <td>Mean Average Perecentage Error (MAPE)</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{responsedata.model_name}}</td>
+            <td>{{responsedata.exp_created_on | date}}</td>
+            <td>{{responsedata.value["r2 score"] | number}}</td>
+            <td>{{responsedata.value.mse | number}}</td>
+            <td>-</td>
+            <td>{{responsedata.value.mae | number}}</td>
+            <td>{{responsedata.value.mape | number}}</td>
+        </tr>
+    </tbody>
+</table>
