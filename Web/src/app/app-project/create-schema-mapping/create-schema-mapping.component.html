@@ -44,10 +44,11 @@
                                         </select>
                                 </td>
                                 <td id="td_{{i}}" [ngClass]="{'errorstatus': data.change_column_name == data.column_name}">
-                                    <input class="form-control columnname" type="text" id="columnname_{{i}}" [value]="data.change_column_name" (keydown)="checksame(data.column_name,$event.target.value,i)" (keyup)="checksame(data.column_name,$event.target.value,i)" maxlength="100">
+                                    <input (change)="checkuniquecolumnname($event,i)" class="form-control columnname" type="text" id="columnname_{{i}}" [value]="data.change_column_name" (keydown)="checksame(data.column_name,$event.target.value,i)" (keyup)="checksame(data.column_name,$event.target.value,i)"
+                                        maxlength="100">
                                     <div class="invalid-feedback">
-                                        <span class="text-red">Change column name must be different from column
-                                                name</span>
+                                        <span class="text-red changeerrpr_{{i}}">Column name already exist                                       
+                                        </span>
                                     </div>
                                 </td>
                             </tr>
