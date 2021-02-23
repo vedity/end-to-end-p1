@@ -37,7 +37,7 @@ class DBClass:
         Returns:
             [dataframe]: [it will return read csv file data in the form of dataframe.]
         """
-        read_df=pd.read_csv(file_path, na_filter= False) #  Read csv file and load data into dataframe.
+        read_df=pd.read_csv(file_path, na_filter= False,encoding = 'utf8') #  Read csv file and load data into dataframe.
         column_name_list = read_df.columns.values.tolist()
     
         column_list = []
@@ -456,7 +456,7 @@ class DBClass:
             logging.info("data preprocess : SchemaClass : get_query_string : execution start")
             # sql command to get details from schema table  based on  schema id 
             sql_command = "select column_name,case when changed_column_name = '' then column_name else changed_column_name end column_list  from mlaas.schema_tbl where schema_id ="+str(schema_id)+"and column_attribute !='Ignore' order by index"
-            
+            logging.info(str(sql_command) + " get_query_string")
             #execute sql commnad if data exist then return dataframe else return None
             schema_df = self.select_records(connection,sql_command) 
 
