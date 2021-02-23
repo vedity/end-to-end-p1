@@ -107,7 +107,7 @@ class ExploreClass:
         #? Logical Code Begins
         try:
             
-            #! Temporary solution to remove 1 column dataframe problem 
+            #! Temporary solution to 1 column dataframe problem 
             added_col = False
             if (type(data_df) is pd.Series):
                 arr = [0]*len(data_df)
@@ -176,8 +176,8 @@ class ExploreClass:
         
                 #? Getting Least Frequent Values & Count, only for the categorical columns
                 if self.get_datatype(numerical_columns,col).startswith("Ca"):
-                    most_frequent, least_frequent, most_occurrence, least_occurrence = self.get_max_min_occurrence(data_df[col])
                     try:
+                        most_frequent, least_frequent, most_occurrence, least_occurrence = self.get_max_min_occurrence(data_df[col])
                         stats_df.iloc[i,2] = most_frequent
                         stats_df.iloc[i,3] = most_occurrence
                         stats_df.iloc[i,-6] = least_frequent
@@ -468,6 +468,10 @@ class ExploreClass:
         try:
             value_count = series.value_counts()
             count_list = list(value_count)
+            
+            #? No value in the column
+            if len(count_list) == 0:
+                return np.NaN,np.NaN,np.NaN,np.NaN
             
             #? Only one value repeating in the column
             if len(count_list) == 1:
