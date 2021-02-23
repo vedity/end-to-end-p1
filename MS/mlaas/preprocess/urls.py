@@ -24,4 +24,9 @@ urlpatterns = [
     
     #url for possible operation for cleanup
     path('mlaas/preprocess/cleanup/master_operation/',MasterOperationListClass.as_view()),
+
+    #ValidateColumnName
+    path('mlaas/preprocess/schema/column/name/exist/',ValidateColumnName.as_view()),
+
+    
 ]

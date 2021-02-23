@@ -472,7 +472,7 @@ class DatasetClass:
         logging.info("data ingestion : DatasetClass : delete_data_details : execution start")
         
         #? Creating Sql Query
-        sql_command = 'DROP TABLE '+ user_name +'.'+table_name
+        sql_command = 'DROP TABLE '+ user_name +'."'+table_name+'"'
         
         status = DBObject.delete_records(connection,sql_command)
         logging.debug(f"data ingestion  :  DatasetClass  :  delete_data_details  :  Dropped {user_name}.{table_name} table")
@@ -576,7 +576,6 @@ class DatasetClass:
 
             #sql query to delete raw dataset for given dataset id
             sql_command = f"DELETE FROM {table_name} WHERE dataset_id = '{raw_dataset_id}'"
-            logging.info(str(sql_command) + "    ---")
 
             #execute the sql query
             dataset_status = DBObject.delete_records(connection,sql_command)

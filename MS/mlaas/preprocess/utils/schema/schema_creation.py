@@ -27,6 +27,7 @@ LogObject.log_setting()
 logger = logging.getLogger('Schema_creation')
 json_obj = JsonFormatClass()  # Initialize the JsonFormat Class
 timeline_Obj=activity_timeline.ActivityTimelineClass(database,user,password,host,port) #initialize the ActivityTimeline Class
+
 class SchemaClass:
             
     def get_schema(self):
@@ -190,15 +191,35 @@ class SchemaClass:
 
                     if change_col_name.find('(') !=-1 or  change_col_name.find(')') !=-1 or change_col_name.find('%')!=-1:
                         raise InvalidColumnNames(500)
+       
+                    change_column_name.append(schema_data[count]["change_column_name"]) #append change column name
 
                     index_list.append(schema_data[count]["index"]) #append  index 
-
-                    change_column_name.append(schema_data[count]["change_column_name"]) #append change column name
 
                     column_name_list.append(schema_data[count]["column_name"]) #append column_name
 
                     column_attribute_list.append(schema_data[count]["column_attribute"]) #append attribute type
             
+            logging.info(str(change_column_name)+" change_column_name")
+            for value in change_column_name:
+                if value != '':
+                    if change_column_name.count(value.lower()) > 1 or change_column_name.count(value.upper()) > 1:
+                        raise ChangeColumnNameSame(500)
+            
+            
+        
+            column_count_value,ignore_count_value = self.get_count_value(DBObject,connection,schema_id)
+
+
+            logging.info(str(column_attribute_list)+" column_attribute_list")
+
+            logging.info(str(column_count_value)+" column_count_value")
+            logging.info(str(ignore_count_value)+" ignore_count_value")
+            logging.info(str(len(column_attribute_list))+" column_attribute_list")
+            if (column_count_value-ignore_count_value)== column_attribute_list.count('Ignore') :
+                raise IgnoreColumns(500)
+
+
             #set the datatype list none
             column_datatype_list=None
             
@@ -225,7 +246,7 @@ class SchemaClass:
             logging.info("data preprocess : SchemaClass : save_schema : execution stop")
             return schema_status
 
-        except (SchemaUpdateFailed,TableCreationFailed,SameColumnNameFound,InvalidColumnNames) as exc:
+        except (SchemaUpdateFailed,TableCreationFailed,SameColumnNameFound,InvalidColumnNames,ChangeColumnNameSame,IgnoreColumns) as exc:
             logging.error("data preprocess : ingestclass : save_schema : Exception " + str(exc.msg))
             logging.error("data preprocess : ingestclass : save_schema : " +traceback.format_exc())
             return exc.msg
@@ -499,10 +520,38 @@ class SchemaClass:
             
             logging.info("data preprocess : SchemaClass : get_schema_data : execution stop")
             return schema_data
+
         except (SchemaDataNotFound) as exc:
             logging.error("data preprocess : SchemaClass : get_schema_data : Exception " + str(exc.msg))
             logging.error("data preprocess : SchemaClass : get_schema_data : " +traceback.format_exc())
             return exc.msg
     
+    def get_count_value(self,DBObject,connection,schema_id):
+        """
+        function used to get the count values from the schema table of column name and "Ignore" attribute type
+
+        Args:
+            schema_id[(Integer)] : [Id of the schema table]
+
+        Return:
+            [Integer,Integer] : [return the count value of column name,return the count value of Ignore type in column attribute ]
+        """
+        #get the table name and columns,and schema of the table
+        schema_table_name,_,_ = self.get_schema()
+
+        #get the total column count and Ignore count for the perticular schema id
+        sql_command = "select count(schema_id) as column_count,(select count(column_attribute) from "+str(schema_table_name)+" where schema_id ='"+str(schema_id)+"' and column_attribute ='Ignore') as ignore_count from "+str(schema_table_name)+" where schema_id ='"+str(schema_id)+"'"
+        
+        #Execute te sql command
+        dataframe = DBObject.select_records(connection,sql_command)
+
+        #get the total count value where index column will not be considered
+        column_count_value,ignore_count_value = int(dataframe['column_count'][0])-1,int(dataframe['ignore_count'][0])
+
+        return column_count_value,ignore_count_value
+
+
+
+
     
         

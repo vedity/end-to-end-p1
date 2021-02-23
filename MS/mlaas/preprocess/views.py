@@ -172,6 +172,39 @@ class SchemaClass(APIView):
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
                             
 
+class ValidateColumnName(APIView):
+
+        def get(self, request, format=None):
+                """
+                function used to validate column name given by user name to actual dataset column name present or not
+                
+                Args:
+                        schema_id[(Integer)] : [ Id of the schema table]
+                        column_name[(String)] : [ Name of te column name ]
+                
+                Return :
+                        status_code(500 or 200),
+                        error_msg(Error message while checking validation failed or successfull),
+                        Response(return false if failed otherwise true)
+                """
+                try :
+                        logging.info("data preprocess : ValidateColumnName : GET Method : execution start")
+                        schema_id = request.query_params.get('schema_id') #get the schema id
+                        column_name = request.query_params.get('column_name') #get the schema id 
+                        
+                        sql_command = "select case when changed_column_name='' then column_name else changed_column_name end column_list  from mlaas.schema_tbl where schema_id='"+str(schema_id)+"'"
+                        dataframe = DBObject.select_records(connection,sql_command)
+                        
+                        column_list = list(dataframe['column_list'])
+                        if column_list.count(column_name)==1:
+                                return Response({"status_code":"500","error_msg":"Column name already exist ","response":"false"})
+                        else:
+                                return Response({"status_code":"200","error_msg":"you can proceed","response":"true"})
+                except Exception as e:
+                        logging.error("data preprocess : ValidateColumnName : GET Method : Exception :" + str(e))
+                        logging.error("data preprocess : ValidateColumnName : GET Method : "+ traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+
 class ScheamColumnListClass(APIView):
 
         def get(self, request, format=None):

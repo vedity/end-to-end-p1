@@ -19,6 +19,9 @@ from common.utils.database import db
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.ingest.ingest_exception import *
 from common.utils.logger_handler import custom_logger as cl
+# from preprocess.utils import preprocessing
+# preprocessObj =  preprocessing.PreprocessingClass(database,user,password,host,port) #initialize Preprocess class object
+
 from preprocess.utils.schema.schema_creation import *
 from database import *
 
@@ -142,6 +145,8 @@ class ProjectClass:
             
             #get the schema mapping details with column name and datatype
             column_name_list,column_datatype_list = schema_obj.get_dataset_schema(DBObject,connection,dataset_id) 
+            
+            # missing_value_lst,noise_status_lst = preprocessObj.get_preprocess_cache(dataset_id)
             
             # column name and datatype will be inserted into schema table with schema id
             status=schema_obj.update_dataset_schema(DBObject,connection,schema_id,column_name_list,column_datatype_list)
