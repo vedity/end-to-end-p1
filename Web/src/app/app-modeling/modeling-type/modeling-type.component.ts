@@ -63,18 +63,18 @@ export class ModelingTypeComponent implements OnInit {
 
   compareIds = [];
   setCopmareIds(val, id) {
-    console.log(val, id);
+    // console.log(val, id);
     if (val == true) {
       this.compareIds.push(id);
     }
     else {
-      console.log(this.compareIds.indexOf(id));
+      // console.log(this.compareIds.indexOf(id));
       var index=this.compareIds.indexOf(id);
       if (index != -1) {
         this.compareIds.splice(index, 1);
       }
     }
-    console.log(this.compareIds);
+    // console.log(this.compareIds);
     if(this.compareIds.length>1){
       this.iscompare=true;
     }
@@ -101,7 +101,7 @@ export class ModelingTypeComponent implements OnInit {
     if (data.status_code == "200") {
       this.modeldata = data.response;
 
-      console.log(this.modeldata);
+      // console.log(this.modeldata);
       this.contentloaded = true;
       // data.response.forEach(element => {
       //   this.modeldata.push(JSON.parse(element));
@@ -145,7 +145,7 @@ export class ModelingTypeComponent implements OnInit {
     if (data.status_code == "200") {
       this.toaster.success(data.error_msg, 'Success');
       this.processInterval = setInterval(() => {
-        console.log("called");
+        // console.log("called");
         this.getModelDescription();
       }, 5000);
     }

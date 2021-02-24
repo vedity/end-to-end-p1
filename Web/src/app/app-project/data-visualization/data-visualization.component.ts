@@ -395,7 +395,7 @@ export class DataVisualizationComponent implements OnInit {
       });
       i++;
     }
-    console.log(series);
+    // console.log(series);
     
     return series;
   }
