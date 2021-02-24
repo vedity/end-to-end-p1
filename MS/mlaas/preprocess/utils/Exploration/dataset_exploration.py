@@ -188,7 +188,6 @@ class ExploreClass:
                         stats_df.iloc[i,-6] = np.NaN
                         stats_df.iloc[i,-7] = np.NaN
                 i += 1
-
             stats_df['Plot Values'] = axislist
             stats_df['Datatype'] = predicted_datatypes
             
@@ -326,7 +325,7 @@ class ExploreClass:
                 
             Returns:
                 List[(Intiger|Float)]: List of 2 Lists containing bin_edges & histogram values.
- 
+
         '''
         
         try:
@@ -464,6 +463,18 @@ class ExploreClass:
             return []
         
     def get_max_min_occurrence(self, series):
+        '''
+            Takes pandas.Series as an input and returns occurrence related information.
+            
+            Args:
+                series(pandas.Series): Column data.
+                
+            Returns:
+                most_frequent(Intiger|String): Most occurring element in the column.
+                least_frequent(Intiger|String): Least occurring element in the column.
+                most_occurrence(Intiger): Frequency count of the Most occurring element.
+                least_occurrence(Intiger): Frequency count of the least occurring element.
+        '''
         
         try:
             value_count = series.value_counts()
