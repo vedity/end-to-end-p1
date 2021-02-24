@@ -251,3 +251,12 @@ canvas {
         transform: translateY(-50%);
     }
 }
+
+.note {
+    position: absolute;
+    right: 10px;
+    bottom: -25px;
+    p {
+        margin-bottom: 0px;
+    }
+}

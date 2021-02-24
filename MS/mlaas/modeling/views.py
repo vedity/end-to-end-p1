@@ -117,7 +117,6 @@ class StartModelClass(APIView):
                         
                 """
                 try:
-
                         model_mode =request.query_params.get('model_mode')
                         ModelObject = ModelClass(Model_Mode,input_features_list,
                                                 target_features_list,project_id,dataset_id,user_id,
