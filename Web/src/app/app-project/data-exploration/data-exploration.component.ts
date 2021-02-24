@@ -112,6 +112,7 @@ export class DataExplorationComponent implements OnInit {
       scrollCollapse: true,
       info: false,
       searching: false,
+      scrollX:true,
       
       scrollY: "calc(100vh - 365px)",
     }

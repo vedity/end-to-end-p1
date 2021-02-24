@@ -13,6 +13,14 @@ export class ModelingModalSummaryComponent implements OnInit {
   constructor(public router: Router, public apiservice: ModelingTypeApiService, public toaster: ToastrService) { }
   experiment_id: any;
   responsedata: any;
+  animation = "progress-dark";
+  theme = {
+    'border-radius': '5px',
+    'height': '40px',
+    'background-color': ' rgb(34 39 54)',
+    'border': '1px solid #32394e',
+    'animation-duration': '20s'
+  };
   ngOnInit(): void {
     this.getModelSummary();
   }
@@ -26,7 +34,7 @@ export class ModelingModalSummaryComponent implements OnInit {
   successHandler(data) {
     if (data.status_code == "200") {
       this.responsedata = JSON.parse(data.response);
-      console.log(this.responsedata);
+      // console.log(this.responsedata);
       // this.toaster.success(data.error_msg, 'Success');
     }
     else {
