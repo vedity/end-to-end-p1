@@ -86,7 +86,8 @@ Creating Testing Docker Images:
     - cd ..
 
   only:
-    - uat
+    # - uat
+    - UAT
 
 Creating Production Docker Images:
   image: docker:latest
