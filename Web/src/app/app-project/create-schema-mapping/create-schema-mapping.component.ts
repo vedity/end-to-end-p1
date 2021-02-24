@@ -40,7 +40,7 @@ export class CreateSchemaMappingComponent implements OnInit {
   };
 
   checkuniquecolumnname(event, id) {
-    console.log(event.target.value, id);
+    // console.log(event.target.value, id);
     if (event.target.value != "") {
       this.apiService.checkuniqueColumnName(event.target.value, this.schema_id).subscribe(
         logs => this.checkuniquesuccessHandler(logs,id),
@@ -50,7 +50,7 @@ export class CreateSchemaMappingComponent implements OnInit {
   }
 
   checkuniquesuccessHandler(data,id){
-    console.log(data);
+    // console.log(data);
     if(data.status_code=='500'){
       $("#td_"+id).addClass("errorstatus")
     }
@@ -72,7 +72,7 @@ export class CreateSchemaMappingComponent implements OnInit {
     }
     this.displaydiv = true;
     this.getColumnAttributeList();
-    console.log(this.project_id, this.dataset_id);
+    // console.log(this.project_id, this.dataset_id);
 
     this.getSchema(this.project_id, this.dataset_id, this.schema_id);
   }
@@ -149,7 +149,7 @@ export class CreateSchemaMappingComponent implements OnInit {
       });
       if (savedata.length > 0) {
         savedata.push(this.datasetSchema[0]);
-        console.log(savedata);
+        // console.log(savedata);
 
         this.apiService.saveDatasetSchema(this.dataset_id, this.project_id, this.schema_id, { data: savedata }).subscribe(logs => this.savesuccessHandler(logs), error => this.errorHandler(error));
 
@@ -185,7 +185,7 @@ export class CreateSchemaMappingComponent implements OnInit {
         //   }
         // }
       });
-      console.log(this.saveAs);
+      // console.log(this.saveAs);
       this.apiService.saveasDatasetSchema(this.project_id, this.saveAs.dataset_name, this.saveAs.description, this.saveAs.isPrivate, "Save as", { data: savedata }).subscribe(logs => this.savesuccessHandler(logs), error => this.errorHandler(error));
 
     }

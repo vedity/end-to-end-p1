@@ -11,6 +11,14 @@ import { ModelingTypeApiService } from '../modeling-type.service';
 export class ModelingPerformanceMatricsComponent implements OnInit {
   experiment_id: any;
   responsedata: any;
+  animation = "progress-dark";
+  theme = {
+    'border-radius': '5px',
+    'height': '40px',
+    'background-color': ' rgb(34 39 54)',
+    'border': '1px solid #32394e',
+    'animation-duration': '20s'
+  };
   constructor(public router: Router, public apiservice: ModelingTypeApiService, public toaster: ToastrService) { }
 
   ngOnInit(): void {
@@ -26,7 +34,7 @@ export class ModelingPerformanceMatricsComponent implements OnInit {
   successHandler(data) {
     if (data.status_code == "200") {
       this.responsedata = data.response;
-      console.log(this.responsedata);
+      // console.log(this.responsedata);
       // this.toaster.success(data.error_msg, 'Success');
     }
     else {

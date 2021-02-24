@@ -21,6 +21,14 @@ import {
 })
 export class ModelingActualPredictionComponent implements OnInit {
   @ViewChild("chart") chart: ChartComponent;
+  animation = "progress-dark";
+  theme = {
+    'border-radius': '5px',
+    'height': '40px',
+    'background-color': ' rgb(34 39 54)',
+    'border': '1px solid #32394e',
+    'animation-duration': '20s'
+  };
   public chartOptions1: any;
   public chartOptions2: any;
   constructor(public router: Router, public apiservice: ModelingTypeApiService, public toaster: ToastrService) { }
@@ -38,7 +46,7 @@ export class ModelingActualPredictionComponent implements OnInit {
       logs => this.successHandler(logs),
       error => this.errorHandler(error));
   }
-  public generateDayWiseTimeSeries(data) {
+  public generateData(data) {
     var i = 0;
     var series = [];
     while (i < this.responsedata.index.length) {
@@ -53,17 +61,17 @@ export class ModelingActualPredictionComponent implements OnInit {
   successHandler(data) {
     if (data.status_code == "200") {
       this.responsedata = data.response;
-      console.log(this.responsedata);
+      // console.log(this.responsedata);
 
       this.chartOptions1 = {
         series: [
           {
             name: "Actual",
-            data: this.generateDayWiseTimeSeries(this.responsedata.price)
+            data: this.generateData(this.responsedata.price)
           },
           {
             name: "Prediction",
-            data: this.generateDayWiseTimeSeries(this.responsedata.price_prediction)
+            data: this.generateData(this.responsedata.price_prediction)
           }
         ],
         chart: {
@@ -74,7 +82,7 @@ export class ModelingActualPredictionComponent implements OnInit {
             show: true
           }
         },
-        colors: ['#c3c3c3', '#34c38f'],
+        colors: ['#34c38f','#c3c3c3'],
         stroke: {
           width: 3
         },

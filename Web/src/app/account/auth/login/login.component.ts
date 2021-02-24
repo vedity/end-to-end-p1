@@ -73,7 +73,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
           .pipe(first())
           .subscribe(
             data => {
-              console.log(data);
+              // console.log(data);
               if(data.response=="true"){
                 this.router.navigate(['']);
               }

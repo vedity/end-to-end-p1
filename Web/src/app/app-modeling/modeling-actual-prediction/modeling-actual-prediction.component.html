@@ -1,5 +1,6 @@
 <div class="actual  {{classname}}">
-
+    <ngx-skeleton-loader *ngIf="!responsedata" count="7" [animation]="animation" [theme]="theme">
+    </ngx-skeleton-loader>
     <div class="left-box" *ngIf="responsedata">
         <!-- <a href="javascript:void(0);" title="expand" (click)="allowExpand()" class="expand-btn"><i class="bx bx-expand"></i></a> -->
         <!-- <apx-chart *ngIf="responsedata" class="apex-charts" dir="ltr" [series]="simpleline.series" [chart]="simpleline.chart" [plotOptions]="simpleline.plotOptions" [yaxis]="simpleline.yaxis" [title]="simpleline.title" [stroke]="simpleline.stroke" [dataLabels]="simpleline.dataLabels"
