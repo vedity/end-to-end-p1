@@ -20,10 +20,10 @@ from common.utils.exception_handler.python_exception.common.common_exception imp
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
 
 #* Relative Imports
-from ingest.utils.dataset import dataset_creation
-from ingest.utils.dataset import dataset_creation
+from ingest.utils.dataset import dataset_creation as dc
 
-dc = dataset_creation.DatasetClass()
+
+dc = dc.DatasetClass()
 
 class ExploreClass:
 
