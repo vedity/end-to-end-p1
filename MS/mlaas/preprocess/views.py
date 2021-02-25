@@ -291,6 +291,7 @@ class MasterOperationListClass(APIView):
                         operations = preprocessObj.get_all_operations() #call get_possible_operation class
                         if isinstance(operations,list):  
                                         response = json.dumps(operations)
+                                        response = json.loads(response)
                                         logging.info("data preprocess : MasterOperationListClass : GET Method : execution stop")
                                         return Response({"status_code":"200","error_msg":"Successfull retrival","response":response})
                         else:
