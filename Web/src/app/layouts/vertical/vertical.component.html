@@ -33,7 +33,7 @@
                                             <div class="media-body">
                                                 <div>
                                                     <h5>{{activity.activity_name}} <span>{{activity.timestamp |date :'shortTime'}}</span></h5>
-                                                    <p>{{activity.activity_description}} </p>
+                                                    <p [innerHtml]="activity.activity_description"></p>
                                                 </div>
                                             </div>
                                         </div>
