@@ -50,9 +50,10 @@
                         <h4 class="card-title mt-4 mb-3">Modeling Mode</h4>
                         <div class="box">
                             <span class="switcher switcher-1">
-                      <input type="checkbox" id="switcher-1">
-                      <label for="switcher-1"></label>
-                   </span>
+                                <input type="checkbox" id="switcher-1"
+                                    (click)="LargeModal(largeModal,$event.target.checked)">
+                                <label for="switcher-1"></label>
+                            </span>
 
                         </div>
 
@@ -102,8 +103,8 @@
 
             <div class="right-detail-box">
                 <span class="switcher switcher-1">
-                  <input type="checkbox" id="switcher-1" value="true">
-                  <label for="switcher-1"></label>
+                    <input type="checkbox" id="switcher-1" value="true">
+                    <label for="switcher-1"></label>
                 </span>
 
             </div>
@@ -125,7 +126,8 @@
                                             <div class="custom-control custom-checkbox">
                                                 <input type="checkbox" class="custom-control-input" (change)="setCopmareIds($event.target.checked,item.experiment_id)" id="customCheck_{{i}}">
                                                 <label class="custom-control-label" for="customCheck_{{i}}">{{item.experiment_name}}</label>
-                                            </div> <span class="date-time">{{item.exp_created_on | date}}</span> </h4>
+                                            </div> <span class="date-time">{{item.exp_created_on | date}}</span>
+                                        </h4>
                                         <div class="model-status">
                                             <i *ngIf="item.status=='running'" title="{{item.status}}" style="color: #34c38f;" class="dripicons-browser-upload Blink"></i>
                                             <i *ngIf="item.status=='error'" title="{{item.status}}" style="color: #f14646;" class="dripicons-browser-upload"></i>
@@ -160,6 +162,8 @@
                                         <div class="text-right">
                                             <button class="btn btn-outline-success" (click)="extraLarge(exlargeModal,item.experiment_name)">View
                                                 Detail </button>
+
+
                                         </div>
                                     </div>
                                 </div>
@@ -240,6 +244,8 @@
             <div [ngbNavOutlet]="justifiednavnew" [hidden]="!contentloaded"></div>
         </div>
     </div>
+    <button class="btn btn-outline-success openmodal" hidden (click)="ProjectData(projectModal)">View
+        Detail </button>
     <!-- <div [ngbNavOutlet]="justifiednav">
 
     </div> -->
@@ -266,13 +272,6 @@
         <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-hidden="true">×</button>
     </div>
     <div class="modal-body">
-        <!-- <div class="form-group">
-            <div class="custom-control custom-checkbox mb-3">
-                <input type="checkbox" class="custom-control-input" id="customCheck1">
-                <label class="custom-control-label" for="customCheck1">Keep private</label>
-            </div>
- 
-        </div> -->
         <form #f="ngForm">
 
             <div class="form-group">
@@ -297,7 +296,139 @@
                 <button class="btn btn-success" [disabled]="!f.form.valid" (click)="startModel()" (click)="modal.dismiss('Cross click')">Start</button>
             </div>
         </form>
+    </div>
+</ng-template>
 
 
+<ng-template #largeModal let-modal>
+    <div class="modal-header">
+        <h5> Manual Modeling </h5>
+        <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Close click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body manul-modeling">
+        <div class="row content-1" *ngIf="contentid==1">
+            <div class="col-md-12">
+                <h4 class="font-size-18 mt-3 mb-3">Split Dataset</h4>
+                <div class="form-group">
+                    <label>Select split method</label>
+                    <select class="form-control" (change)="splitmethodselection=$event.target.value">
+                        <option value="crossvalidation">Cross Validation</option>
+                        <option value="trainvalidation">Train - Validation - Holdout</option>
+                    </select>
+                </div>
+                <div class="cross-validation" *ngIf="splitmethodselection=='crossvalidation'">
+                    <div class="form-group">
+                        <label>Number of cross validation(CV) folds</label>
+                        <input type="text" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Holdout perecentage</label>
+                        <input type="range" class="custom-range" min="0" max="100" id="customRange2">
+                        <!-- <div class="range-wrap">
+            <input type="range" class="range">
+            <output class="bubble" value="50"></output>
+          </div> -->
+                    </div>
+                    <div class="from-group">
+                        <label>Random status</label>
+                        <input type="number" class="form-control">
+                    </div>
+                </div>
+                <div class="tr-v-h" *ngIf="splitmethodselection=='trainvalidation'">
+                    <div class="form-group">
+                        <label>Split ratio</label>
+                        <select class="form-control">
+                            <option>60% - 20% - 20%</option>
+                            <option>70% - 15% - 15%</option>
+                            <option>80% - 10% - 10%</option>
+                            <option>90% - 5% - 5%</option>
+                            <option>95% - 5% - 0%</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Random status</label>
+                        <input type="number" class="form-control">
+                    </div>
+                </div>
+                <div class="text-center mb-4 mt-3">
+                    <button class="btn btn-success" type="submit" (click)="showContent(2)">Next</button>
+                </div>
+            </div>
+        </div>
+        <div class="row content-2" *ngIf="contentid==2">
+            <div class="col-md-12">
+                <h4 class="font-size-18 mt-3 mb-3">Select model</h4>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label>Select model</label>
+                    <!-- <select class="form-control" (change)="hyperparams=$event.target.value">
+                        <option value="sklearn">Linear Regression with SK Learn</option>
+                        <option value="keras">Linear Regression with Keras</option>
+                    </select> -->
+                    <select class="form-control" (change)="getHyperParams($event.target.value)">
+                        <option value=""> Select </option>
+                        <option value="{{item}}" *ngFor="let item of algorithmlist">{{item}}</option>
+                    </select>
+
+                </div>
+            </div>
+            <div class="col-md-12" *ngIf="paramsList!=null">
+                <h4 class="font-size-18 mt-3 mb-3">Hyperparameter</h4>
+            </div>
+
+            <div class="col-md-6" *ngFor="let item of paramsList">
+                <div class="form-group">
+                    <label>{{item}}</label>
+                    <input type="text" class="form-control">
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <div class="text-center mb-4">
+                    <button class="btn btn-success mr-3" type="submit" (click)="showContent(1)">Previous</button>
+                    <button class="btn btn-success" type="submit" (click)="modal.dismiss('Cross click')">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+
+<ng-template #projectModal let-modal>
+    <div class="modal-header">
+        <h5> Project Detail </h5>
+        <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Close click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label>Select Project</label>
+                    <select class="form-control" (change)="hyperparams=$event.target.value">
+                    <option value="sklearn">Project 1</option>
+                    <option value="keras">Project 2</option>
+                </select>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label>Select Dataset</label>
+                    <select class="form-control" (change)="hyperparams=$event.target.value">
+                    <option value="sklearn">Dataset 1</option>
+                    <option value="keras">Dataset 2</option>
+                </select>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="text-center mb-4">
+                    <button class="btn btn-success" type="submit" (click)="modal.dismiss('Cross click')">Next</button>
+                </div>
+            </div>
+        </div>
     </div>
 </ng-template>

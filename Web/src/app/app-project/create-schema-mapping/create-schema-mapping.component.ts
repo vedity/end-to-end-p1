@@ -47,15 +47,21 @@ export class CreateSchemaMappingComponent implements OnInit {
         error => this.errorHandler(error)
       )
     }
+    else{
+      $("#td_"+id).removeClass("errorstatus");
+      $(".changeerror_"+id).text('');
+    }
   }
 
   checkuniquesuccessHandler(data,id){
     // console.log(data);
     if(data.status_code=='500'){
-      $("#td_"+id).addClass("errorstatus")
+      $("#td_"+id).addClass("errorstatus");
+      $(".changeerror_"+id).text(data.error_msg);
     }
     else{
-      $("#td_"+id).removeClass("errorstatus")
+      $("#td_"+id).removeClass("errorstatus");
+      $(".changeerror_"+id).text('');
     }
     
   }

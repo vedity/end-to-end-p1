@@ -1,11 +1,11 @@
 class AlgorithmDetector:
     """Maintains the track and data for algorithms and their respective hyperparameters.
     """
-    def __init__(self, DBObject, connection):
+    def __init__(self, target_df, DBObject, connection):
         # self.target_df = target_df
         self.DBObject = DBObject
         self.connection = connection
-        # self.algorithm_type, self.model_type = self.set_model_type(target_df)
+        self.algorithm_type, self.model_type = self.set_model_type(target_df)
         # self.models_list = self.show_models_list()
         
 
@@ -47,25 +47,24 @@ class AlgorithmDetector:
         return algorithm_type, model_type
 
 
-    def get_model_types(self, target_df):
+    def get_model_types(self):
         """This function returns the algorithm and model type on the basis of target_df.
 
         Returns:
             tuple: algorithm_type (single_target, multi_target, unseupervised, and more), model_type (Regression, Classification, and more)
         """
-        algorithm_type, model_type = self.set_model_type(target_df)
-        return algorithm_type, model_type
+        return self.algorithm_type, self.model_type
     
-    def show_models_list(self, algorithm_type, model_type):
+    def show_models_list(self):
         """Returns the compatible list of model on the basis of algorithm_type and model_type.
 
         Returns:
             list: models_list, contains list of all the ML/DL models derived from the algorithm and model type.
         """
         print('In show models_list')
-        sql_command = "select model_name from mlaas.model_master_tbl where model_type='"+model_type+"'"+" and algorithm_type='"+algorithm_type+"'"
-        models_list = self.DBObject.select_records(self.connection, sql_command)
-        return models_list
+        sql_command = "select model_name from mlaas.model_master_tbl where model_type='"+self.model_type+"'"+" and algorithm_type='"+self.algorithm_type+"'"
+        self.models_list = self.DBObject.select_records(self.connection, sql_command)
+        return self.models_list
 
 
     def get_hyperparameters_list(self, model_name):

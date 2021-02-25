@@ -8,22 +8,25 @@
  Vipul Prajapati          18-DEC-2020           1.3           Added functionality for create schema.
 */
 '''
+#Python library imports
 import psycopg2
 import psycopg2.extras as extras
 import pandas as pd 
-from sqlalchemy import create_engine
 import json
-from database import *
 import logging
+from sqlalchemy import create_engine
+
+#database variable file import
+from database import *
+
+#Common utils import
 from common.utils.logger_handler import custom_logger as cl
 from common.utils.exception_handler.python_exception.common.common_exception import *
 
 user_name = 'admin'
 log_enable = True
-
 LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
-
 logger = logging.getLogger('dataset_creation')
 
 class DBClass:
@@ -233,7 +236,7 @@ class DBClass:
             connection.rollback() # Rollback the changes.
             cursor.close() # Close the cursor.
             status = 1 # If failed
-
+            logger.info(str(error) + " Error in delete record function")
         return status
 
     def update_records(self,connection,sql_command):
@@ -677,13 +680,16 @@ class DBClass:
             
             #sql command to get Raw dataset id based on the dataset_name and page_name 
             sql_Command = "SELECT dataset_id,dataset_table_name from mlaas.dataset_tbl where dataset_name='"+str(dataset_name)+"' and page_name ='schema mapping'"
-            
+            logging.info(str(sql_Command) + " query")
+
             #execute the sql command and get te dataframe if found else None
             dataframe = self.select_records(connection,sql_Command)
             
             #get the dataset id
             dataset_id = int(dataframe['dataset_id'][0])
             table_name = str(dataframe['dataset_table_name'][0])
+            logging.info(str(dataset_id) + " query")
+            logging.info(str(table_name) + " query")
 
             return dataset_id,table_name
         except Exception as exc:

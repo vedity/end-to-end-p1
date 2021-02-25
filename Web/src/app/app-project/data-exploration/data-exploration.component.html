@@ -5,6 +5,8 @@
     <div class="col-md-12">
         <div class="card table-card">
             <div class="card-body">
+
+
                 <ngx-skeleton-loader *ngIf="loaderdiv" count="7" [animation]="animation" [theme]="theme">
                 </ngx-skeleton-loader>
                 <div *ngIf="!loaderdiv">
@@ -80,15 +82,13 @@
                                                     <th>No</th>
                                                     <th>Column</th>
                                                     <th>Data Type</th>
-                                                    <<<<<<< HEAD <th>Graph</th>
-                                                        =======
-                                                        <th>Value Distribution</th>
-                                                        >>>>>>> 58d21c3618beee4afc7efc723e7706cee2eb1f70
-                                                        <th>Count</th>
-                                                        <th>Missing</th>
-                                                        <th>Most Occuring</th>
-                                                        <th>Least Occurring</th>
-                                                        <th>Unique</th>
+                                                    <th>Graph</th>
+                                                    <th>Value Distribution</th>
+                                                    <th>Count</th>
+                                                    <th>Missing</th>
+                                                    <th>Most Occurring</th>
+                                                    <th>Least Occurring</th>
+                                                    <th>Unique</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -116,7 +116,7 @@
                                         </table>
                                     </div>
                                     <div class="note">
-                                        <p>'*' means there are more than one values for the same occurence frequency.</p>
+                                        <p>'*' means there are more than one values for the same occurrence frequency.</p>
                                     </div>
                                 </ng-template>
                             </li>
