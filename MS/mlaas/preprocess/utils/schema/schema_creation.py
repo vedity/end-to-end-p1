@@ -76,11 +76,13 @@ class SchemaClass:
 
             #check the dataset visibility if private append the user name with  dataset table name 
             #dataset visibility if public assign table name as  dataset table name we get
+
             if dataset_visibility =="private":
                 table_name=user_name+'."'+dataset_table_name+'"'
+                
             else:
                 
-                table_name = dataset_table_name
+                table_name = 'public."'+dataset_table_name+'"'
             
             #get the column list and datatype  based on given table name
             column_name_list,predicted_datatype = self.get_attribute_datatype(connection,DBObject,table_name)
@@ -184,39 +186,43 @@ class SchemaClass:
 
             for count in range(len(schema_data)):
 
-                    #check if change column and  prev column are same or not
-                    if schema_data[count]["change_column_name"] == schema_data[count]["column_name"]: 
-                        raise SameColumnNameFound(500)
+                if schema_data[count]["column_name"] != 'index':
 
-                    change_col_name = str(schema_data[count]["change_column_name"])
+                        #check if change column and  prev column are same or not
+                        if schema_data[count]["change_column_name"] == schema_data[count]["column_name"]: 
+                            raise SameColumnNameFound(500)
 
-                    if change_col_name.find('(') !=-1 or  change_col_name.find(')') !=-1 or change_col_name.find('%')!=-1:
-                        raise InvalidColumnNames(500)
-       
-                    change_column_name.append(schema_data[count]["change_column_name"]) #append change column name
+                        change_col_name = str(schema_data[count]["change_column_name"])
 
-                    index_list.append(schema_data[count]["index"]) #append  index 
+                        if change_col_name.find('(') !=-1 or  change_col_name.find(')') !=-1 or change_col_name.find('%')!=-1:
+                            raise InvalidColumnNames(500)
+        
+                        change_column_name.append(schema_data[count]["change_column_name"]) #append change column name
 
-                    column_name_list.append(schema_data[count]["column_name"]) #append column_name
+                        index_list.append(schema_data[count]["index"]) #append  index 
 
-                    column_attribute_list.append(schema_data[count]["column_attribute"]) #append attribute type
+                        column_name_list.append(schema_data[count]["column_name"]) #append column_name
+
+                        column_attribute_list.append(schema_data[count]["column_attribute"]) #append attribute type
+
+                        
+
             
-            # logging.info(str(change_column_name)+" column_attribute_list")
+            logging.info(str(change_column_name)+" change_column_name")
+            logging.info(str(column_name_list)+" column_name_list")
+            logging.info(str(column_attribute_list)+" column_attribute_list")
+
+            #logging.info(str(change_column_name)+" column_attribute_list")
             for value in change_column_name:
                 if value != '':
-                    if change_column_name.count(value.lower()) > 1 or change_column_name.count(value.upper()) == 1:
+                    if change_column_name.count(value.lower()) > 1 :
                         raise ChangeColumnNameSame(500)
             
-            
-        
             column_count_value,ignore_count_value = self.get_count_value(DBObject,connection,schema_id)
 
 
             logging.info(str(column_attribute_list)+" column_attribute_list")
 
-            logging.info(str(column_count_value)+" column_count_value")
-            logging.info(str(ignore_count_value)+" ignore_count_value")
-            logging.info(str(len(column_attribute_list))+" column_attribute_list")
             if (column_count_value-ignore_count_value)== column_attribute_list.count('Ignore') :
                 raise IgnoreColumns(500)
 
@@ -297,17 +303,20 @@ class SchemaClass:
                 activity=""
 
                 if id==5:
-                    
-                    if len(change_column_lst)>2:
+                    column_string = " "
+                    column_string = activity_description+" <br/>"
+                    for count in range(len(change_column_lst)):
+                        column_string += str(column_lst[count])+" <-> "+str(change_column_lst[count])+"<br/> "
+                    # if len(change_column_lst)>2:
+                        
+                    #     change_column_name=",".join(change_column_lst[:len(change_column_lst)-1])+' and '+change_column_lst[-1]+' Respectively.'
+                    #     column_name=",".join(column_lst[:len(column_lst)-1])+' and '+column_lst[-1]+''
+                    # else:
+                    #     change_column_name=",".join(change_column_lst)
+                    #     column_name=",".join(column_lst)
 
-                        change_column_name=",".join(change_column_lst[:len(change_column_lst)-1])+' and '+change_column_lst[-1]+' Respectively.'
-                        column_name=",".join(column_lst[:len(column_lst)-1])+' and '+column_lst[-1]+''
-                    else:
-                        change_column_name=",".join(change_column_lst)
-                        column_name=",".join(column_lst)
-
-                    activity = activity_description.replace('*',column_name).replace('$',dataset_name).replace('?',change_column_name)+"," 
-
+                    # activity = activity_description.replace('*',column_name).replace('$',dataset_name)
+                    activity = column_string
                 elif id==6:
 
                     column_target=",".join(target_column_lst)
@@ -504,7 +513,7 @@ class SchemaClass:
             table_name,_,_ = self.get_schema()
             
             # sql command to get details from schema table  based on  schema id 
-            sql_command = "select case when changed_column_name='' then column_name else changed_column_name end column_list,index,data_type,column_attribute  from "+str(table_name)+" where schema_id="+str(schema_id)+" and column_attribute !='Ignore' order by index"           
+            sql_command = "select case when changed_column_name ='' then column_name else changed_column_name end column_list,index,data_type,column_attribute  from "+str(table_name)+" where schema_id="+str(schema_id)+" and column_attribute !='Ignore' order by index"           
         
             #execute sql commnad if data exist then return dataframe else return None
             schema_df = DBObject.select_records(connection,sql_command) 

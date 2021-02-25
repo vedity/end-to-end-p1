@@ -242,7 +242,7 @@ class DBClass:
             connection.rollback() # Rollback the changes.
             cursor.close() # Close the cursor.
             status = 1 # If failed
-
+            logger.info(str(error) + " Error in delete record function")
         return status
 
     def update_records(self,connection,sql_command):
@@ -686,13 +686,16 @@ class DBClass:
             
             #sql command to get Raw dataset id based on the dataset_name and page_name 
             sql_Command = "SELECT dataset_id,dataset_table_name from mlaas.dataset_tbl where dataset_name='"+str(dataset_name)+"' and page_name ='schema mapping'"
-            
+            logging.info(str(sql_Command) + " query")
+
             #execute the sql command and get te dataframe if found else None
             dataframe = self.select_records(connection,sql_Command)
             
             #get the dataset id
             dataset_id = int(dataframe['dataset_id'][0])
             table_name = str(dataframe['dataset_table_name'][0])
+            logging.info(str(dataset_id) + " query")
+            logging.info(str(table_name) + " query")
 
             return dataset_id,table_name
         except Exception as exc:
