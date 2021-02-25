@@ -21,9 +21,9 @@ from ...model_utils.sklearn_regression import linear_regressor
 from ...model_experiments import model_experiment
 from sklearn.model_selection import train_test_split
 # from ....split_data import SplitData
-
-
 from common.utils.logger_handler import custom_logger as cl
+
+
 
 user_name = 'admin'
 log_enable = True
@@ -33,9 +33,11 @@ LogObject.log_setting()
 
 logger = logging.getLogger('model_identifier')
 
+
+
+
 class RegressionClass:
-    """Regression Class, stores the implementation of all the regression model.
-    """
+
   
     def regression_model(self,Model_Mode,input_features_list,target_features_list, X_train, X_valid, X_test, y_train, y_valid, y_test,
                     SplitDataObject, model_type, algorithm_type, DBObject, connection, connection_string, project_id,dataset_id,user_id):
@@ -61,10 +63,11 @@ class RegressionClass:
         """
         logging.info("modeling : RegressionClass : all_regression_model : execution start")
         # it will set mlflow tracking uri where all the parameters and matrices gets stored experiment wise.
-        mlflow.set_tracking_uri("postgresql+psycopg2://airflow:airflow@postgresql:5432/airflow")
+        mlflow.set_tracking_uri("postgresql+psycopg2://airflow:airflow@postgresql:5432/airflow?options=-csearch_path%3Ddbo,mlaas")
         
-        # First Algorithm
+        # # Algorithm First
         if algorithm_type == 'Single_Target':
+            
             self.linear_regression_sklearn(Model_Mode,input_features_list,target_features_list,
                                 project_id,dataset_id,user_id, X_train, X_valid, X_test, y_train, y_valid, y_test, 
                                 SplitDataObject, DBObject, connection, connection_string)
@@ -72,6 +75,9 @@ class RegressionClass:
         logging.info("modeling : RegressionClass : all_regression_model : execution end")
         
         # # Algorithm Second
+        
+        
+        
         
         
     # This is for manually model run    
@@ -89,7 +95,7 @@ class RegressionClass:
         # it will set mlflow tracking uri where all the parameters and matrices gets stored experiment wise.
         if model_id == 1:
             
-            mlflow.set_tracking_uri("postgresql+psycopg2://airflow:airflow@postgresql:5432/airflow")
+            mlflow.set_tracking_uri("postgresql+psycopg2://airflow:airflow@postgresql:5432/airflow?options=-csearch_path%3Ddbo,mlaas")
             
             # TODO : we will used parameter class will take these parameters  from users.
             # Get model id and model name and model type from the user.
@@ -146,21 +152,15 @@ class RegressionClass:
         exp_name = "my first"
         # Get from database
         sql_command = "select experiment_id from experiments order by experiment_id desc limit 1"
-        # we use counter to associate a uniqueness to the experiment name.
         counter = DBObject.select_records(connection, sql_command).iloc[0, 0]
-        if counter is None: # This is called when the user runs the model(clicks on start) for the first time.
+        if counter is None:
             counter = 0
-        else: # this is called when the user has already called the start model atleast once before.
+        else:
             counter += 1
         
         id = uuid.uuid1() 
-        # Used to assign a unique experiment name on the basis of model_mode, exp_name and counter.
         experiment_name = SplitDataObject.model_mode.upper()+"_"+exp_name.upper() + "_" + str(counter)
         
-        ## Below Basic Parameter Changes Based On Model
-        # test_size = 0.20 # holdout
-        # random_state = 1
-        # cv = 5 # K-Fold Cross Validation 
         
         # create experiment 
         experiment_id = mlflow.create_experiment(experiment_name)
@@ -172,7 +172,7 @@ class RegressionClass:
             LRObject = linear_regressor.LinearRegressionClass(input_features_list, target_features_list, 
                                                             X_train, X_valid, X_test, y_train, y_valid, 
                                                             y_test, SplitDataObject)
-            LRObject.run_pipeline() # Runs the Machine Learning pipeline, which trains the data.
+            LRObject.run_pipeline()
         
         
         

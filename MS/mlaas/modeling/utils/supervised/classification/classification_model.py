@@ -69,7 +69,7 @@ class ProbabilisticClass:
                              model_type):
         
         print("Model Running in auto mode ")
-        mlflow.set_tracking_uri("postgresql+psycopg2://postgres:admin@postgresql:5432/postgres")
+        mlflow.set_tracking_uri("postgresql+psycopg2://postgres:admin@postgresql:5432/postgres?options=-csearch_path%3Ddbo,mlaas")
         
         model_id = 2
         model_name = 'logistic classifier'
@@ -109,7 +109,7 @@ class ProbabilisticClass:
         
         if model_name == 'logistic classifier' :
             
-            mlflow.set_tracking_uri("postgresql+psycopg2://postgres:admin@postgresql:5432/postgres")
+            mlflow.set_tracking_uri("postgresql+psycopg2://postgres:admin@postgresql:5432/postgres?options=-csearch_path%3Ddbo,mlaas")
             
             # model_id = 1
             # model_name = 'linear regression'
