@@ -5,6 +5,8 @@
     <div class="col-md-12">
         <div class="card table-card">
             <div class="card-body">
+
+
                 <ngx-skeleton-loader *ngIf="loaderdiv" count="7" [animation]="animation" [theme]="theme">
                 </ngx-skeleton-loader>
                 <div *ngIf="!loaderdiv">
@@ -81,12 +83,12 @@
                                                     <th>Column</th>
                                                     <th>Data Type</th>
                                                     <th>Graph</th>
-                                                        <th>Value Distribution</th>
-                                                        <th>Count</th>
-                                                        <th>Missing</th>
-                                                        <th>Most Occurring</th>
-                                                        <th>Least Occurring</th>
-                                                        <th>Unique</th>
+                                                    <th>Value Distribution</th>
+                                                    <th>Count</th>
+                                                    <th>Missing</th>
+                                                    <th>Most Occurring</th>
+                                                    <th>Least Occurring</th>
+                                                    <th>Unique</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
