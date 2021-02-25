@@ -100,3 +100,24 @@ class OperationOrderingFailed(Exception):
      
     def __str__(self):
         return (self.msg)
+
+
+class ChangeColumnNameSame(Exception):
+    """ Raise exception where Change column name  are been same """
+    def __init__(self,status_code):
+        self.msg = "Column name already assign to other column"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)
+
+class IgnoreColumns(Exception):
+    """ All column attribute cannot be Ignored """
+    def __init__(self,status_code):
+        self.msg = "All column cannot be Ignored"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)

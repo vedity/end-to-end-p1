@@ -10,26 +10,35 @@
 
 */
 '''
+# Python library import
 import pandas as pd
 import logging
 import traceback
+
+#Ingest util/dataset file import
 from ..dataset import dataset_creation 
 
-from common.utils.database import db
+#Database variable import
+from database import *
+
+# Common file imports
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.ingest.ingest_exception import *
 from common.utils.logger_handler import custom_logger as cl
-from preprocess.utils.schema.schema_creation import *
-from database import *
+from common.utils.database import db
 
+# Preprocess file imports
+from preprocess.utils import preprocessing
+from preprocess.utils.schema.schema_creation import *
+
+# Object Initialization
+preprocessObj =  preprocessing.PreprocessingClass(database,user,password,host,port) #initialize Preprocess class object
 schema_obj=SchemaClass() #initialize Schema object from schema class
 
 user_name = 'admin'
 log_enable = True
-
 LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
-
 logger = logging.getLogger('project_creation')
 
 
@@ -143,8 +152,11 @@ class ProjectClass:
             #get the schema mapping details with column name and datatype
             column_name_list,column_datatype_list = schema_obj.get_dataset_schema(DBObject,connection,dataset_id) 
             
+            missing_value_lst,noise_status_lst = preprocessObj.get_preprocess_cache(dataset_id)
+            
+            missing_value_lst,noise_status_lst = list(missing_value_lst),list(noise_status_lst)
             # column name and datatype will be inserted into schema table with schema id
-            status=schema_obj.update_dataset_schema(DBObject,connection,schema_id,column_name_list,column_datatype_list)
+            status=schema_obj.update_dataset_schema(DBObject,connection,schema_id,column_name_list,column_datatype_list,missing_flag=missing_value_lst,noise_flag=noise_status_lst)
             
         else :
             status = 1 # Failed

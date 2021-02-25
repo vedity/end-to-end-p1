@@ -24,9 +24,9 @@ export class VerticalComponent implements OnInit, AfterViewInit {
   constructor(private router: Router,public apiService:LayoutApiService,public toaster:ToastrService) {
     
     router.events.forEach((event) => {
-     
       if (event instanceof NavigationEnd) {
         document.body.classList.remove('sidebar-enable');
+      this.getactivivtyTimeline();
       }
     });
   }
@@ -77,6 +77,8 @@ export class VerticalComponent implements OnInit, AfterViewInit {
   }
 
   toggleTimeline() {
+    this.getactivivtyTimeline();
+
     if (this.classname == "")
       this.classname = "open";
     else

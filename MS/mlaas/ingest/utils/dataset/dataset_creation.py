@@ -8,22 +8,22 @@
  Vipul Prajapati          05-JAN-2021           1.3           no_of_rows field added into dataset tbl.           
 */
 '''
-# from mlaas.ingest.utils import dataset
+
+# Python library imports
 import os
 import pandas as pd
 import logging
 import traceback
-from ..project import project_creation
+
+# Common file imports
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.ingest.ingest_exception import *
 from common.utils.logger_handler import custom_logger as cl
 
 user_name = 'admin'
 log_enable = True
-
 LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
-
 logger = logging.getLogger('dataset_creation')
 
 
@@ -387,13 +387,18 @@ class DatasetClass:
             #? This condition will be false when called form delete_project_details function,
             #? because that function has already checked that this dataset is used nowhere
             if not skip_check:   
-                ProjectObject = project_creation.ProjectClass() # Get dataset class object
+                # ProjectObject = project_creation.ProjectClass() # Get dataset class object
 
-                project_table_name,_,_ = ProjectObject.make_project_schema()
-                
+                # project_table_name,_,_ = ProjectObject.make_project_schema()
+                project_table_name = 'mlaas.project_tbl'
                 sql_command = f"SELECT PROJECT_ID FROM {project_table_name} WHERE original_dataset_id = '{dataset_id}'"
                 dataset_ids_df = DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
-                id_count = len(dataset_ids_df)
+                
+                #? No project table
+                if dataset_ids_df is None:
+                    id_count = 0
+                else:
+                    id_count = len(dataset_ids_df)
             else:
                 id_count = 0
                 
@@ -467,7 +472,7 @@ class DatasetClass:
         logging.info("data ingestion : DatasetClass : delete_data_details : execution start")
         
         #? Creating Sql Query
-        sql_command = 'DROP TABLE '+ user_name +'.'+table_name
+        sql_command = 'DROP TABLE '+ user_name +'."'+table_name+'"'
         
         status = DBObject.delete_records(connection,sql_command)
         logging.debug(f"data ingestion  :  DatasetClass  :  delete_data_details  :  Dropped {user_name}.{table_name} table")
@@ -571,7 +576,6 @@ class DatasetClass:
 
             #sql query to delete raw dataset for given dataset id
             sql_command = f"DELETE FROM {table_name} WHERE dataset_id = '{raw_dataset_id}'"
-            logging.info(str(sql_command) + "    ---")
 
             #execute the sql query
             dataset_status = DBObject.delete_records(connection,sql_command)

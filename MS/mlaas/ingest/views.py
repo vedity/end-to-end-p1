@@ -10,32 +10,37 @@
 
 */
 '''
-
+# Python library import
 import json
 import logging
 import traceback
 import pandas as pd
 import datetime 
-from database import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
+
+# Database variable file import
+from database import *
+
+# Ingest utils files
 from .utils import ingestion
 from .utils.ingestion import *
+
+# Common file imports
+from common.utils.exception_handler.python_exception import *
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.ingest.ingest_exception import *
-from common.utils.logger_handler import custom_logger as cl
-from common.utils.exception_handler.python_exception import *
 from common.utils.json_format.json_formater import *
 from common.utils.activity_timeline import *
 from common.utils.activity_timeline import activity_timeline
-
-
+from common.utils.logger_handler import custom_logger as cl
 
 user_name = 'admin'
 log_enable = True
 LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
 logger = logging.getLogger('ingest_view')
+
 
 DBObject=db.DBClass() #Get DBClass object
 connection,connection_string=DBObject.database_connection(database,user,password,host,port) #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)

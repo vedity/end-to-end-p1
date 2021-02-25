@@ -8,22 +8,25 @@
  Vipul Prajapati          18-DEC-2020           1.3           Added functionality for create schema.
 */
 '''
+#Python library imports
 import psycopg2
 import psycopg2.extras as extras
 import pandas as pd 
-from sqlalchemy import create_engine
 import json
-from database import *
 import logging
+from sqlalchemy import create_engine
+
+#database variable file import
+from database import *
+
+#Common utils import
 from common.utils.logger_handler import custom_logger as cl
 from common.utils.exception_handler.python_exception.common.common_exception import *
 
 user_name = 'admin'
 log_enable = True
-
 LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
-
 logger = logging.getLogger('dataset_creation')
 
 class DBClass:
@@ -37,7 +40,7 @@ class DBClass:
         Returns:
             [dataframe]: [it will return read csv file data in the form of dataframe.]
         """
-        read_df=pd.read_csv(file_path, na_filter= False) #  Read csv file and load data into dataframe.
+        read_df=pd.read_csv(file_path, na_filter= False,encoding = 'utf8') #  Read csv file and load data into dataframe.
         column_name_list = read_df.columns.values.tolist()
     
         column_list = []
@@ -456,7 +459,7 @@ class DBClass:
             logging.info("data preprocess : SchemaClass : get_query_string : execution start")
             # sql command to get details from schema table  based on  schema id 
             sql_command = "select column_name,case when changed_column_name = '' then column_name else changed_column_name end column_list  from mlaas.schema_tbl where schema_id ="+str(schema_id)+"and column_attribute !='Ignore' order by index"
-            
+            logging.info(str(sql_command) + " get_query_string")
             #execute sql commnad if data exist then return dataframe else return None
             schema_df = self.select_records(connection,sql_command) 
 

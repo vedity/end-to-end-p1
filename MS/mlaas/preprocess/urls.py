@@ -20,6 +20,13 @@ urlpatterns = [
     path('mlaas/preprocess/schema/attribute/list/',ScheamColumnListClass.as_view()),
 
     #url for possible operation for cleanup
-    path('mlaas/preprocess/cleanup/operation/',OperationListClass.as_view())
+    path('mlaas/preprocess/cleanup/operation/',OperationListClass.as_view()),
+    
+    #url for possible operation for cleanup
+    path('mlaas/preprocess/cleanup/master_operation/',MasterOperationListClass.as_view()),
+
+    #ValidateColumnName
+    path('mlaas/preprocess/schema/column/name/exist/',ValidateColumnName.as_view()),
+
     
 ]

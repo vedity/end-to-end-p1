@@ -21,19 +21,19 @@
                                 </a>
                                 <ng-template ngbNavContent>
                                     <div class="nobordertable">
-                                        <table datatable [dtOptions]="dtOptions" class="table table-centered table-nowrap   ">
+                                        <table style="width: 100%;" datatable [dtOptions]="dtOptions" class="table table-centered table-nowrap">
                                             <thead>
                                                 <tr>
                                                     <th>No</th>
-                                                    <th>Column Name</th>
+                                                    <th>Column</th>
                                                     <th>Data Type</th>
                                                     <th>Graph</th>
-                                                    <th>Data Count</th>
-                                                    <th>Missing Data</th>
-                                                    <th>Unique Data</th>
-                                                    <th>Min Value</th>
-                                                    <th>Max Value</th>
-                                                    <th>Mean Value</th>
+                                                    <th>Count</th>
+                                                    <th>Missing</th>
+                                                    <!-- <th>Unique Data</th> -->
+                                                    <th>Min </th>
+                                                    <th>Max </th>
+                                                    <th>Mean </th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -52,7 +52,7 @@
                                                     </td>
                                                     <td>{{item["DataCount"]==null?'-':item["DataCount"]}}</td>
                                                     <td>{{item["Null Values"]==null?'-':item["Null Values"]}}</td>
-                                                    <td>{{item["Unique Values"]==null?'-':item["Unique Values"]}}</td>
+                                                    <!-- <td>{{item["Unique Values"]==null?'-':item["Unique Values"]}}</td> -->
                                                     <td>{{item["Min Value"]==null?'-':item["Min Value"]}}</td>
                                                     <td>{{item["Max Value"]==null?'-':item["Max Value"]}}</td>
                                                     <td>{{item["Mean"]==null?'-':item["Mean"]}}</td>
@@ -61,7 +61,9 @@
                                         </table>
                                     </div>
 
-
+                                    <div class="note">
+                                        <p>'*' means there are more than one values for the same occurence frequency.</p>
+                                    </div>
 
                                 </ng-template>
                             </li>
@@ -72,18 +74,21 @@
                                 </a>
                                 <ng-template ngbNavContent>
                                     <div class="nobordertable">
-                                        <table datatable [dtOptions]="dtOptions" class="table table-centered table-nowrap ">
+                                        <table style="width: 100%;" datatable [dtOptions]="dtOptions" class="table table-centered table-nowrap ">
                                             <thead>
                                                 <tr class="thead-light">
                                                     <th>No</th>
-                                                    <th>Column Name</th>
+                                                    <th>Column</th>
                                                     <th>Data Type</th>
-                                                    <th>Graph</th>
-                                                    <th>Data Count</th>
-                                                    <th>Missing Data</th>
-                                                    <th>Most Occuring</th>
-                                                    <th>Least Occurring</th>
-                                                    <th>Unique Data</th>
+                                                    <<<<<<< HEAD <th>Graph</th>
+                                                        =======
+                                                        <th>Value Distribution</th>
+                                                        >>>>>>> 58d21c3618beee4afc7efc723e7706cee2eb1f70
+                                                        <th>Count</th>
+                                                        <th>Missing</th>
+                                                        <th>Most Occuring</th>
+                                                        <th>Least Occurring</th>
+                                                        <th>Unique</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -110,9 +115,13 @@
                                             </tbody>
                                         </table>
                                     </div>
+                                    <div class="note">
+                                        <p>'*' means there are more than one values for the same occurrence frequency.</p>
+                                    </div>
                                 </ng-template>
                             </li>
                         </ul>
+
                     </div>
                     <div [ngbNavOutlet]="customNav"></div>
                 </div>

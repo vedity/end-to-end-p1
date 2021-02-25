@@ -25,6 +25,11 @@ import * as exporting from 'highcharts/modules/exporting.src';
 import * as theme from 'highcharts/themes/dark-unica.src';
 import { ModelingTypeComponent } from './modeling-type/modeling-type.component';
 import { ModelingViewDetailComponent } from './modeling-view-detail/modeling-view-detail.component';
+import { ModelingLearningCurveComponent } from './modeling-learning-curve/modeling-learning-curve.component';
+import { ModelingFeatureImportanceComponent } from './modeling-feature-importance/modeling-feature-importance.component';
+import { ModelingPerformanceMatricsComponent } from './modeling-performance-matrics/modeling-performance-matrics.component';
+import { ModelingModalSummaryComponent } from './modeling-modal-summary/modeling-modal-summary.component';
+import { ModelingActualPredictionComponent } from './modeling-actual-prediction/modeling-actual-prediction.component';
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   suppressScrollX: true,
@@ -33,7 +38,12 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
 @NgModule({
   declarations: [
     ModelingTypeComponent,
-    ModelingViewDetailComponent
+    ModelingViewDetailComponent,
+    ModelingLearningCurveComponent,
+    ModelingFeatureImportanceComponent,
+    ModelingPerformanceMatricsComponent,
+    ModelingModalSummaryComponent,
+    ModelingActualPredictionComponent
   ],
   imports: [
     CommonModule,

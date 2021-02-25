@@ -8,7 +8,7 @@
                     <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table table-centered table-nowrap">
                         <thead class="thead-light">
                             <tr>
-                                <th>Project Name
+                                <th>Project
                                     <img class="sort-icon" src="sort_both.png">
                                     <img class="desc-icon" src="sort_desc.png">
                                     <img class="asc-icon" src="sort_asc.png">
@@ -80,10 +80,12 @@
                                 </td>
                                 <td class="status-icon" class="text-center">
                                     <span style="display:none;">{{data.model_status}}</span>
-                                    <i *ngIf="data.model_status==0" style="color: #34c38f;" class="dripicons-browser-upload"></i>
-                                    <i *ngIf="data.model_status==1" style="color: #f14646;" class="dripicons-browser-upload"></i>
-                                    <i *ngIf="data.model_status==-1" style="color: #a6b0cf;" class="dripicons-browser-upload"></i>
-                                    <i *ngIf="data.model_status==2" style="color: #3e6aec;" class="dripicons-browser-upload"></i>
+                                    <a [routerLink]="['/modeling']" [state]="{dataset_id: data.dataset_id ,project_id:data.project_id}">
+                                        <i *ngIf="data.model_status==0" style="color: #34c38f;" class="dripicons-browser-upload"></i>
+                                        <i *ngIf="data.model_status==1" style="color: #f14646;" class="dripicons-browser-upload"></i>
+                                        <i *ngIf="data.model_status==-1" style="color: #a6b0cf;" class="dripicons-browser-upload"></i>
+                                        <i *ngIf="data.model_status==2" style="color: #3e6aec;" class="dripicons-browser-upload"></i>
+                                    </a>
                                 </td>
                                 <td class="text-center">
                                     <span style="display:none;">{{data.deployment_status}}</span>

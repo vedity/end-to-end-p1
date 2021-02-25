@@ -7,6 +7,7 @@
 */
 '''
 
+#* Libraries
 from scipy import stats
 import logging
 import math
@@ -14,12 +15,15 @@ import pandas as pd
 import numpy as np
 import json
 
-from ingest.utils.dataset import dataset_creation
+#* Exceptions
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
-from ingest.utils.dataset import dataset_creation
 
-dc = dataset_creation.DatasetClass()
+#* Relative Imports
+from ingest.utils.dataset import dataset_creation as dc
+
+
+dc = dc.DatasetClass()
 
 class ExploreClass:
 
@@ -98,9 +102,19 @@ class ExploreClass:
         #? Getting all the data
         sql_command = f"SELECT {str(query)} FROM {user_name}.{dataset_table_name}"
         data_df = DBObject.select_records(connection,sql_command)    
-        logging.info("--------->"+str(data_df.dtypes))
+        data_df = data_df.replace([''],np.NaN)
+        
         #? Logical Code Begins
         try:
+            
+            #! Temporary solution to 1 column dataframe problem 
+            added_col = False
+            if (type(data_df) is pd.Series):
+                arr = [0]*len(data_df)
+                series = pd.Series(arr)
+                data_df = pd.DataFrame([data_df, series], columns = [data_df.name, 'auto_generated_column'])
+                added_col = True
+            
             #? Getting Statistics
             stats_df = data_df.describe(include = 'all')
             
@@ -164,18 +178,17 @@ class ExploreClass:
                 #? Getting Least Frequent Values & Count, only for the categorical columns
                 if self.get_datatype(numerical_columns,col).startswith("Ca"):
                     try:
-                        value_count = data_df[col].value_counts()
-                        stats_df.iloc[i,2] = value_count.index[0]
-                        stats_df.iloc[i,3] = value_count.iloc[0]
-                        stats_df.iloc[i,-6] = value_count.index[-1]
-                        stats_df.iloc[i,-7] = value_count.iloc[-1]
+                        most_frequent, least_frequent, most_occurrence, least_occurrence = self.get_max_min_occurrence(data_df[col])
+                        stats_df.iloc[i,2] = most_frequent
+                        stats_df.iloc[i,3] = most_occurrence
+                        stats_df.iloc[i,-6] = least_frequent
+                        stats_df.iloc[i,-7] = least_occurrence
                     except:
                         stats_df.iloc[i,2] = np.NaN
                         stats_df.iloc[i,3] = np.NaN
                         stats_df.iloc[i,-6] = np.NaN
                         stats_df.iloc[i,-7] = np.NaN
                 i += 1
-
             stats_df['Plot Values'] = axislist
             stats_df['Datatype'] = predicted_datatypes
             
@@ -258,6 +271,9 @@ class ExploreClass:
         except:
             return 2
         
+        if added_col:
+            stats_df.drop(labels = ['auto_generated_column'], axis = 0,inplace = True)
+
         return stats_df.round(2)    
     
     def iqr(self,arr):
@@ -310,7 +326,7 @@ class ExploreClass:
                 
             Returns:
                 List[(Intiger|Float)]: List of 2 Lists containing bin_edges & histogram values.
- 
+
         '''
         
         try:
@@ -446,3 +462,56 @@ class ExploreClass:
             return list(set(partial_list_1.tolist() + partial_list_2.tolist()))
         except:
             return []
+        
+    def get_max_min_occurrence(self, series):
+        '''
+            Takes pandas.Series as an input and returns occurrence related information.
+            
+            Args:
+                series(pandas.Series): Column data.
+                
+            Returns:
+                most_frequent(Intiger|String): Most occurring element in the column.
+                least_frequent(Intiger|String): Least occurring element in the column.
+                most_occurrence(Intiger): Frequency count of the Most occurring element.
+                least_occurrence(Intiger): Frequency count of the least occurring element.
+        '''
+        
+        try:
+            value_count = series.value_counts()
+            count_list = list(value_count)
+            
+            #? No value in the column
+            if len(count_list) == 0:
+                return np.NaN,np.NaN,np.NaN,np.NaN
+            
+            #? Only one value repeating in the column
+            if len(count_list) == 1:
+                return value_count.index[0],value_count.index[0],count_list[0],count_list[0]
+            
+            #? Are there multiple lease or most frequent values with the same frequency
+            multiple_least_occ = False
+            multiple_most_occ = False
+            if count_list[-1] == count_list[-2]:
+                multiple_least_occ = True
+            if count_list[0] == count_list[1]:
+                multiple_most_occ = True
+                
+            #? Both most frequent & least frequent values have multiple values with the same frequency
+            if multiple_least_occ and multiple_most_occ:
+                return '*','*',count_list[0],count_list[-1]
+            
+            #? Only least frequent values have multiple values with the same frequency
+            elif multiple_least_occ:
+                return value_count.index[0],'*',count_list[0],count_list[-1]
+            
+            #? Only most frequent values have multiple values with the same frequency
+            elif multiple_most_occ:
+                return '*',value_count.index[-1],count_list[0],count_list[-1]
+            
+            #? Most Frequent & Least frequent values don't have any other values with same frequency of occurrence
+            else:
+                return value_count.index[0],value_count.index[-1],count_list[0],count_list[-1]
+        
+        except:
+            return np.NaN,np.NaN,np.NaN,np.NaN

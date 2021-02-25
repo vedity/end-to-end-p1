@@ -47,7 +47,7 @@ export class ListProjectComponent implements OnInit {
         dtInstance.columns().every(function () {
           const that = this;
          
-          console.log( );
+          // console.log( );
           
           $('#input_'+ this.index("visible")).on('keyup change', function () {
             if (that.search() !== this['value']) {
