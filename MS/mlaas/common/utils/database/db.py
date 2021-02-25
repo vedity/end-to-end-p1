@@ -8,22 +8,25 @@
  Vipul Prajapati          18-DEC-2020           1.3           Added functionality for create schema.
 */
 '''
+#Python library imports
 import psycopg2
 import psycopg2.extras as extras
 import pandas as pd 
-from sqlalchemy import create_engine
 import json
-from database import *
 import logging
+from sqlalchemy import create_engine
+
+#database variable file import
+from database import *
+
+#Common utils import
 from common.utils.logger_handler import custom_logger as cl
 from common.utils.exception_handler.python_exception.common.common_exception import *
 
 user_name = 'admin'
 log_enable = True
-
 LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
-
 logger = logging.getLogger('dataset_creation')
 
 class DBClass:
