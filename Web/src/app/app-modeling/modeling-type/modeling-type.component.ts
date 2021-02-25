@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DataTableDirective } from 'angular-datatables';
 import { ToastrService } from 'ngx-toastr';
-// import { setInterval } from 'timers';
+//  import { manualmodeling } from './modeling.model';
 import { ModelingTypeApiService } from '../modeling-type.service';
 
 @Component({
@@ -12,6 +12,10 @@ import { ModelingTypeApiService } from '../modeling-type.service';
   styleUrls: ['./modeling-type.component.scss']
 })
 export class ModelingTypeComponent implements OnInit {
+  // mySwitch: boolean = false;
+  // public data:manualmodeling;
+  splitmethodselection="crossvalidation";
+  hyperparams='sklearn';
   @ViewChild(DataTableDirective, { static: false })
   datatableElement: DataTableDirective;
   dtOptions: DataTables.Settings = {};
@@ -33,11 +37,9 @@ export class ModelingTypeComponent implements OnInit {
   public modelDescription: any;
   processclass: any = "stop";
   processInterval: any;
-  data: any = {
-    experiment_name: "",
-    experiment_desc: ""
-  };
+ 
   ngOnInit(): void {
+   let projectdatamodel;
     this.dtOptions = {
       paging: false,
       ordering: false,
@@ -53,11 +55,16 @@ export class ModelingTypeComponent implements OnInit {
       localStorage.setItem("modeling", JSON.stringify(this.params));
     }
     else {
+      if(this.params.selectproject==false){
+        $(".openmodal").trigger('click');
+      }
+    //this.modalService.open(projectdatamodel, { size: 'lg', windowClass: 'modal-holder', centered: true });
       this.params = localStorage.getItem("params");
       this.params = JSON.parse(this.params);
     }
     this.getDatasetInfo();
     this.getModelDescription();
+    this.getAlgorithmList();
   }
 
 
@@ -69,17 +76,17 @@ export class ModelingTypeComponent implements OnInit {
     }
     else {
       // console.log(this.compareIds.indexOf(id));
-      var index=this.compareIds.indexOf(id);
+      var index = this.compareIds.indexOf(id);
       if (index != -1) {
         this.compareIds.splice(index, 1);
       }
     }
     // console.log(this.compareIds);
-    if(this.compareIds.length>1){
-      this.iscompare=true;
+    if (this.compareIds.length > 1) {
+      this.iscompare = true;
     }
-    else{
-      this.iscompare=false;
+    else {
+      this.iscompare = false;
     }
   }
 
@@ -88,8 +95,46 @@ export class ModelingTypeComponent implements OnInit {
       logs => this.successHandler(logs),
       error => this.errorHandler(error));
 
+  } 
+  
+  getAlgorithmList() {
+    this.apiservice.getAlgorithmList().subscribe(
+      logs => this.successAlgorithmListHandler(logs),
+      error => this.errorHandler(error));
   }
 
+  algorithmlist: any;
+  successAlgorithmListHandler(data) {
+    if (data.status_code == "200") {
+      this.algorithmlist = data.response.model_name;
+    }
+    else {
+      this.errorHandler(data);
+    }
+  }
+
+
+  getHyperParams(val){
+    if(val!=""){
+      this.apiservice.getHyperparamsList(val).subscribe(
+        logs => this.successParamsListHandler(logs),
+        error => this.errorHandler(error));
+    }
+    else
+    this.paramsList=null
+  }
+
+  paramsList: any;
+  successParamsListHandler(data) {
+    if (data.status_code == "200") {
+      this.paramsList = data.response.model_parameter;
+      console.log(this.paramsList);
+      
+    }
+    else {
+      this.errorHandler(data);
+    }
+  }
   getModelDescription() {
     this.apiservice.getModelDescription(this.params.dataset_id, this.params.project_id, this.params.user_id).subscribe(
       logs => this.descsuccessHandler(logs),
@@ -100,15 +145,7 @@ export class ModelingTypeComponent implements OnInit {
   descsuccessHandler(data) {
     if (data.status_code == "200") {
       this.modeldata = data.response;
-
-      // console.log(this.modeldata);
       this.contentloaded = true;
-      // data.response.forEach(element => {
-      //   this.modeldata.push(JSON.parse(element));
-      // });
-      // console.log(this.modeldata);
-
-      // this.toaster.success(data.error_msg, 'Success');
     }
     else {
       this.errorHandler(data);
@@ -127,12 +164,7 @@ export class ModelingTypeComponent implements OnInit {
       experiment_name: this.params.experiment_name,
       experiment_desc: this.params.experiment_desc
     }
-    // this.apiservice.startModeling(obj).subscribe( 
-    //   logs => this.startsuccessHandler(logs),
-    // error => this.errorHandler(error));
-
   }
-
 
   stopModel() {
     this.processclass = "stop";
@@ -145,7 +177,6 @@ export class ModelingTypeComponent implements OnInit {
     if (data.status_code == "200") {
       this.toaster.success(data.error_msg, 'Success');
       this.processInterval = setInterval(() => {
-        // console.log("called");
         this.getModelDescription();
       }, 5000);
     }
@@ -173,13 +204,29 @@ export class ModelingTypeComponent implements OnInit {
     }
   }
 
-  modeltitle:any;
-  extraLarge(exlargeModal: any,name) {
-    this.modeltitle=name;
+  modeltitle: any;
+  extraLarge(exlargeModal: any, name) {
+    this.modeltitle = name;
     this.modalService.open(exlargeModal, { size: 'xl', windowClass: 'modal-holder', centered: true });
   };
 
   smallModal(modelingmodal: any) {
     this.modalService.open(modelingmodal, { size: 'md', windowClass: 'modal-holder', centered: true });
   }
+
+  contentid = 0;
+  LargeModal(largeModal: any, val) {
+    if (val) {
+      this.contentid = 1;
+      this.modalService.open(largeModal, { size: 'lg', windowClass: 'modal-holder', centered: true });
+    }
+  };
+
+  ProjectData(projectModal:any){
+    this.modalService.open(projectModal, { size: 'lg', windowClass: 'modal-holder', centered: true });
+  }
+
+  showContent(id) {
+    this.contentid = id;
+  };
 }
