@@ -192,14 +192,23 @@ class ValidateColumnName(APIView):
                         schema_id = request.query_params.get('schema_id') #get the schema id
                         column_name = request.query_params.get('column_name') #get the schema id 
                         
+                         
                         sql_command = "select case when changed_column_name='' then column_name else changed_column_name end column_list  from mlaas.schema_tbl where schema_id='"+str(schema_id)+"'"
                         dataframe = DBObject.select_records(connection,sql_command)
                         
                         column_list = list(dataframe['column_list'])
-                        if column_list.count(column_name)==1:
+                        
+                        column_name = str(column_name).strip()
+                       
+                        if len(column_name)==0:
+                                return Response({"status_code":"500","error_msg":"Only space are not allowed ","response":"false"})
+
+                        elif column_list.count(column_name)==1:
                                 return Response({"status_code":"500","error_msg":"Column name already exist ","response":"false"})
+
                         else:
                                 return Response({"status_code":"200","error_msg":"you can proceed","response":"true"})
+
                 except Exception as e:
                         logging.error("data preprocess : ValidateColumnName : GET Method : Exception :" + str(e))
                         logging.error("data preprocess : ValidateColumnName : GET Method : "+ traceback.format_exc())
@@ -263,7 +272,8 @@ class OperationListClass(APIView):
                         operation = preprocessObj.get_possible_operations(dataset_id,schema_id,column_ids) #call get_possible_operation class
                         if isinstance(operation,list):  
                                         logging.info("data preprocess : OperationListClass : POST Method : execution stop")
-                                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":operation})
+                                        response = [{'id' : i} for i in operation]
+                                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":response})
                         else:
                                         status_code,error_msg=json_obj.get_Status_code(operation) # extract the status_code and error_msg from schema_data
                                         logging.info("data preprocess : OperationListClass : POST Method : execution stop : status_code :"+status_code)
@@ -290,6 +300,7 @@ class MasterOperationListClass(APIView):
                         operations = preprocessObj.get_all_operations() #call get_possible_operation class
                         if isinstance(operations,list):  
                                         response = json.dumps(operations)
+                                        response = json.loads(response)
                                         logging.info("data preprocess : MasterOperationListClass : GET Method : execution stop")
                                         return Response({"status_code":"200","error_msg":"Successfull retrival","response":response})
                         else:

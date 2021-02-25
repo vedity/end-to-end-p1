@@ -39,35 +39,20 @@ class LinearRegressionClass:
         """This is used to initialise the model input parameter when model class is called.
         """
 
-        # self.input_features_list = input_features_list # List of input features(which are used to train the model)
-        # self.target_features_list = target_features_list # list of target features (features to be predicted)
-        self.SplitDataObject = SplitDataObject # This object stores the variables used to split the data.
+        self.input_features_list = input_features_list
+        self.target_features_list = target_features_list
+        self.SplitDataObject = SplitDataObject
         # self.input_features_list.remove('index')
-        self.input_features_list = input_features_list[1:] # List of input features(which are used to train the model)
-        self.target_features_list = target_features_list[1:] # list of target features (features to be predicted)
+        self.input_features_list = input_features_list[1:]
+        self.target_features_list = target_features_list[1:]
         # self.input_features_list.remove('index')
-        self.X_train = X_train 
+        self.X_train = X_train
         self.X_test = X_test
         self.X_valid = X_valid
         self.y_train = y_train
         self.y_test = y_test
         self.y_valid = y_valid
-        
-     
-    
-    
-    # def get_split_dataset(self):
-        
-    #     """This function is used to splits the dataset.
-
-    #     Returns:
-    #         [dataframe]: [it will return train-test or train-valid-test data dataframe.]
-    #     """
-        
-    #     return self.split_data_object.get_split_data(self.input_df, self.target_df)                                                                            
-    
-    #     # split_data_object
-        
+          
     def train_model(self,X_train,y_train):
         
         """This function is used to train the model.
@@ -93,7 +78,7 @@ class LinearRegressionClass:
     
     def get_learning_curve(self,model,X_train,y_train):
         
-        """This function gets learning curve generated while training the data.
+        """This function is get learning curve.
 
         Args:
             model ([object]): [train model object]
@@ -104,18 +89,15 @@ class LinearRegressionClass:
         X_train = X_train[self.input_features_list]
         y_train = y_train[self.target_features_list]
         
-        # Dividing train data size into bins.
         train_sizes=np.linspace(0.10, 1.0, 5)
         train_sizes, train_scores, test_scores, fit_times, _ = \
         learning_curve(estimator = model, X=X_train, y=y_train, cv=None, scoring='r2',n_jobs=None,
                        train_sizes=train_sizes,
                        return_times=True)
         
-        # Average of train score(accuracy).
         train_mean = train_scores.mean(axis=1)
-        # Average of train score(accuracy).
         test_mean = test_scores.mean(axis=1)
-        # Create the learning curve dictionary.
+        
         learning_curve_dict = {"train_size":train_sizes.tolist(),"train_score":train_mean.tolist(),"test_score":test_mean.tolist()}
         
         return learning_curve_dict
@@ -152,15 +134,7 @@ class LinearRegressionClass:
         
         return features_impact_dict
  
-    # def save_model(self,model):
-        
-        
-    #     """This function is used to save model file.
-    #     """
-        
-    #     # save the model to disk
-    #     filename = 'linear_regressor_finalized_model.sav'
-    #     pickle.dump(model, open(filename, 'wb'))
+    
 
     def get_actual_prediction(self,model,X_test,y_test):
         
@@ -243,11 +217,7 @@ class LinearRegressionClass:
             
         train_size = X_train.shape[0]
         test_size = X_test.shape[0]
-        print('SplitDataObject:- ', self.SplitDataObject)
-        # print(self.valid
         
-        # print('Type of cv:- ', type(self.split_data_object.cv))
-
         # json does not recognize NumPy data types. 
         # Convert the number to a Python int before serializing the object:
         model_summary = {"Model Name":"linear Regression",
@@ -257,7 +227,7 @@ class LinearRegressionClass:
                          "Train Split":1-float(self.SplitDataObject.test_size),"Test Split":float(self.SplitDataObject.test_size),
                          "Random State":int(self.SplitDataObject.random_state),
                          "CV (K-Fold )":int(self.SplitDataObject.cv)}
-        print(model_summary)
+        
         return model_summary
       
       
@@ -319,8 +289,6 @@ class LinearRegressionClass:
         
         """This function is used as a pipeline which will execute function in a sequence.
         """
-        
-        # X_train, X_test, y_train, y_test = self.split_dataset()
         # train the model
         model = self.train_model(self.X_train,self.y_train)
         # get features importance
@@ -339,8 +307,6 @@ class LinearRegressionClass:
         model_summary = self.model_summary(self.X_train,self.X_test,self.y_train) # high level model summary
         # get model learning curve
         learning_curve_dict = self.get_learning_curve(model,self.X_train,self.y_train)
-        # finally save the model
-        # self.save_model(model) # it will save in pickle format
         
         
         # log mlflow parameter
@@ -363,7 +329,7 @@ class LinearRegressionClass:
         mlflow.log_dict(features_impact_dict,"features_importance.json")
         mlflow.log_dict(model_summary,"model_summary.json")
         mlflow.log_dict(final_result_dict,"predictions.json")
-        print('This is done')
+        
         
         
         
