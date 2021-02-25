@@ -422,6 +422,7 @@ class DatasetClass:
                 #v 1.4
                 dataset_name = dataset_df['dataset_name'][0]
                 sql_command = f"DELETE FROM {table_name} WHERE dataset_id = '{dataset_id}'"
+                
                 dataset_status = DBObject.delete_records(connection,sql_command)
                 if dataset_status == 1: return 1,_
                 
@@ -470,7 +471,7 @@ class DatasetClass:
             [integer]: [it will return status of the dataset deletion. if successfully then 0 else 1.]
         """
         logging.info("data ingestion : DatasetClass : delete_data_details : execution start")
-        
+        logging.info("####>"+str(table_name))
         #? Creating Sql Query
         sql_command = 'DROP TABLE '+ user_name +'."'+table_name+'"'
         
@@ -573,7 +574,8 @@ class DatasetClass:
 
             #get the  dataset id and table name of the raw dataset
             raw_dataset_id,raw_dataset_table = DBObject.get_raw_dataset_detail(connection,dataset_id)
-
+            logging.info("----------------->"+str(table_name))
+            logging.info("----------------->"+str(raw_dataset_id))
             #sql query to delete raw dataset for given dataset id
             sql_command = f"DELETE FROM {table_name} WHERE dataset_id = '{raw_dataset_id}'"
 
