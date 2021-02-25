@@ -24,6 +24,7 @@ from .cleaning import noise_reduction as nr
 #* Library Imports
 import logging
 import traceback
+import numpy as np
 
 user_name = 'admin'
 log_enable = True
@@ -236,6 +237,7 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
             #? Getting all the data
             sql_command = f"SELECT * FROM {user_name}.{dataset_table_name}"
             data_df = DBObject.select_records(connection,sql_command)    
+            data_df = data_df.replace([''],np.NaN)
             
             missing_value_status = []
             noise_status = []
