@@ -279,7 +279,7 @@ class DatasetClass:
             sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_name ='" + dataset_name + "' and user_name = '"+ user_name + "' and page_name='schema mapping'"
             
         else:
-            sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_name ='" + dataset_name + "' and user_name = '"+ user_name + "'"
+            sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_name ='" + dataset_name + "' and user_name = '"+ user_name + "' and no_of_rows != 0"
 
         # Get dataframe of dataset id. 
         dataset_df = DBObject.select_records(connection,sql_command)
@@ -473,7 +473,7 @@ class DatasetClass:
         
         #? Creating Sql Query
         sql_command = 'DROP TABLE '+ user_name +'."'+table_name+'"'
-        
+        logging.info(str(sql_command)+ " delete")
         status = DBObject.delete_records(connection,sql_command)
         logging.debug(f"data ingestion  :  DatasetClass  :  delete_data_details  :  Dropped {user_name}.{table_name} table")
         
@@ -573,9 +573,10 @@ class DatasetClass:
 
             #get the  dataset id and table name of the raw dataset
             raw_dataset_id,raw_dataset_table = DBObject.get_raw_dataset_detail(connection,dataset_id)
-
+            
             #sql query to delete raw dataset for given dataset id
             sql_command = f"DELETE FROM {table_name} WHERE dataset_id = '{raw_dataset_id}'"
+
 
             #execute the sql query
             dataset_status = DBObject.delete_records(connection,sql_command)
@@ -601,14 +602,15 @@ class DatasetClass:
            
             #check the visibility 
             if dataset_visibility=='private':
-                new_table_name = user_name+'."'+raw_table_name+'"'
-                copy_table_name = user_name+'."'+original_table_name+'"'
-            else:
-                new_table_name = raw_table_name
-                copy_table_name = original_table_name
 
+                sql_command = 'CREATE TABLE '+str(user_name)+'."'+str(raw_table_name)+'" AS SELECT * FROM '+str(user_name)+'."'+str(original_table_name)+'"'
+                logging.info(str(sql_command)+ " private")
+            else:
+                sql_command = 'CREATE TABLE public."'+str(raw_table_name)+'" AS SELECT * FROM public."'+str(original_table_name)+'"'
+                logging.info(str(sql_command)+ " public")
+            
             #form the new table based on te existing table 
-            sql_command = 'CREATE TABLE '+str(new_table_name)+' AS SELECT * FROM '+str(copy_table_name)
+            
             create_status = DBObject.update_records(connection,sql_command)
 
             #update the dataset table name of the raw dataset

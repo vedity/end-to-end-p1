@@ -76,11 +76,13 @@ class SchemaClass:
 
             #check the dataset visibility if private append the user name with  dataset table name 
             #dataset visibility if public assign table name as  dataset table name we get
+
             if dataset_visibility =="private":
                 table_name=user_name+'."'+dataset_table_name+'"'
+                
             else:
                 
-                table_name = dataset_table_name
+                table_name = 'public."'+dataset_table_name+'"'
             
             #get the column list and datatype  based on given table name
             column_name_list,predicted_datatype = self.get_attribute_datatype(connection,DBObject,table_name)
@@ -301,17 +303,20 @@ class SchemaClass:
                 activity=""
 
                 if id==5:
-                    
-                    if len(change_column_lst)>2:
+                    column_string = " "
+                    column_string = activity_description+" <br/>"
+                    for count in range(len(change_column_lst)):
+                        column_string += str(column_lst[count])+" <-> "+str(change_column_lst[count])+"<br/> "
+                    # if len(change_column_lst)>2:
+                        
+                    #     change_column_name=",".join(change_column_lst[:len(change_column_lst)-1])+' and '+change_column_lst[-1]+' Respectively.'
+                    #     column_name=",".join(column_lst[:len(column_lst)-1])+' and '+column_lst[-1]+''
+                    # else:
+                    #     change_column_name=",".join(change_column_lst)
+                    #     column_name=",".join(column_lst)
 
-                        change_column_name=",".join(change_column_lst[:len(change_column_lst)-1])+' and '+change_column_lst[-1]+' Respectively.'
-                        column_name=",".join(column_lst[:len(column_lst)-1])+' and '+column_lst[-1]+''
-                    else:
-                        change_column_name=",".join(change_column_lst)
-                        column_name=",".join(column_lst)
-
-                    activity = activity_description.replace('*',column_name).replace('$',dataset_name).replace('?',change_column_name)+"," 
-
+                    # activity = activity_description.replace('*',column_name).replace('$',dataset_name)
+                    activity = column_string
                 elif id==6:
 
                     column_target=",".join(target_column_lst)
