@@ -1,4 +1,4 @@
-activity_id,activity_name,activity_description,language,operation,0
+activity_id,activity_name,activity_description,language,operation,code
 1,Create Dataset,You have created dataset,US,Create,0
 2,Delete Dataset,You have deleted dataset,US,Delete,0
 3,Create Project,You have created project,US,Create,0

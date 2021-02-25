@@ -231,7 +231,7 @@ class DatasetClass:
         # Get dataframe of the file data.
         
         file_data_df = DBObject.read_data(file_path)
-        
+        logging.info("---->"+str(file_data_df))
         # Get number of rows.
         no_of_rows = file_data_df.shape[0]
         logger.info("no_of_rows:===="+str(no_of_rows))

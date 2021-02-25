@@ -202,13 +202,13 @@ class ActivityTimelineClass:
 
             #get the connection stablish to postgressql  
             connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port)
-            
+            logging.info("####>"+str(connection))
             if connection == None :
                 raise DatabaseConnectionFailed(500)
 
             #command to get the activity master table details based on activity id and language and code
             sql_command = ("SELECT activity_name,activity_description,operation from mlaas.activity_master_tbl where activity_id='"+str(id)+"' and language='"+str(language)+"' and code ='"+str(code)+"'")
-
+            logging.info("####>"+str(sql_command))
             #excute the sql query
             activity_df = DBObject.select_records(connection,sql_command)  
 

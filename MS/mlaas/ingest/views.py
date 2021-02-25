@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+# python 2
 '''
 /*CHANGE HISTORY
 
@@ -211,10 +213,13 @@ class CreateDatasetClass(APIView):
                         exists_dataset_status=IngestionObj.does_dataset_exists(dataset_name,user_name) #call does_dataset_exists, check if dataset name exist for that perticular user name return false if not,otherwise true
                         if exists_dataset_status == False:
                                 file=request.FILES['inputfile'] #get inputfile Name
-                                try:
-                                        file_data = pd.read_csv(request.FILES['inputfile'],encoding="UTF-8")   # read the csv file and store into dataframe variable 
-                                except:
-                                        return Response({"status_code":500,"error_msg":"Invalid CSV Format","response":"false"})
+                                
+
+                                #try:
+                                file_data = pd.read_csv(request.FILES['inputfile'],encoding='ANSI')   # read the csv file and store into dataframe variable 
+                                
+                                # except:
+                                #         return Response({"status_code":500,"error_msg":"Invalid CSV Format","response":"false"})
                                                 
                                                                         
                                 file_check_status = IngestionObj.check_file(file,file_data)  # call check_file function to verify csv file data
@@ -227,7 +232,7 @@ class CreateDatasetClass(APIView):
                                 file_path="static/server/" #server path where all the dataset will store
                                 file_name =IngestionObj.save_file(DBObject,connection,user_name,dataset_visibility,file,file_path)
                         else:
-                                return Response({"status_code":"501","error_msg":"Dataset name exists","response":"false"})
+                                return Response({"status_code":"500","error_msg":"Dataset name exists","response":"false"})
 
                         dataset_Status,dataset_id=IngestionObj.create_dataset(dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name) #call create_dataset method to create dataset and insert csv data into table
                         if dataset_Status != 0:
@@ -238,6 +243,7 @@ class CreateDatasetClass(APIView):
                                 activity_id = 1
                                 activity_df = timeline_Obj.get_activity(activity_id,"US")
                                 activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= dataset_name)
+                                
                                 project_id=0
                                 end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
                                 activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time)
@@ -252,7 +258,7 @@ class CreateDatasetClass(APIView):
                 except Exception as e:
                                 logging.error("data ingestion : CreateDatasetClass : POST Method : Exception : " + str(e))
                                 logging.error("data ingestion : CreateDatasetClass : POST Method : "+traceback.format_exc())
-                                return Response({"status_code":"502","error_msg":str(e),"response":"false"}) 
+                                return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
 
 
 #class for retrive csv data 
