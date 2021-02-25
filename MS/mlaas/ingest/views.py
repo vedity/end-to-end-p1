@@ -221,7 +221,7 @@ class CreateDatasetClass(APIView):
                                 
 
                                 #try:
-                                file_data = pd.read_csv(request.FILES['inputfile'],encoding='ANSI')   # read the csv file and store into dataframe variable 
+                                file_data = pd.read_csv(request.FILES['inputfile'])   # read the csv file and store into dataframe variable 
                                 
                                 # except:
                                 #         return Response({"status_code":500,"error_msg":"Invalid CSV Format","response":"false"})
