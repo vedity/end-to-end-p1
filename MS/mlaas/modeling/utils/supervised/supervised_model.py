@@ -25,12 +25,6 @@ LogObject.log_setting()
 logger = logging.getLogger('model_identifier')
 
 class SupervisedClass(RC,PC):
-    """This class implements the supervised ML algorithms.
-
-    Args:
-        RC (Class): [Regression Class, stores the implementation of all the regression model.]
-        PC (Class): [Regression Class, stores the implementation of all the regression model.]
-    """
     
 
     def supervised_algorithm(self,Model_Mode,input_features_list,target_features_list,
@@ -40,7 +34,20 @@ class SupervisedClass(RC,PC):
         """This function is used to call supervised algorithm.
         """
         logging.info("modeling : SupervisedClass : supervised_algorithm : execution start")
-
+    
+        # reg_type = 0
+        # cls_type = 0
+        
+        # for i in range(1,len(target_df.columns)):
+        #     Total_Length = len(target_df.iloc[:,i])
+        #     Unq_Length = len(target_df.iloc[:,i].unique())
+            
+        #     Thresh_Hold = int((Total_Length * 10) / 100)
+            
+        #     if Thresh_Hold < Unq_Length :
+        #         reg_type = 1
+        #     else:
+        #         cls_type = 1
 
         # It will check whether target is regressor or classifier.
         X_train, X_valid, X_test, y_train, y_valid, y_test = SplitDataObject.get_split_data(input_df, target_df)

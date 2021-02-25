@@ -4,15 +4,7 @@ import ast
 class SplitData:
     
     def __init__(self,basic_split_parameters,DBObject, connection):
-        # self.split_dataset = split_dataset
         
-        # self.split_method = None 
-        # self.random_state = None
-        # self.test_size = None
-        # self.train_size = None
-        # self.cv = None
-        # self.valid_size = None
-
         self.model_mode = basic_split_parameters['model_mode']
         
         if self.model_mode == 'manual':
@@ -20,12 +12,18 @@ class SplitData:
             self.split_method, self.random_state, self.test_size, self.train_size, self.cv, self.valid_size = self.get_split_dataset(basic_split_parameters)
             
         else :
-            config_path ="./modeling/basic_dataset_split_config.json"
-            json_data=open(config_path,'r') 
-            dataset_split = json_data.read()
-            dataset_split_param_dict = ast.literal_eval(dataset_split) 
-                
+            sql_command = "select * from mlaas.auto_model_split_param_tbl"
+            split_data_df=DBObject.select_records(connection,sql_command)
+            split_param = split_data_df['split_param'][0]
             
+            dataset_split_param_dict = ast.literal_eval(split_param)
+            #TODO Need to change
+            # config_path ="./modeling/basic_dataset_split_config.json"
+            # json_data=open(config_path,'r') 
+            # dataset_split = json_data.read()
+            # dataset_split_param_dict = ast.literal_eval(dataset_split) 
+                
+                
             # dataset_split_param_dict = json.load(config_path)
             self.split_method = dataset_split_param_dict['split_method']
             self.random_state = dataset_split_param_dict['random_state']
@@ -63,26 +61,7 @@ class SplitData:
         return split_method, random_state, test_size, train_size, cv, valid_size
 
 
-    # def get_auto_split_dataset(self, model_id, DBObject, connection):
-    #     """This function runs only when the model_mode is 'auto'.
-
-    #     Args:
-    #         model_name (string): [Name of the ML/DL model]
-    #         DBObject (db): [Database connection object]
-    #         connection (connection): [DB connection]
-
-    #     Returns:
-    #         [tuple]: [dataset splitting method, and parameters required to split it.]
-    #     """
-    #     # print(model_name)
-    #     # sql_command = "select model_id from mlaas.split_data_params_tbl where model_name='Linear_Regression_With_Sklearn'"
-    #     # model_id = DBObject.select_records(connection, sql_command).iloc[0, 0]
-    #     # print(model_id)
-    #     sql_command = 'select split_method,cv,valid_size,test_size,random_state from mlaas.split_dataset_params_tbl where model_id='+str(model_id)
-    #     dataset_split_parameters = DBObject.select_records(connection, sql_command).iloc[0, :]
-    #     # print(dataset_split_parameters)
-    #     return self.get_split_dataset(dataset_split_parameters)        
-
+    
 
     def get_split_data(self, X, y):
         """Returns train-test or train-valid-test split on the basis of split_method.
