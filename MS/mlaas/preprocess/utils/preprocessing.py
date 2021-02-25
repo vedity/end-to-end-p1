@@ -24,6 +24,7 @@ from .cleaning import noise_reduction as nr
 #* Library Imports
 import logging
 import traceback
+import numpy as np
 
 user_name = 'admin'
 log_enable = True
@@ -151,7 +152,7 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
                 
             sql_command = f"select amt.activity_id,amt.activity_name,pat.parent_activity_name from mlaas.activity_master_tbl amt , mlaas.parent_activity_tbl pat where amt.code = '0' and amt.parent_activity_id = pat.parent_activity_id"
             operations_df = DBObject.select_records(connection,sql_command) 
-            
+            logging.info("--->"+str(sql_command))
             #? Logical Function Starts
             try:
                 master_response = []
@@ -236,6 +237,7 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
             #? Getting all the data
             sql_command = f"SELECT * FROM {user_name}.{dataset_table_name}"
             data_df = DBObject.select_records(connection,sql_command)    
+            data_df = data_df.replace([''],np.NaN)
             
             missing_value_status = []
             noise_status = []
