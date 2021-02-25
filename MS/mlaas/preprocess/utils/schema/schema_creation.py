@@ -184,39 +184,43 @@ class SchemaClass:
 
             for count in range(len(schema_data)):
 
-                    #check if change column and  prev column are same or not
-                    if schema_data[count]["change_column_name"] == schema_data[count]["column_name"]: 
-                        raise SameColumnNameFound(500)
+                if schema_data[count]["column_name"] != 'index':
 
-                    change_col_name = str(schema_data[count]["change_column_name"])
+                        #check if change column and  prev column are same or not
+                        if schema_data[count]["change_column_name"] == schema_data[count]["column_name"]: 
+                            raise SameColumnNameFound(500)
 
-                    if change_col_name.find('(') !=-1 or  change_col_name.find(')') !=-1 or change_col_name.find('%')!=-1:
-                        raise InvalidColumnNames(500)
-       
-                    change_column_name.append(schema_data[count]["change_column_name"]) #append change column name
+                        change_col_name = str(schema_data[count]["change_column_name"])
 
-                    index_list.append(schema_data[count]["index"]) #append  index 
+                        if change_col_name.find('(') !=-1 or  change_col_name.find(')') !=-1 or change_col_name.find('%')!=-1:
+                            raise InvalidColumnNames(500)
+        
+                        change_column_name.append(schema_data[count]["change_column_name"]) #append change column name
 
-                    column_name_list.append(schema_data[count]["column_name"]) #append column_name
+                        index_list.append(schema_data[count]["index"]) #append  index 
 
-                    column_attribute_list.append(schema_data[count]["column_attribute"]) #append attribute type
+                        column_name_list.append(schema_data[count]["column_name"]) #append column_name
+
+                        column_attribute_list.append(schema_data[count]["column_attribute"]) #append attribute type
+
+                        
+
             
-            # logging.info(str(change_column_name)+" column_attribute_list")
+            logging.info(str(change_column_name)+" change_column_name")
+            logging.info(str(column_name_list)+" column_name_list")
+            logging.info(str(column_attribute_list)+" column_attribute_list")
+
+            #logging.info(str(change_column_name)+" column_attribute_list")
             for value in change_column_name:
                 if value != '':
-                    if change_column_name.count(value.lower()) > 1 or change_column_name.count(value.upper()) == 1:
+                    if change_column_name.count(value.lower()) > 1 :
                         raise ChangeColumnNameSame(500)
             
-            
-        
             column_count_value,ignore_count_value = self.get_count_value(DBObject,connection,schema_id)
 
 
             logging.info(str(column_attribute_list)+" column_attribute_list")
 
-            logging.info(str(column_count_value)+" column_count_value")
-            logging.info(str(ignore_count_value)+" ignore_count_value")
-            logging.info(str(len(column_attribute_list))+" column_attribute_list")
             if (column_count_value-ignore_count_value)== column_attribute_list.count('Ignore') :
                 raise IgnoreColumns(500)
 
@@ -504,7 +508,7 @@ class SchemaClass:
             table_name,_,_ = self.get_schema()
             
             # sql command to get details from schema table  based on  schema id 
-            sql_command = "select case when changed_column_name='' then column_name else changed_column_name end column_list,index,data_type,column_attribute  from "+str(table_name)+" where schema_id="+str(schema_id)+" and column_attribute !='Ignore' order by index"           
+            sql_command = "select case when changed_column_name ='' then column_name else changed_column_name end column_list,index,data_type,column_attribute  from "+str(table_name)+" where schema_id="+str(schema_id)+" and column_attribute !='Ignore' order by index"           
         
             #execute sql commnad if data exist then return dataframe else return None
             schema_df = DBObject.select_records(connection,sql_command) 
