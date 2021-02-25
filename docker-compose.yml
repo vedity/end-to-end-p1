@@ -25,7 +25,8 @@ services:
             - LOAD_EX=n
             - EXECUTOR=Local
         volumes:                                        # mount the following local folders
-            - ./MS/mlaas/dags:/usr/local/airflow/dags
+            - ./MS/mlaas:/usr/local/airflow/dags
+            - ./MS/mlaas/mlruns:/usr/local/airflow/mlruns
         ports:
             - "8080:8080"                               # expose port
         command: webserver

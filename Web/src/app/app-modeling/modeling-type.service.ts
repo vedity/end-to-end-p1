@@ -60,4 +60,13 @@ export class ModelingTypeApiService {
     var params = new HttpParams().append("experiment_id", experiment_id);
     return this.httpClient.get(this.baseUrl + "modeling/actualvsprediction/", { headers: this.headers, params });
   }
+
+  getAlgorithmList(): Observable<any> {
+    return this.httpClient.get(this.baseUrl + "modeling/selectalgorithm/", { headers: this.headers });
+  }
+
+  getHyperparamsList(model_name): Observable<any> {
+    var params = new HttpParams().append("model_name", model_name);
+    return this.httpClient.get(this.baseUrl + "modeling/hyperparameters/", { headers: this.headers, params });
+  }
 }

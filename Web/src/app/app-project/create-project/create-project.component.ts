@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { ProjectApiService } from '../project-api.service';
-import { createproject } from './project.model'
+import { ProjectApiService } from '../../app-project/project-api.service';
+import { createproject } from '../../app-project/create-project/project.model'
 import bsCustomFileInput from 'bs-custom-file-input';
 @Component({
   selector: 'app-create-project',
