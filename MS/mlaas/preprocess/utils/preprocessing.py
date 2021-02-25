@@ -152,7 +152,7 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
                 
             sql_command = f"select amt.activity_id,amt.activity_name,pat.parent_activity_name from mlaas.activity_master_tbl amt , mlaas.parent_activity_tbl pat where amt.code = '0' and amt.parent_activity_id = pat.parent_activity_id"
             operations_df = DBObject.select_records(connection,sql_command) 
-            
+            logging.info("--->"+str(sql_command))
             #? Logical Function Starts
             try:
                 master_response = []

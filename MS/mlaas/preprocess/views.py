@@ -263,7 +263,8 @@ class OperationListClass(APIView):
                         operation = preprocessObj.get_possible_operations(dataset_id,schema_id,column_ids) #call get_possible_operation class
                         if isinstance(operation,list):  
                                         logging.info("data preprocess : OperationListClass : POST Method : execution stop")
-                                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":operation})
+                                        response = [{'id' : i} for i in operation]
+                                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":response})
                         else:
                                         status_code,error_msg=json_obj.get_Status_code(operation) # extract the status_code and error_msg from schema_data
                                         logging.info("data preprocess : OperationListClass : POST Method : execution stop : status_code :"+status_code)
@@ -290,6 +291,7 @@ class MasterOperationListClass(APIView):
                         operations = preprocessObj.get_all_operations() #call get_possible_operation class
                         if isinstance(operations,list):  
                                         response = json.dumps(operations)
+                                        response = json.loads(response)
                                         logging.info("data preprocess : MasterOperationListClass : GET Method : execution stop")
                                         return Response({"status_code":"200","error_msg":"Successfull retrival","response":response})
                         else:
