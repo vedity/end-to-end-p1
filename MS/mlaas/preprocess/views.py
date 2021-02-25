@@ -192,14 +192,23 @@ class ValidateColumnName(APIView):
                         schema_id = request.query_params.get('schema_id') #get the schema id
                         column_name = request.query_params.get('column_name') #get the schema id 
                         
+                         
                         sql_command = "select case when changed_column_name='' then column_name else changed_column_name end column_list  from mlaas.schema_tbl where schema_id='"+str(schema_id)+"'"
                         dataframe = DBObject.select_records(connection,sql_command)
                         
                         column_list = list(dataframe['column_list'])
-                        if column_list.count(column_name)==1:
+                        
+                        column_name = str(column_name).strip()
+                       
+                        if len(column_name)==0:
+                                return Response({"status_code":"500","error_msg":"Only space are not allowed ","response":"false"})
+
+                        elif column_list.count(column_name)==1:
                                 return Response({"status_code":"500","error_msg":"Column name already exist ","response":"false"})
+
                         else:
                                 return Response({"status_code":"200","error_msg":"you can proceed","response":"true"})
+
                 except Exception as e:
                         logging.error("data preprocess : ValidateColumnName : GET Method : Exception :" + str(e))
                         logging.error("data preprocess : ValidateColumnName : GET Method : "+ traceback.format_exc())
