@@ -154,11 +154,6 @@ class MenuClass(APIView):
                                 return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
 
-
-
-
-       
-
 class ActivityTimelineClass(APIView):
         
         def post(self,request,formate=None):
