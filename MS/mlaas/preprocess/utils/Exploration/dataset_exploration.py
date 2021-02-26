@@ -65,49 +65,20 @@ class ExploreClass:
         logging.info("data preprocessing : ExploreClass : get_attribute_datatype : execution stop")    
         return attribute_type
     
-    def get_dataset_statistics(self,DBObject,connection,dataset_id,schema_id):
+    def get_dataset_statistics(self,data_df):
         """
             This class returns all the statistics for the given dataset.
             
             Args:
-                DBObject ([object]): [object of database class.],
-                connection ([object]): [connection object of database class.],
-                dataset-id ([intiger]): [id of the dataset.]
-            
+                data_df([pandas.DataFrame]): [Dataframe containing raw data.]
+                
             Returns:
                 stats_df ([pandas.Dataframe]): [Dataframe containing all the statistics.]
         """
         
-        #? getting the name of the dataset_tbl
-        table_name,_,_ = dc.make_dataset_schema()
-        
-        #? Getting user_name and dataset_visibility
-        sql_command = f"SELECT USER_NAME,DATASET_VISIBILITY,DATASET_TABLE_NAME,no_of_rows FROM {table_name} WHERE dataset_id = '{dataset_id}'"
-        visibility_df = DBObject.select_records(connection,sql_command) 
-        if len(visibility_df) != 0: 
-            user_name,dataset_visibility = visibility_df['user_name'][0],visibility_df['dataset_visibility'][0]
-        #? No entry for the given dataset_id        
-        else: return 1
-        
-        #? Getting CSV table name
-        dataset_table_name = visibility_df['dataset_table_name'][0]
-        dataset_table_name = '"'+ dataset_table_name+'"'
-        
-        #? changing the database schema for the public databases
-        if dataset_visibility == 'public':
-            user_name = 'public'
-        
-
-        query = DBObject.get_query_string(connection,schema_id)
-        #? Getting all the data
-        sql_command = f"SELECT {str(query)} FROM {user_name}.{dataset_table_name}"
-        data_df = DBObject.select_records(connection,sql_command)    
-        data_df = data_df.replace([''],np.NaN)
-        
         #? Logical Code Begins
         try:
             
-            #! Temporary solution to 1 column dataframe problem 
             added_col = False
             if (type(data_df) is pd.Series):
                 arr = [0]*len(data_df)
