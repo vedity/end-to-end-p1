@@ -20,6 +20,7 @@ from ingest.utils.dataset import dataset_creation
 from .Exploration import dataset_exploration as de
 from .schema import schema_creation as sc
 from .cleaning import noise_reduction as nr
+from .cleaning import cleaning
 
 #* Library Imports
 import logging
@@ -34,9 +35,10 @@ LogObject.log_setting()
 
 logger = logging.getLogger('preprocessing')
 
+#* Object Definition
 dc = dataset_creation.DatasetClass()
 
-class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
+class PreprocessingClass(sc.SchemaClass,de.ExploreClass,cleaning.CleaningClass):
     def __init__(self,database,user,password,host,port):
         """This constructor is used to initialize database credentials.
            It will initialize when object of this class is created with below parameter.
@@ -672,6 +674,11 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
         except Exception as exc:
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc))
             return OperationOrderingFailed(500).msg
+        
+        
+    #* PREPROCESSING FUNCTIONS
+    
+    
     
 
 
