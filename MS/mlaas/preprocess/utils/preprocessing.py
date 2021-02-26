@@ -170,7 +170,7 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
             It is used to get the column names.
             
             Args:
-                schema_id(Intiger):
+                schema_id(Intiger): schema id of the associated dataset.
                 
             Returns:
                 column_names(List of Strings): List of Name of the columns.
@@ -196,7 +196,7 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
             
             return column_names.tolist()
             
-        except (DatabaseConnectionFailed) as exc:
+        except (DatabaseConnectionFailed,EntryNotFound) as exc:
             logging.error("data preprocessing : PreprocessingClass : get_col_names : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_col_names : " +traceback.format_exc())
             return exc.msg
@@ -379,8 +379,13 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
                 raise DatabaseConnectionFailed(500)
 
             num_cols = [data_df.columns.get_loc(i) for i in data_df._get_numeric_data().columns]
-            logging.info("========>"+str(num_cols)+str(data_df._get_numeric_data().columns.tolist()))
             data_types, missing_val_list, noise_list = self.retrive_preprocess_cache(DBObject,connection,schema_id)
+            data_types = data_types[1:]
+            missing_val_list = missing_val_list[1:]
+            noise_list = noise_list[1:]
+            
+            missing_val_list = [bool(i) for i in missing_val_list]
+            noise_list = [bool(i) for i in noise_list]
             
             #? Logical function starts
             try:
