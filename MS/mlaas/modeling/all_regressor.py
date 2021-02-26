@@ -15,10 +15,10 @@ import mlflow
 import mlflow.sklearn
 import uuid 
 import logging
-# from database import *
-
-
-
+<<<<<<< HEAD
+from database import *
+from common.utils.database import db
+from sklearn.model_selection import train_test_split
 # ## Get Database Connection
 # DBObject=db.DBClass()     
 # connection,connection_string=DBObject.database_connection(database,user,password,host,port) 
@@ -42,7 +42,7 @@ def get_dataset_ids(**kwargs):
     
 def get_dataset_info(**kwargs):
     print("still in process")
-
+>>>>>>> development
 
 
 
