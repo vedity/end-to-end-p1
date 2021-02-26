@@ -379,6 +379,7 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
                 raise DatabaseConnectionFailed(500)
 
             num_cols = [data_df.columns.get_loc(i) for i in data_df._get_numeric_data().columns]
+            logging.info("========>"+str(num_cols)+str(data_df._get_numeric_data().columns.tolist()))
             data_types, missing_val_list, noise_list = self.retrive_preprocess_cache(DBObject,connection,schema_id)
             
             #? Logical function starts
