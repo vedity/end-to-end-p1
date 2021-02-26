@@ -28,5 +28,6 @@ urlpatterns = [
     #ValidateColumnName
     path('mlaas/preprocess/schema/column/name/exist/',ValidateColumnName.as_view()),
 
-    
+    path('mlaas/preprocess/cleanup/get_col_name/',GetColumnListClass.as_view()),
+
 ]
