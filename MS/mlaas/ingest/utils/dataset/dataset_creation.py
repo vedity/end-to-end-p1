@@ -611,7 +611,6 @@ class DatasetClass:
                 logging.info(str(sql_command)+ " public")
             
             #form the new table based on te existing table 
-            
             create_status = DBObject.update_records(connection,sql_command)
 
             #update the dataset table name of the raw dataset
