@@ -7,9 +7,16 @@
 */
 '''
 
+#* Importing Libraries
 import pandas as pd
 import numpy as np
 from collections import Counter
+
+#* Relative Imports
+from . import missing_value_handling as mvh
+
+#* Initializing Objects
+MVH_OBJECT = mvh.MissingValueClass()
 
 class RemoveNoiseClass:
     
@@ -133,14 +140,95 @@ class RemoveNoiseClass:
 
             return noisy, cleanable, valid_str
         
-    def remove_noise(self, series, noisy_cols = None):
-        pass
-    
-    def replace_noise(self, series, noisy_cols = None, operation_type = 0, val = None):
-        pass
-    
-    def to_numeric_col(self, Series, string_cols):
-        pass
-    
+    def drop_noise(self, series):
+        '''
+            Takes in noisy series & replaces the string noise with the `np.NaN` value.
+            
+            Args:
+            -----
+            series (`pandas.Series`): the column data.
+            
+            Returns:
+            -------
+            series (`pandas.Series`): the column data with noise replaced with `np.NaN`.
+        '''
+        
+        series = pd.to_numeric(series, errors = 'coerce')
+        
+        return series
+        
+    def remove_noise(self, dataframe, column_id = None):
+        '''
+            Removes the rows where given columns contains noise.
+            
+            Args:
+            -----
+            dataframe (`pandas.DataFrame`): Whole dataframe.
+            column_id (`List`) (default = `None`): List containing the column ids. if `None` then takes whole dataframe.
+            
+            Returns:
+            --------
+            dataframe (`pandas.DataFrame`): Dataframe with noise removed.
+        '''
+        
+        if column_id:
+            for i in column_id:
+                dataframe.iloc[:,i] = self.drop_noise(dataframe.iloc[:,i])
+        else:
+            for i in dataframe.columns:
+                dataframe.iloc[:,i] = self.drop_noise(dataframe.iloc[:,i])
+        
+        return MVH_OBJECT.discard_missing_values(dataframe= dataframe, column_id= column_id)
+        
+    def replace_noise(self, series, operation_type = 0, val = np.NaN):
+        '''
+            This function replaces the noise by performing the operation you specified on given columns.
+            
+            Args:
+            -----
+            series (`pandas.Series`): the whole series.
+            operation_type (`Intiger`): Type of the operation.
+                - 0 : Replace with Mean.
+                - 1 : Replace with Median.
+                - 2 : Replace with Mode.
+                - 3 : Replace with End of Distribution.
+                - 4 : Replace with a random sample.
+                - 5 : Replace with an arbitrary value. \n
+            val (`Intiger`) (default = `numpy.NaN`): Value to be replaced in place of the noise in the case of the arbitrary value imputation.  
+            
+            Returns:
+            --------
+            series (`pandas.Series`): Updated series.
+        '''
+        
+        #? Replacing noise with NaN
+        series = self.drop_noise(series)
+        
+        if operation_type == 0:
+            #? Handling with Mean
+            series = MVH_OBJECT.mean_imputation(series)
+        
+        elif operation_type == 1:
+            #? Handling with Median
+            series = MVH_OBJECT.median_imputation(series)
+        
+        elif operation_type == 2:
+            #? Handling with Mode
+            series = MVH_OBJECT.mode_imputation(series)
+        
+        elif operation_type == 3:
+            #? Handling with end of distribution
+            series = MVH_OBJECT.end_of_distribution(series)
+        
+        elif operation_type == 4:
+            #? Handling with random sample imputation
+            series = MVH_OBJECT.random_sample_imputation(series)
+        
+        elif operation_type == 5:
+            #? Handling with Arbitrary value
+            series = MVH_OBJECT.add_missing_category(series, val)
+        
+        return series
+        
     def to_string_col(self, Series, cols):
         pass
