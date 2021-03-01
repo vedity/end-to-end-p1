@@ -21,6 +21,7 @@ from .Exploration import dataset_exploration as de
 from .schema import schema_creation as sc
 from .cleaning import noise_reduction as nr
 from .cleaning import cleaning
+from .Transformation import transformation as trs
 
 #* Library Imports
 import logging
@@ -38,7 +39,7 @@ logger = logging.getLogger('preprocessing')
 #* Object Definition
 dc = dataset_creation.DatasetClass()
 
-class PreprocessingClass(sc.SchemaClass,de.ExploreClass,cleaning.CleaningClass):
+class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass, trs.TransformationClass):
     def __init__(self,database,user,password,host,port):
         """This constructor is used to initialize database credentials.
            It will initialize when object of this class is created with below parameter.
@@ -756,14 +757,14 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,cleaning.CleaningClass):
                     data_df = self.repl_outliers_med_z_score(data_df, col)
                 elif op == 22:
                     data_df = self.apply_log_transformation(data_df, col)
-                # elif op == 23:
-                #     data_df = self.mean_imputation(data_df, col)
-                # elif op == 24:
-                #     data_df = self.mean_imputation(data_df, col)
-                # elif op == 25:
-                #     data_df = self.mean_imputation(data_df, col)
+                elif op == 23:
+                    data_df = self.standard_scaling(data_df)
+                elif op == 24:
+                    data_df = self.min_max_scaling(data_df)
+                elif op == 25:
+                    data_df = self.robust_scaling(data_df)
                 # elif op == 26:
-                #     data_df = self.mean_imputation(data_df, col)
+                #     data_df = self.custom_scaling(data_df, mx, mn)
                 # elif op == 27:
                 #     data_df = self.mean_imputation(data_df, col)
                 # elif op == 28:
