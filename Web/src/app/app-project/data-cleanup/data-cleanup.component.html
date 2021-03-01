@@ -1,6 +1,7 @@
 <div class="page-title-box d-flex align-items-center justify-content-between">
     <h4 class="mb-0 font-size-18">Data Cleanup</h4>
-    <button type="button" class="btn btn-success modeling-btn" (click)="smallModal(modelingmodal)">Modeling</button>
+    <a class="btn btn-success modeling-btn" [routerLink]="['/modeling']" style="right: 290px" [state]="{selectproject:false}"> Modeling</a>
+    <a class="btn btn-success modeling-btn" [routerLink]="['/modeling']" [state]="{dataset_id: dataset_id ,project_id:project_id,selectproject:true}">Modeling</a>
 </div>
 <div class="row">
     <div class="col-md-12">
@@ -236,43 +237,3 @@
         </div>
     </div>
 </div>
-
-<ng-template #modelingmodal let-modal class="modeling-modal">
-    <div class="modal-header">
-        <h5 class="modal-title mt-0">Create Experiment</h5>
-        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-hidden="true">×</button>
-    </div>
-    <div class="modal-body">
-        <!-- <div class="form-group">
-            <div class="custom-control custom-checkbox mb-3">
-                <input type="checkbox" class="custom-control-input" id="customCheck1">
-                <label class="custom-control-label" for="customCheck1">Keep private</label>
-            </div>
- 
-        </div> -->
-        <form #f="ngForm">
-
-            <div class="form-group">
-                <label for="example-text-input" class="col-form-label">Experiment Name<span class="required-label">&nbsp;*</span></label>
-
-                <input class="form-control" required type="text" [(ngModel)]="data.experiment_name" name="experiment_name" #experiment_name="ngModel" maxlength="200">
-                <div class="invalid-feedback" *ngIf="experiment_name.errors?.required && (experiment_name.dirty || experiment_name.touched)">
-                    <span *ngIf="experiment_name.errors?.required && (experiment_name.dirty || experiment_name.touched)" class="text-red">Please enter experiment name</span>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="example-text-input" class="col-form-label">Experiment Description<span class="required-label">&nbsp;*</span></label>
-                <textarea class="form-control" maxlength="500" [(ngModel)]="data.experiment_desc" name="experiment_desc" #experiment_desc="ngModel" required></textarea>
-                <div class="invalid-feedback" *ngIf="experiment_desc.errors?.required && (experiment_desc.dirty || experiment_desc.touched)">
-                    <span *ngIf="experiment_desc.errors?.required && (experiment_desc.dirty || experiment_desc.touched)" class="text-red">Please enter description</span>
-                </div>
-            </div>
-
-            <div class="button-items text-center">
-                <button class="btn btn-success" [disabled]="!f.form.valid" (click)="gotoModeling()" (click)="modal.dismiss('Cross click')">Next</button>
-            </div>
-        </form>
-
-
-    </div>
-</ng-template>

@@ -24,9 +24,9 @@ from ...model_experiments import model_experiment
 from sklearn.model_selection import train_test_split
 
 # from ....split_data import SplitData
-
-
 from common.utils.logger_handler import custom_logger as cl
+
+
 
 user_name = 'admin'
 log_enable = True
@@ -35,6 +35,9 @@ LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
 
 logger = logging.getLogger('model_identifier')
+
+
+
 
 class RegressionClass:
     """Regression Class, stores the implementation of all the regression model.
@@ -75,6 +78,9 @@ class RegressionClass:
             
         
         logging.info("modeling : RegressionClass : all_regression_model : execution end")
+        
+        
+        
         
         
     # This is for manually model run    

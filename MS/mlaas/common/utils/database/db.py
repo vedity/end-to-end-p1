@@ -8,22 +8,32 @@
  Vipul Prajapati          18-DEC-2020           1.3           Added functionality for create schema.
 */
 '''
+#Python library imports
 import psycopg2
 import psycopg2.extras as extras
 import pandas as pd 
-from sqlalchemy import create_engine
+import numpy as np
 import json
 import logging
+import traceback
+from sqlalchemy import create_engine
+
+#database variable file import
+from database import *
+from ingest.utils.dataset import dataset_creation as dc
+
+#Common utils import
 from common.utils.logger_handler import custom_logger as cl
 from common.utils.exception_handler.python_exception.common.common_exception import *
 
 user_name = 'admin'
 log_enable = True
-
 LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
-
 logger = logging.getLogger('dataset_creation')
+
+#? Dataset Class Object
+DatasetObject = dc.DatasetClass()
 
 class DBClass:
 
@@ -36,8 +46,9 @@ class DBClass:
         Returns:
             [dataframe]: [it will return read csv file data in the form of dataframe.]
         """
-        read_df=pd.read_csv(file_path, na_filter= False) #  Read csv file and load data into dataframe.
+        read_df=pd.read_csv(file_path, na_filter= False,encoding = 'utf8') #  Read csv file and load data into dataframe.
         column_name_list = read_df.columns.values.tolist()
+    
         column_list = []
         for name in column_name_list:
             if read_df.dtypes.to_dict()[name] == 'object':
@@ -147,7 +158,7 @@ class DBClass:
         
     
     
-    def insert_records(self,connection,table_name,row_tuples,cols):
+    def insert_records(self,connection,table_name,row_tuples,cols,Flag=0):
         """This function is used to insert data into database table.
 
         Args:
@@ -160,22 +171,31 @@ class DBClass:
             [integer]: [it will return status of the data insertion. if successfully then 0 else 1.]
         """
         
+
+
         cols = cols # Get columns name for database insert query.
         tuples = row_tuples # Get record for database insert query.
-        logging.info("cols"+str(cols))
-        query = "INSERT INTO %s(%s) VALUES %%s" % (table_name, cols) # Make query
-        
+
         cursor = connection.cursor() # Open cursor for database.
         try:
-            extras.execute_values(cursor, query, tuples) # Excute insert query.
+            if Flag == 0 :
+                query = "INSERT INTO %s(%s) VALUES %%s " % (table_name, cols) # Make query
+                extras.execute_values(cursor, query, tuples) # Excute insert query.
+                index = 0
+            else:
+                query = "INSERT INTO %s(%s) VALUES %%s RETURNING index" % (table_name, cols) # Make query
+                extras.execute_values(cursor, query, tuples) # Excute insert query.
+                index = [row[0] for row in cursor.fetchall()][0]
+            
+            status = 0
             connection.commit() # Commit the changes.
             cursor.close()
-            return 0 # If successfully inserted.
+            return status,index # If successfully inserted.
         except (Exception, psycopg2.DatabaseError) as error:
             connection.rollback() # Rollback the changes.
             cursor.close() # Close the cursor.
             logging.info(str(error))
-            return 1 # If failed.
+            return 1,None # If failed.
 
     
     def select_records(self,connection,sql_command):
@@ -188,11 +208,13 @@ class DBClass:
         Returns:
             [dataframe]: [it will return dataframe of the selected data from the database table.]
         """
-        cursor = connection.cursor() # Open the cursor.
         sql_command = sql_command # Get sql command.
         try :
-            data = pd.read_sql(sql_command, connection) # Read data from database table.
-            self.update_records(connection,'commit')
+           
+            connection_string = "postgresql://" + user + ":" + password + "@" + host + ":" + port + "/" + database # Make database connection string.
+            engine = create_engine(connection_string) # Create database engine.
+            data = pd.read_sql_query(sql_command, engine) #method of sqlalchemy
+    
             return data   
         except(Exception, psycopg2.DatabaseError) as error:
             return None
@@ -209,6 +231,7 @@ class DBClass:
         Returns:
             [integer]: [it will return stauts of deleted record. if successfully then 0 else 1.]
         """
+        logging.info("--->"+str(connection))
         cursor = connection.cursor() # Open the cursor.
         sql_command = sql_command # Get delete query
         try:
@@ -219,7 +242,7 @@ class DBClass:
             connection.rollback() # Rollback the changes.
             cursor.close() # Close the cursor.
             status = 1 # If failed
-
+            logger.info(str(error) + " Error in delete record function")
         return status
 
     def update_records(self,connection,sql_command):
@@ -442,7 +465,7 @@ class DBClass:
             logging.info("data preprocess : SchemaClass : get_query_string : execution start")
             # sql command to get details from schema table  based on  schema id 
             sql_command = "select column_name,case when changed_column_name = '' then column_name else changed_column_name end column_list  from mlaas.schema_tbl where schema_id ="+str(schema_id)+"and column_attribute !='Ignore' order by index"
-            
+            logging.info(str(sql_command) + " get_query_string")
             #execute sql commnad if data exist then return dataframe else return None
             schema_df = self.select_records(connection,sql_command) 
 
@@ -581,6 +604,7 @@ class DBClass:
                 [Dataframe] : [return the dataframe of dataset table ]
         '''
         sql_command = "SELECT dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows,dataset_desc from mlaas.dataset_tbl Where dataset_id =" + str(dataset_id)
+        logging.info(str(sql_command) + " command")
         dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         return dataset_df 
     
@@ -662,21 +686,79 @@ class DBClass:
             
             #sql command to get Raw dataset id based on the dataset_name and page_name 
             sql_Command = "SELECT dataset_id,dataset_table_name from mlaas.dataset_tbl where dataset_name='"+str(dataset_name)+"' and page_name ='schema mapping'"
-            
+            logging.info(str(sql_Command) + " query")
+
             #execute the sql command and get te dataframe if found else None
             dataframe = self.select_records(connection,sql_Command)
             
             #get the dataset id
             dataset_id = int(dataframe['dataset_id'][0])
             table_name = str(dataframe['dataset_table_name'][0])
+            logging.info(str(dataset_id) + " query")
+            logging.info(str(table_name) + " query")
 
             return dataset_id,table_name
         except Exception as exc:
             return exc,None
 
+    def get_dataset_df(self, connection, dataset_id, schema_id = None):
+        '''
+            Returns a dataframe containing data of given dataset_id & schema_id.  
+            If schema_id is not given then it returns whole datatable without schema changes. 
+            
+            Args:
+                connection(Object): Postgres Connection Object.
+                dataset_id(Intiger): id of the dataset.
+                schema_id(Intiger) [default None]: id of the dataset in the schema table.
+                
+            Returns:
+                data_df(pandas.DataFrame): Dataframe containing the data.
+        '''
+        
+        try:
+            logging.info("database : DBClass : get_dataset_df : execution start")
+            
+            #? getting the name of the dataset_tbl
+            table_name,_,_ = DatasetObject.make_dataset_schema()
+            
+            #? Getting user_name and dataset_visibility
+            sql_command = f"SELECT USER_NAME,DATASET_VISIBILITY,DATASET_TABLE_NAME,no_of_rows FROM {table_name} WHERE dataset_id = '{dataset_id}'"
+            visibility_df = self.select_records(connection,sql_command) 
+            if len(visibility_df) != 0: 
+                user_name,dataset_visibility = visibility_df['user_name'][0],visibility_df['dataset_visibility'][0]
+            #? No entry for the given dataset_id        
+            else: raise EntryNotFound(500)
+            
+            #? Getting CSV table name
+            dataset_table_name = visibility_df['dataset_table_name'][0]
+            dataset_table_name = '"'+ dataset_table_name+'"'
+            
+            #? changing the database schema for the public databases
+            if dataset_visibility == 'public':
+                user_name = 'public'
+            
+            #? Get Whole table
+            if schema_id is None:
+                sql_command = f"SELECT * FROM {user_name}.{dataset_table_name}"
+            
+            #? Get table with schema changes applied
+            else:
+                query = self.get_query_string(connection,schema_id)
+                #? Getting all the data
+                sql_command = f"SELECT {str(query)} FROM {user_name}.{dataset_table_name}"
+            
+            data_df = self.select_records(connection,sql_command)    
+            data_df = data_df.replace([''],np.NaN)
+            
+            logging.info("database : DBClass : get_dataset_df : execution stop")
 
-
-
+            return data_df
+            
+        except (EntryNotFound) as exc:
+            logging.error("database : DBClass : get_dataset_df : Exception " + str(exc.msg))
+            logging.error("database : DBClass : get_dataset_df : " +traceback.format_exc())
+            return exc.msg
+        
 
 
      

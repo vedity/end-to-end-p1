@@ -49,8 +49,8 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-form-label">Dataset Description<span class="required-label">&nbsp;*</span></label>
-                    <textarea class="form-control" maxlength="500" [(ngModel)]="data.datasetdescription" name="datasetdescription" #datasetdescription="ngModel" required></textarea>
+                    <label class="col-form-label">Dataset Description</label>
+                    <textarea class="form-control" maxlength="500" [(ngModel)]="data.datasetdescription" [disabled]="selectchangedisablevalidation" name="datasetdescription" #datasetdescription="ngModel"></textarea>
                     <div class="invalid-feedback" *ngIf="datasetdescription.errors?.required && (datasetdescription.dirty || datasetdescription.touched)">
                         <span *ngIf="datasetdescription.errors?.required && (datasetdescription.dirty || datasetdescription.touched)" class="text-red">Please enter description</span>
                     </div>

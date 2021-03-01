@@ -27,20 +27,23 @@ LogObject.log_setting()
 logger = logging.getLogger('Schema_creation')
 json_obj = JsonFormatClass()  # Initialize the JsonFormat Class
 timeline_Obj=activity_timeline.ActivityTimelineClass(database,user,password,host,port) #initialize the ActivityTimeline Class
+
 class SchemaClass:
             
     def get_schema(self):
         # schema table name
         table_name = 'mlaas.schema_tbl'
         # Columns for schema table
-        cols = 'schema_id,column_name,changed_column_name,data_type,column_attribute' 
+        cols = 'schema_id,column_name,changed_column_name,data_type,column_attribute,missing_flag,noise_flag' 
         # Schema of schema_table
         schema ="index bigserial,"\
                 "schema_id bigint,"\
                 "column_name  text,"\
                 "changed_column_name  text,"\
                 "data_type  text,"\
-                "column_attribute  text"
+                "column_attribute  text,"\
+                "missing_flag text,"\
+                "noise_flag text"
                 
         return table_name,cols,schema
     
@@ -73,11 +76,13 @@ class SchemaClass:
 
             #check the dataset visibility if private append the user name with  dataset table name 
             #dataset visibility if public assign table name as  dataset table name we get
+
             if dataset_visibility =="private":
-                table_name=user_name+"."+dataset_table_name
+                table_name=user_name+'."'+dataset_table_name+'"'
+                
             else:
                 
-                table_name = dataset_table_name
+                table_name = 'public."'+dataset_table_name+'"'
             
             #get the column list and datatype  based on given table name
             column_name_list,predicted_datatype = self.get_attribute_datatype(connection,DBObject,table_name)
@@ -110,7 +115,7 @@ class SchemaClass:
             logging.info("data preprocess : SchemaClass : get_attribute_datatype : execution start")
 
             sql_command = "SELECT * FROM "+table_name #sql query
-
+            logging.info(str(sql_command)+ "command")
             csv_data = DBObject.select_records(connection,sql_command) #execute sql commnad if data exist then return data else return None
             
             if csv_data is None or len(csv_data) == 0:
@@ -128,7 +133,6 @@ class SchemaClass:
 
                 unique_values = list(set(column_data)) #get the set of unique values convert into list
                 
-                
                 if (len(unique_values)/no_of_rows) < 0.2 :
                     if "," in str(column_data[1]): #check if the comma value present
                         value = "categorical list"
@@ -137,7 +141,9 @@ class SchemaClass:
                 else:
                     value =  "false" #check condition if condition true then set as categorical else false
                 if value =="false": 
+                    
                     datatype_value = csv_data.dtypes.to_dict()[column_name] #get datatype specified for perticular column name
+                   
                     if datatype_value in ['float64','float32','int32','int64']: #check if int,float,double present then set it "numerical"
                         value = "numerical"
 
@@ -180,23 +186,44 @@ class SchemaClass:
 
             for count in range(len(schema_data)):
 
-                    #check if change column and  prev column are same or not
-                    if schema_data[count]["change_column_name"] == schema_data[count]["column_name"]: 
-                        raise SameColumnNameFound(500)
+                if schema_data[count]["column_name"] != 'index':
 
-                    change_col_name = str(schema_data[count]["change_column_name"])
+                        #check if change column and  prev column are same or not
+                        if schema_data[count]["change_column_name"] == schema_data[count]["column_name"]: 
+                            raise SameColumnNameFound(500)
 
-                    if change_col_name.find('(') !=-1 or  change_col_name.find(')') !=-1 or change_col_name.find('%')!=-1:
-                        raise InvalidColumnName(500)
+                        change_col_name = str(schema_data[count]["change_column_name"])
 
-                    index_list.append(schema_data[count]["index"]) #append  index 
+                        if change_col_name.find('(') !=-1 or  change_col_name.find(')') !=-1 or change_col_name.find('%')!=-1:
+                            raise InvalidColumnNames(500)
+        
+                        change_column_name.append(schema_data[count]["change_column_name"]) #append change column name
 
-                    change_column_name.append(schema_data[count]["change_column_name"]) #append change column name
+                        index_list.append(schema_data[count]["index"]) #append  index 
 
-                    column_name_list.append(schema_data[count]["column_name"]) #append column_name
+                        column_name_list.append(schema_data[count]["column_name"]) #append column_name
 
-                    column_attribute_list.append(schema_data[count]["column_attribute"]) #append attribute type
+                        column_attribute_list.append(schema_data[count]["column_attribute"]) #append attribute type
+
+            # logging.info(str(change_column_name)+" change_column_name")
+            # logging.info(str(column_name_list)+" column_name_list")
+            # logging.info(str(column_attribute_list)+" column_attribute_list")
+
+            #logging.info(str(change_column_name)+" column_attribute_list")
+            for value in change_column_name:
+                if value != '':
+                    if change_column_name.count(value) > 1 :
+                        raise ChangeColumnNameSame(500)
             
+            column_count_value,ignore_count_value = self.get_count_value(DBObject,connection,schema_id)
+
+
+            logging.info(str(column_attribute_list)+" column_attribute_list")
+
+            if (column_count_value-ignore_count_value)== column_attribute_list.count('Ignore') :
+                raise IgnoreColumns(500)
+
+
             #set the datatype list none
             column_datatype_list=None
             
@@ -223,7 +250,7 @@ class SchemaClass:
             logging.info("data preprocess : SchemaClass : save_schema : execution stop")
             return schema_status
 
-        except (SchemaUpdateFailed,TableCreationFailed,SameColumnNameFound,InvalidColumnName) as exc:
+        except (SchemaUpdateFailed,TableCreationFailed,SameColumnNameFound,InvalidColumnNames,ChangeColumnNameSame,IgnoreColumns) as exc:
             logging.error("data preprocess : ingestclass : save_schema : Exception " + str(exc.msg))
             logging.error("data preprocess : ingestclass : save_schema : " +traceback.format_exc())
             return exc.msg
@@ -273,17 +300,20 @@ class SchemaClass:
                 activity=""
 
                 if id==5:
-                    
-                    if len(change_column_lst)>2:
+                    column_string = " "
+                    column_string = activity_description+" <br/>"
+                    for count in range(len(change_column_lst)):
+                        column_string += str(column_lst[count])+" <-> "+str(change_column_lst[count])+"<br/> "
+                    # if len(change_column_lst)>2:
+                        
+                    #     change_column_name=",".join(change_column_lst[:len(change_column_lst)-1])+' and '+change_column_lst[-1]+' Respectively.'
+                    #     column_name=",".join(column_lst[:len(column_lst)-1])+' and '+column_lst[-1]+''
+                    # else:
+                    #     change_column_name=",".join(change_column_lst)
+                    #     column_name=",".join(column_lst)
 
-                        change_column_name=",".join(change_column_lst[:len(change_column_lst)-1])+' and '+change_column_lst[-1]+' Respectively.'
-                        column_name=",".join(column_lst[:len(column_lst)-1])+' and '+column_lst[-1]+''
-                    else:
-                        change_column_name=",".join(change_column_lst)
-                        column_name=",".join(column_lst)
-
-                    activity = activity_description.replace('*',column_name).replace('$',dataset_name).replace('?',change_column_name)+"," 
-
+                    # activity = activity_description.replace('*',column_name).replace('$',dataset_name)
+                    activity = column_string
                 elif id==6:
 
                     column_target=",".join(target_column_lst)
@@ -296,12 +326,8 @@ class SchemaClass:
                 # length will minus from the string to avoid comma(,)
                 activity_description = activity[0:len(activity)-1]
 
-                #get the time stamp
-                timestamp = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
-
-
                 #insert data into activity table
-                status = timeline_Obj.insert_user_activity(id,user_name,project_id,dataset_id,activity_description,timestamp)
+                status = timeline_Obj.insert_user_activity(id,user_name,project_id,dataset_id,activity_description)
                 
                 #return 1 if insertion failed 
                 if status==False:
@@ -362,7 +388,7 @@ class SchemaClass:
             logging.error("data preprocess : SchemaClass : get_column_list : " +traceback.format_exc())
             return str(exc)
 
-    def update_dataset_schema(self,DBObject,connection,schema_id,column_name_list,column_datatype_list,change_column_name=None,column_attribute_list=None,index_list=None): ###
+    def update_dataset_schema(self,DBObject,connection,schema_id,column_name_list,column_datatype_list,change_column_name=None,column_attribute_list=None,index_list=None,missing_flag=None,noise_flag=None): ###
         """
         this function used to insert the records into a table if not exist otherwise it will update the existing schema data record from the table.
         Args:
@@ -389,7 +415,6 @@ class SchemaClass:
 
                 #check if values in schema table,data is exist or not. If exist then update the values else insert new record
                 status = self.is_existing_schema(DBObject,connection,schema_id)
-
                 if status == True  :
                     new_cols_lst = change_column_name
                     cols_attribute_lst = column_attribute_list
@@ -411,15 +436,15 @@ class SchemaClass:
                     prev_cols_lst = column_name_list
                     new_cols_lst = ''
                     cols_attribute_lst = 'Select'
-                    for prev_col,new_dtype in zip(prev_cols_lst,prev_dtype_lst): 
+                    for prev_col,new_dtype,missing_value,noise_value in zip(prev_cols_lst,prev_dtype_lst,missing_flag,noise_flag): 
 
-                        row = schema_id,prev_col,new_cols_lst,new_dtype,cols_attribute_lst
+                        row = schema_id,prev_col,new_cols_lst,new_dtype,cols_attribute_lst,str(missing_value),str(noise_value)
 
                         # Make record for project table
                         row_tuples = [tuple(row)] 
                         
                         #insert the records into schema table
-                        status = DBObject.insert_records(connection,schema_table_name,row_tuples,cols) 
+                        status,_ = DBObject.insert_records(connection,schema_table_name,row_tuples,cols) 
                         if status ==1:
                             raise SchemaInsertionFailed(500)
 
@@ -485,7 +510,7 @@ class SchemaClass:
             table_name,_,_ = self.get_schema()
             
             # sql command to get details from schema table  based on  schema id 
-            sql_command = "select case when changed_column_name='' then column_name else changed_column_name end column_list,index,data_type,column_attribute  from mlaas.schema_tbl where schema_id="+str(schema_id)+" and column_attribute !='Ignore' order by index"           
+            sql_command = "select case when changed_column_name ='' then column_name else changed_column_name end column_list,index,data_type,column_attribute  from "+str(table_name)+" where schema_id="+str(schema_id)+" and column_attribute !='Ignore' order by index"           
         
             #execute sql commnad if data exist then return dataframe else return None
             schema_df = DBObject.select_records(connection,sql_command) 
@@ -501,10 +526,38 @@ class SchemaClass:
             
             logging.info("data preprocess : SchemaClass : get_schema_data : execution stop")
             return schema_data
+
         except (SchemaDataNotFound) as exc:
             logging.error("data preprocess : SchemaClass : get_schema_data : Exception " + str(exc.msg))
             logging.error("data preprocess : SchemaClass : get_schema_data : " +traceback.format_exc())
             return exc.msg
     
+    def get_count_value(self,DBObject,connection,schema_id):
+        """
+        function used to get the count values from the schema table of column name and "Ignore" attribute type
+
+        Args:
+            schema_id[(Integer)] : [Id of the schema table]
+
+        Return:
+            [Integer,Integer] : [return the count value of column name,return the count value of Ignore type in column attribute ]
+        """
+        #get the table name and columns,and schema of the table
+        schema_table_name,_,_ = self.get_schema()
+
+        #get the total column count and Ignore count for the perticular schema id
+        sql_command = "select count(schema_id) as column_count,(select count(column_attribute) from "+str(schema_table_name)+" where schema_id ='"+str(schema_id)+"' and column_attribute ='Ignore') as ignore_count from "+str(schema_table_name)+" where schema_id ='"+str(schema_id)+"'"
+        
+        #Execute te sql command
+        dataframe = DBObject.select_records(connection,sql_command)
+
+        #get the total count value where index column will not be considered
+        column_count_value,ignore_count_value = int(dataframe['column_count'][0])-1,int(dataframe['ignore_count'][0])
+
+        return column_count_value,ignore_count_value
+
+
+
+
     
         

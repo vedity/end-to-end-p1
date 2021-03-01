@@ -82,9 +82,50 @@ class TableDataNotFound(Exception):
         return (self.msg)
 
 class InvalidColumnNames(Exception):
-    """  Value of column name and change column name cannot be same"""
+    """ InvalidColumnNames """
     def __init__(self,status_code):
-        self.msg = " Column name contains '(' , ')'  or '%' "
+        self.msg = " Column name contains '('  ')'  or '%' "
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)
+
+class OperationOrderingFailed(Exception):
+    """  Function that Reorders the operation failed."""
+    def __init__(self,status_code):
+        self.msg = " Operation Reordering Failed."
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)
+
+
+class ChangeColumnNameSame(Exception):
+    """ Raise exception where Change column name  are been same """
+    def __init__(self,status_code):
+        self.msg = "Column name already assign to other column"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)
+
+class IgnoreColumns(Exception):
+    """ All column attribute cannot be Ignored """
+    def __init__(self,status_code):
+        self.msg = "All column cannot be Ignored"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)
+    
+class GetDataDfFailed(Exception):
+    """ get_data_df function failed to return a dataframe. """
+    def __init__(self,status_code):
+        self.msg = "get_data_df function failed."
         self.status_code = status_code
         self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
      

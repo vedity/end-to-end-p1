@@ -51,6 +51,7 @@ class UserLoginClass(APIView):
                         logging.info("Common  : UserLoginClass : GET Method : execution start")
                         user_name = request.query_params.get('user_name') #get user_name
                         password = request.query_params.get('password') #get password
+                        logging.info("--->"+str(connection))
                         check_user_auth_tbl=DBObject.is_existing_table(connection,'user_auth_tbl','mlaas') #check user_auth_tbl exists
                         if check_user_auth_tbl == "False":
                                 user_df=DBObject.read_data('common/user_registration_tbl.csv') #read user_registration_tbl.csv
@@ -63,6 +64,10 @@ class UserLoginClass(APIView):
                         if check_activity_master_tbl == "False":
                                 activity_df=DBObject.read_data('common/activity_master_tbl.csv')#read activity_master_tbl.csv
                                 status=DBObject.load_df_into_db(connection_string,'activity_master_tbl',activity_df,'mlaas') #creare table activity_master_tbl         
+                        check_parent_activity_tbl=DBObject.is_existing_table(connection,'parent_activity_tbl','mlaas')#check activity_master_tbl exists
+                        if check_parent_activity_tbl == "False":
+                                parent_activity_df=DBObject.read_data('common/parent_activity_tbl.csv')#read parent_activity_tbl.csv
+                                status=DBObject.load_df_into_db(connection_string,'parent_activity_tbl',parent_activity_df,'mlaas') #creare table parent_activity_tbl         
                         user_status = DBObject.user_authentication(connection,user_name,password) #check the user user authenticated or not
                         if user_status != True:
                                 status_code,error_msg=json_obj.get_Status_code(user_status)
@@ -149,11 +154,6 @@ class MenuClass(APIView):
                                 return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
 
-
-
-
-       
-
 class ActivityTimelineClass(APIView):
         
         def post(self,request,formate=None):
@@ -216,4 +216,3 @@ class ActivityTimelineClass(APIView):
                         logging.error("Common  : ActivityTimelineClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
  
-        

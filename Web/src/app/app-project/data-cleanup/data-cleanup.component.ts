@@ -17,10 +17,7 @@ export class DataCleanupComponent implements OnInit {
   loaderdiv = false;
   displaytitle = "false";
   errorStatus = true;
-  data: any={
-    experiment_name:"",
-    experiment_desc:""
-  };
+ 
   animation = "progress-dark";
   theme = {
     'border-radius': '5px',
@@ -50,20 +47,20 @@ export class DataCleanupComponent implements OnInit {
 
   
 
-  gotoModeling() {
-    let user=localStorage.getItem("currentUser")
-    //console.log(user);
-    this.data.project_id=this.project_id;
-    this.data.dataset_id=this.dataset_id;
-    this.data.user_id=JSON.parse(user).id;
-    console.log(this.data);
-    localStorage.setItem("Modeling",JSON.stringify(this.data));
-   // this.data.model_mode="auto";
-    this.router.navigate(["modeling"]);
+  // gotoModeling() {
+  // //   let user=localStorage.getItem("currentUser")
+  // //   //console.log(user);
+  // //   this.data.project_id=this.project_id;
+  // //   this.data.dataset_id=this.dataset_id;
+  // //   this.data.user_id=JSON.parse(user).id;
+  // //   console.log(this.data);
+  // //   //localStorage.setItem("Modeling",JSON.stringify(this.data));
+  // //  // this.data.model_mode="auto";
+  // //   this.router.navigate(["modeling"]);
 
-  }
+  // }
 
-  smallModal(modelingmodal: any) {
-    this.modalService.open(modelingmodal, { size: 'md', windowClass: 'modal-holder', centered: true });
-  }
+  // smallModal(modelingmodal: any) {
+  //   this.modalService.open(modelingmodal, { size: 'md', windowClass: 'modal-holder', centered: true });
+  // }
 }

@@ -10,25 +10,35 @@
 
 */
 '''
+# Python library import
 import pandas as pd
 import logging
 import traceback
+
+#Ingest util/dataset file import
 from ..dataset import dataset_creation 
-from common.utils.database import db
+
+#Database variable import
+from database import *
+
+# Common file imports
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.ingest.ingest_exception import *
 from common.utils.logger_handler import custom_logger as cl
-from preprocess.utils.schema.schema_creation import *
-from database import *
+from common.utils.database import db
 
+# Preprocess file imports
+from preprocess.utils import preprocessing
+from preprocess.utils.schema.schema_creation import *
+
+# Object Initialization
+preprocessObj =  preprocessing.PreprocessingClass(database,user,password,host,port) #initialize Preprocess class object
 schema_obj=SchemaClass() #initialize Schema object from schema class
 
 user_name = 'admin'
 log_enable = True
-
 LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
-
 logger = logging.getLogger('project_creation')
 
 
@@ -117,8 +127,9 @@ class ProjectClass:
         DatasetObject = dataset_creation.DatasetClass()
 
         if original_dataset_id == None:
-            _,original_dataset_id,schema_dataset_id = DatasetObject.make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name)
-            dataset_id = schema_dataset_id
+            _,original_dataset_id,raw_dataset_id  = DatasetObject.make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name)
+            dataset_id = raw_dataset_id
+            
         else:
             
             dataset_id,_ = DBObject.get_raw_dataset_detail(connection,original_dataset_id)
@@ -128,7 +139,7 @@ class ProjectClass:
         row_tuples = self.make_project_records(project_name,project_desc,user_name,original_dataset_id,dataset_id) 
 
         # Get status about inserting records into project table. if successful then 0 else 1. 
-        insert_status = DBObject.insert_records(connection,table_name,row_tuples,cols) 
+        insert_status,_ = DBObject.insert_records(connection,table_name,row_tuples,cols) 
 
         # This condition is used to check project table and data is successfully stored into project table or not.if successful then 0 else 1. 
         if schema_status in [0,1] and create_status in [0,1] and insert_status == 0 :
@@ -141,14 +152,20 @@ class ProjectClass:
             #get the schema mapping details with column name and datatype
             column_name_list,column_datatype_list = schema_obj.get_dataset_schema(DBObject,connection,dataset_id) 
             
+            missing_value_lst,noise_status_lst = preprocessObj.get_preprocess_cache(dataset_id)
+            logging.info(str(missing_value_lst) + " find")
+            logging.info(str(noise_status_lst))
+            missing_value_lst,noise_status_lst = list(missing_value_lst),list(noise_status_lst)
             # column name and datatype will be inserted into schema table with schema id
-            status=schema_obj.update_dataset_schema(DBObject,connection,schema_id,column_name_list,column_datatype_list)
+
+            status=schema_obj.update_dataset_schema(DBObject,connection,schema_id,column_name_list,column_datatype_list,missing_flag=missing_value_lst,noise_flag=noise_status_lst)
             
         else :
             status = 1 # Failed
             project_id = None
+            original_dataset_id = None
             
-        logging.info("data ingestion : ProjectClass : make_project : execution end")
+        
         return status,project_id,original_dataset_id
 
     def get_project_id(self,DBObject,connection,row_tuples,user_name):

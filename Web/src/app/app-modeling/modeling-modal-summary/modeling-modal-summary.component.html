@@ -1,0 +1,24 @@
+<ngx-skeleton-loader *ngIf="!responsedata" count="7" [animation]="animation" [theme]="theme">
+</ngx-skeleton-loader>
+<div class="row modal-summary" *ngIf="responsedata">
+    <div class="col-md-12">
+        <div class="line">
+            <label>Name :</label> <span>{{responsedata["Model Name"]}}</span>
+        </div>
+        <div class="line">
+            <label>Train Size :</label> <span>{{responsedata["Train Size"]}}kb</span>
+        </div>
+        <div class="line">
+            <label>Train Split :</label> <span>{{responsedata["Train Split"]}}</span>
+        </div>
+        <div class="line">
+            <label>Test Size :</label> <span>{{responsedata["Test Size"]}}</span>
+        </div>
+        <div class="line">
+            <label>Test Size :</label> <span>{{responsedata["Test Size"]}}mb</span>
+        </div>
+        <div class="line">
+            <label>Random State :</label> <span>{{responsedata["Random State"]}}</span>
+        </div>
+    </div>
+</div>

@@ -30,7 +30,7 @@ class ExperimentClass:
     def add_experiments(self, DBObject, connection, connection_string):
         
         table_name='mlaas.model_experiment_tbl'
-        cols = 'experiment_id,run_uuid,project_id ,dataset_id,user_id,model_id,model_mode' 
+        cols = 'experiment_id,run_uuid,project_id,dataset_id,user_id,model_id,model_mode' 
         
         row = self.experiment_id,self.run_uuid,self.project_id ,self.dataset_id,self.user_id,self.model_id,self.model_mode    
         row_tuples = [tuple(row)]
