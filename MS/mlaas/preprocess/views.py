@@ -91,7 +91,6 @@ class DatasetExplorationClass(APIView):
 #            return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
 
 
-
 class SchemaSaveClass(APIView):
 
         def post(self,request,format=None):
@@ -131,11 +130,6 @@ class SchemaSaveClass(APIView):
                         logging.error("data preprocess : SchemaSaveClass : POST Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
                         
-
-
-
-
-
 
 # Class to retrive & insert for Schema data
 # It will take url string as mlaas/ingest/dataset_schema/. 
