@@ -206,6 +206,8 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise DataNotFound(500)
             data_type = data_details_df.dtypes.to_dict()
             logging.info(data_details_df)  
+            data_details_df.update(data_details_df.loc[:, data_details_df.dtypes.astype(str).str.contains('date')].astype(str))
+            logging.info(data_details_df)  
 
             data_details_df=data_details_df.to_json(orient='records',date_format='iso')
             logging.info(data_details_df)
