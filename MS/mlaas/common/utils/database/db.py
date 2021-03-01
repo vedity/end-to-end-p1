@@ -473,7 +473,7 @@ class DBClass:
             column_name,column_list = schema_df['column_name'],schema_df['column_list']
 
             string_query = ""
-            for count in range(1,len(column_name)):
+            for count in range(0,len(column_name)):
                 #append string column name as alias  column list name
                 string_query +='"'+column_name[count]+'" as "'+column_list[count]+'",'
             
@@ -513,7 +513,8 @@ class DBClass:
                 select_clause="*"
             else:
                 query = self.get_query_string(connection,schema_id)
-                select_clause=str(columns_list[0])+","+str(query)
+                # select_clause=str(columns_list[0])+","+str(query)
+                select_clause=str(query)
             if customefilter!='()':
                 customefilter_clause="where "+customefilter #add where to customefilter_clause 
             if str(sort_index) != "0" or global_search_value!="" or customefilter_clause!="":  
@@ -746,6 +747,7 @@ class DBClass:
                 query = self.get_query_string(connection,schema_id)
                 #? Getting all the data
                 sql_command = f"SELECT {str(query)} FROM {user_name}.{dataset_table_name}"
+                logger.info("sql_command===="+sql_command)
             
             data_df = self.select_records(connection,sql_command)    
             data_df = data_df.replace([''],np.NaN)
