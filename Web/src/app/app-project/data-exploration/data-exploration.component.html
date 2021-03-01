@@ -83,7 +83,6 @@
                                                     <th>Column</th>
                                                     <th>Data Type</th>
                                                     <th>Graph</th>
-                                                    <th>Value Distribution</th>
                                                     <th>Count</th>
                                                     <th>Missing</th>
                                                     <th>Most Occurring</th>
@@ -190,8 +189,10 @@
                     </a>
                     <ng-template ngbNavContent>
                         <div [chart]="chart" id="highchhart"></div>
-                        <!-- <apx-chart class="apex-charts" dir="ltr" [series]="boxplotChartexpand.series" [chart]="boxplotChartexpand.chart" [title]="boxplotChartexpand.title" [xaxis]="boxplotChartexpand.xaxis" [yaxis]="boxplotChartexpand.yaxis">
-                            </apx-chart> -->
+                        <!-- <div id="chart">
+                            <apx-chart [series]="chartOptions.series" [chart]="chartOptions.chart" [plotOptions]="chartOptions.plotOptions" [title]="chartOptions.title"></apx-chart>
+                        </div> -->
+
                     </ng-template>
                 </li>
 

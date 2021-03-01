@@ -8,6 +8,7 @@ import bsCustomFileInput from 'bs-custom-file-input';
 import { createdataset } from './dataset.model'
 import { NgForm } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-list-database',
   templateUrl: './list-database.component.html',
@@ -26,7 +27,7 @@ export class ListDatabaseComponent implements OnInit {
   filter: boolean = true;
   loaderdiv = false;
   f: NgForm;
-  constructor(public apiService: ProjectApiService, public toaster: ToastrService,private modalService: NgbModal) { }
+  constructor(public apiService: ProjectApiService, public toaster: ToastrService,private modalService: NgbModal,public router:Router) { }
   transactions: any = [];
   ngOnInit(): void {
     this.data.isprivate = true;
@@ -53,6 +54,7 @@ export class ListDatabaseComponent implements OnInit {
       this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
         dtInstance.columns().every(function () {
           const that = this;
+          
           $('#input_'+ this.index("visible")).on('keyup change', function () {
             if (that.search() !== this['value']) {
               that
@@ -65,7 +67,7 @@ export class ListDatabaseComponent implements OnInit {
     }
     else {
       this.rendered();
-      this.dtTrigger.next();
+     // this.dtTrigger.next();
     }
   }
 
@@ -149,19 +151,25 @@ export class ListDatabaseComponent implements OnInit {
   }
 
   rendered() {
-    this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
-      dtInstance.columns().every(function () {
-        const that = this;
-        $('#input_'+ this.index("visible")).on('keyup change', function () {
-          if (that.search() !== this['value']) {
-            that
-              .search(this['value'])
-              .draw();
-          }
-        });
-      });
-      dtInstance.destroy();
-    });
+    let currentUrl = this.router.url;
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+    this.router.onSameUrlNavigation = 'reload';
+    this.router.navigate([currentUrl]);
+
+    // this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
+    //   dtInstance.destroy();
+    //   dtInstance.columns().every(function () {
+    //     const that = this;
+    //     $('#input_'+ this.index("visible")).on('keyup change', function () {
+    //       if (that.search() !== this['value']) {
+    //         that
+    //           .search(this['value'])
+    //           .draw();
+    //       }
+    //     });
+    //   });
+    // });
+    // this.dtTrigger.next();
   }
 
   errorStatus: boolean = true
