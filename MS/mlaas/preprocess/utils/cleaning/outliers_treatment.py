@@ -133,19 +133,22 @@ class OutliersTreatmentClass:
             Returns a series where the outliers are replaced with the given function(Mean of Median)
             
             Args:
-                series[(pandas.Series)]: column,
-                operation[(intiger)] (default = 0): which operation should be performed,
-                                                        0 => mean
-                                                        1 => median
-                detect_method[(intiger)] (default = 0): which method should be used to detect outliers,
-                                                        0 => Extreme Value Analysis
-                                                        1 => Z-score method
-                less_probable[(boolean)] (default = False): should less probable outliers be raplaced?
-                level[(intiger)] (default = 3): level of std in Z-score method.
-                log[(boolean)] (default = False): Apply log transforamation before outlier detection?
+            -----
+            series[(pandas.Series)]: column,
+            operation[(intiger)] (default = 0): which operation should be performed,
+                - 0 : mean
+                - 1 : median
+                - 2 : mode \n
+            detect_method[(intiger)] (default = 0): which method should be used to detect outliers,
+                - 0 : Extreme Value Analysis
+                - 1 : Z-score method \n
+            less_probable[(boolean)] (default = False): should less probable outliers be raplaced?
+            level[(intiger)] (default = 3): level of std in Z-score method.
+            log[(boolean)] (default = False): Apply log transforamation before outlier detection?
                 
             Returns:
-                List[(intiger|float)]: Updated Column
+            --------
+            List[(intiger|float)]: Updated Column
         '''
         
         try:
@@ -156,6 +159,8 @@ class OutliersTreatmentClass:
                 value = np.mean(series)
             elif operation == 1:
                 value = np.median(series)
+            elif operation == 2:
+                value = stats.mode(series.tolist())
             else:
                 return 2
             

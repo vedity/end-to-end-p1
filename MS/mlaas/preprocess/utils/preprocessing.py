@@ -20,6 +20,7 @@ from ingest.utils.dataset import dataset_creation
 from .Exploration import dataset_exploration as de
 from .schema import schema_creation as sc
 from .cleaning import noise_reduction as nr
+from .cleaning import cleaning
 
 #* Library Imports
 import logging
@@ -34,9 +35,10 @@ LogObject.log_setting()
 
 logger = logging.getLogger('preprocessing')
 
+#* Object Definition
 dc = dataset_creation.DatasetClass()
 
-class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
+class PreprocessingClass(sc.SchemaClass,de.ExploreClass,cleaning.CleaningClass):
     def __init__(self,database,user,password,host,port):
         """This constructor is used to initialize database credentials.
            It will initialize when object of this class is created with below parameter.
@@ -170,7 +172,7 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
             It is used to get the column names.
             
             Args:
-                schema_id(Intiger):
+                schema_id(Intiger): schema id of the associated dataset.
                 
             Returns:
                 column_names(List of Strings): List of Name of the columns.
@@ -196,7 +198,7 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
             
             return column_names.tolist()
             
-        except (DatabaseConnectionFailed) as exc:
+        except (DatabaseConnectionFailed,EntryNotFound) as exc:
             logging.error("data preprocessing : PreprocessingClass : get_col_names : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_col_names : " +traceback.format_exc())
             return exc.msg
@@ -350,124 +352,11 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
             logging.info(f"data preprocessing : PreprocessingClass : retrive_preprocess_cache : function failed : {str(exc)}")
             return str(exc)
             
-    def get_possible_operations(self, dataset_id, schema_id, column_ids):
-        '''
-            This function returns all possible operations for given columns.
-            
-            Args:
-                schema_id(int): Id of the dataset's schema.
-                column_ids(list of intigers): Selected columns.
-                
-            Returns:
-                operations[List]: List of possible operations.
-        '''
-        try:
-            logging.info("data preprocessing : PreprocessingClass : get_possible_operations : execution start")
-            
-            #TODO: THIS NEEDS TO BE REMOVED LATER BECAUSE IT TAKES MORE TIME TO GET WHOLE DATAFRAME
-            
-            #? Getting Dataframe
-            data_df = self.get_data_df(dataset_id,schema_id)
-            if isinstance(data_df, str):
-                raise GetDataDfFailed(500)
-            
-            #TODO: Remove Until HERE
-            
-            #? Getting DB object & connection object
-            DBObject,connection,connection_string = self.get_db_connection()
-            if connection == None :
-                raise DatabaseConnectionFailed(500)
-
-            num_cols = [data_df.columns.get_loc(i) for i in data_df._get_numeric_data().columns]
-            logging.info("========>"+str(num_cols)+str(data_df._get_numeric_data().columns.tolist()))
-            data_types, missing_val_list, noise_list = self.retrive_preprocess_cache(DBObject,connection,schema_id)
-            
-            #? Logical function starts
-            try:
-                all_col_operations = []
-
-                for id in column_ids:
-                    operations = [1,2,3,6,10]
-
-                    #? Column is both numerical & categorical
-                    if (id in num_cols) and (data_types[id].startswith('ca') and data_types[id].endswith('l')):
-                        col_type = 0
-                    #? Column is Numerical
-                    elif id in num_cols:
-                        col_type = 1
-                    #? Column is categorical
-                    elif data_types[id].startswith('ca') and data_types[id].endswith('l'):
-                        col_type = 2
-                    else:
-                        col_type = 3
-
-                    #? Column is text column
-                    if col_type == 3:
-                        all_col_operations.append(operations)
-                        continue
-                    
-                    #? Adding Missing Value Operations
-                    if col_type == 0:
-                        operations += [4,5,7,8,9]
-                    elif col_type == 1:
-                        operations += [4,5,7]
-                    elif col_type == 2:
-                        operations += [8,9]
-                    
-                    #? Adding Noise Reduction Operations
-                    if not missing_val_list[id]:
-                        operations += [11,14,15]
-                        if col_type == 0 or col_type == 1:
-                            operations += [12,13]
-                    
-                    #? Outlier Removal & Scaling Operations for numeric; Encoding ops for Categorical
-                    if not missing_val_list[id] and not noise_list[id]:
-                        if col_type == 0 or col_type == 1:
-                            operations += [16,17,18,19,20,21,22,23,24,25,26]
-                        if col_type == 0 or col_type == 2:
-                            operations += [27,28,29]
-                        
-                    #? Math operations
-                    if not noise_list[id]:
-                        if col_type == 0 or col_type == 1:
-                            operations += [30,31,32,33]
-                            
-                    all_col_operations.append(operations)
-                
-                #? Getting Final Common Operation List
-                final_op_list = []
-                for ops in all_col_operations:
-                    for op in ops:
-                        flag = True
-                        for other_ops in all_col_operations:
-                            if op not in other_ops:
-                                flag = False
-                                break
-                        if flag == True:
-                            final_op_list.append(op)
-                final_op_list = list(set(final_op_list))
-                final_op_list.sort()
-                
-                logging.info("data preprocessing : PreprocessingClass : get_possible_operations : execution End")
-                
-                return final_op_list    
-            
-            except Exception as exc:
-                logging.info(f"data preprocessing : PreprocessingClass : get_possible_operations : Function failed : {str(exc)}")
-                return exc
-            
-        except (DatabaseConnectionFailed,GetDataDfFailed) as exc:
-            logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
-            logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
-            return exc.msg
-        
-        
     # def get_possible_operations(self, dataset_id, schema_id, column_ids):
     #     '''
     #         This function returns all possible operations for given columns.
             
     #         Args:
-    #             dataset_id(int): Id of the dataset.
     #             schema_id(int): Id of the dataset's schema.
     #             column_ids(list of intigers): Selected columns.
                 
@@ -477,55 +366,44 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
     #     try:
     #         logging.info("data preprocessing : PreprocessingClass : get_possible_operations : execution start")
             
+    #         #TODO: THIS NEEDS TO BE REMOVED LATER BECAUSE IT TAKES MORE TIME TO GET WHOLE DATAFRAME
+            
+    #         #? Getting Dataframe
+    #         data_df = self.get_data_df(dataset_id,schema_id)
+    #         if isinstance(data_df, str):
+    #             raise GetDataDfFailed(500)
+            
+    #         #TODO: Remove Until HERE
+            
+    #         #? Getting DB object & connection object
     #         DBObject,connection,connection_string = self.get_db_connection()
     #         if connection == None :
-    #             raise DatabaseConnectionFailed(500)  
-                
-    #         #? getting the name of the dataset_tbl
-    #         table_name,_,_ = dc.make_dataset_schema()
+    #             raise DatabaseConnectionFailed(500)
+
+    #         num_cols = [data_df.columns.get_loc(i) for i in data_df._get_numeric_data().columns]
+    #         data_types, missing_val_list, noise_list = self.retrive_preprocess_cache(DBObject,connection,schema_id)
+    #         data_types = data_types[1:]
+    #         missing_val_list = missing_val_list[1:]
+    #         noise_list = noise_list[1:]
             
-    #         #? Getting user_name and dataset_visibility
-    #         sql_command = f"SELECT USER_NAME,DATASET_VISIBILITY,DATASET_TABLE_NAME,no_of_rows FROM {table_name} WHERE dataset_id = '{dataset_id}'"
-    #         visibility_df = DBObject.select_records(connection,sql_command) 
-    #         if len(visibility_df) != 0: 
-    #             user_name,dataset_visibility = visibility_df['user_name'][0],visibility_df['dataset_visibility'][0]
-    #         #? No entry for the given dataset_id        
-    #         else: raise EntryNotFound(500)
-            
-    #         #? Getting CSV table name
-    #         dataset_table_name = visibility_df['dataset_table_name'][0]
-    #         dataset_table_name = '"'+ dataset_table_name+'"'
-            
-    #         #? changing the database schema for the public databases
-    #         if dataset_visibility == 'public':
-    #             user_name = 'public'
-            
-    #         query = DBObject.get_query_string(connection,schema_id)
-    #         #? Getting all the data
-    #         sql_command = f"SELECT {str(query)} FROM {user_name}.{dataset_table_name}"
-    #         data_df = DBObject.select_records(connection,sql_command)    
-            
-    #         num_cols = data_df._get_numeric_data().columns.tolist()
-    #         predicted_datatypes = self.get_attrbt_datatype(data_df,data_df.columns,len(data_df))
+    #         missing_val_list = [bool(i) for i in missing_val_list]
+    #         noise_list = [bool(i) for i in noise_list]
             
     #         #? Logical function starts
     #         try:
-    #             #? Logical function starts
     #             all_col_operations = []
 
     #             for id in column_ids:
-    #                 col = data_df.columns[id]
-    #                 series = data_df[col]
     #                 operations = [1,2,3,6,10]
 
     #                 #? Column is both numerical & categorical
-    #                 if (col in numerical_columns) and (predicted_datatypes[id].startswith('Ca')):
+    #                 if (id in num_cols) and (data_types[id].startswith('c') and data_types[id].endswith('l')):
     #                     col_type = 0
     #                 #? Column is Numerical
-    #                 elif col in numerical_columns:
+    #                 elif id in num_cols:
     #                     col_type = 1
     #                 #? Column is categorical
-    #                 elif predicted_datatypes[id].startswith('Ca'):
+    #                 elif data_types[id].startswith('c') and data_types[id].endswith('l'):
     #                     col_type = 2
     #                 else:
     #                     col_type = 3
@@ -543,25 +421,21 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
     #                 elif col_type == 2:
     #                     operations += [8,9]
                     
-    #                 missing_values = data_df[col].isnull().any()
-    #                 if missing_values == False:
-    #                     noisy,_,_ = self.detect_noise(series)
-                    
     #                 #? Adding Noise Reduction Operations
-    #                 if not missing_values:
+    #                 if not missing_val_list[id]:
     #                     operations += [11,14,15]
     #                     if col_type == 0 or col_type == 1:
     #                         operations += [12,13]
                     
     #                 #? Outlier Removal & Scaling Operations for numeric; Encoding ops for Categorical
-    #                 if not missing_values and not noisy:
+    #                 if not missing_val_list[id] and not noise_list[id]:
     #                     if col_type == 0 or col_type == 1:
     #                         operations += [16,17,18,19,20,21,22,23,24,25,26]
     #                     if col_type == 0 or col_type == 2:
     #                         operations += [27,28,29]
                         
     #                 #? Math operations
-    #                 if not noisy:
+    #                 if not noise_list[id]:
     #                     if col_type == 0 or col_type == 1:
     #                         operations += [30,31,32,33]
                             
@@ -583,16 +457,149 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
                 
     #             logging.info("data preprocessing : PreprocessingClass : get_possible_operations : execution End")
                 
-    #             return final_op_list    
+    #             return [i+8 for i in final_op_list]    
             
     #         except Exception as exc:
     #             logging.info(f"data preprocessing : PreprocessingClass : get_possible_operations : Function failed : {str(exc)}")
     #             return exc
-                
-    #     except (DatabaseConnectionFailed,EntryNotFound) as exc:
+            
+    #     except (DatabaseConnectionFailed,GetDataDfFailed) as exc:
     #         logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
     #         logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
     #         return exc.msg
+        
+        
+    def get_possible_operations(self, dataset_id, schema_id, column_ids):
+        '''
+            This function returns all possible operations for given columns.
+            
+            Args:
+                dataset_id(int): Id of the dataset.
+                schema_id(int): Id of the dataset's schema.
+                column_ids(list of intigers): Selected columns.
+                
+            Returns:
+                operations[List]: List of possible operations.
+        '''
+        try:
+            logging.info("data preprocessing : PreprocessingClass : get_possible_operations : execution start")
+            
+            DBObject,connection,connection_string = self.get_db_connection()
+            if connection == None :
+                raise DatabaseConnectionFailed(500)  
+                
+            #? getting the name of the dataset_tbl
+            table_name,_,_ = dc.make_dataset_schema()
+            
+            #? Getting user_name and dataset_visibility
+            sql_command = f"SELECT USER_NAME,DATASET_VISIBILITY,DATASET_TABLE_NAME,no_of_rows FROM {table_name} WHERE dataset_id = '{dataset_id}'"
+            visibility_df = DBObject.select_records(connection,sql_command) 
+            if len(visibility_df) != 0: 
+                user_name,dataset_visibility = visibility_df['user_name'][0],visibility_df['dataset_visibility'][0]
+            #? No entry for the given dataset_id        
+            else: raise EntryNotFound(500)
+            
+            #? Getting CSV table name
+            dataset_table_name = visibility_df['dataset_table_name'][0]
+            dataset_table_name = '"'+ dataset_table_name+'"'
+            
+            #? changing the database schema for the public databases
+            if dataset_visibility == 'public':
+                user_name = 'public'
+            
+            query = DBObject.get_query_string(connection,schema_id)
+            #? Getting all the data
+            sql_command = f"SELECT {str(query)} FROM {user_name}.{dataset_table_name}"
+            data_df = DBObject.select_records(connection,sql_command)    
+            
+            num_cols = data_df._get_numeric_data().columns.tolist()
+            predicted_datatypes = self.get_attrbt_datatype(data_df,data_df.columns,len(data_df))
+            
+            #? Logical function starts
+            try:
+                #? Logical function starts
+                all_col_operations = []
+
+                for id in column_ids:
+                    col = data_df.columns[id]
+                    series = data_df[col]
+                    operations = [1,2,3,6,10]
+
+                    #? Column is both numerical & categorical
+                    if (col in numerical_columns) and (predicted_datatypes[id].startswith('Ca')):
+                        col_type = 0
+                    #? Column is Numerical
+                    elif col in numerical_columns:
+                        col_type = 1
+                    #? Column is categorical
+                    elif predicted_datatypes[id].startswith('Ca'):
+                        col_type = 2
+                    else:
+                        col_type = 3
+
+                    #? Column is text column
+                    if col_type == 3:
+                        all_col_operations.append(operations)
+                        continue
+                    
+                    #? Adding Missing Value Operations
+                    if col_type == 0:
+                        operations += [4,5,7,8,9]
+                    elif col_type == 1:
+                        operations += [4,5,7]
+                    elif col_type == 2:
+                        operations += [8,9]
+                    
+                    missing_values = data_df[col].isnull().any()
+                    if missing_values == False:
+                        noisy,_,_ = self.detect_noise(series)
+                    
+                    #? Adding Noise Reduction Operations
+                    if not missing_values:
+                        operations += [11,14,15]
+                        if col_type == 0 or col_type == 1:
+                            operations += [12,13]
+                    
+                    #? Outlier Removal & Scaling Operations for numeric; Encoding ops for Categorical
+                    if not missing_values and not noisy:
+                        if col_type == 0 or col_type == 1:
+                            operations += [16,17,18,19,20,21,22,23,24,25,26]
+                        if col_type == 0 or col_type == 2:
+                            operations += [27,28,29]
+                        
+                    #? Math operations
+                    if not noisy:
+                        if col_type == 0 or col_type == 1:
+                            operations += [30,31,32,33]
+                            
+                    all_col_operations.append(operations)
+                
+                #? Getting Final Common Operation List
+                final_op_list = []
+                for ops in all_col_operations:
+                    for op in ops:
+                        flag = True
+                        for other_ops in all_col_operations:
+                            if op not in other_ops:
+                                flag = False
+                                break
+                        if flag == True:
+                            final_op_list.append(op)
+                final_op_list = list(set(final_op_list))
+                final_op_list.sort()
+                
+                logging.info("data preprocessing : PreprocessingClass : get_possible_operations : execution End")
+                
+                return [i+8 for i in final_op_list]    
+            
+            except Exception as exc:
+                logging.info(f"data preprocessing : PreprocessingClass : get_possible_operations : Function failed : {str(exc)}")
+                return exc
+                
+        except (DatabaseConnectionFailed,EntryNotFound) as exc:
+            logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
+            logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
+            return exc.msg
         
     def reorder_operations(self, data):
         '''
@@ -636,7 +643,8 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
             operation_dict = {}
             for dicts in data:
                 for ids in dicts['column_id']:
-                    operation_dict[ids] = list(set(operation_dict.get(ids,[]) + dicts['selected_handling']))
+                    operation_dict[ids] = list(set(operation_dict.get(ids,[]) + [i-8 for i in dicts['selected_handling']]))
+                    #? Important: Above line also handles the renumbering of the operation numbers
         
             #? Getting all the operation in the sorted order
             operations = list(operation_dict.values())
@@ -648,6 +656,7 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
             all_operations = list(set(all_operations))
             #? Sorting Operations
             all_operations.sort()
+            #? Rearranging the operation numbering such that they start from 1
             
             #? Getting final reordered dictionary
             final_dict = {}
@@ -667,7 +676,117 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,nr.RemoveNoiseClass):
         except Exception as exc:
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc))
             return OperationOrderingFailed(500).msg
-    
+        
+        
+    def master_executor(self, dataset_id, schema_id, request, save_as = False):
+        '''
+            It takes the request from the frontend and executes the cleanup operations.
+            
+            Args:
+            -----
+            dataset_id (`Intiger`): Id of the dataset.
+            schema_id (`Intiger`): Id of the dataset in the schema_tbl.
+            request (`Dict`): Request coming from the frontend.
+            save_as (`Boolean`) (default = `False`): Has the user chosen save_as option?
+            
+            Returns:
+            --------
+            Positive or Negative responce.
+        '''
+        
+        try:
+            logging.info("data preprocessing : PreprocessingClass : master_executor : execution start")
+            
+            #? Getting Dataframe
+            data_df = self.get_data_df(dataset_id,schema_id)
+            if isinstance(data_df, str):
+                raise GetDataDfFailed(500)
+            
+            #? Getting operations in the ordered format
+            operation_ordering = self.reorder_operations(request)
+            
+            operations = operation_ordering.keys()
+            
+            for op in operations:
+                
+                #? Getting Columns
+                col = operation_ordering[op]
+                
+                if op == 1:
+                    data_df = self.discard_missing_values(data_df, col)
+                # elif op == 2:
+                #     data_df = self.delete_above(data_df, col, val)
+                # elif op == 3:
+                #     data_df = self.delete_below(data_df, col, val)
+                elif op == 4:
+                    data_df = self.mean_imputation(data_df, col)
+                elif op == 5:
+                    data_df = self.median_imputation(data_df, col)
+                # elif op == 6:
+                #     data_df = self.arbitrary_value_imputation(data_df, col, val)
+                elif op == 7:
+                    data_df = self.end_of_distribution(data_df, col)
+                elif op == 8:
+                    data_df = self.frequent_category_imputation(data_df, col)
+                elif op == 9:
+                    data_df = self.add_missing_category(data_df, col)
+                elif op == 10:
+                    data_df = self.random_sample_imputation(data_df, col)
+                elif op == 11:
+                    data_df = self.remove_noise(data_df, col)
+                elif op == 12:
+                    data_df = self.repl_noise_mean(data_df, col)
+                elif op == 13:
+                    data_df = self.repl_noise_median(data_df, col)
+                elif op == 14:
+                    data_df = self.repl_noise_random_sample(data_df, col)
+                # elif op == 15:
+                #     data_df = self.repl_noise_arbitrary_val(data_df, col, val)
+                elif op == 16:
+                    data_df = self.rem_outliers_ext_val_analysis(data_df, col)
+                elif op == 17:
+                    data_df = self.rem_outliers_z_score(data_df, col)
+                elif op == 18:
+                    data_df = self.repl_outliers_mean_ext_val_analysis(data_df, col)
+                elif op == 19:
+                    data_df = self.repl_outliers_mean_z_score(data_df, col)
+                elif op == 20:
+                    data_df = self.repl_outliers_med_ext_val_analysis(data_df, col)
+                elif op == 21:
+                    data_df = self.repl_outliers_med_z_score(data_df, col)
+                elif op == 22:
+                    data_df = self.apply_log_transformation(data_df, col)
+                # elif op == 23:
+                #     data_df = self.mean_imputation(data_df, col)
+                # elif op == 24:
+                #     data_df = self.mean_imputation(data_df, col)
+                # elif op == 25:
+                #     data_df = self.mean_imputation(data_df, col)
+                # elif op == 26:
+                #     data_df = self.mean_imputation(data_df, col)
+                # elif op == 27:
+                #     data_df = self.mean_imputation(data_df, col)
+                # elif op == 28:
+                #     data_df = self.mean_imputation(data_df, col)
+                # elif op == 29:
+                #     data_df = self.mean_imputation(data_df, col)
+                # elif op == 30:
+                #     data_df = self.mean_imputation(data_df, col)
+                # elif op == 31:
+                #     data_df = self.mean_imputation(data_df, col)
+                # elif op == 32:
+                #     data_df = self.mean_imputation(data_df, col)
+                # elif op == 33:
+                #     data_df = self.mean_imputation(data_df, col)
+            
+            logging.info("data preprocessing : PreprocessingClass : master_executor : execution stop")
+            
+        except (GetDataDfFailed) as exc:
+            logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
+            logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
+            return exc.msg
+            
+        
 
 
 
