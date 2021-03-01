@@ -397,13 +397,13 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,cleaning.CleaningClass):
                     operations = [1,2,3,6,10]
 
                     #? Column is both numerical & categorical
-                    if (id in num_cols) and (data_types[id].startswith('ca') and data_types[id].endswith('l')):
+                    if (id in num_cols) and (data_types[id].startswith('c') and data_types[id].endswith('l')):
                         col_type = 0
                     #? Column is Numerical
                     elif id in num_cols:
                         col_type = 1
                     #? Column is categorical
-                    elif data_types[id].startswith('ca') and data_types[id].endswith('l'):
+                    elif data_types[id].startswith('c') and data_types[id].endswith('l'):
                         col_type = 2
                     else:
                         col_type = 3
@@ -457,7 +457,7 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,cleaning.CleaningClass):
                 
                 logging.info("data preprocessing : PreprocessingClass : get_possible_operations : execution End")
                 
-                return final_op_list    
+                return [i+8 for i in final_op_list]    
             
             except Exception as exc:
                 logging.info(f"data preprocessing : PreprocessingClass : get_possible_operations : Function failed : {str(exc)}")
@@ -590,7 +590,7 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,cleaning.CleaningClass):
                 
     #             logging.info("data preprocessing : PreprocessingClass : get_possible_operations : execution End")
                 
-    #             return final_op_list    
+    #             return [i+8 for i in final_op_list]    
             
     #         except Exception as exc:
     #             logging.info(f"data preprocessing : PreprocessingClass : get_possible_operations : Function failed : {str(exc)}")
@@ -643,7 +643,8 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,cleaning.CleaningClass):
             operation_dict = {}
             for dicts in data:
                 for ids in dicts['column_id']:
-                    operation_dict[ids] = list(set(operation_dict.get(ids,[]) + dicts['selected_handling']))
+                    operation_dict[ids] = list(set(operation_dict.get(ids,[]) + [i-8 for i in dicts['selected_handling']]))
+                    #? Important: Above line also handles the renumbering of the operation numbers
         
             #? Getting all the operation in the sorted order
             operations = list(operation_dict.values())
@@ -655,6 +656,7 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,cleaning.CleaningClass):
             all_operations = list(set(all_operations))
             #? Sorting Operations
             all_operations.sort()
+            #? Rearranging the operation numbering such that they start from 1
             
             #? Getting final reordered dictionary
             final_dict = {}
