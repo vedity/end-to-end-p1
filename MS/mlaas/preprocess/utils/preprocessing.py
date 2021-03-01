@@ -780,7 +780,8 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,cleaning.CleaningClass):
                 #     data_df = self.mean_imputation(data_df, col)
             
             logging.info("data preprocessing : PreprocessingClass : master_executor : execution stop")
-            
+            return data_df
+
         except (GetDataDfFailed) as exc:
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())

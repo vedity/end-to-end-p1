@@ -30,4 +30,5 @@ urlpatterns = [
 
     path('mlaas/preprocess/cleanup/get_col_name/',GetColumnListClass.as_view()),
 
+    path('mlaas/preprocess/cleanup/save/',CleanupSave.as_view()),
 ]

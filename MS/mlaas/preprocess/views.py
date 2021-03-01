@@ -247,6 +247,7 @@ class ScheamColumnListClass(APIView):
                                 logging.error("data preprocess : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
                                 return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
+#preprocessing Rest API
 class OperationListClass(APIView):
         
         def post(self, request, format=None):
@@ -348,3 +349,19 @@ class GetColumnListClass(APIView):
                                 logging.error("data preprocess : GetColumnListClass : POST Method : "+ traceback.format_exc())
                                 return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
+class CleanupSave(APIView):
+        def post(self, request, format=None):
+                try:
+                        logging.info("data preprocess : CleanupSave : POST Method : execution start")
+                        schema_id = request.query_params.get('schema_id') #get schema id
+                        dataset_id = request.query_params.get('dataset_id') #get dataset id
+                        data = json.dumps(request.data) #get handling json
+                        data = json.loads(data) 
+                        operation = preprocessObj.master_executor(dataset_id,schema_id,data)
+                        logging.info("data preprocess : CleanupSave : POST Method : execution stop")
+                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":operation})
+
+                except Exception as e:
+                        logging.error("data preprocess : CleanupSave : POST Method : Exception :" + str(e))
+                        logging.error("data preprocess : CleanupSave : POST Method : "+ traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
