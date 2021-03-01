@@ -1,9 +1,7 @@
+kafka-python==1.4.6
 pandas
 numpy
 scipy
-django
-djangorestframework
-requests
-django-cors-headers
 mlflow==1.13.1
 sklearn
+

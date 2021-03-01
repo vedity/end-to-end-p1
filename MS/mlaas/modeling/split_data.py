@@ -1,43 +1,32 @@
-from sklearn.model_selection import train_test_split
+'''
+/*CHANGE HISTORY
+
+--CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
+ Mann Purohit         10-FEB-2021           1.0         Initial Version           
+
+*/
+'''
+
 import json
 import ast 
+import logging
+
+from common.utils.logger_handler import custom_logger as cl
+from sklearn.model_selection import train_test_split
+
+
+user_name = 'admin'
+log_enable = True
+
+LogObject = cl.LogClass(user_name,log_enable)
+LogObject.log_setting()
+
+logger = logging.getLogger('model_identifier')
+
+
 class SplitData:
     
-    def __init__(self,basic_split_parameters,DBObject, connection):
-        
-        self.model_mode = basic_split_parameters['model_mode']
-        
-        if self.model_mode == 'manual':
-            
-            self.split_method, self.random_state, self.test_size, self.train_size, self.cv, self.valid_size = self.get_split_dataset(basic_split_parameters)
-            
-        else :
-            sql_command = "select * from mlaas.auto_model_split_param_tbl"
-            split_data_df=DBObject.select_records(connection,sql_command)
-            split_param = split_data_df['split_param'][0]
-            
-            dataset_split_param_dict = ast.literal_eval(split_param)
-            #TODO Need to change
-            # config_path ="./modeling/basic_dataset_split_config.json"
-            # json_data=open(config_path,'r') 
-            # dataset_split = json_data.read()
-            # dataset_split_param_dict = ast.literal_eval(dataset_split) 
-                
-                
-            # dataset_split_param_dict = json.load(config_path)
-            self.split_method = dataset_split_param_dict['split_method']
-            self.random_state = dataset_split_param_dict['random_state']
-            self.test_size = dataset_split_param_dict['test_size'] 
-            self.train_size = dataset_split_param_dict['train_size']
-            self.cv =  dataset_split_param_dict['cv']
-            self.valid_size = dataset_split_param_dict['valid_size']
-           
-            
-        # if self.model_mode == 'auto':
-                #     self.split_method, self.random_state, self.test_size, self.train_size, self.cv, self.valid_size = self.get_auto_split_dataset(model_id, DBObject, connection)
-
-
-    def get_split_dataset(self, dataset_split_parameters):
+    def get_dataset_split_dict(self, dataset_split_parameters):
         """ Returns the splitting dataset parameters.
         Args:
         dataset_split_parameters (dictionary): [Contains the model_mode, and if required, other necessary parameters.]
@@ -45,25 +34,47 @@ class SplitData:
         Returns:
             [tuple]: [dataset splitting method, and parameters required to split it.]
         """
+        if dataset_split_parameters['model_mode'] == 'Manual':
 
-        split_method = dataset_split_parameters['split_method']
-        random_state = dataset_split_parameters['random_state']
-        test_size = dataset_split_parameters['test_size']
-        train_size = 1 - test_size
-        
-        if split_method == 'cross_validation':    
-            cv = dataset_split_parameters['cv']
-            valid_size = None
-        else:
-            valid_size = dataset_split_parameters['valid_size']
-            cv = None
-        # print(split_method, random_state, test_size, train_size, cv, valid_size)
-        return split_method, random_state, test_size, train_size, cv, valid_size
+            split_method = dataset_split_parameters['split_method']
+            random_state = dataset_split_parameters['random_state']
+            test_size = dataset_split_parameters['test_size']
+            train_size = 1 - test_size
+            
+            if split_method == 'cross_validation':    
+                cv = dataset_split_parameters['cv']
+                valid_size = None
+            else:
+                valid_size = dataset_split_parameters['valid_size']
+                cv = None
+
+        elif dataset_split_parameters['model_mode'] == 'Auto':
+
+            # config_path ="./basic_dataset_split_config.json"
+            # json_data=open(config_path,'r') 
+            # dataset_split = json_data.read()
+            # dataset_split_param_dict = ast.literal_eval(dataset_split) 
+            
+            ############# 
+            dataset_split_param_dict ={"split_method" : "cross_validation",
+                                       "train_size" : 0.8, "test_size" : 0.2, 
+                                       "random_state" : 0, "cv" : 5,
+                                       "valid_size" : None}
+            
+            # dataset_split_param_dict = json.load(config_path)
+            split_method = dataset_split_param_dict['split_method']
+            random_state = dataset_split_param_dict['random_state']
+            test_size = dataset_split_param_dict['test_size'] 
+            train_size = dataset_split_param_dict['train_size']
+            cv =  dataset_split_param_dict['cv']
+            valid_size = dataset_split_param_dict['valid_size']
+
+        dataset_split_dict = {'split_method': split_method, 'random_state': random_state, 'test_size': test_size,
+                             'train_size': train_size, 'cv': cv, 'valid_size': valid_size}
+        return dataset_split_dict
 
 
-    
-
-    def get_split_data(self, X, y):
+    def get_split_data(self, input_df, target_df, random_state, test_size, valid_size, split_method):
         """Returns train-test or train-valid-test split on the basis of split_method.
 
         Args:
@@ -73,17 +84,58 @@ class SplitData:
         Returns:
             X_train, X_test, Y_train, Y_test or also returns X_valid, Y_valid: Splitted data for train and test.
         """
-        if self.split_method == 'cross_validation':
-            X_train, X_test, Y_train, Y_test = train_test_split(X, y, test_size=self.test_size,
-                                                                random_state=self.random_state)
+        if split_method == 'cross_validation':
+            X_train, X_test, Y_train, Y_test = train_test_split(input_df, target_df, test_size=test_size,
+                                                                random_state=random_state)
 
             return X_train, None, X_test, Y_train, None, Y_test
         else:
             X_train_valid, X_test, Y_train_valid, Y_test = train_test_split(X, y, test_size=self.test_size,
                                                                         random_state=self.random_state)
 
-            X_train, X_valid, Y_train, Y_valid = train_test_split(X_train_valid, Y_train_valid, test_size=self.valid_size,
-                                                            random_state=self.random_state)
+            X_train, X_valid, Y_train, Y_valid = train_test_split(X_train_valid, Y_train_valid, test_size=valid_size,
+                                                            random_state=random_state)
 
-            return X_train, X_valid, X_test, Y_train, Y_valid, Y_test 
+            return X_train, X_valid, X_test, Y_train, Y_valid, Y_test
+
+    
+
+    def get_scaled_data(self, DBObject, connection, user_id, project_id, dataset_id):
+
+        logging.info("modeling : ModelClass : get_scaled_data : execution start")
+        """Returns the data that will be preprocessed by the user in the preprocessing stage.
+
+        Returns:
+            [Dataframes]: [input_features_df:- the df used to predict target features, target_features_df:- the target/dependent data]
+        """
+        #TODO, this will change in future as there will be multiple users,projects and datasets.
+        dataset_name_command = 'select * from mlaas.cleaned_ref_tbl where dataset_id = ' + str(dataset_id)
+        dataset_df = DBObject.select_records(connection, dataset_name_command)
+
+        dataset_table_name = dataset_df['scaled_data_table'][0]# Add exception
+        input_features_list = ast.literal_eval(dataset_df['input_features'][0])# Add exception
+        target_features_list = ast.literal_eval(dataset_df['target_features'][0])# Add exception
+
+        #TODO This will change in future.
+        scaled_df_get_command = 'select * from mlaas.' + dataset_table_name
+        scaled_df = DBObject.select_records(connection, scaled_df_get_command)
+
+        input_features_df= scaled_df[input_features_list]  # by using self.input_features_list. must include unique seq id
+        target_features_df = scaled_df[target_features_list]  # by using self.target_features_list .must include unique seq id
+        logging.info("modeling : ModelClass : get_scaled_data : execution end")
+        return input_features_df,target_features_df 
+
+
+    
+    def get_input_target_features_list(self, user_id, project_id, dataset_id, DBObject, connection):
+        #TODO sql_command will be changed in the future
+        sql_command = 'select input_features,target_features from mlaas.cleaned_ref_tbl where user_id={} and project_id={} and dataset_id={}'.format(user_id, project_id, dataset_id)
+        input_target_df = DBObject.select_records(connection, sql_command)
+        #TODO Add Exception
+        input_features = input_target_df['input_features'][0]# Get the input features list
+        target_features = input_target_df['target_features'][0]# Get the target features list
+        input_features = ast.literal_eval(input_features)
+        target_features = ast.literal_eval(target_features)
+
+        return input_features, target_features
 
