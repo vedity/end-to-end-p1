@@ -317,7 +317,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
 
         return data_df
     
-    def repl_outliers_mean_ext_val_analysis(self, data_df, col):
+    def repl_outliers_mean_z_score(self, data_df, col):
         '''
             Operation id: 19
         '''
