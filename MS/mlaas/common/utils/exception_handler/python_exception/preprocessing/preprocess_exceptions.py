@@ -121,3 +121,13 @@ class IgnoreColumns(Exception):
      
     def __str__(self):
         return (self.msg)
+    
+class GetDataDfFailed(Exception):
+    """ get_data_df function failed to return a dataframe. """
+    def __init__(self,status_code):
+        self.msg = "get_data_df function failed."
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)

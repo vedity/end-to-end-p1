@@ -16,7 +16,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .utils.Exploration import dataset_exploration
 from .utils import preprocessing
-
+from .utils.cleaning import missing_value_handling
 from .utils.schema.schema_creation import *
 from common.utils.json_format.json_formater import *
 from common.utils.database import db
@@ -35,6 +35,8 @@ logger = logging.getLogger('preprocess_view')
 DBObject=db.DBClass() #Get DBClass object
 connection,connection_string=DBObject.database_connection(database,user,password,host,port) #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 preprocessObj =  preprocessing.PreprocessingClass(database,user,password,host,port) #initialize Preprocess class object
+
+
 
 
 class DatasetExplorationClass(APIView):
@@ -263,6 +265,8 @@ class OperationListClass(APIView):
 
                 '''
                 try:
+                        logging.info("data preprocess : OperationListClass : POST Method : execution start")
+                        
                         dataset_id = request.query_params.get('dataset_id') #get dataset id
                         schema_id = request.query_params.get('schema_id') #get schema id
                         column_ids = request.query_params.get('column_ids') #get column_id
@@ -297,6 +301,7 @@ class MasterOperationListClass(APIView):
                         Response(return false if failed otherwise json data)
                 '''
                 try:
+                        logging.info("data preprocess : MasterOperationListClass : GET Method : execution start")
                         operations = preprocessObj.get_all_operations() #call get_possible_operation class
                         if isinstance(operations,list):  
                                         response = json.dumps(operations)
@@ -311,3 +316,35 @@ class MasterOperationListClass(APIView):
                                 logging.error("data preprocess : MasterOperationListClass : GET Method : Exception :" + str(e))
                                 logging.error("data preprocess : MasterOperationListClass : GET Method : "+ traceback.format_exc())
                                 return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+
+class GetColumnListClass(APIView):
+        
+        def post(self, request, format=None):
+                '''
+                This class is used get column names for the data cleanup page.
+                Args  : 
+                        schema_id(Intiger): schema id of the dataset.
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival failed or successfull),
+                        Response(return false if failed otherwise json data)
+                '''
+                try:
+                        logging.info("data preprocess : GetColumnListClass : POST Method : execution start")
+                        
+                        schema_id = request.query_params.get('schema_id') #get schema id
+                        
+                        columns = preprocessObj.get_col_names(schema_id)
+                        if isinstance(columns,list): 
+                                        response = [{"column_id": i, "col_name": name} for i,name in enumerate(columns)]
+                                        logging.info("data preprocess : GetColumnListClass : POST Method : execution stop")
+                                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":response})
+                        else:
+                                        status_code,error_msg=json_obj.get_Status_code(columns) # extract the status_code and error_msg from schema_data
+                                        logging.info("data preprocess : GetColumnListClass : POST Method : execution stop : status_code :"+status_code)
+                                        return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                except Exception as e:
+                                logging.error("data preprocess : GetColumnListClass : POST Method : Exception :" + str(e))
+                                logging.error("data preprocess : GetColumnListClass : POST Method : "+ traceback.format_exc())
+                                return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+
