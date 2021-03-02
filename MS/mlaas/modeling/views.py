@@ -309,34 +309,6 @@ class ActualVsPredictionClass(APIView):
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
 
-class FinalModelDescriptionClass(APIView):
-
-        def get(self, request, format=None):
-                """
-                This function is used to get PerformanceMetrics of particular experiement
-        
-                Args  : 
-                        experiment_id[(Integer)]   :[Id of Experiment]
-                Return : 
-                        status_code(500 or 200),
-                        error_msg(Error message for retrival & insertions failed or successfull),
-                        Response(return false if failed otherwise json data)
-                """
-                try:
-                        logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
-                        
-                        project_id = request.query_params.get('project_id') #get Username
-                        
-                        final_model_data =ModelStatObject.show_model_details(project_id)
-                        
-                        logging.info("modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
-                        # print(learning_curve_json)
-                        return Response({"status_code":"200","error_msg":"Successfully updated","response":final_model_data})
-                        
-                except Exception as e:
-                        logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
-                        logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
-                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
 
 class ShowExperimentsListClass(APIView):
 
