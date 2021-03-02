@@ -332,8 +332,8 @@ class LinearRegressionClass:
         mlflow.log_metric("mse", mse)
         mlflow.log_metric("mae", mae)
         mlflow.log_metric("mape", mape)
-        mlflow.log_metric("holdout_score", holdout_score)
-        mlflow.log_metric("cv_score", cv_score)
+        # mlflow.log_metric("holdout_score", holdout_score)
+        # mlflow.log_metric("cv_score", cv_score)
        
         # log artifacts (output files)
         mlflow.sklearn.log_model(model,"Linear_Regressor_Model")
@@ -341,6 +341,8 @@ class LinearRegressionClass:
         mlflow.log_dict(features_impact_dict,"features_importance.json")
         mlflow.log_dict(model_summary,"model_summary.json")
         mlflow.log_dict(final_result_dict,"predictions.json")
+        
+        return cv_score,holdout_score
         
         
         
