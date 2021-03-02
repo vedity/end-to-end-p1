@@ -832,11 +832,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 raise GetDataDfFailed(500)
             
             if scaling_type == 0:
-                data_df = self.standard_scaling(data_df)
+                data_df = self.standard_scaling(data_df._get_numeric_data())
             elif scaling_type == 1:
-                data_df = self.min_max_scaling(data_df)
+                data_df = self.min_max_scaling(data_df._get_numeric_data())
             elif scaling_type == 2:
-                data_df = self.robust_scaling(data_df)
+                data_df = self.robust_scaling(data_df._get_numeric_data())
                     
             feature_cols = str(list(data_df.columns))
             feature_cols = feature_cols.replace("'",'"')

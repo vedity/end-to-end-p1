@@ -14,24 +14,42 @@ LogObject.log_setting()
 logger = logging.getLogger('feature_scaling')
 
 class FeaturnScalingClass:
+    
     def standard_scaling(self,dataframe):
         
         scaler = StandardScaler()
-        scaled_data = scaler.fit_transform(dataframe)
-        scaled_df = pd.DataFrame(scaled_data,columns = dataframe.columns)
-        return scaled_df
-
+        
+        scaled_data = scaler.fit_transform(dataframe._get_numeric_data())
+        scaled_df = pd.DataFrame(scaled_data,columns = dataframe._get_numeric_data().columns)
+            
+        for col in scaled_df.columns:
+            dataframe[col] = scaled_df[col]
+            
+        return dataframe
+    
     def min_max_scaling(self,dataframe):
-        min_max = MinMaxScaler()
-        min_max_data = min_max.fit_transform(dataframe)
-        scaled_df = pd.DataFrame(min_max_data,columns = dataframe.columns)
-        return scaled_df
+        
+        scaler = MinMaxScaler()
+        
+        scaled_data = scaler.fit_transform(dataframe._get_numeric_data())
+        scaled_df = pd.DataFrame(scaled_data,columns = dataframe._get_numeric_data().columns)
+            
+        for col in scaled_df.columns:
+            dataframe[col] = scaled_df[col]
+            
+        return dataframe
     
     def robust_scaling(self,dataframe):
-        robust_scaler = RobustScaler()
-        robust_data = robust_scaler.fit_transform(dataframe)
-        scaled_df = pd.DataFrame(robust_data,columns = dataframe.columns)
-        return scaled_df
+        
+        scaler = RobustScaler()
+        
+        scaled_data = scaler.fit_transform(dataframe._get_numeric_data())
+        scaled_df = pd.DataFrame(scaled_data,columns = dataframe._get_numeric_data().columns)
+            
+        for col in scaled_df.columns:
+            dataframe[col] = scaled_df[col]
+            
+        return dataframe
     
     def custom_scaling(dataframe, max, min):
         count = dataframe.shape[1]
