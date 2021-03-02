@@ -66,11 +66,12 @@ class ShowDatasetInfoClass(APIView):
 
                         logging.info("modeling : ModelStatisticsClass : GET Method : execution start")
                         
-                        
+                       
                         project_id = request.query_params.get('project_id')
                         dataset_id = request.query_params.get('dataset_id')
                         user_id=request.query_params.get('user_id')
                         
+                        project_id,dataset_id,user_id = 2,2,2
                         ModelObject = ModelClass(Model_Mode,
                                         user_id,
                                         project_id,
@@ -118,15 +119,22 @@ class StartModelClass(APIView):
                 """
                 try:
                         logging.info("modeling : ExperimentClass : GET Method : execution start")
-                        user_id,dataset_id,project_id = 2,2,2 # We will get it from the front-end
+                        # We will get it from the front-end
+                        user_id,dataset_id,project_id = 2,2,2 
 
                         Model_Mode = 'Auto'
+                        
+                        experiment_name = 'house_prediction'
+                        experiment_desc ='this is for testing'
+                        
+                        
+                        
                         ModelObject = ModelClass(Model_Mode,user_id, project_id,dataset_id,
                                                 DBObject,connection,connection_string)# Initializing the ModelClass
 
                         if Model_Mode == 'Auto': 
                                 # SplitDataObject = ModelObject.split_dataset(basic_split_parameters)
-                                ModelObject.algorithm_identifier()
+                                ModelObject.algorithm_identifier(experiment_name,experiment_desc)
                                 logging.info("modeling : ModelClass : GET Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully updated","response":"True"})
                         else:
@@ -301,34 +309,6 @@ class ActualVsPredictionClass(APIView):
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
 
-class FinalModelDescriptionClass(APIView):
-
-        def get(self, request, format=None):
-                """
-                This function is used to get PerformanceMetrics of particular experiement
-        
-                Args  : 
-                        experiment_id[(Integer)]   :[Id of Experiment]
-                Return : 
-                        status_code(500 or 200),
-                        error_msg(Error message for retrival & insertions failed or successfull),
-                        Response(return false if failed otherwise json data)
-                """
-                try:
-                        logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
-                        
-                        project_id = request.query_params.get('project_id') #get Username
-                        
-                        final_model_data =ModelStatObject.show_model_details(project_id)
-                        
-                        logging.info("modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
-                        # print(learning_curve_json)
-                        return Response({"status_code":"200","error_msg":"Successfully updated","response":final_model_data})
-                        
-                except Exception as e:
-                        logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
-                        logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
-                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
 
 class ShowExperimentsListClass(APIView):
 
@@ -347,8 +327,8 @@ class ShowExperimentsListClass(APIView):
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
                         
                         project_id = request.query_params.get('project_id') #get Username
-                        
-                        experiment_data =ModelStatObject.show_experiments_list(project_id)
+                        exp_name = 'house_prediction'
+                        experiment_data =ModelStatObject.show_running_experiments(project_id,exp_name)
                         
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
                         # print(learning_curve_json)
