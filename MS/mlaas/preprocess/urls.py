@@ -19,17 +19,19 @@ urlpatterns = [
     #url for schema column attribute
     path('mlaas/preprocess/schema/attribute/list/',ScheamColumnListClass.as_view()),
 
+    #ValidateColumnName
+    path('mlaas/preprocess/schema/column/name/exist/',ValidateColumnName.as_view()),
+
     #url for possible operation for cleanup
     path('mlaas/preprocess/cleanup/operation/',OperationListClass.as_view()),
     
     #url for possible operation for cleanup
     path('mlaas/preprocess/cleanup/master_operation/',MasterOperationListClass.as_view()),
 
-    #ValidateColumnName
-    path('mlaas/preprocess/schema/column/name/exist/',ValidateColumnName.as_view()),
-
+    #url for get column name
     path('mlaas/preprocess/cleanup/get_col_name/',GetColumnListClass.as_view()),
 
+    #url for save cleanup 
     path('mlaas/preprocess/cleanup/save/',CleanupSave.as_view()),
     
     path('mlaas/preprocess/cleanup/scaling/',ScalingClass.as_view()),
