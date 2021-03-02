@@ -1,16 +1,33 @@
+'''
+/*CHANGE HISTORY
+
+--CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
+ Mann Purohit         15-FEB-2021           1.0         Initial Version           
+
+*/
+'''
+
+import logging
+import traceback
+import ast
+
+from common.utils.logger_handler import custom_logger as cl
+
+user_name = 'admin'
+log_enable = True
+
+LogObject = cl.LogClass(user_name,log_enable)
+LogObject.log_setting()
+
+logger = logging.getLogger('project_creation')
+
 class AlgorithmDetector:
-    """Maintains the track and data for algorithms and their respective hyperparameters.
-    """
-    def __init__(self, target_df, DBObject, connection):
-        # self.target_df = target_df
+
+    def __init__(self, DBObject, connection):
         self.DBObject = DBObject
         self.connection = connection
-        self.algorithm_type, self.model_type = self.set_model_type(target_df)
-        # self.models_list = self.show_models_list()
-        
 
-
-    def set_model_type(self, target_df):
+    def get_model_type(self, target_df):
         """Returns the list of all algorithm using the model_type and algorithm_type.
 
         Args:
@@ -21,13 +38,14 @@ class AlgorithmDetector:
         """
         algorithm_type = None
         model_type = None
-        
+        # This logic is used to distinguish different types of algorithms and models.
+
         target_shape = target_df.shape
         total_length = target_shape[0]
         unq_length = len(target_df.iloc[:,1].unique())
-        threshold = int((total_length * 10) / 100)
+        threshold = int((total_length * 0.01) / 100) # Subject to change, further research.
 
-        if threshold < unq_length :
+        if threshold < unq_length:
             model_type = 'Regression'
             
             if target_shape[1] == 2:
@@ -41,33 +59,21 @@ class AlgorithmDetector:
                 algorithm_type = 'Binary_Classification'
             elif unq_length > 2:
                 algorithm_type = 'MultiClass_Classification'
-                
-        self.algorithm_type, self.model_type = algorithm_type, model_type
         
         return algorithm_type, model_type
-
-
-    def get_model_types(self):
-        """This function returns the algorithm and model type on the basis of target_df.
-
-        Returns:
-            tuple: algorithm_type (single_target, multi_target, unseupervised, and more), model_type (Regression, Classification, and more)
-        """
-        return self.algorithm_type, self.model_type
     
-    def show_models_list(self):
+    def show_models_list(self, algorithm_type, model_type):
         """Returns the compatible list of model on the basis of algorithm_type and model_type.
 
         Returns:
             list: models_list, contains list of all the ML/DL models derived from the algorithm and model type.
         """
-        print('In show models_list')
-        sql_command = "select model_name from mlaas.model_master_tbl where model_type='"+self.model_type+"'"+" and algorithm_type='"+self.algorithm_type+"'"
-        self.models_list = self.DBObject.select_records(self.connection, sql_command)
-        return self.models_list
+        sql_command = "select * from mlaas.model_master_tbl where model_type='"+model_type+"'"+" and algorithm_type='"+algorithm_type+"'"
+        models_list = self.DBObject.select_records(self.connection, sql_command)# Add exception
+        return models_list
 
 
-    def get_hyperparameters_list(self, model_name):
+    def get_hyperparameters_list(self, model_id):
         """Returns the appropriate list of hyperparameters associated with the model_name argument.
 
         Args:
@@ -76,16 +82,6 @@ class AlgorithmDetector:
         Returns:
             list: list of hyperparameters of the model 'model_name'.
         """
-        print('Model_name:- ', model_name)
-        sql_command = "select model_parameter from mlaas.model_master_tbl where model_name='"+model_name+"'"
-        print('SQL Command:- ', sql_command)
-        hyperparameters_list = self.DBObject.select_records(self.connection, sql_command)
-        print(hyperparameters_list)
+        sql_command = "select model_parameter from mlaas.model_master_tbl where model_id='"+model_id+"'"
+        hyperparameters_list = self.DBObject.select_records(self.connection, sql_command)['model_parameter'][0]# Add exception
         return hyperparameters_list
-
-
-        
-
-# How to get the DBObject, and connection in the class AlgorithmDetector?
-
-#Update my code in model_identifier.

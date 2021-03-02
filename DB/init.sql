@@ -27,11 +27,12 @@ CREATE TABLE mlaas.model_experiment_tbl (
 
 CREATE TABLE mlaas.model_master_tbl (
  	model_id integer,
-    model_name text,
-    model_desc text,
-    model_parameter text,
-    model_type text,
-    algorithm_type text
+   model_name text,
+   model_desc text,
+   model_parameter text,
+   model_type text,
+   algorithm_type text,
+   model_created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
 
 CREATE TABLE mlaas.cleaned_ref_tbl (
@@ -43,3 +44,15 @@ CREATE TABLE mlaas.cleaned_ref_tbl (
     target_features text,
     scaled_data_table text
     );
+
+CREATE TABLE mlaas.model_dags_tbl
+(
+unq_id bigserial,
+dag_id varchar,
+run_id varchar,
+execution_date timestamptz,
+project_id bigint,
+dataset_id bigint,
+user_id integer,
+dag_created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
