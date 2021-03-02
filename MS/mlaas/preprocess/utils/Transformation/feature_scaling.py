@@ -49,6 +49,6 @@ class FeaturnScalingClass:
             #Looping based on columns present in the dataframe
             for i,val in enumerate(dataframe[column_name]):
 
-                dataframe[column_name][i] = round(((val- col_min_value)/(col_max_value - col_min_value))*(max - min) + min,2)
+                dataframe[column_name][i] = ((val- col_min_value)/(col_max_value - col_min_value))*(max - min) + min
 
         return dataframe

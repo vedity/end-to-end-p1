@@ -50,7 +50,7 @@ class MissingValueClass:
         logging.info("Preprocess : MissingValueClass : mean_imputation : execution start")
         
         #Replace the NaN value with mean of the column 
-        series.fillna(round(series.mean(),2), inplace = True)
+        series.fillna(round(series.mean(),4), inplace = True)
 
         logging.info("Preprocess : MissingValueClass : mean_imputation : execution stop")
         return series
@@ -67,7 +67,7 @@ class MissingValueClass:
         logging.info("Preprocess : MissingValueClass : median_imputation : execution start")
 
         #Replace the NaN value with median of the column 
-        series.fillna(round(series.median(),2),inplace = True)
+        series.fillna(round(series.median(),4),inplace = True)
 
         logging.info("Preprocess : MissingValueClass : median_imputation : execution stop")
         return series
@@ -104,7 +104,7 @@ class MissingValueClass:
         extreme = series.mean()+3*series.std()
 
         #replace the NaN value extreme distribution value
-        series.fillna(round(extreme,2),inplace = True)
+        series.fillna(round(extreme,4),inplace = True)
 
         logging.info("Preprocess : MissingValueClass : end_of_distribution : execution stop")
         return series

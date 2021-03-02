@@ -21,11 +21,14 @@ from .Exploration import dataset_exploration as de
 from .schema import schema_creation as sc
 from .cleaning import noise_reduction as nr
 from .cleaning import cleaning
+from .Transformation import transformation as trs
 
 #* Library Imports
 import logging
 import traceback
 import numpy as np
+import pandas as pd
+import uuid
 
 user_name = 'admin'
 log_enable = True
@@ -38,7 +41,7 @@ logger = logging.getLogger('preprocessing')
 #* Object Definition
 dc = dataset_creation.DatasetClass()
 
-class PreprocessingClass(sc.SchemaClass,de.ExploreClass,cleaning.CleaningClass):
+class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass, trs.TransformationClass):
     def __init__(self,database,user,password,host,port):
         """This constructor is used to initialize database credentials.
            It will initialize when object of this class is created with below parameter.
@@ -678,7 +681,7 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,cleaning.CleaningClass):
             return OperationOrderingFailed(500).msg
         
         
-    def master_executor(self, dataset_id, schema_id, request, save_as = False):
+    def master_executor(self, dataset_id, schema_id,request, save_as = False):
         '''
             It takes the request from the frontend and executes the cleanup operations.
             
@@ -758,14 +761,6 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,cleaning.CleaningClass):
                     data_df = self.repl_outliers_med_z_score(data_df, col)
                 elif op == 22:
                     data_df = self.apply_log_transformation(data_df, col)
-                # elif op == 23:
-                #     data_df = self.mean_imputation(data_df, col)
-                # elif op == 24:
-                #     data_df = self.mean_imputation(data_df, col)
-                # elif op == 25:
-                #     data_df = self.mean_imputation(data_df, col)
-                # elif op == 26:
-                #     data_df = self.mean_imputation(data_df, col)
                 # elif op == 27:
                 #     data_df = self.mean_imputation(data_df, col)
                 # elif op == 28:
@@ -807,8 +802,72 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,cleaning.CleaningClass):
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
             return exc.msg
             
-        
-
+    def handover(self, dataset_id, schema_id, project_id, user_id, scaling_type = 0, val = None):
+        '''
+            This function is used to store the scaled numpy file into the scaled dataset folder.
+            
+            Args:
+            -----
+            data_df (`pandas.DataFrame`) = whole dataframe.
+            scaling_type (`Intiger`) (default = `0`): Type of the rescaling operation.
+                - 0 : Standard Scaling
+                - 1 : Min-max Scaling
+                - 2 : Robust Scaling
+                - 3 : Custom Scaling
+                
+            Returns:
+            -------
+            status (`Intiger`): Status of the upload.
+        '''
+        try:
+            logging.info("data preprocessing : PreprocessingClass : handover : execution start")
+            
+            DBObject,connection,connection_string = self.get_db_connection()
+            if connection == None :
+                raise DatabaseConnectionFailed(500)  
+            
+            #? Getting Dataframe
+            data_df = self.get_data_df(dataset_id,schema_id)
+            if isinstance(data_df, str):
+                raise GetDataDfFailed(500)
+            
+            if scaling_type == 0:
+                data_df = self.standard_scaling(data_df)
+            elif scaling_type == 1:
+                data_df = self.min_max_scaling(data_df)
+            elif scaling_type == 2:
+                data_df = self.robust_scaling(data_df)
+                    
+            feature_cols = str(list(data_df.columns))
+            feature_cols = feature_cols.replace("'",'"')
+            target_cols = str(DBObject.get_target_col(connection, schema_id))
+            target_cols = target_cols.replace("'",'"')
+            filename = "scaled_data/scaled_data_" + str(uuid.uuid1().time)
+                    
+            sql_command = f"select * from mlaas.cleaned_ref_tbl crt where crt.dataset_id = '{dataset_id}' and crt.project_id = '{project_id}' and crt.user_id = '{user_id}'"
+            data=DBObject.select_records(connection,sql_command)
+            
+            np.save(filename,data_df.to_numpy())
+            
+            if len(data == 0):
+                row = project_id,dataset_id,user_id,feature_cols,target_cols,filename
+                row_tuples = [tuple(row)]
+                col_names = "project_id,dataset_id,user_id,input_features,target_features,scaled_data_table"
+                
+                status = DBObject.insert_records(connection,"mlaas.cleaned_ref_tbl",row_tuples, col_names)
+                logging.info("data preprocessing : PreprocessingClass : handover : execution stop")
+                
+            else:
+                sql_command = f"update mlaas.cleaned_ref_tbl set target_features= '{target_cols}' ,input_features='{feature_cols}',scaled_data_table = '{filename}' where dataset_id = '{dataset_id}' and project_id = '{project_id}' and user_id  = '{user_id}'"
+                status = DBObject.update_records(connection, sql_command)
+            
+            return status
+            
+        except (DatabaseConnectionFailed,GetDataDfFailed) as exc:
+            logging.error("data preprocessing : PreprocessingClass : handover : Exception " + str(exc.msg))
+            logging.error("data preprocessing : PreprocessingClass : handover : " +traceback.format_exc())
+            return exc.msg
+            
 
 
 
