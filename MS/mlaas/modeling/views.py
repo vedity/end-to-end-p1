@@ -66,11 +66,12 @@ class ShowDatasetInfoClass(APIView):
 
                         logging.info("modeling : ModelStatisticsClass : GET Method : execution start")
                         
-                        
+                       
                         project_id = request.query_params.get('project_id')
                         dataset_id = request.query_params.get('dataset_id')
                         user_id=request.query_params.get('user_id')
                         
+                        project_id,dataset_id,user_id = 2,2,2
                         ModelObject = ModelClass(Model_Mode,
                                         user_id,
                                         project_id,
@@ -118,15 +119,22 @@ class StartModelClass(APIView):
                 """
                 try:
                         logging.info("modeling : ExperimentClass : GET Method : execution start")
-                        user_id,dataset_id,project_id = 2,2,2 # We will get it from the front-end
+                        # We will get it from the front-end
+                        user_id,dataset_id,project_id = 2,2,2 
 
                         Model_Mode = 'Auto'
+                        
+                        experiment_name = 'house_prediction'
+                        experiment_desc ='this is for testing'
+                        
+                        
+                        
                         ModelObject = ModelClass(Model_Mode,user_id, project_id,dataset_id,
                                                 DBObject,connection,connection_string)# Initializing the ModelClass
 
                         if Model_Mode == 'Auto': 
                                 # SplitDataObject = ModelObject.split_dataset(basic_split_parameters)
-                                ModelObject.algorithm_identifier()
+                                ModelObject.algorithm_identifier(experiment_name,experiment_desc)
                                 logging.info("modeling : ModelClass : GET Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully updated","response":"True"})
                         else:
@@ -347,8 +355,8 @@ class ShowExperimentsListClass(APIView):
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
                         
                         project_id = request.query_params.get('project_id') #get Username
-                        
-                        experiment_data =ModelStatObject.show_experiments_list(project_id)
+                        exp_name = 'house_prediction'
+                        experiment_data =ModelStatObject.show_running_experiments(project_id,exp_name)
                         
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
                         # print(learning_curve_json)

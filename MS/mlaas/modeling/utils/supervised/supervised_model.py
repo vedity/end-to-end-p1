@@ -35,7 +35,7 @@ class SupervisedClass(RC,PC):
     """
     
 
-    def supervised_algorithm(self, Model_Mode, user_id, project_id, dataset_id, DBObject, connection):
+    def supervised_algorithm(self, Model_Mode, user_id, project_id, dataset_id, DBObject, connection,experiment_name,experiment_desc):
         
         """This function is used to call supervised algorithm.
         """
@@ -50,7 +50,7 @@ class SupervisedClass(RC,PC):
         if model_type == "Regression" :
             # Call Regression Class's method
             super(SupervisedClass,self).regression_model(Model_Mode, user_id, project_id, dataset_id,
-                                                        model_type, algorithm_type, DBObject,connection)
+                                                        model_type, algorithm_type, DBObject,connection,experiment_name,experiment_desc)
                 
                                                 
         elif model_type == "Classification" :
@@ -71,7 +71,7 @@ class SupervisedClass(RC,PC):
                                                          connection_string,
                                                          project_id,
                                                          dataset_id,
-                                                         user_id)
+                                                         user_id,experiment_name,experiment_desc)
         
         else:
             print("please select appropriate target")

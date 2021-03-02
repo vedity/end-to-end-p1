@@ -69,15 +69,20 @@ def start_pipeline(dag,run_id,execution_date,ds,**kwargs):
     print("dataset id ==",kwargs['dag_run'].conf['dataset_id'])
     print("user id ==",kwargs['dag_run'].conf['user_id'])
     
+    print("experiment name ==",kwargs['dag_run'].conf['exp_name'])
+    print("experiment desc ==",kwargs['dag_run'].conf['exp_desc'])
+    
+    model_mode = kwargs['dag_run'].conf['model_mode']
     dag_id = dag.dag_id
     project_id = int(kwargs['dag_run'].conf['project_id'])
     dataset_id = int(kwargs['dag_run'].conf['dataset_id'])
     user_id = int(kwargs['dag_run'].conf['user_id'])
+    exp_name  = kwargs['dag_run'].conf['exp_name']
     
     table_name='mlaas.model_dags_tbl'
-    cols = 'dag_id,run_id,execution_date,project_id,dataset_id,user_id' 
+    cols = 'dag_id,exp_name,run_id,execution_date,project_id,dataset_id,user_id,model_mode' 
         
-    row = dag_id,run_id,execution_date,project_id,dataset_id,user_id    
+    row = dag_id,exp_name ,run_id,execution_date,project_id,dataset_id,user_id,model_mode    
     row_tuples = [tuple(row)]
     
     dag_status = DBObject.insert_records(connection,table_name,row_tuples,cols)
@@ -87,7 +92,7 @@ def start_pipeline(dag,run_id,execution_date,ds,**kwargs):
     
 
              
-def linear_regression_sklearn(**kwargs):
+def linear_regression_sklearn(run_id,**kwargs):
         
         mlflow.set_tracking_uri("postgresql+psycopg2://airflow:airflow@postgresql:5432/airflow?options=-csearch_path%3Ddbo,mlaas")
        
@@ -115,36 +120,47 @@ def linear_regression_sklearn(**kwargs):
         print(dataset_split_dict)
         
         # Get from database
-        sql_command = "select experiment_id from mlaas.experiments order by experiment_id desc limit 1"
-        counter = DBObject.select_records(connection, sql_command)
-        print("counter==",counter)
+        # sql_command = "select nextval('unq_num_seq') as ids"
+        # counter = DBObject.select_records(connection, sql_command)
+        # print("counter==",counter)
         
-        if counter is None:
-            counter = 1
-        else:
-            counter = counter['experiment_id'][0]
-            counter += 1
+        # if counter is None:
+        #     counter = 1
+        # else:
+        #     counter = counter['ids'][0]
+            
 
+        # print("updated counter =",counter)
+        
         id = uuid.uuid1().time 
         experiment_name = model_mode.upper() + "_" + experiment_name.upper() + "_" + str(id)
+        
         # create experiment 
         experiment_id = mlflow.create_experiment(experiment_name)
         experiment = mlflow.get_experiment(experiment_id)
         # mlflow set_experiment and run the model.
         with mlflow.start_run(experiment_id=experiment_id) as run:
+            # Get experiment id and run id from the experiment set.
+            run_uuid = run.info.run_id
+            experiment_id = experiment.experiment_id
+            cv_score = 0.0
+            holdout_score = 0.0
+            dag_run_id = run_id
+            ################### Add Experiment ################################
+            ExpObject = model_experiment.ExperimentClass(DBObject, connection, connection_string)
+            add_exp_status = ExpObject.add_experiments(experiment_id,experiment_name,run_uuid,
+                                                          project_id,dataset_id,user_id,
+                                                          model_id,model_mode,
+                                                          dag_run_id,cv_score,holdout_score)
             ## Declare Object
             LRObject = linear_regressor.LinearRegressionClass(input_features_list, target_features_list, 
                                                             X_train, X_valid, X_test, y_train, y_valid, 
                                                             y_test, dataset_split_dict)
-            LRObject.run_pipeline()
+            cv_score,holdout_score = LRObject.run_pipeline()
+            
+            ## Update Experiment ########
+            upd_exp_status = ExpObject.update_experiment(experiment_id,cv_score,holdout_score)
         
-        # Get experiment id and run id from the experiment set.
-        run_uuid = run.info.run_id
-        experiment_id = experiment.experiment_id
-
-        # Add Experiment into database
-        ExpObject = model_experiment.ExperimentClass(experiment_id,experiment_name,run_uuid,project_id,dataset_id,user_id,model_id,model_mode)
-        experiment_status = ExpObject.add_experiments(DBObject, connection, connection_string)
-        print("experiment_status == ",experiment_status)
+        print("experiment_status == ",upd_exp_status)
         
         
