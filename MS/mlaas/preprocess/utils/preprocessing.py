@@ -824,14 +824,22 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             target_cols = target_cols.replace("'",'"')
             filename = "scaled_data/scaled_data_" + str(uuid.uuid1().time)
                     
+            sql_command = f"select * from mlaas.cleaned_ref_tbl crt where crt.dataset_id = '{dataset_id}' and crt.project_id = '{project_id}' and crt.user_id = '{user_id}'"
+            data=DBObject.select_records(connection,sql_command)
+            
             np.save(filename,data_df.to_numpy())
             
-            row = project_id,dataset_id,user_id,feature_cols,target_cols,filename
-            row_tuples = [tuple(row)]
-            col_names = "project_id,dataset_id,user_id,input_features,target_features,scaled_data_table"
-            
-            status = DBObject.insert_records(connection,"mlaas.cleaned_ref_tbl",row_tuples, col_names)
-            logging.info("data preprocessing : PreprocessingClass : handover : execution stop")
+            if len(data == 0):
+                row = project_id,dataset_id,user_id,feature_cols,target_cols,filename
+                row_tuples = [tuple(row)]
+                col_names = "project_id,dataset_id,user_id,input_features,target_features,scaled_data_table"
+                
+                status = DBObject.insert_records(connection,"mlaas.cleaned_ref_tbl",row_tuples, col_names)
+                logging.info("data preprocessing : PreprocessingClass : handover : execution stop")
+                
+            else:
+                sql_command = f"update mlaas.cleaned_ref_tbl set target_features= '{target_cols}' ,input_features='{feature_cols}',scaled_data_table = '{filename}' where dataset_id = '{dataset_id}' and project_id = '{project_id}' and user_id  = '{user_id}'"
+                status = DBObject.update_records(connection, sql_command)
             
             return status
             
