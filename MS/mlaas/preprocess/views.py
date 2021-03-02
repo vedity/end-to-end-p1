@@ -267,13 +267,14 @@ class OperationListClass(APIView):
                 '''
                 try:
                         logging.info("data preprocess : OperationListClass : POST Method : execution start")
-                        
-                        dataset_id = request.query_params.get('dataset_id') #get dataset id
-                        schema_id = request.query_params.get('schema_id') #get schema id
-                        column_ids = request.query_params.get('column_ids') #get column_id
-                        column_ids = column_ids[1:-1].split(",") #split columnids by comma sepration
-                        column_ids = [int(i) for i in column_ids] #convert all ids to int
+                        data = json.dumps(request.data) #get handling json
+                        data = json.loads(data) 
+                        dataset_id = data['dataset_id']
+                        schema_id = data['schema_id']
 
+                        column_ids = data['column_ids']
+                        column_ids = column_ids.split(",") #split columnids by comma sepration
+                        column_ids = [int(i) for i in column_ids] #convert all ids to int
                         operation = preprocessObj.get_possible_operations(dataset_id,schema_id,column_ids) #call get_possible_operation class
                         if isinstance(operation,list):  
                                         logging.info("data preprocess : OperationListClass : POST Method : execution stop")
@@ -318,9 +319,8 @@ class MasterOperationListClass(APIView):
                                 logging.error("data preprocess : MasterOperationListClass : GET Method : "+ traceback.format_exc())
                                 return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
-class GetColumnListClass(APIView):
-        
-        def post(self, request, format=None):
+class GetColumnListClass(APIView):        
+        def get(self, request, format=None):
                 '''
                 This class is used get column names for the data cleanup page.
                 Args  : 
@@ -351,6 +351,17 @@ class GetColumnListClass(APIView):
 
 class CleanupSave(APIView):
         def post(self, request, format=None):
+                '''
+                This class is used to save clean data for the data cleanup page.
+                Args  : 
+                        schema_id(Integer): schema id of the dataset.
+                        datasetid(Integer): dataset id of the dataset.
+                        data(JSON Body): column id, handling id. 
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival failed or successfull),
+                        Response(return false if failed otherwise json data)
+                '''
                 try:
                         logging.info("data preprocess : CleanupSave : POST Method : execution start")
                         schema_id = request.query_params.get('schema_id') #get schema id
