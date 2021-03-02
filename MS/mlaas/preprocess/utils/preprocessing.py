@@ -849,7 +849,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             np.save(filename,data_df.to_numpy())
             
-            if len(data == 0):
+            if len(data) == 0:
                 row = project_id,dataset_id,user_id,feature_cols,target_cols,filename
                 row_tuples = [tuple(row)]
                 col_names = "project_id,dataset_id,user_id,input_features,target_features,scaled_data_table"
