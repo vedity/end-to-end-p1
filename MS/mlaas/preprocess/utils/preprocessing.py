@@ -526,10 +526,10 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,cleaning.CleaningClass):
                     operations = [1,2,3,6,10]
 
                     #? Column is both numerical & categorical
-                    if (col in numerical_columns) and (predicted_datatypes[id].startswith('Ca')):
+                    if (col in num_cols) and (predicted_datatypes[id].startswith('Ca')):
                         col_type = 0
                     #? Column is Numerical
-                    elif col in numerical_columns:
+                    elif col in num_cols:
                         col_type = 1
                     #? Column is categorical
                     elif predicted_datatypes[id].startswith('Ca'):
@@ -696,7 +696,9 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,cleaning.CleaningClass):
         
         try:
             logging.info("data preprocessing : PreprocessingClass : master_executor : execution start")
-            
+            DBObject,connection,connection_string = self.get_db_connection()
+            if connection == None :
+                raise DatabaseConnectionFailed(500)
             #? Getting Dataframe
             data_df = self.get_data_df(dataset_id,schema_id)
             if isinstance(data_df, str):
@@ -778,9 +780,27 @@ class PreprocessingClass(sc.SchemaClass,de.ExploreClass,cleaning.CleaningClass):
                 #     data_df = self.mean_imputation(data_df, col)
                 # elif op == 33:
                 #     data_df = self.mean_imputation(data_df, col)
+            sql_command = "select dataset_visibility,dataset_table_name,user_name from mlaas.dataset_tbl  where dataset_id='"+str(dataset_id)+"'"
             
+            logging.info(str(sql_command))
+            dataframe = DBObject.select_records(connection,sql_command)
+ 
+            dataset_visibility,dataset_table_name,user_name  = str(dataframe['dataset_visibility'][0]),str(dataframe['dataset_table_name'][0]),str(dataframe['user_name'][0])
+ 
+            updated_table_name = DBObject.get_table_name(connection,dataset_table_name)
+            
+            if dataset_visibility == 'public':
+                user_name='public'
+ 
+            status = DBObject.load_df_into_db(connection_string,updated_table_name,data_df,user_name)
+ 
+            if status == 0:
+ 
+                Sql_command = "update mlaas.dataset_tbl set dataset_table_name='"+str(updated_table_name)+"' where dataset_id='"+str(dataset_id)+"'"
+                logging.info(str(sql_command))
+                update_status = DBObject.update_records(connection,Sql_command)
             logging.info("data preprocessing : PreprocessingClass : master_executor : execution stop")
-            return data_df
+            return update_status
 
         except (GetDataDfFailed) as exc:
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
