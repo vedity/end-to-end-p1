@@ -477,11 +477,11 @@ class SchemaClass:
 
             #this sql command will get schema_id if found.
             sql_command = "select schema_id from "+ table_name +" where schema_id='"+str(schema_id)+"'"
-
+            logging.info(str(sql_command) + " check error" )
             #execute the query string,if record exist return dataframe else None
             data=DBObject.select_records(connection,sql_command) 
 
-            
+            logging.info(str(len(data)) + " check error" )
             if len(data) > 0: 
                 Flag = True
             else:
