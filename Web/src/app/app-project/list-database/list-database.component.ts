@@ -54,6 +54,7 @@ export class ListDatabaseComponent implements OnInit {
       this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
         dtInstance.columns().every(function () {
           const that = this;
+          
           $('#input_'+ this.index("visible")).on('keyup change', function () {
             console.log(this['value']);
             if (that.search() !== this['value']) {
