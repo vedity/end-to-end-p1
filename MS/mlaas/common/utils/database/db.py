@@ -176,6 +176,7 @@ class DBClass:
         cols = cols # Get columns name for database insert query.
         tuples = row_tuples # Get record for database insert query.
 
+
         cursor = connection.cursor() # Open cursor for database.
         try:
             if Flag == 0 :
@@ -194,7 +195,7 @@ class DBClass:
         except (Exception, psycopg2.DatabaseError) as error:
             connection.rollback() # Rollback the changes.
             cursor.close() # Close the cursor.
-            logging.info(str(error))
+            logging.error(str(error))
             return 1,None # If failed.
 
     
@@ -761,6 +762,12 @@ class DBClass:
             logging.error("database : DBClass : get_dataset_df : " +traceback.format_exc())
             return exc.msg
         
-
+    def get_target_col(self, connection, schema_id):
+        
+        sql_command = f"select st.column_name from mlaas.schema_tbl st where st.schema_id = '{schema_id}' and st.column_attribute = 'Target'"
+        target_df = self.select_records(connection,sql_command)
+        
+        target_lst = target_df['column_name']
+        return target_lst.tolist()
 
      
