@@ -27,7 +27,7 @@ export class ModelingTypeApiService {
 
   startModeling(obj):Observable<any>{
     var params = new HttpParams().append("model_mode", obj.model_mode);
-    return this.httpClient.post(this.baseUrl + "modeling/startmodel/",obj, { headers: this.headers ,params});
+    return this.httpClient.post(this.baseUrl + "modeling/startmodel/", { headers: this.headers ,params});
   }
 
 

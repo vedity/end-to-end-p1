@@ -1,23 +1,28 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { DataTableDirective } from 'angular-datatables';
 import { ToastrService } from 'ngx-toastr';
-import { DataExplorationApiService } from '../data-exploration.service';
+import { DataCleanupApiService } from '../data-cleanup.service';
 @Component({
   selector: 'app-data-cleanup',
   templateUrl: './data-cleanup.component.html',
   styleUrls: ['./data-cleanup.component.scss']
 })
 export class DataCleanupComponent implements OnInit {
-
-  constructor(public apiService: DataExplorationApiService, public toaster: ToastrService, private modalService: NgbModal, public router: Router) { }
+  @ViewChild(DataTableDirective, { static: false })
+  datatableElement: DataTableDirective;
+  dtOptions: DataTables.Settings = {};
+  constructor(public apiService: DataCleanupApiService, public toaster: ToastrService, private modalService: NgbModal, public router: Router) { }
   @Input() public dataset_id: any;
   @Input() public title: any;
   @Input() public project_id: any
+  @Input() public schema_id: any
   loaderdiv = false;
   displaytitle = "false";
   errorStatus = true;
- 
+  operationList: any;
+  columnList: any;
   animation = "progress-dark";
   theme = {
     'border-radius': '5px',
@@ -28,7 +33,18 @@ export class DataCleanupComponent implements OnInit {
   };
 
   ngOnInit(): void {
-
+    this.dtOptions = {
+      paging: false,
+      ordering: false,
+      scrollCollapse: true,
+      info: false,
+      searching: false,
+      //scrollX: true,
+      scrollY: "52vh",
+    }
+    this.loaderdiv=true;
+    this.getOpertion();
+    this.getColumnList();
   }
 
 
@@ -45,22 +61,39 @@ export class DataCleanupComponent implements OnInit {
     }
   }
 
-  
+  getOpertion() {
+    this.apiService.getOperation().subscribe(
+      logs => this.operationlistsuccessHandler(logs),
+      error => this.errorHandler(error)
+    )
+  }
 
-  // gotoModeling() {
-  // //   let user=localStorage.getItem("currentUser")
-  // //   //console.log(user);
-  // //   this.data.project_id=this.project_id;
-  // //   this.data.dataset_id=this.dataset_id;
-  // //   this.data.user_id=JSON.parse(user).id;
-  // //   console.log(this.data);
-  // //   //localStorage.setItem("Modeling",JSON.stringify(this.data));
-  // //  // this.data.model_mode="auto";
-  // //   this.router.navigate(["modeling"]);
+  operationlistsuccessHandler(data) {
+    if (data.status_code == "200") {
+      this.operationList = data.response;
+    }
+    else {
+      this.errorHandler(data);
+    }
+  }
 
-  // }
+  getColumnList() {
+    this.apiService.getColumnList(this.schema_id).subscribe(
+      logs => this.columnlistsuccessHandler(logs),
+      error => this.errorHandler(error)
+    )
+  }
 
-  // smallModal(modelingmodal: any) {
-  //   this.modalService.open(modelingmodal, { size: 'md', windowClass: 'modal-holder', centered: true });
-  // }
+  columnlistsuccessHandler(data) {
+    if (data.status_code == "200") {
+      this.columnList = data.response;
+      setTimeout(() => {
+      this.loaderdiv=false;
+        
+      }, 10);
+    }
+    else {
+      this.errorHandler(data);
+    }
+  }
 }

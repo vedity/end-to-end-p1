@@ -5,7 +5,7 @@ import { DataTableDirective } from 'angular-datatables';
 import { ToastrService } from 'ngx-toastr';
 //  import { manualmodeling } from './modeling.model';
 import { ModelingTypeApiService } from '../modeling-type.service';
-
+import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
 @Component({
   selector: 'app-modeling-type',
   templateUrl: './modeling-type.component.html',
@@ -14,6 +14,9 @@ import { ModelingTypeApiService } from '../modeling-type.service';
 export class ModelingTypeComponent implements OnInit {
   // mySwitch: boolean = false;
   // public data:manualmodeling;
+  timePeriods = [
+    'Experiment 1','Experiment 2','Experiment 3','Experiment 4'
+  ];
   splitmethodselection="crossvalidation";
   hyperparams='sklearn';
   @ViewChild(DataTableDirective, { static: false })
@@ -37,7 +40,8 @@ export class ModelingTypeComponent implements OnInit {
   public modelDescription: any;
   processclass: any = "stop";
   processInterval: any;
- 
+  lineColumAreaChart:any;
+  
   ngOnInit(): void {
    let projectdatamodel;
     this.dtOptions = {
@@ -49,9 +53,8 @@ export class ModelingTypeComponent implements OnInit {
       scrollY: "calc(100vh - 365px)",
     }
     this.params = history.state;
+
     if (this.params.dataset_id != undefined) {
-      let user = localStorage.getItem("currentUser")
-      this.params.user_id = JSON.parse(user).id;
       localStorage.setItem("modeling", JSON.stringify(this.params));
     }
     else {
@@ -62,12 +65,90 @@ export class ModelingTypeComponent implements OnInit {
       this.params = localStorage.getItem("params");
       this.params = JSON.parse(this.params);
     }
+
+    this.lineColumAreaChart = {
+      chart: {
+          height: 200,
+          type: 'line',
+          stacked: false,
+          toolbar: {
+              show: false
+          }
+      },
+      stroke: {
+          width: [2, 2, 4],
+        //   curve: 'smooth'
+      },
+    //   plotOptions: {
+    //       bar: {
+    //           columnWidth: '50%'
+    //       }
+    //   },
+      colors: ['#f46a6a', '#34c38f'],
+      series: [{
+          name: 'Experiment 1',
+        //   type: 'line',
+          data: [23, 11, 50, 70, 13, 56, 37, 78, 44, 22, 30]
+      }, {
+          name: 'Experiment 2',
+        //   type: 'line',
+          data: [23, 10, 22, 30, 13, 20, 31, 21, 40, 20, 32]
+      }],
+      fill: {
+          opacity: [0.85, 1],
+          gradient: {
+              inverseColors: false,
+              shade: 'light',
+              type: 'vertical',
+              opacityFrom: 0.85,
+              opacityTo: 0.55,
+              stops: [0, 100, 100, 100]
+          }
+      },
+      // tslint:disable-next-line: max-line-length
+      labels: ['01/01/2003', '02/01/2003', '03/01/2003', '04/01/2003', '05/01/2003', '06/01/2003', '07/01/2003', '08/01/2003', '09/01/2003', '10/01/2003', '11/01/2003'],
+      markers: {
+          size: [0,2]
+      },
+      legend: {
+          offsetY: 5,
+      },
+      xaxis: {
+          type: 'datetime',
+      },
+      yaxis: {
+          title: {
+              text: 'Points',
+          },
+      },
+      tooltip: {
+          shared: true,
+          intersect: false,
+          y: {
+              formatter(y) {
+                  if (typeof y !== 'undefined') {
+                      return y.toFixed(0) + ' points';
+                  }
+                  return y;
+              }
+          }
+      },
+      grid: {
+          borderColor: '#f1f1f1'
+      }
+    };
+    let user = localStorage.getItem("currentUser")
+    this.params.user_id = JSON.parse(user).id;
+    console.log(user);
     this.getDatasetInfo();
     this.getModelDescription();
     this.getAlgorithmList();
   }
 
-
+  drop(event: CdkDragDrop<string[]>) {
+    moveItemInArray(this.timePeriods, event.previousIndex, event.currentIndex);
+  }
+  
   compareIds = [];
   setCopmareIds(val, id) {
     // console.log(val, id);
@@ -106,7 +187,9 @@ export class ModelingTypeComponent implements OnInit {
   algorithmlist: any;
   successAlgorithmListHandler(data) {
     if (data.status_code == "200") {
-      this.algorithmlist = data.response.model_name;
+      this.algorithmlist = data.response;
+      console.log(this.algorithmlist);
+      
     }
     else {
       this.errorHandler(data);
@@ -127,7 +210,7 @@ export class ModelingTypeComponent implements OnInit {
   paramsList: any;
   successParamsListHandler(data) {
     if (data.status_code == "200") {
-      this.paramsList = data.response.model_parameter;
+      this.paramsList = data.response.model_parameters;
       console.log(this.paramsList);
       
     }
@@ -157,13 +240,19 @@ export class ModelingTypeComponent implements OnInit {
     this.experiment_name = this.params.experiment_name;
     this.experiment_desc = this.params.experiment_desc;
     let obj = {
-      user_id: this.params.user_id,
-      dataset_id: this.params.dataset_id,
-      project_id: this.params.project_id,
+      user_id:2,// this.params.user_id,
+      dataset_id:2,// this.params.dataset_id,
+      project_id:2,// this.params.project_id,
       model_mode: "auto",
       experiment_name: this.params.experiment_name,
       experiment_desc: this.params.experiment_desc
     }
+    this.apiservice.startModeling(obj).subscribe(
+      logs=>this.startsuccessHandler(logs),
+      error=>this.errorHandler(error)
+      
+    )
+
   }
 
   stopModel() {
@@ -220,6 +309,11 @@ export class ModelingTypeComponent implements OnInit {
       this.contentid = 1;
       this.modalService.open(largeModal, { size: 'lg', windowClass: 'modal-holder', centered: true });
     }
+  };
+
+  compareLarge (compareModal: any) 
+  {
+    this.modalService.open(compareModal, { size: 'xl',windowClass:'modal-holder', centered: true });
   };
 
   ProjectData(projectModal:any){
