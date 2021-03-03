@@ -10,6 +10,7 @@
 import json
 import ast 
 import logging
+import numpy as np
 
 from common.utils.logger_handler import custom_logger as cl
 from sklearn.model_selection import train_test_split
@@ -99,29 +100,34 @@ class SplitData:
             return X_train, X_valid, X_test, Y_train, Y_valid, Y_test
 
     
+    def get_scaled_path(self,DBObject,connection,project_id):
+        
+        sql_command = 'select scaled_data_path from mlaas.cleaned_ref_tbl where project_id = ' + str(project_id)
+        data_df = DBObject.select_records(connection, sql_command)
 
-    def get_scaled_data(self, DBObject, connection, user_id, project_id, dataset_id):
-
-        logging.info("modeling : ModelClass : get_scaled_data : execution start")
+        path = dataset_df['scaled_data_path'][0]# Add exception
+        
+        return path
+    
+    def get_scaled_data(self,path):
         """Returns the data that will be preprocessed by the user in the preprocessing stage.
 
         Returns:
             [Dataframes]: [input_features_df:- the df used to predict target features, target_features_df:- the target/dependent data]
         """
+        logging.info("modeling : ModelClass : get_scaled_data : execution start")
         #TODO, this will change in future as there will be multiple users,projects and datasets.
-        dataset_name_command = 'select * from mlaas.cleaned_ref_tbl where dataset_id = ' + str(dataset_id)
-        dataset_df = DBObject.select_records(connection, dataset_name_command)
-
-        dataset_table_name = dataset_df['scaled_data_table'][0]# Add exception
-        input_features_list = ast.literal_eval(dataset_df['input_features'][0])# Add exception
-        target_features_list = ast.literal_eval(dataset_df['target_features'][0])# Add exception
-
-        #TODO This will change in future.
-        scaled_df_get_command = 'select * from mlaas.' + dataset_table_name
-        scaled_df = DBObject.select_records(connection, scaled_df_get_command)
-
-        input_features_df= scaled_df[input_features_list]  # by using self.input_features_list. must include unique seq id
-        target_features_df = scaled_df[target_features_list]  # by using self.target_features_list .must include unique seq id
+        # Read Scaled Data From Numpy File    
+         
+        scaled_df = np.load(path)
+        
+        input_features_df = scaled_df[:,0:-1]
+        
+        index=scaled_df[:,0].reshape(len(scaled_df[:,0]),1) 
+        target=scaled_df[:,-1].reshape(len(scaled_df[:,-1]),1)
+        
+        target_features_df =np.concatenate((index,target),axis=1) 
+        
         logging.info("modeling : ModelClass : get_scaled_data : execution end")
         return input_features_df,target_features_df 
 
@@ -134,6 +140,7 @@ class SplitData:
         #TODO Add Exception
         input_features = input_target_df['input_features'][0]# Get the input features list
         target_features = input_target_df['target_features'][0]# Get the target features list
+        
         input_features = ast.literal_eval(input_features)
         target_features = ast.literal_eval(target_features)
 

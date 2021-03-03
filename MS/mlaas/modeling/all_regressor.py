@@ -17,7 +17,8 @@ import mlflow
 import mlflow.sklearn
 import uuid 
 import logging
-
+import sys
+import os
 from database import *
 from common.utils.database import db
 
@@ -44,7 +45,11 @@ connection,connection_string=DBObject.database_connection(database,user,password
 
 def get_auto_model_param(user_id, project_id, dataset_id, dataset_split_dict):
     
-    input_df, target_df = SplitData().get_scaled_data(DBObject, connection, user_id, project_id, dataset_id)
+    path="/usr/local/airflow/dags/scaled_dataset/my_data_num.npy"
+    
+    # scaled_path = SplitData().get_scaled_path(DBObject,connection,project_id)
+    
+    input_df, target_df = SplitData().get_scaled_data(path)
     
     input_features_list, target_features_list = SplitData().get_input_target_features_list(user_id, project_id, dataset_id, DBObject, connection)
     
@@ -60,18 +65,7 @@ def get_auto_model_param(user_id, project_id, dataset_id, dataset_split_dict):
 
 def start_pipeline(dag,run_id,execution_date,ds,**kwargs):
     print("regressor pipeline start")
-    print("ds ==",ds)
-    print("dag id ==",dag.dag_id)
-    print("run id ==",run_id)
-    print("excution date ==",execution_date)
-    print("model mode==",kwargs['dag_run'].conf['model_mode'])
-    print("project id ==",kwargs['dag_run'].conf['project_id'])
-    print("dataset id ==",kwargs['dag_run'].conf['dataset_id'])
-    print("user id ==",kwargs['dag_run'].conf['user_id'])
-    
-    print("experiment name ==",kwargs['dag_run'].conf['exp_name'])
-    print("experiment desc ==",kwargs['dag_run'].conf['exp_desc'])
-    
+
     model_mode = kwargs['dag_run'].conf['model_mode']
     dag_id = dag.dag_id
     project_id = int(kwargs['dag_run'].conf['project_id'])
@@ -111,29 +105,19 @@ def linear_regression_sklearn(run_id,**kwargs):
         # TODO : experiment name and experiment_desc coming from frontend.
         
         # Create an experiment name, which must be unique and case sensitive
-        experiment_name = "house_prediction"
+        experiment_name = kwargs['dag_run'].conf['exp_name']
         
-        print(model_mode)
-        print(model_id)
-        print(project_id,dataset_id,user_id)
-        print(input_features_list,target_features_list)
-        print(dataset_split_dict)
         
         # Get from database
-        # sql_command = "select nextval('unq_num_seq') as ids"
-        # counter = DBObject.select_records(connection, sql_command)
-        # print("counter==",counter)
-        
-        # if counter is None:
-        #     counter = 1
-        # else:
-        #     counter = counter['ids'][0]
-            
+        sql_command = "select nextval('unq_num_seq') as ids"
+        counter = DBObject.select_records(connection, sql_command)
+        print("counter==",counter)
+        counter = counter['ids'][0]
 
-        # print("updated counter =",counter)
+        print("updated counter =",counter)
         
         id = uuid.uuid1().time 
-        experiment_name = model_mode.upper() + "_" + experiment_name.upper() + "_" + str(id)
+        experiment_name = experiment_name.upper() + "_" + str(counter)
         
         # create experiment 
         experiment_id = mlflow.create_experiment(experiment_name)
@@ -143,23 +127,25 @@ def linear_regression_sklearn(run_id,**kwargs):
             # Get experiment id and run id from the experiment set.
             run_uuid = run.info.run_id
             experiment_id = experiment.experiment_id
-            cv_score = 0.0
-            holdout_score = 0.0
             dag_run_id = run_id
             ################### Add Experiment ################################
             ExpObject = model_experiment.ExperimentClass(DBObject, connection, connection_string)
             add_exp_status = ExpObject.add_experiments(experiment_id,experiment_name,run_uuid,
                                                           project_id,dataset_id,user_id,
-                                                          model_id,model_mode,
-                                                          dag_run_id,cv_score,holdout_score)
-            ## Declare Object
-            LRObject = linear_regressor.LinearRegressionClass(input_features_list, target_features_list, 
-                                                            X_train, X_valid, X_test, y_train, y_valid, 
-                                                            y_test, dataset_split_dict)
-            cv_score,holdout_score = LRObject.run_pipeline()
+                                                          model_id,model_mode,dag_run_id)
+            
+            try:
+                ## Declare Object
+                LRObject = linear_regressor.LinearRegressionClass(input_features_list, target_features_list, 
+                                                                X_train, X_valid, X_test, y_train, y_valid, 
+                                                                y_test, dataset_split_dict)
+                LRObject.run_pipeline()
+                status = "success"
+            except:
+                status = "failed"
             
             ## Update Experiment ########
-            upd_exp_status = ExpObject.update_experiment(experiment_id,cv_score,holdout_score)
+            upd_exp_status = ExpObject.update_experiment(experiment_id,status)
         
         print("experiment_status == ",upd_exp_status)
         
