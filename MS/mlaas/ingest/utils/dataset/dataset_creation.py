@@ -508,10 +508,12 @@ class DatasetClass:
             if dataset_visibility == 'public':
                 #? Is there any(public & private) dataset with same name?
                 sql_command = f"SELECT dataset_id FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' and page_name in ('Create dataset','Create Project','schema save')"
+                logging.info(str(sql_command) + "check file")
                 #! Possible Security Issue: User will get to know that some other user has private dataset with same name
             else:
                 #? Is there any public dataset with same name?
                 sql_command = f"SELECT dataset_id FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND DATASET_VISIBILITY = 'public' and page_name in ('Create dataset','Create Project','schema save')"
+                logging.info(str(sql_command) + "check file")
                 data_df=DBObject.select_records(connection,sql_command)
                 data=len(data_df)
 
@@ -519,6 +521,7 @@ class DatasetClass:
                     #? No public dataset with same name
                     #? Is there any private dataset from you with same name?
                     sql_command = f"SELECT dataset_id FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND USER_NAME = '{user_name}' and page_name in ('Create dataset','Create Project','schema save')"
+                    logging.info(str(sql_command) + "check file")
                 else:
                     #! There is a public dataset with your name
                     logging.debug(f"data ingestion  :  DatasetClass  :  dataset_exist  :  A public dataset with the same dataset_name exists at dataset_id = {int(data_df['dataset_id'][0])}")
