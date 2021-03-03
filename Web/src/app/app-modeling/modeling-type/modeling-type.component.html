@@ -99,10 +99,10 @@
                                             </div> <span class="date-time">{{item.exp_created_on | date}}</span>
                                         </h4>
                                         <div class="model-status">
-                                            <i *ngIf="item.state=='running'" title="{{item.status}}" style="color: #34c38f;" class="dripicons-browser-upload Blink"></i>
-                                            <i *ngIf="item.state=='failed'" title="{{item.status}}" style="color: #f14646;" class="dripicons-browser-upload"></i>
-                                            <i *ngIf="item.state=='pending'" title="{{item.status}}" style="color: #a6b0cf;" class="dripicons-browser-upload"></i>
-                                            <i *ngIf="item.state=='success'" title="{{item.status}}" style="color: #3e6aec;" class="dripicons-browser-upload"></i>
+                                            <i *ngIf="item.status=='running'" title="{{item.status}}" style="color: #34c38f;" class="dripicons-browser-upload Blink"></i>
+                                            <i *ngIf="item.status=='failed'" title="{{item.status}}" style="color: #f14646;" class="dripicons-browser-upload"></i>
+                                            <i *ngIf="item.status=='pending'" title="{{item.status}}" style="color: #a6b0cf;" class="dripicons-browser-upload"></i>
+                                            <i *ngIf="item.status=='success'" title="{{item.status}}" style="color: #3e6aec;" class="dripicons-browser-upload"></i>
                                         </div>
                                         <div class="model-type">
                                             <p>{{item.model_mode}}</p>
@@ -376,8 +376,6 @@
                         <div cdkDropList cdkDropListOrientation="horizontal" class="example-list" (cdkDropListDropped)="drop($event)">
 
                             <div class="box box-one example-box" *ngFor="let item of timePeriods" cdkDrag>
-
-
                                 <ul>
                                     <li class="name">{{item}} <a href="javascript:void(0)" title="Remove"><i class="mdi mdi-close"></i></a></li>
                                     <li>2.2333</li>

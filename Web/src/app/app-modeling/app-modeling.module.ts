@@ -46,7 +46,6 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     ModelingActualPredictionComponent
   ],
   imports: [
-    DragDropModule,
     CommonModule,
     FormsModule,
     NgbDropdownModule,
@@ -68,7 +67,8 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     NgbTooltipModule,
     PerfectScrollbarModule,
     NgxSkeletonLoaderModule.forRoot(),
-    NgbNavModule
+    NgbNavModule,
+    DragDropModule
   ],
   providers: [
     {

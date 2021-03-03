@@ -65,7 +65,6 @@ export function createTranslateLoader(http: HttpClient): any {
         deps: [HttpClient]
       }
     }),
-    DragDropModule,
     LayoutsModule,
     AppRoutingModule,
     ExtrapagesModule,
@@ -78,8 +77,8 @@ export function createTranslateLoader(http: HttpClient): any {
     SharedModule,
     ScrollToModule.forRoot(),
     DataTablesModule,
-    NgxSkeletonLoaderModule.forRoot()
-    
+    NgxSkeletonLoaderModule.forRoot(),
+    DragDropModule
   ],
   bootstrap: [AppComponent],
   providers: [
