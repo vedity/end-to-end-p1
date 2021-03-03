@@ -19,22 +19,22 @@ class ExperimentClass:
         self.connection = connection
         self.connection_string = connection_string
         self.table_name='mlaas.model_experiment_tbl'
-        self.cols = 'experiment_id,run_uuid,project_id,dataset_id,user_id,model_id,model_mode,dag_run_id,cv_score,holdout_score' 
+        self.cols = 'experiment_id,run_uuid,project_id,dataset_id,user_id,model_id,model_mode,dag_run_id' 
         
        
          
     def add_experiments(self,experiment_id,experiment_name,run_uuid,
-                        project_id,dataset_id,user_id,model_id,model_mode,dag_run_id,cv_score,holdout_score):
+                        project_id,dataset_id,user_id,model_id,model_mode,dag_run_id):
         
-        row = experiment_id,run_uuid,project_id ,dataset_id,user_id,model_id,model_mode,dag_run_id,cv_score,holdout_score    
+        row = experiment_id,run_uuid,project_id ,dataset_id,user_id,model_id,model_mode,dag_run_id
         row_tuples = [tuple(row)]
         
         experiment_status = self.DBObject.insert_records(self.connection,self.table_name,row_tuples,self.cols)
         return experiment_status
     
-    def update_experiment(self,experiment_id,cv_score,holdout_score):
+    def update_experiment(self,experiment_id,status):
         
-        sql_command = "UPDATE "+self.table_name+" SET status='success',cv_score="+str(cv_score)+",holdout_score="+str(holdout_score)+" WHERE experiment_id="+str(experiment_id)
+        sql_command = "UPDATE "+self.table_name+" SET status='"+status+"' WHERE experiment_id="+str(experiment_id)
         upd_exp_status = self.DBObject.update_records(self.connection,sql_command)
         
         return upd_exp_status

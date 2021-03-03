@@ -24,8 +24,6 @@ CREATE TABLE mlaas.model_experiment_tbl
    model_id  integer,
    model_mode  text,
    dag_run_id varchar,
-   cv_score numeric,
-   holdout_score numeric,
    status varchar NOT NULL DEFAULT 'running', 
    exp_created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()              
 );
@@ -63,3 +61,10 @@ user_id integer,
 model_mode varchar,
 dag_created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+
+create sequence unq_num_seq
+increment 1;
+
+
+SELECT setval('unq_num_seq', 1);
