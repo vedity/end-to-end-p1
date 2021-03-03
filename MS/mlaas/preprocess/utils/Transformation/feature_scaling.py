@@ -51,6 +51,7 @@ class FeaturnScalingClass:
             
         return dataframe
     
+    #! There are some bugs in this function
     def custom_scaling(dataframe, max, min):
         count = dataframe.shape[1]
         for index in range(count):

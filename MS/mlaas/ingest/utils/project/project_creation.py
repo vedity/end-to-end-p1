@@ -66,7 +66,10 @@ class ProjectClass:
                 "user_name  text,"\
                 "original_dataset_id  bigint,"\
                 "dataset_id bigint,"\
-                "schema_id bigserial ,"\
+                "schema_id bigserial,"\
+                "input_features text,"\
+                "target_features text,"\
+                "scaled_data_path text ,"\
                 "created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()" 
                 
         logging.info("data ingestion : ProjectClass : make_project_schema : execution end")
