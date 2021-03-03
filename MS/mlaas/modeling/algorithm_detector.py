@@ -6,7 +6,7 @@
 
 */
 '''
-
+import numpy as np
 import logging
 import traceback
 import ast
@@ -42,7 +42,7 @@ class AlgorithmDetector:
 
         target_shape = target_df.shape
         total_length = target_shape[0]
-        unq_length = len(target_df.iloc[:,1].unique())
+        unq_length = len(np.unique(target_df))
         threshold = int((total_length * 0.01) / 100) # Subject to change, further research.
 
         if threshold < unq_length:
