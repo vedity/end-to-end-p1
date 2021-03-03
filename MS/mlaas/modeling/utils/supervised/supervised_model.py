@@ -43,7 +43,11 @@ class SupervisedClass(RC,PC):
 
         AlgorithmDetectorObject = AlgorithmDetector(DBObject, connection)
         SplitDataObject = SplitData()
-        _, target_df = SplitDataObject.get_scaled_data(DBObject, connection, user_id, project_id, dataset_id)
+        path="./scaled_dataset/my_data_num.npy"
+        
+        # scaled_path = SplitDataObject.get_scaled_path(DBObject,connection,project_id)
+        
+        _, target_df = SplitDataObject.get_scaled_data(path)
         
         algorithm_type, model_type = AlgorithmDetectorObject.get_model_type(target_df)
 

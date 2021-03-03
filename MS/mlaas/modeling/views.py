@@ -124,7 +124,7 @@ class StartModelClass(APIView):
 
                         Model_Mode = 'Auto'
                         
-                        experiment_name = 'house_prediction'
+                        experiment_name = 'kc_house_demo_test'
                         experiment_desc ='this is for testing'
                         
                         
@@ -327,7 +327,7 @@ class ShowExperimentsListClass(APIView):
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
                         
                         project_id = request.query_params.get('project_id') #get Username
-                        exp_name = 'house_prediction'
+                        exp_name = 'kc_house_demo_test'
                         experiment_data =ModelStatObject.show_running_experiments(project_id,exp_name)
                         
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
