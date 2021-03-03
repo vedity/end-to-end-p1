@@ -351,7 +351,10 @@ class DatasetClass:
         # Get dataframe of loaded csv.
         data_details_df = DBObject.select_records(connection,sql_data) 
         data_details_count_df = DBObject.select_records(connection,sql_filtercount) 
-        filtercount=data_details_count_df["count"]
+        
+        logging.info(str(data_details_count_df) + "check")
+
+        filtercount= data_details_count_df["count"]
         logging.info("data ingestion : DatasetClass : show_data_details : execution end")
         return data_details_df,filtercount
 
