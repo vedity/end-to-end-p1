@@ -22,15 +22,15 @@
                         </thead>
                         <tbody>
                             <!-- class="active-row" -->
-                            <tr *ngFor="let item of columnList">
+                            <tr *ngFor="let item of columnList;let i=index">
                                 <td>
                                     <div class="custom-control custom-checkbox mb-3">
-                                        <input type="checkbox" class="custom-control-input" value="{{item.column_id}}" data-value="{{item.column_id}}" id="customCheck1">
-                                        <label class="custom-control-label" for="customCheck1">{{item.col_name}}</label>
+                                        <input type="checkbox" class="custom-control-input" value="{{item.column_id}}" data-value="{{item.column_id}}" id="customCheck_{{i}}">
+                                        <label class="custom-control-label" for="customCheck_{{i}}">{{item.col_name}}</label>
                                     </div>
                                 </td>
-                                <td>
-                                    <div class="handling">
+                                <td class="handlinmg-list">
+                                    <!-- <div class="handling">
                                         <p>Replace Missing Value</p>
                                         <a href="javascript:void(0);"> <i class=" bx bx-trash"></i></a>
                                     </div>
@@ -41,7 +41,7 @@
                                     <div class="handling">
                                         <p>Encoded</p>
                                         <a href="javascript:void(0);"> <i class=" bx bx-trash"></i></a>
-                                    </div>
+                                    </div> -->
 
 
                                 </td>

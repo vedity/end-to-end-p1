@@ -106,7 +106,30 @@
                                     </th>
                                 </tr>
                             </thead>
+                            <thead>
+                                <tr class="thead-light" [hidden]="filter">
+                                    <td>
+                                        <input class="form-control filter" id="input_0" type="text" name="search-dataset-name" />
+                                    </td>
+                                    <td>
+                                        <input class="form-control filter" id="input_1" type="text" name="search-size" />
+                                    </td>
+                                    <td>
+                                        <input class="form-control filter" id="input_2" type="text" name="search-total_rows" />
 
+                                    </td>
+                                    <td>
+                                        <select class="form-control filter" id="input_3" name="search-visibility">
+                                            <option value="">None</option>
+                                            <option value="Public">Public</option>
+                                            <option value="Private">Private</option>
+                                        </select>
+                                    </td>
+                                    <td><input class="form-control filter" type="text" id="input_4" name="search-created-by" /></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </thead>
                             <tbody class="tbody">
                                 <tr *ngFor="let data of transactions">
                                     <td title="{{data.dataset_name}}">{{data.dataset_name}}</td>
@@ -115,7 +138,8 @@
                                     <td>{{data.no_of_rows}}
                                     </td>
                                     <td class="text-center">
-                                        <span style="display:none;">{{data.dataset_visibility}}</span>
+                                        <span style="display:none;" *ngIf="data.dataset_visibility==='public'">Public</span>
+                                        <span style="display:none;" *ngIf="data.dataset_visibility==='private'">Private</span>
 
                                         <i *ngIf="data.dataset_visibility==='public'" class="bx bx-globe"></i>
                                         <i *ngIf="data.dataset_visibility==='private'" class="bx bx-lock-alt"></i>
@@ -133,30 +157,7 @@
                                     </td>
                                 </tr>
                             </tbody>
-                            <thead>
-                                <tr class="thead-light" [hidden]="filter">
-                                    <td>
-                                        <input class="form-control filter" id="input_0" type="text" name="search-dataset-name" />
-                                    </td>
-                                    <td>
-                                        <input class="form-control filter" id="input_1" type="text" name="search-size" />
-                                    </td>
-                                    <td>
-                                        <input class="form-control filter" id="input_2" type="text" name="search-total_rows" />
 
-                                    </td>
-                                    <td>
-                                        <select class="form-control filter" id="input_4" name="search-visibility">
-                                            <option value="">None</option>
-                                            <option value="public">Public</option>
-                                            <option value="private">Private</option>
-                                        </select>
-                                    </td>
-                                    <td><input class="form-control filter" type="text" id="input_5" name="search-created-by" /></td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                            </thead>
                         </table>
                     </div>
                 </div>
