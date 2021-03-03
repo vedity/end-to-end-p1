@@ -56,6 +56,7 @@ export class ListDatabaseComponent implements OnInit {
           const that = this;
           
           $('#input_'+ this.index("visible")).on('keyup change', function () {
+            console.log(this['value']);
             if (that.search() !== this['value']) {
               that
                 .search(this['value'])

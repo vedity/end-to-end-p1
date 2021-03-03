@@ -53,18 +53,18 @@
                                 <td>
                                     <select class="form-control filter" id="input_2" name="search-model-status">
                                     <option value="">None</option>
-                                    <option value="0">Success</option>
-                                    <option value="-1">Pending</option>
-                                    <option value="1">Failed</option>
-                                    <option value="2">In Progress</option>
+                                    <option value="Success">Success</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Failed">Failed</option>
+                                    <option value="InProgress">In Progress</option>
                                 </select>
                                 </td>
                                 <td>
                                     <select class="form-control filter" id="input_3" name="search-deployment-status">
                                     <option value="">None</option>
-                                    <option value="-1">Pending</option>
-                                    <option value="0">Active</option>
-                                    <option value="1">Suspended</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Suspended">Suspended</option>
                                 </select>
                                 </td>
                                 <td></td>
@@ -79,7 +79,10 @@
                                     <span style="display:none;">{{data.dataset_status}}</span> {{data.dataset_name}}
                                 </td>
                                 <td class="status-icon" class="text-center">
-                                    <span style="display:none;">{{data.model_status}}</span>
+                                    <span style="display:none;" *ngIf="data.model_status==0">Success</span>
+                                    <span style="display:none;" *ngIf="data.model_status==-1">Pending</span>
+                                    <span style="display:none;" *ngIf="data.model_status==1">Failed</span>
+                                    <span style="display:none;" *ngIf="data.model_status==2">InProgress</span>
                                     <a [routerLink]="['/modeling']" [state]="{dataset_id: data.dataset_id ,project_id:data.project_id}">
                                         <i *ngIf="data.model_status==0" style="color: #34c38f;" class="dripicons-browser-upload"></i>
                                         <i *ngIf="data.model_status==1" style="color: #f14646;" class="dripicons-browser-upload"></i>
@@ -88,7 +91,9 @@
                                     </a>
                                 </td>
                                 <td class="text-center">
-                                    <span style="display:none;">{{data.deployment_status}}</span>
+                                    <span style="display:none;" *ngIf="data.deployment_status==-1">Pending</span>
+                                    <span style="display:none;" *ngIf="data.deployment_status==0">Active</span>
+                                    <span style="display:none;" *ngIf="data.deployment_status==1">Suspended</span>
                                     <span *ngIf="data.deployment_status==-1" class="badge badge-pill badge-pill badge-soft-dark ml-1 font-size-12">Pending</span>
                                     <span *ngIf="data.deployment_status==1" class="badge badge-pill badge-soft-danger ml-1 font-size-12">Suspended</span>
                                     <span *ngIf="data.deployment_status==0" class="badge badge-pill badge-soft-success ml-1 font-size-12">Active</span>
