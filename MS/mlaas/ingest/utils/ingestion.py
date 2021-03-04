@@ -95,7 +95,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
 
             logging.debug("data ingestion : ingestclass : create_project : we get status of project : "+str(project_status)+ " and Project id : "+str(project_id)+" and original_dataset_id : "+str(original_dataset_id))
             if project_status == 2:
-                raise ProjectAlreadyExist(500)
+                raise DatasetAlreadyExist(500)
                 
             elif project_status == 1:
                 raise ProjectCreationFailed(500) # If Failed.
@@ -107,7 +107,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 status = super(IngestClass,self).update_dataset_status(DBObject,connection,project_id)
                 
                 
-        except (DatabaseConnectionFailed,ProjectAlreadyExist,LoadCSVDataFailed,ProjectCreationFailed,Exception) as exc:
+        except (DatabaseConnectionFailed,DatasetAlreadyExist,ProjectAlreadyExist,LoadCSVDataFailed,ProjectCreationFailed,Exception) as exc:
             logging.error("data ingestion : ingestclass : create_project : Exception " + str(exc.msg))
             logging.error("data ingestion : ingestclass : create_project : " +traceback.format_exc())
             return exc.msg,None,None
@@ -447,7 +447,9 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             table_name,schema,cols = super(IngestClass, self).make_dataset_schema()
         
             sql_command = f"SELECT DATASET_VISIBILITY FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND USER_NAME = '{user_name}'"
+            logging.info(str(sql_command) + " check error")
             visibility_df = DBObject.select_records(connection,sql_command) 
+            
             if visibility_df is None:
                 return False
             if len(visibility_df) == 0:

@@ -91,7 +91,6 @@ class DatasetExplorationClass(APIView):
 #            return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
 
 
-
 class SchemaSaveClass(APIView):
 
         def post(self,request,format=None):
@@ -131,11 +130,6 @@ class SchemaSaveClass(APIView):
                         logging.error("data preprocess : SchemaSaveClass : POST Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
                         
-
-
-
-
-
 
 # Class to retrive & insert for Schema data
 # It will take url string as mlaas/ingest/dataset_schema/. 
@@ -384,11 +378,11 @@ class ScalingClass(APIView):
                         schema_id = request.query_params.get('schema_id') #get schema id
                         dataset_id = request.query_params.get('dataset_id') #get dataset id
                         project_id = request.query_params.get('project_id') #get dataset id
-                        user_id = request.query_params.get('user_id') #get dataset id
+                        user_name = request.query_params.get('user_name') #get dataset id
                         scaling_operation = request.query_params.get('scaling_op')
                         data = json.dumps(request.data) #get handling json
                         data = json.loads(data) 
-                        operation = preprocessObj.handover(dataset_id, schema_id, project_id, user_id, scaling_operation)
+                        operation = preprocessObj.handover(dataset_id, schema_id, project_id, user_name, scaling_operation)
                         logging.info("data preprocess : HandoverClass : POST Method : execution stop")
                         return Response({"status_code":"200","error_msg":"Successfull retrival","response":operation})
 

@@ -66,7 +66,10 @@ class ProjectClass:
                 "user_name  text,"\
                 "original_dataset_id  bigint,"\
                 "dataset_id bigint,"\
-                "schema_id bigserial ,"\
+                "schema_id bigserial,"\
+                "input_features text,"\
+                "target_features text,"\
+                "scaled_data_path text ,"\
                 "created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()" 
                 
         logging.info("data ingestion : ProjectClass : make_project_schema : execution end")
@@ -127,8 +130,11 @@ class ProjectClass:
         DatasetObject = dataset_creation.DatasetClass()
 
         if original_dataset_id == None:
-            _,original_dataset_id,raw_dataset_id  = DatasetObject.make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name)
-            dataset_id = raw_dataset_id
+            status,original_dataset_id,raw_dataset_id  = DatasetObject.make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name)   
+            if status ==2:
+                return 2,None,None
+            else:
+                dataset_id = raw_dataset_id
             
         else:
             
@@ -310,9 +316,12 @@ class ProjectClass:
             #? Checking if Same project_name exists for the same user
             project_name=str(project_name).replace("'","''")
             sql_command = f"SELECT PROJECT_ID FROM {table_name} WHERE PROJECT_NAME = '{project_name}' AND USER_NAME = '{user_name}'"
+            #logging.info(str(sql_command) + " check error")
+
             data=DBObject.select_records(connection,sql_command)
             data=len(data)
-            
+
+            #logging.info(str(data) + " check error")
             logging.info("data ingestion : ProjectClass : project_exists : execution end")
             
             #! Same project_name exists for the same user, then return status True

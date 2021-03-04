@@ -209,7 +209,7 @@ class DBClass:
         Returns:
             [dataframe]: [it will return dataframe of the selected data from the database table.]
         """
-        sql_command = sql_command # Get sql command.
+        sql_command = str(sql_command).replace('%',"%%") # Get sql command.
         try :
            
             connection_string = "postgresql://" + user + ":" + password + "@" + host + ":" + port + "/" + database # Make database connection string.
@@ -218,6 +218,7 @@ class DBClass:
     
             return data   
         except(Exception, psycopg2.DatabaseError) as error:
+            logging.info(str(error) + "check")
             return None
         
        
@@ -538,6 +539,7 @@ class DBClass:
                 sql_data = f'SELECT {str(select_clause)} From {table_name} where "{columns_list[0]}" between {start_index} and {end_index}  {order_clause}' # sql Query without any filter and clause
                 sql_filtercount = f'SELECT count(*) From {table_name}' #sql Query with customefilter_clause
 
+            logging.info(str(sql_filtercount))
             return sql_data,sql_filtercount
         except Exception as exc:
             return str(exc) 
