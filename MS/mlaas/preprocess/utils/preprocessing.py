@@ -848,7 +848,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             final_cols = feature_cols+tg_cols
             
-            data_df = data_df[final_cols[1:]]
+            data_df = data_df[final_cols]
             
             feature_cols = str(feature_cols)
             target_cols = str(target_cols)
