@@ -216,11 +216,12 @@ class SchemaClass:
                         raise ChangeColumnNameSame(500)
             
             column_count_value,ignore_count_value = self.get_count_value(DBObject,connection,schema_id)
-
-
             logging.info(str(column_attribute_list)+" column_attribute_list")
+            logging.info(str(column_count_value)+" column_count_value")
+            logging.info(str(ignore_count_value)+" ignore_count_value")
+            logging.info(str(len(column_attribute_list))+" column_attribute_list")
 
-            if (column_count_value-ignore_count_value)== column_attribute_list.count('Ignore') :
+            if (column_count_value-ignore_count_value)== column_attribute_list.count('Ignore') and column_attribute_list.count('Select')==0 and column_attribute_list.count('Target')==0 :
                 raise IgnoreColumns(500)
 
 
