@@ -9,7 +9,7 @@ db.sqlite3-journal
 MS/mlaas/static/server/*
 __pycache__
 mlruns
-scaled_dataset/
+scaled_dataset/*
 
 ### Angular ###
 # compiled output

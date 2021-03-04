@@ -78,10 +78,7 @@ class ExploreClass:
         
         #? Logical Code Begins
         try:
-            try:
-                data_df = data_df.iloc[:,1:]
-            except:
-                pass
+            data_df.reset_index(drop=True,inplace = True)
             
             added_col = False
             if (type(data_df) is pd.Series):
