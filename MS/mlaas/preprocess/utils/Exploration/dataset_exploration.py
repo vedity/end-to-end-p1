@@ -78,6 +78,7 @@ class ExploreClass:
         
         #? Logical Code Begins
         try:
+            data_df = data_df.iloc[:,1:]
             
             added_col = False
             if (type(data_df) is pd.Series):
