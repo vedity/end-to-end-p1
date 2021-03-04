@@ -802,7 +802,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
             return exc.msg
             
-    def handover(self, dataset_id, schema_id, project_id, user_id, scaling_type = 0, val = None):
+    def handover(self, dataset_id, schema_id, project_id, user_name, scaling_type = 0, val = None):
         '''
             This function is used to store the scaled numpy file into the scaled dataset folder.
             
@@ -832,34 +832,49 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 raise GetDataDfFailed(500)
             
             if scaling_type == 0:
-                data_df = self.standard_scaling(data_df._get_numeric_data())
+                data_df[:,1:] = self.standard_scaling(data_df[:,1:]._get_numeric_data())
             elif scaling_type == 1:
-                data_df = self.min_max_scaling(data_df._get_numeric_data())
+                data_df[:,1:] = self.min_max_scaling(data_df[:,1:]._get_numeric_data())
             elif scaling_type == 2:
-                data_df = self.robust_scaling(data_df._get_numeric_data())
+                data_df[:,1:] = self.robust_scaling(data_df[:,1:]._get_numeric_data())
                     
-            feature_cols = str(list(data_df.columns))
+            feature_cols = list(data_df.columns)
+            tg_cols = DBObject.get_target_col(connection, schema_id)
+            for col in tg_cols:
+                feature_cols.remove(col)
+            
+            target_cols = [data_df.columns[0]]
+            target_cols += tg_cols
+            logging.info("------>"+str(target_cols)+str(feature_cols))
+            
+            final_cols = feature_cols+tg_cols
+            logging.info("------>"+str(final_cols))
+            
+            data_df = data_df[final_cols[1:]]
+            
+            feature_cols = str(feature_cols)
+            target_cols = str(target_cols)
             feature_cols = feature_cols.replace("'",'"')
-            target_cols = str(DBObject.get_target_col(connection, schema_id))
             target_cols = target_cols.replace("'",'"')
-            filename = "scaled_data/scaled_data_" + str(uuid.uuid1().time)
-                    
-            sql_command = f"select * from mlaas.cleaned_ref_tbl crt where crt.dataset_id = '{dataset_id}' and crt.project_id = '{project_id}' and crt.user_id = '{user_id}'"
-            data=DBObject.select_records(connection,sql_command)
+            filename = "scaled_dataset/scaled_data_" + str(uuid.uuid1().time)
+            logging.info("------>"+str(target_cols)+str(feature_cols))
+            
+            # sql_command = f"select * from mlaas.cleaned_ref_tbl crt where crt.dataset_id = '{dataset_id}' and crt.project_id = '{project_id}' and crt.user_id = '{user_id}'"
+            # data=DBObject.select_records(connection,sql_command)
             
             np.save(filename,data_df.to_numpy())
             
-            if len(data) == 0:
-                row = project_id,dataset_id,user_id,feature_cols,target_cols,filename
-                row_tuples = [tuple(row)]
-                col_names = "project_id,dataset_id,user_id,input_features,target_features,scaled_data_table"
+            # if len(data) == 0:
+            #     row = project_id,dataset_id,user_name,feature_cols,target_cols,filename
+            #     row_tuples = [tuple(row)]
+            #     col_names = "project_id,dataset_id,user_id,input_features,target_features,scaled_data_table"
                 
-                status = DBObject.insert_records(connection,"mlaas.cleaned_ref_tbl",row_tuples, col_names)
-                logging.info("data preprocessing : PreprocessingClass : handover : execution stop")
+            #     status = DBObject.insert_records(connection,"mlaas.cleaned_ref_tbl",row_tuples, col_names)
+            #     logging.info("data preprocessing : PreprocessingClass : handover : execution stop")
                 
-            else:
-                sql_command = f"update mlaas.cleaned_ref_tbl set target_features= '{target_cols}' ,input_features='{feature_cols}',scaled_data_table = '{filename}' where dataset_id = '{dataset_id}' and project_id = '{project_id}' and user_id  = '{user_id}'"
-                status = DBObject.update_records(connection, sql_command)
+            # else:
+            sql_command = f"update mlaas.project_tbl set target_features= '{target_cols}' ,input_features='{feature_cols}',scaled_data_path = '{filename}' where dataset_id = '{dataset_id}' and project_id = '{project_id}' and user_name  = '{user_name}'"
+            status = DBObject.update_records(connection, sql_command)
             
             return status
             
