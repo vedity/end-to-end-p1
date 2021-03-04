@@ -703,10 +703,21 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if connection == None :
                 raise DatabaseConnectionFailed(500)
             #? Getting Dataframe
-            data_df = self.get_data_df(dataset_id,schema_id)
-            if isinstance(data_df, str):
-                raise GetDataDfFailed(500)
             
+            #Get the dataframe of dataset detail based on the dataset id
+            dataframe = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
+
+            #Extract the dataframe based on its column name as key
+            table_name,dataset_visibility,user_name = str(dataframe['dataset_table_name'][0]),str(dataframe['dataset_visibility'][0]),str(dataframe['user_name'][0])
+            
+            if dataset_visibility == 'private':
+                dataset_table_name = user_name+'."'+table_name+'"'
+            else:
+                dataset_table_name = 'public'+'."'+table_name+'"'
+
+            #get the Column list
+            column_list = DBObject.get_column_list(connection,dataset_id)
+
             #? Getting operations in the ordered format
             operation_ordering = self.reorder_operations(request)
             
@@ -717,85 +728,10 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 #? Getting Columns
                 col = operation_ordering[op]
                 
-                if op == 1:
-                    data_df = self.discard_missing_values(data_df, col)
-                # elif op == 2:
-                #     data_df = self.delete_above(data_df, col, val)
-                # elif op == 3:
-                #     data_df = self.delete_below(data_df, col, val)
-                elif op == 4:
-                    data_df = self.mean_imputation(data_df, col)
-                elif op == 5:
-                    data_df = self.median_imputation(data_df, col)
-                # elif op == 6:
-                #     data_df = self.arbitrary_value_imputation(data_df, col, val)
-                elif op == 7:
-                    data_df = self.end_of_distribution(data_df, col)
-                elif op == 8:
-                    data_df = self.frequent_category_imputation(data_df, col)
-                elif op == 9:
-                    data_df = self.add_missing_category(data_df, col)
-                elif op == 10:
-                    data_df = self.random_sample_imputation(data_df, col)
-                elif op == 11:
-                    data_df = self.remove_noise(data_df, col)
-                elif op == 12:
-                    data_df = self.repl_noise_mean(data_df, col)
-                elif op == 13:
-                    data_df = self.repl_noise_median(data_df, col)
-                elif op == 14:
-                    data_df = self.repl_noise_random_sample(data_df, col)
-                # elif op == 15:
-                #     data_df = self.repl_noise_arbitrary_val(data_df, col, val)
-                elif op == 16:
-                    data_df = self.rem_outliers_ext_val_analysis(data_df, col)
-                elif op == 17:
-                    data_df = self.rem_outliers_z_score(data_df, col)
-                elif op == 18:
-                    data_df = self.repl_outliers_mean_ext_val_analysis(data_df, col)
-                elif op == 19:
-                    data_df = self.repl_outliers_mean_z_score(data_df, col)
-                elif op == 20:
-                    data_df = self.repl_outliers_med_ext_val_analysis(data_df, col)
-                elif op == 21:
-                    data_df = self.repl_outliers_med_z_score(data_df, col)
-                elif op == 22:
-                    data_df = self.apply_log_transformation(data_df, col)
-                # elif op == 27:
-                #     data_df = self.mean_imputation(data_df, col)
-                # elif op == 28:
-                #     data_df = self.mean_imputation(data_df, col)
-                # elif op == 29:
-                #     data_df = self.mean_imputation(data_df, col)
-                # elif op == 30:
-                #     data_df = self.mean_imputation(data_df, col)
-                # elif op == 31:
-                #     data_df = self.mean_imputation(data_df, col)
-                # elif op == 32:
-                #     data_df = self.mean_imputation(data_df, col)
-                # elif op == 33:
-                #     data_df = self.mean_imputation(data_df, col)
-            sql_command = "select dataset_visibility,dataset_table_name,user_name from mlaas.dataset_tbl  where dataset_id='"+str(dataset_id)+"'"
-            
-            logging.info(str(sql_command))
-            dataframe = DBObject.select_records(connection,sql_command)
- 
-            dataset_visibility,dataset_table_name,user_name  = str(dataframe['dataset_visibility'][0]),str(dataframe['dataset_table_name'][0]),str(dataframe['user_name'][0])
- 
-            updated_table_name = DBObject.get_table_name(connection,dataset_table_name)
-            
-            if dataset_visibility == 'public':
-                user_name='public'
- 
-            status = DBObject.load_df_into_db(connection_string,updated_table_name,data_df,user_name)
- 
-            if status == 0:
- 
-                Sql_command = "update mlaas.dataset_tbl set dataset_table_name='"+str(updated_table_name)+"' where dataset_id='"+str(dataset_id)+"'"
-                logging.info(str(sql_command))
-                update_status = DBObject.update_records(connection,Sql_command)
+                status = self.imputation(DBObject, connection, column_list, dataset_table_name, col,op)
+                
             logging.info("data preprocessing : PreprocessingClass : master_executor : execution stop")
-            return update_status
+            return status
 
         except (GetDataDfFailed) as exc:
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))

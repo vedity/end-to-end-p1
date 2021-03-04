@@ -12,30 +12,28 @@ logger = logging.getLogger('missing_value_handling')
 
 class MissingValueClass:
 
-    # def discard_missing_values(self, dataframe, column_id = None):
-    #     '''
-    #         Returns a dataframe where all the rows where given columns have null values are removed.
+#     def discard_missing_values(self, DBObject,connection, table_name,col_name):
+#         '''
+#             Returns a dataframe where all the rows where given columns have null values are removed.
             
-    #         Args:
-    #         -----
-    #         dataframe (`pandas.Dataframe`): Whole Dataframe.
-    #         column_id (`List`) (default = `None`): List of Columns. If `None` then considers whole dataframe.
+#             Args:
+#             -----
+#             dataframe (`pandas.Dataframe`): Whole Dataframe.
+#             column_id (`List`) (default = `None`): List of Columns. If `None` then considers whole dataframe.
 
-    #         Returns:
-    #         -------
-    #         dataframe (`pandas.Dataframe`): Dataframe with all the missing data removed.
-    #     '''
-        
-    #     if column_id:
-            
-    #         for i in column_id:
-            
-    #             dataframe.dropna(subset=[dataframe.columns[i]], inplace = True)
-                
-    #         return dataframe
-        
-    #     else:
-    #         return dataframe.dropna()
+#             Returns:
+#             -------
+#             dataframe (`pandas.Dataframe`): Dataframe with all the missing data removed.
+#         '''
+#         logging.info("Preprocess : MissingValueClass : mean_imputation : execution start")
+
+#         sql_command = f"delete from {table_name}  where {col_name} =''" # Get update query
+#         logging.info(str(sql_command))
+
+#         status = DBObject.update_records(connection,sql_command)
+
+#         logging.info("Preprocess : MissingValueClass : mean_imputation : execution stop")
+#         return status
     
     def missing_value_imputation(self,DBObject,connection, table_name,col_name,impute_value):
         """
@@ -49,68 +47,34 @@ class MissingValueClass:
         """
         logging.info("Preprocess : MissingValueClass : mean_imputation : execution start")
 
-        sql_command = f"Update {table_name} set {col_name}={impute_value} where {col_name}=''" # Get update query
+        sql_command = f"Update {table_name} set {col_name}={impute_value} where {col_name} is null" # Get update query
         logging.info(str(sql_command))
 
         status = DBObject.update_records(connection,sql_command)
 
-
         logging.info("Preprocess : MissingValueClass : mean_imputation : execution stop")
         return status
     
-    # def median_imputation(self,series):
-    #     """
-    #     Function will replace column NaN value with its column median value
+    def end_of_distribution(self,series):
+        """
+        Returns a series with missing values replaced by a maximum value that is not an outlier.
         
-    #     Args:
-    #             series[(pandas.Series)] : [the Series containing the column data]
-    #     Return:
-    #             series[(pandas.Series)] : [return the updated series]
-    #     """
-    #     logging.info("Preprocess : MissingValueClass : median_imputation : execution start")
+        Args:
+                series[(pandas.Series)] : [the Series containing the column data]
+        Return:
+                series[(pandas.Series)] : [return the updated series]
+        """
+        logging.info("Preprocess : MissingValueClass : end_of_distribution : execution start")
 
-    #     #Replace the NaN value with median of the column 
-    #     series.fillna(round(series.median(),4),inplace = True)
-
-    #     logging.info("Preprocess : MissingValueClass : median_imputation : execution stop")
-    #     return series
-    
-    # def mode_imputation(self,series):
-    #     """
-    #     function will replace column NaN value with its column mode value
         
-    #     Args:
-    #             series[(pandas.Series)] : [the Series containing the column data]
-    #     Return:
-    #             series[(pandas.Series)] : [return the updated series]
-    #     """
-    #     logging.info("Preprocess : MissingValueClass : mode_imputation : execution start")
+        # #get the extreme distribution value based on the formula
+        # extreme = series.mean()+3*series.std()
 
-    #     #Replace the NaN value with Mode of the column
-    #     series = series.fillna(round(series.mode()),inplace = True)
+        # #replace the NaN value extreme distribution value
+        # series.fillna(round(extreme,4),inplace = True)
 
-    #     logging.info("Preprocess : MissingValueClass : mode_imputation : execution stop")
-    #     return series
-    
-    # def end_of_distribution(self,series):
-    #     """
-    #     Returns a series with missing values replaced by a maximum value that is not an outlier.
-        
-    #     Args:
-    #             series[(pandas.Series)] : [the Series containing the column data]
-    #     Return:
-    #             series[(pandas.Series)] : [return the updated series]
-    #     """
-    #     logging.info("Preprocess : MissingValueClass : end_of_distribution : execution start")
-
-    #     #get the extreme distribution value based on the formula
-    #     extreme = series.mean()+3*series.std()
-
-    #     #replace the NaN value extreme distribution value
-    #     series.fillna(round(extreme,4),inplace = True)
-
-    #     logging.info("Preprocess : MissingValueClass : end_of_distribution : execution stop")
-    #     return series
+        logging.info("Preprocess : MissingValueClass : end_of_distribution : execution stop")
+        return series
     
     # def random_sample_imputation(self,series):
     #     """
