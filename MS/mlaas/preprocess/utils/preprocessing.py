@@ -781,10 +781,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             target_cols = [data_df.columns[0]]
             target_cols += tg_cols
-            logging.info("------>"+str(target_cols)+str(feature_cols))
             
             final_cols = feature_cols+tg_cols
-            logging.info("------>"+str(final_cols))
             
             data_df = data_df[final_cols[1:]]
             
@@ -793,7 +791,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             feature_cols = feature_cols.replace("'",'"')
             target_cols = target_cols.replace("'",'"')
             filename = "scaled_dataset/scaled_data_" + str(uuid.uuid1().time)
-            logging.info("------>"+str(target_cols)+str(feature_cols))
             
             # sql_command = f"select * from mlaas.cleaned_ref_tbl crt where crt.dataset_id = '{dataset_id}' and crt.project_id = '{project_id}' and crt.user_id = '{user_id}'"
             # data=DBObject.select_records(connection,sql_command)
