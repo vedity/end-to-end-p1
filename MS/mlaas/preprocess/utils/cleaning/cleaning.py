@@ -38,66 +38,36 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     #* MISSING VALUE HANDLING
     
-    # def discard_missing_values(self, data_df, col, whole = False):
-    #     '''
-    #         Operation id: 1
-    #     '''
+    def discard_missing_values(self,DBObject,connection,column_list, table_name, col):
+        '''
+            Operation id: 1
+        '''
         
-    #     logging.info("data preprocessing : CleaningClass : discard_missing_values : execution start")
-        
-    #     if whole:
-    #         #? Perform operation on whole dataframe.
-    #         col = None
-        
-    #     logging.info("data preprocessing : CleaningClass : discard_missing_values : execution stop")
-    #     return super().discard_missing_values(DBObject,connection, table_name,col_name)
-    
-    def imputation(self,DBObject,connection,column_list, table_name, col, operation):
-        
-        logging.info("data preprocessing : CleaningClass : mean_imputation : execution start")
-        
+        logging.info("data preprocessing : CleaningClass : discard_missing_values : execution start")
         cols = [column_list[i] for i in col]
         logging.info(str(cols))
         for column in cols:
-            try:
-                impute_value = self.get_impute_value(DBObject,connection,table_name,column,operation)
-                status = super().missing_value_imputation(DBObject,connection, table_name,column,impute_value)
-
-            except Exception as exc:
-                logging.info(str(exc) + " error ")
-                status =1
-                continue
-
-        logging.info("data preprocessing : CleaningClass : mean_imputation : execution stop")
+                status = super().discard_missing_values(DBObject,connection, table_name,column)
+        logging.info("data preprocessing : CleaningClass : discard_missing_values : execution stop")
         return status
     
-    def get_impute_value(self,DBObject,connection,table_name,column_name,operation):
-
-        if operation == 4:
-            sql_command = 'select AVG("'+column_name+'") AS mean from '+str(table_name)
-            logging.info(str(sql_command))
-            dataframe = DBObject.select_records(connection,sql_command)
-            impute_value = float(dataframe['mean'][0])
-            
-        elif operation == 5:
-            sql_command = 'select PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY "'+str(column_name)+'") AS median from '+str(table_name)
-            logging.info(str(sql_command))
-            dataframe = DBObject.select_records(connection,sql_command)
-            impute_value = int(dataframe['median'][0])
-
-        elif operation == 6:
-            sql_command = 'select MODE() WITHIN GROUP (ORDER BY "'+str(column_name)+'") AS mode from '+str(table_name)
-            logging.info(str(sql_command))
-            dataframe = DBObject.select_records(connection,sql_command)
-            impute_value = int(dataframe['mode'][0])
+    def mean_imputation(self, data_df, col, val):
+        '''
+            Operation id: 6
+        '''
         
-        elif operation == 7:
-            sql_command = 'select ((select AVG("'+column_name+'") AS mean from '+str(table_name)+')+3*(select STDEV("'+column_name+'") AS mean from '+str(table_name)+')) as value'
-            logging.info(str(sql_command))
-            dataframe = DBObject.select_records(connection,sql_command)
-            impute_value = int(dataframe['value'][0])
+        logging.info("data preprocessing : CleaningClass : arbitrary_value_imputation : execution start")
+        
+        cols = [data_df.columns[i] for i in col]
+        
+        for column in cols:
+            try:
+                data_df[column] = super().add_missing_category(data_df[column], val)
+            except:
+                continue
 
-        return impute_value       
+        logging.info("data preprocessing : CleaningClass : arbitrary_value_imputation : execution stop")
+        return data_df
     
    
     
@@ -119,23 +89,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     #     logging.info("data preprocessing : CleaningClass : arbitrary_value_imputation : execution stop")
     #     return data_df
     
-    # def end_of_distribution(self, data_df, col):
-    #     '''
-    #         Operation id: 7
-    #     '''
-        
-    #     logging.info("data preprocessing : CleaningClass : end_of_distribution : execution start")
-        
-    #     cols = [data_df.columns[i] for i in col]
-        
-    #     for column in cols:
-    #         try:
-    #             data_df[column] = super().end_of_distribution(data_df[column])
-    #         except:
-    #             continue
-
-    #     logging.info("data preprocessing : CleaningClass : end_of_distribution : execution stop")
-    #     return data_df
+   
     
     # def frequent_category_imputation(self, data_df, col):
     #     '''
@@ -155,23 +109,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     #     logging.info("data preprocessing : CleaningClass : frequent_category_imputation : execution stop")
     #     return data_df
     
-    # def add_missing_category(self, data_df, col):
-    #     '''
-    #         Operation id: 9
-    #     '''
-        
-    #     logging.info("data preprocessing : CleaningClass : add_missing_category : execution start")
-        
-    #     cols = [data_df.columns[i] for i in col]
-        
-    #     for column in cols:
-    #         try:
-    #             data_df[column] = super().add_missing_category(data_df[column])
-    #         except:
-    #             continue
 
-    #     logging.info("data preprocessing : CleaningClass : add_missing_category : execution stop")
-    #     return data_df
     
     # def random_sample_imputation(self, data_df, col):
     #     '''

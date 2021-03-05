@@ -329,11 +329,11 @@ class GetColumnListClass(APIView):
                         
                         schema_id = request.query_params.get('schema_id') #get schema id
                         
-                        columns = preprocessObj.get_col_names(schema_id)
-                        if isinstance(columns,list): 
-                                        response = [{"column_id": i, "col_name": name} for i,name in enumerate(columns)]
+                        column_json = preprocessObj.get_col_names(schema_id)
+                        if isinstance(column_json,list): 
+                                        
                                         logging.info("data preprocess : GetColumnListClass : POST Method : execution stop")
-                                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":response})
+                                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":column_json})
                         else:
                                         status_code,error_msg=json_obj.get_Status_code(columns) # extract the status_code and error_msg from schema_data
                                         logging.info("data preprocess : GetColumnListClass : POST Method : execution stop : status_code :"+status_code)
