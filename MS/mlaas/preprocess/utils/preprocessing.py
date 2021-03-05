@@ -226,7 +226,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if connection == None :
                 raise DatabaseConnectionFailed(500)  
                 
-            sql_command = f"select amt.activity_id,amt.activity_name,pat.parent_activity_name from mlaas.activity_master_tbl amt , mlaas.parent_activity_tbl pat where amt.code = '0' and amt.parent_activity_id = pat.parent_activity_id"
+            sql_command = f"select amt.activity_id,amt.activity_name,pat.parent_activity_name,ptt.tab_name from mlaas.activity_master_tbl amt , mlaas.parent_activity_tbl pat, mlaas.preprocess_tab_tbl ptt where amt.code = '0' and amt.parent_activity_id = pat.parent_activity_id and ptt.tab_id = pat.tab_id"
             operations_df = DBObject.select_records(connection,sql_command) 
             
             if operations_df is None:
@@ -234,35 +234,49 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             #? Logical Function Starts
             try:
+                #? To store dictionaries
                 master_response = []
-                i = 1
-                
-                #? Getting all operations based on the parent activities
-                for dfs in operations_df.groupby('parent_activity_name'):
+
+                #? For ids
+                k = 1
+                for tabs in operations_df.groupby('tab_name'):
                     
-                    #? Dictionary to store different operation classes
-                    operation_class_dict = {}
-                    operation_class_dict['id'] = i
-                    i+=1
-                    #? Name of Parent Activity
-                    operation_class_dict['title'] = dfs[0]
+                    #? To store operation classes which will be shown in the tab
+                    tab_dict = {}
                     
-                    #? Adding all the operations that comes under the Parent activity
-                    handlers = []
-                    j = 1
-                    for index,data in dfs[1].iterrows():
-                        #? Dictionary for each operations
-                        operation_dict = {}
-                        operation_dict['id'] = j
-                        operation_dict['name'] = data['activity_name']
-                        operation_dict['operation_id'] = index
-                        handlers.append(operation_dict)
-                        j += 1
-                    
-                    #? All possible operations within the class
-                    operation_class_dict['operations'] = handlers
-                    master_response.append(operation_class_dict)
-                    
+                    #? To store operation classes
+                    operation_classes = []
+                    i = 1
+                    for dfs in tabs[1].groupby('parent_activity_name'):
+                        
+                        #? To store each individual operations
+                        operation_class_dict = {}
+                        handlers = []
+                        
+                        #? Storing each individual operations
+                        j = 1
+                        for index,data in dfs[1].iterrows():
+                            operation_dict = {}
+                            operation_dict['id'] = j
+                            operation_dict['name'] = data['activity_name']
+                            operation_dict['operation_id'] = data['activity_id']
+                            handlers.append(operation_dict)
+                            j += 1
+                        
+                        #? Adding the operations to the class
+                        operation_class_dict['id'] = i
+                        operation_class_dict['title'] = dfs[0]
+                        operation_class_dict['operations'] = handlers
+                        operation_classes.append(operation_class_dict)
+                        i+=1
+                        
+                    #? Adding classes to the tab
+                    tab_dict['tab_id'] = k
+                    tab_dict['tab_name'] = tabs[0]
+                    tab_dict['operation_classes'] = operation_classes
+                    master_response.append(tab_dict)
+                    k += 1
+    
                 logging.info("data preprocessing : PreprocessingClass : get_all_operations : execution stop")
                 return master_response
             
@@ -833,12 +847,15 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             target_cols = str(target_cols)
             feature_cols = feature_cols.replace("'",'"')
             target_cols = target_cols.replace("'",'"')
-            filename = "scaled_dataset/scaled_data_" + str(uuid.uuid1().time)
+            unique_id = str(uuid.uuid1().time)
+            train_filename = "scaled_dataset/scaled_data_" + unique_id + "/scaled_train_data_" + unique_id
+            test_filename = "scaled_dataset/scaled_data_" + unique_id + "/scaled_test_data_" + unique_id
             
             # sql_command = f"select * from mlaas.cleaned_ref_tbl crt where crt.dataset_id = '{dataset_id}' and crt.project_id = '{project_id}' and crt.user_id = '{user_id}'"
             # data=DBObject.select_records(connection,sql_command)
             
-            np.save(filename,data_df.to_numpy())
+            np.save(train_filename,data_df.to_numpy())
+            np.save(test_filename,data_df.to_numpy())
             
             # if len(data) == 0:
             #     row = project_id,dataset_id,user_name,feature_cols,target_cols,filename
