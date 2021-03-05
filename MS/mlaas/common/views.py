@@ -68,6 +68,10 @@ class UserLoginClass(APIView):
                         if check_parent_activity_tbl == "False":
                                 parent_activity_df=DBObject.read_data('common/parent_activity_tbl.csv')#read parent_activity_tbl.csv
                                 status=DBObject.load_df_into_db(connection_string,'parent_activity_tbl',parent_activity_df,'mlaas') #creare table parent_activity_tbl         
+                        check_preprocess_tab_tbl=DBObject.is_existing_table(connection,'preprocess_tab_tbl','mlaas')#check activity_master_tbl exists
+                        if check_preprocess_tab_tbl == "False":
+                                preprocess_tab_df=DBObject.read_data('common/preprocess_tab_tbl.csv')#read parent_activity_tbl.csv
+                                status=DBObject.load_df_into_db(connection_string,'preprocess_tab_tbl',preprocess_tab_df,'mlaas') #creare table parent_activity_tbl         
                         user_status = DBObject.user_authentication(connection,user_name,password) #check the user user authenticated or not
                         if user_status != True:
                                 status_code,error_msg=json_obj.get_Status_code(user_status)
