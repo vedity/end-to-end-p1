@@ -55,6 +55,8 @@ class RegressionClass:
                                 DBObject, connection,experiment_name,experiment_desc)
         
         logging.info("modeling : RegressionClass : regression_model : execution end")
+        
+        
     
     # This is for auto model run   
     def all_regression_model(self,Model_Mode, user_id, project_id, dataset_id, model_type, algorithm_type,
@@ -73,6 +75,10 @@ class RegressionClass:
             
             result = requests.post("http://airflow:8080/api/experimental/dags/auto_regressor_pipeline/dag_runs",data=json.dumps(json_data),verify=False)#owner
             
+            #### Get Running Dag Id and Run Id
+            
+            # dag_id,run_id = self.get_dag_ids(project_id,experiment_name,DBObject, connection)
+            
         else:
             print("yet not tested")
             
@@ -80,6 +86,7 @@ class RegressionClass:
         logging.info("modeling : RegressionClass : all_regression_model : execution end")
         
         
+       
         
         
         

@@ -37,8 +37,7 @@ ModelStatObject = ModelStatisticsClass(DBObject,connection)
 
 Model_Mode ="Auto"
 project_id,dataset_id,user_id = 2,2,2
-# input_features_list = ['index','bedrooms','bathrooms','sqft_living','sqft_lot','floors','waterfront','view','condition','grade','sqft_above','sqft_basement','yr_built','yr_renovated','zipcode','lat','long','sqft_living15','sqft_lot15']  
-# target_features_list = ['index','price'] 
+
 
 ###############
 
@@ -120,11 +119,19 @@ class StartModelClass(APIView):
                 try:
                         logging.info("modeling : ExperimentClass : GET Method : execution start")
                         # We will get it from the front-end
-                        user_id,dataset_id,project_id = 2,2,2 
-
-                        Model_Mode = 'Auto'
+                        Model_Mode = request.query_params.get('model_mode')
+                        # NEED TO GET USER ID
+                        user_name = request.query_params.get('user_name')
+                        user_id = 1
+                        project_id = int(request.query_params.get('project_id'))
+                        dataset_id = int(request.query_params.get('dataset_id'))
                         
-                        experiment_name = 'kc_house_demo_test'
+                        
+                        # user_id,dataset_id,project_id = 1,2,1 
+
+                        # Model_Mode = 'Auto'
+                        
+                        experiment_name = request.query_params.get('experiment_name')
                         experiment_desc ='this is for testing'
                         
                         
@@ -136,7 +143,7 @@ class StartModelClass(APIView):
                                 # SplitDataObject = ModelObject.split_dataset(basic_split_parameters)
                                 ModelObject.algorithm_identifier(experiment_name,experiment_desc)
                                 logging.info("modeling : ModelClass : GET Method : execution stop : status_code :200")
-                                return Response({"status_code":"200","error_msg":"Successfully updated","response":"True"})
+                                return Response({"status_code":"200","error_msg":"Successfully updated","response":"pipeline started"})
                         else:
                                 
                                 
@@ -326,8 +333,10 @@ class ShowExperimentsListClass(APIView):
                 try:
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
                         
-                        project_id = request.query_params.get('project_id') #get Username
-                        exp_name = 'kc_house_demo_test'
+                        project_id = int(request.query_params.get('project_id')) #get Username
+                        exp_name = request.query_params.get('experiment_name')
+                        
+                        # exp_name = 'jay_code_scaled_data'
                         experiment_data =ModelStatObject.show_running_experiments(project_id,exp_name)
                         
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
@@ -338,6 +347,71 @@ class ShowExperimentsListClass(APIView):
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+                
+                
+class ShowAllExperimentsListClass(APIView):
+
+        def get(self, request, format=None):
+                """
+                This function is used to get PerformanceMetrics of particular experiment.
+        
+                Args  : 
+                        experiment_id[(Integer)]   :[Id of Experiment]
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival & insertions failed or successfull),
+                        Response(return false if failed otherwise json data)
+                """
+                try:
+                        logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
+                        
+                        project_id = int(request.query_params.get('project_id')) #get Username
+                
+                        
+                        experiment_data =ModelStatObject.show_all_experiments(project_id)
+                        
+                        logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
+                        
+                        return Response({"status_code":"200","error_msg":"Successfully updated","response":experiment_data})
+                        
+                except Exception as e:
+                        logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
+                        logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+                
+                
+class CheckModelStatusClass(APIView):
+
+        def get(self, request, format=None):
+                """
+                This function is used to get PerformanceMetrics of particular experiment.
+        
+                Args  : 
+                        experiment_id[(Integer)]   :[Id of Experiment]
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival & insertions failed or successfull),
+                        Response(return false if failed otherwise json data)
+                """
+                try:
+                        logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
+                        
+                        project_id = int(request.query_params.get('project_id')) #get Username
+                        
+                        experiment_name = request.query_params.get('experiment_name')
+                
+                        
+                        experiment_data =ModelStatObject.check_model_status(project_id,experiment_name)
+                        
+                        logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
+                        
+                        return Response({"status_code":"200","error_msg":"Successfully updated","response":experiment_data})
+                        
+                except Exception as e:
+                        logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
+                        logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+
 
 
 class SelectAlgorithmClass(APIView):

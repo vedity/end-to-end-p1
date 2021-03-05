@@ -28,6 +28,11 @@ urlpatterns = [
 
     path('mlaas/modeling/hyperparameters/', HyperParametersClass.as_view()),
 
-    path('mlaas/modeling/showexperimentslist/', ShowExperimentsListClass.as_view())
-
+    path('mlaas/modeling/showexperimentslist/', ShowExperimentsListClass.as_view()),
+    
+    path('mlaas/modeling/showallexperimentslist/', ShowAllExperimentsListClass.as_view()),
+    
+    path('mlaas/modeling/checkmodelstatus/', CheckModelStatusClass.as_view())
+    
+      
 ]
