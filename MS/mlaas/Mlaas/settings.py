@@ -27,7 +27,7 @@ SECRET_KEY = '3#pf#g%1e*@bccpiyjummz0563hk$lez^sgvo17elv$l-pb5)d'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['http://isg.loginto.me:8000','http://isg.loginto.me:4200','http://isg.loginto.me:8080']
 
 
 # Application definition
@@ -62,6 +62,9 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS =[
     'http://localhost:4200',
     'http://localhost:8080',
+    'http://isg.loginto.me:8000',
+    'http://isg.loginto.me:4200',
+    'http://isg.loginto.me:8080',
     ]
 
 ROOT_URLCONF = 'Mlaas.urls'
