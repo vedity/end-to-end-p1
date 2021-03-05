@@ -45,10 +45,11 @@ connection,connection_string=DBObject.database_connection(database,user,password
 
 def get_auto_model_param(user_id, project_id, dataset_id, dataset_split_dict):
     
-    path="/usr/local/airflow/dags/scaled_dataset/my_data_num.npy"
+    # path="/usr/local/airflow/dags/scaled_dataset/my_data_num.npy"
     
-    # scaled_path = SplitData().get_scaled_path(DBObject,connection,project_id)
-    
+    scaled_path = SplitData().get_scaled_path(DBObject,connection,project_id)
+    path = "/usr/local/airflow/dags/" + scaled_path +".npy"
+    print("path==",path)
     input_df, target_df = SplitData().get_scaled_data(path)
     
     input_features_list, target_features_list = SplitData().get_input_target_features_list(user_id, project_id, dataset_id, DBObject, connection)
@@ -97,7 +98,7 @@ def linear_regression_sklearn(run_id,**kwargs):
         project_id = int(kwargs['dag_run'].conf['project_id'])
         dataset_id = int(kwargs['dag_run'].conf['dataset_id'])
         user_id = int(kwargs['dag_run'].conf['user_id'])
-        
+        print(user_id)
         dataset_split_parameters = {"model_mode":model_mode}
         dataset_split_dict = SplitData().get_dataset_split_dict(dataset_split_parameters)
         input_features_list, target_features_list, X_train, X_test, X_valid, y_train, y_test, y_valid= get_auto_model_param(user_id, project_id, dataset_id, dataset_split_dict)

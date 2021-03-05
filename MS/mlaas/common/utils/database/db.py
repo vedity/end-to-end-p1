@@ -47,6 +47,8 @@ class DBClass:
             [dataframe]: [it will return read csv file data in the form of dataframe.]
         """
         read_df=pd.read_csv(file_path) #  Read csv file and load data into dataframe.
+        logging.info(str(read_df) + " read dataframe")
+
         column_name_list = read_df.columns.values.tolist()
     
         column_list = []
@@ -54,9 +56,9 @@ class DBClass:
             if read_df.dtypes.to_dict()[name] == 'object':
                 column_list.append(name)
         read_df=pd.read_csv(file_path,parse_dates=column_list) #  Read csv file and load data into dataframe.
-        return read_df
-
-
+<<<<<<< HEAD
+=======
+        
     def database_connection(self,database,user,password,host,port):
         """This function is used to make connection with database.
 

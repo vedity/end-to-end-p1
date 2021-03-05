@@ -188,18 +188,19 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if connection == None :
                 raise DatabaseConnectionFailed(500)  
                 
-            sql_command = f"select case when changed_column_name = '' then column_name else changed_column_name end column_list  from mlaas.schema_tbl where schema_id ='{str(schema_id)}' and column_attribute !='Ignore' order by index"
-            
+            sql_command = f"select case when changed_column_name = '' then column_name else changed_column_name end column_list,case when 'True' in( missing_flag, noise_flag) then 'True' else 'False' end flag from mlaas.schema_tbl where schema_id ='{str(schema_id)}' and column_attribute !='Ignore' order by index"
             col_df = DBObject.select_records(connection,sql_command) 
             
             if col_df is None:
                 raise EntryNotFound(500)
             
-            column_names = col_df['column_list']
-            
+            column_name,flag_value = list(col_df['column_list']),list(col_df['flag'])
+
+            json_data = [{"column_id": count, "col_name": column_name[count],"is_missing":flag_value[count]} for count in range(len(column_name))]
+            logging.info(str(json_data) + " json data")
             logging.info("data preprocessing : PreprocessingClass : get_col_names : execution stop")
             
-            return column_names.tolist()
+            return json_data
             
         except (DatabaseConnectionFailed,EntryNotFound) as exc:
             logging.error("data preprocessing : PreprocessingClass : get_col_names : Exception " + str(exc.msg))
@@ -741,9 +742,51 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 
                 #? Getting Columns
                 col = operation_ordering[op]
+
+                if op == 1:
+                    data_df = self.discard_missing_values(data_df, col)
+                # elif op == 2:
+                    # data_df = self.delete_above(data_df, col, val)
+                # elif op == 3:
+                    # data_df = self.delete_below(data_df, col, val)
+                elif op == 5:
+                    status = self.imputation(DBObject, connection, column_list, dataset_table_name, col,op)
+                # elif op == 6:
+                #     data_df = self.arbitrary_value_imputation(data_df, col, val)
+                elif op == 7:
+                    data_df = self.end_of_distribution(data_df, col)
+                elif op == 8:
+                    data_df = self.frequent_category_imputation(data_df, col)
+                elif op == 9:
+                    data_df = self.add_missing_category(data_df, col)
+                elif op == 10:
+                    data_df = self.random_sample_imputation(data_df, col)
+                elif op == 11:
+                    data_df = self.remove_noise(data_df, col)
+                elif op == 12:
+                    data_df = self.repl_noise_mean(data_df, col)
+                elif op == 13:
+                    data_df = self.repl_noise_median(data_df, col)
+                elif op == 14:
+                    data_df = self.repl_noise_random_sample(data_df, col)
+                # elif op == 15:
+                #     data_df = self.repl_noise_arbitrary_val(data_df, col, val)
+                elif op == 16:
+                    data_df = self.rem_outliers_ext_val_analysis(data_df, col)
+                elif op == 17:
+                    data_df = self.rem_outliers_z_score(data_df, col)
+                elif op == 18:
+                    data_df = self.repl_outliers_mean_ext_val_analysis(data_df, col)
+                elif op == 19:
+                    data_df = self.repl_outliers_mean_z_score(data_df, col)
+                elif op == 20:
+                    data_df = self.repl_outliers_med_ext_val_analysis(data_df, col)
+                elif op == 21:
+                    data_df = self.repl_outliers_med_z_score(data_df, col)
+                elif op == 22:
+                    data_df = self.apply_log_transformation(data_df, col)
                 
-                status = self.imputation(DBObject, connection, column_list, dataset_table_name, col,op)
-                
+
             logging.info("data preprocessing : PreprocessingClass : master_executor : execution stop")
             return status
 
