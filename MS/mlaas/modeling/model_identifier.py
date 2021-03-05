@@ -71,6 +71,8 @@ class ModelClass(SC, SplitData):
             self.unsupervised_algorithm(experiment_name,experiment_desc)
             
         logging.info("modeling : ModelClass : algorithm_identifier : execution end")
+        
+        
            
             
     
@@ -143,6 +145,8 @@ class ModelClass(SC, SplitData):
                                                     self.connection,experiment_name,experiment_desc)
         
         logging.info("modeling : ModelClass : supervised_algorithm : execution end")
+        
+        
     
     def unsupervised_algorithm(self,experiment_name,experiment_desc):
         """This function is used to call unsupervised algorithm.

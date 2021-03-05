@@ -78,6 +78,7 @@ class ExploreClass:
         
         #? Logical Code Begins
         try:
+            data_df.reset_index(drop=True,inplace = True)
             
             added_col = False
             if (type(data_df) is pd.Series):
@@ -244,7 +245,7 @@ class ExploreClass:
         if added_col:
             stats_df.drop(labels = ['auto_generated_column'], axis = 0,inplace = True)
 
-        return stats_df.round(2)    
+        return stats_df.iloc[1:].round(2)    
     
     def iqr(self,arr):
         '''

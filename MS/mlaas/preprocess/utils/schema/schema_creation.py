@@ -216,11 +216,12 @@ class SchemaClass:
                         raise ChangeColumnNameSame(500)
             
             column_count_value,ignore_count_value = self.get_count_value(DBObject,connection,schema_id)
-
-
             logging.info(str(column_attribute_list)+" column_attribute_list")
+            logging.info(str(column_count_value)+" column_count_value")
+            logging.info(str(ignore_count_value)+" ignore_count_value")
+            logging.info(str(len(column_attribute_list))+" column_attribute_list")
 
-            if (column_count_value-ignore_count_value)== column_attribute_list.count('Ignore') :
+            if (column_count_value-ignore_count_value)== column_attribute_list.count('Ignore') and column_attribute_list.count('Select')==0 and column_attribute_list.count('Target')==0 :
                 raise IgnoreColumns(500)
 
 
@@ -510,7 +511,7 @@ class SchemaClass:
             table_name,_,_ = self.get_schema()
             
             # sql command to get details from schema table  based on  schema id 
-            sql_command = "select case when changed_column_name ='' then column_name else changed_column_name end column_list,index,data_type,column_attribute  from "+str(table_name)+" where schema_id="+str(schema_id)+" and column_attribute !='Ignore' order by index"           
+            sql_command = "select case when changed_column_name ='' then column_name else changed_column_name end column_list,index,data_type,column_attribute  from "+str(table_name)+" where schema_id="+str(schema_id)+" order by index"           
         
             #execute sql commnad if data exist then return dataframe else return None
             schema_df = DBObject.select_records(connection,sql_command) 

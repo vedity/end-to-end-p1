@@ -66,5 +66,9 @@ dag_created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()
 create sequence unq_num_seq
 increment 1;
 
-
 SELECT setval('unq_num_seq', 1);
+
+
+
+
+

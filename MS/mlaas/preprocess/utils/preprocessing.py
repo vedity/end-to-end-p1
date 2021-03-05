@@ -188,18 +188,19 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if connection == None :
                 raise DatabaseConnectionFailed(500)  
                 
-            sql_command = f"select case when changed_column_name = '' then column_name else changed_column_name end column_list  from mlaas.schema_tbl where schema_id ='{str(schema_id)}' and column_attribute !='Ignore' order by index"
-            
+            sql_command = f"select case when changed_column_name = '' then column_name else changed_column_name end column_list,case when 'True' in( missing_flag, noise_flag) then 'True' else 'False' end flag from mlaas.schema_tbl where schema_id ='{str(schema_id)}' and column_attribute !='Ignore' order by index"
             col_df = DBObject.select_records(connection,sql_command) 
             
             if col_df is None:
                 raise EntryNotFound(500)
             
-            column_names = col_df['column_list']
-            
+            column_name,flag_value = list(col_df['column_list']),list(col_df['flag'])
+
+            json_data = [{"column_id": count, "col_name": column_name[count],"is_missing":flag_value[count]} for count in range(len(column_name))]
+            logging.info(str(json_data) + " json data")
             logging.info("data preprocessing : PreprocessingClass : get_col_names : execution stop")
             
-            return column_names.tolist()
+            return json_data
             
         except (DatabaseConnectionFailed,EntryNotFound) as exc:
             logging.error("data preprocessing : PreprocessingClass : get_col_names : Exception " + str(exc.msg))
@@ -703,10 +704,21 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if connection == None :
                 raise DatabaseConnectionFailed(500)
             #? Getting Dataframe
-            data_df = self.get_data_df(dataset_id,schema_id)
-            if isinstance(data_df, str):
-                raise GetDataDfFailed(500)
             
+            #Get the dataframe of dataset detail based on the dataset id
+            dataframe = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
+
+            #Extract the dataframe based on its column name as key
+            table_name,dataset_visibility,user_name = str(dataframe['dataset_table_name'][0]),str(dataframe['dataset_visibility'][0]),str(dataframe['user_name'][0])
+            
+            if dataset_visibility == 'private':
+                dataset_table_name = user_name+'."'+table_name+'"'
+            else:
+                dataset_table_name = 'public'+'."'+table_name+'"'
+
+            #get the Column list
+            column_list = DBObject.get_column_list(connection,dataset_id)
+
             #? Getting operations in the ordered format
             operation_ordering = self.reorder_operations(request)
             
@@ -716,17 +728,15 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 
                 #? Getting Columns
                 col = operation_ordering[op]
-                
+
                 if op == 1:
                     data_df = self.discard_missing_values(data_df, col)
                 # elif op == 2:
-                #     data_df = self.delete_above(data_df, col, val)
+                    # data_df = self.delete_above(data_df, col, val)
                 # elif op == 3:
-                #     data_df = self.delete_below(data_df, col, val)
-                elif op == 4:
-                    data_df = self.mean_imputation(data_df, col)
+                    # data_df = self.delete_below(data_df, col, val)
                 elif op == 5:
-                    data_df = self.median_imputation(data_df, col)
+                    status = self.imputation(DBObject, connection, column_list, dataset_table_name, col,op)
                 # elif op == 6:
                 #     data_df = self.arbitrary_value_imputation(data_df, col, val)
                 elif op == 7:
@@ -761,41 +771,10 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     data_df = self.repl_outliers_med_z_score(data_df, col)
                 elif op == 22:
                     data_df = self.apply_log_transformation(data_df, col)
-                # elif op == 27:
-                #     data_df = self.mean_imputation(data_df, col)
-                # elif op == 28:
-                #     data_df = self.mean_imputation(data_df, col)
-                # elif op == 29:
-                #     data_df = self.mean_imputation(data_df, col)
-                # elif op == 30:
-                #     data_df = self.mean_imputation(data_df, col)
-                # elif op == 31:
-                #     data_df = self.mean_imputation(data_df, col)
-                # elif op == 32:
-                #     data_df = self.mean_imputation(data_df, col)
-                # elif op == 33:
-                #     data_df = self.mean_imputation(data_df, col)
-            sql_command = "select dataset_visibility,dataset_table_name,user_name from mlaas.dataset_tbl  where dataset_id='"+str(dataset_id)+"'"
-            
-            logging.info(str(sql_command))
-            dataframe = DBObject.select_records(connection,sql_command)
- 
-            dataset_visibility,dataset_table_name,user_name  = str(dataframe['dataset_visibility'][0]),str(dataframe['dataset_table_name'][0]),str(dataframe['user_name'][0])
- 
-            updated_table_name = DBObject.get_table_name(connection,dataset_table_name)
-            
-            if dataset_visibility == 'public':
-                user_name='public'
- 
-            status = DBObject.load_df_into_db(connection_string,updated_table_name,data_df,user_name)
- 
-            if status == 0:
- 
-                Sql_command = "update mlaas.dataset_tbl set dataset_table_name='"+str(updated_table_name)+"' where dataset_id='"+str(dataset_id)+"'"
-                logging.info(str(sql_command))
-                update_status = DBObject.update_records(connection,Sql_command)
+                
+
             logging.info("data preprocessing : PreprocessingClass : master_executor : execution stop")
-            return update_status
+            return status
 
         except (GetDataDfFailed) as exc:
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
@@ -845,19 +824,16 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             target_cols = [data_df.columns[0]]
             target_cols += tg_cols
-            logging.info("------>"+str(target_cols)+str(feature_cols))
             
             final_cols = feature_cols+tg_cols
-            logging.info("------>"+str(final_cols))
             
-            data_df = data_df[final_cols[1:]]
+            data_df = data_df[final_cols]
             
             feature_cols = str(feature_cols)
             target_cols = str(target_cols)
             feature_cols = feature_cols.replace("'",'"')
             target_cols = target_cols.replace("'",'"')
             filename = "scaled_dataset/scaled_data_" + str(uuid.uuid1().time)
-            logging.info("------>"+str(target_cols)+str(feature_cols))
             
             # sql_command = f"select * from mlaas.cleaned_ref_tbl crt where crt.dataset_id = '{dataset_id}' and crt.project_id = '{project_id}' and crt.user_id = '{user_id}'"
             # data=DBObject.select_records(connection,sql_command)
