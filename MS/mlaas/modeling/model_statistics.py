@@ -270,7 +270,11 @@ class ModelStatisticsClass:
             
             dag_run_id = model_dag_df['run_id'][0]
             
-            sql_command = "select met.*,mmt.model_name,dt.dataset_name,round(cast(sv.cv_score as numeric),3) as cv_score,round(cast(sv.holdout_score as numeric)) as holdout_score from mlaas.model_experiment_tbl met,mlaas.model_master_tbl mmt,mlaas.score_view sv,mlaas.dataset_tbl dt  where met.model_id = mmt.model_id and met.experiment_id=sv.experiment_id and met.dataset_id=dt.dataset_id and met.project_id="+str(project_id) +" and met.dag_run_id='"+ dag_run_id +"' and met.status='running'"
+            sql_command = "select met.*,e.name as experiment_name,mmt.model_name,dt.dataset_name,round(cast(sv.cv_score as numeric),3) as cv_score,round(cast(sv.holdout_score as numeric),3) as holdout_score "\
+                          "from mlaas.model_experiment_tbl met,mlaas.model_master_tbl mmt,mlaas.score_view sv,mlaas.dataset_tbl dt,mlaas.experiments e "\
+                          "where met.model_id = mmt.model_id and met.experiment_id=sv.experiment_id and met.dataset_id=dt.dataset_id and met.experiment_id=e.experiment_id "\
+                          "and met.project_id="+str(project_id) +" and met.dag_run_id='"+ dag_run_id +"' and met.status='running'"
+                          
             model_experiment_data_df = self.DBObject.select_records(self.connection, sql_command)
     
             # Converting final_df to json
@@ -293,7 +297,12 @@ class ModelStatisticsClass:
             
         """
         try:
-            sql_command = "select met.*,mmt.model_name,dt.dataset_name,round(cast(sv.cv_score as numeric),3) as cv_score,round(cast(sv.holdout_score as numeric)) as holdout_score  from mlaas.model_experiment_tbl met,mlaas.model_master_tbl mmt,mlaas.score_view sv,mlaas.dataset_tbl dt  where met.model_id = mmt.model_id and met.experiment_id=sv.experiment_id and met.dataset_id=dt.dataset_id and met.project_id="+str(project_id)
+            sql_command = "select met.*,e.name as experiment_name,mmt.model_name,dt.dataset_name,"\
+                          "round(cast(sv.cv_score as numeric),3) as cv_score,round(cast(sv.holdout_score as numeric),3) as holdout_score "\
+                          " from mlaas.model_experiment_tbl met,mlaas.model_master_tbl mmt,mlaas.score_view sv,mlaas.dataset_tbl dt,mlaas.experiments e"\
+                          " where met.model_id = mmt.model_id and met.experiment_id=sv.experiment_id and met.dataset_id=dt.dataset_id and met.experiment_id=e.experiment_id "\
+                          " and met.project_id="+str(project_id)
+                          
             model_experiment_data_df = self.DBObject.select_records(self.connection, sql_command)
             # Converting final_df to json
             json_data = model_experiment_data_df.to_json(orient='records',date_format='iso')
@@ -316,6 +325,27 @@ class ModelStatisticsClass:
             return 1
         else:
             return 0
+        
+        
+    def check_model_status(self,project_id,experiment_name):
+        
+        try:
+        
+            sql_command ="select dag_id,run_id from mlaas.model_dags_tbl where project_id='"+str(project_id)+"' and exp_name='"+experiment_name+"'"
+            
+            dag_df = self.DBObject.select_records(self.connection, sql_command)
+            
+            dag_id,run_id = dag_df['dag_id'][0],dag_df['run_id'][0]
+            
+            sql_command = "select state from dag_run where dag_id='"+dag_id+"' and run_id='"+run_id +"'"
+            state_df = self.DBObject.select_records(self.connection, sql_command)
+            status=state_df['state'][0]
+            
+        except:
+            status = "there is some problem"
+        
+        return status
+        
         
 
     
