@@ -43,9 +43,10 @@ class SupervisedClass(RC,PC):
 
         AlgorithmDetectorObject = AlgorithmDetector(DBObject, connection)
         SplitDataObject = SplitData()
-        path="./scaled_dataset/my_data_num.npy"
+        #path="./scaled_dataset/my_data_num.npy"
         
-        # scaled_path = SplitDataObject.get_scaled_path(DBObject,connection,project_id)
+        scaled_path = SplitDataObject.get_scaled_path(DBObject,connection,project_id)
+        path = "./"+scaled_path+".npy"
         
         _, target_df = SplitDataObject.get_scaled_data(path)
         
@@ -81,6 +82,8 @@ class SupervisedClass(RC,PC):
             print("please select appropriate target")
             
         logging.info("modeling : SupervisedClass : supervised_algorithm : execution end")
+        
+        
         
         
     def run_regression_model(self,model_id,model_name,model_type,Model_Mode, input_features_list,

@@ -101,11 +101,12 @@ class SplitData:
 
     
     def get_scaled_path(self,DBObject,connection,project_id):
-        
-        sql_command = 'select scaled_data_path from mlaas.cleaned_ref_tbl where project_id = ' + str(project_id)
+        #TODO This command will change
+        sql_command = 'select scaled_data_path from mlaas.project_tbl where project_id = ' + str(project_id)
+        # sql_command = 'select scaled_data_path from mlaas.cleaned_ref_tbl where project_id = ' + str(project_id)
         data_df = DBObject.select_records(connection, sql_command)
 
-        path = dataset_df['scaled_data_path'][0]# Add exception
+        path = data_df['scaled_data_path'][0]# Add exception
         
         return path
     
@@ -119,7 +120,7 @@ class SplitData:
         #TODO, this will change in future as there will be multiple users,projects and datasets.
         # Read Scaled Data From Numpy File    
          
-        scaled_df = np.load(path)
+        scaled_df = np.load(path,allow_pickle=True)
         
         input_features_df = scaled_df[:,0:-1]
         
@@ -135,7 +136,7 @@ class SplitData:
     
     def get_input_target_features_list(self, user_id, project_id, dataset_id, DBObject, connection):
         #TODO sql_command will be changed in the future
-        sql_command = 'select input_features,target_features from mlaas.cleaned_ref_tbl where user_id={} and project_id={} and dataset_id={}'.format(user_id, project_id, dataset_id)
+        sql_command = 'select input_features,target_features from mlaas.project_tbl where  project_id={} and dataset_id={}'.format(project_id, dataset_id)
         input_target_df = DBObject.select_records(connection, sql_command)
         #TODO Add Exception
         input_features = input_target_df['input_features'][0]# Get the input features list
