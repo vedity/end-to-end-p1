@@ -1,18 +1,16 @@
-<div class="page-title-box d-flex align-items-center justify-content-between">
-    <h4 class="mb-0 font-size-18">Data Cleanup</h4>
-    <a class="btn btn-success modeling-btn" [routerLink]="['/modeling']" style="right: 290px" [state]="{selectproject:false}"> Modeling</a>
-    <a class="btn btn-success modeling-btn" [routerLink]="['/modeling']" [state]="{dataset_id: dataset_id ,project_id:project_id,selectproject:true}">Modeling</a>
-</div>
-<div class="row">
-    <div class="col-md-12">
-        <div class="card table-card">
-            <div class="card-body">
-                <h4 class="card-title mb-4">{{title}}</h4>
-                <ngx-skeleton-loader *ngIf="loaderdiv" count="7" [animation]="animation" [theme]="theme">
-                </ngx-skeleton-loader>
-                <div class="left-box" [hidden]="loaderdiv">
+<a class="btn btn-success modeling-btn" [routerLink]="['/modeling']">Modeling</a>
 
+<ul ngbNav #justifiednavdatacleanup="ngbNav" [activeId]="1" class="nav-tabs nav cleanup-tabs">
+    <li [ngbNavItem]="1">
+        <a ngbNavLink title="Data Cleanup">
+            <span class="">Cleaning</span>
 
+        </a>
+        <ng-template ngbNavContent>
+            <ngx-skeleton-loader *ngIf="loaderdiv" count="7" [animation]="animation" [theme]="theme">
+            </ngx-skeleton-loader>
+            <div class="left-box" [hidden]="loaderdiv">
+                <perfect-scrollbar style="height: 490px;">
                     <table class="table" datatable [dtOptions]="dtOptions" *ngIf="columnList">
                         <thead>
                             <tr>
@@ -25,146 +23,217 @@
                             <tr *ngFor="let item of columnList;let i=index">
                                 <td>
                                     <div class="custom-control custom-checkbox mb-3">
-                                        <input type="checkbox" class="custom-control-input" value="{{item.column_id}}" data-value="{{item.column_id}}" id="customCheck_{{i}}">
+                                        <input [disabled]="item.is_missing=='False'" type="checkbox" class="custom-control-input" value="{{item.column_id}}" (change)="selectColumn($event)" data-value="{{item.column_id}}" id="customCheck_{{i}}">
                                         <label class="custom-control-label" for="customCheck_{{i}}">{{item.col_name}}</label>
                                     </div>
                                 </td>
-                                <td class="handlinmg-list">
-                                    <!-- <div class="handling">
-                                        <p>Replace Missing Value</p>
-                                        <a href="javascript:void(0);"> <i class=" bx bx-trash"></i></a>
-                                    </div>
-                                    <div class="handling">
-                                        <p>Removie Noise</p>
-                                        <a href="javascript:void(0);"> <i class=" bx bx-trash"></i></a>
-                                    </div>
-                                    <div class="handling">
-                                        <p>Encoded</p>
-                                        <a href="javascript:void(0);"> <i class=" bx bx-trash"></i></a>
-                                    </div> -->
-
-
+                                <td class="handlinmg-list" id="handling_{{item.column_id}}">
                                 </td>
                             </tr>
                         </tbody>
                     </table>
-                </div>
-                <div class="right-box" [hidden]="loaderdiv">
-                    <perfect-scrollbar style="height:56vh;">
-                        <div class="right-inner">
-                            <div *ngFor="let item of operationList;let i=index">
-                                <h4 class="mb-3">{{item.title}}</h4>
+                </perfect-scrollbar>
+            </div>
+            <div class="right-box" [hidden]="loaderdiv">
+                <div class="right-inner">
+                    <ul ngbNav #justifiednavmissing="ngbNav" [activeId]="1" class="nav-tabs nav noise-tabs">
+                        <li [ngbNavItem]="1">
+                            <a ngbNavLink title="Data Cleanup">
+                                <span>Missing Value</span>
+
+                            </a>
+                            <ng-template ngbNavContent>
+                                <h4 class="mb-3">Missing Value Handling</h4>
                                 <div class="row">
-                                    <div class="col-md-4" *ngFor="let childitem of item.operations">
+                                    <div class="col-md-4">
                                         <div class="custom-control custom-radio mb-3 ">
-                                            <input type="radio" id="customRadio_{{i}}" value="{{childitem.operation_id}}" name="customRadio" class="custom-control-input">
-                                            <label class="custom-control-label" for="customRadio_{{i}}">{{childitem.name}}</label>
+                                            <input type="radio" id="customRadio1" name="customRadio" class="custom-control-input">
+                                            <label class="custom-control-label" for="customRadio1">Replace
+                                                                    missing value with</label>
                                         </div>
-                                        <!-- <div class="ml-3">
+                                        <div class="ml-3">
                                             <div class="custom-control custom-radio mb-3 ">
                                                 <input type="radio" id="median" name="min" class="custom-control-input">
                                                 <label class="custom-control-label" for="median">With
-                                            Median</label>
+                                                                        Median</label>
                                             </div>
                                             <div class="custom-control custom-radio mb-3 ">
                                                 <input type="radio" id="mean" name="min" class="custom-control-input">
                                                 <label class="custom-control-label" for="mean">With Mean</label>
                                             </div>
-                                        </div> -->
+                                        </div>
 
                                     </div>
-                                    <!-- <div class="col-md-6">
+                                    <div class="col-md-6">
                                         <div class="custom-control custom-radio mb-3 col-md-6">
                                             <input type="radio" id="customRadio2" name="customRadio" class="custom-control-input">
                                             <label class="custom-control-label" for="customRadio2">Drop affected
-                                        rows</label>
+                                                                    rows</label>
                                         </div>
-                                    </div> -->
-                                </div>
-                            </div>
-                            <!--                             
-                            <h4 class="mb-3">Rescaling</h4>
-                            <div class="row mb-4">
+                                    </div>
 
-                                <div class="col-md-3">
-                                    <div class="custom-control custom-radio">
-                                        <input type="radio" id="min-max" name="rescaling" class="custom-control-input">
-                                        <label class="custom-control-label" for="min-max">Min-Max</label>
-                                    </div>
                                 </div>
-                                <div class="col-md-3">
-                                    <div class="custom-control custom-radio">
-                                        <input type="radio" id="scaler" name="rescaling" class="custom-control-input">
-                                        <label class="custom-control-label" for="scaler">Std.Scaler</label>
+                            </ng-template>
+                        </li>
+                        <li [ngbNavItem]="2">
+                            <a ngbNavLink title="Data Cleanup">
+                                <span class="">Transformation</span>
+
+                            </a>
+                            <ng-template ngbNavContent>
+
+                                <h4 class="mb-3">Remove Noise By</h4>
+                                <div class="row mb-4">
+                                    <div class="col-md-3">
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="regression" name="noise" class="custom-control-input">
+                                            <label class="custom-control-label" for="regression">Regression</label>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="custom-control custom-radio">
-                                        <input type="radio" id="robust" name="rescaling" class="custom-control-input">
-                                        <label class="custom-control-label" for="robust">Robust</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="custom-control custom-radio">
-                                        <input type="radio" id="normalization" name="rescaling" class="custom-control-input">
-                                        <label class="custom-control-label" for="normalization">Normalization</label>
+                                    <div class="col-md-3">
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="binning" name="noise" class="custom-control-input">
+                                            <label class="custom-control-label" for="binning">Binning</label>
+                                        </div>
                                     </div>
                                 </div>
 
-                            </div>
-                            <h4 class="mb-3">Remove Noise By</h4>
-                            <div class="row mb-4">
-                                <div class="col-md-3">
-                                    <div class="custom-control custom-radio">
-                                        <input type="radio" id="regression" name="noise" class="custom-control-input">
-                                        <label class="custom-control-label" for="regression">Regression</label>
+                                <h4 class="mb-3">Select Encode Type</h4>
+                                <div class="row mb-4">
+                                    <div class="col-md-3">
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="hot-encoding" name="encode" class="custom-control-input">
+                                            <label class="custom-control-label" for="hot-encoding">One hot
+                                                                    encoding</label>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="custom-control custom-radio">
-                                        <input type="radio" id="binning" name="noise" class="custom-control-input">
-                                        <label class="custom-control-label" for="binning">Binning</label>
+                                    <div class="col-md-3">
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="label" name="encode" class="custom-control-input">
+                                            <label class="custom-control-label" for="label">Label
+                                                                    encoding</label>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
 
-                            <h4 class="mb-3">Select Encode Type</h4>
-                            <div class="row mb-4">
-                                <div class="col-md-3">
-                                    <div class="custom-control custom-radio">
-                                        <input type="radio" id="hot-encoding" name="encode" class="custom-control-input">
-                                        <label class="custom-control-label" for="hot-encoding">One hot
-                                    encoding</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="custom-control custom-radio">
-                                        <input type="radio" id="label" name="encode" class="custom-control-input">
-                                        <label class="custom-control-label" for="label">Label
-                                    encoding</label>
-                                    </div>
                                 </div>
 
-                            </div>
+                                <div class="form-group">
+                                    <div class="custom-control custom-checkbox mb-3">
+                                        <input type="checkbox" class="custom-control-input" id="duplicate">
+                                        <label class="custom-control-label" for="duplicate">Remove duplicate
+                                                                data</label>
+                                    </div>
 
-                            <div class="form-group">
-                                <div class="custom-control custom-checkbox mb-3">
-                                    <input type="checkbox" class="custom-control-input" id="duplicate">
-                                    <label class="custom-control-label" for="duplicate">Remove duplicate
-                                data</label>
                                 </div>
 
-                            </div> -->
+                                <div class="button-items text-center">
+                                    <button type="button" class="btn btn-secondary">Reset</button>
+                                    <div class="btn-group me-1 dropdown" ngbDropdown>
+                                        <button type="button" class="btn btn-success">Save</button>
+                                        <button type="button" class="btn btn-success dropdown-toggle dropdown-toggle-split" ngbDropdownToggle>
+                                                              <i class="mdi mdi-chevron-down"></i>
+                                                            </button>
+                                        <div class="dropdown-menu" ngbDropdownMenu>
+                                            <a class="dropdown-item" href="javascript: void(0);">Save As</a>
+
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </ng-template>
+                        </li>
+                    </ul>
+                    <div [ngbNavOutlet]="justifiednavmissing"></div>
+                </div>
+            </div>
+        </ng-template>
+    </li>
+    <li [ngbNavItem]="2">
+        <a ngbNavLink title="Rescaling">
+            <span class="">Scale & Split</span>
+
+        </a>
+        <ng-template ngbNavContent>
+            <div class="row justify-content-md-left">
+                <div class="col-md-5">
+
+                    <h4 class="font-size-18 mt-3 mb-3">Split Dataset</h4>
+                    <div class="form-group">
+                        <label>Select split method</label>
+                        <select class="form-control">
+                                                <option value="1">Cross Validation</option>
+                                                <option value="2">Train - Validation - Holdout</option>
+                                              </select>
+                    </div>
+                    <div class="cross-validation">
+                        <div class="form-group">
+                            <label>Number of cross validation(CV) folds</label>
+                            <input type="text" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Holdout perecentage</label>
+                            <input type="range" class="custom-range" min="0" max="100" id="customRange2">
 
                         </div>
-                    </perfect-scrollbar>
+                        <div class="from-group">
+                            <label>Random status</label>
+                            <input type="number" class="form-control">
+                        </div>
+                    </div>
 
-                    <div class="button-items text-center">
-                        <button type="button" class="btn btn-secondary">Reset</button>
-                        <button type="button" class="btn btn-success">Save</button>
-                        <button type="button" class="btn btn-secondary">Save As</button>
+                </div>
+
+                <div class="col-md-4">
+                    <h4 class="mb-3 mt-3">Rescaling</h4>
+
+
+                    <div class="row mb-4">
+
+                        <div class="col-md-6 mb-3">
+                            <div class="custom-control custom-radio">
+                                <input type="radio" id="min-max" name="rescaling" class="custom-control-input">
+                                <label class="custom-control-label" for="min-max">Min-Max</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="custom-control custom-radio">
+                                <input type="radio" id="scaler" name="rescaling" class="custom-control-input">
+                                <label class="custom-control-label" for="scaler">Std.Scaler</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="custom-control custom-radio">
+                                <input type="radio" id="robust" name="rescaling" class="custom-control-input">
+                                <label class="custom-control-label" for="robust">Robust</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="custom-control custom-radio">
+                                <input type="radio" id="normalization" name="rescaling" class="custom-control-input">
+                                <label class="custom-control-label" for="normalization">Normalization</label>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="text-left mb-4 mt-4">
+                        <button class="btn btn-success" type="submit">Scale & Split</button>
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+    </li>
+</ul>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card table-card">
+            <div class="card-body">
+                <h4 class="card-title mb-4">{{title}}</h4>
+                <div [ngbNavOutlet]="justifiednavdatacleanup"></div>
             </div>
         </div>
     </div>

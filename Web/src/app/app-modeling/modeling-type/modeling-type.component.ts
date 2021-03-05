@@ -141,7 +141,7 @@ export class ModelingTypeComponent implements OnInit {
     this.params.user_id = JSON.parse(user).id;
     console.log(user);
     this.getDatasetInfo();
-    this.getModelDescription();
+  //  this.getModelDescription();
     this.getAlgorithmList();
   }
 

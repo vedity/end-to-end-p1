@@ -1,3 +1,18 @@
+.modeling-btn {
+    position: absolute;
+    right: 200px;
+    margin-top: 5px;
+}
+
+.hidden {
+    display: none;
+}
+
+.custom-control-input[disabled]~.custom-control-label::before,
+.custom-control-input:disabled~.custom-control-label::before {
+    background-color: #5a6074 !important;
+}
+
 .module-main {
     position: relative;
 }
@@ -80,12 +95,11 @@ table {
 
 .graph-td {
     position: relative;
-    width: 175px;
 }
 
 .expand-graph {
     position: absolute;
-    right: 6px;
+    left: 145px;
     color: #9a9ca3;
     top: 3px;
     z-index: 99;
@@ -95,12 +109,6 @@ table {
     .apexcharts-canvas {
         padding-left: 30px;
     }
-}
-
-canvas {
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
 }
 
 .card-body {
@@ -181,12 +189,14 @@ canvas {
     display: inline-block;
     vertical-align: top;
     margin-right: -5px;
+    height: 100%;
     h4 {
         font-size: 1rem !important;
     }
     .right-inner {
         background: #222736;
-        padding: 20px;
+        padding: 40px;
+        height: 62vh;
     }
     // .row{margin-left:0px; margin-right:0px;}
     .button-items {
@@ -194,9 +204,6 @@ canvas {
     }
 }
 
-// table{
-//      tbody{height:calc(100vh - 400px); overflow-y: scroll;}
-// }
 .custom-control-input:checked~.custom-control-label::before {
     color: #fff;
     border-color: #34c38f !important;
@@ -205,6 +212,173 @@ canvas {
 
 .modeling-btn {
     position: absolute;
-    right: 200px;
-    margin-top: 5px;
+    right: 260px;
+    margin-top: -5px;
+}
+
+.table-card tr th,
+.table-card tr td {
+    width: 25%;
+}
+
+.button-items {
+    margin-top: 15px;
+}
+
+.table-data-card {
+    table tr th,
+    table tr td {
+        width: 10%;
+    }
+    td {
+        padding-left: 15px;
+    }
+}
+
+table {
+    margin-bottom: 0px !important;
+}
+
+.graph-box {
+    width: 100%;
+}
+
+.one-box {
+    .box {
+        width: 100%;
+    }
+}
+
+.two-box {
+    .box {
+        width: 50%;
+        display: inline-block;
+    }
+}
+
+.three-box {
+    .box {
+        width: 33.33%;
+        display: inline-block;
+    }
+}
+
+.col-two {
+    position: relative;
+    padding: 0px 20px;
+    .left {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    .right {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+}
+
+.note {
+    position: absolute;
+    right: 10px;
+    bottom: -10px;
+    p {
+        margin-bottom: 0px;
+    }
+}
+
+.steps-box {
+    margin-bottom: 30px;
+    text-align: center;
+    p {
+        display: inline-block;
+        margin-right: 100px;
+        border: 1px solid #32ad84;
+        padding: 5px 20px;
+        border-radius: 15px;
+        margin-bottom: 0px;
+        position: relative;
+    }
+    p:after {
+        position: absolute;
+        left: 100%;
+        top: 10px;
+        content: "";
+        background: #32ad84;
+        display: block;
+        width: 100px;
+        height: 2px;
+    }
+    p:last-child:after {
+        display: none;
+    }
+    p.active {
+        background: #32ad84;
+        color: #fff;
+    }
+}
+
+.cleanup-tabs {
+    .nav-link {
+        padding: 0.8rem 1rem !important;
+    }
+}
+
+.noise-tabs {
+    border-bottom: none !important;
+    width: 463px;
+    margin: 20px auto;
+    li {
+        margin-right: 100px;
+        position: relative;
+        a {
+            border: 2px solid #34c38f;
+            border-radius: 25px;
+        }
+    }
+    li:after {
+        position: absolute;
+        left: 100%;
+        top: 17px;
+        content: "";
+        background: #32ad84;
+        display: block;
+        width: 100px;
+        height: 2px;
+    }
+    li:last-child:after {
+        display: none;
+    }
+    a.active {
+        background: #32ad84;
+        color: #fff;
+    }
+}
+
+.reset-btn {
+    position: absolute;
+    right: 30px;
+    top: 70px;
+}
+
+.dropdown-menu.show {
+    top: 87% !important;
+    left: 7px !important;
+}
+
+.dropdown-menu {
+    min-width: 7rem !important;
+    background: #299b71 !important;
+    padding: 0rem 0 !important;
+    .dropdown-item {
+        color: #fff !important;
+        padding: 7px 10px !important;
+    }
+    .dropdown-item.active,
+    .dropdown-item:active,
+    .dropdown-item:hover {
+        background: #34c38f !important;
+    }
 }
