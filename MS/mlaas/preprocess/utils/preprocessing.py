@@ -825,11 +825,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 raise GetDataDfFailed(500)
             
             if scaling_type == 0:
-                data_df[:,1:] = self.standard_scaling(data_df[:,1:]._get_numeric_data())
+                data_df[:,1:] = self.standard_scaling(data_df[:,1:])
             elif scaling_type == 1:
-                data_df[:,1:] = self.min_max_scaling(data_df[:,1:]._get_numeric_data())
+                data_df[:,1:] = self.min_max_scaling(data_df[:,1:])
             elif scaling_type == 2:
-                data_df[:,1:] = self.robust_scaling(data_df[:,1:]._get_numeric_data())
+                data_df[:,1:] = self.robust_scaling(data_df[:,1:])
                     
             feature_cols = list(data_df.columns)
             tg_cols = DBObject.get_target_col(connection, schema_id)
@@ -847,16 +847,13 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             target_cols = str(target_cols)
             feature_cols = feature_cols.replace("'",'"')
             target_cols = target_cols.replace("'",'"')
-            unique_id = str(uuid.uuid1().time)
-            train_filename = "scaled_dataset/scaled_data_" + unique_id + "/scaled_train_data_" + unique_id
-            test_filename = "scaled_dataset/scaled_data_" + unique_id + "/scaled_test_data_" + unique_id
+            filename = "scaled_dataset/scaled_data_" + str(uuid.uuid1().time)
             
             # sql_command = f"select * from mlaas.cleaned_ref_tbl crt where crt.dataset_id = '{dataset_id}' and crt.project_id = '{project_id}' and crt.user_id = '{user_id}'"
             # data=DBObject.select_records(connection,sql_command)
             
-            np.save(train_filename,data_df.to_numpy())
-            np.save(test_filename,data_df.to_numpy())
-            
+            np.save(filename,data_df.to_numpy())
+
             # if len(data) == 0:
             #     row = project_id,dataset_id,user_name,feature_cols,target_cols,filename
             #     row_tuples = [tuple(row)]
