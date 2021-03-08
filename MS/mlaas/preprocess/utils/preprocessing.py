@@ -791,7 +791,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 
 
             logging.info("data preprocessing : PreprocessingClass : master_executor : execution stop")
-            return data_df
+            return update_status
 
         except (GetDataDfFailed) as exc:
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
