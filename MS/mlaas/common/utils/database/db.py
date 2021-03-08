@@ -46,6 +46,7 @@ class DBClass:
         Returns:
             [dataframe]: [it will return read csv file data in the form of dataframe.]
         """
+
         read_df=pd.read_csv(file_path) #  Read csv file and load data into dataframe.
         logging.info(str(read_df) + " read dataframe")
 
@@ -56,7 +57,7 @@ class DBClass:
             if read_df.dtypes.to_dict()[name] == 'object':
                 column_list.append(name)
         read_df=pd.read_csv(file_path,parse_dates=column_list) #  Read csv file and load data into dataframe.
-        
+        return read_df
     def database_connection(self,database,user,password,host,port):
         """This function is used to make connection with database.
 
@@ -320,7 +321,9 @@ class DBClass:
         engine = create_engine(connection_string) # Create database engine.
         schema_name = user_name.lower()
         try :
+            
             file_data_df.to_sql(table_name,engine,schema=schema_name,) # Load data into database with table structure.
+            
             status = 0 # If successfully.
         except Exception as e:
             logging.info("Exception: "+str(e))
@@ -555,6 +558,7 @@ class DBClass:
         """
         sql_command = "SELECT 1 FROM information_schema.tables WHERE table_schema ='"+schema+"' AND table_name = '"+table_name+"'"
         data=self.select_records(connection,sql_command) #call select_records which return data if found else None
+        print(str(data) + "checking")
         if len(data) == 0: # check whether length of data is empty or not
             self.create_schema(connection)
             return "False"
