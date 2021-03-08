@@ -91,8 +91,8 @@ class SplitData:
 
             return X_train, None, X_test, Y_train, None, Y_test
         else:
-            X_train_valid, X_test, Y_train_valid, Y_test = train_test_split(X, y, test_size=self.test_size,
-                                                                        random_state=self.random_state)
+            X_train_valid, X_test, Y_train_valid, Y_test = train_test_split(input_df, target_df, test_size=test_size,
+                                                                        random_state=random_state)
 
             X_train, X_valid, Y_train, Y_valid = train_test_split(X_train_valid, Y_train_valid, test_size=valid_size,
                                                             random_state=random_state)

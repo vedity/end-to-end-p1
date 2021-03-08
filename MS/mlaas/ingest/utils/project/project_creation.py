@@ -69,7 +69,7 @@ class ProjectClass:
                 "schema_id bigserial,"\
                 "input_features text,"\
                 "target_features text,"\
-                "scaled_data_path text ,"\
+                "scaled_split_parameters text ,"\
                 "created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()" 
                 
         logging.info("data ingestion : ProjectClass : make_project_schema : execution end")
