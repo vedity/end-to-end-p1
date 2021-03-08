@@ -253,7 +253,7 @@ class ModelStatisticsClass:
         return final_model_data
 
 
-    def show_experiments_list(self, project_id):
+    def show_running_experiments(self, project_id,exp_name):
         """This function is used to get experiments_list of particular project.
 
         Args:
@@ -265,60 +265,87 @@ class ModelStatisticsClass:
         """
         try:
             # Get the necessary values from the mlaas.model_experiment_tbl
-            sql_command = "select experiment_id, model_mode, exp_created_on, 'completed' status from mlaas.model_experiment_tbl where project_id="+str(project_id)
-            logging.info("Model Exp Table:- " + str(project_id))
-            model_experiment_tbl_data = self.DBObject.select_records(self.connection, sql_command)
-            logging.info("Model Exp Table:- " + str(model_experiment_tbl_data))
-            # Get the name of the experiments
-            experiment_ids = tuple(model_experiment_tbl_data['experiment_id'])
-            logging.info('aaa'+str(experiment_ids))
-            if len(experiment_ids) > 1:
-                sql_command = 'select name as experiment_name from mlaas.experiments where experiment_id in'+str(experiment_ids)
-                exp_names = self.DBObject.select_records(self.connection, sql_command)['experiment_name']
-                logging.info("aaaaaaaaaa"+str(exp_names))
-            else:
-                sql_command = 'select name as experiment_name from mlaas.experiments where experiment_id='+str(experiment_ids[0])
-                exp_names = self.DBObject.select_records(self.connection, sql_command)['experiment_name']
+            sql_command ="select run_id from mlaas.model_dags_tbl where project_id="+str(project_id)+" and exp_name='"+exp_name+"'"
+            model_dag_df = self.DBObject.select_records(self.connection,sql_command)
             
-            # Get the name of the models, associated with their respective model_id
-            sql_command = 'select mmt.model_id,mmt.model_name from mlaas.model_master_tbl mmt inner join mlaas.model_experiment_tbl met on mmt.model_id = met.model_id'
-            model_df = self.DBObject.select_records(self.connection, sql_command)
-            model_names=model_df['model_name']
+            dag_run_id = model_dag_df['run_id'][0]
             
-            model_ids =model_df['model_id'] 
-            
-            # Get the name of the datasets associated with their respective dataset_id
-            sql_command = 'select dbt.dataset_name from mlaas.dataset_tbl dbt inner join mlaas.model_experiment_tbl met on dbt.dataset_id = met.dataset_id'
-            dataset_names = self.DBObject.select_records(self.connection, sql_command)['dataset_name']
-
-            # Get the cv_score and holdout_score associated with the project_id
-            accuracy_df = self.accuracy_metrics(project_id)
-
-            # Get the experiment creation dates
-            exp_creation_dates = model_experiment_tbl_data['exp_created_on']
-
-            # Get the model mode
-            model_modes = model_experiment_tbl_data['model_mode']
-
-            status_df = model_experiment_tbl_data['status']
-
-
-            experiment_series = model_experiment_tbl_data['experiment_id']
-            # Merging all the Dataframes and Series to get the final Df.
-            final_df = pd.DataFrame([experiment_series, status_df, exp_names, model_names,model_ids, dataset_names, exp_creation_dates, model_modes, accuracy_df['cv_score'], accuracy_df['holdout_score']]).T
-
-            ### 
-            sql_command ="select mmt.model_id,mmt.model_name,ti.task_id,ti.dag_id,ti.execution_date,ti.state from task_instance ti,mlaas.model_master_tbl mmt where ti.task_id = mmt.model_name and ti.execution_date in (select execution_date from dag_run where run_id in (select run_id from mlaas.model_dags_tbl where project_id ="+str(project_id)+" order by execution_date desc limit 1))"
-            dag_df = self.DBObject.select_records(self.connection, sql_command)[['model_id','model_name','state']]
-            
-            final_df=pd.merge(final_df,dag_df,how='inner',on='model_id')
+            sql_command = "select met.*,e.name as experiment_name,mmt.model_name,dt.dataset_name,round(cast(sv.cv_score as numeric),3) as cv_score,round(cast(sv.holdout_score as numeric),3) as holdout_score "\
+                          "from mlaas.model_experiment_tbl met,mlaas.model_master_tbl mmt,mlaas.score_view sv,mlaas.dataset_tbl dt,mlaas.experiments e "\
+                          "where met.model_id = mmt.model_id and met.experiment_id=sv.experiment_id and met.dataset_id=dt.dataset_id and met.experiment_id=e.experiment_id "\
+                          "and met.project_id="+str(project_id) +" and met.dag_run_id='"+ dag_run_id +"' and met.status='running'"
+                          
+            model_experiment_data_df = self.DBObject.select_records(self.connection, sql_command)
+    
             # Converting final_df to json
-            json_data = final_df.to_json(orient='records',date_format='iso')
+            json_data = model_experiment_data_df.to_json(orient='records',date_format='iso')
             final_data = json.loads(json_data)
         except Exception as exc:
             logging.error("modeling : ModelStatisticsClass : show_experiments_list : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : show_experiments_list : " +traceback.format_exc())
             return str(exc)
         return final_data
+    
+    def show_all_experiments(self, project_id):
+        """This function is used to get experiments_list of particular project.
+
+        Args:
+            project_id ([object]): [Project id of particular experiment.]
+
+        Returns:
+            [data_frame]: [it will return the dataframe of experiments_list.]
+            
+        """
+        try:
+            sql_command = "select met.*,e.name as experiment_name,mmt.model_name,dt.dataset_name,"\
+                          "round(cast(sv.cv_score as numeric),3) as cv_score,round(cast(sv.holdout_score as numeric),3) as holdout_score "\
+                          " from mlaas.model_experiment_tbl met,mlaas.model_master_tbl mmt,mlaas.score_view sv,mlaas.dataset_tbl dt,mlaas.experiments e"\
+                          " where met.model_id = mmt.model_id and met.experiment_id=sv.experiment_id and met.dataset_id=dt.dataset_id and met.experiment_id=e.experiment_id "\
+                          " and met.project_id="+str(project_id)
+                          
+            model_experiment_data_df = self.DBObject.select_records(self.connection, sql_command)
+            # Converting final_df to json
+            json_data = model_experiment_data_df.to_json(orient='records',date_format='iso')
+            final_data = json.loads(json_data)
+        except Exception as exc:
+            logging.error("modeling : ModelStatisticsClass : show_experiments_list : Exception " + str(exc))
+            logging.error("modeling : ModelStatisticsClass : show_experiments_list : " +traceback.format_exc())
+            return str(exc)
+        return final_data
+    
+    
+    def check_existing_experiment(self,experiment_name):
+        
+        sql_command="select * from mlaas.model_dags_tbl where exp_name='"+experiment_name+"'"
+        experiment_data_df = self.DBObject.select_records(self.connection, sql_command)
+        
+        if experiment_data_df is None :
+            return 0
+        elif len(experiment_data_df) > 0:
+            return 1
+        else:
+            return 0
+        
+        
+    def check_model_status(self,project_id,experiment_name):
+        
+        try:
+        
+            sql_command ="select dag_id,run_id from mlaas.model_dags_tbl where project_id='"+str(project_id)+"' and exp_name='"+experiment_name+"'"
+            
+            dag_df = self.DBObject.select_records(self.connection, sql_command)
+            
+            dag_id,run_id = dag_df['dag_id'][0],dag_df['run_id'][0]
+            
+            sql_command = "select state from dag_run where dag_id='"+dag_id+"' and run_id='"+run_id +"'"
+            state_df = self.DBObject.select_records(self.connection, sql_command)
+            status=state_df['state'][0]
+            
+        except:
+            status = "there is some problem"
+        
+        return status
+        
+        
 
     

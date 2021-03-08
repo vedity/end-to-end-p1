@@ -13,17 +13,20 @@ CREATE TABLE mlaas.user_auth_table (
  	address text
  	);
 
-CREATE TABLE mlaas.model_experiment_tbl (
- 	exp_unq_id bigserial,
-    experiment_id  integer,
-    run_uuid text,
-    project_id bigint,
-    dataset_id bigint,
-    user_id integer,
-    model_id  integer,
-    model_mode  text,
-    exp_created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()              
- 	);
+CREATE TABLE mlaas.model_experiment_tbl
+(
+   exp_unq_id bigserial,
+   experiment_id  integer,
+   run_uuid text,
+   project_id bigint,
+   dataset_id bigint,
+   user_id integer,
+   model_id  integer,
+   model_mode  text,
+   dag_run_id varchar,
+   status varchar NOT NULL DEFAULT 'running', 
+   exp_created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()              
+);
 
 CREATE TABLE mlaas.model_master_tbl (
  	model_id integer,
@@ -49,10 +52,23 @@ CREATE TABLE mlaas.model_dags_tbl
 (
 unq_id bigserial,
 dag_id varchar,
+exp_name varchar,
 run_id varchar,
 execution_date timestamptz,
 project_id bigint,
 dataset_id bigint,
 user_id integer,
+model_mode varchar,
 dag_created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+
+create sequence unq_num_seq
+increment 1;
+
+SELECT setval('unq_num_seq', 1);
+
+
+
+
+

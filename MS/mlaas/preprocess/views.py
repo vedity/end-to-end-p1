@@ -91,7 +91,6 @@ class DatasetExplorationClass(APIView):
 #            return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
 
 
-
 class SchemaSaveClass(APIView):
 
         def post(self,request,format=None):
@@ -131,11 +130,6 @@ class SchemaSaveClass(APIView):
                         logging.error("data preprocess : SchemaSaveClass : POST Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
                         
-
-
-
-
-
 
 # Class to retrive & insert for Schema data
 # It will take url string as mlaas/ingest/dataset_schema/. 
@@ -335,11 +329,11 @@ class GetColumnListClass(APIView):
                         
                         schema_id = request.query_params.get('schema_id') #get schema id
                         
-                        columns = preprocessObj.get_col_names(schema_id)
-                        if isinstance(columns,list): 
-                                        response = [{"column_id": i, "col_name": name} for i,name in enumerate(columns)]
+                        column_json = preprocessObj.get_col_names(schema_id)
+                        if isinstance(column_json,list): 
+                                        
                                         logging.info("data preprocess : GetColumnListClass : POST Method : execution stop")
-                                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":response})
+                                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":column_json})
                         else:
                                         status_code,error_msg=json_obj.get_Status_code(columns) # extract the status_code and error_msg from schema_data
                                         logging.info("data preprocess : GetColumnListClass : POST Method : execution stop : status_code :"+status_code)
@@ -376,3 +370,40 @@ class CleanupSave(APIView):
                         logging.error("data preprocess : CleanupSave : POST Method : Exception :" + str(e))
                         logging.error("data preprocess : CleanupSave : POST Method : "+ traceback.format_exc())
                         return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+                
+class ScalingClass(APIView):
+        def post(self, request, format=None):
+                try:
+                        logging.info("data preprocess : HandoverClass : POST Method : execution start")
+                        schema_id = request.query_params.get('schema_id') #get schema id
+                        dataset_id = request.query_params.get('dataset_id') #get dataset id
+                        project_id = request.query_params.get('project_id') #get dataset id
+                        user_name = request.query_params.get('user_name') #get dataset id
+                        scaling_operation = request.query_params.get('scaling_op') 
+                        split_method = request.query_params.get('split_method')
+                        cv = request.query_params.get('cv')
+                        valid_size = request.query_params.get('valid_size')
+                        test_size = request.query_params.get('test_size')
+                        random_state = request.query_params.get('random_state')
+                        split_parameters = {'split_method': split_method ,'cv': cv,'valid_size': valid_size, 'test_size': test_size,'random_state': random_state}
+                        operation = preprocessObj.handover(dataset_id, schema_id, project_id, user_name,split_parameters, scaling_operation)
+                        logging.info("data preprocess : HandoverClass : POST Method : execution stop")
+                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":operation})
+
+                except Exception as e:
+                        logging.error("data preprocess : HandoverClass : POST Method : Exception :" + str(e))
+                        logging.error("data preprocess : HandoverClass : POST Method : "+ traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+        
+
+class Scalingtype(APIView):
+        def get(self,request,format=None):
+                try :
+                        logging.info("data preprocess : ScheamAttributeListClass : POST Method : execution start")
+                        column_attribute = [{"id" : 0,"name": "Standard Scaler"},{"id" : 1,"name": "Min-Max"},{"id": 2,"name": "Robust"}]
+                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":column_attribute})
+                except Exception as e:
+                        logging.error("data preprocess : ScheamAttributeListClass : POST Method : Exception :" + str(e))
+                        logging.error("data preprocess : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+                

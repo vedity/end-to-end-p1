@@ -46,9 +46,6 @@ export class ListProjectComponent implements OnInit {
       this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
         dtInstance.columns().every(function () {
           const that = this;
-         
-          // console.log( );
-          
           $('#input_'+ this.index("visible")).on('keyup change', function () {
             if (that.search() !== this['value']) {
               that

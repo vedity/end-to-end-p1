@@ -51,9 +51,9 @@ class ModelClass(SC, SplitData):
         self.project_id = project_id # Get Project Id
         self.dataset_id = dataset_id # Get Datset Id
         self.DBObject, self.connection, self.connection_string = DBObject,connection,connection_string# Get Database Object,Connection And Connection String
-        # self.input_features_list, self.target_features_list = SplitData().get_input_target_features_list(user_id, project_id, dataset_id, DBObject, connection) # Get Input and Target Features List 
+        self.input_features_list, self.target_features_list = SplitData().get_input_target_features_list(user_id, project_id, dataset_id, DBObject, connection) # Get Input and Target Features List 
     
-    def algorithm_identifier(self):
+    def algorithm_identifier(self,experiment_name,experiment_desc):
         
         logging.info("modeling : ModelClass : algorithm_identifier : execution start")
         
@@ -64,13 +64,15 @@ class ModelClass(SC, SplitData):
         # It will check wheather it is supervised algorithm or not.
         if len(self.target_features_list) > 0:
              # call  supervised algorithm method
-            self.supervised_algorithm()
+            self.supervised_algorithm(experiment_name,experiment_desc)
             
         else:
             # call  unsupervised algorithm method
-            self.unsupervised_algorithm()
+            self.unsupervised_algorithm(experiment_name,experiment_desc)
             
         logging.info("modeling : ModelClass : algorithm_identifier : execution end")
+        
+        
            
             
     
@@ -130,7 +132,7 @@ class ModelClass(SC, SplitData):
         logging.info("modeling : ModelClass : run_model : execution end")
 
     
-    def supervised_algorithm(self):
+    def supervised_algorithm(self,experiment_name,experiment_desc):
         """This function is used to call supervised algorithm.
         """
         logging.info("modeling : ModelClass : supervised_algorithm : execution start") 
@@ -140,11 +142,13 @@ class ModelClass(SC, SplitData):
                                                     self.project_id,
                                                     self.dataset_id,
                                                     self.DBObject,
-                                                    self.connection)
+                                                    self.connection,experiment_name,experiment_desc)
         
         logging.info("modeling : ModelClass : supervised_algorithm : execution end")
+        
+        
     
-    def unsupervised_algorithm(self):
+    def unsupervised_algorithm(self,experiment_name,experiment_desc):
         """This function is used to call unsupervised algorithm.
         """
         logging.info("modeling : ModelClass : unsupervised_algorithm : execution start")
@@ -162,12 +166,12 @@ class ModelClass(SC, SplitData):
         logging.info("modeling : ModelClass : get_dataset_info : execution start")
        
         # SQL query to get the project_name
-        sql_command = 'select project_name from mlaas.project_tbl where project_id=' + str(self.project_id)
+        sql_command = 'select project_name from mlaas.project_tbl where project_id=1'# + str(self.project_id)
         project_df = self.DBObject.select_records(self.connection, sql_command)
         project_name = project_df['project_name'][0]
 
         # SQL query to get the dataset_name
-        sql_command = 'select dataset_name from mlaas.dataset_tbl where dataset_id=' + str(self.dataset_id)
+        sql_command = 'select dataset_name from mlaas.dataset_tbl where dataset_id=2'# + str(self.dataset_id)
         dataset_df = self.DBObject.select_records(self.connection, sql_command)
         dataset_name = dataset_df['dataset_name'][0]
 

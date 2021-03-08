@@ -24,12 +24,15 @@ urlpatterns = [
 
     path('mlaas/modeling/actualvsprediction/',ActualVsPredictionClass.as_view()),
 
-    path('mlaas/modeling/finalmodeldescription/', FinalModelDescriptionClass.as_view()),
-
     path('mlaas/modeling/selectalgorithm/', SelectAlgorithmClass.as_view()),
 
     path('mlaas/modeling/hyperparameters/', HyperParametersClass.as_view()),
 
-    path('mlaas/modeling/showexperimentslist/', ShowExperimentsListClass.as_view())
-
+    path('mlaas/modeling/showexperimentslist/', ShowExperimentsListClass.as_view()),
+    
+    path('mlaas/modeling/showallexperimentslist/', ShowAllExperimentsListClass.as_view()),
+    
+    path('mlaas/modeling/checkmodelstatus/', CheckModelStatusClass.as_view())
+    
+      
 ]

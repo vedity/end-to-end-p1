@@ -35,7 +35,7 @@ class SupervisedClass(RC,PC):
     """
     
 
-    def supervised_algorithm(self, Model_Mode, user_id, project_id, dataset_id, DBObject, connection):
+    def supervised_algorithm(self, Model_Mode, user_id, project_id, dataset_id, DBObject, connection,experiment_name,experiment_desc):
         
         """This function is used to call supervised algorithm.
         """
@@ -43,14 +43,19 @@ class SupervisedClass(RC,PC):
 
         AlgorithmDetectorObject = AlgorithmDetector(DBObject, connection)
         SplitDataObject = SplitData()
-        _, target_df = SplitDataObject.get_scaled_data(DBObject, connection, user_id, project_id, dataset_id)
+        #path="./scaled_dataset/my_data_num.npy"
+        
+        scaled_path = SplitDataObject.get_scaled_path(DBObject,connection,project_id)
+        path = "./"+scaled_path+".npy"
+        
+        _, target_df = SplitDataObject.get_scaled_data(path)
         
         algorithm_type, model_type = AlgorithmDetectorObject.get_model_type(target_df)
 
         if model_type == "Regression" :
             # Call Regression Class's method
             super(SupervisedClass,self).regression_model(Model_Mode, user_id, project_id, dataset_id,
-                                                        model_type, algorithm_type, DBObject,connection)
+                                                        model_type, algorithm_type, DBObject,connection,experiment_name,experiment_desc)
                 
                                                 
         elif model_type == "Classification" :
@@ -71,12 +76,14 @@ class SupervisedClass(RC,PC):
                                                          connection_string,
                                                          project_id,
                                                          dataset_id,
-                                                         user_id)
+                                                         user_id,experiment_name,experiment_desc)
         
         else:
             print("please select appropriate target")
             
         logging.info("modeling : SupervisedClass : supervised_algorithm : execution end")
+        
+        
         
         
     def run_regression_model(self,model_id,model_name,model_type,Model_Mode, input_features_list,

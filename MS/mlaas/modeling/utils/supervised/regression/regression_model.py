@@ -44,7 +44,7 @@ class RegressionClass:
     """
   
     def regression_model(self,Model_Mode, user_id, project_id,dataset_id, model_type, algorithm_type,
-                        DBObject, connection):
+                        DBObject, connection,experiment_name,experiment_desc):
         
         """This function is used to run regression type model.
         """
@@ -52,13 +52,15 @@ class RegressionClass:
 
         # Call private method of the current class .
         self.all_regression_model(Model_Mode, user_id,project_id,dataset_id, model_type, algorithm_type,
-                                DBObject, connection)
+                                DBObject, connection,experiment_name,experiment_desc)
         
         logging.info("modeling : RegressionClass : regression_model : execution end")
+        
+        
     
     # This is for auto model run   
     def all_regression_model(self,Model_Mode, user_id, project_id, dataset_id, model_type, algorithm_type,
-                            DBObject, connection):
+                            DBObject, connection,experiment_name,experiment_desc):
         
         """This function is used to run all regression type model.
         """
@@ -67,11 +69,15 @@ class RegressionClass:
         #TODO we will remove this condition and pass variable to rest api
         if algorithm_type == 'Single_Target':
             
-            json_data = {'conf':'{"model_mode":"Auto","project_id":'+str(project_id)+',"dataset_id":'+str(dataset_id)+',"user_id":'+str(user_id)+'}'}
+            json_data = {'conf':'{"model_mode":"Auto","project_id":'+str(project_id)+',"dataset_id":'+str(dataset_id)+',"exp_name":"'+experiment_name+'","exp_desc":"'+experiment_desc+'","user_id":'+str(user_id)+'}'}
             
             logging.info("modeling : RegressionClass : all_regression_model : execution"+str(json_data))
             
             result = requests.post("http://airflow:8080/api/experimental/dags/auto_regressor_pipeline/dag_runs",data=json.dumps(json_data),verify=False)#owner
+            
+            #### Get Running Dag Id and Run Id
+            
+            # dag_id,run_id = self.get_dag_ids(project_id,experiment_name,DBObject, connection)
             
         else:
             print("yet not tested")
@@ -80,6 +86,7 @@ class RegressionClass:
         logging.info("modeling : RegressionClass : all_regression_model : execution end")
         
         
+       
         
         
         
