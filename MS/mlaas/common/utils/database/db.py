@@ -57,9 +57,6 @@ class DBClass:
                 column_list.append(name)
         read_df=pd.read_csv(file_path,parse_dates=column_list) #  Read csv file and load data into dataframe.
         
-        return read_df
-
-
     def database_connection(self,database,user,password,host,port):
         """This function is used to make connection with database.
 
@@ -214,7 +211,7 @@ class DBClass:
         """
         sql_command = str(sql_command).replace('%',"%%") # Get sql command.
         try :
-           
+        
             connection_string = "postgresql://" + user + ":" + password + "@" + host + ":" + port + "/" + database # Make database connection string.
             engine = create_engine(connection_string) # Create database engine.
             data = pd.read_sql_query(sql_command, engine) #method of sqlalchemy
@@ -525,8 +522,8 @@ class DBClass:
             if str(sort_index) != "0" or global_search_value!="" or customefilter_clause!="":  
                 if start_index==0:                              #checking column
                     if customefilter_clause !="":
-                       sql_data = f'select * from (SELECT {str(select_clause)} From {table_name} {global_search_clause} {order_clause}) as dt {customefilter_clause} {order_clause} limit {length}'   #sql Query with customefilter_clause
-                       sql_filtercount = f'select count(*) from (SELECT {str(select_clause)} From {table_name} {global_search_clause} ) as dt {customefilter_clause} ' #sql Query for filter row count                             
+                        sql_data = f'select * from (SELECT {str(select_clause)} From {table_name} {global_search_clause} {order_clause}) as dt {customefilter_clause} {order_clause} limit {length}'   #sql Query with customefilter_clause
+                        sql_filtercount = f'select count(*) from (SELECT {str(select_clause)} From {table_name} {global_search_clause} ) as dt {customefilter_clause} ' #sql Query for filter row count                             
                     else:
                         sql_data = f'SELECT {str(select_clause)} From {table_name} {global_search_clause} {order_clause} limit {length}'  #sql Query without customefilter_clause 
                         sql_filtercount = f'SELECT count(*) From {table_name} {global_search_clause}'   #sql Query for filter row count                             

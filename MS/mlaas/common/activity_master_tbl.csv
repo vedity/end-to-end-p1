@@ -73,18 +73,6 @@ activity_id,activity_name,activity_description,language,operation,code,parent_ac
 30,Apply Log Transformation,operation on column(s) * pending,US,Operation,0,3
 30,Apply Log Transformation,operation on column(s) * in process,US,Operation,1,3
 30,Apply Log Transformation,operation on column(s) * completed,US,Operation,2,3
-31,Standard Scaling,operation on column(s) * pending,US,Operation,0,4
-31,Standard Scaling,operation on column(s) * in process,US,Operation,1,4
-31,Standard Scaling,operation on column(s) * completed,US,Operation,2,4
-32,Min-Max Scaling,operation on column(s) * pending,US,Operation,0,4
-32,Min-Max Scaling,operation on column(s) * in process,US,Operation,1,4
-32,Min-Max Scaling,operation on column(s) * completed,US,Operation,2,4
-33,Robust Scaling,operation on column(s) * pending,US,Operation,0,4
-33,Robust Scaling,operation on column(s) * in process,US,Operation,1,4
-33,Robust Scaling,operation on column(s) * completed,US,Operation,2,4
-34,Custom Scaling,operation on column(s) * pending,US,Operation,0,4
-34,Custom Scaling,operation on column(s) * in process,US,Operation,1,4
-34,Custom Scaling,operation on column(s) * completed,US,Operation,2,4
 35,Label Encoding,operation on column(s) * pending,US,Operation,0,5
 35,Label Encoding,operation on column(s) * in process,US,Operation,1,5
 35,Label Encoding,operation on column(s) * completed,US,Operation,2,5

@@ -10,7 +10,7 @@
 #* Exceptions
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
-
+import os
 #* Common utilities
 from common.utils.database import db
 from common.utils.logger_handler import custom_logger as cl
@@ -22,14 +22,14 @@ from .schema import schema_creation as sc
 from .cleaning import noise_reduction as nr
 from .cleaning import cleaning
 from .Transformation import transformation as trs
-
+from modeling.split_data import SplitData as sd
 #* Library Imports
 import logging
 import traceback
 import numpy as np
 import pandas as pd
 import uuid
-
+from sklearn.model_selection import train_test_split
 user_name = 'admin'
 log_enable = True
 
@@ -226,7 +226,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if connection == None :
                 raise DatabaseConnectionFailed(500)  
                 
-            sql_command = f"select amt.activity_id,amt.activity_name,pat.parent_activity_name from mlaas.activity_master_tbl amt , mlaas.parent_activity_tbl pat where amt.code = '0' and amt.parent_activity_id = pat.parent_activity_id"
+            sql_command = f"select amt.activity_id,amt.activity_name,pat.parent_activity_name,ptt.tab_name from mlaas.activity_master_tbl amt , mlaas.parent_activity_tbl pat, mlaas.preprocess_tab_tbl ptt where amt.code = '0' and amt.parent_activity_id = pat.parent_activity_id and ptt.tab_id = pat.tab_id"
             operations_df = DBObject.select_records(connection,sql_command) 
             
             if operations_df is None:
@@ -234,35 +234,49 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             #? Logical Function Starts
             try:
+                #? To store dictionaries
                 master_response = []
-                i = 1
-                
-                #? Getting all operations based on the parent activities
-                for dfs in operations_df.groupby('parent_activity_name'):
+
+                #? For ids
+                k = 1
+                for tabs in operations_df.groupby('tab_name'):
                     
-                    #? Dictionary to store different operation classes
-                    operation_class_dict = {}
-                    operation_class_dict['id'] = i
-                    i+=1
-                    #? Name of Parent Activity
-                    operation_class_dict['title'] = dfs[0]
+                    #? To store operation classes which will be shown in the tab
+                    tab_dict = {}
                     
-                    #? Adding all the operations that comes under the Parent activity
-                    handlers = []
-                    j = 1
-                    for index,data in dfs[1].iterrows():
-                        #? Dictionary for each operations
-                        operation_dict = {}
-                        operation_dict['id'] = j
-                        operation_dict['name'] = data['activity_name']
-                        operation_dict['operation_id'] = index
-                        handlers.append(operation_dict)
-                        j += 1
-                    
-                    #? All possible operations within the class
-                    operation_class_dict['operations'] = handlers
-                    master_response.append(operation_class_dict)
-                    
+                    #? To store operation classes
+                    operation_classes = []
+                    i = 1
+                    for dfs in tabs[1].groupby('parent_activity_name'):
+                        
+                        #? To store each individual operations
+                        operation_class_dict = {}
+                        handlers = []
+                        
+                        #? Storing each individual operations
+                        j = 1
+                        for index,data in dfs[1].iterrows():
+                            operation_dict = {}
+                            operation_dict['id'] = j
+                            operation_dict['name'] = data['activity_name']
+                            operation_dict['operation_id'] = data['activity_id']
+                            handlers.append(operation_dict)
+                            j += 1
+                        
+                        #? Adding the operations to the class
+                        operation_class_dict['id'] = i
+                        operation_class_dict['title'] = dfs[0]
+                        operation_class_dict['operations'] = handlers
+                        operation_classes.append(operation_class_dict)
+                        i+=1
+                        
+                    #? Adding classes to the tab
+                    tab_dict['tab_id'] = k
+                    tab_dict['tab_name'] = tabs[0]
+                    tab_dict['operation_classes'] = operation_classes
+                    master_response.append(tab_dict)
+                    k += 1
+    
                 logging.info("data preprocessing : PreprocessingClass : get_all_operations : execution stop")
                 return master_response
             
@@ -784,7 +798,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
             return exc.msg
             
-    def handover(self, dataset_id, schema_id, project_id, user_name, scaling_type = 0, val = None):
+    def handover(self, dataset_id, schema_id, project_id, user_name,split_parameters,scaling_type = 0, val = None):
         '''
             This function is used to store the scaled numpy file into the scaled dataset folder.
             
@@ -814,11 +828,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 raise GetDataDfFailed(500)
             
             if scaling_type == 0:
-                data_df[:,1:] = self.standard_scaling(data_df[:,1:]._get_numeric_data())
+                data_df[:,1:] = self.standard_scaling(data_df[:,1:])
             elif scaling_type == 1:
-                data_df[:,1:] = self.min_max_scaling(data_df[:,1:]._get_numeric_data())
+                data_df[:,1:] = self.min_max_scaling(data_df[:,1:])
             elif scaling_type == 2:
-                data_df[:,1:] = self.robust_scaling(data_df[:,1:]._get_numeric_data())
+                data_df[:,1:] = self.robust_scaling(data_df[:,1:])
                     
             feature_cols = list(data_df.columns)
             tg_cols = DBObject.get_target_col(connection, schema_id)
@@ -828,33 +842,58 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             target_cols = [data_df.columns[0]]
             target_cols += tg_cols
             
-            final_cols = feature_cols+tg_cols
-            
-            data_df = data_df[final_cols]
-            
-            feature_cols = str(feature_cols)
-            target_cols = str(target_cols)
+            input_features_df = data_df[feature_cols] #input_features_df
+            target_features_df=data_df[target_cols] #target_features_df
+            feature_cols = str(feature_cols) #input feature_cols
+            target_cols = str(target_cols) #target feature_cols
             feature_cols = feature_cols.replace("'",'"')
             target_cols = target_cols.replace("'",'"')
-            filename = "scaled_dataset/scaled_data_" + str(uuid.uuid1().time)
-            
-            # sql_command = f"select * from mlaas.cleaned_ref_tbl crt where crt.dataset_id = '{dataset_id}' and crt.project_id = '{project_id}' and crt.user_id = '{user_id}'"
-            # data=DBObject.select_records(connection,sql_command)
-            
-            np.save(filename,data_df.to_numpy())
-            
-            # if len(data) == 0:
-            #     row = project_id,dataset_id,user_name,feature_cols,target_cols,filename
-            #     row_tuples = [tuple(row)]
-            #     col_names = "project_id,dataset_id,user_id,input_features,target_features,scaled_data_table"
-                
-            #     status = DBObject.insert_records(connection,"mlaas.cleaned_ref_tbl",row_tuples, col_names)
-            #     logging.info("data preprocessing : PreprocessingClass : handover : execution stop")
-                
-            # else:
-            sql_command = f"update mlaas.project_tbl set target_features= '{target_cols}' ,input_features='{feature_cols}',scaled_data_path = '{filename}' where dataset_id = '{dataset_id}' and project_id = '{project_id}' and user_name  = '{user_name}'"
+
+
+            # #splitting parameters
+            split_method =split_parameters['split_method'] #get split_method
+            cv = split_parameters['cv'] #get cv
+            random_state = split_parameters['random_state'] #get random_state
+            test_size = split_parameters['test_size'] #get test_size
+            valid_size = split_parameters['valid_size'] #get valid_size
+            if valid_size=='':
+                valid_size=0
+            else:
+                valid_size=float(valid_size)
+            unique_id = str(uuid.uuid1().time) #genrate unique_id
+            scale_dir = "scaled_dataset/scaled_data_" + unique_id  #genrate directory
+            CHECK_FOLDER = os.path.isdir(scale_dir) #check directory already exists or not
+            # If folder doesn't exist, then create it.
+            if not CHECK_FOLDER:
+                os.makedirs(scale_dir) #create directory
+                logger.info("Directory  Created")
+            else:
+                logger.info("Directory  already exists")
+            train_X_filename = scale_dir+"/scaled_train_X_data_" + unique_id #genrate train_X file path
+            train_Y_filename = scale_dir+"/scaled_train_Y_data_" + unique_id #genrate train_Y file path
+            test_X_filename =  scale_dir+"/scaled_test_X_data_" + unique_id  #genrate test_X file path  
+            test_Y_filename =  scale_dir+"/scaled_test_Y_data_" + unique_id  #genrate test_Y file path     
+            valid_X_filename = ""
+            valid_Y_filename = ""
+            Y_valid_count= None
+            X_train, X_valid, X_test, Y_train, Y_valid, Y_test=sd.get_split_data(self,input_features_df,target_features_df, int(random_state),float(test_size), valid_size, str(split_method))
+            if split_method != 'cross_validation':
+                Y_valid_count= Y_valid.shape[0]
+                valid_X_filename = scale_dir+"/scaled_valid_X_data_" + unique_id #genrate valid_X file path     
+                valid_Y_filename = scale_dir+"/scaled_valid_Y_data_" + unique_id #genrate valid_Y file path     
+                np.save(valid_X_filename,X_valid.to_numpy()) #sa
+                np.save(valid_Y_filename,Y_valid.to_numpy())    
+            Y_train_count=Y_train.shape[0]
+            Y_test_count =Y_test.shape[0]        
+            np.save(train_X_filename,X_train.to_numpy())
+            np.save(train_Y_filename,Y_train.to_numpy())
+            np.save(test_X_filename,X_test.to_numpy())
+            np.save(test_Y_filename,Y_test.to_numpy())
+        
+            scaled_split_parameters = '{"split_method":'+ (split_method)+' ,"cv":'+ str(cv)+',"valid_size":'+ str(valid_size)+', "test_size":'+ str(test_size)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":'+train_X_filename+',"train_Y_filename":'+train_Y_filename+',"test_X_filename":'+test_X_filename+',"test_Y_filename":'+test_Y_filename+',"valid_X_filename":'+valid_X_filename+',"valid_Y_filename":'+valid_Y_filename+'}'
+            logger.info("scaled_split_parameters=="+scaled_split_parameters)
+            sql_command = f"update mlaas.project_tbl set target_features= '{target_cols}' ,input_features='{feature_cols}',scaled_split_parameters = '{scaled_split_parameters}' where dataset_id = '{dataset_id}' and project_id = '{project_id}' and user_name={user_name}"
             status = DBObject.update_records(connection, sql_command)
-            
             return status
             
         except (DatabaseConnectionFailed,GetDataDfFailed) as exc:
