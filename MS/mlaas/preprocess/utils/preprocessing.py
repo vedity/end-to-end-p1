@@ -732,7 +732,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
 
             #get the Column list
             column_list = DBObject.get_column_list(connection,dataset_id)
-            logging.info(str(column_list) + "column_list")
+            logging.info(str(column_list) + " column_list")
 
             #? Getting operations in the ordered format
             operation_ordering = self.reorder_operations(request)
