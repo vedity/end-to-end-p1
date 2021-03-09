@@ -938,7 +938,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             valid_X_filename = "None"
             valid_Y_filename = "None"
             Y_valid_count= None
-            X_train, X_valid, X_test, Y_train, Y_valid, Y_test=sd.get_split_data(self,input_features_df,target_features_df, int(random_state),float(test_size), valid_size, str(split_method))
+            X_train, X_valid, X_test, Y_train, Y_valid, Y_test=mt.get_split_data(input_features_df,target_features_df, int(random_state),float(test_size), valid_size, str(split_method))
             if split_method != 'cross_validation':
                 Y_valid_count= Y_valid.shape[0]
                 valid_X_filename = scale_dir+"/scaled_valid_X_data_" + unique_id #genrate valid_X file path     

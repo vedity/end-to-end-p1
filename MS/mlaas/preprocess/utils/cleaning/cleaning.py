@@ -149,12 +149,8 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         cols = [column_list[i] for i in col]
         logging.info(str(cols))
         for col_name in cols:
-            try:
-                if value is None:
-                    impute_value =  "'Missing'"
-                else:
-                    impute_value =  value           
-                status = self.perform_missing_value_imputation(DBObject,connection, table_name,col_name,impute_value)
+            try:         
+                status = self.perform_missing_value_imputation(DBObject,connection, table_name,col_name,value)
             except Exception as exc:
                 return exc
 
