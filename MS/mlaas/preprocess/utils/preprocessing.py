@@ -22,7 +22,7 @@ from .schema import schema_creation as sc
 from .cleaning import noise_reduction as nr
 from .cleaning import cleaning
 from .Transformation import transformation as trs
-from modeling.split_data import SplitData as sd
+# from modeling.split_data import SplitData as sd
 #* Library Imports
 import logging
 import traceback

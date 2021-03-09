@@ -26,62 +26,79 @@ class AlgorithmDetector:
     def __init__(self, DBObject, connection):
         self.DBObject = DBObject
         self.connection = connection
-
-    def get_model_type(self, target_df):
-        """Returns the list of all algorithm using the model_type and algorithm_type.
-
-        Args:
-            target_df ([DataFrame]): [Target values of the target features.]
-
-        Returns:
-            [string, string]: [algorithm type, model type]
-        """
-        algorithm_type = None
-        model_type = None
-        # This logic is used to distinguish different types of algorithms and models.
-
-        target_shape = target_df.shape
-        total_length = target_shape[0]
-        unq_length = len(np.unique(target_df))
-        threshold = int((total_length * 0.01) / 100) # Subject to change, further research.
-
-        if threshold < unq_length:
-            model_type = 'Regression'
-            
-            if target_shape[1] == 2:
-                algorithm_type = 'Single_Target'
-            elif target_shape[1] > 2:
-                algorithm_type = 'Multi_Target'
-            
-        else:
-            model_type = 'Classification'
-            if unq_length == 2:
-                algorithm_type = 'Binary_Classification'
-            elif unq_length > 2:
-                algorithm_type = 'MultiClass_Classification'
-        
-        return algorithm_type, model_type
     
-    def show_models_list(self, algorithm_type, model_type):
+    
+    def get_dataset_info(self,project_id,dataset_id,user_id):
+        """This function returns the project_name, dataset_name and the target columns for the associated dataset.
+ 
+        Returns:
+            Tuple: project_name, dataset_name, target_columns:- name of target feature/s associated to the dataset.
+        """
+        logging.info("modeling : ModelClass : get_dataset_info : execution start")
+       
+        # SQL query to get the project_name
+        sql_command = 'select target_features,project_name from mlaas.project_tbl where project_id='+str(project_id)
+        project_df = self.DBObject.select_records(self.connection, sql_command)
+        
+        project_name = project_df['project_name'][0]
+        input_features = project_df['target_features'][0]
+        target_columns= ast.literal_eval(input_features)[1:]
+        
+        # SQL query to get the dataset_name
+        sql_command = 'select dataset_name from mlaas.dataset_tbl where dataset_id='+str(dataset_id)
+        dataset_df = self.DBObject.select_records(self.connection, sql_command)
+        dataset_name = dataset_df['dataset_name'][0]
+ 
+        logging.info("modeling : ModelClass : get_dataset_info : execution end"+str(type(target_columns)))
+ 
+        return project_name, dataset_name, target_columns
+    
+    def get_model_type(self, project_id, dataset_id):
+        sql_command = 'select problem_type from mlaas.project_tbl where project_id={} and dataset_id={}'.format(project_id, dataset_id)
+        model_type_literal = self.DBObject.select_records(self.connection, sql_command)
+ 
+        model_type_dict = ast.literal_eval(model_type_literal.iloc[0, 0])
+        return model_type_dict
+    
+    
+    def show_models_list(self, project_id, dataset_id, model_type):
         """Returns the compatible list of model on the basis of algorithm_type and model_type.
-
+ 
         Returns:
             list: models_list, contains list of all the ML/DL models derived from the algorithm and model type.
         """
-        sql_command = "select * from mlaas.model_master_tbl where model_type='"+model_type+"'"+" and algorithm_type='"+algorithm_type+"'"
+        sql_command = 'select target_features from mlaas.project_tbl where project_id={} and dataset_id={}'.format(project_id, dataset_id)
+        target_features = ast.literal_eval(self.DBObject.select_records(self.connection, sql_command).iloc[0, 0])
+        if model_type != 'Unsupervised':
+            if len(target_features) > 2:
+                algorithm_type = 'Multi_Target'
+            elif len(target_features) == 2:
+                algorithm_type = 'Single_Target'
+ 
+            sql_command = "select * from mlaas.model_master_tbl where model_type='"+model_type+"'"+" and algorithm_type='"+algorithm_type+"'"
+        elif model_type == 'Unsupervised':
+ 
+            sql_command = "select * from mlaas.model_master_tbl where model_type='"+model_type+"'"
         models_list = self.DBObject.select_records(self.connection, sql_command)# Add exception
-        return models_list
-
-
-    def get_hyperparameters_list(self, model_id):
-        """Returns the appropriate list of hyperparameters associated with the model_name argument.
-
+        models_list_json = json.loads(models_list.to_json(orient='records', date_format='iso'))
+        return models_list_json
+ 
+    def get_hyperparameters(self, model_id):
+        """Returns the appropriate list of hyperparameters associated with the model_name argument, 
+            along with how to display and validate them.
+ 
         Args:
-            model_name (string): name of the ML/DL model.
-
+            model_id (int): Unique identity of the ML/DL model.
+ 
         Returns:
-            list: list of hyperparameters of the model 'model_name'.
+            list: list of hyperparameters associated with the model 'model_id'.
         """
-        sql_command = "select model_parameter from mlaas.model_master_tbl where model_id='"+model_id+"'"
-        hyperparameters_list = self.DBObject.select_records(self.connection, sql_command)['model_parameter'][0]# Add exception
-        return hyperparameters_list
+        sql_command = 'select hyperparameter, value, type from mlaas.model_hyperparams_tbl where model_id='+str(model_id)
+        model_hyperparams_df = self.DBObject.select_records(self.connection, sql_command)
+        model_hyperparams_df['value'] = model_hyperparams_df['value'].apply(lambda x: ast.literal_eval(x))
+        logging.info("Model_hyperparams_df dtypes = " + str(model_hyperparams_df))
+        # if model_hyperparams_df == None or (len(model_hyperparams_df) == 0):
+        #     # Raise Error of model_id not found
+        #     pass
+        json_data = json.loads(model_hyperparams_df.to_json(orient='records', date_format='iso'))
+        return json_data

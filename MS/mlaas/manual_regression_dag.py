@@ -16,10 +16,10 @@ from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.mysql_operator import MySqlOperator
 from airflow.operators.email_operator import EmailOperator
 
-### Import function from main file
-
 from modeling.all_regressor import start_pipeline
 from modeling.all_regressor import linear_regression_sklearn
+from modeling.all_regressor import manual_algorithm_identifier
+
 
 
 args = {
@@ -28,46 +28,26 @@ args = {
 'provide_context': True,}
 
 
+
 dag = DAG(
-    dag_id='auto_regressor_pipeline',
+    dag_id='manual_regression_dag',
     default_args=args,         
-    catchup=False,                         
+    catchup=False,          
 )
 
-##### One dag for auto #########
+# model_dict = {'linear_regression_sklearn': linear_regression_sklearn}
+
 
 t1 = PythonOperator(
     task_id='start_pipeline',
     python_callable=start_pipeline,
     dag=dag,
 )
-    
-
-t2 = PythonOperator(
-    task_id='Linear_Regression_Sklearn', 
-    python_callable=linear_regression_sklearn,
-    dag=dag,
-    op_kwargs={'model_mode':'Auto', 'model_id':1}
-)
 
 
-t3 = PythonOperator(
-    task_id='Linear_Regression_Keras', 
-    python_callable=linear_regression_sklearn,
-    dag=dag,
-    op_kwargs={'model_mode':'Auto', 'model_id':2}
-)
+t2 = PythonOperator(task_id='regression_manual',
+                    python_callable=manual_algorithm_identifier,
+                    op_kwargs={'model_mode': 'Manual'},
+                    dag=dag)
 
-t4 = PythonOperator(
-    task_id='XGBoost_Regressor', 
-    python_callable=linear_regression_sklearn,
-    dag=dag,
-    op_kwargs={'model_mode':'Auto', 'model_id':3}
-)
-
-
-t1 >> [t2,t3,t4]
-    
-
-
-
+t1 >> t2
