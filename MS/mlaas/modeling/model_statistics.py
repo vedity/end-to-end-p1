@@ -253,7 +253,7 @@ class ModelStatisticsClass:
         return final_model_data
 
 
-    def show_running_experiments(self, project_id,exp_name):
+    def show_running_experiments(self, project_id):
         """This function is used to get experiments_list of particular project.
 
         Args:
@@ -265,18 +265,12 @@ class ModelStatisticsClass:
         """
         try:
             # Get the necessary values from the mlaas.model_experiment_tbl
-            sql_command ="select run_id from mlaas.model_dags_tbl where project_id="+str(project_id)+" and exp_name='"+exp_name+"'"
-            model_dag_df = self.DBObject.select_records(self.connection,sql_command)
-            
-            dag_run_id = model_dag_df['run_id'][0]
-            
             sql_command = "select met.*,e.name as experiment_name,mmt.model_name,dt.dataset_name,round(cast(sv.cv_score as numeric),3) as cv_score,round(cast(sv.holdout_score as numeric),3) as holdout_score "\
                           "from mlaas.model_experiment_tbl met,mlaas.model_master_tbl mmt,mlaas.score_view sv,mlaas.dataset_tbl dt,mlaas.experiments e "\
                           "where met.model_id = mmt.model_id and met.experiment_id=sv.experiment_id and met.dataset_id=dt.dataset_id and met.experiment_id=e.experiment_id "\
-                          "and met.project_id="+str(project_id) +" and met.dag_run_id='"+ dag_run_id +"' and met.status='running'"
+                          "and met.project_id="+str(project_id) +" and met.status='running'"
                           
             model_experiment_data_df = self.DBObject.select_records(self.connection, sql_command)
-    
             # Converting final_df to json
             json_data = model_experiment_data_df.to_json(orient='records',date_format='iso')
             final_data = json.loads(json_data)
