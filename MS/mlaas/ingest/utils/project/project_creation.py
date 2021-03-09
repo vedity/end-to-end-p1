@@ -70,6 +70,7 @@ class ProjectClass:
                 "input_features text,"\
                 "target_features text,"\
                 "scaled_split_parameters text ,"\
+                "problem_type text,"\
                 "created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()" 
                 
         logging.info("data ingestion : ProjectClass : make_project_schema : execution end")

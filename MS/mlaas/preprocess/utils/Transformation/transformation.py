@@ -14,6 +14,7 @@ import traceback
 #* Relative Imports
 from . import duplicate_data_handling as ddh
 from . import feature_scaling as fs
+from . import categorical_encoding as ce
 
 #* Commong Utilities
 from common.utils.database import db
@@ -30,7 +31,7 @@ logger = logging.getLogger('transformation')
 
 
 
-class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass):
+class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass, ce.EncodeClass):
     '''
         Handles orchastration of the transforamtion related Functions.
     '''
@@ -92,3 +93,44 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         logging.info("data preprocessing : TransformationClass : duplicate_data_removal : execution stop")
         
         return super().custom_scaling(dataframe, max, min)
+    
+    #* Categorical Encoding
+    
+    def label_encoding(self, dataframe, col):
+        '''
+            Operation id: 10
+        '''
+        
+        logging.info("data preprocessing : TransformationClass : label_encoding : execution start")
+        
+        cols = [dataframe.columns[i] for i in col]
+        
+        for column in cols:
+            try:
+                dataframe[column] =super().label_encoding(dataframe[column])
+            except:
+                continue
+
+        logging.info("data preprocessing : TransformationClass : label_encoding : execution stop")
+        return dataframe
+    
+    def one_hot_encoding(self, dataframe, col):
+        '''
+            Operation id: 10
+        '''
+        
+        logging.info("data preprocessing : TransformationClass : one_hot_encoding : execution start")
+        
+        cols = [dataframe.columns[i] for i in col]
+        
+        for column in cols:
+            try:
+                temp_df =super().one_hot_encoding(dataframe[column])
+                dataframe.drop([column], axis=1, inplace = True)
+                dataframe = dataframe.join(temp_df)
+            except:
+                continue
+
+        logging.info("data preprocessing : TransformationClass : one_hot_encoding : execution stop")
+        return dataframe
+    

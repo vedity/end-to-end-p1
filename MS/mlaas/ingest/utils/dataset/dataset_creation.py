@@ -19,7 +19,7 @@ import traceback
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.ingest.ingest_exception import *
 from common.utils.logger_handler import custom_logger as cl
-
+#from common.utils.database.db import DBClass
 user_name = 'admin'
 log_enable = True
 LogObject = cl.LogClass(user_name,log_enable)
@@ -188,15 +188,19 @@ class DatasetClass:
             if row_creation_flag == True:
                 load_data_status,no_of_rows = self.load_dataset(DBObject,connection,connection_string,file_name,dataset_visibility,user_name)
             else:
+                # raw_no_of_rows = DBObject.get_row_count(connection , oid)
+                # logging.info("========>"+str(raw_no_of_rows))
                 load_data_status = self.insert_raw_dataset(DBObject,connection,raw_dataset_id,user_name,file_name,dataset_visibility)
-                
+            
+    
             if load_data_status == 1:
                 return 1,None,None
             else:
                 if row_creation_flag == True:
                     sql_command = "UPDATE "+str(table_name)+" set no_of_rows="+str(no_of_rows)+" where dataset_id="+str(original_dataset_id)
                     update_status = DBObject.update_records(connection,sql_command)
-
+            
+                
             if flag == True:
                 if row_creation_flag == True:
                     page_name='schema mapping'
@@ -619,8 +623,20 @@ class DatasetClass:
             #form the new table based on te existing table 
             create_status = DBObject.update_records(connection,sql_command)
 
+            ################
+            if create_status == 0:
+                if dataset_visibility == 'private':
+                    table_name = user_name+'."'+str(raw_table_name)+'"'
+                else:
+                    table_name = 'public."'+str(raw_table_name)+'"'
+                
+                sql_command = "SELECT count(*) from "+str(table_name)
+                logging.info(str(sql_command) + "  check")
+                dataframe = DBObject.select_records(connection,sql_command)
+                no_of_rows = int(dataframe['count'][0])
+                logging.info("----->"+str(no_of_rows))
             #update the dataset table name of the raw dataset
-            sql_command = "UPDATE mlaas.dataset_tbl SET dataset_table_name='"+str(raw_table_name)+"' where dataset_id ='"+str(dataset_id)+"'"
+            sql_command = "UPDATE mlaas.dataset_tbl SET dataset_table_name='"+str(raw_table_name)+"',no_of_rows = '"+str(no_of_rows)+"' where dataset_id ='"+str(dataset_id)+"'"
             create_status = DBObject.update_records(connection,sql_command)
             
             return create_status

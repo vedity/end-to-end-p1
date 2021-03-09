@@ -82,10 +82,10 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : median_imputation : execution start")
         
         cols = [column_list[i] for i in col]
-        logging.info(str(cols))
         for col_name in cols:
             try:
                 sql_command = 'select PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY "'+str(col_name)+'") AS impute_value from '+str(table_name)
+                logging.info(sql_command)
                 dataframe = DBObject.select_records(connection,sql_command)
 
                 impute_value = round(dataframe['impute_value'][0],5)
@@ -149,12 +149,8 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         cols = [column_list[i] for i in col]
         logging.info(str(cols))
         for col_name in cols:
-            try:
-                if value is None:
-                    impute_value =  "'Missing'"
-                else:
-                    impute_value =  value           
-                status = self.perform_missing_value_imputation(DBObject,connection, table_name,col_name,impute_value)
+            try:         
+                status = self.perform_missing_value_imputation(DBObject,connection, table_name,col_name,value)
             except Exception as exc:
                 return exc
 
@@ -183,7 +179,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
             
 
         logging.info("data preprocessing : CleaningClass : frequent_category_imputation : execution stop")
-        return dataframe
+        return status
     
     def random_sample_imputation(self, data_df, col):
         '''

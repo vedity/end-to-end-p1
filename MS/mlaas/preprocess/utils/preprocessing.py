@@ -22,13 +22,15 @@ from .schema import schema_creation as sc
 from .cleaning import noise_reduction as nr
 from .cleaning import cleaning
 from .Transformation import transformation as trs
-from modeling.split_data import SplitData as sd
+# from modeling.split_data import SplitData as sd
 #* Library Imports
 import logging
 import traceback
 import numpy as np
 import pandas as pd
 import uuid
+#from model_type import ModelType
+from .model_type import ModelType
 from sklearn.model_selection import train_test_split
 user_name = 'admin'
 log_enable = True
@@ -738,30 +740,43 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             operation_ordering = self.reorder_operations(request)
             
             operations = operation_ordering.keys()
-            data_df = 1
             for op in operations:
+                status = 1
+                flag = False
                 
                 #? Getting Columns
                 col = operation_ordering[op]
 
+                #? Getting Dataframe
+                data_df = self.get_data_df(dataset_id,schema_id)
+                if isinstance(data_df, str):
+                    raise GetDataDfFailed(500)
+                
+                
                 if op == 1:
-                    data_df = self.discard_missing_values(DBObject,connection,column_list, dataset_table_name, col)
+                    status = self.discard_missing_values(DBObject,connection,column_list, dataset_table_name, col)
+                    flag = True
                 # elif op == 2:
                 #     data_df = self.delete_above(data_df, col, val)
                 # elif op == 3:
                 #     data_df = self.delete_below(data_df, col, val)
                 elif op == 4:
-                    data_df = self.mean_imputation(DBObject,connection,column_list, dataset_table_name, col)
+                    status = self.mean_imputation(DBObject,connection,column_list, dataset_table_name, col)
+                    flag = True
                 elif op == 5:
-                    data_df = self.median_imputation(DBObject,connection,column_list, dataset_table_name, col)
+                    status = self.median_imputation(DBObject,connection,column_list, dataset_table_name, col)
+                    flag = True
                 # elif op == 6:
                 #     data_df = self.arbitrary_value_imputation(data_df, col, val)
                 elif op == 7:
-                    data_df = self.end_of_distribution(DBObject,connection,column_list, dataset_table_name, col)
+                    status = self.end_of_distribution(DBObject,connection,column_list, dataset_table_name, col)
+                    flag = True
                 elif op == 8:
-                    data_df = self.frequent_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
+                    status = self.frequent_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
+                    flag = True
                 elif op == 9:
-                    data_df = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
+                    status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
+                    flag = True
                 elif op == 10:
                     data_df = self.random_sample_imputation(data_df, col)
                 elif op == 11:
@@ -788,12 +803,48 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     data_df = self.repl_outliers_med_z_score(data_df, col)
                 elif op == 22:
                     data_df = self.apply_log_transformation(data_df, col)
+                elif op == 27:
+                    data_df = self.label_encoding(data_df, col)
+                elif op == 28:
+                    data_df = self.one_hot_encoding(data_df, col)
+                    
+
+                # sql_command = "select dataset_visibility,dataset_table_name,user_name from mlaas.dataset_tbl  where dataset_id='"+str(dataset_id)+"'"
                 
+                # logging.info(str(sql_command))
+                # dataframe = DBObject.select_records(connection,sql_command)
+    
+                # dataset_visibility,dataset_table_name,user_name  = str(dataframe['dataset_visibility'][0]),str(dataframe['dataset_table_name'][0]),str(dataframe['user_name'][0])
+                if status == 1:
+                    if flag:
+                        #? Sql function Failed
+                        raise SavingFailed(500)
+                    
+                    data_df.drop(data_df.columns[0],axis=1, inplace = True)
 
+                    updated_table_name = DBObject.get_table_name(connection,table_name)
+                    
+                    if dataset_visibility == 'public':
+                        user_name='public'
+        
+                    status = DBObject.load_df_into_db(connection_string,updated_table_name,data_df,user_name)
+    
+                    sql_command = "update mlaas.dataset_tbl set dataset_table_name='"+str(updated_table_name)+"' where dataset_id='"+str(dataset_id)+"'"
+                    logging.info(str(sql_command))
+                    update_status = DBObject.update_records(connection,sql_command)
+                    status = update_status
+                    if status == 1:
+                        raise SavingFailed(500)
+                    else:
+                        sql_command = f"drop table {dataset_table_name}"
+                        update_status = DBObject.update_records(connection,sql_command)
+                        status = update_status
+                    
+                    
             logging.info("data preprocessing : PreprocessingClass : master_executor : execution stop")
-            return update_status
+            return status
 
-        except (GetDataDfFailed) as exc:
+        except (DatabaseConnectionFailed,GetDataDfFailed,SavingFailed) as exc:
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
             return exc.msg
@@ -844,6 +895,13 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             input_features_df = data_df[feature_cols] #input_features_df
             target_features_df=data_df[target_cols] #target_features_df
+            mt = ModelType()
+            problem_type = mt.get_model_type(target_features_df)
+            model_type = problem_type[0]
+            algorithm_type = problem_type[1]
+            target_type = problem_type[2]
+            problem_type_dict = '{"model_type": "'+str(model_type)+'","algorithm_type": "'+str(algorithm_type)+'","target_type": "'+str(target_type)+'"}'
+            
             feature_cols = str(feature_cols) #input feature_cols
             target_cols = str(target_cols) #target feature_cols
             feature_cols = feature_cols.replace("'",'"')
@@ -853,11 +911,14 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             # #splitting parameters
             split_method =split_parameters['split_method'] #get split_method
             cv = split_parameters['cv'] #get cv
+            if len(cv) == 0:
+                cv = None
+            
             random_state = split_parameters['random_state'] #get random_state
             test_size = split_parameters['test_size'] #get test_size
             valid_size = split_parameters['valid_size'] #get valid_size
-            if valid_size=='':
-                valid_size=0
+            if len(valid_size) == 0:
+                valid_size= None
             else:
                 valid_size=float(valid_size)
             unique_id = str(uuid.uuid1().time) #genrate unique_id
@@ -873,10 +934,10 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             train_Y_filename = scale_dir+"/scaled_train_Y_data_" + unique_id #genrate train_Y file path
             test_X_filename =  scale_dir+"/scaled_test_X_data_" + unique_id  #genrate test_X file path  
             test_Y_filename =  scale_dir+"/scaled_test_Y_data_" + unique_id  #genrate test_Y file path     
-            valid_X_filename = ""
-            valid_Y_filename = ""
+            valid_X_filename = "None"
+            valid_Y_filename = "None"
             Y_valid_count= None
-            X_train, X_valid, X_test, Y_train, Y_valid, Y_test=sd.get_split_data(self,input_features_df,target_features_df, int(random_state),float(test_size), valid_size, str(split_method))
+            X_train, X_valid, X_test, Y_train, Y_valid, Y_test=mt.get_split_data(input_features_df,target_features_df, int(random_state),float(test_size), valid_size, str(split_method))
             if split_method != 'cross_validation':
                 Y_valid_count= Y_valid.shape[0]
                 valid_X_filename = scale_dir+"/scaled_valid_X_data_" + unique_id #genrate valid_X file path     
@@ -890,9 +951,9 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             np.save(test_X_filename,X_test.to_numpy())
             np.save(test_Y_filename,Y_test.to_numpy())
         
-            scaled_split_parameters = '{"split_method":'+ (split_method)+' ,"cv":'+ str(cv)+',"valid_size":'+ str(valid_size)+', "test_size":'+ str(test_size)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":'+train_X_filename+',"train_Y_filename":'+train_Y_filename+',"test_X_filename":'+test_X_filename+',"test_Y_filename":'+test_Y_filename+',"valid_X_filename":'+valid_X_filename+',"valid_Y_filename":'+valid_Y_filename+'}'
+            scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_size)+', "test_ratio":'+ str(test_size)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'"}'
             logger.info("scaled_split_parameters=="+scaled_split_parameters)
-            sql_command = f"update mlaas.project_tbl set target_features= '{target_cols}' ,input_features='{feature_cols}',scaled_split_parameters = '{scaled_split_parameters}' where dataset_id = '{dataset_id}' and project_id = '{project_id}' and user_name={user_name}"
+            sql_command = f"update mlaas.project_tbl set target_features= '{target_cols}' ,input_features='{feature_cols}',scaled_split_parameters = '{scaled_split_parameters}',problem_type = '{problem_type_dict}' where dataset_id = '{dataset_id}' and project_id = '{project_id}' and user_name= '{user_name}'"
             status = DBObject.update_records(connection, sql_command)
             return status
             
