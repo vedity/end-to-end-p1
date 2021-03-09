@@ -394,3 +394,16 @@ class ScalingClass(APIView):
                         logging.error("data preprocess : HandoverClass : POST Method : Exception :" + str(e))
                         logging.error("data preprocess : HandoverClass : POST Method : "+ traceback.format_exc())
                         return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+        
+
+class Scalingtype(APIView):
+        def get(self,request,format=None):
+                try :
+                        logging.info("data preprocess : ScheamAttributeListClass : POST Method : execution start")
+                        column_attribute = [{"id" : 0,"name": "Standard Scaler"},{"id" : 1,"name": "Min-Max"},{"id": 2,"name": "Robust"}]
+                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":column_attribute})
+                except Exception as e:
+                        logging.error("data preprocess : ScheamAttributeListClass : POST Method : Exception :" + str(e))
+                        logging.error("data preprocess : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+                

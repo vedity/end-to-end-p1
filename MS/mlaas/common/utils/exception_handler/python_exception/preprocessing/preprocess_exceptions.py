@@ -131,3 +131,13 @@ class GetDataDfFailed(Exception):
      
     def __str__(self):
         return (self.msg)
+    
+class SavingFailed(Exception):
+    """ Master Operator function failed to save the data into postgres. """
+    def __init__(self,status_code):
+        self.msg = "Saving Failed."
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)
