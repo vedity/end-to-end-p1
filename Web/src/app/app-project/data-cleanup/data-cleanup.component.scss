@@ -1,7 +1,7 @@
 .modeling-btn {
     position: absolute;
     right: 200px;
-    margin-top: 5px;
+    margin-top: -5px;
 }
 
 .hidden {
@@ -210,12 +210,11 @@ table {
     background-color: #34c38f !important;
 }
 
-.modeling-btn {
-    position: absolute;
-    right: 260px;
-    margin-top: -5px;
-}
-
+// .modeling-btn {
+//     position: absolute;
+//     right: 260px;
+//     margin-top: -5px;
+// }
 .table-card tr th,
 .table-card tr td {
     width: 25%;
@@ -328,7 +327,7 @@ table {
 
 .noise-tabs {
     border-bottom: none !important;
-    width: 463px;
+    width: 520px;
     margin: 20px auto;
     li {
         margin-right: 100px;

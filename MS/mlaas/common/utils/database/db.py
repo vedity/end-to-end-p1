@@ -57,6 +57,7 @@ class DBClass:
                 column_list.append(name)
         read_df=pd.read_csv(file_path,na_filter = False,parse_dates=column_list) #  Read csv file and load data into dataframe.
         
+        return read_df
     def database_connection(self,database,user,password,host,port):
         """This function is used to make connection with database.
 

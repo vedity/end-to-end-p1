@@ -1,4 +1,5 @@
-<a class="btn btn-success modeling-btn" [routerLink]="['/modeling']">Modeling</a>
+<a class="btn btn-success modeling-btn" [routerLink]="['/modeling']" style="right: 290px" [state]="{selectproject:false}"> Modeling</a>
+<a class="btn btn-success modeling-btn" [routerLink]="['/modeling']" [state]="{dataset_id: dataset_id ,project_id:project_id,selectproject:true}">Modeling</a>
 
 <ul ngbNav #justifiednavdatacleanup="ngbNav" [activeId]="1" class="nav-tabs nav cleanup-tabs">
     <li [ngbNavItem]="1">
@@ -10,72 +11,59 @@
             <ngx-skeleton-loader *ngIf="loaderdiv" count="7" [animation]="animation" [theme]="theme">
             </ngx-skeleton-loader>
             <div class="left-box" [hidden]="loaderdiv">
-                <perfect-scrollbar style="height: 490px;">
-                    <table class="table" datatable [dtOptions]="dtOptions" *ngIf="columnList">
-                        <thead>
-                            <tr>
-                                <th>Column</th>
-                                <th>Handling</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- class="active-row" -->
-                            <tr *ngFor="let item of columnList;let i=index">
-                                <td>
-                                    <div class="custom-control custom-checkbox mb-3">
-                                        <input [disabled]="item.is_missing=='False'" type="checkbox" class="custom-control-input" value="{{item.column_id}}" (change)="selectColumn($event)" data-value="{{item.column_id}}" id="customCheck_{{i}}">
-                                        <label class="custom-control-label" for="customCheck_{{i}}">{{item.col_name}}</label>
-                                    </div>
-                                </td>
-                                <td class="handlinmg-list" id="handling_{{item.column_id}}">
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </perfect-scrollbar>
+                <!-- <perfect-scrollbar style="height: 490px;"> -->
+                <table class="table" datatable [dtOptions]="dtOptions" *ngIf="columnList">
+                    <thead>
+                        <tr>
+                            <th>Column</th>
+                            <th>Handling</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- class="active-row" -->
+                        <tr *ngFor="let item of columnList;let i=index">
+                            <td>
+                                <div class="custom-control custom-checkbox mb-3">
+                                    <input [disabled]="item.is_missing=='False' && activeId==1" type="checkbox" class="custom-control-input" value="{{item.column_id}}" (change)="selectColumn($event)" data-value="{{item.column_id}}" id="customCheck_{{i}}">
+                                    <label class="custom-control-label" for="customCheck_{{i}}">{{item.col_name}}</label>
+                                </div>
+                            </td>
+                            <td class="handlinmg-list" id="handling_{{item.column_id}}">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- </perfect-scrollbar> -->
             </div>
             <div class="right-box" [hidden]="loaderdiv">
                 <div class="right-inner">
                     <ul ngbNav #justifiednavmissing="ngbNav" [activeId]="1" class="nav-tabs nav noise-tabs">
-                        <li [ngbNavItem]="1">
-                            <a ngbNavLink title="Data Cleanup">
-                                <span>Missing Value</span>
-
+                        <li [ngbNavItem]="i+1" (click)="activeId=item.tab_id" *ngFor="let item of operationList;let i=index">
+                            <a ngbNavLink title="{{item.tab_name}}">
+                                <span>{{item.tab_name}}</span>
                             </a>
                             <ng-template ngbNavContent>
-                                <h4 class="mb-3">Missing Value Handling</h4>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="custom-control custom-radio mb-3 ">
-                                            <input type="radio" id="customRadio1" name="customRadio" class="custom-control-input">
-                                            <label class="custom-control-label" for="customRadio1">Replace
-                                                                    missing value with</label>
-                                        </div>
-                                        <div class="ml-3">
+                                <div *ngFor="let operations of item.operation_classes;let k=index">
+                                    <h4 class="mb-3">{{operations.title}}</h4>
+                                    <div class="row">
+                                        <div class="col-md-4" *ngFor="let childitem of operations.operations;let j=index" [ngClass]="{'displaychilditem':operationIds.indexOf(childitem.operation_id)!=-1}">
                                             <div class="custom-control custom-radio mb-3 ">
-                                                <input type="radio" id="median" name="min" class="custom-control-input">
-                                                <label class="custom-control-label" for="median">With
-                                                                        Median</label>
+                                                <input type="radio" id="customRadio_{{k}}_{{j}}" name="customRadio_{{k}}" value="{{childitem.operation_id}}" data-waschecked="false" [disabled]="operationIds.indexOf(childitem.operation_id)==-1" (click)="selectHandling($event,childitem.operation_id,childitem.name)"
+                                                    class="custom-control-input">
+                                                <label class="custom-control-label" for="customRadio_{{k}}_{{j}}">{{childitem.name}}</label>
                                             </div>
-                                            <div class="custom-control custom-radio mb-3 ">
-                                                <input type="radio" id="mean" name="min" class="custom-control-input">
-                                                <label class="custom-control-label" for="mean">With Mean</label>
-                                            </div>
+
+
+
                                         </div>
 
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="custom-control custom-radio mb-3 col-md-6">
-                                            <input type="radio" id="customRadio2" name="customRadio" class="custom-control-input">
-                                            <label class="custom-control-label" for="customRadio2">Drop affected
-                                                                    rows</label>
-                                        </div>
-                                    </div>
 
+                                    </div>
                                 </div>
+
                             </ng-template>
                         </li>
-                        <li [ngbNavItem]="2">
+                        <!-- <li [ngbNavItem]="2">
                             <a ngbNavLink title="Data Cleanup">
                                 <span class="">Transformation</span>
 
@@ -141,7 +129,7 @@
 
                                 </div>
                             </ng-template>
-                        </li>
+                        </li> -->
                     </ul>
                     <div [ngbNavOutlet]="justifiednavmissing"></div>
                 </div>
@@ -160,12 +148,12 @@
                     <h4 class="font-size-18 mt-3 mb-3">Split Dataset</h4>
                     <div class="form-group">
                         <label>Select split method</label>
-                        <select class="form-control">
-                                                <option value="1">Cross Validation</option>
-                                                <option value="2">Train - Validation - Holdout</option>
-                                              </select>
+                        <select class="form-control" (change)="splitmethodselection=$event.target.value">
+                            <option value="crossvalidation">Cross Validation</option>
+                            <option value="trainvalidation">Train - Validation - Holdout</option>
+                        </select>
                     </div>
-                    <div class="cross-validation">
+                    <div class="cross-validation" *ngIf="splitmethodselection=='crossvalidation'">
                         <div class="form-group">
                             <label>Number of cross validation(CV) folds</label>
                             <input type="text" class="form-control">
@@ -173,9 +161,24 @@
                         <div class="form-group">
                             <label>Holdout perecentage</label>
                             <input type="range" class="custom-range" min="0" max="100" id="customRange2">
-
                         </div>
                         <div class="from-group">
+                            <label>Random status</label>
+                            <input type="number" class="form-control">
+                        </div>
+                    </div>
+                    <div class="tr-v-h" *ngIf="splitmethodselection=='trainvalidation'">
+                        <div class="form-group">
+                            <label>Split ratio</label>
+                            <select class="form-control">
+                                <option>60% - 20% - 20%</option>
+                                <option>70% - 15% - 15%</option>
+                                <option>80% - 10% - 10%</option>
+                                <option>90% - 5% - 5%</option>
+                                <option>95% - 5% - 0%</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label>Random status</label>
                             <input type="number" class="form-control">
                         </div>

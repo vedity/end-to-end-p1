@@ -14,6 +14,7 @@ export class DataCleanupComponent implements OnInit {
   @ViewChild(DataTableDirective, { static: false })
   datatableElement: DataTableDirective;
   dtOptions: DataTables.Settings = {};
+  activeId=1;
   constructor(public apiService: DataCleanupApiService, public toaster: ToastrService, private modalService: NgbModal, public router: Router) { }
   @Input() public dataset_id: any;
   @Input() public title: any;
@@ -24,6 +25,8 @@ export class DataCleanupComponent implements OnInit {
   errorStatus = true;
   operationList: any;
   columnList: any;
+  splitmethodselection="crossvalidation";
+  hyperparams='sklearn';
   animation = "progress-dark";
   theme = {
     'border-radius': '5px',
