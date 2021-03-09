@@ -110,10 +110,8 @@ class StartModelClass(APIView):
                         user_id = 1 # get user id from user auth table
                         project_id = int(request.query_params.get('project_id'))
                         dataset_id = int(request.query_params.get('dataset_id'))
+                        model_type = request.query_params.get('model_type')
                         
-                        model_type = 'Regression' #TODO get from front-end
-                        
-
                         experiment_name = request.query_params.get('experiment_name')
                         experiment_desc ='this is for testing'
                         

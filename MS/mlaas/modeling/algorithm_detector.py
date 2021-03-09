@@ -37,15 +37,15 @@ class AlgorithmDetector:
         logging.info("modeling : ModelClass : get_dataset_info : execution start")
        
         # SQL query to get the project_name
-        sql_command = 'select input_features,project_name from mlaas.project_tbl where project_id='+str(self.project_id)
+        sql_command = 'select target_features,project_name from mlaas.project_tbl where project_id='+str(project_id)
         project_df = self.DBObject.select_records(self.connection, sql_command)
         
         project_name = project_df['project_name'][0]
-        input_features = project_df['input_features'][0]
+        input_features = project_df['target_features'][0]
         target_columns= ast.literal_eval(input_features)[1:]
         
         # SQL query to get the dataset_name
-        sql_command = 'select dataset_name from mlaas.dataset_tbl where dataset_id='+str(self.dataset_id)
+        sql_command = 'select dataset_name from mlaas.dataset_tbl where dataset_id='+str(dataset_id)
         dataset_df = self.DBObject.select_records(self.connection, sql_command)
         dataset_name = dataset_df['dataset_name'][0]
  
@@ -54,7 +54,7 @@ class AlgorithmDetector:
         return project_name, dataset_name, target_columns
     
     def get_model_type(self, project_id, dataset_id):
-        sql_command = 'select model_type from mlaas.project_tbl where project_id={} and dataset_id={}'.format(project_id, dataset_id)
+        sql_command = 'select problem_type from mlaas.project_tbl where project_id={} and dataset_id={}'.format(project_id, dataset_id)
         model_type_literal = self.DBObject.select_records(self.connection, sql_command)
  
         model_type_dict = ast.literal_eval(model_type_literal.iloc[0, 0])

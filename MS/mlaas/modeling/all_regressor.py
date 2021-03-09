@@ -83,14 +83,7 @@ def linear_regression_sklearn(run_id,**kwargs):
         mlflow.set_tracking_uri("postgresql+psycopg2://airflow:airflow@postgresql:5432/airflow?options=-csearch_path%3Ddbo,mlaas")
        
         #TODO Later On model id may be changed
-       
-        # model_id = kwargs['model_id']
-        # model_mode = kwargs['dag_run'].conf['model_mode']
-        # project_id = int(kwargs['dag_run'].conf['project_id'])
-        # dataset_id = int(kwargs['dag_run'].conf['dataset_id'])
-        # user_id = int(kwargs['dag_run'].conf['user_id'])
-        # print(user_id)
-        
+     
         model_mode = kwargs['model_mode']
         model_id = kwargs['model_id']
         if model_mode == 'Auto':
@@ -105,7 +98,7 @@ def linear_regression_sklearn(run_id,**kwargs):
             user_id = kwargs['user_id']
             experiment_name = kwargs['exp_name']
         
-        input_features_list, target_features_list, X_train, X_test, X_valid, y_train, y_test, y_valid, scaled_split_dict= get_model_data(user_id, project_id, dataset_id, dataset_split_dict)
+        input_features_list, target_features_list, X_train, X_test, X_valid, y_train, y_test, y_valid, scaled_split_dict= get_model_data(user_id, project_id, dataset_id)
            
         # TODO : experiment name and experiment_desc coming from frontend.
         
