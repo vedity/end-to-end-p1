@@ -43,17 +43,13 @@ class ModelStatisticsClass:
             artifact_uri = self.DBObject.select_records(self.connection, sql_command).iloc[0,0]
             logging.info("modeling : ModelStatisticsClass : learning_curve : execution end"+str(artifact_uri))
             learning_curve_uri = artifact_uri + '/learning_curve.json'
-            # json_data = open(learning_curve_uri, 'r')
-            # learning_curve = json_data.read()
+            
             with open(learning_curve_uri, "r") as rf:
                 learning_curve_df = json.load(rf)
 
-            #learning_curve = pd.DataFrame.from_dict(decoded_data)
-            learning_curve_rounded_df = DataFrame(learning_curve_df, columns = ['train_size','train_score','test_score']).round(decimals = 2)
-            # learning_curve = dict()
-            # for key in decoded_data:
-            #     learning_curve[key] = round(decoded_data[key], 2)            
-            # return learning_curve
+           
+            learning_curve_rounded_df = DataFrame(learning_curve_df).round(decimals = 2)
+           
             logging.info("modeling : ModelStatisticsClass : learning_curve : execution end")
         except Exception as exc:
             logging.error("modeling : ModelStatisticsClass : learning_curve : Exception " + str(exc))
@@ -82,6 +78,8 @@ class ModelStatisticsClass:
             # actual_vs_prediction = json_data.read()
             with open(actual_vs_prediction_uri, "r") as rf:
                 actual_vs_prediction_df = json.load(rf)
+                
+            actual_vs_prediction_df = DataFrame(actual_vs_prediction_df).round(decimals = 0)
 
             logging.info("modeling : ModelStatisticsClass : actual_vs_prediction : execution end")
         except Exception as exc:
@@ -171,10 +169,7 @@ class ModelStatisticsClass:
             sql_command = 'select model_name from mlaas.model_master_tbl where model_id='+str(model_experiment_tbl_data['model_id'])
             model_name = self.DBObject.select_records(self.connection, sql_command).iloc[0, 0]
             
-            # final_df = pd.merge(metrics_df, model_name_df, left_index=True, right_index=True)
-            # metrics_dict = metrics_df.to_dict()
-            # metrics_dict['model_name'] = str(model_name)
-            # metrics_json = pd.DataFrame(metrics_dict).to_json()
+            
             
             metrics_json = json.loads(metrics_rounded_df.to_json())
             model_desc = {'model_name': model_name, 'exp_created_on': model_experiment_tbl_data['exp_created_on']}

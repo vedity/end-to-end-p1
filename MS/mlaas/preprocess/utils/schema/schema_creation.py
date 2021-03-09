@@ -196,8 +196,10 @@ class SchemaClass:
 
                         if change_col_name.find('(') !=-1 or  change_col_name.find(')') !=-1 or change_col_name.find('%')!=-1:
                             raise InvalidColumnNames(500)
-        
-                        change_column_name.append(schema_data[count]["change_column_name"]) #append change column name
+                            
+                        if len(schema_data[count]["change_column_name"]) != 0:
+
+                            change_column_name.append(schema_data[count]["change_column_name"]) #append change column name
 
                         index_list.append(schema_data[count]["index"]) #append  index 
 
@@ -205,15 +207,17 @@ class SchemaClass:
 
                         column_attribute_list.append(schema_data[count]["column_attribute"]) #append attribute type
 
-            # logging.info(str(change_column_name)+" change_column_name")
-            # logging.info(str(column_name_list)+" column_name_list")
-            # logging.info(str(column_attribute_list)+" column_attribute_list")
+            logging.info(str(change_column_name)+" change_column_name")
+            logging.info(str(column_name_list)+" column_name_list")
+            logging.info(str(column_attribute_list)+" column_attribute_list")
 
             #logging.info(str(change_column_name)+" column_attribute_list")
             for value in change_column_name:
                 if value != '':
-                    if change_column_name.count(value) > 1 :
+                    if str(change_column_name).strip().count(str(value).strip()) > 1 :
                         raise ChangeColumnNameSame(500)
+            
+
             
             column_count_value,ignore_count_value = self.get_count_value(DBObject,connection,schema_id)
             logging.info(str(column_attribute_list)+" column_attribute_list")
@@ -389,7 +393,7 @@ class SchemaClass:
             logging.error("data preprocess : SchemaClass : get_column_list : " +traceback.format_exc())
             return str(exc)
 
-    def update_dataset_schema(self,DBObject,connection,schema_id,column_name_list,column_datatype_list,change_column_name=None,column_attribute_list=None,index_list=None,missing_flag=None,noise_flag=None): ###
+    def update_dataset_schema(self,DBObject,connection,schema_id,column_name_list,column_datatype_list,change_column_name=None,column_attribute_list=None,index_list=None,missing_flag=None,noise_flag=None,flag = False): ###
         """
         this function used to insert the records into a table if not exist otherwise it will update the existing schema data record from the table.
         Args:
@@ -416,7 +420,7 @@ class SchemaClass:
 
                 #check if values in schema table,data is exist or not. If exist then update the values else insert new record
                 status = self.is_existing_schema(DBObject,connection,schema_id)
-                if status == True  :
+                if status == True and flag == False :
                     new_cols_lst = change_column_name
                     cols_attribute_lst = column_attribute_list
 

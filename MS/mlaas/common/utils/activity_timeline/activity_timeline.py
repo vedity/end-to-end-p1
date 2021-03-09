@@ -135,7 +135,8 @@ class ActivityTimelineClass:
 
             #excute the sql query
             activity_df = DBObject.select_records(connection,sql_command)  
-
+            if activity_df is None:
+                raise DataNotFound(500)
             length_df = activity_df['user_name']            
             if len(length_df)==0:
                 raise DataNotFound(500)

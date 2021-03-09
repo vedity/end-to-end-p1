@@ -110,10 +110,8 @@ class StartModelClass(APIView):
                         user_id = 1 # get user id from user auth table
                         project_id = int(request.query_params.get('project_id'))
                         dataset_id = int(request.query_params.get('dataset_id'))
-                        
-                        # model_type = 'Regression' #TODO get from front-end
                         model_type = request.query_params.get('model_type')
-
+                        
                         experiment_name = request.query_params.get('experiment_name')
                         experiment_desc ='this is for testing'
                         
@@ -401,13 +399,12 @@ class SelectAlgorithmClass(APIView):
                 """
                 try:
                         
-                        
-                        ModelObject = ModelClass(Model_Mode, user_id, project_id,dataset_id,
-                                                DBObject,connection,connection_string)
-                        
+                        project_id = int(request.query_params.get('project_id'))
+                        user_id = int(request.query_params.get('user_id'))
+                        model_type = int(request.query_params.get('model_type'))
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
                         # experiment_id = request.query_params.get('experiment_id') #get Username
-                        models_list = ModelObject.show_model_list()
+                        models_list = AlgorithmDetectorObj.show_models_list(project_id,dataset_id,model_type)
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
                         # print(learning_curve_json)
                         return Response({"status_code":"200","error_msg":"Successfully updated","response":models_list})
