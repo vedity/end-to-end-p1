@@ -696,7 +696,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             return OperationOrderingFailed(500).msg
         
         
-    def master_executor(self, dataset_id, schema_id,request, save_as = False):
+    def master_executor(self, dataset_id, schema_id,request, save_as = False,value = None):
         '''
             It takes the request from the frontend and executes the cleanup operations.
             
@@ -732,33 +732,36 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
 
             #get the Column list
             column_list = DBObject.get_column_list(connection,dataset_id)
+            logging.info(str(column_list) + " column_list")
 
             #? Getting operations in the ordered format
             operation_ordering = self.reorder_operations(request)
             
             operations = operation_ordering.keys()
-            
+            data_df = 1
             for op in operations:
                 
                 #? Getting Columns
                 col = operation_ordering[op]
 
                 if op == 1:
-                    data_df = self.discard_missing_values(data_df, col)
+                    data_df = self.discard_missing_values(DBObject,connection,column_list, dataset_table_name, col)
                 # elif op == 2:
-                    # data_df = self.delete_above(data_df, col, val)
+                #     data_df = self.delete_above(data_df, col, val)
                 # elif op == 3:
-                    # data_df = self.delete_below(data_df, col, val)
+                #     data_df = self.delete_below(data_df, col, val)
+                elif op == 4:
+                    data_df = self.mean_imputation(DBObject,connection,column_list, dataset_table_name, col)
                 elif op == 5:
-                    status = self.imputation(DBObject, connection, column_list, dataset_table_name, col,op)
+                    data_df = self.median_imputation(DBObject,connection,column_list, dataset_table_name, col)
                 # elif op == 6:
                 #     data_df = self.arbitrary_value_imputation(data_df, col, val)
                 elif op == 7:
-                    data_df = self.end_of_distribution(data_df, col)
+                    data_df = self.end_of_distribution(DBObject,connection,column_list, dataset_table_name, col)
                 elif op == 8:
-                    data_df = self.frequent_category_imputation(data_df, col)
+                    data_df = self.frequent_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
                 elif op == 9:
-                    data_df = self.add_missing_category(data_df, col)
+                    data_df = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
                 elif op == 10:
                     data_df = self.random_sample_imputation(data_df, col)
                 elif op == 11:
@@ -788,7 +791,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 
 
             logging.info("data preprocessing : PreprocessingClass : master_executor : execution stop")
-            return status
+            return update_status
 
         except (GetDataDfFailed) as exc:
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
