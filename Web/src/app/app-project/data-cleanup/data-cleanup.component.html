@@ -12,7 +12,7 @@
             </ngx-skeleton-loader>
             <div class="left-box" [hidden]="loaderdiv">
                 <!-- <perfect-scrollbar style="height: 490px;"> -->
-                <table class="table" datatable [dtOptions]="dtOptions" *ngIf="columnList">
+                <table class="table datadetailtable" datatable [dtOptions]="dtOptions" *ngIf="columnList">
                     <thead>
                         <tr>
                             <th>Column</th>
@@ -24,11 +24,20 @@
                         <tr *ngFor="let item of columnList;let i=index">
                             <td>
                                 <div class="custom-control custom-checkbox mb-3">
-                                    <input [disabled]="item.is_missing=='False' && activeId==1" type="checkbox" class="custom-control-input" value="{{item.column_id}}" (change)="selectColumn($event)" data-value="{{item.column_id}}" id="customCheck_{{i}}">
+                                    <input [disabled]="item.is_missing=='False' && activeId==1" type="checkbox" class="custom-control-input checkbox" value="{{item.column_id}}" (change)="selectColumn($event)" data-value="{{item.column_id}}" id="customCheck_{{i}}">
                                     <label class="custom-control-label" for="customCheck_{{i}}">{{item.col_name}}</label>
                                 </div>
                             </td>
                             <td class="handlinmg-list" id="handling_{{item.column_id}}">
+                                <div *ngFor="let tabs of operationList">
+                                    <div class="handling" id="handlingitem_{{item.column_id}}_{{handles}}" *ngFor="let handles of item['handling_'+tabs.tab_id];let j=index">
+                                        <p>{{item['handlingname_'+tabs.tab_id][j]}}&nbsp;
+                                            <a href="javascript:void(0);" id="trash_{{handles}}"> <i class=" bx bx-trash" (click)="removeHandling(item['handlingtarget_'+tabs.tab_id][j],item.column_id);"></i></a>
+                                        </p>
+                                    </div>
+                                </div>
+
+
                             </td>
                         </tr>
                     </tbody>
@@ -38,7 +47,7 @@
             <div class="right-box" [hidden]="loaderdiv">
                 <div class="right-inner">
                     <ul ngbNav #justifiednavmissing="ngbNav" [activeId]="1" class="nav-tabs nav noise-tabs">
-                        <li [ngbNavItem]="i+1" (click)="activeId=item.tab_id" *ngFor="let item of operationList;let i=index">
+                        <li [ngbNavItem]="i+1" (click)="activeId=item.tab_id;tabchange(item.tab_id)" *ngFor="let item of operationList;let i=index">
                             <a ngbNavLink title="{{item.tab_name}}">
                                 <span>{{item.tab_name}}</span>
                             </a>
@@ -48,9 +57,9 @@
                                     <div class="row">
                                         <div class="col-md-4" *ngFor="let childitem of operations.operations;let j=index" [ngClass]="{'displaychilditem':operationIds.indexOf(childitem.operation_id)!=-1}">
                                             <div class="custom-control custom-radio mb-3 ">
-                                                <input type="radio" id="customRadio_{{k}}_{{j}}" name="customRadio_{{k}}" value="{{childitem.operation_id}}" data-waschecked="false" [disabled]="operationIds.indexOf(childitem.operation_id)==-1" (click)="selectHandling($event,childitem.operation_id,childitem.name)"
-                                                    class="custom-control-input">
-                                                <label class="custom-control-label" for="customRadio_{{k}}_{{j}}">{{childitem.name}}</label>
+                                                <input type="radio" id="customRadio_{{k}}_{{j}}" name="customRadio_{{k}}" value="{{childitem.operation_id}}" title="{{childitem.name}}" data-waschecked="false" [disabled]="operationIds.indexOf(childitem.operation_id)==-1" (click)="selectHandling($event,childitem.operation_id)"
+                                                    class="custom-control-input radiobutton">
+                                                <label class="custom-control-label" for="customRadio_{{k}}_{{j}}" id="radiolabel_{{k}}_{{j}}">{{childitem.name}}</label>
                                             </div>
 
 
@@ -143,7 +152,23 @@
         </a>
         <ng-template ngbNavContent>
             <div class="row justify-content-md-left">
-                <div class="col-md-5">
+                <div class="col-md-4">
+                    <h4 class="mb-3 mt-3">Scaling</h4>
+
+
+                    <div class="row mb-4">
+
+                        <div class="col-md-4 mb-3" *ngFor="let item of scaleOperations">
+                            <div class="custom-control custom-radio">
+                                <input type="radio" id="{{item.id}}" name="rescaling" class="custom-control-input">
+                                <label class="custom-control-label" for="min-max">{{item.name}}</label>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+                <div class="col-md-6">
 
                     <h4 class="font-size-18 mt-3 mb-3">Split Dataset</h4>
                     <div class="form-group">
@@ -186,44 +211,12 @@
 
                 </div>
 
-                <div class="col-md-4">
-                    <h4 class="mb-3 mt-3">Rescaling</h4>
 
-
-                    <div class="row mb-4">
-
-                        <div class="col-md-6 mb-3">
-                            <div class="custom-control custom-radio">
-                                <input type="radio" id="min-max" name="rescaling" class="custom-control-input">
-                                <label class="custom-control-label" for="min-max">Min-Max</label>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="custom-control custom-radio">
-                                <input type="radio" id="scaler" name="rescaling" class="custom-control-input">
-                                <label class="custom-control-label" for="scaler">Std.Scaler</label>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="custom-control custom-radio">
-                                <input type="radio" id="robust" name="rescaling" class="custom-control-input">
-                                <label class="custom-control-label" for="robust">Robust</label>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="custom-control custom-radio">
-                                <input type="radio" id="normalization" name="rescaling" class="custom-control-input">
-                                <label class="custom-control-label" for="normalization">Normalization</label>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
             </div>
 
             <div class="row">
                 <div class="col-md-12">
-                    <div class="text-left mb-4 mt-4">
+                    <div class="text-center mb-4 mt-4">
                         <button class="btn btn-success" type="submit">Scale & Split</button>
                     </div>
                 </div>

@@ -4,6 +4,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DataTableDirective } from 'angular-datatables';
 import { ToastrService } from 'ngx-toastr';
 import { DataCleanupApiService } from '../data-cleanup.service';
+
 @Component({
   selector: 'app-data-cleanup',
   templateUrl: './data-cleanup.component.html',
@@ -14,7 +15,7 @@ export class DataCleanupComponent implements OnInit {
   @ViewChild(DataTableDirective, { static: false })
   datatableElement: DataTableDirective;
   dtOptions: DataTables.Settings = {};
-  activeId=1;
+  activeId = 1;
   constructor(public apiService: DataCleanupApiService, public toaster: ToastrService, private modalService: NgbModal, public router: Router) { }
   @Input() public dataset_id: any;
   @Input() public title: any;
@@ -25,8 +26,9 @@ export class DataCleanupComponent implements OnInit {
   errorStatus = true;
   operationList: any;
   columnList: any;
-  splitmethodselection="crossvalidation";
-  hyperparams='sklearn';
+  splitmethodselection = "crossvalidation";
+  scaleOperations:any;
+  hyperparams = 'sklearn';
   animation = "progress-dark";
   theme = {
     'border-radius': '5px',
@@ -49,6 +51,7 @@ export class DataCleanupComponent implements OnInit {
     this.loaderdiv = true;
     this.getOpertion();
     this.getColumnList();
+    this.getScalingOperations();
   }
 
 
@@ -81,22 +84,18 @@ export class DataCleanupComponent implements OnInit {
     }
   }
 
-  selectedcolumnswithoperation=[];
- // selectedoperations=[];
+  selectedcolumnswithoperation = [];
+  // selectedoperations=[];
   selectedColumn = [];
   selectColumn(event) {
-    if($(".radioitems:checked").length>0){
-      let selectedoperations=[];
-      $(".radioitems:checked").each(function(){
-       selectedoperations.push($(this).val());
-      $(this).prop("checked",false);
-      })
-      this.selectedcolumnswithoperation.push({ids:this.selectedColumn,operations:selectedoperations})
-    }
-
-    console.log("selectedcolumnswithoperation",this.selectedcolumnswithoperation);
-   
-   
+    // if ($(".radioitems:checked").length > 0) {
+    //   let selectedoperations = [];
+    //   $(".radioitems:checked").each(function () {
+    //     selectedoperations.push($(this).val());
+    //     $(this).prop("checked", false);
+    //   })
+    //   this.selectedcolumnswithoperation.push({ ids: this.selectedColumn, operations: selectedoperations })
+    // }
     if (event.target.checked) {
       this.selectedColumn.push(event.target.value);
     }
@@ -106,6 +105,7 @@ export class DataCleanupComponent implements OnInit {
         this.selectedColumn.splice(index, 1);
       }
     }
+    $(".radiobutton:checked").prop('checked', false);
     this.getColumnviseOperation();
   }
 
@@ -148,9 +148,9 @@ export class DataCleanupComponent implements OnInit {
   columnlistsuccessHandler(data) {
     if (data.status_code == "200") {
       this.columnList = data.response;
+      console.log(this.columnList);
       setTimeout(() => {
         this.loaderdiv = false;
-
       }, 10);
     }
     else {
@@ -158,38 +158,87 @@ export class DataCleanupComponent implements OnInit {
     }
   }
 
-handling=[];
-  selectHandling(event,id,name){
-    var item=this.handling.find(s=>s.column.toString()==this.selectedColumn.toString());
-   if($("#"+event.target.id).data("waschecked")){
-     $("#"+event.target.id).prop('checked',false);
-     $("#"+event.target.id).data('waschecked',false);
-     this.selectedColumn.forEach(element => {
-      $("#handling_"+element).find($("#handlingitem_"+id)).remove();
-     });
-   }
-   else{
-    $("#"+event.target.id).prop('checked',true);
-    $("#"+event.target.id).data('waschecked',true);
+  handling = [];
+  selectHandling(event, id) {
+    var item = this.handling.find(s => s.column.toString() == this.selectedColumn.toString());
+    $("#" + event.target.id).prop('checked', true);
+    if (item == undefined) {
+      this.handling.push({ column: this.selectedColumn, operation: [id] })
+    }
+    else {
+      item.operation.push(id);
+    }
+    this.setHandlers();
+  }
+
+  setHandlers() {
+    let tabid = this.activeId;
     this.selectedColumn.forEach(element => {
-      console.log(element);
-      var html='<div class="handling" id="handlingitem_'+id+'"><p>'+name+'&nbsp;<a href="javascript:void(0);"  id="trash_'+id+'"> <i class=" bx bx-trash" (click)="removeHandling('+id+','+element+','+event.target.id+');"></i></a></p></div>'
-      $("#handling_"+element).append(html);
+      var selectedelem = this.columnList.filter(function (e) {
+        if (e.column_id == element) {
+          e["handling_" + tabid] = [];
+          e["handlingname_" + tabid] = [];
+          e["handlingtarget_" + tabid] = [];
+          if ($(".radiobutton:checked").length > 0) {
+            $(".radiobutton:checked").each(function () {
+              e["handling_" + tabid].push($(this).val().toString());
+              e["handlingname_" + tabid].push($(this).attr('title'));
+              e["handlingtarget_" + tabid].push($(this).prop('id'));
+            })
+          }
+        }
+        return e;
+      });
+      console.log(selectedelem);
+
     });
-if(item==undefined){
-  this.handling.push({column:this.selectedColumn,operation:[id]})
-}
-else{
-  item.operation.push(id);
-}
-   }
   }
 
 
-  removeHandling(handling,column,target){
-    $("#handling_"+column).find($("#handlingitem_"+handling)).remove();
-    $("#"+target).prop('checked',false);
-    $("#"+target).data('waschecked',false);
-   }
-  
+  removeHandlers(id, columnid) {
+    let tabid = this.activeId;
+    var selectedelem = this.columnList.filter(function (e) {
+      if (e.column_id == columnid) {
+        let val = $("#" + id).val();
+        console.log(val);
+        e["handling_" + tabid].splice(e["handling_" + tabid].indexOf(val), 1);
+        e["handlingname_" + tabid].splice( e["handlingname_" + tabid].indexOf($("#" + id).attr('title')), 1);
+        e["handlingtarget_" + tabid].splice(e["handlingtarget_" + tabid].indexOf(id), 1);
+      }
+      return e;
+    });
+    console.log(selectedelem);
+  }
+
+  removeHandling(id, column) {
+    if (this.selectedColumn.length == 1)
+      $("#" + id).prop('checked', false);
+    this.removeHandlers(id, column);
+  }
+
+  tabchange(tabid) {
+    $(".checkbox:checked").prop("checked", false);
+    this.selectedColumn = [];
+    this.getColumnviseOperation();
+  }
+
+  getScalingOperations(){
+    this.apiService.getScalingOperations().subscribe(
+      logs=>this.scaleSuccessHandler(logs),
+      error=>this.errorHandler(error)
+    )
+  }
+
+  scaleSuccessHandler(data)
+  {
+    if (data.status_code == "200") {
+      this.scaleOperations = data.response;
+      console.log(this.scaleOperations);
+      
+    }
+    else {
+      this.errorHandler(data);
+    }
+  }
+
 }
