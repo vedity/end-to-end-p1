@@ -738,30 +738,43 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             operation_ordering = self.reorder_operations(request)
             
             operations = operation_ordering.keys()
-            data_df = 1
             for op in operations:
+                status = 1
+                flag = False
                 
                 #? Getting Columns
                 col = operation_ordering[op]
 
+                #? Getting Dataframe
+                data_df = self.get_data_df(dataset_id,schema_id)
+                if isinstance(data_df, str):
+                    raise GetDataDfFailed(500)
+                
+                
                 if op == 1:
-                    data_df = self.discard_missing_values(DBObject,connection,column_list, dataset_table_name, col)
+                    status = self.discard_missing_values(DBObject,connection,column_list, dataset_table_name, col)
+                    flag = True
                 # elif op == 2:
                 #     data_df = self.delete_above(data_df, col, val)
                 # elif op == 3:
                 #     data_df = self.delete_below(data_df, col, val)
                 elif op == 4:
-                    data_df = self.mean_imputation(DBObject,connection,column_list, dataset_table_name, col)
+                    status = self.mean_imputation(DBObject,connection,column_list, dataset_table_name, col)
+                    flag = True
                 elif op == 5:
-                    data_df = self.median_imputation(DBObject,connection,column_list, dataset_table_name, col)
+                    status = self.median_imputation(DBObject,connection,column_list, dataset_table_name, col)
+                    flag = True
                 # elif op == 6:
                 #     data_df = self.arbitrary_value_imputation(data_df, col, val)
                 elif op == 7:
-                    data_df = self.end_of_distribution(DBObject,connection,column_list, dataset_table_name, col)
+                    status = self.end_of_distribution(DBObject,connection,column_list, dataset_table_name, col)
+                    flag = True
                 elif op == 8:
-                    data_df = self.frequent_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
+                    status = self.frequent_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
+                    flag = True
                 elif op == 9:
-                    data_df = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
+                    status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
+                    flag = True
                 elif op == 10:
                     data_df = self.random_sample_imputation(data_df, col)
                 elif op == 11:
@@ -788,12 +801,48 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     data_df = self.repl_outliers_med_z_score(data_df, col)
                 elif op == 22:
                     data_df = self.apply_log_transformation(data_df, col)
+                elif op == 27:
+                    data_df = self.label_encoding(data_df, col)
+                elif op == 28:
+                    data_df = self.one_hot_encoding(data_df, col)
+                    
+
+                # sql_command = "select dataset_visibility,dataset_table_name,user_name from mlaas.dataset_tbl  where dataset_id='"+str(dataset_id)+"'"
                 
+                # logging.info(str(sql_command))
+                # dataframe = DBObject.select_records(connection,sql_command)
+    
+                # dataset_visibility,dataset_table_name,user_name  = str(dataframe['dataset_visibility'][0]),str(dataframe['dataset_table_name'][0]),str(dataframe['user_name'][0])
+                if status == 1:
+                    if flag:
+                        #? Sql function Failed
+                        raise SavingFailed(500)
+                    
+                    data_df.drop(data_df.columns[0],axis=1, inplace = True)
 
+                    updated_table_name = DBObject.get_table_name(connection,table_name)
+                    
+                    if dataset_visibility == 'public':
+                        user_name='public'
+        
+                    status = DBObject.load_df_into_db(connection_string,updated_table_name,data_df,user_name)
+    
+                    sql_command = "update mlaas.dataset_tbl set dataset_table_name='"+str(updated_table_name)+"' where dataset_id='"+str(dataset_id)+"'"
+                    logging.info(str(sql_command))
+                    update_status = DBObject.update_records(connection,sql_command)
+                    status = update_status
+                    if status == 1:
+                        raise SavingFailed(500)
+                    else:
+                        sql_command = f"drop table {dataset_table_name}"
+                        update_status = DBObject.update_records(connection,sql_command)
+                        status = update_status
+                    
+                    
             logging.info("data preprocessing : PreprocessingClass : master_executor : execution stop")
-            return data_df
+            return status
 
-        except (GetDataDfFailed) as exc:
+        except (DatabaseConnectionFailed,GetDataDfFailed,SavingFailed) as exc:
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
             return exc.msg
