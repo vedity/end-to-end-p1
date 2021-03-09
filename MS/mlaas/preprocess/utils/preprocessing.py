@@ -29,6 +29,8 @@ import traceback
 import numpy as np
 import pandas as pd
 import uuid
+#from model_type import ModelType
+from .model_type import ModelType
 from sklearn.model_selection import train_test_split
 user_name = 'admin'
 log_enable = True
@@ -844,6 +846,14 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             input_features_df = data_df[feature_cols] #input_features_df
             target_features_df=data_df[target_cols] #target_features_df
+            mt = ModelType()
+            problem_type = mt.get_model_type(target_features_df)
+            model_type = problem_type[0]
+            algorithm_type = problem_type[1]
+            target_type = problem_type[2]
+            problem_type_dict = '{"model_type": "'+str(model_type)+'","algorithm_type": "'+str(algorithm_type)+'",,"target_type": "'+str(target_type)+'"}'
+            logging.info("---->"+ str(problem_type_dict))
+            
             feature_cols = str(feature_cols) #input feature_cols
             target_cols = str(target_cols) #target feature_cols
             feature_cols = feature_cols.replace("'",'"')
@@ -853,6 +863,9 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             # #splitting parameters
             split_method =split_parameters['split_method'] #get split_method
             cv = split_parameters['cv'] #get cv
+            if len(cv) == 0:
+                cv = None
+            logging.info("---->"+ str(cv))
             random_state = split_parameters['random_state'] #get random_state
             test_size = split_parameters['test_size'] #get test_size
             valid_size = split_parameters['valid_size'] #get valid_size
@@ -873,8 +886,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             train_Y_filename = scale_dir+"/scaled_train_Y_data_" + unique_id #genrate train_Y file path
             test_X_filename =  scale_dir+"/scaled_test_X_data_" + unique_id  #genrate test_X file path  
             test_Y_filename =  scale_dir+"/scaled_test_Y_data_" + unique_id  #genrate test_Y file path     
-            valid_X_filename = ""
-            valid_Y_filename = ""
+            valid_X_filename = "None"
+            valid_Y_filename = "None"
             Y_valid_count= None
             X_train, X_valid, X_test, Y_train, Y_valid, Y_test=sd.get_split_data(self,input_features_df,target_features_df, int(random_state),float(test_size), valid_size, str(split_method))
             if split_method != 'cross_validation':
@@ -890,9 +903,9 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             np.save(test_X_filename,X_test.to_numpy())
             np.save(test_Y_filename,Y_test.to_numpy())
         
-            scaled_split_parameters = '{"split_method":'+ (split_method)+' ,"cv":'+ str(cv)+',"valid_size":'+ str(valid_size)+', "test_size":'+ str(test_size)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":'+train_X_filename+',"train_Y_filename":'+train_Y_filename+',"test_X_filename":'+test_X_filename+',"test_Y_filename":'+test_Y_filename+',"valid_X_filename":'+valid_X_filename+',"valid_Y_filename":'+valid_Y_filename+'}'
+            scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":"'+ str(cv)+'","valid_ratio":'+ str(valid_size)+', "test_ratio":'+ str(test_size)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'"}'
             logger.info("scaled_split_parameters=="+scaled_split_parameters)
-            sql_command = f"update mlaas.project_tbl set target_features= '{target_cols}' ,input_features='{feature_cols}',scaled_split_parameters = '{scaled_split_parameters}' where dataset_id = '{dataset_id}' and project_id = '{project_id}' and user_name={user_name}"
+            sql_command = f"update mlaas.project_tbl set target_features= '{target_cols}' ,input_features='{feature_cols}',scaled_split_parameters = '{scaled_split_parameters}',problem_type = '{problem_type_dict}' where dataset_id = '{dataset_id}' and project_id = '{project_id}' and user_name= '{user_name}'"
             status = DBObject.update_records(connection, sql_command)
             return status
             
