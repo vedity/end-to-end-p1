@@ -43,17 +43,13 @@ class ModelStatisticsClass:
             artifact_uri = self.DBObject.select_records(self.connection, sql_command).iloc[0,0]
             logging.info("modeling : ModelStatisticsClass : learning_curve : execution end"+str(artifact_uri))
             learning_curve_uri = artifact_uri + '/learning_curve.json'
-            # json_data = open(learning_curve_uri, 'r')
-            # learning_curve = json_data.read()
+            
             with open(learning_curve_uri, "r") as rf:
                 learning_curve_df = json.load(rf)
 
-            #learning_curve = pd.DataFrame.from_dict(decoded_data)
-            learning_curve_rounded_df = DataFrame(learning_curve_df, columns = ['train_size','train_score','test_score']).round(decimals = 2)
-            # learning_curve = dict()
-            # for key in decoded_data:
-            #     learning_curve[key] = round(decoded_data[key], 2)            
-            # return learning_curve
+           
+            learning_curve_rounded_df = DataFrame(learning_curve_df).round(decimals = 2)
+           
             logging.info("modeling : ModelStatisticsClass : learning_curve : execution end")
         except Exception as exc:
             logging.error("modeling : ModelStatisticsClass : learning_curve : Exception " + str(exc))
@@ -82,6 +78,8 @@ class ModelStatisticsClass:
             # actual_vs_prediction = json_data.read()
             with open(actual_vs_prediction_uri, "r") as rf:
                 actual_vs_prediction_df = json.load(rf)
+                
+            actual_vs_prediction_df = DataFrame(actual_vs_prediction_df).round(decimals = 0)
 
             logging.info("modeling : ModelStatisticsClass : actual_vs_prediction : execution end")
         except Exception as exc:
@@ -171,10 +169,7 @@ class ModelStatisticsClass:
             sql_command = 'select model_name from mlaas.model_master_tbl where model_id='+str(model_experiment_tbl_data['model_id'])
             model_name = self.DBObject.select_records(self.connection, sql_command).iloc[0, 0]
             
-            # final_df = pd.merge(metrics_df, model_name_df, left_index=True, right_index=True)
-            # metrics_dict = metrics_df.to_dict()
-            # metrics_dict['model_name'] = str(model_name)
-            # metrics_json = pd.DataFrame(metrics_dict).to_json()
+            
             
             metrics_json = json.loads(metrics_rounded_df.to_json())
             model_desc = {'model_name': model_name, 'exp_created_on': model_experiment_tbl_data['exp_created_on']}
@@ -253,7 +248,7 @@ class ModelStatisticsClass:
         return final_model_data
 
 
-    def show_running_experiments(self, project_id,exp_name):
+    def show_running_experiments(self, project_id):
         """This function is used to get experiments_list of particular project.
 
         Args:
@@ -265,18 +260,12 @@ class ModelStatisticsClass:
         """
         try:
             # Get the necessary values from the mlaas.model_experiment_tbl
-            sql_command ="select run_id from mlaas.model_dags_tbl where project_id="+str(project_id)+" and exp_name='"+exp_name+"'"
-            model_dag_df = self.DBObject.select_records(self.connection,sql_command)
-            
-            dag_run_id = model_dag_df['run_id'][0]
-            
             sql_command = "select met.*,e.name as experiment_name,mmt.model_name,dt.dataset_name,round(cast(sv.cv_score as numeric),3) as cv_score,round(cast(sv.holdout_score as numeric),3) as holdout_score "\
                           "from mlaas.model_experiment_tbl met,mlaas.model_master_tbl mmt,mlaas.score_view sv,mlaas.dataset_tbl dt,mlaas.experiments e "\
                           "where met.model_id = mmt.model_id and met.experiment_id=sv.experiment_id and met.dataset_id=dt.dataset_id and met.experiment_id=e.experiment_id "\
-                          "and met.project_id="+str(project_id) +" and met.dag_run_id='"+ dag_run_id +"' and met.status='running'"
+                          "and met.project_id="+str(project_id) +" and met.status='running'"
                           
             model_experiment_data_df = self.DBObject.select_records(self.connection, sql_command)
-    
             # Converting final_df to json
             json_data = model_experiment_data_df.to_json(orient='records',date_format='iso')
             final_data = json.loads(json_data)
