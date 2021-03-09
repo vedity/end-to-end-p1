@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from 'src/environments/environment';
 @Injectable({
   providedIn: 'root'
 })
 export class DataCleanupApiService 
 {
-  baseUrl = 'http://127.0.0.1:8000/mlaas/'
+  baseUrl = environment.baseUrl;
   headers = new HttpHeaders({
     'Content-type': 'application/json',
   });
@@ -24,5 +25,9 @@ export class DataCleanupApiService
 
   getColumnviseOperations(obj): Observable<any> {
     return this.httpClient.post(this.baseUrl + "preprocess/cleanup/operation/",obj, { headers: this.headers });
+  }
+
+  getScalingOperations(){
+    return this.httpClient.get(this.baseUrl + "preprocess/cleanup/scaling/type/", { headers: this.headers });
   }
 }
