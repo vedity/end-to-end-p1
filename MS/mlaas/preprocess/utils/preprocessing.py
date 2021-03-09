@@ -901,7 +901,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             algorithm_type = problem_type[1]
             target_type = problem_type[2]
             problem_type_dict = '{"model_type": "'+str(model_type)+'","algorithm_type": "'+str(algorithm_type)+'","target_type": "'+str(target_type)+'"}'
-            logging.info("---->"+ str(problem_type_dict))
             
             feature_cols = str(feature_cols) #input feature_cols
             target_cols = str(target_cols) #target feature_cols
@@ -914,7 +913,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             cv = split_parameters['cv'] #get cv
             if len(cv) == 0:
                 cv = None
-            logging.info("---->"+ str(cv))
+            
             random_state = split_parameters['random_state'] #get random_state
             test_size = split_parameters['test_size'] #get test_size
             valid_size = split_parameters['valid_size'] #get valid_size
