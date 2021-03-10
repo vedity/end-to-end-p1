@@ -127,8 +127,11 @@ class StartModelClass(APIView):
                                 
                                 model_id = int(request.query_params.get('model_id'))
                                 # hyperparameters = request.query_params.get('hyperparameters')
-                                hyperparameters = {"epochs": 10, "learning_rate": 0.01, "batch_size": 32, "loss": "mean_absolute_error", "optimizer": "Adam", 
-                                        "activation": "relu"}
+                                if model_id == 2:
+                                        hyperparameters = {"epochs": 10, "learning_rate": 0.01, "batch_size": 32, "loss": "mean_absolute_error", "optimizer": "Adam", 
+                                                "activation": "relu"}
+                                else:
+                                        hyperparameters = ""
                                 
                                 ModelObject = ModelClass(Model_Mode,user_id, project_id,dataset_id,
                                                 DBObject,connection,connection_string)
@@ -403,8 +406,8 @@ class SelectAlgorithmClass(APIView):
                 try:
                         
                         project_id = int(request.query_params.get('project_id'))
-                        user_id = int(request.query_params.get('user_id'))
-                        model_type = int(request.query_params.get('model_type'))
+                        dataset_id = int(request.query_params.get('dataset_id'))
+                        model_type = request.query_params.get('model_type')
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
                         # experiment_id = request.query_params.get('experiment_id') #get Username
                         models_list = AlgorithmDetectorObj.show_models_list(project_id,dataset_id,model_type)
@@ -434,20 +437,16 @@ class HyperParametersClass(APIView):
                         Response(return false if failed otherwise json data)
                 """
                 try:
-                        
-                        ModelObject = ModelClass(Model_Mode, user_id, project_id,dataset_id,
-                                                DBObject,connection,connection_string)
-                        
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
-                        model_name  = request.query_params.get('model_name') #get Username 
-                        hyperparams = ModelObject.get_hyperparameters_list(model_name)
+                        model_id  = request.query_params.get('model_id')
+                        hyperparams_dict = AlgorithmDetectorObj.get_hyperparameters(model_id)
                         # h1 = hyperparameters_json.to_json(orient='records',date_format='iso')
                         # logging.info("aaaaaaaaa"+str(h1))
                         # x = '[ "A","B","C" , " D"]'
-                        if hyperparams != 'none':
-                                hyperparams = ast.literal_eval(hyperparams)
+                        # if hyperparams != 'none':
+                        #         hyperparams = ast.literal_eval(hyperparams)
 
-                        hyperparams_dict = {'model_parameters': hyperparams}
+                        # hyperparams_dict = {'model_parameters': hyperparams}
                         logging.info(" modeling : ModelStatisticsClass : POST Method : execution stop : status_code :200")
                         return Response({"status_code":"200","error_msg":"Successfully updated","response":hyperparams_dict})
                         

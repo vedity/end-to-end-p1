@@ -27,7 +27,8 @@ from sklearn.model_selection import ( train_test_split,
 
 class LogisticClassifierClass:
     
-    def __init__(self,input_df,target_df,test_size,random_state,cv):
+    def __init__(self,input_features_list, target_features_list, X_train, X_valid, X_test, 
+                y_train, y_valid, y_test, scaled_split_dict):
         
         """This is used to initialise the model input parameter when model class is called.
         """
