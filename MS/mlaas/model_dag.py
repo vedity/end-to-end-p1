@@ -34,6 +34,7 @@ dag = DAG(
     catchup=False,                         
 )
 
+##### One dag for auto #########
 
 t1 = PythonOperator(
     task_id='start_pipeline',
@@ -46,7 +47,7 @@ t2 = PythonOperator(
     task_id='Linear_Regression_Sklearn', 
     python_callable=linear_regression_sklearn,
     dag=dag,
-    op_kwargs={'model_id':1}
+    op_kwargs={'model_mode':'Auto', 'model_id':1}
 )
 
 
@@ -54,14 +55,14 @@ t3 = PythonOperator(
     task_id='Linear_Regression_Keras', 
     python_callable=linear_regression_sklearn,
     dag=dag,
-    op_kwargs={'model_id':2}
+    op_kwargs={'model_mode':'Auto', 'model_id':2}
 )
 
 t4 = PythonOperator(
     task_id='XGBoost_Regressor', 
     python_callable=linear_regression_sklearn,
     dag=dag,
-    op_kwargs={'model_id':3}
+    op_kwargs={'model_mode':'Auto', 'model_id':3}
 )
 
 

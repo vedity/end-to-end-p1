@@ -58,6 +58,7 @@ class DBClass:
                 column_list.append(name)
         read_df=pd.read_csv(file_path,parse_dates=column_list) #  Read csv file and load data into dataframe.
         return read_df
+    
     def database_connection(self,database,user,password,host,port):
         """This function is used to make connection with database.
 
@@ -321,7 +322,7 @@ class DBClass:
         engine = create_engine(connection_string) # Create database engine.
         schema_name = user_name.lower()
         try :
-            
+            logging.info("get data frame=="+str(file_data_df))
             file_data_df.to_sql(table_name,engine,schema=schema_name,) # Load data into database with table structure.
             
             status = 0 # If successfully.

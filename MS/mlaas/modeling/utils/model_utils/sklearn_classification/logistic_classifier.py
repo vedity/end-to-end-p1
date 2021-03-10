@@ -27,44 +27,25 @@ from sklearn.model_selection import ( train_test_split,
 
 class LogisticClassifierClass:
     
-    def __init__(self,input_df,target_df,test_size,random_state,cv):
+    def __init__(self,input_features_list, target_features_list, X_train, X_valid, X_test, 
+                y_train, y_valid, y_test, scaled_split_dict):
         
         """This is used to initialise the model input parameter when model class is called.
         """
         
-        self.input_df = input_df
-        self.target_df = target_df
-        self.test_size = test_size
-        self.random_state = random_state
-        self.cv = cv
-        self.input = input_df.columns.values.tolist()
-        self.input.remove('seq_id')
-        self.target = target_df.columns.values.tolist()
-        self.target.remove('seq_id')
-        
-        self.input_features = self.input
-        self.target_features = self.target
-           
-     
-    
-    
-    def split_dataset(self):
-        
-        """This function is used to splits the dataset.
+        self.dataset_split_dict = scaled_split_dict # This object stores the variables used to split the data.
+        # List of input features(which are used to train the model)
+        self.input_features_list = input_features_list[1:] 
+        # list of target features (features to be predicted)
+        self.target_features_list = target_features_list[1:] 
+       
+        self.X_train = X_train 
+        self.X_test = X_test
+        self.X_valid = X_valid
+        self.y_train = y_train
+        self.y_test = y_test
+        self.y_valid = y_valid
 
-        Returns:
-            [dataframe]: [it will return train and test data dataframe.]
-        """
-        
-        X_train, X_test, y_train, y_test = train_test_split(self.input_df,
-                                                            self.target_df, 
-                                                            test_size=self.test_size, 
-                                                            random_state=self.random_state
-                                                            )
-        
-        
-        return X_train, X_test, y_train, y_test
-    
         
     def train_model(self,X_train,y_train):
         
@@ -77,13 +58,15 @@ class LogisticClassifierClass:
         Returns:
             [object]: [it will return train model object.]
         """
-        # get Input Training Features
-        X_train = X_train[self.input_features] 
-        # get Target Tarining Features
-        y_train = y_train[self.target_features] 
         
+        # get Input Training Features
+        X_train = X_train[:,1:] 
+        # get Target Training Features
+        y_train = y_train[:,-1].reshape(len(y_train[:,-1]),1)
+
         # Note, solvers available: {‘newton-cg’, ‘lbfgs’, ‘liblinear’, ‘sag’, ‘saga’}, default=’lbfgs’
-        # define the model
+
+        # define the model 
         model = LogisticRegression(solver='sag')
         # fit the model
         model.fit(X_train, y_train) 
@@ -100,17 +83,35 @@ class LogisticClassifierClass:
             y_train ([dataframe]): [target train data]
         """
         
-        X_train = X_train[self.input_features]
-        y_train = y_train[self.target_features]
+        # X_train = X_train[self.input_features]
+        # y_train = y_train[self.target_features]
         
+        # train_sizes=np.linspace(0.10, 1.0, 5)
+        # train_sizes, train_scores, test_scores, fit_times, _ = \
+        # learning_curve(estimator = model, X=X_train, y=y_train,cv=2,
+        #                train_sizes=train_sizes,
+        #                return_times=True)
+        
+        # train_mean = train_scores.mean(axis=1)
+        # test_mean = test_scores.mean(axis=1)
+        X_train = X_train[:,1:] 
+        y_train = y_train[:,-1].reshape(len(y_train[:,-1]),1)
+        # Dividing train data size into bins.
         train_sizes=np.linspace(0.10, 1.0, 5)
         train_sizes, train_scores, test_scores, fit_times, _ = \
-        learning_curve(estimator = model, X=X_train, y=y_train,cv=2,
+        learning_curve(estimator = model, X=X_train, y=y_train, cv=None, scoring='accuracy',n_jobs=None,
                        train_sizes=train_sizes,
                        return_times=True)
         
+        # Average of train score(accuracy).
         train_mean = train_scores.mean(axis=1)
+        # Average of train score(accuracy).
         test_mean = test_scores.mean(axis=1)
+        # Create the learning curve dictionary.
+        learning_curve_dict = {"train_size":train_sizes.tolist(),"train_score":train_mean.tolist(),"test_score":test_mean.tolist()}
+        
+        return learning_curve_dict
+        
         
     def features_importance(self,model,X_train):
         
@@ -120,16 +121,14 @@ class LogisticClassifierClass:
             [dict]: [it will return features impact dictionary.]
         """
         
-        
-        X_train = X_train[self.input_features]
+        X_train = X_train[:,1:] 
+        # X_train = X_train[self.input_features_list]
         stddev = []
         importance = model.coef_.tolist()[0]
-        
-        features = pd.DataFrame(importance, self.input_features ,columns = ['coefficient'])
+        features = pd.DataFrame(importance, self.input_features_list,columns = ['coefficient'])
         features.coefficient = features.coefficient.abs()
-        
-        for i in self.input_features:
-            stdev = X_train[i].std()
+        for i in range(0,len(self.input_features_list)):
+            stdev = np.std(X_train[:,i])
             stddev.append(stdev)
          
         features['stddev'] = np.array(stddev).reshape(-1,1)
@@ -137,7 +136,7 @@ class LogisticClassifierClass:
         features['norm_importance'] = 100 * features['importance'] / features['importance'].max()
         
         features['features_name'] = features.index
-        sorted_df = features.sort_values(by='norm_importance')
+        sorted_df = features.sort_values(by='norm_importance',ascending = False)
         
         features_impact_dict = sorted_df[['features_name','norm_importance']].to_dict(orient='list')
         
@@ -158,18 +157,51 @@ class LogisticClassifierClass:
         Returns:
             [list]: [it will return actual and prediction list.]
         """
-        
-        X_test = X_test[self.input_features]
+        X_train = self.X_train[:,1:]
+        X_test = X_test[:, 1:]
   
         prediction_arr = model.predict(X_test)
-        prediction_flat_lst = prediction_arr.tolist()
+        prediction_lst = prediction_arr.tolist()
 
-        actual_df= y_test[self.target_features]
-        actual_lst = actual_df.values.tolist()
-        actual_flat_lst = [int(item) for elem in actual_lst for item in elem]
+        actual_values = y_test[:,1]
+        actual_lst = actual_values.tolist()
         
-        return actual_flat_lst,prediction_flat_lst
+        if len(self.target_features_list) == 1 :
+            
+            prediction_flat_lst = [item for elem in prediction_lst for item in elem]
+            actual_flat_lst = actual_lst 
+            return actual_flat_lst,prediction_flat_lst
         
+        else:
+            prediction_flat_lst =  [ list(map(sub_lst)) for sub_lst in prediction_lst ]
+            actual_flat_lst =  [ list(map(sub_lst)) for sub_lst in actual_lst ]
+            return actual_flat_lst,prediction_flat_lst
+        
+
+    
+    def save_prediction(self,y_test,prediction_lst):
+        
+        """This function is used to save test results or predictions.
+        """
+         
+        # y_test.reset_index(inplace = True, drop = True)
+        # append_str = '_prediction'
+        # target_features_suf_res = [sub + append_str for sub in self.target_features]
+        # test_results_df = pd.DataFrame(prediction_lst, columns = target_features_suf_res) 
+        
+        # final_result_df = pd.concat([y_test,test_results_df],axis=1)
+        
+        y_df.reset_index(inplace = True, drop = True)
+        y_df['index']=y_test[:,0]
+        append_str = '_prediction'
+        target_features_suf_res = [sub + append_str for sub in self.target_features_list]
+        test_results_df = pd.DataFrame(prediction_lst, columns = target_features_suf_res) 
+        
+        final_result_df = pd.concat([y_df,test_results_df],axis=1)
+        print("final results ==",final_result_df)
+        final_result_dict = final_result_df.to_dict(orient='list') 
+        print("final results dict ==",final_result_dict)
+        return final_result_dict
         
     
     def get_evaluation_matrix(self,actual_lst,prediction_lst):
@@ -202,19 +234,19 @@ class LogisticClassifierClass:
             [dict]: [it will return model summary.]
         """
 
-        X_train = X_train[self.input_features]
-        X_test = X_test[self.input_features]
-        y_train = y_train[self.target_features]
         train_size = X_train.shape[0]
         test_size = X_test.shape[0]
-        model_summary = {"Model Name":"Logistic Classifier",
-                         "Input Features":self.input_features,
-                         "Target Features":self.target_features,
-                         "Train Size":train_size,"Test Size":test_size,
-                         "Train Split":1-self.test_size,"Test Split":self.test_size,
-                         "Random State":self.random_state,
-                         "CV (K-Fold )":self.cv}
-            
+        
+        model_summary = {"Model Name":"Linear_Regression_Sklearn",
+                         "Input Features":self.input_features_list,
+                         "Target Features":self.target_features_list,
+                         "Train Size":int(train_size),"Test Size":int(test_size),
+                         "Train Split":self.dataset_split_dict['train_size'],"Test Split":float(self.dataset_split_dict['test_size']),
+                         "Random State":int(self.dataset_split_dict['random_state']),
+                         "Valid Split":self.dataset_split_dict['valid_size'],
+                         "CV (K-Fold )":int(self.dataset_split_dict['cv'])}
+        
+        
         return model_summary
         
        
@@ -226,19 +258,21 @@ class LogisticClassifierClass:
             [float]: [it will return cv score.]
         """
         
-        X_train = X_train[self.input_features]
-        y_train = y_train[self.target_features]
+        X_train = X_train[:,1:] 
+        y_train = y_train[:,-1].reshape(len(y_train[:,-1]),1)
         
-        shuffle = KFold(n_splits=self.cv,
+        shuffle = KFold(n_splits=self.dataset_split_dict['cv'],
                     shuffle=True,
-                    random_state=self.random_state)
+                    random_state=self.dataset_split_dict['random_state'])
         
-        cv_scores = cross_val_score(estimator=LogisticRegression(),
+        cv_scores = cross_val_score(estimator=LinearRegression(),
                                 X=X_train,
                                 y=y_train,
-                                cv=shuffle)
-        
-        return  cv_scores.mean()
+                                cv=shuffle,
+                                scoring='accuracy')
+        cv_score_mean = cv_scores.mean()
+
+        return cv_score_mean
         
     def holdout_score(self,model,X_test,y_test):
         
@@ -252,59 +286,47 @@ class LogisticClassifierClass:
         Returns:
             [float]: [it will return holdout score.]
         """
-        
-        X_test = X_test[self.input_features]
-        actual = y_test[self.target_features]
+        X_test = X_test[:, 1:]
+        actual = y_test[:, 1]
         
         prediction = model.predict(X_test)
-        ho_score = accuracy_score(actual,prediction)
+        holdout_score = r2_score(actual,prediction)
 
-        return ho_score
+        return holdout_score
       
 
-    def save_prediction(self,y_test,prediction_lst):
-        
-        """This function is used to save test results or predictions.
-        """
-         
-        y_test.reset_index(inplace = True, drop = True)
-        append_str = '_prediction'
-        target_features_suf_res = [sub + append_str for sub in self.target_features]
-        test_results_df = pd.DataFrame(prediction_lst, columns = target_features_suf_res) 
-        
-        final_result_df = pd.concat([y_test,test_results_df],axis=1)
-              
     def run_pipeline(self):
         
         """This function is used as a pipeline which will execute function in a sequence.
         """
-        X_train, X_test, y_train, y_test = self.split_dataset()
+        self.X_train, self.X_test, self.y_train, self.y_test = self.split_dataset()
         # train the model
-        model = self.train_model(X_train,y_train)
+        model = self.train_model(self.X_train,self.y_train)
         # get features importance
-        features_impact_dict = self.features_importance(model,X_train) 
+        features_impact_dict = self.features_importance(model,self.X_train) 
         # get actual and predicted values 
-        actual_lst,prediction_lst = self.get_actual_prediction(model,X_test,y_test)
+        actual_lst,prediction_lst = self.get_actual_prediction(model,self.X_test,self.y_test)
         # save prediction
-        self.save_prediction(y_test,prediction_lst)
+        self.save_prediction(self.y_test,prediction_lst)
         # all evaluation matrix
         CM,accuracy,recall,precision = self.get_evaluation_matrix(actual_lst,prediction_lst)  
         # get cv score
-        cv_scores = self.cv_score(X_train,y_train) # default k-fold with 5 (r2-score)
+        if self.dataset_split_dict['split_method'] == 'cross_validation':
+            cv_score = self.cv_score(self.X_train,self.y_train) # default k-fold with 5 (r2-score)
+        else:
+            cv_score = None
         # get holdout score
-        ho_score = self.holdout_score(model,X_test,y_test) # default 80:20 splits (r2-score)
+        holdout_score = self.holdout_score(model,self.X_test,self.y_test) # default 80:20 splits (r2-score)
         # get model summary
-        model_summary = self.model_summary(X_train, X_test,y_train) # high level model summary
+        model_summary = self.model_summary(self.X_train, self.X_test,self.y_train) # high level model summary
         # get model learning curve
-        self.get_learning_curve(model,X_train,y_train)
-        # finally save the model
-        # self.save_model(model) # it will save in pickle format
+        learning_curve_dict = self.get_learning_curve(model,self.X_train,self.y_train)
         
         # log mlflow parameter
-        mlflow.log_param("random state", self.random_state)
-        mlflow.log_param("train size", 1-self.test_size)
-        mlflow.log_param("test size", self.test_size)
-        mlflow.log_param("k-fold", self.cv)
+        mlflow.log_param("random state", self.dataset_split_dict['random_state'])
+        mlflow.log_param("train size", 1-self.dataset_split_dict['test_size'])
+        mlflow.log_param("test size", self.dataset_split_dict['test_size'])
+        mlflow.log_param("k-fold", self.dataset_split_dict['cv'])
         
         # log mlflow matrix
         # mlflow.log_metric("confusion matrix", CM)
@@ -313,8 +335,9 @@ class LogisticClassifierClass:
         mlflow.log_metric("precision", precision)
        
         # log artifacts (output files)
-        mlflow.sklearn.log_model(model,"Logistic_Classifier_Model")
+        mlflow.sklearn.log_model(model,"Linear_Regressor_Model")
+        mlflow.log_dict(learning_curve_dict,"learning_curve.json")
         mlflow.log_dict(features_impact_dict,"features_importance.json")
         mlflow.log_dict(model_summary,"model_summary.json")
-        
+        mlflow.log_dict(final_result_dict,"predictions.json")
         
