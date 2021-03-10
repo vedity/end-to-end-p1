@@ -133,6 +133,9 @@ class StartModelClass(APIView):
                                 ModelObject = ModelClass(Model_Mode,user_id, project_id,dataset_id,
                                                 DBObject,connection,connection_string)
                                 
+                                manual_model_params_dict = {'model_id':model_id, 'hyperparameters': hyperparameters,
+                                                        'experiment_name': experiment_name}
+
                                 ModelObject.store_manual_model_params(manual_model_params_dict)
                                 # model_type = 'Regression'
                                 ModelObject.run_model(model_type, model_id, experiment_name, experiment_desc)
