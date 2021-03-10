@@ -629,10 +629,16 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 {
                 column_id: [1]
                 selected_handling: [12,16,17]
+                values: [15,'',33]
                 },
                 {
                 column_id: [1,2]
                 selected_handling: [10,14,17]
+                values: {
+                    10: 25
+                    14: None
+                    17: None
+                }
                 }
             ]
             
@@ -805,7 +811,19 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     data_df = self.label_encoding(data_df, col)
                 elif op == 28:
                     data_df = self.one_hot_encoding(data_df, col)
-                    
+                elif op == 30:
+                    status = self.add_to_column(DBObject,connection,column_list, dataset_table_name, col, value)
+                    flag = True
+                elif op == 31:
+                    status = self.subtract_from_column(DBObject,connection,column_list, dataset_table_name, col, value)
+                    flag = True
+                elif op == 32:
+                    status = self.multiply_column(DBObject,connection,column_list, dataset_table_name, col, value)
+                    flag = True
+                elif op == 33:
+                    status = self.divide_column(DBObject,connection,column_list, dataset_table_name, col, value)
+                    flag = True
+                
 
                 # sql_command = "select dataset_visibility,dataset_table_name,user_name from mlaas.dataset_tbl  where dataset_id='"+str(dataset_id)+"'"
                 
