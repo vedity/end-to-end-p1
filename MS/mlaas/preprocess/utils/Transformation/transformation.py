@@ -15,6 +15,7 @@ import traceback
 from . import duplicate_data_handling as ddh
 from . import feature_scaling as fs
 from . import categorical_encoding as ce
+from . import math_functions as mf
 
 #* Commong Utilities
 from common.utils.database import db
@@ -31,7 +32,7 @@ logger = logging.getLogger('transformation')
 
 
 
-class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass, ce.EncodeClass):
+class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass, ce.EncodeClass, mf.MathOperationsClass):
     '''
         Handles orchastration of the transforamtion related Functions.
     '''
@@ -98,7 +99,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
     
     def label_encoding(self, dataframe, col):
         '''
-            Operation id: 10
+            Operation id: 27
         '''
         
         logging.info("data preprocessing : TransformationClass : label_encoding : execution start")
@@ -116,7 +117,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
     
     def one_hot_encoding(self, dataframe, col):
         '''
-            Operation id: 10
+            Operation id: 28
         '''
         
         logging.info("data preprocessing : TransformationClass : one_hot_encoding : execution start")
@@ -133,4 +134,78 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
 
         logging.info("data preprocessing : TransformationClass : one_hot_encoding : execution stop")
         return dataframe
+    
+    #* MATH OPERATIONS
+    
+    def add_to_column(self, DBObject,connection,column_list, table_name, col, value):
+        '''
+            Operation id: 30
+        '''
+        logging.info("data preprocessing : TransformationClass : add_to_column : execution start")
+        
+        operation = '+'
+        
+        cols = [column_list[i] for i in col]
+        for col_name in cols:
+            try:
+                status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value)
+            except Exception as exc:
+                return exc
+
+        logging.info("data preprocessing : TransformationClass : add_to_column : execution stop")
+        return status
+    
+    def subtract_from_column(self, DBObject,connection,column_list, table_name, col, value):
+        '''
+            Operation id: 31
+        '''
+        logging.info("data preprocessing : TransformationClass : subtract_from_column : execution start")
+        
+        operation = '-'
+        
+        cols = [column_list[i] for i in col]
+        for col_name in cols:
+            try:
+                status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value)
+            except Exception as exc:
+                return exc
+
+        logging.info("data preprocessing : TransformationClass : subtract_from_column : execution stop")
+        return status
+    
+    def multiply_column(self, DBObject,connection,column_list, table_name, col, value):
+        '''
+            Operation id: 32
+        '''
+        logging.info("data preprocessing : TransformationClass : multiply_column : execution start")
+        
+        operation = '*'
+        
+        cols = [column_list[i] for i in col]
+        for col_name in cols:
+            try:
+                status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value)
+            except Exception as exc:
+                return exc
+
+        logging.info("data preprocessing : TransformationClass : multiply_column : execution stop")
+        return status
+    
+    def divide_column(self, DBObject,connection,column_list, table_name, col, value):
+        '''
+            Operation id: 33
+        '''
+        logging.info("data preprocessing : TransformationClass : divide_column : execution start")
+        
+        operation = '/'
+        
+        cols = [column_list[i] for i in col]
+        for col_name in cols:
+            try:
+                status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value)
+            except Exception as exc:
+                return exc
+
+        logging.info("data preprocessing : TransformationClass : divide_column : execution stop")
+        return status
     

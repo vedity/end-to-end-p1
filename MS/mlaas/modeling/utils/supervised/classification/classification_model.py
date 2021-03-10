@@ -20,16 +20,8 @@ from ...model_experiments import model_experiment
 
 class ProbabilisticClass:
     
-    def classification_model(self,Model_Mode,
-                         input_features_list,
-                         target_features_list,
-                         input_df,
-                         target_df,
-                         project_id,
-                         dataset_id,
-                         user_id):
-        
-        model_type = 'Classification Model'
+    def classification_model(self,Model_Mode, user_id, project_id, dataset_id,
+                            model_type, algorithm_type,target_type,DBObject,connection,experiment_name,experiment_desc):
         
         print("This is classification type problem")
         
@@ -47,26 +39,12 @@ class ProbabilisticClass:
         print("model type ==",model_type)
         
         
-        self.all_classification_model(Model_Mode,
-                                    input_features_list,
-                                    target_features_list,
-                                    project_id,
-                                    dataset_id,
-                                    user_id,
-                                    input_df,
-                                    target_df,
-                                    model_type)
+        self.all_classification_model(Model_Mode, user_id, project_id, dataset_id,
+                                    model_type, algorithm_type,target_type,DBObject,connection,experiment_name,experiment_desc)
             
     # This is for auto model run   
-    def all_classification_model(self,Model_Mode,
-                             input_features_list,
-                             target_features_list,
-                             project_id,
-                             dataset_id,
-                             user_id,
-                             input_df,
-                             target_df,
-                             model_type):
+    def all_classification_model(self,Model_Mode, user_id, project_id, dataset_id,
+                                model_type, algorithm_type,target_type,DBObject,connection,experiment_name,experiment_desc):
         
         print("Model Running in auto mode ")
         mlflow.set_tracking_uri("postgresql+psycopg2://postgres:admin@postgresql:5432/postgres?options=-csearch_path%3Ddbo,mlaas")
