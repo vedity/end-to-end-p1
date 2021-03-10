@@ -322,7 +322,7 @@ class DBClass:
         engine = create_engine(connection_string) # Create database engine.
         schema_name = user_name.lower()
         try :
-            
+            logging.info("get data frame=="+str(file_data_df))
             file_data_df.to_sql(table_name,engine,schema=schema_name,) # Load data into database with table structure.
             
             status = 0 # If successfully.

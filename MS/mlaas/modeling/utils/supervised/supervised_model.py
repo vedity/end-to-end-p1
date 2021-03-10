@@ -50,10 +50,8 @@ class SupervisedClass(RC,PC):
                                                 
         elif model_type == "Classification" :
             # Call Probabilistic Class's method
-            super(SupervisedClass,self).classification_model(Model_Mode,
-                                                             DBObject,connection,connection_string,
-                                                             project_id,dataset_id,user_id,
-                                                             experiment_name,experiment_desc)
+            super(SupervisedClass,self).classification_model(Model_Mode, user_id, project_id, dataset_id,
+                                                        model_type, algorithm_type,target_type,DBObject,connection,experiment_name,experiment_desc)
         
         else:
             print("please select appropriate target")

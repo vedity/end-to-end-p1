@@ -10,6 +10,7 @@ import numpy as np
 import logging
 import traceback
 import ast
+import json
 
 from common.utils.logger_handler import custom_logger as cl
 
@@ -93,9 +94,10 @@ class AlgorithmDetector:
         Returns:
             list: list of hyperparameters associated with the model 'model_id'.
         """
-        sql_command = 'select hyperparameter, value, type from mlaas.model_hyperparams_tbl where model_id='+str(model_id)
+        sql_command = 'select hyperparameter, param_value, display_type from mlaas.model_hyperparams_tbl where model_id='+str(model_id)
         model_hyperparams_df = self.DBObject.select_records(self.connection, sql_command)
-        model_hyperparams_df['value'] = model_hyperparams_df['value'].apply(lambda x: ast.literal_eval(x))
+        logging.info("HYPERPARAMSS---" + str(model_hyperparams_df))
+        model_hyperparams_df['param_value'] = model_hyperparams_df['param_value'].apply(lambda x: ast.literal_eval(x))
         logging.info("Model_hyperparams_df dtypes = " + str(model_hyperparams_df))
         # if model_hyperparams_df == None or (len(model_hyperparams_df) == 0):
         #     # Raise Error of model_id not found
