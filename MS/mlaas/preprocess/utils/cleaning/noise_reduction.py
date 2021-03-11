@@ -238,6 +238,6 @@ class RemoveNoiseClass:
             Detects if there is removable noise present in the column.
         '''
         
-        
+        pass
     
     
