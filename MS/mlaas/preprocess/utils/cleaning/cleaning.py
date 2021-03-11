@@ -12,7 +12,7 @@ import logging
 import traceback
 
 #* Relative Imports
-from . import outliers_treatment as ot
+from . import outlier_sql as ot
 from . import noise_reduction as nr
 from . import missing_value_handling as mvh
 
@@ -51,7 +51,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : discard_missing_values : execution stop")
         return status
     
-    def mean_imputation(self, DBObject,connection,column_list, table_name, col):
+    def mean_imputation(self, DBObject,connection,column_list, table_name, col,flag = False):
         '''
             Operation id: 6
         '''
@@ -67,6 +67,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
 
                 impute_value = round(dataframe['impute_value'][0],5)
 
+                if flag == True:
+                    return impute_value
+                    
                 status = self.perform_missing_value_imputation(DBObject,connection, table_name,col_name,impute_value)
             except Exception as exc:
                 return exc
@@ -360,77 +363,97 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : delete_below : execution stop")
         return super().delete_below(data_df, col, val)
     
-    def rem_outliers_ext_val_analysis(self, data_df, col):
+    def rem_outliers_ext_val_analysis(self, DBObject,connection,column_list, dataset_table_name,col):
         '''
             Operation id: 16
         '''
         
         logging.info("data preprocessing : CleaningClass : rem_outliers_ext_val_analysis : execution start")
         
-        cols = [data_df.columns[i] for i in col]
-        
-        for column in cols:
+        cols = [column_list[i] for i in col]
+        logging.info(str(cols))
+        for col_name in cols:
             try:
-                data_df = self.remove_outliers(data_df, column)
-            except:
-                continue
+
+                status = self.remove_outliers(DBObject,connection,dataset_table_name,col_name, detect_method = 0)
+                logging.info(str(status))
+                
+            except Exception as exc:
+                return str(exc)
 
         logging.info("data preprocessing : CleaningClass : rem_outliers_ext_val_analysis : execution stop")
-        return data_df
+        return status
     
-    def rem_outliers_z_score(self, data_df, col):
+    def rem_outliers_z_score(self,DBObject,connection,column_list, dataset_table_name,col):
         '''
             Operation id: 17
         '''
         
         logging.info("data preprocessing : CleaningClass : rem_outliers_z_score : execution start")
         
-        cols = [data_df.columns[i] for i in col]
-        
-        for column in cols:
+        cols = [column_list[i] for i in col]
+        logging.info(str(cols))
+        for col_name in cols:
             try:
-                data_df = self.remove_outliers(data_df, column, detect_method= 1)
-            except:
-                continue
+                
+                status = self.remove_outliers(DBObject,connection,dataset_table_name,col_name, detect_method = 1)
+                logging.info(str(status))
+
+            except Exception as exc:
+                return str(exc)
 
         logging.info("data preprocessing : CleaningClass : rem_outliers_z_score : execution stop")
-        return data_df
+        return status
+
     
-    def repl_outliers_mean_ext_val_analysis(self, data_df, col):
+    def repl_outliers_mean_ext_val_analysis(self, DBObject,connection,column_list, table_name,col):
         '''
             Operation id: 18
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_outliers_mean_ext_val_analysis : execution start")
+
+        #impute_value = self.mean_imputation(DBObject,connection,column_list, table_name, col,flag = True)
         
-        cols = [data_df.columns[i] for i in col]
-        
-        for column in cols:
+        cols = [column_list[i] for i in col]
+        logging.info(str(cols))
+        for col_name in cols:
             try:
-                data_df[column] = self.replace_outliers(data_df[column])
-            except:
-                continue
+                sql_command = 'select AVG("'+col_name+'") AS impute_value from '+str(table_name)
+                dataframe = DBObject.select_records(connection,sql_command)
+                impute_value = round(dataframe['impute_value'][0],5)
+                
+                status = self.replace_outliers(DBObject,connection,table_name,col_name,impute_value, 0)
+                logging.info(str(status))
+            except Exception as exc:
+                return str(exc)
 
         logging.info("data preprocessing : CleaningClass : repl_outliers_mean_ext_val_analysis : execution stop")
-        return data_df
+        return status
     
-    def repl_outliers_mean_z_score(self, data_df, col):
+    def repl_outliers_mean_z_score(self, DBObject,connection,column_list, table_name, col):
         '''
             Operation id: 19
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_outliers_mean_z_score : execution start")
         
-        cols = [data_df.columns[i] for i in col]
-        
-        for column in cols:
+
+        cols = [column_list[i] for i in col]
+        logging.info(str(cols))
+        for col_name in cols:
             try:
-                data_df[column] = self.replace_outliers(data_df[column], detect_method= 1)
-            except:
-                continue
+                sql_command = 'select AVG("'+col_name+'") AS impute_value from '+str(table_name)
+                dataframe = DBObject.select_records(connection,sql_command)
+                impute_value = round(dataframe['impute_value'][0],5)
+                
+                status = self.replace_outliers(DBObject,connection,table_name,col_name,impute_value,1)
+                
+            except Exception as exc:
+                return str(exc)
 
         logging.info("data preprocessing : CleaningClass : repl_outliers_mean_z_score : execution stop")
-        return data_df
+        return status
     
     def repl_outliers_med_ext_val_analysis(self, data_df, col):
         '''

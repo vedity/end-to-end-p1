@@ -790,13 +790,13 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 # elif op == 15:
                 #     data_df = self.repl_noise_arbitrary_val(data_df, col, val)
                 elif op == 16:
-                    data_df = self.rem_outliers_ext_val_analysis(data_df, col)
+                    status = self.rem_outliers_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
                 elif op == 17:
-                    data_df = self.rem_outliers_z_score(data_df, col)
+                    status = self.rem_outliers_z_score(DBObject,connection,column_list, dataset_table_name,col)
                 elif op == 18:
-                    data_df = self.repl_outliers_mean_ext_val_analysis(data_df, col)
+                    status = self.repl_outliers_mean_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
                 elif op == 19:
-                    data_df = self.repl_outliers_mean_z_score(data_df, col)
+                    status = self.repl_outliers_mean_z_score(DBObject,connection,column_list, dataset_table_name,col)
                 elif op == 20:
                     data_df = self.repl_outliers_med_ext_val_analysis(data_df, col)
                 elif op == 21:
@@ -809,12 +809,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     data_df = self.one_hot_encoding(data_df, col)
                     
 
-                # sql_command = "select dataset_visibility,dataset_table_name,user_name from mlaas.dataset_tbl  where dataset_id='"+str(dataset_id)+"'"
-                
-                # logging.info(str(sql_command))
-                # dataframe = DBObject.select_records(connection,sql_command)
-    
-                # dataset_visibility,dataset_table_name,user_name  = str(dataframe['dataset_visibility'][0]),str(dataframe['dataset_table_name'][0]),str(dataframe['user_name'][0])
                 if status == 1:
                     if flag:
                         #? Sql function Failed

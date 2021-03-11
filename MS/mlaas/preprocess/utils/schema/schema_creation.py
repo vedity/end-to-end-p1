@@ -209,7 +209,8 @@ class SchemaClass:
             # logging.info(str(column_name_list)+" column_name_list")
             # logging.info(str(column_attribute_list)+" column_attribute_list")
 
-            #logging.info(str(change_column_name)+" column_attribute_list")
+            # logging.info(str(change_column_name)+" column_attribute_list")
+
             for value in change_column_name:
                 if value != '':
                     if change_column_name.count(value) > 1 :
@@ -548,7 +549,6 @@ class SchemaClass:
 
         #get the total column count and Ignore count for the perticular schema id
         sql_command = "select count(schema_id) as column_count,(select count(column_attribute) from "+str(schema_table_name)+" where schema_id ='"+str(schema_id)+"' and column_attribute ='Ignore') as ignore_count from "+str(schema_table_name)+" where schema_id ='"+str(schema_id)+"'"
-        
         #Execute te sql command
         dataframe = DBObject.select_records(connection,sql_command)
 
