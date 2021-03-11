@@ -104,41 +104,41 @@ class RemoveNoiseClass:
                     
     #     return noisy_cols, cleanable_cols, valid_str_cols
     
-    # def detect_noise(self, series):
-    #     '''
-    #         Takes series as an input.
-    #         This function returns Noisy columns, Cleanable columns & Numeric_str cols for given series.
+    def detect_noise(self, series):
+        '''
+            Takes series as an input.
+            This function returns Noisy columns, Cleanable columns & Numeric_str cols for given series.
             
-    #         Args:
-    #             data_df(pandas.Series): the Series containing the column data.
+            Args:
+                data_df(pandas.Series): the Series containing the column data.
                 
-    #         Returns:
-    #             noisy(boolean): Is the column noisy?
-    #             cleanable(boolean): Can the column be cleaned?
-    #             valid_str(boolean): Can the column be converted to numerical?
-    #     '''
+            Returns:
+                noisy(boolean): Is the column noisy?
+                cleanable(boolean): Can the column be cleaned?
+                valid_str(boolean): Can the column be converted to numerical?
+        '''
         
-    #     #? Is the column of object dtype? if not the the column is not noisy
-    #     if series.dtypes != object:
-    #         return False, False, False
-    #     else:
-    #         noisy = False
-    #         valid_str = False
-    #         cleanable = False
+        #? Is the column of object dtype? if not the the column is not noisy
+        if series.dtypes != object:
+            return False, False, False
+        else:
+            noisy = False
+            valid_str = False
+            cleanable = False
 
-    #         is_string_col,is_val_str_col,is_string_minority = self._check_string_col(series)
-    #         #? if the column is not string column then the column is noisy
-    #         if not is_string_col:
-    #             noisy = True
-    #             #? Is is cleanable
-    #             if is_string_minority:
-    #                 cleanable = True
-    #         else:
-    #             #? Can it be converted to numerical columns
-    #             if is_val_str_col:
-    #                 valid_str = True
+            is_string_col,is_val_str_col,is_string_minority = self._check_string_col(series)
+            #? if the column is not string column then the column is noisy
+            if not is_string_col:
+                noisy = True
+                #? Is is cleanable
+                if is_string_minority:
+                    cleanable = True
+            else:
+                #? Can it be converted to numerical columns
+                if is_val_str_col:
+                    valid_str = True
 
-    #         return noisy, cleanable, valid_str
+            return noisy, cleanable, valid_str
         
     # def drop_noise(self, series):
     #     '''
@@ -233,11 +233,11 @@ class RemoveNoiseClass:
     # def to_string_col(self, Series, cols):
     #     pass
     
-    def detect_noise(self, DBObject, connection, table_name, column_name):
-        '''
-            Detects if there is removable noise present in the column.
-        '''
+    # def detect_noise(self, DBObject, connection, table_name, column_name):
+    #     '''
+    #         Detects if there is removable noise present in the column.
+    #     '''
         
-        pass
+    #     pass
     
     
