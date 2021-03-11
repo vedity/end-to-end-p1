@@ -159,14 +159,10 @@ class ProjectClass:
             #get the schema mapping details with column name and datatype
             column_name_list,column_datatype_list = schema_obj.get_dataset_schema(DBObject,connection,dataset_id) 
             
-            # missing_value_lst,noise_status_lst = preprocessObj.get_preprocess_cache(dataset_id)
-            # logging.info(str(missing_value_lst) + " find")
-            # logging.info(str(noise_status_lst))
-            # missing_value_lst,noise_status_lst = list(missing_value_lst),list(noise_status_lst)
+            missing_value_lst,noise_status_lst = preprocessObj.get_preprocess_cache(dataset_id)
+            missing_value_lst,noise_status_lst = list(missing_value_lst),list(noise_status_lst)
             # column name and datatype will be inserted into schema table with schema id
-            missing_value_lst= ['False' for i in range(len(column_datatype_list)) ]
-            noise_status_lst= ['False' for i in range(len(column_datatype_list)) ]
-
+            
             status=schema_obj.update_dataset_schema(DBObject,connection,schema_id,column_name_list,column_datatype_list,missing_flag=missing_value_lst,noise_flag=noise_status_lst)
             
         else :
