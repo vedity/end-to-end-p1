@@ -236,7 +236,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if connection == None :
                 raise DatabaseConnectionFailed(500)  
                 
-            sql_command = f"select amt.activity_id,amt.activity_name,amt.user_input,pat.parent_activity_name,ptt.tab_name from mlaas.activity_master_tbl amt , mlaas.parent_activity_tbl pat, mlaas.preprocess_tab_tbl ptt where amt.code = '0' and amt.parent_activity_id = pat.parent_activity_id and ptt.tab_id = pat.tab_id"
+            sql_command = f"select amt.activity_id,amt.activity_name,amt.user_input,pat.parent_activity_name,ptt.tab_name from mlaas.activity_master_tbl amt , mlaas.parent_activity_tbl pat, mlaas.preprocess_tab_tbl ptt where amt.code = '0' and amt.parent_activity_id = pat.parent_activity_id and ptt.tab_id = pat.tab_id order by amt.activity_id"
             operations_df = DBObject.select_records(connection,sql_command) 
             
             if operations_df is None:
@@ -518,6 +518,14 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if isinstance(data_df, str):
                 raise GetDataDfFailed(500)
             
+            #? Getting DB object & connection object
+            DBObject,connection,connection_string = self.get_db_connection()
+            if connection == None :
+                raise DatabaseConnectionFailed(500)
+
+            #? Getting Table Name
+            table_name = DBObject.get_active_table_name(connection, dataset_id)
+            
             num_cols = data_df._get_numeric_data().columns.tolist()
             predicted_datatypes = self.get_attrbt_datatype(data_df,data_df.columns,len(data_df))
             
@@ -529,7 +537,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 for id in column_ids:
                     col = data_df.columns[id]
                     series = data_df[col]
-                    operations = [1,2,3,6,10]
+                    operations = [3,4]
 
                     #? Column is both numerical & categorical
                     if (col in num_cols) and (predicted_datatypes[id].startswith('Ca')):
@@ -543,40 +551,38 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     else:
                         col_type = 3
 
-                    #? Column is text column
-                    if col_type == 3:
-                        all_col_operations.append(operations)
-                        continue
-                    
-                    #? Adding Missing Value Operations
-                    if col_type == 0:
-                        operations += [4,5,7,8,9]
-                    elif col_type == 1:
-                        operations += [4,5,7]
-                    elif col_type == 2:
-                        operations += [8,9]
-                    
                     missing_values = data_df[col].isnull().any()
-                    if missing_values == False:
-                        noisy,_,_ = self.detect_noise(series)
+                    noise_status = self.dtct_noise(DBObject, connection, col, table_name= table_name)
+                    if noise_status == 1:
+                        noise_status = True
+                    else: noise_status = False
                     
-                    #? Adding Noise Reduction Operations
-                    if not missing_values:
-                        operations += [11,14,15]
+                    if missing_values:
+                        #? Adding Missing Value Operations
+                        if col_type == 0:
+                            operations += [1,6,7,8,9,10,11,13]
+                        elif col_type == 1:
+                            operations += [1,6,7,8,9,10,13]
+                        elif col_type == 2 or col_type == 3:
+                            operations += [1,11,12]
+                    
+                    if noise_status:
                         if col_type == 0 or col_type == 1:
-                            operations += [12,13]
+                            operations += [5,14,15,16,17,18,19]
                     
                     #? Outlier Removal & Scaling Operations for numeric; Encoding ops for Categorical
-                    if not missing_values and not noisy:
+                    if not missing_values and not noise_status:
                         if col_type == 0 or col_type == 1:
-                            operations += [16,17,18,19,20,21,22,23,24,25,26]
-                        if col_type == 0 or col_type == 2:
-                            operations += [27,28,29]
+                            operations += [3,4,20,21,22,23,24,25,26]
+                        if col_type == 2 or col_type == 3:
+                            operations += [27,28]
+                        if col_type == 0:
+                            operations += [28]
                         
                     #? Math operations
-                    if not noisy:
+                    if not noise_status:
                         if col_type == 0 or col_type == 1:
-                            operations += [30,31,32,33]
+                            operations += [29,30,31,32]
                             
                     all_col_operations.append(operations)
                 
