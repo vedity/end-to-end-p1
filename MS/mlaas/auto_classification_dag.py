@@ -29,7 +29,7 @@ args = {
 
 
 dag = DAG(
-    dag_id='auto_regressor_pipeline',
+    dag_id='auto_classification_pipeline',
     default_args=args,         
     catchup=False,                         
 )
@@ -44,7 +44,7 @@ t1 = PythonOperator(
     
 
 t2 = PythonOperator(
-    task_id='Linear_Regression_Sklearn', 
+    task_id='Logistic_Regression_Sklearn', 
     python_callable=linear_regression_sklearn,
     dag=dag,
     op_kwargs={'model_mode':'Auto', 'model_id':1}
@@ -64,10 +64,4 @@ t4 = PythonOperator(
     dag=dag,
     op_kwargs={'model_mode':'Auto', 'model_id':3}
 )
-
-
-t1 >> [t2,t3,t4]
-    
-
-
 

@@ -10,7 +10,7 @@ MS/mlaas/static/server/*
 __pycache__
 mlruns
 scaled_dataset/*
-
+*.npy
 ### Angular ###
 # compiled output
 dist/

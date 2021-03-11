@@ -41,11 +41,11 @@ logger = logging.getLogger('view')
 class LinearRegressionClass:
     
     def __init__(self, input_features_list, target_features_list, X_train, X_valid, X_test, 
-                y_train, y_valid, y_test, dataset_split_dict):
+                y_train, y_valid, y_test, scaled_split_dict):
         
         """This is used to initialise the model input parameter when model class is called.
         """
-        self.dataset_split_dict = dataset_split_dict # This object stores the variables used to split the data.
+        self.dataset_split_dict = scaled_split_dict # This object stores the variables used to split the data.
         # List of input features(which are used to train the model)
         self.input_features_list = input_features_list[1:] 
         # list of target features (features to be predicted)
@@ -90,7 +90,7 @@ class LinearRegressionClass:
             y_train ([dataframe]): [target train data]
         """
         X_train = X_train[:,1:] 
-        y_train = y_train[:,-1].reshape(len(y_train[:,-1]),1)
+        y_train = y_train[:,-1].reshape(-1,1)
         # Dividing train data size into bins.
         train_sizes=np.linspace(0.10, 1.0, 5)
         train_sizes, train_scores, test_scores, fit_times, _ = \
@@ -180,8 +180,9 @@ class LinearRegressionClass:
         test_results_df = pd.DataFrame(prediction_lst, columns = target_features_suf_res) 
         
         final_result_df = pd.concat([y_df,test_results_df],axis=1)
+        print("final results ==",final_result_df)
         final_result_dict = final_result_df.to_dict(orient='list') 
-        
+        print("final results dict ==",final_result_dict)
         return final_result_dict
         
         
@@ -223,9 +224,10 @@ class LinearRegressionClass:
                          "Input Features":self.input_features_list,
                          "Target Features":self.target_features_list,
                          "Train Size":int(train_size),"Test Size":int(test_size),
-                         "Train Split":1-float(self.dataset_split_dict['test_size']),"Test Split":float(self.dataset_split_dict['test_size']),
+                         "Train Split":self.dataset_split_dict['train_size'],"Test Split":float(self.dataset_split_dict['test_size']),
                          "Random State":int(self.dataset_split_dict['random_state']),
-                         "CV (K-Fold )":int(self.dataset_split_dict['cv'])}
+                         "Valid Split":self.dataset_split_dict['valid_size'],
+                         "CV (K-Fold )":self.dataset_split_dict['cv']}
         
         
         return model_summary
@@ -257,7 +259,6 @@ class LinearRegressionClass:
         return cv_score_mean
         
         
-        
     def holdout_score(self,model,X_test,y_test):
         
         """This function is used to get holdout score.
@@ -279,8 +280,6 @@ class LinearRegressionClass:
         return holdout_score
 
         
-        
-        
     def run_pipeline(self):
         
         """This function is used as a pipeline which will execute function in a sequence.
@@ -296,7 +295,10 @@ class LinearRegressionClass:
         # all evaluation matrix
         r2score,mse,mae,mape = self.get_evaluation_matrix(actual_lst,prediction_lst)  
         # get cv score
-        cv_score = self.cv_score(self.X_train,self.y_train) # default k-fold with 5 (r2-score)
+        if self.dataset_split_dict['split_method'] == 'cross_validation':
+            cv_score = self.cv_score(self.X_train,self.y_train) # default k-fold with 5 (r2-score)
+        else:
+            cv_score = 0
         # get holdout score
         holdout_score = self.holdout_score(model,self.X_test,self.y_test) # default 80:20 splits (r2-score)
         # get model summary
@@ -307,10 +309,15 @@ class LinearRegressionClass:
         
         
         # log mlflow parameter
+        mlflow.log_param("split method", self.dataset_split_dict['split_method'])
+        mlflow.log_param("train ratio", 1-(self.dataset_split_dict['test_ratio'] + self.dataset_split_dict['valid_ratio']))
+        mlflow.log_param("test ratio", self.dataset_split_dict['test_ratio'])
+        mlflow.log_param("valid ratio", self.dataset_split_dict['valid_ratio'])
         mlflow.log_param("random state", self.dataset_split_dict['random_state'])
-        mlflow.log_param("train size", 1-self.dataset_split_dict['test_size'])
-        mlflow.log_param("test size", self.dataset_split_dict['test_size'])
         mlflow.log_param("k-fold", self.dataset_split_dict['cv'])
+        mlflow.log_param("train size", self.dataset_split_dict['train_size'])
+        mlflow.log_param("test size", self.dataset_split_dict['test_size'])
+        mlflow.log_param("valid size", self.dataset_split_dict['valid_size'])
         
         # log mlflow matrix
         mlflow.log_metric("r2 score", r2score)

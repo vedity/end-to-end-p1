@@ -121,7 +121,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : mode_imputation : execution stop")
         return status
     
-    def end_of_distribution(self,  DBObject,connection,column_list, table_name, col):
+    def end_of_distribution(self,DBObject,connection,column_list, table_name, col):
         '''
             Operation id: ?
         '''
@@ -142,7 +142,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : mode_imputation : execution stop")
         return status
 
-    def missing_category_imputation(self,DBObject,connection,column_list, table_name, col,value):
+    def missing_category_imputation(self,DBObject,connection,column_list, table_name, col,value = "'Missing'"):
         '''
             Operation id: 8
         '''
@@ -152,7 +152,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         cols = [column_list[i] for i in col]
         logging.info(str(cols))
         for col_name in cols:
-            try:         
+            try:
                 status = self.perform_missing_value_imputation(DBObject,connection, table_name,col_name,value)
             except Exception as exc:
                 return exc

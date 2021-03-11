@@ -12,7 +12,7 @@ logger = logging.getLogger('missing_value_handling')
 
 class MissingValueClass:
 
-    def discard_missing_values(self, DBObject,connection, table_name,col_name):
+    def discard_missing_values(self, DBObject,connection, table_name,col_name, condition = "is null"):
         '''
             Returns a dataframe where all the rows where given columns have null values are removed.
             
@@ -27,7 +27,7 @@ class MissingValueClass:
         '''
         logging.info("Preprocess : MissingValueClass : mean_imputation : execution start")
 
-        sql_command = f'delete from {table_name}  where "{col_name}" is null' # Get update query
+        sql_command = f'delete from {table_name}  where "{col_name}" {condition}' # Get update query
         logging.info(str(sql_command))
 
         status = DBObject.update_records(connection,sql_command)
@@ -35,7 +35,7 @@ class MissingValueClass:
         logging.info("Preprocess : MissingValueClass : mean_imputation : execution stop")
         return status
     
-    def perform_missing_value_imputation(self,DBObject,connection, table_name,col_name,impute_value):
+    def perform_missing_value_imputation(self,DBObject,connection, table_name,col_name,impute_value, condition = "is null"):
         """
         Function will replace column NaN value with its column mean value
         
@@ -47,10 +47,28 @@ class MissingValueClass:
         """
         logging.info("Preprocess : MissingValueClass : mean_imputation : execution start")
 
-        sql_command = f'Update {table_name} set "{col_name}"={impute_value} where "{col_name}" is null' # Get update query
+        sql_command = f'Update {table_name} set "{col_name}"={impute_value} where "{col_name}" {condition}' # Get update query
         logging.info(str(sql_command))
 
         status = DBObject.update_records(connection,sql_command)
 
         logging.info("Preprocess : MissingValueClass : mean_imputation : execution stop")
         return status
+    
+    def detect_missing_values(self, DBObject, connection, table_name, col_name):
+        '''
+            Returns True if there are any missing values in the column, else returns False.
+            
+            Args:
+            -----
+            DBObject (`object`): DB Class Object.
+            connection (`object`): Postgres Connection object.
+            table_name (`String`): Name of the table. (Ex. `public.demo_tbl`)
+            col_name (`String`): Name of the Column.
+            
+            Returns:
+            --------
+            `boolean`: `True` if missing value exists else `False`.
+        '''
+        
+        pass

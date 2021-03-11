@@ -3,7 +3,7 @@
 
 --CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
  Vipul Prajapati      25-JAN-2021           1.0         Initial Version 
- Mann Purohit         02-FEB-2021           1.1           
+ Mann Purohit         02-FEB-2021           1.1         
 
 */
 '''
@@ -43,24 +43,17 @@ DBObject=db.DBClass()
 connection,connection_string=DBObject.database_connection(database,user,password,host,port) 
 
 
-def get_auto_model_param(user_id, project_id, dataset_id, dataset_split_dict):
+def get_model_data(user_id, project_id, dataset_id):
+    #TODO Optimize this.
+    scaled_split_dict = SplitData().get_scaled_split_dict(DBObject,connection,project_id, dataset_id)
     
-    # path="/usr/local/airflow/dags/scaled_dataset/my_data_num.npy"
+    X_train,X_valid,X_test,y_train,y_valid,y_test = SplitData().get_split_datasets(scaled_split_dict)
     
-    scaled_path = SplitData().get_scaled_path(DBObject,connection,project_id)
-    path = "/usr/local/airflow/dags/" + scaled_path +".npy"
-    print("path==",path)
-    input_df, target_df = SplitData().get_scaled_data(path)
+    input_features_list, target_features_list = SplitData().get_features_list(user_id, project_id, dataset_id, DBObject, connection)
     
-    input_features_list, target_features_list = SplitData().get_input_target_features_list(user_id, project_id, dataset_id, DBObject, connection)
-    
-    ################### Split Dataset #########################
-    X_train,X_valid,X_test,y_train,y_valid,y_test = SplitData().get_split_data(input_df, target_df, random_state=dataset_split_dict['random_state'], 
-                                            test_size=dataset_split_dict['test_size'], valid_size=dataset_split_dict['valid_size'], 
-                                            split_method=dataset_split_dict['split_method'])
-    
-    return input_features_list, target_features_list, X_train, X_test, X_valid, y_train, y_test, y_valid
+    return input_features_list, target_features_list, X_train, X_test, X_valid, y_train, y_test, y_valid, scaled_split_dict
 
+    
     
 ######################################## Regression Pipeline Code ###################################################
 
@@ -83,8 +76,6 @@ def start_pipeline(dag,run_id,execution_date,ds,**kwargs):
     dag_status = DBObject.insert_records(connection,table_name,row_tuples,cols)
     print("dag status ==",dag_status)
     
-   
-    
 
              
 def linear_regression_sklearn(run_id,**kwargs):
@@ -92,37 +83,29 @@ def linear_regression_sklearn(run_id,**kwargs):
         mlflow.set_tracking_uri("postgresql+psycopg2://airflow:airflow@postgresql:5432/airflow?options=-csearch_path%3Ddbo,mlaas")
        
         #TODO Later On model id may be changed
-       
+     
+        model_mode = kwargs['model_mode']
         model_id = kwargs['model_id']
-        model_mode = kwargs['dag_run'].conf['model_mode']
-        project_id = int(kwargs['dag_run'].conf['project_id'])
-        dataset_id = int(kwargs['dag_run'].conf['dataset_id'])
-        user_id = int(kwargs['dag_run'].conf['user_id'])
-        print(user_id)
-        dataset_split_parameters = {"model_mode":model_mode}
-        dataset_split_dict = SplitData().get_dataset_split_dict(dataset_split_parameters)
-        input_features_list, target_features_list, X_train, X_test, X_valid, y_train, y_test, y_valid= get_auto_model_param(user_id, project_id, dataset_id, dataset_split_dict)
+        if model_mode == 'Auto':
+            project_id = int(kwargs['dag_run'].conf['project_id'])
+            dataset_id = int(kwargs['dag_run'].conf['dataset_id'])
+            user_id = int(kwargs['dag_run'].conf['user_id'])
+            experiment_name = kwargs['dag_run'].conf['exp_name']
+ 
+        else:
+            project_id = kwargs['project_id']
+            dataset_id = kwargs['dataset_id']
+            user_id = kwargs['user_id']
+            experiment_name = kwargs['exp_name']
+        
+        input_features_list, target_features_list, X_train, X_test, X_valid, y_train, y_test, y_valid, scaled_split_dict= get_model_data(user_id, project_id, dataset_id)
            
         # TODO : experiment name and experiment_desc coming from frontend.
         
         # Create an experiment name, which must be unique and case sensitive
-        experiment_name = kwargs['dag_run'].conf['exp_name']
-        
-        
-        # Get from database
-        sql_command = "select nextval('unq_num_seq') as ids"
-        counter = DBObject.select_records(connection, sql_command)
-        print("counter==",counter)
-        counter = counter['ids'][0]
-
-        print("updated counter =",counter)
-        
-        id = uuid.uuid1().time 
-        experiment_name = experiment_name.upper() + "_" + str(counter)
-        
-        # create experiment 
-        experiment_id = mlflow.create_experiment(experiment_name)
-        experiment = mlflow.get_experiment(experiment_id)
+        # experiment_name = kwargs['dag_run'].conf['exp_name']
+        ExpObject = model_experiment.ExperimentClass(DBObject, connection, connection_string)
+        experiment, experiment_id = ExpObject.get_mlflow_experiment(experiment_name)
         # mlflow set_experiment and run the model.
         with mlflow.start_run(experiment_id=experiment_id) as run:
             # Get experiment id and run id from the experiment set.
@@ -130,7 +113,7 @@ def linear_regression_sklearn(run_id,**kwargs):
             experiment_id = experiment.experiment_id
             dag_run_id = run_id
             ################### Add Experiment ################################
-            ExpObject = model_experiment.ExperimentClass(DBObject, connection, connection_string)
+            
             add_exp_status = ExpObject.add_experiments(experiment_id,experiment_name,run_uuid,
                                                           project_id,dataset_id,user_id,
                                                           model_id,model_mode,dag_run_id)
@@ -139,7 +122,7 @@ def linear_regression_sklearn(run_id,**kwargs):
                 ## Declare Object
                 LRObject = linear_regressor.LinearRegressionClass(input_features_list, target_features_list, 
                                                                 X_train, X_valid, X_test, y_train, y_valid, 
-                                                                y_test, dataset_split_dict)
+                                                                y_test, scaled_split_dict)
                 LRObject.run_pipeline()
                 status = "success"
             except:
@@ -150,4 +133,23 @@ def linear_regression_sklearn(run_id,**kwargs):
         
         print("experiment_status == ",upd_exp_status)
         
+        
+        
+def manual_algorithm_identifier(run_id, **kwargs):
+    
+    model_name = kwargs['dag_run'].conf['model_name']
+    model_mode = kwargs['model_mode']
+    project_id = int(kwargs['dag_run'].conf['project_id'])
+    dataset_id = int(kwargs['dag_run'].conf['dataset_id'])
+    user_id = int(kwargs['dag_run'].conf['user_id'])
+    exp_name = kwargs['dag_run'].conf['exp_name']
+    model_id = int(kwargs['dag_run'].conf['model_id'])
+ 
+    if model_id == 1:
+        linear_regression_sklearn(run_id, user_id=user_id, project_id=project_id, dataset_id=dataset_id, exp_name=exp_name, 
+                            model_mode=model_mode, model_id=model_id)
+        
+        
+
+
         

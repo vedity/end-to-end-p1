@@ -10,6 +10,8 @@
 
 import json
 from pandas import DataFrame
+import mlflow
+import re
 
 class ExperimentClass:
     
@@ -38,6 +40,22 @@ class ExperimentClass:
         upd_exp_status = self.DBObject.update_records(self.connection,sql_command)
         
         return upd_exp_status
+
+
+    def get_mlflow_experiment(self, experiment_name):
+        sql_command = "select nextval('unq_num_seq') as ids"
+        counter = self.DBObject.select_records(self.connection, sql_command)
+        # print("counter==",counter)
+        counter = counter['ids'][0]
+
+        # print("updated counter =",counter)
+        experiment_name = experiment_name.upper() + "_" + str(counter)
+        
+        # create experiment 
+        experiment_id = mlflow.create_experiment(experiment_name)
+        experiment = mlflow.get_experiment(experiment_id)
+        
+        return experiment, experiment_id
         
            
             
