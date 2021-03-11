@@ -236,7 +236,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if connection == None :
                 raise DatabaseConnectionFailed(500)  
                 
-            sql_command = f"select amt.activity_id,amt.activity_name,pat.parent_activity_name,ptt.tab_name from mlaas.activity_master_tbl amt , mlaas.parent_activity_tbl pat, mlaas.preprocess_tab_tbl ptt where amt.code = '0' and amt.parent_activity_id = pat.parent_activity_id and ptt.tab_id = pat.tab_id"
+            sql_command = f"select amt.activity_id,amt.activity_name,amt.user_input,pat.parent_activity_name,ptt.tab_name from mlaas.activity_master_tbl amt , mlaas.parent_activity_tbl pat, mlaas.preprocess_tab_tbl ptt where amt.code = '0' and amt.parent_activity_id = pat.parent_activity_id and ptt.tab_id = pat.tab_id"
             operations_df = DBObject.select_records(connection,sql_command) 
             
             if operations_df is None:
@@ -270,6 +270,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                             operation_dict['id'] = j
                             operation_dict['name'] = data['activity_name']
                             operation_dict['operation_id'] = data['activity_id']
+                            operation_dict['user_input'] = data['user_input']
                             handlers.append(operation_dict)
                             j += 1
                         
