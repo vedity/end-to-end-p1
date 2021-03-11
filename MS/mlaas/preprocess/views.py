@@ -329,7 +329,7 @@ class GetColumnListClass(APIView):
                         
                         schema_id = request.query_params.get('schema_id') #get schema id
                         
-                        column_json = preprocessObj.get_col_names(schema_id)
+                        column_json = preprocessObj.get_col_names(schema_id,True)
                         if isinstance(column_json,list): 
                                         
                                         logging.info("data preprocess : GetColumnListClass : POST Method : execution stop")

@@ -54,3 +54,21 @@ class MissingValueClass:
 
         logging.info("Preprocess : MissingValueClass : mean_imputation : execution stop")
         return status
+    
+    def detect_missing_values(self, DBObject, connection, table_name, col_name):
+        '''
+            Returns True if there are any missing values in the column, else returns False.
+            
+            Args:
+            -----
+            DBObject (`object`): DB Class Object.
+            connection (`object`): Postgres Connection object.
+            table_name (`String`): Name of the table. (Ex. `public.demo_tbl`)
+            col_name (`String`): Name of the Column.
+            
+            Returns:
+            --------
+            `boolean`: `True` if missing value exists else `False`.
+        '''
+        
+        pass
