@@ -944,7 +944,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             tg_cols = DBObject.get_target_col(connection, schema_id)
             for col in tg_cols:
                 feature_cols.remove(col)
-            
             target_cols = [data_df.columns[0]]
             target_cols += tg_cols
             
