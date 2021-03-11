@@ -406,4 +406,16 @@ class Scalingtype(APIView):
                         logging.error("data preprocess : ScheamAttributeListClass : POST Method : Exception :" + str(e))
                         logging.error("data preprocess : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
                         return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+
+class TrainValidHoldout(APIView):
+        def get(self,request,format=None):
+                try :
+                        logging.info("data preprocess : TrainValidHoldout : GET Method : execution start")
+                        holdout = [{"id" : 1,"value": "95-0-5"},{"id" : 2,"value": "90-5-5"},{"id" : 3,"value": "85-5-10"},{"id" : 4,"value": "80-10-10"},{"id" : 5,"value": "75-10-15"},{"id" : 6,"value": "70-15-15"},{"id" : 7,"value": "65-15-20"},{"id" : 8,"value": "60-20-20"}]
+                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":holdout})
+                except Exception as e:
+                        logging.error("data preprocess : TrainValidHoldout : GET Method : Exception :" + str(e))
+                        logging.error("data preprocess : TrainValidHoldout : GET Method : "+ traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+
                 

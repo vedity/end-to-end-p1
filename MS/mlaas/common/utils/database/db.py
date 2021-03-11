@@ -235,7 +235,7 @@ class DBClass:
         Returns:
             [integer]: [it will return stauts of deleted record. if successfully then 0 else 1.]
         """
-        logging.info("--->"+str(connection))
+        
         cursor = connection.cursor() # Open the cursor.
         sql_command = sql_command # Get delete query
         try:
