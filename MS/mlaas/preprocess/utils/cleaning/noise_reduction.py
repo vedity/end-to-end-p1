@@ -265,7 +265,6 @@ class RemoveNoiseClass:
                 - `2` : Too Much Noise
         '''
         column_name = '"' + column_name + '"'
-        
         if dataset_id is None:
             sql_command = f"select (count(*)*100)/(select count(*) from {table_name}) as noise_percentage from {table_name} where {column_name} !~ '[0-9.]';"
             
@@ -273,11 +272,11 @@ class RemoveNoiseClass:
         if not isinstance(noise_df, pd.DataFrame):
             return 0
         
-        noise_percentage = int(noise_df['noise_percentage'])
+        noise_percentage = noise_df['noise_percentage'].tolist()[0]
         
         if noise_percentage == 0:
             noise_status =  0
-        elif noise_percentage <= 0.33:
+        elif noise_percentage <= 33:
             noise_status = 1
         else:
             noise_status = 2

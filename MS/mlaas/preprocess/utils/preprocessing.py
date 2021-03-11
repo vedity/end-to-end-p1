@@ -320,6 +320,14 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if isinstance(data_df, str):
                 raise GetDataDfFailed(500)
             
+            #? Getting DB object & connection object
+            DBObject,connection,connection_string = self.get_db_connection()
+            if connection == None :
+                raise DatabaseConnectionFailed(500)
+
+            #? Getting Table Name
+            table_name = DBObject.get_active_table_name(connection, dataset_id)
+            
             missing_value_status = []
             noise_status = []
             for col in data_df.columns:
@@ -330,8 +338,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 missing_value_status.append(is_missing_value)
                 
                 #? Checking if there is noise in the column
-                noisy,_,_ = self.detect_noise(series)
-                noise_status.append(noisy)
+                noise = self.dtct_noise(DBObject, connection, col, table_name= table_name)
+                if noise == 1:
+                    noise = True
+                else: noise = False
+                noise_status.append(noise)
             
             logging.info("data preprocessing : PreprocessingClass : get_preprocess_cache : execution stop")
             return missing_value_status,noise_status
