@@ -107,12 +107,12 @@ class ModelClass(SC, SplitData):
         model_id = manual_model_params_dict['model_id']
         # model_name = manual_model_params_dict['model_name']
         hyperparameters = str(manual_model_params_dict['hyperparameters'])
-        exp_name = manual_model_params_dict['exp_name']
+        experiment_name = manual_model_params_dict['experiment_name']
  
         table_name = 'mlaas.manual_model_params_tbl'
         cols = 'user_id, project_id, dataset_id, exp_name, model_id, hyperparameters'
  
-        row = self.user_id, self.project_id, self.dataset_id, exp_name, model_id, hyperparameters
+        row = self.user_id, self.project_id, self.dataset_id, experiment_name, model_id, hyperparameters
         row_tuples = [tuple(row)]
  
         store_manual_model_params_status = self.DBObject.insert_records(self.connection,table_name,row_tuples,cols)

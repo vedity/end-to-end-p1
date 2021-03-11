@@ -259,7 +259,6 @@ class LinearRegressionClass:
         return cv_score_mean
         
         
-        
     def holdout_score(self,model,X_test,y_test):
         
         """This function is used to get holdout score.

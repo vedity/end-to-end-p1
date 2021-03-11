@@ -23,6 +23,7 @@ from .cleaning import noise_reduction as nr
 from .cleaning import cleaning
 from .Transformation import transformation as trs
 # from modeling.split_data import SplitData as sd
+
 #* Library Imports
 import logging
 import traceback
@@ -32,6 +33,7 @@ import uuid
 #from model_type import ModelType
 from .model_type import ModelType
 from sklearn.model_selection import train_test_split
+
 user_name = 'admin'
 log_enable = True
 
@@ -172,12 +174,13 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.error("data preprocessing : PreprocessingClass : get_schema_details : " +traceback.format_exc())
             return exc.msg
         
-    def get_col_names(self, schema_id):
+    def get_col_names(self, schema_id, json = False):
         '''
             It is used to get the column names.
             
             Args:
-                schema_id(Intiger): schema id of the associated dataset.
+                schema_id (Intiger): schema id of the associated dataset.
+                json (Boolean) (default: False): Returns json dict if True else returns List of Column Names. 
                 
             Returns:
                 column_names(List of Strings): List of Name of the columns.
@@ -197,9 +200,14 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 raise EntryNotFound(500)
             
             column_name,flag_value = list(col_df['column_list']),list(col_df['flag'])
-
-            json_data = [{"column_id": count, "col_name": column_name[count],"is_missing":flag_value[count]} for count in range(len(column_name))]
-            logging.info(str(json_data) + " json data")
+            
+            #? Returning column names if user doesn't want json
+            if not json:
+                logging.info("data preprocessing : PreprocessingClass : get_col_names : execution stop")
+                return column_name
+            
+            #? For FrontEnd 
+            json_data = [{"column_id": count, "col_name": column_name[count],"is_missing":flag_value[count]} for count in range(1,len(column_name))]
             logging.info("data preprocessing : PreprocessingClass : get_col_names : execution stop")
             
             return json_data
@@ -228,7 +236,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if connection == None :
                 raise DatabaseConnectionFailed(500)  
                 
-            sql_command = f"select amt.activity_id,amt.activity_name,pat.parent_activity_name,ptt.tab_name from mlaas.activity_master_tbl amt , mlaas.parent_activity_tbl pat, mlaas.preprocess_tab_tbl ptt where amt.code = '0' and amt.parent_activity_id = pat.parent_activity_id and ptt.tab_id = pat.tab_id"
+            sql_command = f"select amt.activity_id,amt.activity_name,amt.user_input,pat.parent_activity_name,ptt.tab_name from mlaas.activity_master_tbl amt , mlaas.parent_activity_tbl pat, mlaas.preprocess_tab_tbl ptt where amt.code = '0' and amt.parent_activity_id = pat.parent_activity_id and ptt.tab_id = pat.tab_id order by amt.activity_id"
             operations_df = DBObject.select_records(connection,sql_command) 
             
             if operations_df is None:
@@ -262,6 +270,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                             operation_dict['id'] = j
                             operation_dict['name'] = data['activity_name']
                             operation_dict['operation_id'] = data['activity_id']
+                            operation_dict['user_input'] = data['user_input']
                             handlers.append(operation_dict)
                             j += 1
                         
@@ -311,6 +320,14 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if isinstance(data_df, str):
                 raise GetDataDfFailed(500)
             
+            #? Getting DB object & connection object
+            DBObject,connection,connection_string = self.get_db_connection()
+            if connection == None :
+                raise DatabaseConnectionFailed(500)
+
+            #? Getting Table Name
+            table_name = DBObject.get_active_table_name(connection, dataset_id)
+            
             missing_value_status = []
             noise_status = []
             for col in data_df.columns:
@@ -321,8 +338,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 missing_value_status.append(is_missing_value)
                 
                 #? Checking if there is noise in the column
-                noisy,_,_ = self.detect_noise(series)
-                noise_status.append(noisy)
+                noise = self.dtct_noise(DBObject, connection, col, table_name= table_name)
+                if noise == 1:
+                    noise = True
+                else: noise = False
+                noise_status.append(noise)
             
             logging.info("data preprocessing : PreprocessingClass : get_preprocess_cache : execution stop")
             return missing_value_status,noise_status
@@ -504,33 +524,18 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         try:
             logging.info("data preprocessing : PreprocessingClass : get_possible_operations : execution start")
             
+            #? Getting Dataframe
+            data_df = self.get_data_df(dataset_id,schema_id)
+            if isinstance(data_df, str):
+                raise GetDataDfFailed(500)
+            
+            #? Getting DB object & connection object
             DBObject,connection,connection_string = self.get_db_connection()
             if connection == None :
-                raise DatabaseConnectionFailed(500)  
-                
-            #? getting the name of the dataset_tbl
-            table_name,_,_ = dc.make_dataset_schema()
-            
-            #? Getting user_name and dataset_visibility
-            sql_command = f"SELECT USER_NAME,DATASET_VISIBILITY,DATASET_TABLE_NAME,no_of_rows FROM {table_name} WHERE dataset_id = '{dataset_id}'"
-            visibility_df = DBObject.select_records(connection,sql_command) 
-            if len(visibility_df) != 0: 
-                user_name,dataset_visibility = visibility_df['user_name'][0],visibility_df['dataset_visibility'][0]
-            #? No entry for the given dataset_id        
-            else: raise EntryNotFound(500)
-            
-            #? Getting CSV table name
-            dataset_table_name = visibility_df['dataset_table_name'][0]
-            dataset_table_name = '"'+ dataset_table_name+'"'
-            
-            #? changing the database schema for the public databases
-            if dataset_visibility == 'public':
-                user_name = 'public'
-            
-            query = DBObject.get_query_string(connection,schema_id)
-            #? Getting all the data
-            sql_command = f"SELECT {str(query)} FROM {user_name}.{dataset_table_name}"
-            data_df = DBObject.select_records(connection,sql_command)    
+                raise DatabaseConnectionFailed(500)
+
+            #? Getting Table Name
+            table_name = DBObject.get_active_table_name(connection, dataset_id)
             
             num_cols = data_df._get_numeric_data().columns.tolist()
             predicted_datatypes = self.get_attrbt_datatype(data_df,data_df.columns,len(data_df))
@@ -543,7 +548,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 for id in column_ids:
                     col = data_df.columns[id]
                     series = data_df[col]
-                    operations = [1,2,3,6,10]
+                    operations = [3,4]
 
                     #? Column is both numerical & categorical
                     if (col in num_cols) and (predicted_datatypes[id].startswith('Ca')):
@@ -557,40 +562,38 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     else:
                         col_type = 3
 
-                    #? Column is text column
-                    if col_type == 3:
-                        all_col_operations.append(operations)
-                        continue
-                    
-                    #? Adding Missing Value Operations
-                    if col_type == 0:
-                        operations += [4,5,7,8,9]
-                    elif col_type == 1:
-                        operations += [4,5,7]
-                    elif col_type == 2:
-                        operations += [8,9]
-                    
                     missing_values = data_df[col].isnull().any()
-                    if missing_values == False:
-                        noisy,_,_ = self.detect_noise(series)
+                    noise_status = self.dtct_noise(DBObject, connection, col, table_name= table_name)
+                    if noise_status == 1:
+                        noise_status = True
+                    else: noise_status = False
                     
-                    #? Adding Noise Reduction Operations
-                    if not missing_values:
-                        operations += [11,14,15]
+                    if missing_values:
+                        #? Adding Missing Value Operations
+                        if col_type == 0:
+                            operations += [1,6,7,8,9,10,11,13]
+                        elif col_type == 1:
+                            operations += [1,6,7,8,9,10,13]
+                        elif col_type == 2 or col_type == 3:
+                            operations += [1,11,12]
+                    
+                    if noise_status:
                         if col_type == 0 or col_type == 1:
-                            operations += [12,13]
+                            operations += [5,14,15,16,17,18,19]
                     
                     #? Outlier Removal & Scaling Operations for numeric; Encoding ops for Categorical
-                    if not missing_values and not noisy:
+                    if not missing_values and not noise_status:
                         if col_type == 0 or col_type == 1:
-                            operations += [16,17,18,19,20,21,22,23,24,25,26]
-                        if col_type == 0 or col_type == 2:
-                            operations += [27,28,29]
+                            operations += [3,4,20,21,22,23,24,25,26]
+                        if col_type == 2 or col_type == 3:
+                            operations += [27,28]
+                        if col_type == 0:
+                            operations += [28]
                         
                     #? Math operations
-                    if not noisy:
+                    if not noise_status:
                         if col_type == 0 or col_type == 1:
-                            operations += [30,31,32,33]
+                            operations += [29,30,31,32]
                             
                     all_col_operations.append(operations)
                 
@@ -616,7 +619,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 logging.info(f"data preprocessing : PreprocessingClass : get_possible_operations : Function failed : {str(exc)}")
                 return exc
                 
-        except (DatabaseConnectionFailed,EntryNotFound) as exc:
+        except (DatabaseConnectionFailed,EntryNotFound,GetDataDfFailed) as exc:
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
             return exc.msg
@@ -631,10 +634,16 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 {
                 column_id: [1]
                 selected_handling: [12,16,17]
+                values: [15,'',33]
                 },
                 {
                 column_id: [1,2]
                 selected_handling: [10,14,17]
+                values: {
+                    10: 25
+                    14: None
+                    17: None
+                }
                 }
             ]
             
@@ -733,7 +742,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 dataset_table_name = 'public'+'."'+table_name+'"'
 
             #get the Column list
-            column_list = DBObject.get_column_list(connection,dataset_id)
+            column_list = self.get_col_names(schema_id)
             logging.info(str(column_list) + " column_list")
 
             #? Getting operations in the ordered format
@@ -746,12 +755,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 
                 #? Getting Columns
                 col = operation_ordering[op]
-
-                #? Getting Dataframe
-                data_df = self.get_data_df(dataset_id,schema_id)
-                if isinstance(data_df, str):
-                    raise GetDataDfFailed(500)
-                
                 
                 if op == 1:
                     status = self.discard_missing_values(DBObject,connection,column_list, dataset_table_name, col)
@@ -778,36 +781,88 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
                     flag = True
                 elif op == 10:
+                    #? Getting Dataframe
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
                     data_df = self.random_sample_imputation(data_df, col)
                 elif op == 11:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
                     data_df = self.remove_noise(data_df, col)
                 elif op == 12:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
                     data_df = self.repl_noise_mean(data_df, col)
                 elif op == 13:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
                     data_df = self.repl_noise_median(data_df, col)
                 elif op == 14:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
                     data_df = self.repl_noise_random_sample(data_df, col)
                 # elif op == 15:
                 #     data_df = self.repl_noise_arbitrary_val(data_df, col, val)
                 elif op == 16:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
                     data_df = self.rem_outliers_ext_val_analysis(data_df, col)
                 elif op == 17:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
                     data_df = self.rem_outliers_z_score(data_df, col)
                 elif op == 18:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
                     data_df = self.repl_outliers_mean_ext_val_analysis(data_df, col)
                 elif op == 19:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
                     data_df = self.repl_outliers_mean_z_score(data_df, col)
                 elif op == 20:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
                     data_df = self.repl_outliers_med_ext_val_analysis(data_df, col)
                 elif op == 21:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
                     data_df = self.repl_outliers_med_z_score(data_df, col)
                 elif op == 22:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
                     data_df = self.apply_log_transformation(data_df, col)
                 elif op == 27:
-                    data_df = self.label_encoding(data_df, col)
+                    status = self.label_encoding(DBObject,connection,column_list, dataset_table_name, col)
+                    flag = True
                 elif op == 28:
-                    data_df = self.one_hot_encoding(data_df, col)
-                    
+                    data_df = self.one_hot_encoding(DBObject,connection,column_list, dataset_table_name, col)
+                    logging.info("------>"+str(data_df))
+                    #flag = True
+                elif op == 30:
+                    status = self.add_to_column(DBObject,connection,column_list, dataset_table_name, col, value)
+                    flag = True
+                elif op == 31:
+                    status = self.subtract_from_column(DBObject,connection,column_list, dataset_table_name, col, value)
+                    flag = True
+                elif op == 32:
+                    status = self.multiply_column(DBObject,connection,column_list, dataset_table_name, col, value)
+                    flag = True
+                elif op == 33:
+                    status = self.divide_column(DBObject,connection,column_list, dataset_table_name, col, value)
+                    flag = True
+                
 
                 # sql_command = "select dataset_visibility,dataset_table_name,user_name from mlaas.dataset_tbl  where dataset_id='"+str(dataset_id)+"'"
                 

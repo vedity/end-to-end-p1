@@ -69,22 +69,39 @@ increment 1;
 SELECT setval('unq_num_seq', 1);
 
 
-CREATE OR REPLACE VIEW mlaas.score_view
-AS SELECT a.experiment_id,
-a.project_id,
-a.run_uuid,
-a.cv_score,
-mr.value AS holdout_score
-FROM ( SELECT met.experiment_id,
-met.project_id,
-met.run_uuid,
-m.key,
-m.value AS cv_score
-FROM mlaas.model_experiment_tbl met,
-mlaas.metrics m
-WHERE met.run_uuid = m.run_uuid AND m.key = 'cv_score') a,
-mlaas.metrics mr
-WHERE a.run_uuid = mr.run_uuid AND mr.key = 'holdout_score';
+-- CREATE OR REPLACE VIEW mlaas.score_view
+-- AS SELECT a.experiment_id,
+-- a.project_id,
+-- a.run_uuid,
+-- a.cv_score,
+-- mr.value AS holdout_score
+-- FROM ( SELECT met.experiment_id,
+-- met.project_id,
+-- met.run_uuid,
+-- m.key,
+-- m.value AS cv_score
+-- FROM mlaas.model_experiment_tbl met,
+-- mlaas.metrics m
+-- WHERE met.run_uuid = m.run_uuid AND m.key = 'cv_score') a,
+-- mlaas.metrics mr
+-- WHERE a.run_uuid = mr.run_uuid AND mr.key = 'holdout_score';
+
+CREATE TABLE mlaas.manual_model_params_tbl (
+	user_id int4 NULL,
+	project_id int4 NULL,
+	dataset_id int4 NULL,
+	exp_name varchar NULL,
+	model_id int4 NULL,
+	hyperparameters varchar null
+);
+
+CREATE TABLE mlaas.model_hyperparams_tbl (
+	model_id int4 NULL,
+	hyperparameter varchar NULL,
+	param_value varchar NULL,
+	display_type varchar NULL
+);
+
 
 
 
