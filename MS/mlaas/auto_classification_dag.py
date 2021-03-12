@@ -18,8 +18,8 @@ from airflow.operators.email_operator import EmailOperator
 
 ### Import function from main file
 
-from modeling.all_regressor import start_pipeline
-from modeling.all_regressor import linear_regression_sklearn
+from modeling.all_classifier import start_pipeline
+from modeling.all_classifier import logistic_regression_sklearn
 
 
 args = {
@@ -45,23 +45,23 @@ t1 = PythonOperator(
 
 t2 = PythonOperator(
     task_id='Logistic_Regression_Sklearn', 
-    python_callable=linear_regression_sklearn,
+    python_callable=logistic_regression_sklearn,
     dag=dag,
-    op_kwargs={'model_mode':'Auto', 'model_id':1}
+    op_kwargs={'model_mode':'Auto', 'model_id':4}
 )
 
+t1 >> t2
+# t3 = PythonOperator(
+#     task_id='Linear_Regression_Keras', 
+#     python_callable=linear_regression_sklearn,
+#     dag=dag,
+#     op_kwargs={'model_mode':'Auto', 'model_id':2}
+# )
 
-t3 = PythonOperator(
-    task_id='Linear_Regression_Keras', 
-    python_callable=linear_regression_sklearn,
-    dag=dag,
-    op_kwargs={'model_mode':'Auto', 'model_id':2}
-)
-
-t4 = PythonOperator(
-    task_id='XGBoost_Regressor', 
-    python_callable=linear_regression_sklearn,
-    dag=dag,
-    op_kwargs={'model_mode':'Auto', 'model_id':3}
-)
+# t4 = PythonOperator(
+#     task_id='XGBoost_Regressor', 
+#     python_callable=linear_regression_sklearn,
+#     dag=dag,
+#     op_kwargs={'model_mode':'Auto', 'model_id':3}
+# )
 

@@ -24,6 +24,8 @@ urlpatterns = [
 
     path('mlaas/modeling/actualvsprediction/',ActualVsPredictionClass.as_view()),
 
+    path('mlaas/modeling/confusion_matrix/',ConfusionMatrixClass.as_view()),
+
     path('mlaas/modeling/selectalgorithm/', SelectAlgorithmClass.as_view()),
 
     path('mlaas/modeling/hyperparameters/', HyperParametersClass.as_view()),
