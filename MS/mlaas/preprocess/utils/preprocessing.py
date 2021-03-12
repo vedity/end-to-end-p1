@@ -644,11 +644,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 {
                 column_id: [1,2]
                 selected_handling: [10,14,17]
-                values: {
-                    10: 25
-                    14: None
-                    17: None
-                }
+                values: ['','','']
                 }
             ]
             
@@ -764,7 +760,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 temp_col = str(temp_col)
                 temp_col = temp_col[1:-1]
                 temp_col = temp_col.replace('"',"'")
-                logging.info("------->"+ temp_col)
                 
                 activity_id = self.operation_start(DBObject, connection, op, user_name, project_id, dataset_id, temp_col)
                 
@@ -860,7 +855,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     flag = True
                 elif op == 28:
                     status = self.one_hot_encoding(DBObject,connection,column_list, dataset_table_name, col)
-                    #flag = True
+                    flag = True
                 elif op == 29:
                     status = self.add_to_column(DBObject,connection,column_list, dataset_table_name, col, value)
                     flag = True
