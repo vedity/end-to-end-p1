@@ -298,6 +298,37 @@ class ActualVsPredictionClass(APIView):
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
 
 
+
+#It will take url string as mlaas/modeling/actualvsprediction/. 
+class ConfusionMatrixClass(APIView):
+
+        def get(self, request, format=None):
+                """
+                This function is used to get Actual VS Predicated value of particular experiement
+        
+                Args  : 
+                        experiment_id[(Integer)]   :[Id of Experiment]
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival & insertions failed or successfull),
+                        Response(return false if failed otherwise json data)
+                """
+                try:
+                       
+                        logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
+                        experiment_id = request.query_params.get('experiment_id') #get Username
+                        confusion_matrix_json = json.loads(ModelStatObject.confusion_matrix(experiment_id))
+                        logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
+                        return Response({"status_code":"200","error_msg":"Successfully updated","response":confusion_matrix_json})
+                        
+
+                except Exception as e:
+                        logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
+                        logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
+
+
+
 class ShowExperimentsListClass(APIView):
 
         def get(self, request, format=None):

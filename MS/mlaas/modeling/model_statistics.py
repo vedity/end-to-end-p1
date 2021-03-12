@@ -169,6 +169,32 @@ class ModelStatisticsClass:
             logging.error("modeling : ModelStatisticsClass : model_summary : " +traceback.format_exc())
             return exc.msg
         return model_summary
+
+    def confusion_matrix(self, experiment_id): #TODO perform
+        """This function is used to get model_summary of particular experiment.
+
+        Args:
+            experiment_id ([object]): [Experiment id of particular experiment.]
+
+        Returns:
+            [data_frame]: [it will return the dataframe for model_summary.]
+            
+        """
+        try:
+
+            sql_command = 'select artifact_uri from mlaas.runs where experiment_id='+str(experiment_id)
+            artifact_uri = self.DBObject.select_records(self.connection, sql_command).iloc[0,0]
+            confusion_matrix_uri = artifact_uri + '/confusion_matrix.json'
+            json_data = open(confusion_matrix_uri, 'r')
+            confusion_matrix = json_data.read()
+
+        except Exception as exc:
+            logging.error("modeling : ModelStatisticsClass : confusion_matrix : Exception " + str(exc))
+            logging.error("modeling : ModelStatisticsClass : confusion_matrix : " +traceback.format_exc())
+            return str(exc)
+        return confusion_matrix
+
+    
     
     def performance_metrics(self, experiment_id): # Remaining
         """This function is used to get features_importance of particular experiment.
