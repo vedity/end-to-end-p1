@@ -10,7 +10,8 @@
 #* Exceptions
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
-import os
+from common.utils.activity_timeline import activity_timeline
+
 #* Common utilities
 from common.utils.database import db
 from common.utils.logger_handler import custom_logger as cl
@@ -22,16 +23,17 @@ from .schema import schema_creation as sc
 from .cleaning import noise_reduction as nr
 from .cleaning import cleaning
 from .Transformation import transformation as trs
+from .model_type import ModelType
 # from modeling.split_data import SplitData as sd
+#from model_type import ModelType
 
 #* Library Imports
+import os
 import logging
 import traceback
 import numpy as np
 import pandas as pd
 import uuid
-#from model_type import ModelType
-from .model_type import ModelType
 from sklearn.model_selection import train_test_split
 
 user_name = 'admin'
@@ -62,6 +64,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         self.password = password # Password
         self.host = host # Host Name
         self.port = port # Port Number
+        self.AT = activity_timeline.ActivityTimelineClass(database, user, password, host, port)
+        self.op_diff = 8 #difference between database_operation ids & universal operation ids
         
     def get_db_connection(self):
         """This function is used to initialize database connection.
@@ -613,7 +617,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 
                 logging.info("data preprocessing : PreprocessingClass : get_possible_operations : execution End")
                 
-                return [i+8 for i in final_op_list]    
+                return [i+self.op_diff for i in final_op_list]    
             
             except Exception as exc:
                 logging.info(f"data preprocessing : PreprocessingClass : get_possible_operations : Function failed : {str(exc)}")
@@ -672,7 +676,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             operation_dict = {}
             for dicts in data:
                 for ids in dicts['column_id']:
-                    operation_dict[ids] = list(set(operation_dict.get(ids,[]) + [i-8 for i in dicts['selected_handling']]))
+                    operation_dict[ids] = list(set(operation_dict.get(ids,[]) + [i-self.op_diff for i in dicts['selected_handling']]))
                     #? Important: Above line also handles the renumbering of the operation numbers
         
             #? Getting all the operation in the sorted order
@@ -707,7 +711,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             return OperationOrderingFailed(500).msg
         
         
-    def master_executor(self, dataset_id, schema_id,request, save_as = False,value = None):
+    def master_executor(self, project_id,dataset_id, schema_id,request, save_as = False,value = None):
         '''
             It takes the request from the frontend and executes the cleanup operations.
             
@@ -755,90 +759,97 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 
                 #? Getting Columns
                 col = operation_ordering[op]
+                temp_col = [column_list[i] for i in col]
+                temp_col = str(temp_col)
+                temp_col = temp_col[1:-1]
+                temp_col = temp_col.replace('"',"'")
+                logging.info("------->"+ temp_col)
+                
+                activity_id = self.operation_start(DBObject, connection, op, user_name, project_id, dataset_id, temp_col)
                 
                 if op == 1:
                     status = self.discard_missing_values(DBObject,connection,column_list, dataset_table_name, col)
                     flag = True
-                # elif op == 2:
-                #     data_df = self.delete_above(data_df, col, val)
                 # elif op == 3:
+                #     data_df = self.delete_above(data_df, col, val)
+                # elif op == 4:
                 #     data_df = self.delete_below(data_df, col, val)
-                elif op == 4:
+                elif op == 6:
                     status = self.mean_imputation(DBObject,connection,column_list, dataset_table_name, col)
                     flag = True
-                elif op == 5:
+                elif op == 7:
                     status = self.median_imputation(DBObject,connection,column_list, dataset_table_name, col)
                     flag = True
                 # elif op == 6:
                 #     data_df = self.arbitrary_value_imputation(data_df, col, val)
-                elif op == 7:
+                elif op == 10:
                     status = self.end_of_distribution(DBObject,connection,column_list, dataset_table_name, col)
                     flag = True
-                elif op == 8:
+                elif op == 11:
                     status = self.frequent_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
                     flag = True
-                elif op == 9:
+                elif op == 12:
                     status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
                     flag = True
-                elif op == 10:
+                elif op == 13:
                     #? Getting Dataframe
                     data_df = self.get_data_df(dataset_id,schema_id)
                     if isinstance(data_df, str):
                         raise GetDataDfFailed(500)
                     data_df = self.random_sample_imputation(data_df, col)
-                elif op == 11:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.remove_noise(data_df, col)
-                elif op == 12:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.repl_noise_mean(data_df, col)
-                elif op == 13:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.repl_noise_median(data_df, col)
-                elif op == 14:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.repl_noise_random_sample(data_df, col)
-                # elif op == 15:
-                #     data_df = self.repl_noise_arbitrary_val(data_df, col, val)
-                elif op == 16:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.rem_outliers_ext_val_analysis(data_df, col)
-                elif op == 17:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.rem_outliers_z_score(data_df, col)
-                elif op == 18:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.repl_outliers_mean_ext_val_analysis(data_df, col)
-                elif op == 19:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.repl_outliers_mean_z_score(data_df, col)
+                # elif op == 11:
+                #     data_df = self.get_data_df(dataset_id,schema_id)
+                #     if isinstance(data_df, str):
+                #         raise GetDataDfFailed(500)
+                #     data_df = self.remove_noise(data_df, col)
+                # elif op == 12:
+                #     data_df = self.get_data_df(dataset_id,schema_id)
+                #     if isinstance(data_df, str):
+                #         raise GetDataDfFailed(500)
+                #     data_df = self.repl_noise_mean(data_df, col)
+                # elif op == 13:
+                #     data_df = self.get_data_df(dataset_id,schema_id)
+                #     if isinstance(data_df, str):
+                #         raise GetDataDfFailed(500)
+                #     data_df = self.repl_noise_median(data_df, col)
+                # elif op == 14:
+                #     data_df = self.get_data_df(dataset_id,schema_id)
+                #     if isinstance(data_df, str):
+                #         raise GetDataDfFailed(500)
+                #     data_df = self.repl_noise_random_sample(data_df, col)
+                # # elif op == 15:
+                # #     data_df = self.repl_noise_arbitrary_val(data_df, col, val)
                 elif op == 20:
                     data_df = self.get_data_df(dataset_id,schema_id)
                     if isinstance(data_df, str):
                         raise GetDataDfFailed(500)
-                    data_df = self.repl_outliers_med_ext_val_analysis(data_df, col)
+                    data_df = self.rem_outliers_ext_val_analysis(data_df, col)
                 elif op == 21:
                     data_df = self.get_data_df(dataset_id,schema_id)
                     if isinstance(data_df, str):
                         raise GetDataDfFailed(500)
-                    data_df = self.repl_outliers_med_z_score(data_df, col)
+                    data_df = self.rem_outliers_z_score(data_df, col)
                 elif op == 22:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
+                    data_df = self.repl_outliers_mean_ext_val_analysis(data_df, col)
+                elif op == 23:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
+                    data_df = self.repl_outliers_mean_z_score(data_df, col)
+                elif op == 24:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
+                    data_df = self.repl_outliers_med_ext_val_analysis(data_df, col)
+                elif op == 25:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
+                    data_df = self.repl_outliers_med_z_score(data_df, col)
+                elif op == 26:
                     data_df = self.get_data_df(dataset_id,schema_id)
                     if isinstance(data_df, str):
                         raise GetDataDfFailed(500)
@@ -853,16 +864,16 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     if isinstance(data_df, str):
                         raise GetDataDfFailed(500)
                     data_df = self.one_hot_encoding(data_df, col)
-                elif op == 30:
+                elif op == 29:
                     status = self.add_to_column(DBObject,connection,column_list, dataset_table_name, col, value)
                     flag = True
-                elif op == 31:
+                elif op == 30:
                     status = self.subtract_from_column(DBObject,connection,column_list, dataset_table_name, col, value)
                     flag = True
-                elif op == 32:
+                elif op == 31:
                     status = self.multiply_column(DBObject,connection,column_list, dataset_table_name, col, value)
                     flag = True
-                elif op == 33:
+                elif op == 32:
                     status = self.divide_column(DBObject,connection,column_list, dataset_table_name, col, value)
                     flag = True
                 
@@ -897,6 +908,9 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                         sql_command = f"drop table {dataset_table_name}"
                         update_status = DBObject.update_records(connection,sql_command)
                         status = update_status
+                        activity_status = self.operation_end(DBObject, connection, activity_id, op, temp_col)
+                else:
+                    activity_status = self.operation_end(DBObject, connection, activity_id, op, temp_col)
                     
                     
             logging.info("data preprocessing : PreprocessingClass : master_executor : execution stop")
@@ -1019,8 +1033,34 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.error("data preprocessing : PreprocessingClass : handover : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : handover : " +traceback.format_exc())
             return exc.msg
+        
+    def get_activity_desc(self, DBObject, connection, operation_id, col_name, code = 1):
+        
+        #? Getting Description
+        sql_command = f"select replace (amt.activity_name || ' ' || amt.activity_description, '*', {col_name}) as description from mlaas.activity_master_tbl amt where amt.activity_id = '{operation_id}' and amt.code = '{code}'"
+        logging.info('--------->Activity '+sql_command)
+        
+        desc_df = DBObject.select_records(connection,sql_command)
+        if not isinstance(desc_df, pd.DataFrame):
+            return "Failed to Extract Activity Description."
+        
+        description = desc_df['description'].tolist()[0]
+        
+        return description
             
-
+    def operation_start(self, DBObject, connection, operation_id, user_name, project_id, dataset_id, col_name):
+        operation_id += self.op_diff
+        desc = self.get_activity_desc(DBObject, connection, operation_id, col_name, code = 1)
+        _,activity_id = self.AT.insert_user_activity(operation_id,user_name,project_id,dataset_id,desc,column_id =col_name)
+        
+        return activity_id
+    
+    def operation_end(self, DBObject, connection, activity_id, operation_id, col_name):
+        operation_id += self.op_diff
+        desc = self.get_activity_desc(DBObject, connection, operation_id, col_name, code = 2)
+        
+        status = self.AT.update_activity(activity_id,desc)
+        return status
 
 
 
