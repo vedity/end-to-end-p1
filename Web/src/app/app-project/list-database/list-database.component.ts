@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { DataTableDirective } from 'angular-datatables';
 import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
@@ -21,6 +21,7 @@ export class ListDatabaseComponent implements OnInit {
   dtOptions: DataTables.Settings = {
     scrollCollapse: true,
     scrollY: "calc(100vh - 520px)",
+    autoWidth:false
   };
   dtTrigger: Subject<any> = new Subject<any>();
   data: createdataset = new createdataset();
@@ -29,6 +30,16 @@ export class ListDatabaseComponent implements OnInit {
   f: NgForm;
   constructor(public apiService: ProjectApiService, public toaster: ToastrService,private modalService: NgbModal,public router:Router) { }
   transactions: any = [];
+
+	@HostListener('window:resize', ['$event'])
+	onResize(event) {
+    if (this.datatableElement.dtInstance) {
+      this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
+        dtInstance.columns.adjust().draw();
+      })
+    }
+	}
+
   ngOnInit(): void {
     this.data.isprivate = true;
     bsCustomFileInput.init();
@@ -64,6 +75,7 @@ export class ListDatabaseComponent implements OnInit {
             }
           });
         });
+        dtInstance.columns.adjust();
       });
     }
     else {
@@ -150,6 +162,8 @@ export class ListDatabaseComponent implements OnInit {
       }
     });
   }
+
+  
 
   rendered() {
     let currentUrl = this.router.url;
