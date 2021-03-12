@@ -859,8 +859,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     status = self.label_encoding(DBObject,connection,column_list, dataset_table_name, col)
                     flag = True
                 elif op == 28:
-                    data_df = self.one_hot_encoding(DBObject,connection,column_list, dataset_table_name, col)
-                    logging.info("------>"+str(data_df))
+                    status = self.one_hot_encoding(DBObject,connection,column_list, dataset_table_name, col)
                     #flag = True
                 elif op == 29:
                     status = self.add_to_column(DBObject,connection,column_list, dataset_table_name, col, value)
