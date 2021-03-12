@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewChild } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, HostListener } from '@angular/core';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -25,6 +25,15 @@ export class TransactionComponent implements OnInit {
   finaldisplaykey: any;
   finaldisplayvalue: any;
   constructor(private modalService: NgbModal) { }
+
+  @HostListener('window:resize', ['$event'])
+	onResize(event) {
+    if (this.datatableElement.dtInstance) {
+      this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
+        dtInstance.columns.adjust().draw();
+      })
+    }
+	}
 
   ngOnInit() {
     this.keys = [];

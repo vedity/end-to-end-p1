@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, Input, OnInit, ViewChild } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DataTableDirective } from 'angular-datatables';
 import { ToastrService } from 'ngx-toastr';
@@ -39,6 +39,15 @@ export class CreateSchemaMappingComponent implements OnInit {
     'animation-duration': '20s'
   };
 
+  @HostListener('window:resize', ['$event'])
+	onResize(event) {
+    if (this.datatableElement.dtInstance) {
+      this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
+        dtInstance.columns.adjust().draw();
+      })
+    }
+	}
+
   checkuniquecolumnname(event, id) {
     // console.log(event.target.value, id);
     if (event.target.value != "") {
@@ -65,6 +74,8 @@ export class CreateSchemaMappingComponent implements OnInit {
     }
     
   }
+
+
 
   ngOnInit(): void {
     this.dtOptions = {
