@@ -1,6 +1,21 @@
 import numpy as np
 import pandas as pd
+import logging
 from sklearn.model_selection import train_test_split
+
+
+from common.utils.logger_handler import custom_logger as cl
+
+user_name = 'admin'
+log_enable = True
+
+LogObject = cl.LogClass(user_name,log_enable)
+LogObject.log_setting()
+
+logger = logging.getLogger('project_creation')
+
+
+
 
 class ModelType():
     def get_model_type(self, target_df):
@@ -16,7 +31,9 @@ class ModelType():
          target_df=np.array(target_df)
          target_shape = target_df.shape
          total_length = target_shape[0]
-         unq_length = len(np.unique(target_df))
+         logging.info("TARGET_DF----------------------------------"+str(len(np.unique(target_df[:, 1]))))
+         logging.info("TARGET_DF----------------------------------"+str(np.unique(target_df[:, 1])))
+         unq_length = len(np.unique(target_df[:, 1]))
          threshold = int((total_length * 0.01) / 100) # Subject to change, further research.
          target_type = ""
          if threshold < unq_length:
