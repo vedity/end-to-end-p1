@@ -323,7 +323,7 @@ holdoutlistsuccessHandler(data) {
         this.toaster.error("Please enter required input", 'Error')
        }
        else{
-        this.apiService.saveOperations(this.schema_id, this.dataset_id, this.fianlarray).subscribe(
+        this.apiService.saveOperations(this.schema_id, this.dataset_id,this.project_id, this.fianlarray).subscribe(
           logs => this.saveSuccessHandlers(logs),
           error => this.errorHandler(error)
         )
