@@ -148,8 +148,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         for col_name in cols:
             try:
                 status = super().one_hot_encoding(DBObject, connection, [index,col_name], table_name)
-                logging.info("________>"+str(status))
-                return status
+                return statuss
 
             except Exception as exc:
                 return exc
