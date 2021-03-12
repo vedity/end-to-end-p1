@@ -130,7 +130,7 @@ class ActivityTimelineClass:
                 raise DatabaseConnectionFailed(500)
 
             #command to get the all activity based on the user_name 
-            sql_command = ("SELECT at.user_name,amt.activity_name,at.activity_description,date(at.start_time),at.start_time,amt.operation from "+str(table_name)+" at, mlaas.activity_master_tbl amt where at.user_name='"+str(user_name)+"' and at.activity_id=amt.activity_id order by at.start_time desc")
+            sql_command = ("SELECT at.user_name,amt.activity_name,at.activity_description,date(at.start_time),at.start_time,amt.operation from "+str(table_name)+" at, mlaas.activity_master_tbl amt where at.user_name='"+str(user_name)+"' and at.activity_id=amt.activity_id and amt.code in (-1,0) order by at.start_time desc")
             logging.info(str(sql_command)+ " sql command")
 
             #excute the sql query

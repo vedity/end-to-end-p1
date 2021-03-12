@@ -329,7 +329,7 @@ class GetColumnListClass(APIView):
                         
                         schema_id = request.query_params.get('schema_id') #get schema id
                         
-                        column_json = preprocessObj.get_col_names(schema_id,True)
+                        column_json = preprocessObj.get_col_names(schema_id, True)
                         if isinstance(column_json,list): 
                                         
                                         logging.info("data preprocess : GetColumnListClass : POST Method : execution stop")
@@ -358,11 +358,12 @@ class CleanupSave(APIView):
                 '''
                 try:
                         logging.info("data preprocess : CleanupSave : POST Method : execution start")
+                        project_id = request.query_params.get('project_id') #get schema id
                         schema_id = request.query_params.get('schema_id') #get schema id
                         dataset_id = request.query_params.get('dataset_id') #get dataset id
                         data = json.dumps(request.data) #get handling json
                         data = json.loads(data) 
-                        operation = preprocessObj.master_executor(dataset_id,schema_id,data)
+                        operation = preprocessObj.master_executor(project_id, dataset_id,schema_id,data)
                         logging.info("data preprocess : CleanupSave : POST Method : execution stop")
                         if isinstance(operation,int): 
                                     
@@ -389,8 +390,8 @@ class ScalingClass(APIView):
                         scaling_operation = request.query_params.get('scaling_op') 
                         split_method = request.query_params.get('split_method')
                         cv = request.query_params.get('cv')
-                        valid_size = request.query_params.get('valid_size')
-                        test_size = request.query_params.get('test_size')
+                        valid_size = request.query_params.get('valid_ratio')
+                        test_size = request.query_params.get('test_ratio')
                         random_state = request.query_params.get('random_state')
                         split_parameters = {'split_method': split_method ,'cv': cv,'valid_size': valid_size, 'test_size': test_size,'random_state': random_state}
                         operation = preprocessObj.handover(dataset_id, schema_id, project_id, user_name,split_parameters, scaling_operation)
@@ -413,4 +414,16 @@ class Scalingtype(APIView):
                         logging.error("data preprocess : ScheamAttributeListClass : POST Method : Exception :" + str(e))
                         logging.error("data preprocess : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
                         return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+
+class TrainValidHoldout(APIView):
+        def get(self,request,format=None):
+                try :
+                        logging.info("data preprocess : TrainValidHoldout : GET Method : execution start")
+                        holdout = [{"id" : 1,"value": "95-0-5"},{"id" : 2,"value": "90-5-5"},{"id" : 3,"value": "85-5-10"},{"id" : 4,"value": "80-10-10"},{"id" : 5,"value": "75-10-15"},{"id" : 6,"value": "70-15-15"},{"id" : 7,"value": "65-15-20"},{"id" : 8,"value": "60-20-20"}]
+                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":holdout})
+                except Exception as e:
+                        logging.error("data preprocess : TrainValidHoldout : GET Method : Exception :" + str(e))
+                        logging.error("data preprocess : TrainValidHoldout : POST Method : "+ traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+
                 

@@ -1,105 +1,105 @@
-activity_id,activity_name,activity_description,language,operation,code,parent_activity_id
-1,Create Dataset,You have created dataset,US,Create,0,-1
-2,Delete Dataset,You have deleted dataset,US,Delete,0,-1
-3,Create Project,You have created project,US,Create,0,-1
-4,Delete Project,You have deleted project,US,Delete,0,-1
-5,Column name updated,You have updated the name of Columns,US,Update,0,-1
-6,Selected Target Column,You have selected Columns  *  of dataset $ as Target Columns,US,Select,0,-1
-7,Ignored Column,You have ignored Columns *,US,Ignore,0,-1
-8,Created new dataset,You have saved new dataset,US,Create,0,-1
-9,Discard Missing Values,operation on column * pending,US,Operation,0,1
-9,Discard Missing Values,operation on column * in process,US,Operation,1,1
-9,Discard Missing Values,operation on column * completed,US,Operation,2,1
-10,Discard Noise,operation on column * pending,US,Operation,0,2
-10,Discard Noise,operation on column * in process,US,Operation,1,2
-10,Discard Noise,operation on column * completed,US,Operation,2,2
-11,Delete Above,operation on column * pending,US,Operation,0,3
-11,Delete Above,operation on column * in process,US,Operation,1,3
-11,Delete Above,operation on column * completed,US,Operation,2,3
-12,Delete Below,operation on column * pending,US,Operation,0,3
-12,Delete Below,operation on column * in process,US,Operation,1,3
-12,Delete Below,operation on column * completed,US,Operation,2,3
-13,Remove Noise,operation on column * pending,US,Operation,0,2
-13,Remove Noise,operation on column * in process,US,Operation,1,2
-13,Remove Noise,operation on column * completed,US,Operation,2,2
-14,Mean Imputation,operation on column * pending,US,Operation,0,1
-14,Mean Imputation,operation on column * in process,US,Operation,1,1
-14,Mean Imputation,operation on column * completed,US,Operation,2,1
-15,Median Imputation,operation on column * pending,US,Operation,0,1
-15,Median Imputation,operation on column * in process,US,Operation,1,1
-15,Median Imputation,operation on column * completed,US,Operation,2,1
-16,Mode Imputation,operation on column * pending,US,Operation,0,1
-16,Mode Imputation,operation on column * in process,US,Operation,1,1
-16,Mode Imputation,operation on column * completed,US,Operation,2,1
-17,Arbitarry Value Imputation,operation on column * pending,US,Operation,0,1
-17,Arbitarry Value Imputation,operation on column * in process,US,Operation,1,1
-17,Arbitarry Value Imputation,operation on column * completed,US,Operation,2,1
-18,End_or_Tail Imputation,operation on column * pending,US,Operation,0,1
-18,End_or_Tail Imputation,operation on column * in process,US,Operation,1,1
-18,End_or_Tail Imputation,operation on column * completed,US,Operation,2,1
-19,Frequent Category Imputation,operation on column * pending,US,Operation,0,1
-19,Frequent Category Imputation,operation on column * in process,US,Operation,1,1
-19,Frequent Category Imputation,operation on column * completed,US,Operation,2,1
-20,Add Missing Category,operation on column * pending,US,Operation,0,1
-20,Add Missing Category,operation on column * in process,US,Operation,1,1
-20,Add Missing Category,operation on column * completed,US,Operation,2,1
-21,Random Sample Imputation,operation on column * pending,US,Operation,0,1
-21,Random Sample Imputation,operation on column * in process,US,Operation,1,1
-21,Random Sample Imputation,operation on column * completed,US,Operation,2,1
-22,Replace Noise with Mean,operation on column * pending,US,Operation,0,2
-22,Replace Noise with Mean,operation on column * in process,US,Operation,1,2
-22,Replace Noise with Mean,operation on column * completed,US,Operation,2,2
-23,Replace Noise with Median,operation on column * pending,US,Operation,0,2
-23,Replace Noise with Median,operation on column * in process,US,Operation,1,2
-23,Replace Noise with Median,operation on column * completed,US,Operation,2,2
-24,Replace Noise with Mode,operation on column * pending,US,Operation,0,2
-24,Replace Noise with Mode,operation on column * in process,US,Operation,1,2
-24,Replace Noise with Mode,operation on column * completed,US,Operation,2,2
-25,Replace Noise with End_or_Tail Value,operation on column * pending,US,Operation,0,2
-25,Replace Noise with End_or_Tail Value,operation on column * in process,US,Operation,1,2
-25,Replace Noise with End_or_Tail Value,operation on column * completed,US,Operation,2,2
-26,Replace Noise with Random Value,operation on column * pending,US,Operation,0,2
-26,Replace Noise with Random Value,operation on column * in process,US,Operation,1,2
-26,Replace Noise with Random Value,operation on column * completed,US,Operation,2,2
-27,Replace Noise with Arbitry Value,operation on column * pending,US,Operation,0,2
-27,Replace Noise with Arbitry Value,operation on column * in process,US,Operation,1,2
-27,Replace Noise with Arbitry Value,operation on column * completed,US,Operation,2,2
-28,Remove outliers with Extreme Value analysis,operation on column * pending,US,Operation,0,3
-28,Remove outliers with Extreme Value analysis,operation on column * in process,US,Operation,1,3
-28,Remove outliers with Extreme Value analysis,operation on column * completed,US,Operation,2,3
-29,Remove outliers with Z-score Detection Method,operation on column * pending,US,Operation,0,3
-29,Remove outliers with Z-score Detection Method,operation on column * in process,US,Operation,1,3
-29,Remove outliers with Z-score Detection Method,operation on column * completed,US,Operation,2,3
-30,Replace Outliers with Mean using Extreme Value Analysis Detection,operation on column * pending,US,Operation,0,3
-30,Replace Outliers with Mean using Extreme Value Analysis Detection,operation on column * in process,US,Operation,1,3
-30,Replace Outliers with Mean using Extreme Value Analysis Detection,operation on column * completed,US,Operation,2,3
-31,Replace Outliers with Mean using Z-score Detection,operation on column * pending,US,Operation,0,3
-31,Replace Outliers with Mean using Z-score Detection,operation on column * in process,US,Operation,1,3
-31,Replace Outliers with Mean using Z-score Detection,operation on column * completed,US,Operation,2,3
-32,Replace Outliers with Median using Extreme Value Analysis Detection,operation on column * pending,US,Operation,0,3
-32,Replace Outliers with Median using Extreme Value Analysis Detection,operation on column * in process,US,Operation,1,3
-32,Replace Outliers with Median using Extreme Value Analysis Detection,operation on column * completed,US,Operation,2,3
-33,Replace Outliers with Median using Z-score Detection,operation on column * pending,US,Operation,0,3
-33,Replace Outliers with Median using Z-score Detection,operation on column * in process,US,Operation,1,3
-33,Replace Outliers with Median using Z-score Detection,operation on column * completed,US,Operation,2,3
-34,Apply Log Transformation,operation on column * pending,US,Operation,0,3
-34,Apply Log Transformation,operation on column * in process,US,Operation,1,3
-34,Apply Log Transformation,operation on column * completed,US,Operation,2,3
-35,Label Encoding,operation on column * pending,US,Operation,0,5
-35,Label Encoding,operation on column * in process,US,Operation,1,5
-35,Label Encoding,operation on column * completed,US,Operation,2,5
-36,One Hot Encoding,operation on column * pending,US,Operation,0,5
-36,One Hot Encoding,operation on column * in process,US,Operation,1,5
-36,One Hot Encoding,operation on column * completed,US,Operation,2,5
-37,Add to Column,operation on column * pending,US,Operation,0,6
-37,Add to Column,operation on column * in process,US,Operation,1,6
-37,Add to Column,operation on column * completed,US,Operation,2,6
-38,Subtract from Column,operation on column * pending,US,Operation,0,6
-38,Subtract from Column,operation on column * in process,US,Operation,1,6
-38,Subtract from Column,operation on column * completed,US,Operation,2,6
-39,Divide from column,operation on column * pending,US,Operation,0,6
-39,Divide from column,operation on column * in process,US,Operation,1,6
-39,Divide from column,operation on column * completed,US,Operation,2,6
-40,Multiply into column,operation on column * pending,US,Operation,0,6
-40,Multiply into column,operation on column * in process,US,Operation,1,6
-40,Multiply into column,operation on column * completed,US,Operation,2,6
+activity_id,activity_name,activity_description,language,operation,code,parent_activity_id,user_input
+1,Create Dataset,You have created dataset,US,Create,0,-1,0
+2,Delete Dataset,You have deleted dataset,US,Delete,0,-1,0
+3,Create Project,You have created project,US,Create,0,-1,0
+4,Delete Project,You have deleted project,US,Delete,0,-1,0
+5,Column name updated,You have updated the name of Columns,US,Update,0,-1,0
+6,Selected Target Column,You have selected Columns  *  of dataset $ as Target Columns,US,Select,0,-1,0
+7,Ignored Column,You have ignored Columns *,US,Ignore,0,-1,0
+8,Created new dataset,You have saved new dataset,US,Create,0,-1,0
+9,Discard Missing Values,operation on column * pending,US,Operation,0,1,0
+9,Discard Missing Values,operation on column * in process,US,Operation,1,1,0
+9,Discard Missing Values,operation on column * completed,US,Operation,2,1,0
+10,Discard Noise,operation on column * pending,US,Operation,0,2,0
+10,Discard Noise,operation on column * in process,US,Operation,1,2,0
+10,Discard Noise,operation on column * completed,US,Operation,2,2,0
+11,Delete Above,operation on column * pending,US,Operation,0,3,1
+11,Delete Above,operation on column * in process,US,Operation,1,3,1
+11,Delete Above,operation on column * completed,US,Operation,2,3,1
+12,Delete Below,operation on column * pending,US,Operation,0,3,1
+12,Delete Below,operation on column * in process,US,Operation,1,3,1
+12,Delete Below,operation on column * completed,US,Operation,2,3,1
+13,Remove Noise,operation on column * pending,US,Operation,0,2,0
+13,Remove Noise,operation on column * in process,US,Operation,1,2,0
+13,Remove Noise,operation on column * completed,US,Operation,2,2,0
+14,Mean Imputation,operation on column * pending,US,Operation,0,1,0
+14,Mean Imputation,operation on column * in process,US,Operation,1,1,0
+14,Mean Imputation,operation on column * completed,US,Operation,2,1,0
+15,Median Imputation,operation on column * pending,US,Operation,0,1,0
+15,Median Imputation,operation on column * in process,US,Operation,1,1,0
+15,Median Imputation,operation on column * completed,US,Operation,2,1,0
+16,Mode Imputation,operation on column * pending,US,Operation,0,1,0
+16,Mode Imputation,operation on column * in process,US,Operation,1,1,0
+16,Mode Imputation,operation on column * completed,US,Operation,2,1,0
+17,Arbitarry Value Imputation,operation on column * pending,US,Operation,0,1,1
+17,Arbitarry Value Imputation,operation on column * in process,US,Operation,1,1,1
+17,Arbitarry Value Imputation,operation on column * completed,US,Operation,2,1,1
+18,End_or_Tail Imputation,operation on column * pending,US,Operation,0,1,0
+18,End_or_Tail Imputation,operation on column * in process,US,Operation,1,1,0
+18,End_or_Tail Imputation,operation on column * completed,US,Operation,2,1,0
+19,Frequent Category Imputation,operation on column * pending,US,Operation,0,1,0
+19,Frequent Category Imputation,operation on column * in process,US,Operation,1,1,0
+19,Frequent Category Imputation,operation on column * completed,US,Operation,2,1,0
+20,Add Missing Category,operation on column * pending,US,Operation,0,1,1
+20,Add Missing Category,operation on column * in process,US,Operation,1,1,1
+20,Add Missing Category,operation on column * completed,US,Operation,2,1,1
+21,Random Sample Imputation,operation on column * pending,US,Operation,0,1,0
+21,Random Sample Imputation,operation on column * in process,US,Operation,1,1,0
+21,Random Sample Imputation,operation on column * completed,US,Operation,2,1,0
+22,Replace Noise with Mean,operation on column * pending,US,Operation,0,2,0
+22,Replace Noise with Mean,operation on column * in process,US,Operation,1,2,0
+22,Replace Noise with Mean,operation on column * completed,US,Operation,2,2,0
+23,Replace Noise with Median,operation on column * pending,US,Operation,0,2,0
+23,Replace Noise with Median,operation on column * in process,US,Operation,1,2,0
+23,Replace Noise with Median,operation on column * completed,US,Operation,2,2,0
+24,Replace Noise with Mode,operation on column * pending,US,Operation,0,2,0
+24,Replace Noise with Mode,operation on column * in process,US,Operation,1,2,0
+24,Replace Noise with Mode,operation on column * completed,US,Operation,2,2,0
+25,Replace Noise with End_or_Tail Value,operation on column * pending,US,Operation,0,2,0
+25,Replace Noise with End_or_Tail Value,operation on column * in process,US,Operation,1,2,0
+25,Replace Noise with End_or_Tail Value,operation on column * completed,US,Operation,2,2,0
+26,Replace Noise with Random Value,operation on column * pending,US,Operation,0,2,0
+26,Replace Noise with Random Value,operation on column * in process,US,Operation,1,2,0
+26,Replace Noise with Random Value,operation on column * completed,US,Operation,2,2,0
+27,Replace Noise with Arbitry Value,operation on column * pending,US,Operation,0,2,1
+27,Replace Noise with Arbitry Value,operation on column * in process,US,Operation,1,2,1
+27,Replace Noise with Arbitry Value,operation on column * completed,US,Operation,2,2,1
+28,Remove outliers with Extreme Value analysis,operation on column * pending,US,Operation,0,3,0
+28,Remove outliers with Extreme Value analysis,operation on column * in process,US,Operation,1,3,0
+28,Remove outliers with Extreme Value analysis,operation on column * completed,US,Operation,2,3,0
+29,Remove outliers with Z-score Detection Method,operation on column * pending,US,Operation,0,3,0
+29,Remove outliers with Z-score Detection Method,operation on column * in process,US,Operation,1,3,0
+29,Remove outliers with Z-score Detection Method,operation on column * completed,US,Operation,2,3,0
+30,Replace Outliers with Mean using Extreme Value Analysis Detection,operation on column * pending,US,Operation,0,3,0
+30,Replace Outliers with Mean using Extreme Value Analysis Detection,operation on column * in process,US,Operation,1,3,0
+30,Replace Outliers with Mean using Extreme Value Analysis Detection,operation on column * completed,US,Operation,2,3,0
+31,Replace Outliers with Mean using Z-score Detection,operation on column * pending,US,Operation,0,3,0
+31,Replace Outliers with Mean using Z-score Detection,operation on column * in process,US,Operation,1,3,0
+31,Replace Outliers with Mean using Z-score Detection,operation on column * completed,US,Operation,2,3,0
+32,Replace Outliers with Median using Extreme Value Analysis Detection,operation on column * pending,US,Operation,0,3,0
+32,Replace Outliers with Median using Extreme Value Analysis Detection,operation on column * in process,US,Operation,1,3,0
+32,Replace Outliers with Median using Extreme Value Analysis Detection,operation on column * completed,US,Operation,2,3,0
+33,Replace Outliers with Median using Z-score Detection,operation on column * pending,US,Operation,0,3,0
+33,Replace Outliers with Median using Z-score Detection,operation on column * in process,US,Operation,1,3,0
+33,Replace Outliers with Median using Z-score Detection,operation on column * completed,US,Operation,2,3,0
+34,Apply Log Transformation,operation on column * pending,US,Operation,0,3,0
+34,Apply Log Transformation,operation on column * in process,US,Operation,1,3,0
+34,Apply Log Transformation,operation on column * completed,US,Operation,2,3,0
+35,Label Encoding,operation on column * pending,US,Operation,0,5,0
+35,Label Encoding,operation on column * in process,US,Operation,1,5,0
+35,Label Encoding,operation on column * completed,US,Operation,2,5,0
+36,One Hot Encoding,operation on column * pending,US,Operation,0,5,0
+36,One Hot Encoding,operation on column * in process,US,Operation,1,5,0
+36,One Hot Encoding,operation on column * completed,US,Operation,2,5,0
+37,Add to Column,operation on column * pending,US,Operation,0,6,1
+37,Add to Column,operation on column * in process,US,Operation,1,6,1
+37,Add to Column,operation on column * completed,US,Operation,2,6,1
+38,Subtract from Column,operation on column * pending,US,Operation,0,6,1
+38,Subtract from Column,operation on column * in process,US,Operation,1,6,1
+38,Subtract from Column,operation on column * completed,US,Operation,2,6,1
+39,Divide from column,operation on column * pending,US,Operation,0,6,1
+39,Divide from column,operation on column * in process,US,Operation,1,6,1
+39,Divide from column,operation on column * completed,US,Operation,2,6,1
+40,Multiply into column,operation on column * pending,US,Operation,0,6,1
+40,Multiply into column,operation on column * in process,US,Operation,1,6,1
+40,Multiply into column,operation on column * completed,US,Operation,2,6,1

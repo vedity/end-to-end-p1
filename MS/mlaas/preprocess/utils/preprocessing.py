@@ -10,7 +10,8 @@
 #* Exceptions
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
-import os
+from common.utils.activity_timeline import activity_timeline
+
 #* Common utilities
 from common.utils.database import db
 from common.utils.logger_handler import custom_logger as cl
@@ -22,16 +23,17 @@ from .schema import schema_creation as sc
 from .cleaning import noise_reduction as nr
 from .cleaning import cleaning
 from .Transformation import transformation as trs
+from .model_type import ModelType
 # from modeling.split_data import SplitData as sd
+#from model_type import ModelType
 
 #* Library Imports
+import os
 import logging
 import traceback
 import numpy as np
 import pandas as pd
 import uuid
-#from model_type import ModelType
-from .model_type import ModelType
 from sklearn.model_selection import train_test_split
 
 user_name = 'admin'
@@ -62,6 +64,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         self.password = password # Password
         self.host = host # Host Name
         self.port = port # Port Number
+        self.AT = activity_timeline.ActivityTimelineClass(database, user, password, host, port)
+        self.op_diff = 8 #difference between database_operation ids & universal operation ids
         
     def get_db_connection(self):
         """This function is used to initialize database connection.
@@ -208,6 +212,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             #? For FrontEnd 
             json_data = [{"column_id": count, "col_name": column_name[count],"is_missing":flag_value[count]} for count in range(1,len(column_name))]
+            logging.info("AAAAAAAAAAAAAAAAAAAA" + str(json_data))
             logging.info("data preprocessing : PreprocessingClass : get_col_names : execution stop")
             
             return json_data
@@ -236,7 +241,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if connection == None :
                 raise DatabaseConnectionFailed(500)  
                 
-            sql_command = f"select amt.activity_id,amt.activity_name,pat.parent_activity_name,ptt.tab_name from mlaas.activity_master_tbl amt , mlaas.parent_activity_tbl pat, mlaas.preprocess_tab_tbl ptt where amt.code = '0' and amt.parent_activity_id = pat.parent_activity_id and ptt.tab_id = pat.tab_id"
+            sql_command = f"select amt.activity_id,amt.activity_name,amt.user_input,pat.parent_activity_name,ptt.tab_name from mlaas.activity_master_tbl amt , mlaas.parent_activity_tbl pat, mlaas.preprocess_tab_tbl ptt where amt.code = '0' and amt.parent_activity_id = pat.parent_activity_id and ptt.tab_id = pat.tab_id order by amt.activity_id"
             operations_df = DBObject.select_records(connection,sql_command) 
             
             if operations_df is None:
@@ -270,6 +275,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                             operation_dict['id'] = j
                             operation_dict['name'] = data['activity_name']
                             operation_dict['operation_id'] = data['activity_id']
+                            operation_dict['user_input'] = data['user_input']
                             handlers.append(operation_dict)
                             j += 1
                         
@@ -319,6 +325,14 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if isinstance(data_df, str):
                 raise GetDataDfFailed(500)
             
+            #? Getting DB object & connection object
+            DBObject,connection,connection_string = self.get_db_connection()
+            if connection == None :
+                raise DatabaseConnectionFailed(500)
+
+            #? Getting Table Name
+            table_name = DBObject.get_active_table_name(connection, dataset_id)
+            
             missing_value_status = []
             noise_status = []
             for col in data_df.columns:
@@ -329,8 +343,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 missing_value_status.append(is_missing_value)
                 
                 #? Checking if there is noise in the column
-                noisy,_,_ = self.detect_noise(series)
-                noise_status.append(noisy)
+                noise = self.dtct_noise(DBObject, connection, col, table_name= table_name)
+                if noise == 1:
+                    noise = True
+                else: noise = False
+                noise_status.append(noise)
             
             logging.info("data preprocessing : PreprocessingClass : get_preprocess_cache : execution stop")
             return missing_value_status,noise_status
@@ -517,6 +534,14 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if isinstance(data_df, str):
                 raise GetDataDfFailed(500)
             
+            #? Getting DB object & connection object
+            DBObject,connection,connection_string = self.get_db_connection()
+            if connection == None :
+                raise DatabaseConnectionFailed(500)
+
+            #? Getting Table Name
+            table_name = DBObject.get_active_table_name(connection, dataset_id)
+            
             num_cols = data_df._get_numeric_data().columns.tolist()
             predicted_datatypes = self.get_attrbt_datatype(data_df,data_df.columns,len(data_df))
             
@@ -528,7 +553,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 for id in column_ids:
                     col = data_df.columns[id]
                     series = data_df[col]
-                    operations = [1,2,3,6,10]
+                    operations = [3,4]
 
                     #? Column is both numerical & categorical
                     if (col in num_cols) and (predicted_datatypes[id].startswith('Ca')):
@@ -542,40 +567,38 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     else:
                         col_type = 3
 
-                    #? Column is text column
-                    if col_type == 3:
-                        all_col_operations.append(operations)
-                        continue
-                    
-                    #? Adding Missing Value Operations
-                    if col_type == 0:
-                        operations += [4,5,7,8,9]
-                    elif col_type == 1:
-                        operations += [4,5,7]
-                    elif col_type == 2:
-                        operations += [8,9]
-                    
                     missing_values = data_df[col].isnull().any()
-                    if missing_values == False:
-                        noisy,_,_ = self.detect_noise(series)
+                    noise_status = self.dtct_noise(DBObject, connection, col, table_name= table_name)
+                    if noise_status == 1:
+                        noise_status = True
+                    else: noise_status = False
                     
-                    #? Adding Noise Reduction Operations
-                    if not missing_values:
-                        operations += [11,14,15]
+                    if missing_values:
+                        #? Adding Missing Value Operations
+                        if col_type == 0:
+                            operations += [1,6,7,8,9,10,11,13]
+                        elif col_type == 1:
+                            operations += [1,6,7,8,9,10,13]
+                        elif col_type == 2 or col_type == 3:
+                            operations += [1,11,12]
+                    
+                    if noise_status:
                         if col_type == 0 or col_type == 1:
-                            operations += [12,13]
+                            operations += [5,14,15,16,17,18,19]
                     
                     #? Outlier Removal & Scaling Operations for numeric; Encoding ops for Categorical
-                    if not missing_values and not noisy:
+                    if not missing_values and not noise_status:
                         if col_type == 0 or col_type == 1:
-                            operations += [16,17,18,19,20,21,22,23,24,25,26]
-                        if col_type == 0 or col_type == 2:
-                            operations += [27,28,29]
+                            operations += [3,4,20,21,22,23,24,25,26]
+                        if col_type == 2 or col_type == 3:
+                            operations += [27,28]
+                        if col_type == 0:
+                            operations += [28]
                         
                     #? Math operations
-                    if not noisy:
+                    if not noise_status:
                         if col_type == 0 or col_type == 1:
-                            operations += [30,31,32,33]
+                            operations += [29,30,31,32]
                             
                     all_col_operations.append(operations)
                 
@@ -595,7 +618,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 
                 logging.info("data preprocessing : PreprocessingClass : get_possible_operations : execution End")
                 
-                return [i+8 for i in final_op_list]    
+                return [i+self.op_diff for i in final_op_list]    
             
             except Exception as exc:
                 logging.info(f"data preprocessing : PreprocessingClass : get_possible_operations : Function failed : {str(exc)}")
@@ -654,7 +677,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             operation_dict = {}
             for dicts in data:
                 for ids in dicts['column_id']:
-                    operation_dict[ids] = list(set(operation_dict.get(ids,[]) + [i-8 for i in dicts['selected_handling']]))
+                    operation_dict[ids] = list(set(operation_dict.get(ids,[]) + [i-self.op_diff for i in dicts['selected_handling']]))
                     #? Important: Above line also handles the renumbering of the operation numbers
         
             #? Getting all the operation in the sorted order
@@ -689,7 +712,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             return OperationOrderingFailed(500).msg
         
         
-    def master_executor(self, dataset_id, schema_id,request, save_as = False,value = None):
+    def master_executor(self, project_id,dataset_id, schema_id,request, save_as = False,value = None):
         '''
             It takes the request from the frontend and executes the cleanup operations.
             
@@ -737,96 +760,115 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 
                 #? Getting Columns
                 col = operation_ordering[op]
+                temp_col = [column_list[i] for i in col]
+                temp_col = str(temp_col)
+                temp_col = temp_col[1:-1]
+                temp_col = temp_col.replace('"',"'")
+                logging.info("------->"+ temp_col)
+                
+                activity_id = self.operation_start(DBObject, connection, op, user_name, project_id, dataset_id, temp_col)
                 
                 if op == 1:
                     status = self.discard_missing_values(DBObject,connection,column_list, dataset_table_name, col)
                     flag = True
-                # elif op == 2:
-                #     data_df = self.delete_above(data_df, col, val)
                 # elif op == 3:
+                #     data_df = self.delete_above(data_df, col, val)
+                # elif op == 4:
                 #     data_df = self.delete_below(data_df, col, val)
-                elif op == 4:
+                elif op == 6:
                     status = self.mean_imputation(DBObject,connection,column_list, dataset_table_name, col)
                     flag = True
-                elif op == 5:
+                elif op == 7:
                     status = self.median_imputation(DBObject,connection,column_list, dataset_table_name, col)
                     flag = True
                 # elif op == 6:
                 #     data_df = self.arbitrary_value_imputation(data_df, col, val)
-                elif op == 7:
+                elif op == 10:
                     status = self.end_of_distribution(DBObject,connection,column_list, dataset_table_name, col)
                     flag = True
-                elif op == 8:
+                elif op == 11:
                     status = self.frequent_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
                     flag = True
-                elif op == 9:
-                    status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, col)
-                    flag = True
-                elif op == 23:
-                    #? Getting Dataframe
-                    status = self.random_sample_imputation(DBObject,connection,column_list, dataset_table_name,col)
-
-                elif op == 11:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.remove_noise(data_df, col)
                 elif op == 12:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.repl_noise_mean(data_df, col)
+                    status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
+                    flag = True
                 elif op == 13:
+                    #? Getting Dataframe
                     data_df = self.get_data_df(dataset_id,schema_id)
                     if isinstance(data_df, str):
                         raise GetDataDfFailed(500)
-                    data_df = self.repl_noise_median(data_df, col)
-                elif op == 14:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.repl_noise_random_sample(data_df, col)
-                # elif op == 15:
-                #     data_df = self.repl_noise_arbitrary_val(data_df, col, val)
-                elif op == 16:
-                    status = self.rem_outliers_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
-                elif op == 17:
-                    status = self.rem_outliers_z_score(DBObject,connection,column_list, dataset_table_name,col)
-                elif op == 18:
-                    status = self.repl_outliers_mean_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
-                elif op == 19:
-                    status = self.repl_outliers_mean_z_score(DBObject,connection,column_list, dataset_table_name,col)
+                    data_df = self.random_sample_imputation(data_df, col)
+                # elif op == 11:
+                #     data_df = self.get_data_df(dataset_id,schema_id)
+                #     if isinstance(data_df, str):
+                #         raise GetDataDfFailed(500)
+                #     data_df = self.remove_noise(data_df, col)
+                # elif op == 12:
+                #     data_df = self.get_data_df(dataset_id,schema_id)
+                #     if isinstance(data_df, str):
+                #         raise GetDataDfFailed(500)
+                #     data_df = self.repl_noise_mean(data_df, col)
+                # elif op == 13:
+                #     data_df = self.get_data_df(dataset_id,schema_id)
+                #     if isinstance(data_df, str):
+                #         raise GetDataDfFailed(500)
+                #     data_df = self.repl_noise_median(data_df, col)
+                # elif op == 14:
+                #     data_df = self.get_data_df(dataset_id,schema_id)
+                #     if isinstance(data_df, str):
+                #         raise GetDataDfFailed(500)
+                #     data_df = self.repl_noise_random_sample(data_df, col)
+                # # elif op == 15:
+                # #     data_df = self.repl_noise_arbitrary_val(data_df, col, val)
                 elif op == 20:
-                    
-                    status = self.repl_outliers_med_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
+                    status = self.rem_outliers_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
+                    flag = True
+
                 elif op == 21:
-                    
-                    status = self.repl_outliers_med_z_score(DBObject,connection,column_list, dataset_table_name,col)
+                    status = self.rem_outliers_z_score(DBObject,connection,column_list, dataset_table_name,col)
+                    flag = True
 
                 elif op == 22:
-        
+                    status = self.repl_outliers_mean_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
+                    flag = True
+
+                elif op == 23:
+                    status = self.repl_outliers_mean_z_score(DBObject,connection,column_list, dataset_table_name,col)
+                    flag = True
+
+                elif op == 24:
+                    status = self.repl_outliers_med_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
+                    flag = True
+
+                elif op == 25:
+                    status = self.repl_outliers_med_z_score(DBObject,connection,column_list, dataset_table_name,col)
+                    flag = True
+
+                elif op == 26:
                     status = self.apply_log_transformation(DBObject,connection,column_list, dataset_table_name, col)
+                    flag = True
 
                 elif op == 27:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.label_encoding(data_df, col)
+                    status = self.label_encoding(DBObject,connection,column_list, dataset_table_name, col)
+                    flag = True
+
                 elif op == 28:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.one_hot_encoding(data_df, col)
-                elif op == 30:
+                    status = self.one_hot_encoding(DBObject,connection,column_list, dataset_table_name, col)
+                    flag = True
+
+                elif op == 29:
                     status = self.add_to_column(DBObject,connection,column_list, dataset_table_name, col, value)
                     flag = True
-                elif op == 31:
+
+                elif op == 30:
                     status = self.subtract_from_column(DBObject,connection,column_list, dataset_table_name, col, value)
                     flag = True
-                elif op == 32:
+
+                elif op == 31:
                     status = self.multiply_column(DBObject,connection,column_list, dataset_table_name, col, value)
                     flag = True
-                elif op == 33:
+
+                elif op == 32:
                     status = self.divide_column(DBObject,connection,column_list, dataset_table_name, col, value)
                     flag = True
                 
@@ -855,6 +897,9 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                         sql_command = f"drop table {dataset_table_name}"
                         update_status = DBObject.update_records(connection,sql_command)
                         status = update_status
+                        activity_status = self.operation_end(DBObject, connection, activity_id, op, temp_col)
+                else:
+                    activity_status = self.operation_end(DBObject, connection, activity_id, op, temp_col)
                     
                     
             logging.info("data preprocessing : PreprocessingClass : master_executor : execution stop")
@@ -905,7 +950,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             tg_cols = DBObject.get_target_col(connection, schema_id)
             for col in tg_cols:
                 feature_cols.remove(col)
-            
             target_cols = [data_df.columns[0]]
             target_cols += tg_cols
             
@@ -977,8 +1021,77 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.error("data preprocessing : PreprocessingClass : handover : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : handover : " +traceback.format_exc())
             return exc.msg
+        
+    def get_activity_desc(self, DBObject, connection, operation_id, col_name, code = 1):
+        '''
+            Used to get preprocess activity description from the activity master table.
+        
+            Returns:
+            --------
+            description (`String`): Description for the activity.
+        '''
+        logging.info("data preprocessing : PreprocessingClass : get_activity_desc : execution start")
+        
+        #? Getting Description
+        sql_command = f"select replace (amt.activity_name || ' ' || amt.activity_description, '*', {col_name}) as description from mlaas.activity_master_tbl amt where amt.activity_id = '{operation_id}' and amt.code = '{code}'"
+        
+        desc_df = DBObject.select_records(connection,sql_command)
+        if not isinstance(desc_df, pd.DataFrame):
+            return "Failed to Extract Activity Description."
+        
+        #? Fatching the description
+        description = desc_df['description'].tolist()[0]
+        
+        logging.info("data preprocessing : PreprocessingClass : get_activity_desc : execution stop")
+        
+        return description
             
-
+    def operation_start(self, DBObject, connection, operation_id, user_name, project_id, dataset_id, col_name):
+        '''
+            Used to Insert Activity in the Activity Timeline Table.
+            
+            Returns:
+            --------
+            activity_id (`Intiger`): index of the activity in the activity transection table.
+        '''
+        logging.info("data preprocessing : PreprocessingClass : operation_start : execution start")
+            
+        #? Transforming the operation_id to the operation id stored in the activity timeline table. 
+        operation_id += self.op_diff
+        
+        #? Getting Activity Description
+        desc = self.get_activity_desc(DBObject, connection, operation_id, col_name, code = 1)
+        
+        #? Inserting the activity in the activity_detail_table
+        _,activity_id = self.AT.insert_user_activity(operation_id,user_name,project_id,dataset_id,desc,column_id =col_name)
+        
+        logging.info("data preprocessing : PreprocessingClass : operation_start : execution stop")
+        
+        return activity_id
+    
+    def operation_end(self, DBObject, connection, activity_id, operation_id, col_name):
+        '''
+            Used to update Activity description when the Activity ends.
+            
+            Returns:
+            --------
+            status (`Intiger`): Status of the updation.
+        '''
+        
+        logging.info("data preprocessing : PreprocessingClass : operation_end : execution start")
+        
+        #? Transforming the operation_id to the operation id stored in the activity timeline table. 
+        operation_id += self.op_diff
+        
+        #? Getting Activity Description
+        desc = self.get_activity_desc(DBObject, connection, operation_id, col_name, code = 2)
+        
+        #? Changing the activity description in the activity detail table 
+        status = self.AT.update_activity(activity_id,desc)
+        
+        logging.info("data preprocessing : PreprocessingClass : operation_end : execution stop")
+        
+        return status
 
 
 

@@ -15,6 +15,7 @@ import mlflow.sklearn
 
 from sklearn.linear_model import LogisticRegression 
 from sklearn.model_selection import learning_curve
+from sklearn.preprocessing import LabelEncoder
 
 from sklearn.metrics import *
 
@@ -27,8 +28,8 @@ from sklearn.model_selection import ( train_test_split,
 
 class LogisticClassifierClass:
     
-    def __init__(self,input_features_list, target_features_list, X_train, X_valid, X_test, 
-                y_train, y_valid, y_test, scaled_split_dict):
+    def __init__(self,input_features_list, target_features_list, X_train, X_test, X_valid, 
+                y_train, y_test, y_valid, scaled_split_dict):
         
         """This is used to initialise the model input parameter when model class is called.
         """
@@ -62,7 +63,7 @@ class LogisticClassifierClass:
         # get Input Training Features
         X_train = X_train[:,1:] 
         # get Target Training Features
-        y_train = y_train[:,-1].reshape(len(y_train[:,-1]),1)
+        y_train = y_train[:,-1].reshape(-1 ,1)
 
         # Note, solvers available: {‘newton-cg’, ‘lbfgs’, ‘liblinear’, ‘sag’, ‘saga’}, default=’lbfgs’
 
@@ -82,18 +83,6 @@ class LogisticClassifierClass:
             X_train ([dataframe]): [input train data]
             y_train ([dataframe]): [target train data]
         """
-        
-        # X_train = X_train[self.input_features]
-        # y_train = y_train[self.target_features]
-        
-        # train_sizes=np.linspace(0.10, 1.0, 5)
-        # train_sizes, train_scores, test_scores, fit_times, _ = \
-        # learning_curve(estimator = model, X=X_train, y=y_train,cv=2,
-        #                train_sizes=train_sizes,
-        #                return_times=True)
-        
-        # train_mean = train_scores.mean(axis=1)
-        # test_mean = test_scores.mean(axis=1)
         X_train = X_train[:,1:] 
         y_train = y_train[:,-1].reshape(len(y_train[:,-1]),1)
         # Dividing train data size into bins.
@@ -122,7 +111,6 @@ class LogisticClassifierClass:
         """
         
         X_train = X_train[:,1:] 
-        # X_train = X_train[self.input_features_list]
         stddev = []
         importance = model.coef_.tolist()[0]
         features = pd.DataFrame(importance, self.input_features_list,columns = ['coefficient'])
@@ -141,38 +129,29 @@ class LogisticClassifierClass:
         features_impact_dict = sorted_df[['features_name','norm_importance']].to_dict(orient='list')
         
         return features_impact_dict
-       
-    def save_model(self,model):
-        
-        """This function is used to save model file.
-        """
-        
-        filename = 'logistic_classifier_finalized_model.sav'
-        # pickle.dump(model, open(filename, 'wb'))
 
-    def get_actual_prediction(self,model,X_test,y_test):
+
+    def get_actual_prediction(self,model):
         
         """This function is used to get actuals and predictions.
 
         Returns:
             [list]: [it will return actual and prediction list.]
         """
-        X_train = self.X_train[:,1:]
-        X_test = X_test[:, 1:]
-  
-        prediction_arr = model.predict(X_test)
+        X_test = self.X_test[:, 1:]
+        prediction_arr = model.predict(X_test).reshape(-1, 1)
         prediction_lst = prediction_arr.tolist()
 
-        actual_values = y_test[:,1]
+        actual_values = self.y_test[:,1].reshape(-1, 1)
         actual_lst = actual_values.tolist()
-        
+    
         if len(self.target_features_list) == 1 :
-            
-            prediction_flat_lst = [item for elem in prediction_lst for item in elem]
             actual_flat_lst = actual_lst 
-            return actual_flat_lst,prediction_flat_lst
+    
+            return actual_lst,prediction_lst
         
         else:
+            print("LEN IS TWOOOOOOOOOOOOOOOOOOOOooo--------------------")
             prediction_flat_lst =  [ list(map(sub_lst)) for sub_lst in prediction_lst ]
             actual_flat_lst =  [ list(map(sub_lst)) for sub_lst in actual_lst ]
             return actual_flat_lst,prediction_flat_lst
@@ -184,13 +163,7 @@ class LogisticClassifierClass:
         """This function is used to save test results or predictions.
         """
          
-        # y_test.reset_index(inplace = True, drop = True)
-        # append_str = '_prediction'
-        # target_features_suf_res = [sub + append_str for sub in self.target_features]
-        # test_results_df = pd.DataFrame(prediction_lst, columns = target_features_suf_res) 
-        
-        # final_result_df = pd.concat([y_test,test_results_df],axis=1)
-        
+        y_df = pd.DataFrame(y_test[:,1],columns=self.target_features_list)
         y_df.reset_index(inplace = True, drop = True)
         y_df['index']=y_test[:,0]
         append_str = '_prediction'
@@ -211,7 +184,6 @@ class LogisticClassifierClass:
         Returns:
             [dict]: [it will return model matrices.]
         """
-        
         score = accuracy_score(actual_lst,prediction_lst)
         ## Accuray e AUC
         accuracy = accuracy_score(actual_lst, prediction_lst)
@@ -219,12 +191,13 @@ class LogisticClassifierClass:
         ## Precision e Recall
         recall = recall_score(actual_lst, prediction_lst, pos_label='positive',average='micro')
         precision = precision_score(actual_lst, prediction_lst, pos_label='positive',average='micro')
-        
-        classes = np.unique(actual_lst)
-        
+        # print('ACTUAL LSTTT:-         ', actual_lst.shape)
+        classes = np.unique(actual_lst).astype(object)
         CM = confusion_matrix(actual_lst,prediction_lst,labels=classes)
+        CM_df = pd.DataFrame(CM, columns=classes+'_true', index=classes+'_predicted')
+        CM_dict = CM_df.to_dict()
         
-        return CM,round(accuracy,2),round(recall,2),round(precision,2)
+        return CM_dict,round(accuracy,2),round(recall,2),round(precision,2)
         
     def model_summary(self,X_train, X_test,y_train):
         
@@ -244,7 +217,7 @@ class LogisticClassifierClass:
                          "Train Split":self.dataset_split_dict['train_size'],"Test Split":float(self.dataset_split_dict['test_size']),
                          "Random State":int(self.dataset_split_dict['random_state']),
                          "Valid Split":self.dataset_split_dict['valid_size'],
-                         "CV (K-Fold )":int(self.dataset_split_dict['cv'])}
+                         "CV (K-Fold )":self.dataset_split_dict['cv']}
         
         
         return model_summary
@@ -290,7 +263,7 @@ class LogisticClassifierClass:
         actual = y_test[:, 1]
         
         prediction = model.predict(X_test)
-        holdout_score = r2_score(actual,prediction)
+        holdout_score = accuracy_score(actual,prediction)
 
         return holdout_score
       
@@ -299,40 +272,50 @@ class LogisticClassifierClass:
         
         """This function is used as a pipeline which will execute function in a sequence.
         """
-        self.X_train, self.X_test, self.y_train, self.y_test = self.split_dataset()
         # train the model
         model = self.train_model(self.X_train,self.y_train)
         # get features importance
         features_impact_dict = self.features_importance(model,self.X_train) 
         # get actual and predicted values 
-        actual_lst,prediction_lst = self.get_actual_prediction(model,self.X_test,self.y_test)
+        actual_lst,prediction_lst = self.get_actual_prediction(model)
         # save prediction
-        self.save_prediction(self.y_test,prediction_lst)
+        final_result_dict = self.save_prediction(self.y_test,prediction_lst)
         # all evaluation matrix
-        CM,accuracy,recall,precision = self.get_evaluation_matrix(actual_lst,prediction_lst)  
+        confusion_matrix,accuracy,recall,precision = self.get_evaluation_matrix(actual_lst,prediction_lst)  
         # get cv score
         if self.dataset_split_dict['split_method'] == 'cross_validation':
             cv_score = self.cv_score(self.X_train,self.y_train) # default k-fold with 5 (r2-score)
         else:
-            cv_score = None
+            cv_score = 0
         # get holdout score
         holdout_score = self.holdout_score(model,self.X_test,self.y_test) # default 80:20 splits (r2-score)
         # get model summary
+
+        MLPipelineClass.store_model_metrics(accuracy=accuracy, recall=recall, precision=precision, cv_score=cv_score,
+                                            holdout_score=holdout_score)
         model_summary = self.model_summary(self.X_train, self.X_test,self.y_train) # high level model summary
         # get model learning curve
         learning_curve_dict = self.get_learning_curve(model,self.X_train,self.y_train)
         
-        # log mlflow parameter
+        # log mlflow parameter TODO change it to a for loop in future.
+        mlflow.log_param("split method", self.dataset_split_dict['split_method'])
+        mlflow.log_param("train ratio", 1-(self.dataset_split_dict['test_ratio'] + self.dataset_split_dict['valid_ratio']))
+        mlflow.log_param("test ratio", self.dataset_split_dict['test_ratio'])
+        mlflow.log_param("valid ratio", self.dataset_split_dict['valid_ratio'])
         mlflow.log_param("random state", self.dataset_split_dict['random_state'])
-        mlflow.log_param("train size", 1-self.dataset_split_dict['test_size'])
-        mlflow.log_param("test size", self.dataset_split_dict['test_size'])
         mlflow.log_param("k-fold", self.dataset_split_dict['cv'])
+        mlflow.log_param("train size", self.dataset_split_dict['train_size'])
+        mlflow.log_param("test size", self.dataset_split_dict['test_size'])
+        mlflow.log_param("valid size", self.dataset_split_dict['valid_size'])
         
         # log mlflow matrix
         # mlflow.log_metric("confusion matrix", CM)
         mlflow.log_metric("accuracy", accuracy)
         mlflow.log_metric("recall", recall)
         mlflow.log_metric("precision", precision)
+        mlflow.log_metric("holdout_score", holdout_score)
+        mlflow.log_metric("cv_score", cv_score)
+        
        
         # log artifacts (output files)
         mlflow.sklearn.log_model(model,"Linear_Regressor_Model")
@@ -340,4 +323,5 @@ class LogisticClassifierClass:
         mlflow.log_dict(features_impact_dict,"features_importance.json")
         mlflow.log_dict(model_summary,"model_summary.json")
         mlflow.log_dict(final_result_dict,"predictions.json")
+        mlflow.log_dict(confusion_matrix, "confusion_matrix.json")
         
