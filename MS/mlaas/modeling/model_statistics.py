@@ -6,6 +6,8 @@ from pandas import DataFrame
 import logging
 import traceback
 from common.utils.logger_handler import custom_logger as cl
+from common.utils.exception_handler.python_exception.modeling.modeling_exception import *
+from common.utils.exception_handler.python_exception.common.common_exception import *
 # from MS.mlaas.modeling.views import SelectAlgorithmClass
 
 user_name = 'admin'
@@ -41,6 +43,12 @@ class ModelStatisticsClass:
             logging.info("modeling : ModelStatisticsClass : learning_curve : execution end"+str(experiment_id))
             
             artifact_uri = self.DBObject.select_records(self.connection, sql_command).iloc[0,0]
+            if artifact_uri is None:
+                raise DatabaseConnectionFailed(500)
+
+            if len(artifact_uri) == 0 :
+                raise DataNotFound(500) 
+
             logging.info("modeling : ModelStatisticsClass : learning_curve : execution end"+str(artifact_uri))
             learning_curve_uri = artifact_uri + '/learning_curve.json'
             # json_data = open(learning_curve_uri, 'r')
@@ -55,10 +63,10 @@ class ModelStatisticsClass:
             #     learning_curve[key] = round(decoded_data[key], 2)            
             # return learning_curve
             logging.info("modeling : ModelStatisticsClass : learning_curve : execution end")
-        except Exception as exc:
+        except (DatabaseConnectionFailed,DataNotFound) as exc:
             logging.error("modeling : ModelStatisticsClass : learning_curve : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : learning_curve : " +traceback.format_exc())
-            return str(exc)
+            return exc.msg
         return learning_curve_rounded_df
 
 
@@ -77,6 +85,12 @@ class ModelStatisticsClass:
 
             sql_command = 'select artifact_uri from mlaas.runs where experiment_id='+str(experiment_id)
             artifact_uri = self.DBObject.select_records(self.connection, sql_command).iloc[0,0]
+            if artifact_uri is None:
+                raise DatabaseConnectionFailed(500)
+
+            if len(artifact_uri) == 0 :
+                raise DataNotFound(500) 
+
             actual_vs_prediction_uri = artifact_uri + '/predictions.json'
             # json_data = open(actual_vs_prediction_uri, 'r')
             # actual_vs_prediction = json_data.read()
@@ -84,10 +98,10 @@ class ModelStatisticsClass:
                 actual_vs_prediction_df = json.load(rf)
 
             logging.info("modeling : ModelStatisticsClass : actual_vs_prediction : execution end")
-        except Exception as exc:
+        except (DatabaseConnectionFailed,DataNotFound) as exc:
             logging.error("modeling : ModelStatisticsClass : actual_vs_prediction : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : actual_vs_prediction : " +traceback.format_exc())
-            return str(exc)
+            return exc.msg
         return actual_vs_prediction_df
 
 
@@ -106,6 +120,11 @@ class ModelStatisticsClass:
             logging.info("modeling : ModelStatisticsClass : features_importance : execution end")
             sql_command = 'select artifact_uri from mlaas.runs where experiment_id='+str(experiment_id)
             artifact_uri = self.DBObject.select_records(self.connection, sql_command).iloc[0,0]
+            if artifact_uri is None:
+                raise DatabaseConnectionFailed(500)
+
+            if len(artifact_uri) == 0 :
+                raise DataNotFound(500)
             features_importance_uri = artifact_uri + '/features_importance.json'
             #json_data = open(features_importance_uri, 'r')
             #features_importance = json_data.read()
@@ -115,10 +134,10 @@ class ModelStatisticsClass:
             features_importance_rounded_df = pd.DataFrame(features_importance_df).round(decimals = 2)
             #features_importance_rounded_df = features_importance_rounded_df.sort_values('norm_importance',ascending = False)
             logging.info("modeling : ModelStatisticsClass : actual_vs_prediction : execution end")
-        except Exception as exc:
+        except (DatabaseConnectionFailed,DataNotFound) as exc:
             logging.error("modeling : ModelStatisticsClass : features_importance : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : features_importance : " +traceback.format_exc())
-            return str(exc)
+            return exc.msg
 
         return features_importance_rounded_df
 
@@ -137,14 +156,20 @@ class ModelStatisticsClass:
 
             sql_command = 'select artifact_uri from mlaas.runs where experiment_id='+str(experiment_id)
             artifact_uri = self.DBObject.select_records(self.connection, sql_command).iloc[0,0]
+            if artifact_uri is None:
+                raise DatabaseConnectionFailed(500)
+
+            if len(artifact_uri) == 0 :
+                raise DataNotFound(500)
+
             model_summary_uri = artifact_uri + '/model_summary.json'
             json_data = open(model_summary_uri, 'r')
             model_summary = json_data.read()
 
-        except Exception as exc:
+        except (DatabaseConnectionFailed,DataNotFound) as exc:
             logging.error("modeling : ModelStatisticsClass : model_summary : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : model_summary : " +traceback.format_exc())
-            return str(exc)
+            return exc.msg
         return model_summary
     
     def performance_metrics(self, experiment_id): # Remaining
@@ -161,15 +186,38 @@ class ModelStatisticsClass:
             logging.info("modeling : ModelStatisticsClass : performance_metrics : execution start")            
             sql_command = 'select run_uuid from mlaas.runs where experiment_id='+str(experiment_id)
             run_uuid = self.DBObject.select_records(self.connection, sql_command).iloc[0, 0]
+            if run_uuid is None:
+                raise DatabaseConnectionFailed(500)
+
+            if len(run_uuid) == 0 :
+                raise DataNotFound(500)
             
             sql_command = "select key, value from mlaas.metrics where run_uuid='"+str(run_uuid) +"'"
             metrics_df = self.DBObject.select_records(self.connection, sql_command).set_index('key')
+            if metrics_df is None:
+                raise DatabaseConnectionFailed(500)
+
+            if len(metrics_df) == 0 :
+                raise DataNotFound(500)
+            
             metrics_rounded_df = DataFrame(metrics_df, columns = ['value']).round(decimals = 2)
 
             sql_command = 'select model_id, exp_created_on from mlaas.model_experiment_tbl where experiment_id='+str(experiment_id)
             model_experiment_tbl_data = self.DBObject.select_records(self.connection, sql_command).iloc[0, :]
+            if model_experiment_tbl_data is None:
+                raise DatabaseConnectionFailed(500)
+
+            if len(model_experiment_tbl_data) == 0 :
+                raise DataNotFound(500)
+
             sql_command = 'select model_name from mlaas.model_master_tbl where model_id='+str(model_experiment_tbl_data['model_id'])
             model_name = self.DBObject.select_records(self.connection, sql_command).iloc[0, 0]
+
+            if model_name is None:
+                raise DatabaseConnectionFailed(500)
+
+            if len(model_name) == 0 :
+                raise DataNotFound(500)
             
             # final_df = pd.merge(metrics_df, model_name_df, left_index=True, right_index=True)
             # metrics_dict = metrics_df.to_dict()
@@ -180,10 +228,10 @@ class ModelStatisticsClass:
             model_desc = {'model_name': model_name, 'exp_created_on': model_experiment_tbl_data['exp_created_on']}
             metrics_json.update(model_desc)
             logging.info("modeling : ModelStatisticsClass : performance_metrics : execution end")
-        except Exception as exc:
+        except (DatabaseConnectionFailed,DataNotFound) as exc:
             logging.error("modeling : ModelStatisticsClass : performance_metrics : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : performance_metrics : " +traceback.format_exc())
-            return str(exc)
+            return exc.msg
         return metrics_json
 
 
@@ -209,6 +257,12 @@ class ModelStatisticsClass:
                 
                 sql_command = "select key, value from mlaas.metrics where run_uuid= (select run_uuid from mlaas.runs where experiment_id={}) and (key='cv_score' or key='holdout_score')".format(str(experiment_ids[0]))
             df = self.DBObject.select_records(self.connection, sql_command)
+            if df is None:
+                raise DatabaseConnectionFailed(500)
+
+            if len(df) == 0 :
+                raise DataNotFound(500)
+                
             logging.info('DF:- ' + str(df))
             cv_score_df = df[df['key'] == 'cv_score'].reset_index(drop=True).rename(columns={'value': 'cv_score'})['cv_score']
             holdout_score_df = df[df['key'] == 'holdout_score'].reset_index(drop=True).rename(columns={'value': 'holdout_score'})['holdout_score']
@@ -216,10 +270,10 @@ class ModelStatisticsClass:
             holdout_score_rounded_df = DataFrame(holdout_score_df, columns = ['holdout_score']).round(decimals = 2)
             accuracy_df = pd.merge(cv_score_rounded_df, holdout_score_rounded_df, left_index=True, right_index=True)
             logging.info("modeling : ModelStatisticsClass : accuracy_metrics : execution end")
-        except Exception as exc:
+        except (DatabaseConnectionFailed,DataNotFound) as exc:
             logging.error("modeling : ModelStatisticsClass : accuracy_metrics : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : accuracy_metrics : " +traceback.format_exc())
-            return str(exc)
+            return exc.msg
         return accuracy_df
 
 
@@ -238,6 +292,11 @@ class ModelStatisticsClass:
             logging.info("modeling : ModelStatisticsClass : show_model_details : execution start")
             sql_command = 'select ms.model_id,ms.model_name,ms.model_desc,exp.experiment_id from mlaas.model_experiment_tbl exp,mlaas.model_master_tbl ms where exp.model_id = ms.model_id and exp.project_id ='+str(project_id)
             model_details_df = self.DBObject.select_records(self.connection, sql_command)
+            if model_details_df is None:
+                raise DatabaseConnectionFailed(500)
+
+            if len(model_details_df) == 0 :
+                raise DataNotFound(500)
             
             accuracy_df = self.accuracy_metrics(project_id)
 
@@ -246,14 +305,14 @@ class ModelStatisticsClass:
             final_model_data = json.loads(json_data)
 
             logging.info("modeling : ModelStatisticsClass : show_model_details : execution end")
-        except Exception as exc:
+        except (DatabaseConnectionFailed,DataNotFound) as exc:
             logging.error("modeling : ModelStatisticsClass : show_model_details : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : show_model_details : " +traceback.format_exc())
-            return str(exc)
+            return exc.msg
         return final_model_data
 
 
-    def show_running_experiments(self, project_id,exp_name):
+    def show_running_experiments(self, project_id):
         """This function is used to get experiments_list of particular project.
 
         Args:
@@ -265,25 +324,24 @@ class ModelStatisticsClass:
         """
         try:
             # Get the necessary values from the mlaas.model_experiment_tbl
-            sql_command ="select run_id from mlaas.model_dags_tbl where project_id="+str(project_id)+" and exp_name='"+exp_name+"'"
-            model_dag_df = self.DBObject.select_records(self.connection,sql_command)
-            
-            dag_run_id = model_dag_df['run_id'][0]
-            
             sql_command = "select met.*,e.name as experiment_name,mmt.model_name,dt.dataset_name,round(cast(sv.cv_score as numeric),3) as cv_score,round(cast(sv.holdout_score as numeric),3) as holdout_score "\
                           "from mlaas.model_experiment_tbl met,mlaas.model_master_tbl mmt,mlaas.score_view sv,mlaas.dataset_tbl dt,mlaas.experiments e "\
                           "where met.model_id = mmt.model_id and met.experiment_id=sv.experiment_id and met.dataset_id=dt.dataset_id and met.experiment_id=e.experiment_id "\
-                          "and met.project_id="+str(project_id) +" and met.dag_run_id='"+ dag_run_id +"' and met.status='running'"
+                          "and met.project_id="+str(project_id) +" and met.status='running'"
                           
             model_experiment_data_df = self.DBObject.select_records(self.connection, sql_command)
-    
+            if model_experiment_data_df is None:
+                raise DatabaseConnectionFailed(500)
+
+            if len(model_experiment_data_df) == 0 :
+                raise DataNotFound(500)
             # Converting final_df to json
             json_data = model_experiment_data_df.to_json(orient='records',date_format='iso')
             final_data = json.loads(json_data)
-        except Exception as exc:
+        except (DatabaseConnectionFailed,DataNotFound) as exc:
             logging.error("modeling : ModelStatisticsClass : show_experiments_list : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : show_experiments_list : " +traceback.format_exc())
-            return str(exc)
+            return exc.msg
         return final_data
     
     def show_all_experiments(self, project_id):
@@ -304,13 +362,19 @@ class ModelStatisticsClass:
                           " and met.project_id="+str(project_id)
                           
             model_experiment_data_df = self.DBObject.select_records(self.connection, sql_command)
+
+            if model_experiment_data_df is None:
+                raise DatabaseConnectionFailed(500)
+
+            if len(model_experiment_data_df) == 0 :
+                raise DataNotFound(500)
             # Converting final_df to json
             json_data = model_experiment_data_df.to_json(orient='records',date_format='iso')
             final_data = json.loads(json_data)
-        except Exception as exc:
+        except (DatabaseConnectionFailed,DataNotFound) as exc:
             logging.error("modeling : ModelStatisticsClass : show_experiments_list : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : show_experiments_list : " +traceback.format_exc())
-            return str(exc)
+            return exc.msg
         return final_data
     
     

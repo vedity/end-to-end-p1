@@ -31,16 +31,9 @@ logger = logging.getLogger('view')
 DBObject=db.DBClass()     #Get DBClass object
 connection,connection_string=DBObject.database_connection(database,user,password,host,port)      #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 
+AlgorithmDetectorObj = AlgorithmDetector(DBObject, connection)
+
 ModelStatObject = ModelStatisticsClass(DBObject,connection)
-#ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp
-#################### DO NOT CHANGE THIS AT THIS POINT ################
-
-Model_Mode ="Auto"
-project_id,dataset_id,user_id = 2,2,2
-
-
-###############
-
 
 
 
@@ -69,17 +62,9 @@ class ShowDatasetInfoClass(APIView):
                         project_id = request.query_params.get('project_id')
                         dataset_id = request.query_params.get('dataset_id')
                         user_id=request.query_params.get('user_id')
+
                         
-                        project_id,dataset_id,user_id = 2,2,2
-                        ModelObject = ModelClass(Model_Mode,
-                                        user_id,
-                                        project_id,
-                                        dataset_id, 
-                                        DBObject,
-                                        connection, 
-                                        connection_string)
-                        
-                        project_name, dataset_name, target_columns = ModelObject.get_dataset_info()
+                        project_name, dataset_name, target_columns = AlgorithmDetectorObj.get_dataset_info(project_id, dataset_id, user_id)
                         
                         show_dataset_info_dictionary = {"project_name":project_name,
                                                         "dataset_name":dataset_name,
@@ -122,15 +107,13 @@ class StartModelClass(APIView):
                         Model_Mode = request.query_params.get('model_mode')
                         # NEED TO GET USER ID
                         user_name = request.query_params.get('user_name')
-                        user_id = 1
+                        user_id = 1 # get user id from user auth table
                         project_id = int(request.query_params.get('project_id'))
                         dataset_id = int(request.query_params.get('dataset_id'))
                         
+                        model_type = 'Regression' #TODO get from front-end
                         
-                        # user_id,dataset_id,project_id = 1,2,1 
 
-                        # Model_Mode = 'Auto'
-                        
                         experiment_name = request.query_params.get('experiment_name')
                         experiment_desc ='this is for testing'
                         
@@ -141,29 +124,25 @@ class StartModelClass(APIView):
 
                         if Model_Mode == 'Auto': 
                                 # SplitDataObject = ModelObject.split_dataset(basic_split_parameters)
-                                ModelObject.algorithm_identifier(experiment_name,experiment_desc)
+                                ModelObject.algorithm_identifier(model_type,experiment_name,experiment_desc)
                                 logging.info("modeling : ModelClass : GET Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully updated","response":"pipeline started"})
                         else:
                                 
+                                model_id = int(request.query_params.get('model_id'))
+                                # hyperparameters = request.query_params.get('hyperparameters')
+                                hyperparameters = {"epochs": 10, "learning_rate": 0.01, "batch_size": 32, "loss": "mean_absolute_error", "optimizer": "Adam", 
+                                        "activation": "relu"}
                                 
-                                split_method = request.POST.get('split_method')
-                                cv = request.POST.get('cv')
-                                valid_size = request.POST.get('valid_size')
-                                test_size = request.POST.get('test_size')
-                                random_state = request.POST.get('random_state')
+                                ModelObject = ModelClass(Model_Mode,user_id, project_id,dataset_id,
+                                                DBObject,connection,connection_string)
                                 
-                                model_id = request.POST.get('model_id')
-                                model_name = request.POST.get('model_name')
-                                model_type = request.POST.get('model_type')
+                                ModelObject.store_manual_model_params(manual_model_params_dict)
+                                # model_type = 'Regression'
+                                ModelObject.run_model(model_type, model_id, experiment_name, experiment_desc)
                                 
-                                
-                                basic_split_parameters = {'model_mode': model_mode, 'split_method': split_method ,
-                                                           'cv': cv, 'valid_size': valid_size, 'test_size': test_size,
-                                                           'random_state': random_state}
-                                
-                                split_dataset = ModelObject.split_dataset((basic_split_parameters))
-                                
+                                logging.info("modeling : ModelClass : GET Method : execution stop : status_code :200")
+                                return Response({"status_code":"200","error_msg":"Successfully updated","response":"True"})
                                 
                                 
                 except Exception as e:
@@ -333,14 +312,11 @@ class ShowExperimentsListClass(APIView):
                 try:
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
                         
-                        project_id = int(request.query_params.get('project_id')) #get Username
-                        exp_name = request.query_params.get('experiment_name')
-                        
-                        # exp_name = 'jay_code_scaled_data'
-                        experiment_data =ModelStatObject.show_running_experiments(project_id,exp_name)
+                        project_id = int(request.query_params.get('project_id')) 
+                        experiment_data =ModelStatObject.show_running_experiments(project_id)
                         
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
-                        # print(learning_curve_json)
+                       
                         return Response({"status_code":"200","error_msg":"Successfully updated","response":experiment_data})
                         
                 except Exception as e:
@@ -365,9 +341,8 @@ class ShowAllExperimentsListClass(APIView):
                 try:
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
                         
-                        project_id = int(request.query_params.get('project_id')) #get Username
+                        project_id = int(request.query_params.get('project_id')) 
                 
-                        
                         experiment_data =ModelStatObject.show_all_experiments(project_id)
                         
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
@@ -399,8 +374,7 @@ class CheckModelStatusClass(APIView):
                         project_id = int(request.query_params.get('project_id')) #get Username
                         
                         experiment_name = request.query_params.get('experiment_name')
-                
-                        
+        
                         experiment_data =ModelStatObject.check_model_status(project_id,experiment_name)
                         
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
@@ -448,7 +422,7 @@ class SelectAlgorithmClass(APIView):
 
 #class to start and stop model
 #It will take url string as mlaas/modeling/featureimportance/.                                 
-class HyperParametersClass(APIView):
+class ShowHyperParametersClass(APIView):
 
         def get(self, request, format=None):
                 """
@@ -484,70 +458,3 @@ class HyperParametersClass(APIView):
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
-
-# Start And End
-class SplitDataClass(APIView):
-        def post(self,request,format=None):
-                """
-                This function is used to get Project Name, Dataset name and List of Target Columns which are uploaded user.
-
-                Args  : 
-                        project_id[(Integer)] :[ID of project]
-                        dataset_id[(Integer)] :[ID of dataset]
-                        user_id[(Integer)] :[ID of user]
-                        split_data_dictionary[(Dictionary)] : [Dictionary of Split Data]
-
-                Return : 
-                        status_code(500 or 200),
-                        error_msg(Error message for deletion failed or successfull),
-                        Response(false or true)
-                """
-                try:
-                        logging.info(": : POST Method : execution start")
-                        
-                        Model_Mode = "Auto"
-
-                        ModelObject = ModelClass(Model_Mode,input_features_list,target_features_list,project_id,
-                                                 dataset_id, user_id, DBObject, connection, connection_string)
-                        
-                        
-                        model_mode = request.POST.get('model_mode')
-                        
-                        if model_mode == 'manual': 
-                                split_method = request.POST.get('split_method')
-                                cv = request.POST.get('cv')
-                                valid_size = request.POST.get('valid_size')
-                                test_size = request.POST.get('test_size')
-                                random_state = request.POST.get('random_state')
-                                model_id = request.POST.get('model_id')
-                                model_name = request.POST.get('model_name')
-                                model_type = request.POST.get('model_type')
-                                basic_split_parameters = {}
-                                basic_split_parameters['model_mode']=model_mode
-                                basic_split_parameters['split_method']=split_method
-                                basic_split_parameters['cv']=cv
-                                basic_split_parameters['valid_size']= valid_size
-                                basic_split_parameters['test_size']= test_size
-                                basic_split_parameters['random_state']= random_state
-                                split_data_object = ModelObject.split_dataset(basic_split_parameters)
-
-                        elif model_mode == 'auto':
-                                
-                                basic_split_parameters = {'model_mode': model_mode}
-                                split_data_object = ModelObject.split_dataset(basic_split_parameters)
-                                
-                                
-                        ModelObject.run_model(model_id,model_name,model_type,split_data_object)
-                        if run_model_status !=True:
-                                status_code,error_msg=get_Status_code(run_model_status) # extract the status_code and error_msg from schema_status
-                                logging.info(" :  : POST Method : execution stop : status_code :"+status_code)
-                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
-                        else:
-                                logging.info(": : POST Method : execution stop : status_code :200")
-                                return Response({"status_code":"200","error_msg":"Successfully updated","response":"true"})           
-                except Exception as e:
-                        logging.error(": : POST Method : Exception :" + str(e))
-                        logging.error(": : POST Method : " +traceback.format_exc())
-                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
-                
-                

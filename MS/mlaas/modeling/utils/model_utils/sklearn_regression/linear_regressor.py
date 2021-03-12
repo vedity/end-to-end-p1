@@ -41,11 +41,11 @@ logger = logging.getLogger('view')
 class LinearRegressionClass:
     
     def __init__(self, input_features_list, target_features_list, X_train, X_valid, X_test, 
-                y_train, y_valid, y_test, dataset_split_dict):
+                y_train, y_valid, y_test, scaled_split_dict):
         
         """This is used to initialise the model input parameter when model class is called.
         """
-        self.dataset_split_dict = dataset_split_dict # This object stores the variables used to split the data.
+        self.dataset_split_dict = scaled_split_dict # This object stores the variables used to split the data.
         # List of input features(which are used to train the model)
         self.input_features_list = input_features_list[1:] 
         # list of target features (features to be predicted)
@@ -180,8 +180,9 @@ class LinearRegressionClass:
         test_results_df = pd.DataFrame(prediction_lst, columns = target_features_suf_res) 
         
         final_result_df = pd.concat([y_df,test_results_df],axis=1)
+        print("final results ==",final_result_df)
         final_result_dict = final_result_df.to_dict(orient='list') 
-        
+        print("final results dict ==",final_result_dict)
         return final_result_dict
         
         
@@ -223,8 +224,9 @@ class LinearRegressionClass:
                          "Input Features":self.input_features_list,
                          "Target Features":self.target_features_list,
                          "Train Size":int(train_size),"Test Size":int(test_size),
-                         "Train Split":1-float(self.dataset_split_dict['test_size']),"Test Split":float(self.dataset_split_dict['test_size']),
+                         "Train Split":self.dataset_split_dict['train_size'],"Test Split":float(self.dataset_split_dict['test_size']),
                          "Random State":int(self.dataset_split_dict['random_state']),
+                         "Valid Split":self.dataset_split_dict['valid_size'],
                          "CV (K-Fold )":int(self.dataset_split_dict['cv'])}
         
         
@@ -279,8 +281,6 @@ class LinearRegressionClass:
         return holdout_score
 
         
-        
-        
     def run_pipeline(self):
         
         """This function is used as a pipeline which will execute function in a sequence.
@@ -296,7 +296,10 @@ class LinearRegressionClass:
         # all evaluation matrix
         r2score,mse,mae,mape = self.get_evaluation_matrix(actual_lst,prediction_lst)  
         # get cv score
-        cv_score = self.cv_score(self.X_train,self.y_train) # default k-fold with 5 (r2-score)
+        if self.dataset_split_dict['split_method'] == 'cross_validation':
+            cv_score = self.cv_score(self.X_train,self.y_train) # default k-fold with 5 (r2-score)
+        else:
+            cv_score = None
         # get holdout score
         holdout_score = self.holdout_score(model,self.X_test,self.y_test) # default 80:20 splits (r2-score)
         # get model summary
