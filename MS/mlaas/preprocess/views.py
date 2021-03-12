@@ -358,11 +358,12 @@ class CleanupSave(APIView):
                 '''
                 try:
                         logging.info("data preprocess : CleanupSave : POST Method : execution start")
+                        project_id = request.query_params.get('project_id') #get schema id
                         schema_id = request.query_params.get('schema_id') #get schema id
                         dataset_id = request.query_params.get('dataset_id') #get dataset id
                         data = json.dumps(request.data) #get handling json
                         data = json.loads(data) 
-                        operation = preprocessObj.master_executor(dataset_id,schema_id,data)
+                        operation = preprocessObj.master_executor(project_id, dataset_id,schema_id,data)
                         logging.info("data preprocess : CleanupSave : POST Method : execution stop")
                         return Response({"status_code":"200","error_msg":"Successfull retrival","response":operation})
 
