@@ -20,52 +20,52 @@ MVH_OBJECT = mvh.MissingValueClass()
 
 class RemoveNoiseClass:
     
-    # def _check_string_col(self, series):
-    #     '''
-    #         This Function is used to check if given column is string column or not.
-    #         It also checks if this column is cleanable or not.
-    #         #!Note: This function is only produces accurate results for object dtype columns. 
+    def _check_string_col(self, series):
+        '''
+            This Function is used to check if given column is string column or not.
+            It also checks if this column is cleanable or not.
+            #!Note: This function is only produces accurate results for object dtype columns. 
         
-    #         Args:
-    #             Series(pandas.Series): The Column you want to check.
+            Args:
+                Series(pandas.Series): The Column you want to check.
                 
-    #         Returns:
-    #             is_string_col(boolean): True if the column is completely string.
-    #             is_val_str_col(boolean): True if the column can be converted into numerical.
-    #             is_string_minority(boolean): True is (Float or int) column has negeligible amount of string noise. 
-    #     '''
+            Returns:
+                is_string_col(boolean): True if the column is completely string.
+                is_val_str_col(boolean): True if the column can be converted into numerical.
+                is_string_minority(boolean): True is (Float or int) column has negeligible amount of string noise. 
+        '''
         
-    #     try:
-    #         #? Defining required lists & booleans
-    #         dtype = []
-    #         valid_digit = []
-    #         is_string_col = False
-    #         is_val_str_col = False
-    #         is_string_minority = False
+        try:
+            #? Defining required lists & booleans
+            dtype = []
+            valid_digit = []
+            is_string_col = False
+            is_val_str_col = False
+            is_string_minority = False
             
-    #         #? Getting Datatypes
-    #         for data in series:
-    #             dtype.append(type(data))
+            #? Getting Datatypes
+            for data in series:
+                dtype.append(type(data))
                 
-    #         #? Verifying the column type: if object column contains only one datatype then its a string column.
-    #         if len(set(dtype)) == 1:
-    #             is_string_col = True
+            #? Verifying the column type: if object column contains only one datatype then its a string column.
+            if len(set(dtype)) == 1:
+                is_string_col = True
                 
-    #             #? Checking if the whole column can be converted to string or not.
-    #             for data in series:
-    #                 valid_digit.append(data.isdigit())
-    #             valid_digit_set = list(set(valid_digit))
-    #             if len(valid_digit_set) == 1 and valid_digit_set[0] == True:
-    #                 is_val_str_col = True
-    #         #? If object column has more than 1 datatypes then checking if the string can be ignored or not.
-    #         else:
-    #             dtype_dict = Counter(dtype)
-    #             if (dtype_dict.get(str)/len(series)) <= 0.33:
-    #                 is_string_minority = True
+                #? Checking if the whole column can be converted to string or not.
+                for data in series:
+                    valid_digit.append(data.isdigit())
+                valid_digit_set = list(set(valid_digit))
+                if len(valid_digit_set) == 1 and valid_digit_set[0] == True:
+                    is_val_str_col = True
+            #? If object column has more than 1 datatypes then checking if the string can be ignored or not.
+            else:
+                dtype_dict = Counter(dtype)
+                if (dtype_dict.get(str)/len(series)) <= 0.33:
+                    is_string_minority = True
                     
-    #         return is_string_col,is_val_str_col,is_string_minority
-    #     except:
-    #         return False,False,False
+            return is_string_col,is_val_str_col,is_string_minority
+        except:
+            return False,False,False
         
     # def get_noisy_columns(self, data_df):
     #     '''
@@ -104,41 +104,41 @@ class RemoveNoiseClass:
                     
     #     return noisy_cols, cleanable_cols, valid_str_cols
     
-    # def detect_noise(self, series):
-    #     '''
-    #         Takes series as an input.
-    #         This function returns Noisy columns, Cleanable columns & Numeric_str cols for given series.
+    def detect_noise(self, series):
+        '''
+            Takes series as an input.
+            This function returns Noisy columns, Cleanable columns & Numeric_str cols for given series.
             
-    #         Args:
-    #             data_df(pandas.Series): the Series containing the column data.
+            Args:
+                data_df(pandas.Series): the Series containing the column data.
                 
-    #         Returns:
-    #             noisy(boolean): Is the column noisy?
-    #             cleanable(boolean): Can the column be cleaned?
-    #             valid_str(boolean): Can the column be converted to numerical?
-    #     '''
+            Returns:
+                noisy(boolean): Is the column noisy?
+                cleanable(boolean): Can the column be cleaned?
+                valid_str(boolean): Can the column be converted to numerical?
+        '''
         
-    #     #? Is the column of object dtype? if not the the column is not noisy
-    #     if series.dtypes != object:
-    #         return False, False, False
-    #     else:
-    #         noisy = False
-    #         valid_str = False
-    #         cleanable = False
+        #? Is the column of object dtype? if not the the column is not noisy
+        if series.dtypes != object:
+            return False, False, False
+        else:
+            noisy = False
+            valid_str = False
+            cleanable = False
 
-    #         is_string_col,is_val_str_col,is_string_minority = self._check_string_col(series)
-    #         #? if the column is not string column then the column is noisy
-    #         if not is_string_col:
-    #             noisy = True
-    #             #? Is is cleanable
-    #             if is_string_minority:
-    #                 cleanable = True
-    #         else:
-    #             #? Can it be converted to numerical columns
-    #             if is_val_str_col:
-    #                 valid_str = True
+            is_string_col,is_val_str_col,is_string_minority = self._check_string_col(series)
+            #? if the column is not string column then the column is noisy
+            if not is_string_col:
+                noisy = True
+                #? Is is cleanable
+                if is_string_minority:
+                    cleanable = True
+            else:
+                #? Can it be converted to numerical columns
+                if is_val_str_col:
+                    valid_str = True
 
-    #         return noisy, cleanable, valid_str
+            return noisy, cleanable, valid_str
         
     # def drop_noise(self, series):
     #     '''
@@ -233,11 +233,11 @@ class RemoveNoiseClass:
     # def to_string_col(self, Series, cols):
     #     pass
     
-    def detect_noise(self, DBObject, connection, table_name, column_name):
-        '''
-            Detects if there is removable noise present in the column.
-        '''
+    # def detect_noise(self, DBObject, connection, table_name, column_name):
+    #     '''
+    #         Detects if there is removable noise present in the column.
+    #     '''
         
-        pass
+    #     pass
     
     

@@ -760,14 +760,12 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     status = self.frequent_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
                     flag = True
                 elif op == 9:
-                    status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
+                    status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, col)
                     flag = True
-                elif op == 10:
+                elif op == 23:
                     #? Getting Dataframe
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.random_sample_imputation(data_df, col)
+                    status = self.random_sample_imputation(DBObject,connection,column_list, dataset_table_name,col)
+
                 elif op == 11:
                     data_df = self.get_data_df(dataset_id,schema_id)
                     if isinstance(data_df, str):
@@ -799,20 +797,16 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 elif op == 19:
                     status = self.repl_outliers_mean_z_score(DBObject,connection,column_list, dataset_table_name,col)
                 elif op == 20:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.repl_outliers_med_ext_val_analysis(data_df, col)
+                    
+                    status = self.repl_outliers_med_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
                 elif op == 21:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.repl_outliers_med_z_score(data_df, col)
+                    
+                    status = self.repl_outliers_med_z_score(DBObject,connection,column_list, dataset_table_name,col)
+
                 elif op == 22:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.apply_log_transformation(data_df, col)
+        
+                    status = self.apply_log_transformation(DBObject,connection,column_list, dataset_table_name, col)
+
                 elif op == 27:
                     data_df = self.get_data_df(dataset_id,schema_id)
                     if isinstance(data_df, str):

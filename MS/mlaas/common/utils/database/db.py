@@ -235,7 +235,7 @@ class DBClass:
         Returns:
             [integer]: [it will return stauts of deleted record. if successfully then 0 else 1.]
         """
-        logging.info("--->"+str(connection))
+        
         cursor = connection.cursor() # Open the cursor.
         sql_command = sql_command # Get delete query
         try:
@@ -259,7 +259,7 @@ class DBClass:
         Returns:
             [integer]: [status of updated records. if successfully then 1 else 0.]
         """
-        logging.info("call")
+        
         cursor = connection.cursor() # Open the cursor.
         sql_command = sql_command # Get update query
         try:
@@ -267,13 +267,13 @@ class DBClass:
             connection.commit() # Commit the changes.
             cursor.close() # Close the cursor.
             status = 0 # If Successfully.
-            logging.info("in")
+            
         except (Exception, psycopg2.DatabaseError) as error:
             connection.rollback() # Rollback the changes.
             cursor.close() # Close the cursor.
             status = 1 # If failed
-            logging.info("out")
-            logging.info(str(error))
+            
+            logging.error(str(error))
         return status
 
     def column_rename(self,file_data_df):
@@ -322,12 +322,12 @@ class DBClass:
         engine = create_engine(connection_string) # Create database engine.
         schema_name = user_name.lower()
         try :
-            logging.info("get data frame=="+str(file_data_df))
+            
             file_data_df.to_sql(table_name,engine,schema=schema_name,) # Load data into database with table structure.
             
             status = 0 # If successfully.
         except Exception as e:
-            logging.info("Exception: "+str(e))
+            logging.error("Exception: "+str(e))
             status = 1 # If failed.
             
         return status
@@ -471,7 +471,7 @@ class DBClass:
             logging.info("data preprocess : SchemaClass : get_query_string : execution start")
             # sql command to get details from schema table  based on  schema id 
             sql_command = "select column_name,case when changed_column_name = '' then column_name else changed_column_name end column_list  from mlaas.schema_tbl where schema_id ="+str(schema_id)+"and column_attribute !='Ignore' order by index"
-            logging.info(str(sql_command) + " get_query_string")
+            
             #execute sql commnad if data exist then return dataframe else return None
             schema_df = self.select_records(connection,sql_command) 
 
@@ -543,7 +543,7 @@ class DBClass:
                 sql_data = f'SELECT {str(select_clause)} From {table_name} where "{columns_list[0]}" between {start_index} and {end_index}  {order_clause}' # sql Query without any filter and clause
                 sql_filtercount = f'SELECT count(*) From {table_name}' #sql Query with customefilter_clause
 
-            logging.info(str(sql_filtercount))
+            
             return sql_data,sql_filtercount
         except Exception as exc:
             return str(exc) 
@@ -614,7 +614,7 @@ class DBClass:
                 [Dataframe] : [return the dataframe of dataset table ]
         '''
         sql_command = "SELECT dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows,dataset_desc from mlaas.dataset_tbl Where dataset_id =" + str(dataset_id)
-        logging.info(str(sql_command) + " command")
+        
         dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         return dataset_df 
     
@@ -626,7 +626,7 @@ class DBClass:
                 [Dataframe] : [return the dataframe of project table]
         '''
         sql_command = "SELECT original_dataset_id,dataset_id from mlaas.project_tbl where project_id='"+str(project_id)+"'"
-        logging.info(str(sql_command)+" get_project_detail")
+       
         dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         return dataset_df
     
@@ -683,7 +683,6 @@ class DBClass:
                 dataset_table_name[String] : [Name of the table ] 
 
         """
-        logging.info("call")
         try:
             #sql command to get dataset_name based on original dataset id
             sql_Command = "SELECT dataset_name from mlaas.dataset_tbl where dataset_id ='"+str(original_dataset_id)+"' "
@@ -696,7 +695,7 @@ class DBClass:
             
             #sql command to get Raw dataset id based on the dataset_name and page_name 
             sql_Command = "SELECT dataset_id,dataset_table_name from mlaas.dataset_tbl where dataset_name='"+str(dataset_name)+"' and page_name ='schema mapping'"
-            logging.info(str(sql_Command) + " query")
+            
 
             #execute the sql command and get te dataframe if found else None
             dataframe = self.select_records(connection,sql_Command)
@@ -704,8 +703,7 @@ class DBClass:
             #get the dataset id
             dataset_id = int(dataframe['dataset_id'][0])
             table_name = str(dataframe['dataset_table_name'][0])
-            logging.info(str(dataset_id) + " query")
-            logging.info(str(table_name) + " query")
+           
 
             return dataset_id,table_name
         except Exception as exc:

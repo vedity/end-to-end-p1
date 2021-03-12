@@ -7,13 +7,9 @@
 */
 '''
 
-from numpy.lib.npyio import _savez_compressed_dispatcher
-import pandas as pd
-import numpy as np
-from scipy import stats
 import logging
-import traceback
 from common.utils.logger_handler import custom_logger as cl
+
 #* Defining Logger
 user_name = 'admin'
 log_enable = True
@@ -219,8 +215,8 @@ class OutliersTreatmentClass:
                 return 3
             logging.info("data preprocessing : OutliersTreatmentClass : replace_outliers : execution stop")
             return status
-        except:
-            return 1
+        except Exception as exc:
+            return str(exc)
         
     def remove_outliers(self,DBObject,connection,table_name,col_name, detect_method = 0, log = False):
         '''
