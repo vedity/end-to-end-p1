@@ -37,4 +37,6 @@ urlpatterns = [
     path('mlaas/preprocess/cleanup/scaling/',ScalingClass.as_view()),
     
     path('mlaas/preprocess/cleanup/scaling/type/',Scalingtype.as_view()),
+
+    path('mlaas/preprocess/cleanup/holdout/',TrainValidHoldout.as_view())
 ]

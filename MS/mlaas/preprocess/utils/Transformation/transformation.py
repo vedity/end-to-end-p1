@@ -97,43 +97,84 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
     
     #* Categorical Encoding
     
-    def label_encoding(self, dataframe, col):
+    # def label_encoding(self, dataframe, col):
+    #     '''
+    #         Operation id: 27
+    #     '''
+        
+    #     logging.info("data preprocessing : TransformationClass : label_encoding : execution start")
+        
+    #     cols = [dataframe.columns[i] for i in col]
+        
+    #     for column in cols:
+    #         try:
+    #             dataframe[column] =super().label_encoding(dataframe[column])
+    #         except:
+    #             continue
+
+    #     logging.info("data preprocessing : TransformationClass : label_encoding : execution stop")
+    #     return dataframe
+    
+    def label_encoding(self, DBObject,connection,column_list, table_name, col):
         '''
             Operation id: 27
         '''
         
-        logging.info("data preprocessing : TransformationClass : label_encoding : execution start")
+        logging.info("data preprocessing : TransformationClass : label_encoding : execution start" + str(col))
+
+        index = column_list[0]
+        cols = [column_list[i] for i in col]
         
-        cols = [dataframe.columns[i] for i in col]
-        
-        for column in cols:
+        for col_name in cols:
             try:
-                dataframe[column] =super().label_encoding(dataframe[column])
-            except:
-                continue
+                status = super().label_encoding(DBObject, connection, [index,col_name], table_name)
+                return status
+
+            except Exception as exc:
+                return exc
 
         logging.info("data preprocessing : TransformationClass : label_encoding : execution stop")
-        return dataframe
-    
-    def one_hot_encoding(self, dataframe, col):
+        return status
+
+    def one_hot_encoding(self, DBObject,connection,column_list, table_name, col):
         '''
             Operation id: 28
         '''
         
         logging.info("data preprocessing : TransformationClass : one_hot_encoding : execution start")
+        index = column_list[0]
+        cols = [column_list[i] for i in col]
         
-        cols = [dataframe.columns[i] for i in col]
-        
-        for column in cols:
+        for col_name in cols:
             try:
-                temp_df =super().one_hot_encoding(dataframe[column])
-                dataframe.drop([column], axis=1, inplace = True)
-                dataframe = dataframe.join(temp_df)
-            except:
-                continue
+                df = super().one_hot_encoding(DBObject, connection, [index,col_name], table_name)
+                return df
 
-        logging.info("data preprocessing : TransformationClass : one_hot_encoding : execution stop")
-        return dataframe
+            except Exception as exc:
+                return exc
+
+        logging.info("data preprocessing : TransformationClass : label_encoding : execution stop")
+        return status
+
+    # def one_hot_encoding(self, dataframe, col):
+    #     '''
+    #         Operation id: 28
+    #     '''
+        
+    #     logging.info("data preprocessing : TransformationClass : one_hot_encoding : execution start")
+        
+    #     cols = [dataframe.columns[i] for i in col]
+        
+    #     for column in cols:
+    #         try:
+    #             temp_df =super().one_hot_encoding(dataframe[column])
+    #             dataframe.drop([column], axis=1, inplace = True)
+    #             dataframe = dataframe.join(temp_df)
+    #         except:
+    #             continue
+
+    #     logging.info("data preprocessing : TransformationClass : one_hot_encoding : execution stop")
+    #     return dataframe
     
     #* MATH OPERATIONS
     

@@ -855,15 +855,12 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                         raise GetDataDfFailed(500)
                     data_df = self.apply_log_transformation(data_df, col)
                 elif op == 27:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.label_encoding(data_df, col)
+                    status = self.label_encoding(DBObject,connection,column_list, dataset_table_name, col)
+                    flag = True
                 elif op == 28:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.one_hot_encoding(data_df, col)
+                    data_df = self.one_hot_encoding(DBObject,connection,column_list, dataset_table_name, col)
+                    logging.info("------>"+str(data_df))
+                    #flag = True
                 elif op == 29:
                     status = self.add_to_column(DBObject,connection,column_list, dataset_table_name, col, value)
                     flag = True
@@ -961,7 +958,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             tg_cols = DBObject.get_target_col(connection, schema_id)
             for col in tg_cols:
                 feature_cols.remove(col)
-            
             target_cols = [data_df.columns[0]]
             target_cols += tg_cols
             
