@@ -188,8 +188,7 @@ class DatasetClass:
             if row_creation_flag == True:
                 load_data_status,no_of_rows = self.load_dataset(DBObject,connection,connection_string,file_name,dataset_visibility,user_name)
             else:
-                # raw_no_of_rows = DBObject.get_row_count(connection , oid)
-                # logging.info("========>"+str(raw_no_of_rows))
+                
                 load_data_status = self.insert_raw_dataset(DBObject,connection,raw_dataset_id,user_name,file_name,dataset_visibility)
             
     
@@ -235,10 +234,10 @@ class DatasetClass:
         # Get dataframe of the file data.
         
         file_data_df = DBObject.read_data(file_path)
-        logging.info("---->"+str(file_data_df))
+        
         # Get number of rows.
         no_of_rows = file_data_df.shape[0]
-        logger.info("no_of_rows:===="+str(no_of_rows))
+        
         # Get table name.
         
         table_name = self.get_dataset_table_name(file_name)
@@ -623,7 +622,7 @@ class DatasetClass:
             #form the new table based on te existing table 
             create_status = DBObject.update_records(connection,sql_command)
 
-            ################
+           
             if create_status == 0:
                 if dataset_visibility == 'private':
                     table_name = user_name+'."'+str(raw_table_name)+'"'
@@ -631,10 +630,10 @@ class DatasetClass:
                     table_name = 'public."'+str(raw_table_name)+'"'
                 
                 sql_command = "SELECT count(*) from "+str(table_name)
-                logging.info(str(sql_command) + "  check")
+                
                 dataframe = DBObject.select_records(connection,sql_command)
                 no_of_rows = int(dataframe['count'][0])
-                logging.info("----->"+str(no_of_rows))
+                
             #update the dataset table name of the raw dataset
             sql_command = "UPDATE mlaas.dataset_tbl SET dataset_table_name='"+str(raw_table_name)+"',no_of_rows = '"+str(no_of_rows)+"' where dataset_id ='"+str(dataset_id)+"'"
             create_status = DBObject.update_records(connection,sql_command)
