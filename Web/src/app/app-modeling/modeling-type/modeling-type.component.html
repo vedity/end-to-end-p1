@@ -88,49 +88,52 @@
                         <span class="d-block"><i class="fas fa-border-all"></i></span>
                     </a>
                     <ng-template ngbNavContent>
-                        <div class="row">
-                            <div class="col-md-4" *ngFor="let item of modeldata;let i=index">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h4 class="card-title mb-4">
-                                            <div class="custom-control custom-checkbox">
-                                                <input type="checkbox" class="custom-control-input" (change)="setCopmareIds($event.target.checked,item.experiment_id)" id="customCheck_{{i}}">
-                                                <label class="custom-control-label" for="customCheck_{{i}}">{{item.experiment_name}}</label>
-                                            </div> <span class="date-time">{{item.exp_created_on | date}}</span>
-                                        </h4>
-                                        <div class="model-status">
-                                            <i *ngIf="item.status=='running'" title="{{item.status}}" style="color: #34c38f;" class="dripicons-browser-upload Blink"></i>
-                                            <i *ngIf="item.status=='failed'" title="{{item.status}}" style="color: #f14646;" class="dripicons-browser-upload"></i>
-                                            <i *ngIf="item.status=='pending'" title="{{item.status}}" style="color: #a6b0cf;" class="dripicons-browser-upload"></i>
-                                            <i *ngIf="item.status=='success'" title="{{item.status}}" style="color: #3e6aec;" class="dripicons-browser-upload"></i>
-                                        </div>
-                                        <div class="model-type">
-                                            <p>{{item.model_mode}}</p>
-                                        </div>
-                                        <div class="detail-line">
-                                            <label>Model</label>
-                                            <p>{{item.model_name}}</p>
-                                        </div>
-                                        <div class="detail-line">
-                                            <label>Dataset</label>
-                                            <p>{{item.dataset_name}}</p>
-                                        </div>
-                                        <div class="detail-line small-line">
-                                            <label>Holdout</label>
-                                            <p>{{item.holdout_score}}</p>
-                                        </div>
-                                        <div class="detail-line small-line">
-                                            <label>Cross Validation</label>
-                                            <p>{{item.cv_score}}</p>
-                                        </div>
-                                        <div class="text-right">
-                                            <button class="btn btn-outline-success" (click)="extraLarge(exlargeModal,item.experiment_name)">View
-                                                Detail </button>
+
+                        <perfect-scrollbar style="height:340px;" scrollable="yaxis">
+                            <div class="row">
+                                <div class="col-md-4" *ngFor="let item of modeldata;let i=index">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h4 class="card-title mb-4">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input type="checkbox" class="custom-control-input" (change)="setCopmareIds($event.target.checked,item.experiment_id)" id="customCheck_{{i}}">
+                                                    <label class="custom-control-label" for="customCheck_{{i}}">{{item.experiment_name}}</label>
+                                                </div> <span class="date-time">{{item.exp_created_on | date}}</span>
+                                            </h4>
+                                            <div class="model-status">
+                                                <i *ngIf="item.status=='running'" title="{{item.status}}" style="color: #34c38f;" class="dripicons-browser-upload Blink"></i>
+                                                <i *ngIf="item.status=='failed'" title="{{item.status}}" style="color: #f14646;" class="dripicons-browser-upload"></i>
+                                                <i *ngIf="item.status=='pending'" title="{{item.status}}" style="color: #a6b0cf;" class="dripicons-browser-upload"></i>
+                                                <i *ngIf="item.status=='success'" title="{{item.status}}" style="color: #3e6aec;" class="dripicons-browser-upload"></i>
+                                            </div>
+                                            <div class="model-type">
+                                                <p>{{item.model_mode}}</p>
+                                            </div>
+                                            <div class="detail-line">
+                                                <label>Model</label>
+                                                <p>{{item.model_name}}</p>
+                                            </div>
+                                            <div class="detail-line">
+                                                <label>Dataset</label>
+                                                <p>{{item.dataset_name}}</p>
+                                            </div>
+                                            <div class="detail-line small-line">
+                                                <label>Holdout</label>
+                                                <p>{{item.holdout_score}}</p>
+                                            </div>
+                                            <div class="detail-line small-line">
+                                                <label>Cross Validation</label>
+                                                <p>{{item.cv_score}}</p>
+                                            </div>
+                                            <div class="text-right">
+                                                <button class="btn btn-outline-success" (click)="extraLarge(exlargeModal,item.experiment_name)">View
+                                                    Detail </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </perfect-scrollbar>
                     </ng-template>
                 </li>
                 <li [ngbNavItem]="2">
@@ -142,7 +145,7 @@
                             <div class="col-md-12">
                                 <div class="card list-view">
                                     <div class="card-body">
-                                        <table datatable [dtOptions]="dtOptions" class="table table-centered">
+                                        <table datatable [dtOptions]="dtOptions" style="width: 100%;" class="table table-centered">
                                             <thead>
                                                 <tr>
                                                     <th></th>
@@ -302,7 +305,8 @@
                     <label>Select model</label>
                     <select class="form-control" (change)="getHyperParams($event.target.value)">
                         <option value=""> Select </option>
-                        <option value="{{algorithmlist.model_id[i]}}" *ngFor="let item of algorithmlist.model_name;let i=index">{{item}}</option>
+                        <option value="{{algorithmlist.model_id[i]}}"
+                            *ngFor="let item of algorithmlist.model_name;let i=index">{{item}}</option>
                     </select>
                 </div>
             </div>
@@ -329,8 +333,8 @@
     <div class="modal-header">
         <h5> Model Name </h5>
         <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Close click')">
-        <span aria-hidden="true">&times;</span>
-      </button>
+            <span aria-hidden="true">&times;</span>
+        </button>
     </div>
     <div class="modal-body compare-model">
         <ul ngbNav #justifiednavcompare="ngbNav" [activeId]="1" class="nav-pills nav-justified nav">
@@ -377,7 +381,8 @@
 
                             <div class="box box-one example-box" *ngFor="let item of timePeriods" cdkDrag>
                                 <ul>
-                                    <li class="name">{{item}} <a href="javascript:void(0)" title="Remove"><i class="mdi mdi-close"></i></a></li>
+                                    <li class="name">{{item}} <a href="javascript:void(0)" title="Remove"><i
+                                                class="mdi mdi-close"></i></a></li>
                                     <li>2.2333</li>
                                     <li>25</li>
                                     <li>25333</li>
@@ -423,18 +428,18 @@
                 <div class="form-group">
                     <label>Select Project</label>
                     <select class="form-control" (change)="hyperparams=$event.target.value">
-                    <option value="sklearn">Project 1</option>
-                    <option value="keras">Project 2</option>
-                </select>
+                        <option value="sklearn">Project 1</option>
+                        <option value="keras">Project 2</option>
+                    </select>
                 </div>
             </div>
             <div class="col-md-12">
                 <div class="form-group">
                     <label>Select Dataset</label>
                     <select class="form-control" (change)="hyperparams=$event.target.value">
-                    <option value="sklearn">Dataset 1</option>
-                    <option value="keras">Dataset 2</option>
-                </select>
+                        <option value="sklearn">Dataset 1</option>
+                        <option value="keras">Dataset 2</option>
+                    </select>
                 </div>
             </div>
             <div class="col-md-12">

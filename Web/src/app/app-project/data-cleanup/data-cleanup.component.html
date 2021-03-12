@@ -12,7 +12,7 @@
             </ngx-skeleton-loader>
             <div class="left-box" [hidden]="loaderdiv">
                 <!-- <perfect-scrollbar style="height: 490px;"> -->
-                <table class="table datadetailtable" datatable [dtOptions]="dtOptions" *ngIf="columnList">
+                <table class="table datadetailtable" datatable [dtOptions]="dtOptions" style="width: 100%;" *ngIf="columnList">
                     <thead>
                         <tr>
                             <th>Column</th>
@@ -28,11 +28,12 @@
                                     <label class="custom-control-label" for="customCheck_{{i}}">{{item.col_name}}</label>
                                 </div>
                             </td>
-                            <td class="handlinmg-list" id="handling_{{item.column_id}}">
+                            <td class="handling-list" id="handling_{{item.column_id}}">
                                 <div *ngFor="let tabs of operationList">
-                                    <div class="handling" id="handlingitem_{{item.column_id}}_{{handles}}" *ngFor="let handles of item['handling_'+tabs.tab_id];let j=index">
+                                    <div class="handling handlingitem" id="handlingitem_{{item.column_id}}_{{handles}}" *ngFor="let handles of item['handling_'+tabs.tab_id];let j=index">
                                         <p>{{item['handlingname_'+tabs.tab_id][j]}}&nbsp;
                                             <a href="javascript:void(0);" id="trash_{{handles}}"> <i class=" bx bx-trash" (click)="removeHandling(item['handlingtarget_'+tabs.tab_id][j],item.column_id);"></i></a>
+                                            <input type="hidden" *ngIf="item['handlinginput_'+tabs.tab_id][j]!=undefined" value="" id="setInput_{{item.column_id}}_{{handles}}" />
                                         </p>
                                     </div>
                                 </div>
@@ -60,85 +61,26 @@
                                                 <input type="radio" id="customRadio_{{k}}_{{j}}" name="customRadio_{{k}}" value="{{childitem.operation_id}}" title="{{childitem.name}}" data-waschecked="false" [disabled]="operationIds.indexOf(childitem.operation_id)==-1" (click)="selectHandling($event,childitem.operation_id)"
                                                     class="custom-control-input radiobutton">
                                                 <label class="custom-control-label" for="customRadio_{{k}}_{{j}}" id="radiolabel_{{k}}_{{j}}">{{childitem.name}}</label>
+                                                <input type="text" class="form-control inline-textbox customInput" disabled id="customInput_{{k}}_{{j}}" (change)="setInput(childitem.operation_id,$event.target.value)" *ngIf="childitem.user_input==1">
+
                                             </div>
-
-
-
-                                        </div>
-
-
-                                    </div>
-                                </div>
-
-                            </ng-template>
-                        </li>
-                        <!-- <li [ngbNavItem]="2">
-                            <a ngbNavLink title="Data Cleanup">
-                                <span class="">Transformation</span>
-
-                            </a>
-                            <ng-template ngbNavContent>
-
-                                <h4 class="mb-3">Remove Noise By</h4>
-                                <div class="row mb-4">
-                                    <div class="col-md-3">
-                                        <div class="custom-control custom-radio">
-                                            <input type="radio" id="regression" name="noise" class="custom-control-input">
-                                            <label class="custom-control-label" for="regression">Regression</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="custom-control custom-radio">
-                                            <input type="radio" id="binning" name="noise" class="custom-control-input">
-                                            <label class="custom-control-label" for="binning">Binning</label>
                                         </div>
                                     </div>
                                 </div>
-
-                                <h4 class="mb-3">Select Encode Type</h4>
-                                <div class="row mb-4">
-                                    <div class="col-md-3">
-                                        <div class="custom-control custom-radio">
-                                            <input type="radio" id="hot-encoding" name="encode" class="custom-control-input">
-                                            <label class="custom-control-label" for="hot-encoding">One hot
-                                                                    encoding</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="custom-control custom-radio">
-                                            <input type="radio" id="label" name="encode" class="custom-control-input">
-                                            <label class="custom-control-label" for="label">Label
-                                                                    encoding</label>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                                <div class="form-group">
-                                    <div class="custom-control custom-checkbox mb-3">
-                                        <input type="checkbox" class="custom-control-input" id="duplicate">
-                                        <label class="custom-control-label" for="duplicate">Remove duplicate
-                                                                data</label>
-                                    </div>
-
-                                </div>
-
-                                <div class="button-items text-center">
+                                <div class="button-items text-center" *ngIf="i+1==operationList.length">
                                     <button type="button" class="btn btn-secondary">Reset</button>
                                     <div class="btn-group me-1 dropdown" ngbDropdown>
-                                        <button type="button" class="btn btn-success">Save</button>
+                                        <button type="button" class="btn btn-success" (click)="saveHanlers();">Save</button>
                                         <button type="button" class="btn btn-success dropdown-toggle dropdown-toggle-split" ngbDropdownToggle>
                                                               <i class="mdi mdi-chevron-down"></i>
                                                             </button>
                                         <div class="dropdown-menu" ngbDropdownMenu>
                                             <a class="dropdown-item" href="javascript: void(0);">Save As</a>
-
                                         </div>
                                     </div>
-
                                 </div>
                             </ng-template>
-                        </li> -->
+                        </li>
                     </ul>
                     <div [ngbNavOutlet]="justifiednavmissing"></div>
                 </div>
@@ -152,60 +94,67 @@
         </a>
         <ng-template ngbNavContent>
             <div class="row justify-content-md-left">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <h4 class="mb-3 mt-3">Scaling</h4>
 
 
                     <div class="row mb-4">
 
-                        <div class="col-md-4 mb-3" *ngFor="let item of scaleOperations">
+                        <div class="col-md-12 mb-3" *ngFor="let item of scaleOperations">
                             <div class="custom-control custom-radio">
-                                <input type="radio" id="{{item.id}}" name="rescaling" class="custom-control-input">
-                                <label class="custom-control-label" for="min-max">{{item.name}}</label>
+                                <input type="radio" [(ngModel)]="scaldata.scaling_op" id="rescaling_{{item.id}}" name="rescaling" value="{{item.id}}" class="custom-control-input">
+                                <label class="custom-control-label" for="rescaling_{{item.id}}">{{item.name}}</label>
                             </div>
                         </div>
 
 
                     </div>
                 </div>
-                <div class="col-md-6">
-
+                <div class="col-md-9">
                     <h4 class="font-size-18 mt-3 mb-3">Split Dataset</h4>
                     <div class="form-group">
                         <label>Select split method</label>
-                        <select class="form-control" (change)="splitmethodselection=$event.target.value">
-                            <option value="crossvalidation">Cross Validation</option>
-                            <option value="trainvalidation">Train - Validation - Holdout</option>
+                        <select class="form-control" [(ngModel)]="scaldata.split_method" (change)="splitmethodselection=$event.target.value">
+                            <option value="cross_validation">Cross Validation</option>
+                            <option value="train_valid_holdout">Train - Validation - Holdout</option>
                         </select>
                     </div>
-                    <div class="cross-validation" *ngIf="splitmethodselection=='crossvalidation'">
+                    <div class="cross-validation" *ngIf="splitmethodselection=='cross_validation'">
                         <div class="form-group">
                             <label>Number of cross validation(CV) folds</label>
-                            <input type="text" class="form-control">
+                            <input type="text" [(ngModel)]="scaldata.cv" name="cv" [required]="splitmethodselection=='cross_validation'" #cv="ngModel" [pattern]="numberrangeregex" class="form-control">
+                            <div class="invalid-feedback" *ngIf="cv.errors">
+                                <span *ngIf="cv.errors?.pattern" class="text-red">Please enter CV between 1 and 10</span>
+                                <span *ngIf="cv.errors?.required && (cv.dirty || cv.touched)" class="text-red">Please Enter Number of cross validation(CV) folds</span>
+                            </div>
+
                         </div>
                         <div class="form-group">
                             <label>Holdout perecentage</label>
-                            <input type="range" class="custom-range" min="0" max="100" id="customRange2">
+                            <!-- <input type="range" class="custom-range" min="0" max="100" id="customRange2"> -->
+                            <ng5-slider [(value)]="visibleSelection" [(ngModel)]="scaldata.test_ratio" [options]="visibleBarOptions"></ng5-slider>
                         </div>
                         <div class="from-group">
-                            <label>Random status</label>
-                            <input type="number" class="form-control">
+                            <label>Random state</label>
+                            <input type="number" [(ngModel)]="scaldata.random_state" class="form-control">
                         </div>
                     </div>
-                    <div class="tr-v-h" *ngIf="splitmethodselection=='trainvalidation'">
+                    <div class="tr-v-h" *ngIf="splitmethodselection=='train_valid_holdout'">
                         <div class="form-group">
                             <label>Split ratio</label>
-                            <select class="form-control">
-                                <option>60% - 20% - 20%</option>
-                                <option>70% - 15% - 15%</option>
-                                <option>80% - 10% - 10%</option>
-                                <option>90% - 5% - 5%</option>
-                                <option>95% - 5% - 0%</option>
+                            <select class="form-control" [(ngModel)]="scaldata.split_ratio">
+                                <option value="{{item.value}}" *ngFor="let item of holdoutList">{{item.value}}</option>
+
+                                <!-- <option value="60% - 20% - 20%" >60% - 20% - 20%</option>
+                                <option value="70% - 15% - 15%">70% - 15% - 15%</option>
+                                <option value="80% - 10% - 10%">80% - 10% - 10%</option>
+                                <option value="90% - 5% - 5%">90% - 5% - 5%</option>
+                                <option value="95% - 5% - 0%">95% - 5% - 0%</option> -->
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Random status</label>
-                            <input type="number" class="form-control">
+                            <label>Random state</label>
+                            <input type="number" class="form-control" [(ngModel)]="scaldata.train_random_state">
                         </div>
                     </div>
 
@@ -217,7 +166,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="text-center mb-4 mt-4">
-                        <button class="btn btn-success" type="submit">Scale & Split</button>
+                        <button class="btn btn-success" type="submit" (click)="saveScale()">Scale & Split</button>
                     </div>
                 </div>
             </div>

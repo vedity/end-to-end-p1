@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DataTableDirective } from 'angular-datatables';
@@ -41,6 +41,15 @@ export class ModelingTypeComponent implements OnInit {
   processclass: any = "stop";
   processInterval: any;
   lineColumAreaChart:any;
+
+  @HostListener('window:resize', ['$event'])
+	onResize(event) {
+    if (this.datatableElement.dtInstance) {
+      this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
+        dtInstance.columns.adjust().draw();
+      })
+    }
+	}
   
   ngOnInit(): void {
    let projectdatamodel;

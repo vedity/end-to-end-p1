@@ -35,6 +35,7 @@ import * as more from 'highcharts/highcharts-more.src';
 import * as exporting from 'highcharts/modules/exporting.src';
 import * as theme from 'highcharts/themes/dark-unica.src';
 import { CreateDatasetComponent } from './create-dataset/create-dataset.component';
+import { Ng5SliderModule } from 'ng5-slider';
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   suppressScrollX: true,
@@ -76,7 +77,8 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     NgbTooltipModule,
     PerfectScrollbarModule,
     NgxSkeletonLoaderModule.forRoot(),
-    NgbNavModule
+    NgbNavModule,
+    Ng5SliderModule
   ],
   providers: [
     {
