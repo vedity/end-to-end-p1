@@ -4,18 +4,22 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DataTableDirective } from 'angular-datatables';
 import { ToastrService } from 'ngx-toastr';
 import { DataCleanupApiService } from '../data-cleanup.service';
-
+import { Options } from 'ng5-slider';
+import { scaleandsplit } from './data-cleanup.model';
 @Component({
   selector: 'app-data-cleanup',
   templateUrl: './data-cleanup.component.html',
   styleUrls: ['./data-cleanup.component.scss']
 })
 export class DataCleanupComponent implements OnInit {
+  numberrangeregex="^[1-9][0]?$|^10$"
+
 
   @ViewChild(DataTableDirective, { static: false })
   datatableElement: DataTableDirective;
   dtOptions: DataTables.Settings = {};
   activeId = 1;
+  scaldata: scaleandsplit = new scaleandsplit();
   constructor(public apiService: DataCleanupApiService, public toaster: ToastrService, private modalService: NgbModal, public router: Router) { }
   @Input() public dataset_id: any;
   @Input() public title: any;
@@ -26,8 +30,9 @@ export class DataCleanupComponent implements OnInit {
   errorStatus = true;
   operationList: any;
   columnList: any;
-  splitmethodselection = "crossvalidation";
-  scaleOperations:any;
+  holdoutList:any;
+  splitmethodselection = "cross_validation";
+  scaleOperations: any;
   hyperparams = 'sklearn';
   animation = "progress-dark";
   theme = {
@@ -37,6 +42,22 @@ export class DataCleanupComponent implements OnInit {
     'border': '1px solid #32394e',
     'animation-duration': '20s'
   };
+
+  visibleSelection = 5;
+  visibleBarOptions: Options = {
+    floor: 0,
+    ceil: 100,
+    showSelectionBar: true
+  };
+
+  @HostListener('window:resize', ['$event'])
+	onResize(event) {
+    if (this.datatableElement.dtInstance) {
+      this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
+        dtInstance.columns.adjust().draw();
+      })
+    }
+	}
 
   ngOnInit(): void {
     this.dtOptions = {
@@ -52,6 +73,9 @@ export class DataCleanupComponent implements OnInit {
     this.getOpertion();
     this.getColumnList();
     this.getScalingOperations();
+    this.getHoldoutList();
+    this.scaldata.test_ratio = 20;
+    this.scaldata.split_method = 'cross_validation';
   }
 
 
@@ -84,6 +108,21 @@ export class DataCleanupComponent implements OnInit {
     }
   }
 
+  getHoldoutList(){
+  this.apiService.getHoldoutList().subscribe(
+    logs => this.holdoutlistsuccessHandler(logs),
+    error => this.errorHandler(error)
+  )
+}
+
+holdoutlistsuccessHandler(data) {
+  if (data.status_code == "200") {
+    this.holdoutList = data.response;
+  }
+  else {
+    this.errorHandler(data);
+  }
+}
   selectedcolumnswithoperation = [];
   // selectedoperations=[];
   selectedColumn = [];
@@ -148,7 +187,6 @@ export class DataCleanupComponent implements OnInit {
   columnlistsuccessHandler(data) {
     if (data.status_code == "200") {
       this.columnList = data.response;
-      console.log(this.columnList);
       setTimeout(() => {
         this.loaderdiv = false;
       }, 10);
@@ -189,8 +227,6 @@ export class DataCleanupComponent implements OnInit {
         }
         return e;
       });
-      console.log(selectedelem);
-
     });
   }
 
@@ -200,14 +236,12 @@ export class DataCleanupComponent implements OnInit {
     var selectedelem = this.columnList.filter(function (e) {
       if (e.column_id == columnid) {
         let val = $("#" + id).val();
-        console.log(val);
         e["handling_" + tabid].splice(e["handling_" + tabid].indexOf(val), 1);
-        e["handlingname_" + tabid].splice( e["handlingname_" + tabid].indexOf($("#" + id).attr('title')), 1);
+        e["handlingname_" + tabid].splice(e["handlingname_" + tabid].indexOf($("#" + id).attr('title')), 1);
         e["handlingtarget_" + tabid].splice(e["handlingtarget_" + tabid].indexOf(id), 1);
       }
       return e;
     });
-    console.log(selectedelem);
   }
 
   removeHandling(id, column) {
@@ -222,23 +256,105 @@ export class DataCleanupComponent implements OnInit {
     this.getColumnviseOperation();
   }
 
-  getScalingOperations(){
+  getScalingOperations() {
     this.apiService.getScalingOperations().subscribe(
-      logs=>this.scaleSuccessHandler(logs),
-      error=>this.errorHandler(error)
+      logs => this.scaleSuccessHandler(logs),
+      error => this.errorHandler(error)
     )
   }
 
-  scaleSuccessHandler(data)
-  {
+  scaleSuccessHandler(data) {
     if (data.status_code == "200") {
       this.scaleOperations = data.response;
-      console.log(this.scaleOperations);
-      
     }
     else {
       this.errorHandler(data);
     }
   }
 
+  groupBy(data, key) {
+    return data.reduce(function (rv, x) {
+      (rv[x[key]] = rv[x[key]] || []).push(parseInt(x['selected_handling']));
+      return rv;
+    }, []);
+  };
+
+  fianlarray = [];
+  saveHanlers() {
+    this.fianlarray = [];
+    let arrayhandlers = [];
+    if ($(".handlingitem").length > 0) {
+      $(".handlingitem").each(function () {
+        var id = $(this).prop('id').split('_');
+        var columnid = id[1];
+        var operationid = id[2];
+        arrayhandlers.push({ column_id: columnid, selected_handling: operationid });
+      })
+      var handlers = this.groupBy(arrayhandlers, 'column_id');
+      for (const item in handlers) {
+        this.fianlarray.push({ "column_id": [parseInt(item)], "selected_handling": handlers[item] })
+      }
+      this.apiService.saveOperations(this.schema_id, this.dataset_id, this.fianlarray).subscribe(
+        logs => this.saveSuccessHandlers(logs),
+        error => this.errorHandler(error)
+      )
+    }
+    else
+      this.toaster.error("Please select any handlers", 'Error')
+  }
+
+  saveSuccessHandlers(data) {
+    if (data.status_code == "200") {
+      this.toaster.success(data.error_msg, 'Success')
+    }
+    else {
+      this.errorHandler(data);
+    }
+  }
+  response: any;
+  saveScale() {
+    var user = JSON.parse(localStorage.getItem("currentUser"));
+    if (this.scaldata.split_method == "cross_validation") {
+      this.response = {
+        schema_id: this.schema_id,
+        dataset_id: this.dataset_id,
+        project_id: this.project_id,
+        user_name: user.username,
+        scaling_op: this.scaldata.scaling_op,
+        split_method: this.scaldata.split_method,
+        cv: parseInt(this.scaldata.cv.toString()),
+        valid_ratio: 0,
+        test_ratio: this.scaldata.test_ratio / 100,
+        random_state: this.scaldata.random_state
+      }
+    }
+    else {
+      this.response = {
+        schema_id: this.schema_id,
+        dataset_id: this.dataset_id,
+        project_id: this.project_id,
+        user_name: user.username,
+        scaling_op: this.scaldata.scaling_op,
+        split_method: this.scaldata.split_method,
+        cv: 0,
+        valid_ratio: parseInt(this.scaldata.split_ratio.toString().split('-')[1]) / 100,
+        test_ratio: parseInt(this.scaldata.split_ratio.toString().split('-')[2]) / 100,
+        random_state: this.scaldata.train_random_state
+      }
+    }
+    console.log(this.response);
+    this.apiService.savescalingOpertion(this.response).subscribe(
+      logs => this.savescalSuccessHandlers(logs),
+      error => this.errorHandler(error)
+    )
+  }
+
+  savescalSuccessHandlers(data) {
+    if (data.status_code == "200") {
+      this.toaster.success(data.error_msg, 'Success')
+    }
+    else {
+      this.errorHandler(data);
+    }
+  }
 }

@@ -162,15 +162,19 @@ table {
     display: inline-block;
     .handling {
         p {
-            width: 90%;
-            display: inline-block;
-            vertical-align: top;
+            position: relative;
+            padding-right: 30px;
         }
         a {
-            width: 10%;
-            display: inline-block;
-            vertical-align: top;
-            color: #a6b0cf;
+            position: absolute;
+            right: 5px;
+            top: 0px;
+            color: #fff;
+            padding: 5px 8px;
+            font-size: 16px;
+        }
+        a:hover {
+            color: #556ee6;
         }
     }
     .handling:last-child p {
