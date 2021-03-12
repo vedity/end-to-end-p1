@@ -110,14 +110,10 @@ class StartModelClass(APIView):
                         user_id = 1 # get user id from user auth table
                         project_id = int(request.query_params.get('project_id'))
                         dataset_id = int(request.query_params.get('dataset_id'))
+                        model_type = request.query_params.get('model_type')
                         
-                        model_type = 'Regression' #TODO get from front-end
-                        
-
                         experiment_name = request.query_params.get('experiment_name')
                         experiment_desc ='this is for testing'
-                        
-                        
                         
                         ModelObject = ModelClass(Model_Mode,user_id, project_id,dataset_id,
                                                 DBObject,connection,connection_string)# Initializing the ModelClass
@@ -131,12 +127,18 @@ class StartModelClass(APIView):
                                 
                                 model_id = int(request.query_params.get('model_id'))
                                 # hyperparameters = request.query_params.get('hyperparameters')
-                                hyperparameters = {"epochs": 10, "learning_rate": 0.01, "batch_size": 32, "loss": "mean_absolute_error", "optimizer": "Adam", 
-                                        "activation": "relu"}
+                                if model_id == 2:
+                                        hyperparameters = {"epochs": 10, "learning_rate": 0.01, "batch_size": 32, "loss": "mean_absolute_error", "optimizer": "Adam", 
+                                                "activation": "relu"}
+                                else:
+                                        hyperparameters = ""
                                 
                                 ModelObject = ModelClass(Model_Mode,user_id, project_id,dataset_id,
                                                 DBObject,connection,connection_string)
                                 
+                                manual_model_params_dict = {'model_id':model_id, 'hyperparameters': hyperparameters,
+                                                        'experiment_name': experiment_name}
+
                                 ModelObject.store_manual_model_params(manual_model_params_dict)
                                 # model_type = 'Regression'
                                 ModelObject.run_model(model_type, model_id, experiment_name, experiment_desc)
@@ -403,13 +405,12 @@ class SelectAlgorithmClass(APIView):
                 """
                 try:
                         
-                        
-                        ModelObject = ModelClass(Model_Mode, user_id, project_id,dataset_id,
-                                                DBObject,connection,connection_string)
-                        
+                        project_id = int(request.query_params.get('project_id'))
+                        dataset_id = int(request.query_params.get('dataset_id'))
+                        model_type = request.query_params.get('model_type')
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
                         # experiment_id = request.query_params.get('experiment_id') #get Username
-                        models_list = ModelObject.show_model_list()
+                        models_list = AlgorithmDetectorObj.show_models_list(project_id,dataset_id,model_type)
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
                         # print(learning_curve_json)
                         return Response({"status_code":"200","error_msg":"Successfully updated","response":models_list})
@@ -436,20 +437,16 @@ class ShowHyperParametersClass(APIView):
                         Response(return false if failed otherwise json data)
                 """
                 try:
-                        
-                        ModelObject = ModelClass(Model_Mode, user_id, project_id,dataset_id,
-                                                DBObject,connection,connection_string)
-                        
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
-                        model_name  = request.query_params.get('model_name') #get Username 
-                        hyperparams = ModelObject.get_hyperparameters_list(model_name)
+                        model_id  = request.query_params.get('model_id')
+                        hyperparams_dict = AlgorithmDetectorObj.get_hyperparameters(model_id)
                         # h1 = hyperparameters_json.to_json(orient='records',date_format='iso')
                         # logging.info("aaaaaaaaa"+str(h1))
                         # x = '[ "A","B","C" , " D"]'
-                        if hyperparams != 'none':
-                                hyperparams = ast.literal_eval(hyperparams)
+                        # if hyperparams != 'none':
+                        #         hyperparams = ast.literal_eval(hyperparams)
 
-                        hyperparams_dict = {'model_parameters': hyperparams}
+                        # hyperparams_dict = {'model_parameters': hyperparams}
                         logging.info(" modeling : ModelStatisticsClass : POST Method : execution stop : status_code :200")
                         return Response({"status_code":"200","error_msg":"Successfully updated","response":hyperparams_dict})
                         

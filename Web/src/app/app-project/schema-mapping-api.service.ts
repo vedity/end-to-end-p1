@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from 'src/environments/environment';
 @Injectable({
   providedIn: 'root'
 })
 export class SchemaMappingApiService {
-  baseUrl = 'http://127.0.0.1:8000/mlaas/'           
+  baseUrl = environment.baseUrl;        
   headers = new HttpHeaders({
     'Content-type': 'application/json',
   });

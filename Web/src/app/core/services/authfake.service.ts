@@ -4,12 +4,13 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { User } from '../models/auth.models';
+import { environment } from 'src/environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthfakeauthenticationService {
     private currentUserSubject: BehaviorSubject<User>;
     public currentUser: Observable<User>;
-    baseUrl = 'http://127.0.0.1:8000/mlaas/'
+    baseUrl = environment.baseUrl;
     headers = new HttpHeaders ({
       'Content-type': 'application/json',
     });

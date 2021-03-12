@@ -46,6 +46,7 @@ class DBClass:
         Returns:
             [dataframe]: [it will return read csv file data in the form of dataframe.]
         """
+
         read_df=pd.read_csv(file_path) #  Read csv file and load data into dataframe.
         logging.info(str(read_df) + " read dataframe")
 
@@ -56,9 +57,8 @@ class DBClass:
             if read_df.dtypes.to_dict()[name] == 'object':
                 column_list.append(name)
         read_df=pd.read_csv(file_path,parse_dates=column_list) #  Read csv file and load data into dataframe.
-        
         return read_df
-        
+    
     def database_connection(self,database,user,password,host,port):
         """This function is used to make connection with database.
 
@@ -235,7 +235,7 @@ class DBClass:
         Returns:
             [integer]: [it will return stauts of deleted record. if successfully then 0 else 1.]
         """
-        logging.info("--->"+str(connection))
+        
         cursor = connection.cursor() # Open the cursor.
         sql_command = sql_command # Get delete query
         try:
@@ -324,6 +324,7 @@ class DBClass:
         try :
             logging.info("get data frame=="+str(file_data_df))
             file_data_df.to_sql(table_name,engine,schema=schema_name,) # Load data into database with table structure.
+            
             status = 0 # If successfully.
         except Exception as e:
             logging.info("Exception: "+str(e))
@@ -558,6 +559,7 @@ class DBClass:
         """
         sql_command = "SELECT 1 FROM information_schema.tables WHERE table_schema ='"+schema+"' AND table_name = '"+table_name+"'"
         data=self.select_records(connection,sql_command) #call select_records which return data if found else None
+        print(str(data) + "checking")
         if len(data) == 0: # check whether length of data is empty or not
             self.create_schema(connection)
             return "False"
@@ -602,7 +604,8 @@ class DBClass:
         return column_list
     
 
-    
+    #! The Function of the DB Class is itself taking DBObject as an input... which is unnecessary & logically wrong. 
+    #TODO: We will have to remove DBObject from the function parameters. Because 'self' itself means DBObject.
     def get_dataset_detail(self,DBObject,connection,dataset_id):
         '''This function is used to get dataset table name from dataset id
         Args:
@@ -753,8 +756,7 @@ class DBClass:
                 query = self.get_query_string(connection,schema_id)
                 #? Getting all the data
                 sql_command = f"SELECT {str(query)} FROM {user_name}.{dataset_table_name}"
-                logger.info("sql_command===="+sql_command)
-            
+                
             data_df = self.select_records(connection,sql_command)    
             data_df = data_df.replace([''],np.NaN)
             
@@ -768,11 +770,56 @@ class DBClass:
             return exc.msg
         
     def get_target_col(self, connection, schema_id):
+        '''
+            Returns a list containing target columns.
+            
+            Args:
+            -----
+            connection (`Object`): Postgres Connection Object.
+            schema_id (`Intiger`): id of dataset in the schema table.
+            
+            Returns:
+            -------
+            target_cols (`List`): List of the Names of Target Columns.
+        '''
+        
+        logging.info("database : DBClass : get_target_col : Execution Start")
         
         sql_command = f"select st.column_name from mlaas.schema_tbl st where st.schema_id = '{schema_id}' and st.column_attribute = 'Target'"
         target_df = self.select_records(connection,sql_command)
         
         target_lst = target_df['column_name']
+        
+        logging.info("database : DBClass : get_target_col : Execution Stop")
         return target_lst.tolist()
+    
+    def get_active_table_name(self, connection, dataset_id):
+        '''
+            Returns the Name of the raw data table thats currently associated with the project.
+            
+            Args:
+            -----
+            connection (`Object`): Postgres Connection Object.
+            dataset_id (`Intiger`): id of the dataset.
+            
+            Returns:
+            --------
+            dataset_table_name (`String`): Name of the raw data table.
+        '''
+        
+        logging.info("database : DBClass : get_active_table_name : Execution Start")
+        
+        dataframe = self.get_dataset_detail(self,connection,dataset_id)
 
-     
+        #Extract the dataframe based on its column name as key
+        table_name,dataset_visibility,user_name = str(dataframe['dataset_table_name'][0]),str(dataframe['dataset_visibility'][0]),str(dataframe['user_name'][0])
+        
+        if dataset_visibility == 'private':
+            dataset_table_name = user_name+'."'+table_name+'"'
+        else:
+            dataset_table_name = 'public'+'."'+table_name+'"'
+
+        logging.info("database : DBClass : get_active_table_name : Execution Stop")
+        return dataset_table_name
+
+    

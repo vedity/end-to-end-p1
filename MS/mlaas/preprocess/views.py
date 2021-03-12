@@ -382,8 +382,8 @@ class ScalingClass(APIView):
                         scaling_operation = request.query_params.get('scaling_op') 
                         split_method = request.query_params.get('split_method')
                         cv = request.query_params.get('cv')
-                        valid_size = request.query_params.get('valid_size')
-                        test_size = request.query_params.get('test_size')
+                        valid_size = request.query_params.get('valid_ratio')
+                        test_size = request.query_params.get('test_ratio')
                         random_state = request.query_params.get('random_state')
                         split_parameters = {'split_method': split_method ,'cv': cv,'valid_size': valid_size, 'test_size': test_size,'random_state': random_state}
                         operation = preprocessObj.handover(dataset_id, schema_id, project_id, user_name,split_parameters, scaling_operation)
@@ -394,3 +394,28 @@ class ScalingClass(APIView):
                         logging.error("data preprocess : HandoverClass : POST Method : Exception :" + str(e))
                         logging.error("data preprocess : HandoverClass : POST Method : "+ traceback.format_exc())
                         return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+        
+
+class Scalingtype(APIView):
+        def get(self,request,format=None):
+                try :
+                        logging.info("data preprocess : ScheamAttributeListClass : POST Method : execution start")
+                        column_attribute = [{"id" : 0,"name": "Standard Scaler"},{"id" : 1,"name": "Min-Max"},{"id": 2,"name": "Robust"}]
+                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":column_attribute})
+                except Exception as e:
+                        logging.error("data preprocess : ScheamAttributeListClass : POST Method : Exception :" + str(e))
+                        logging.error("data preprocess : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+
+class TrainValidHoldout(APIView):
+        def get(self,request,format=None):
+                try :
+                        logging.info("data preprocess : TrainValidHoldout : GET Method : execution start")
+                        holdout = [{"id" : 1,"value": "95-0-5"},{"id" : 2,"value": "90-5-5"},{"id" : 3,"value": "85-5-10"},{"id" : 4,"value": "80-10-10"},{"id" : 5,"value": "75-10-15"},{"id" : 6,"value": "70-15-15"},{"id" : 7,"value": "65-15-20"},{"id" : 8,"value": "60-20-20"}]
+                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":holdout})
+                except Exception as e:
+                        logging.error("data preprocess : TrainValidHoldout : GET Method : Exception :" + str(e))
+                        logging.error("data preprocess : TrainValidHoldout : POST Method : "+ traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+
+                

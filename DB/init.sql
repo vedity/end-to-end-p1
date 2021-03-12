@@ -86,6 +86,23 @@ SELECT setval('unq_num_seq', 1);
 -- mlaas.metrics mr
 -- WHERE a.run_uuid = mr.run_uuid AND mr.key = 'holdout_score';
 
+CREATE TABLE mlaas.manual_model_params_tbl (
+	user_id int4 NULL,
+	project_id int4 NULL,
+	dataset_id int4 NULL,
+	exp_name varchar NULL,
+	model_id int4 NULL,
+	hyperparameters varchar null
+);
+
+CREATE TABLE mlaas.model_hyperparams_tbl (
+	model_id int4 NULL,
+	hyperparameter varchar NULL,
+	param_value varchar NULL,
+	display_type varchar NULL
+);
+
+
 
 
 

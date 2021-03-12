@@ -57,12 +57,12 @@ class SplitData:
     def get_split_datasets(self, scaled_split_params_dict):
         
         path = "/usr/local/airflow/dags/"
-        train_X = np.load(path + scaled_split_params_dict['train_X_file_path'], allow_pickle=True)
-        test_X = np.load(path + scaled_split_params_dict['test_X_file_path'], allow_pickle=True)
-        valid_X = np.load(path + scaled_split_params_dict['valid_X_file_path'], allow_pickle=True)
-        train_y = np.load(path + scaled_split_params_dict['train_y_file_path'], allow_pickle=True)
-        test_y = np.load(path + scaled_split_params_dict['test_y_file_path'], allow_pickle=True)
-        valid_y = np.load(path + scaled_split_params_dict['valid_y_file_path'], allow_pickle=True)
+        train_X = np.load(path + scaled_split_params_dict['train_X_filename'], allow_pickle=True)
+        test_X = np.load(path + scaled_split_params_dict['test_X_filename'], allow_pickle=True)
+        valid_X = np.load(path + scaled_split_params_dict['valid_X_filename'], allow_pickle=True)
+        train_y = np.load(path + scaled_split_params_dict['train_Y_filename'], allow_pickle=True)
+        test_y = np.load(path + scaled_split_params_dict['test_Y_filename'], allow_pickle=True)
+        valid_y = np.load(path + scaled_split_params_dict['valid_Y_filename'], allow_pickle=True)
         return train_X, test_X, valid_X, train_y, test_y, valid_y
 
     

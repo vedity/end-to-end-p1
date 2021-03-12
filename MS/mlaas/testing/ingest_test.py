@@ -59,7 +59,7 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
         """
         
         
-        files = '../ingest/dataset/CarPrice_Assignment.csv'
+        files = 'ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser","dataset_name":"auto_dataset_user","visibility":"private","dataset_description":"dataset"}
         response = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
@@ -101,7 +101,7 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
     
         """
         time.sleep(1)
-        files = '../ingest/dataset/pima_indians_diabetes.csv'
+        files = 'ingest/dataset/pima_indians_diabetes.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser","dataset_name":"auto_dataset_name","visibility":"public","dataset_description":"dataset description"}
         response = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
@@ -121,7 +121,7 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
     
         """
         time.sleep(1)
-        files = '../ingest/dataset/empty.csv'
+        files = 'ingest/dataset/empty.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser","dataset_name":"auto_dataset_name3","visibility":"public","dataset_description":"dataset description"}
         response = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
@@ -143,7 +143,7 @@ class TestAIngestPostDatasetClass(unittest.TestCase):
     
         """
         time.sleep(1)
-        files = '../ingest/dataset/one_column.csv'
+        files = 'ingest/dataset/one_column.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser","dataset_name":"auto_dataset_name3","visibility":"public"}
         response = requests.post("http://localhost:8000/mlaas/ingest/create_dataset/",data = info,files = file)
@@ -197,7 +197,7 @@ class TestIngestDatasetDeletion(unittest.TestCase):
             dataset_id ([integer]):[id of the dataset.]
             
         """
-        files = '../ingest/dataset/CarPrice_Assignment.csv'
+        files = 'ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser_four","dataset_name":"auto_dataset_name_four","visibility":"private","dataset_description":"dataset description"}
         response = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
@@ -218,7 +218,7 @@ class TestIngestDatasetDeletion(unittest.TestCase):
             dataset_id ([integer]):[id of the dataset.]
 
         """
-        files = '../ingest/dataset/CarPrice_Assignment.csv'
+        files = 'ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser_six","dataset_name":"autouser_six","visibility":"private","dataset_description":"dataset description"}
         response_private_datset = requests.post("http://localhost:8000/mlaas/ingest/dataset/create/",data = info,files = file)
@@ -254,7 +254,7 @@ class TestCIngestPostProject(unittest.TestCase):
     
         """
         time.sleep(2)
-        files = '../ingest/dataset/CarPrice_Assignment.csv'
+        files = 'ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser_2","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_datasetname","visibility":"private"}
         response = requests.post("http://localhost:8000/mlaas/ingest/project/create/",data = info,files = file)
@@ -287,7 +287,7 @@ class TestCIngestPostProject(unittest.TestCase):
         responsedataset = requests.get("http://localhost:8000/mlaas/ingest/dataset/create/",params = {"user_name":"autouser"})
         json_responsedataset=responsedataset.json()
         json_dataset_id = json_responsedataset["response"][0]["dataset_id"]
-        files = '../ingest/dataset/CarPrice_Assignment.csv'
+        files = 'ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_dataset_name_project","visibility":"public","dataset_id":json_dataset_id}
         response = requests.post("http://localhost:8000/mlaas/ingest/project/create/",data = info,files = file)
@@ -307,7 +307,7 @@ class TestCIngestPostProject(unittest.TestCase):
     
         """
         time.sleep(2)
-        files = '../ingest/dataset/CarPrice_Assignment.csv'
+        files = 'ingest/dataset/CarPrice_Assignment.csv'
         file = {'inputfile': open(files, 'rb')}
         info = {"user_name":"autouser_2","project_name":"auto_project_name","description":"this is automated entry","dataset_name":"auto_dataset_name","visibility":"public"}
         response = requests.post("http://localhost:8000/mlaas/ingest/project/create/",data = info,files = file)

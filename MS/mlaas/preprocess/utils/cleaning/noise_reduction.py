@@ -18,6 +18,17 @@ from . import missing_value_handling as mvh
 #* Initializing Objects
 MVH_OBJECT = mvh.MissingValueClass()
 
+#* Logging
+import logging
+from common.utils.logger_handler import custom_logger as cl
+
+user_name = 'admin'
+log_enable = True
+LogObject = cl.LogClass(user_name,log_enable)
+LogObject.log_setting()
+logger = logging.getLogger('noise_reduction')
+
+
 class RemoveNoiseClass:
     
     def _check_string_col(self, series):
@@ -232,3 +243,43 @@ class RemoveNoiseClass:
         
     def to_string_col(self, Series, cols):
         pass
+    
+    def dtct_noise(self, DBObject, connection, column_name, dataset_id = None, table_name = None):
+        '''
+            Detects if there is removable noise present in the column. 
+            dataset_id here is not necessary but you can give it to improve the performance.
+            
+            Args:
+            -----
+            DBObject,
+            connection,
+            column_name,
+            dataset_id,
+            table_name 
+            
+            Returns:
+            --------
+            noise_status (`Intiger`): Intiger representing the status of the noise.
+                - `0` : No Noise
+                - `1` : Removable amount of noise
+                - `2` : Too Much Noise
+        '''
+        column_name = '"' + column_name + '"'
+        if dataset_id is None:
+            sql_command = f"select (count(*)*100)/(select count(*) from {table_name}) as noise_percentage from {table_name} where {column_name} !~ '[0-9.]';"
+            
+        noise_df = DBObject.select_records(connection,sql_command)
+        if not isinstance(noise_df, pd.DataFrame):
+            return 0
+        
+        noise_percentage = noise_df['noise_percentage'].tolist()[0]
+        
+        if noise_percentage == 0:
+            noise_status =  0
+        elif noise_percentage <= 33:
+            noise_status = 1
+        else:
+            noise_status = 2
+            
+        return noise_status
+    

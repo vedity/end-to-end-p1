@@ -22,14 +22,18 @@ from .schema import schema_creation as sc
 from .cleaning import noise_reduction as nr
 from .cleaning import cleaning
 from .Transformation import transformation as trs
-from modeling.split_data import SplitData as sd
+# from modeling.split_data import SplitData as sd
+
 #* Library Imports
 import logging
 import traceback
 import numpy as np
 import pandas as pd
 import uuid
+#from model_type import ModelType
+from .model_type import ModelType
 from sklearn.model_selection import train_test_split
+
 user_name = 'admin'
 log_enable = True
 
@@ -170,12 +174,13 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.error("data preprocessing : PreprocessingClass : get_schema_details : " +traceback.format_exc())
             return exc.msg
         
-    def get_col_names(self, schema_id):
+    def get_col_names(self, schema_id, json = False):
         '''
             It is used to get the column names.
             
             Args:
-                schema_id(Intiger): schema id of the associated dataset.
+                schema_id (Intiger): schema id of the associated dataset.
+                json (Boolean) (default: False): Returns json dict if True else returns List of Column Names. 
                 
             Returns:
                 column_names(List of Strings): List of Name of the columns.
@@ -195,9 +200,14 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 raise EntryNotFound(500)
             
             column_name,flag_value = list(col_df['column_list']),list(col_df['flag'])
-
-            json_data = [{"column_id": count, "col_name": column_name[count],"is_missing":flag_value[count]} for count in range(len(column_name))]
-            logging.info(str(json_data) + " json data")
+            
+            #? Returning column names if user doesn't want json
+            if not json:
+                logging.info("data preprocessing : PreprocessingClass : get_col_names : execution stop")
+                return column_name
+            
+            #? For FrontEnd 
+            json_data = [{"column_id": count, "col_name": column_name[count],"is_missing":flag_value[count]} for count in range(1,len(column_name))]
             logging.info("data preprocessing : PreprocessingClass : get_col_names : execution stop")
             
             return json_data
@@ -226,7 +236,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if connection == None :
                 raise DatabaseConnectionFailed(500)  
                 
-            sql_command = f"select amt.activity_id,amt.activity_name,pat.parent_activity_name,ptt.tab_name from mlaas.activity_master_tbl amt , mlaas.parent_activity_tbl pat, mlaas.preprocess_tab_tbl ptt where amt.code = '0' and amt.parent_activity_id = pat.parent_activity_id and ptt.tab_id = pat.tab_id"
+            sql_command = f"select amt.activity_id,amt.activity_name,amt.user_input,pat.parent_activity_name,ptt.tab_name from mlaas.activity_master_tbl amt , mlaas.parent_activity_tbl pat, mlaas.preprocess_tab_tbl ptt where amt.code = '0' and amt.parent_activity_id = pat.parent_activity_id and ptt.tab_id = pat.tab_id order by amt.activity_id"
             operations_df = DBObject.select_records(connection,sql_command) 
             
             if operations_df is None:
@@ -260,6 +270,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                             operation_dict['id'] = j
                             operation_dict['name'] = data['activity_name']
                             operation_dict['operation_id'] = data['activity_id']
+                            operation_dict['user_input'] = data['user_input']
                             handlers.append(operation_dict)
                             j += 1
                         
@@ -309,6 +320,14 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if isinstance(data_df, str):
                 raise GetDataDfFailed(500)
             
+            #? Getting DB object & connection object
+            DBObject,connection,connection_string = self.get_db_connection()
+            if connection == None :
+                raise DatabaseConnectionFailed(500)
+
+            #? Getting Table Name
+            table_name = DBObject.get_active_table_name(connection, dataset_id)
+            
             missing_value_status = []
             noise_status = []
             for col in data_df.columns:
@@ -319,8 +338,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 missing_value_status.append(is_missing_value)
                 
                 #? Checking if there is noise in the column
-                noisy,_,_ = self.detect_noise(series)
-                noise_status.append(noisy)
+                noise = self.dtct_noise(DBObject, connection, col, table_name= table_name)
+                if noise == 1:
+                    noise = True
+                else: noise = False
+                noise_status.append(noise)
             
             logging.info("data preprocessing : PreprocessingClass : get_preprocess_cache : execution stop")
             return missing_value_status,noise_status
@@ -502,33 +524,18 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         try:
             logging.info("data preprocessing : PreprocessingClass : get_possible_operations : execution start")
             
+            #? Getting Dataframe
+            data_df = self.get_data_df(dataset_id,schema_id)
+            if isinstance(data_df, str):
+                raise GetDataDfFailed(500)
+            
+            #? Getting DB object & connection object
             DBObject,connection,connection_string = self.get_db_connection()
             if connection == None :
-                raise DatabaseConnectionFailed(500)  
-                
-            #? getting the name of the dataset_tbl
-            table_name,_,_ = dc.make_dataset_schema()
-            
-            #? Getting user_name and dataset_visibility
-            sql_command = f"SELECT USER_NAME,DATASET_VISIBILITY,DATASET_TABLE_NAME,no_of_rows FROM {table_name} WHERE dataset_id = '{dataset_id}'"
-            visibility_df = DBObject.select_records(connection,sql_command) 
-            if len(visibility_df) != 0: 
-                user_name,dataset_visibility = visibility_df['user_name'][0],visibility_df['dataset_visibility'][0]
-            #? No entry for the given dataset_id        
-            else: raise EntryNotFound(500)
-            
-            #? Getting CSV table name
-            dataset_table_name = visibility_df['dataset_table_name'][0]
-            dataset_table_name = '"'+ dataset_table_name+'"'
-            
-            #? changing the database schema for the public databases
-            if dataset_visibility == 'public':
-                user_name = 'public'
-            
-            query = DBObject.get_query_string(connection,schema_id)
-            #? Getting all the data
-            sql_command = f"SELECT {str(query)} FROM {user_name}.{dataset_table_name}"
-            data_df = DBObject.select_records(connection,sql_command)    
+                raise DatabaseConnectionFailed(500)
+
+            #? Getting Table Name
+            table_name = DBObject.get_active_table_name(connection, dataset_id)
             
             num_cols = data_df._get_numeric_data().columns.tolist()
             predicted_datatypes = self.get_attrbt_datatype(data_df,data_df.columns,len(data_df))
@@ -541,7 +548,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 for id in column_ids:
                     col = data_df.columns[id]
                     series = data_df[col]
-                    operations = [1,2,3,6,10]
+                    operations = [3,4]
 
                     #? Column is both numerical & categorical
                     if (col in num_cols) and (predicted_datatypes[id].startswith('Ca')):
@@ -555,40 +562,38 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     else:
                         col_type = 3
 
-                    #? Column is text column
-                    if col_type == 3:
-                        all_col_operations.append(operations)
-                        continue
-                    
-                    #? Adding Missing Value Operations
-                    if col_type == 0:
-                        operations += [4,5,7,8,9]
-                    elif col_type == 1:
-                        operations += [4,5,7]
-                    elif col_type == 2:
-                        operations += [8,9]
-                    
                     missing_values = data_df[col].isnull().any()
-                    if missing_values == False:
-                        noisy,_,_ = self.detect_noise(series)
+                    noise_status = self.dtct_noise(DBObject, connection, col, table_name= table_name)
+                    if noise_status == 1:
+                        noise_status = True
+                    else: noise_status = False
                     
-                    #? Adding Noise Reduction Operations
-                    if not missing_values:
-                        operations += [11,14,15]
+                    if missing_values:
+                        #? Adding Missing Value Operations
+                        if col_type == 0:
+                            operations += [1,6,7,8,9,10,11,13]
+                        elif col_type == 1:
+                            operations += [1,6,7,8,9,10,13]
+                        elif col_type == 2 or col_type == 3:
+                            operations += [1,11,12]
+                    
+                    if noise_status:
                         if col_type == 0 or col_type == 1:
-                            operations += [12,13]
+                            operations += [5,14,15,16,17,18,19]
                     
                     #? Outlier Removal & Scaling Operations for numeric; Encoding ops for Categorical
-                    if not missing_values and not noisy:
+                    if not missing_values and not noise_status:
                         if col_type == 0 or col_type == 1:
-                            operations += [16,17,18,19,20,21,22,23,24,25,26]
-                        if col_type == 0 or col_type == 2:
-                            operations += [27,28,29]
+                            operations += [3,4,20,21,22,23,24,25,26]
+                        if col_type == 2 or col_type == 3:
+                            operations += [27,28]
+                        if col_type == 0:
+                            operations += [28]
                         
                     #? Math operations
-                    if not noisy:
+                    if not noise_status:
                         if col_type == 0 or col_type == 1:
-                            operations += [30,31,32,33]
+                            operations += [29,30,31,32]
                             
                     all_col_operations.append(operations)
                 
@@ -614,7 +619,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 logging.info(f"data preprocessing : PreprocessingClass : get_possible_operations : Function failed : {str(exc)}")
                 return exc
                 
-        except (DatabaseConnectionFailed,EntryNotFound) as exc:
+        except (DatabaseConnectionFailed,EntryNotFound,GetDataDfFailed) as exc:
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
             return exc.msg
@@ -629,10 +634,16 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 {
                 column_id: [1]
                 selected_handling: [12,16,17]
+                values: [15,'',33]
                 },
                 {
                 column_id: [1,2]
                 selected_handling: [10,14,17]
+                values: {
+                    10: 25
+                    14: None
+                    17: None
+                }
                 }
             ]
             
@@ -696,7 +707,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             return OperationOrderingFailed(500).msg
         
         
-    def master_executor(self, dataset_id, schema_id,request, save_as = False):
+    def master_executor(self, dataset_id, schema_id,request, save_as = False,value = None):
         '''
             It takes the request from the frontend and executes the cleanup operations.
             
@@ -731,66 +742,164 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 dataset_table_name = 'public'+'."'+table_name+'"'
 
             #get the Column list
-            column_list = DBObject.get_column_list(connection,dataset_id)
+            column_list = self.get_col_names(schema_id)
+            logging.info(str(column_list) + " column_list")
 
             #? Getting operations in the ordered format
             operation_ordering = self.reorder_operations(request)
             
             operations = operation_ordering.keys()
-            
             for op in operations:
+                status = 1
+                flag = False
                 
                 #? Getting Columns
                 col = operation_ordering[op]
-
+                
                 if op == 1:
-                    data_df = self.discard_missing_values(data_df, col)
+                    status = self.discard_missing_values(DBObject,connection,column_list, dataset_table_name, col)
+                    flag = True
                 # elif op == 2:
-                    # data_df = self.delete_above(data_df, col, val)
+                #     data_df = self.delete_above(data_df, col, val)
                 # elif op == 3:
-                    # data_df = self.delete_below(data_df, col, val)
+                #     data_df = self.delete_below(data_df, col, val)
+                elif op == 4:
+                    status = self.mean_imputation(DBObject,connection,column_list, dataset_table_name, col)
+                    flag = True
                 elif op == 5:
-                    status = self.imputation(DBObject, connection, column_list, dataset_table_name, col,op)
+                    status = self.median_imputation(DBObject,connection,column_list, dataset_table_name, col)
+                    flag = True
                 # elif op == 6:
                 #     data_df = self.arbitrary_value_imputation(data_df, col, val)
                 elif op == 7:
-                    data_df = self.end_of_distribution(data_df, col)
+                    status = self.end_of_distribution(DBObject,connection,column_list, dataset_table_name, col)
+                    flag = True
                 elif op == 8:
-                    data_df = self.frequent_category_imputation(data_df, col)
+                    status = self.frequent_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
+                    flag = True
                 elif op == 9:
-                    data_df = self.add_missing_category(data_df, col)
+                    status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
+                    flag = True
                 elif op == 10:
+                    #? Getting Dataframe
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
                     data_df = self.random_sample_imputation(data_df, col)
                 elif op == 11:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
                     data_df = self.remove_noise(data_df, col)
                 elif op == 12:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
                     data_df = self.repl_noise_mean(data_df, col)
                 elif op == 13:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
                     data_df = self.repl_noise_median(data_df, col)
                 elif op == 14:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
                     data_df = self.repl_noise_random_sample(data_df, col)
                 # elif op == 15:
                 #     data_df = self.repl_noise_arbitrary_val(data_df, col, val)
                 elif op == 16:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
                     data_df = self.rem_outliers_ext_val_analysis(data_df, col)
                 elif op == 17:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
                     data_df = self.rem_outliers_z_score(data_df, col)
                 elif op == 18:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
                     data_df = self.repl_outliers_mean_ext_val_analysis(data_df, col)
                 elif op == 19:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
                     data_df = self.repl_outliers_mean_z_score(data_df, col)
                 elif op == 20:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
                     data_df = self.repl_outliers_med_ext_val_analysis(data_df, col)
                 elif op == 21:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
                     data_df = self.repl_outliers_med_z_score(data_df, col)
                 elif op == 22:
+                    data_df = self.get_data_df(dataset_id,schema_id)
+                    if isinstance(data_df, str):
+                        raise GetDataDfFailed(500)
                     data_df = self.apply_log_transformation(data_df, col)
+                elif op == 27:
+                    status = self.label_encoding(DBObject,connection,column_list, dataset_table_name, col)
+                    flag = True
+                elif op == 28:
+                    data_df = self.one_hot_encoding(DBObject,connection,column_list, dataset_table_name, col)
+                    logging.info("------>"+str(data_df))
+                    #flag = True
+                elif op == 30:
+                    status = self.add_to_column(DBObject,connection,column_list, dataset_table_name, col, value)
+                    flag = True
+                elif op == 31:
+                    status = self.subtract_from_column(DBObject,connection,column_list, dataset_table_name, col, value)
+                    flag = True
+                elif op == 32:
+                    status = self.multiply_column(DBObject,connection,column_list, dataset_table_name, col, value)
+                    flag = True
+                elif op == 33:
+                    status = self.divide_column(DBObject,connection,column_list, dataset_table_name, col, value)
+                    flag = True
                 
 
+                # sql_command = "select dataset_visibility,dataset_table_name,user_name from mlaas.dataset_tbl  where dataset_id='"+str(dataset_id)+"'"
+                
+                # logging.info(str(sql_command))
+                # dataframe = DBObject.select_records(connection,sql_command)
+    
+                # dataset_visibility,dataset_table_name,user_name  = str(dataframe['dataset_visibility'][0]),str(dataframe['dataset_table_name'][0]),str(dataframe['user_name'][0])
+                if status == 1:
+                    if flag:
+                        #? Sql function Failed
+                        raise SavingFailed(500)
+                    
+                    data_df.drop(data_df.columns[0],axis=1, inplace = True)
+
+                    updated_table_name = DBObject.get_table_name(connection,table_name)
+                    
+                    if dataset_visibility == 'public':
+                        user_name='public'
+        
+                    status = DBObject.load_df_into_db(connection_string,updated_table_name,data_df,user_name)
+    
+                    sql_command = "update mlaas.dataset_tbl set dataset_table_name='"+str(updated_table_name)+"' where dataset_id='"+str(dataset_id)+"'"
+                    logging.info(str(sql_command))
+                    update_status = DBObject.update_records(connection,sql_command)
+                    status = update_status
+                    if status == 1:
+                        raise SavingFailed(500)
+                    else:
+                        sql_command = f"drop table {dataset_table_name}"
+                        update_status = DBObject.update_records(connection,sql_command)
+                        status = update_status
+                    
+                    
             logging.info("data preprocessing : PreprocessingClass : master_executor : execution stop")
             return status
 
-        except (GetDataDfFailed) as exc:
+        except (DatabaseConnectionFailed,GetDataDfFailed,SavingFailed) as exc:
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
             return exc.msg
@@ -835,12 +944,18 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             tg_cols = DBObject.get_target_col(connection, schema_id)
             for col in tg_cols:
                 feature_cols.remove(col)
-            
             target_cols = [data_df.columns[0]]
             target_cols += tg_cols
             
             input_features_df = data_df[feature_cols] #input_features_df
             target_features_df=data_df[target_cols] #target_features_df
+            mt = ModelType()
+            problem_type = mt.get_model_type(target_features_df)
+            model_type = problem_type[0]
+            algorithm_type = problem_type[1]
+            target_type = problem_type[2]
+            problem_type_dict = '{"model_type": "'+str(model_type)+'","algorithm_type": "'+str(algorithm_type)+'","target_type": "'+str(target_type)+'"}'
+            
             feature_cols = str(feature_cols) #input feature_cols
             target_cols = str(target_cols) #target feature_cols
             feature_cols = feature_cols.replace("'",'"')
@@ -850,11 +965,14 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             # #splitting parameters
             split_method =split_parameters['split_method'] #get split_method
             cv = split_parameters['cv'] #get cv
+            if len(cv) == 0:
+                cv = None
+            
             random_state = split_parameters['random_state'] #get random_state
             test_size = split_parameters['test_size'] #get test_size
             valid_size = split_parameters['valid_size'] #get valid_size
-            if valid_size=='':
-                valid_size=0
+            if len(valid_size) == 0:
+                valid_size= None
             else:
                 valid_size=float(valid_size)
             unique_id = str(uuid.uuid1().time) #genrate unique_id
@@ -870,10 +988,10 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             train_Y_filename = scale_dir+"/scaled_train_Y_data_" + unique_id #genrate train_Y file path
             test_X_filename =  scale_dir+"/scaled_test_X_data_" + unique_id  #genrate test_X file path  
             test_Y_filename =  scale_dir+"/scaled_test_Y_data_" + unique_id  #genrate test_Y file path     
-            valid_X_filename = ""
-            valid_Y_filename = ""
+            valid_X_filename = "None"
+            valid_Y_filename = "None"
             Y_valid_count= None
-            X_train, X_valid, X_test, Y_train, Y_valid, Y_test=sd.get_split_data(self,input_features_df,target_features_df, int(random_state),float(test_size), valid_size, str(split_method))
+            X_train, X_valid, X_test, Y_train, Y_valid, Y_test=mt.get_split_data(input_features_df,target_features_df, int(random_state),float(test_size), valid_size, str(split_method))
             if split_method != 'cross_validation':
                 Y_valid_count= Y_valid.shape[0]
                 valid_X_filename = scale_dir+"/scaled_valid_X_data_" + unique_id #genrate valid_X file path     
@@ -887,9 +1005,9 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             np.save(test_X_filename,X_test.to_numpy())
             np.save(test_Y_filename,Y_test.to_numpy())
         
-            scaled_split_parameters = '{"split_method":'+ (split_method)+' ,"cv":'+ str(cv)+',"valid_size":'+ str(valid_size)+', "test_size":'+ str(test_size)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":'+train_X_filename+',"train_Y_filename":'+train_Y_filename+',"test_X_filename":'+test_X_filename+',"test_Y_filename":'+test_Y_filename+',"valid_X_filename":'+valid_X_filename+',"valid_Y_filename":'+valid_Y_filename+'}'
+            scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_size)+', "test_ratio":'+ str(test_size)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'"}'
             logger.info("scaled_split_parameters=="+scaled_split_parameters)
-            sql_command = f"update mlaas.project_tbl set target_features= '{target_cols}' ,input_features='{feature_cols}',scaled_split_parameters = '{scaled_split_parameters}' where dataset_id = '{dataset_id}' and project_id = '{project_id}' and user_name={user_name}"
+            sql_command = f"update mlaas.project_tbl set target_features= '{target_cols}' ,input_features='{feature_cols}',scaled_split_parameters = '{scaled_split_parameters}',problem_type = '{problem_type_dict}' where dataset_id = '{dataset_id}' and project_id = '{project_id}' and user_name= '{user_name}'"
             status = DBObject.update_records(connection, sql_command)
             return status
             
