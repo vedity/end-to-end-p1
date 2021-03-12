@@ -793,11 +793,9 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
                     flag = True
                 elif op == 13:
-                    #? Getting Dataframe
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.random_sample_imputation(data_df, col)
+                    status = self.random_sample_imputation(DBObject,connection,column_list, dataset_table_name,col)
+                    flag = True
+
                 # elif op == 11:
                 #     data_df = self.get_data_df(dataset_id,schema_id)
                 #     if isinstance(data_df, str):
@@ -908,6 +906,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         except (DatabaseConnectionFailed,GetDataDfFailed,SavingFailed) as exc:
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
+            logging.error(str(exc) +" Error")
             return exc.msg
             
     def handover(self, dataset_id, schema_id, project_id, user_name,split_parameters,scaling_type = 0, val = None):

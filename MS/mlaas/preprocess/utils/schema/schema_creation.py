@@ -564,6 +564,24 @@ class SchemaClass:
         column_count_value,ignore_count_value = int(dataframe['column_count'][0])-1,int(dataframe['ignore_count'][0])
 
         return column_count_value,ignore_count_value
+    
+    def delete_schema_record(self,DBObject,connection,schema_id,col_name):
+        """
+        Function used to delete the record from  the schema table
+        Args : 
+                schema_id[(integer)] : [Id of the schema table]
+                col_name[(String)] : [Name of the column]
+        Return:
+                [Integer] : [return 0 if successfully deleted else 1]
+        """
+        try:
+            schema_table_name,_,_ = self.get_schema()
+            sql_command = f'delete from {schema_table_name} where schema_id={str(schema_id)} and column_name ="{col_name}"'
+            status = DBObject.update_records(connection,sql_command)
+            return status
+        except Exception as exc:
+            return str(exc)
+
 
 
 

@@ -214,7 +214,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 return str(exc)
 
         logging.info("data preprocessing : CleaningClass : random_sample_imputation : execution stop")
-        return 0
+        return status
     
     def arbitrary_value_imputation(self, data_df, col, val):
         '''

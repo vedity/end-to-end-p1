@@ -59,8 +59,10 @@ class MissingValueClass:
     def random_sample_imputation(self,DBObject,connection,table_name,col_name,impute_value):
 
         logging.info("Preprocess : MissingValueClass : random_sample_imputation : execution start")
+        
+        sql_command = f'update {table_name} t1 set "{col_name}" = (select "{col_name}" col from {table_name} t2 where t2."{col_name}" is not null and t1."{col_name}" is null order by random() limit 1) where t1."{col_name}" is null'
 
-        sql_command = f'update {table_name} c set "{col_name}" =(select  random_value from (values {impute_value}) v(random_value) where C."{col_name}" <> v.random_value order by random() limit 1) where C."{col_name}" is null'
+        #sql_command = f'update {table_name} c set "{col_name}" =(select  random_value from (values {impute_value}) v(random_value) where C."{col_name}" <> v.random_value order by random() limit 1) where C."{col_name}" is null'
         logging.info("Sql_command : Update query : random_sample_imputation : "+str(sql_command))
 
         status = DBObject.update_records(connection,sql_command)
