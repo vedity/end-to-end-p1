@@ -212,6 +212,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             #? For FrontEnd 
             json_data = [{"column_id": count, "col_name": column_name[count],"is_missing":flag_value[count]} for count in range(1,len(column_name))]
+            logging.info("AAAAAAAAAAAAAAAAAAAA" + str(json_data))
             logging.info("data preprocessing : PreprocessingClass : get_col_names : execution stop")
             
             return json_data
@@ -1031,31 +1032,74 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             return exc.msg
         
     def get_activity_desc(self, DBObject, connection, operation_id, col_name, code = 1):
+        '''
+            Used to get preprocess activity description from the activity master table.
+        
+            Returns:
+            --------
+            description (`String`): Description for the activity.
+        '''
+        logging.info("data preprocessing : PreprocessingClass : get_activity_desc : execution start")
         
         #? Getting Description
         sql_command = f"select replace (amt.activity_name || ' ' || amt.activity_description, '*', {col_name}) as description from mlaas.activity_master_tbl amt where amt.activity_id = '{operation_id}' and amt.code = '{code}'"
-        logging.info('--------->Activity '+sql_command)
         
         desc_df = DBObject.select_records(connection,sql_command)
         if not isinstance(desc_df, pd.DataFrame):
             return "Failed to Extract Activity Description."
         
+        #? Fatching the description
         description = desc_df['description'].tolist()[0]
+        
+        logging.info("data preprocessing : PreprocessingClass : get_activity_desc : execution stop")
         
         return description
             
     def operation_start(self, DBObject, connection, operation_id, user_name, project_id, dataset_id, col_name):
+        '''
+            Used to Insert Activity in the Activity Timeline Table.
+            
+            Returns:
+            --------
+            activity_id (`Intiger`): index of the activity in the activity transection table.
+        '''
+        logging.info("data preprocessing : PreprocessingClass : operation_start : execution start")
+            
+        #? Transforming the operation_id to the operation id stored in the activity timeline table. 
         operation_id += self.op_diff
+        
+        #? Getting Activity Description
         desc = self.get_activity_desc(DBObject, connection, operation_id, col_name, code = 1)
+        
+        #? Inserting the activity in the activity_detail_table
         _,activity_id = self.AT.insert_user_activity(operation_id,user_name,project_id,dataset_id,desc,column_id =col_name)
+        
+        logging.info("data preprocessing : PreprocessingClass : operation_start : execution stop")
         
         return activity_id
     
     def operation_end(self, DBObject, connection, activity_id, operation_id, col_name):
+        '''
+            Used to update Activity description when the Activity ends.
+            
+            Returns:
+            --------
+            status (`Intiger`): Status of the updation.
+        '''
+        
+        logging.info("data preprocessing : PreprocessingClass : operation_end : execution start")
+        
+        #? Transforming the operation_id to the operation id stored in the activity timeline table. 
         operation_id += self.op_diff
+        
+        #? Getting Activity Description
         desc = self.get_activity_desc(DBObject, connection, operation_id, col_name, code = 2)
         
+        #? Changing the activity description in the activity detail table 
         status = self.AT.update_activity(activity_id,desc)
+        
+        logging.info("data preprocessing : PreprocessingClass : operation_end : execution stop")
+        
         return status
 
 
