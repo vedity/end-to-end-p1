@@ -33,6 +33,7 @@
                                     <div class="handling handlingitem" id="handlingitem_{{item.column_id}}_{{handles}}" *ngFor="let handles of item['handling_'+tabs.tab_id];let j=index">
                                         <p>{{item['handlingname_'+tabs.tab_id][j]}}&nbsp;
                                             <a href="javascript:void(0);" id="trash_{{handles}}"> <i class=" bx bx-trash" (click)="removeHandling(item['handlingtarget_'+tabs.tab_id][j],item.column_id);"></i></a>
+                                            <input type="hidden" *ngIf="item['handlinginput_'+tabs.tab_id][j]!=undefined" value="" id="setInput_{{item.column_id}}_{{handles}}" />
                                         </p>
                                     </div>
                                 </div>
@@ -60,6 +61,8 @@
                                                 <input type="radio" id="customRadio_{{k}}_{{j}}" name="customRadio_{{k}}" value="{{childitem.operation_id}}" title="{{childitem.name}}" data-waschecked="false" [disabled]="operationIds.indexOf(childitem.operation_id)==-1" (click)="selectHandling($event,childitem.operation_id)"
                                                     class="custom-control-input radiobutton">
                                                 <label class="custom-control-label" for="customRadio_{{k}}_{{j}}" id="radiolabel_{{k}}_{{j}}">{{childitem.name}}</label>
+                                                <input type="text" class="form-control inline-textbox customInput" disabled id="customInput_{{k}}_{{j}}" (change)="setInput(childitem.operation_id,$event.target.value)" *ngIf="childitem.user_input==1">
+
                                             </div>
                                         </div>
                                     </div>

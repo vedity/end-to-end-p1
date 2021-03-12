@@ -124,17 +124,9 @@ holdoutlistsuccessHandler(data) {
   }
 }
   selectedcolumnswithoperation = [];
-  // selectedoperations=[];
   selectedColumn = [];
   selectColumn(event) {
-    // if ($(".radioitems:checked").length > 0) {
-    //   let selectedoperations = [];
-    //   $(".radioitems:checked").each(function () {
-    //     selectedoperations.push($(this).val());
-    //     $(this).prop("checked", false);
-    //   })
-    //   this.selectedcolumnswithoperation.push({ ids: this.selectedColumn, operations: selectedoperations })
-    // }
+    $(".customInput").prop('disabled',true).val('');
     if (event.target.checked) {
       this.selectedColumn.push(event.target.value);
     }
@@ -196,10 +188,21 @@ holdoutlistsuccessHandler(data) {
     }
   }
 
+  setInput(operationid, value) {
+    this.selectedColumn.forEach(element => {
+      var input = $("#setInput_" + element + "_" + operationid).val();
+      if (input != undefined) {
+        $("#setInput_" + element + "_" + operationid).val(value);
+      }
+    });
+  }
+
   handling = [];
   selectHandling(event, id) {
+    $(".customInput").prop('disabled',true).val('');
     var item = this.handling.find(s => s.column.toString() == this.selectedColumn.toString());
     $("#" + event.target.id).prop('checked', true);
+    $("#customInput_"+event.target.id.split('_')[1]+'_'+event.target.id.split('_')[2]).prop('disabled',false);
     if (item == undefined) {
       this.handling.push({ column: this.selectedColumn, operation: [id] })
     }
@@ -217,11 +220,15 @@ holdoutlistsuccessHandler(data) {
           e["handling_" + tabid] = [];
           e["handlingname_" + tabid] = [];
           e["handlingtarget_" + tabid] = [];
+          e["handlinginput_" + tabid] = [];
           if ($(".radiobutton:checked").length > 0) {
             $(".radiobutton:checked").each(function () {
               e["handling_" + tabid].push($(this).val().toString());
               e["handlingname_" + tabid].push($(this).attr('title'));
               e["handlingtarget_" + tabid].push($(this).prop('id'));
+              var ids = $(this).prop('id').split('_')
+              var val = $("#customInput_" + ids[1] + "_" + ids[2]).val();
+              e["handlinginput_" + tabid].push(val);
             })
           }
         }
@@ -274,13 +281,15 @@ holdoutlistsuccessHandler(data) {
 
   groupBy(data, key) {
     return data.reduce(function (rv, x) {
-      (rv[x[key]] = rv[x[key]] || []).push(parseInt(x['selected_handling']));
+      (rv[x[key]] = rv[x[key]] || []).push(x);
       return rv;
     }, []);
   };
 
   fianlarray = [];
+  errorflag:boolean;
   saveHanlers() {
+    this.errorflag=false;
     this.fianlarray = [];
     let arrayhandlers = [];
     if ($(".handlingitem").length > 0) {
@@ -288,16 +297,40 @@ holdoutlistsuccessHandler(data) {
         var id = $(this).prop('id').split('_');
         var columnid = id[1];
         var operationid = id[2];
-        arrayhandlers.push({ column_id: columnid, selected_handling: operationid });
+
+        var value=$("#setInput_"+columnid+"_"+operationid).val();
+        arrayhandlers.push({ column_id: columnid, selected_handling: operationid ,values:value});
       })
-      var handlers = this.groupBy(arrayhandlers, 'column_id');
-      for (const item in handlers) {
-        this.fianlarray.push({ "column_id": [parseInt(item)], "selected_handling": handlers[item] })
-      }
-      this.apiService.saveOperations(this.schema_id, this.dataset_id, this.fianlarray).subscribe(
-        logs => this.saveSuccessHandlers(logs),
-        error => this.errorHandler(error)
-      )
+    
+        var handlers = this.groupBy(arrayhandlers, 'column_id');
+        for (var item in handlers) {
+          let selectedhandling=[];
+          let values=[];
+          for (var childitem of handlers[item]) {
+            selectedhandling.push(parseInt(childitem.selected_handling));
+            if(childitem.values=="")
+            this.errorflag=true;
+
+            if(childitem.values==undefined){
+              childitem.values='';
+            }
+            values.push(childitem.values);
+          }
+          this.fianlarray.push({ "column_id": [parseInt(item)], "selected_handling": selectedhandling, "values": values })
+        }
+       console.log(this.fianlarray);
+       if(this.errorflag==true){
+        this.toaster.error("Please enter required input", 'Error')
+       }
+       else{
+        this.apiService.saveOperations(this.schema_id, this.dataset_id, this.fianlarray).subscribe(
+          logs => this.saveSuccessHandlers(logs),
+          error => this.errorHandler(error)
+        )
+       }
+        
+      
+     
     }
     else
       this.toaster.error("Please select any handlers", 'Error')
