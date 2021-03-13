@@ -47,3 +47,13 @@ class DataDosenotExist(Exception):
 
     def __str__(self):
         return (self.msg)
+
+class ModelIsStillInQueue(Exception):
+    """Model Is Still Is In Queue Exception"""
+    def __init__(self,status_code):
+        self.msg = "Model Is Still In Queue"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+
+    def __str__(self):
+        return (self.msg)

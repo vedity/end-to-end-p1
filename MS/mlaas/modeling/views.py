@@ -35,7 +35,7 @@ AlgorithmDetectorObj = AlgorithmDetector(DBObject, connection)
 
 ModelStatObject = ModelStatisticsClass(DBObject,connection)
 
-
+json_obj = JsonFormatClass()
 
 class ShowDatasetInfoClass(APIView):
         
@@ -72,13 +72,13 @@ class ShowDatasetInfoClass(APIView):
                                                         }
                         
                         
-                        if show_dataset_info_dictionary:
-                                
-                                logging.info("modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
-                                return Response({"status_code":"200","error_msg":"Successfully updated","response":show_dataset_info_dictionary})
+                        if isinstance(show_dataset_info_dictionary,str): #check the instance of dataset_df
+                                status_code,error_msg=json_obj.get_Status_code(show_dataset_info_dictionary) # extract the status_code and error_msg from project_df
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code :"+ status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
-                                logging.info("modeling : ModelStatisticsClass : GET Method : execution stop : status_code :"+500)
-                                return Response({"status_code":"500","error_msg":"Error","response":"false"})   
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code : 200")
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":show_dataset_info_dictionary})
                                 
                 except Exception as e:
                         logging.error("modeling : ModelStatisticsClass : GET Method : Exception :" + str(e))
@@ -174,8 +174,13 @@ class LearningCurveClass(APIView):
                         
                         learning_curve_json =ModelStatObject.learning_curve(experiment_id)
                         logging.info("modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
-                      
-                        return Response({"status_code":"200","error_msg":"Successfully updated","response":learning_curve_json})
+                        if isinstance(learning_curve_json,str): #check the instance of dataset_df
+                                status_code,error_msg=json_obj.get_Status_code(learning_curve_json) # extract the status_code and error_msg from project_df
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code :"+ status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        else:
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code : 200")
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":learning_curve_json})                   
 
                 except Exception as e:
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
@@ -203,7 +208,13 @@ class FeatureImportanceClass(APIView):
                         experiment_id  = request.query_params.get('experiment_id') #get Username
                         feature_importance_json =ModelStatObject.features_importance(experiment_id)
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
-                       
+                        if isinstance(feature_importance_json,str): #check the instance of dataset_df
+                                status_code,error_msg=json_obj.get_Status_code(feature_importance_json) # extract the status_code and error_msg from project_df
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code :"+ status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        else:
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code : 200")
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":feature_importance_json})
                         return Response({"status_code":"200","error_msg":"Successfully updated","response":feature_importance_json})
                         
                 except Exception as e:
@@ -232,7 +243,13 @@ class PerformanceMetricsClass(APIView):
                         performance_metrics_json =ModelStatObject.performance_metrics(experiment_id)
                         logging.info("modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
                         # print(learning_curve_json)
-                        return Response({"status_code":"200","error_msg":"Successfully updated","response":performance_metrics_json})
+                        if isinstance(performance_metrics_json,str): #check the instance of dataset_df
+                                status_code,error_msg=json_obj.get_Status_code(performance_metrics_json) # extract the status_code and error_msg from project_df
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code :"+ status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        else:
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code : 200")
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":performance_metrics_json})
                         
                 except Exception as e:
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
@@ -261,7 +278,13 @@ class ModelSummaryClass(APIView):
                         model_summary_json =ModelStatObject.model_summary(experiment_id)
                         logging.info("modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
                         # print(learning_curve_json)
-                        return Response({"status_code":"200","error_msg":"Successfully updated","response":model_summary_json})
+                        if isinstance(model_summary_json,str): #check the instance of dataset_df
+                                status_code,error_msg=json_obj.get_Status_code(model_summary_json) # extract the status_code and error_msg from project_df
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code :"+ status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        else:
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code : 200")
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":model_summary_json})
                         
                 except Exception as e:
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
@@ -289,9 +312,13 @@ class ActualVsPredictionClass(APIView):
                         experiment_id = request.query_params.get('experiment_id') #get Username
                         actual_vs_prediction_json =ModelStatObject.actual_vs_prediction(experiment_id)
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
-                        return Response({"status_code":"200","error_msg":"Successfully updated","response":actual_vs_prediction_json})
-                        
-
+                        if isinstance(actual_vs_prediction_json,str): #check the instance of dataset_df
+                                status_code,error_msg=json_obj.get_Status_code(actual_vs_prediction_json) # extract the status_code and error_msg from project_df
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code :"+ status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        else:
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code : 200")
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":actual_vs_prediction_json})
                 except Exception as e:
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
@@ -319,6 +346,13 @@ class ConfusionMatrixClass(APIView):
                         experiment_id = request.query_params.get('experiment_id') #get Username
                         confusion_matrix_json = json.loads(ModelStatObject.confusion_matrix(experiment_id))
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
+                        if isinstance(confusion_matrix_json,str): #check the instance of dataset_df
+                                status_code,error_msg=json_obj.get_Status_code(confusion_matrix_json) # extract the status_code and error_msg from project_df
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code :"+ status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        else:
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code : 200")
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":confusion_matrix_json})
                         return Response({"status_code":"200","error_msg":"Successfully updated","response":confusion_matrix_json})
                         
 
@@ -349,6 +383,13 @@ class ShowExperimentsListClass(APIView):
                         experiment_data =ModelStatObject.show_running_experiments(project_id)
                         
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
+                        if isinstance(experiment_data,str): #check the instance of dataset_df
+                                status_code,error_msg=json_obj.get_Status_code(experiment_data) # extract the status_code and error_msg from project_df
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code :"+ status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        else:
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code : 200")
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":experiment_data})
                        
                         return Response({"status_code":"200","error_msg":"Successfully updated","response":experiment_data})
                         
@@ -379,6 +420,13 @@ class ShowAllExperimentsListClass(APIView):
                         experiment_data =ModelStatObject.show_all_experiments(project_id)
                         
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
+                        if isinstance(experiment_data,str): #check the instance of dataset_df
+                                status_code,error_msg=json_obj.get_Status_code(experiment_data) # extract the status_code and error_msg from project_df
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code :"+ status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        else:
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code : 200")
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":experiment_data})
                         
                         return Response({"status_code":"200","error_msg":"Successfully updated","response":experiment_data})
                         
@@ -411,6 +459,13 @@ class CheckModelStatusClass(APIView):
                         experiment_data =ModelStatObject.check_model_status(project_id,experiment_name)
                         
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
+                        if isinstance(learning_curve_json,str): #check the instance of dataset_df
+                                status_code,error_msg=json_obj.get_Status_code(project_df) # extract the status_code and error_msg from project_df
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code :"+ status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        else:
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code : 200")
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":learning_curve_json})
                         
                         return Response({"status_code":"200","error_msg":"Successfully updated","response":experiment_data})
                         

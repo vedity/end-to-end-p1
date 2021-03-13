@@ -68,7 +68,7 @@ class AlgorithmDetector:
     def get_model_type(self, project_id, dataset_id):
         try:
 
-            sql_command = 'select model_type from mlaas.project_tbl where project_id={} and dataset_id={}'.format(project_id, dataset_id)
+            sql_command = 'select problem_type from mlaas.project_tbl where project_id={} and dataset_id={}'.format(project_id, dataset_id)
             model_type_literal = self.DBObject.select_records(self.connection, sql_command)
             if model_type_literal is None:
                 raise DatabaseConnectionFailed(500)
