@@ -213,7 +213,8 @@ class SchemaClass:
             logging.info(str(column_name_list)+" column_name_list")
             logging.info(str(column_attribute_list)+" column_attribute_list")
 
-            #logging.info(str(change_column_name)+" column_attribute_list")
+            # logging.info(str(change_column_name)+" column_attribute_list")
+
             for value in change_column_name:
                 if value != '':
                     if str(change_column_name).strip().count(str(value).strip()) > 1 :
@@ -556,7 +557,6 @@ class SchemaClass:
 
         #get the total column count and Ignore count for the perticular schema id
         sql_command = "select count(schema_id) as column_count,(select count(column_attribute) from "+str(schema_table_name)+" where schema_id ='"+str(schema_id)+"' and column_attribute ='Ignore') as ignore_count from "+str(schema_table_name)+" where schema_id ='"+str(schema_id)+"'"
-        
         #Execute te sql command
         dataframe = DBObject.select_records(connection,sql_command)
 
@@ -564,6 +564,24 @@ class SchemaClass:
         column_count_value,ignore_count_value = int(dataframe['column_count'][0])-1,int(dataframe['ignore_count'][0])
 
         return column_count_value,ignore_count_value
+    
+    def delete_schema_record(self,DBObject,connection,schema_id,col_name):
+        """
+        Function used to delete the record from  the schema table
+        Args : 
+                schema_id[(integer)] : [Id of the schema table]
+                col_name[(String)] : [Name of the column]
+        Return:
+                [Integer] : [return 0 if successfully deleted else 1]
+        """
+        try:
+            schema_table_name,_,_ = self.get_schema()
+            sql_command = f'delete from {schema_table_name} where schema_id={str(schema_id)} and column_name ="{col_name}"'
+            status = DBObject.update_records(connection,sql_command)
+            return status
+        except Exception as exc:
+            return str(exc)
+
 
 
 

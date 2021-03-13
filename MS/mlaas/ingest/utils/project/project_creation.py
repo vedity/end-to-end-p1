@@ -160,6 +160,7 @@ class ProjectClass:
             column_name_list,column_datatype_list = schema_obj.get_dataset_schema(DBObject,connection,dataset_id) 
             
             missing_value_lst,noise_status_lst = preprocessObj.get_preprocess_cache(dataset_id)
+            
             missing_value_lst,noise_status_lst = list(missing_value_lst),list(noise_status_lst)
             # column name and datatype will be inserted into schema table with schema id
             
@@ -240,7 +241,7 @@ class ProjectClass:
         logging.debug("data ingestion : ProjectClass : show_project_details : this will excute select query on table name : "+table_name +" based on user name : "+user_name)
         
         sql_command = "SELECT p.*,d.dataset_name FROM "+ table_name + " p,mlaas.dataset_tbl d WHERE p.USER_NAME ='"+ user_name +"' and p.dataset_id = d.dataset_id"
-        logging.info(str(sql_command)+"  command")
+        
         project_df=DBObject.select_records(connection,sql_command) # Get project details in the form of dataframe.
         logging.info("data ingestion : ProjectClass : show_project_details : execution end")
         return project_df
