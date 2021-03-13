@@ -13,6 +13,8 @@ import ast
 import json
 
 from common.utils.logger_handler import custom_logger as cl
+from common.utils.exception_handler.python_exception.common.common_exception import *
+from common.utils.exception_handler.python_exception import *
 
 user_name = 'admin'
 log_enable = True
@@ -40,7 +42,7 @@ class AlgorithmDetector:
             logging.info("modeling : ModelClass : get_dataset_info : execution start")
         
             # SQL query to get the project_name
-            sql_command = 'select input_features,project_name from mlaas.project_tbl where project_id='+str(self.project_id)
+            sql_command = 'select input_features,project_name from mlaas.project_tbl where project_id='+str(project_id)
             project_df = self.DBObject.select_records(self.connection, sql_command)
             if project_df is None:
                 raise DatabaseConnectionFailed(500)
@@ -53,17 +55,18 @@ class AlgorithmDetector:
             target_columns= ast.literal_eval(input_features)[1:]
             
             # SQL query to get the dataset_name
-            sql_command = 'select dataset_name from mlaas.dataset_tbl where dataset_id='+str(self.dataset_id)
+            sql_command = 'select dataset_name from mlaas.dataset_tbl where dataset_id='+str(dataset_id)
             dataset_df = self.DBObject.select_records(self.connection, sql_command)
             dataset_name = dataset_df['dataset_name'][0]
     
             logging.info("modeling : ModelClass : get_dataset_info : execution end"+str(type(target_columns)))
+            return project_name, dataset_name, target_columns
         except (DatabaseConnectionFailed,DataNotFound) as exc:
             logging.error("modeling : ModelStatisticsClass : performance_metrics : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : performance_metrics : " +traceback.format_exc())
             return exc.msg
     
-        return project_name, dataset_name, target_columns
+        
         
     def get_model_type(self, project_id, dataset_id):
         try:

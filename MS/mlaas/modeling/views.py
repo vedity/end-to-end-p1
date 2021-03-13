@@ -459,15 +459,15 @@ class CheckModelStatusClass(APIView):
                         experiment_data =ModelStatObject.check_model_status(project_id,experiment_name)
                         
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
-                        if isinstance(learning_curve_json,str): #check the instance of dataset_df
-                                status_code,error_msg=json_obj.get_Status_code(project_df) # extract the status_code and error_msg from project_df
+                        if isinstance(experiment_data,str): #check the instance of dataset_df
+                                status_code,error_msg=json_obj.get_Status_code(experiment_data) # extract the status_code and error_msg from project_df
                                 logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code :"+ status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
                                 logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code : 200")
-                                return Response({"status_code":"200","error_msg":"successfull retrival","response":learning_curve_json})
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":experiment_data})
                         
-                        return Response({"status_code":"200","error_msg":"Successfully updated","response":experiment_data})
+                        #return Response({"status_code":"200","error_msg":"Successfully updated","response":experiment_data})
                         
                 except Exception as e:
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
@@ -499,7 +499,14 @@ class SelectAlgorithmClass(APIView):
                         models_list = AlgorithmDetectorObj.show_models_list(project_id,dataset_id,model_type)
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
                         # print(learning_curve_json)
-                        return Response({"status_code":"200","error_msg":"Successfully updated","response":models_list})
+                        if isinstance(models_list,str): #check the instance of dataset_df
+                                status_code,error_msg=json_obj.get_Status_code(models_list) # extract the status_code and error_msg from project_df
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code :"+ status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        else:
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code : 200")
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":models_list})
+                        #return Response({"status_code":"200","error_msg":"Successfully updated","response":models_list})
                         
                 except Exception as e:
                         logging.error(" modelinggggggg : ModelStatisticsClass : GET Method : " + str(e))
@@ -534,6 +541,14 @@ class ShowHyperParametersClass(APIView):
 
                         # hyperparams_dict = {'model_parameters': hyperparams}
                         logging.info(" modeling : ModelStatisticsClass : POST Method : execution stop : status_code :200")
+                        if isinstance(hyperparams_dict,str): #check the instance of dataset_df
+                                status_code,error_msg=json_obj.get_Status_code(hyperparams_dict) # extract the status_code and error_msg from project_df
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code :"+ status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        else:
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code : 200")
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":hyperparams_dict})
+                        
                         return Response({"status_code":"200","error_msg":"Successfully updated","response":hyperparams_dict})
                         
 

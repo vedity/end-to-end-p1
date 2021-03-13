@@ -436,35 +436,35 @@ class ModelStatisticsClass:
         
     def check_model_status(self,project_id,experiment_name):
         
-        try:
+        # try:
         
-            sql_command ="select dag_id,run_id from mlaas.model_dags_tbl where project_id='"+str(project_id)+"' and exp_name='"+experiment_name+"'"
-            
-            dag_df = self.DBObject.select_records(self.connection, sql_command)
+        sql_command ="select dag_id,run_id from mlaas.model_dags_tbl where project_id='"+str(project_id)+"' and exp_name='"+experiment_name+"'"
+        
+        dag_df = self.DBObject.select_records(self.connection, sql_command)
 
-            if dag_df is None:
-                raise DatabaseConnectionFailed(500)
+        # if dag_df is None:
+        #     raise DatabaseConnectionFailed(500)
 
-            if len(dag_df) == 0 :
-                raise DataNotFound(500)
-            
-            dag_id,run_id = dag_df['dag_id'][0],dag_df['run_id'][0]
-            
-            sql_command = "select state from dag_run where dag_id='"+dag_id+"' and run_id='"+run_id +"'"
-            state_df = self.DBObject.select_records(self.connection, sql_command)
-            if state_df is None:
-                raise DatabaseConnectionFailed(500)
+        # if len(dag_df) == 0 :
+        #     raise DataNotFound(500)
+        
+        dag_id,run_id = dag_df['dag_id'][0],dag_df['run_id'][0]
+        
+        sql_command = "select state from dag_run where dag_id='"+dag_id+"' and run_id='"+run_id +"'"
+        state_df = self.DBObject.select_records(self.connection, sql_command)
+        # if state_df is None:
+        #     raise DatabaseConnectionFailed(500)
 
-            if len(state_df) == 0 :
-                raise DataNotFound(500)
-            status=state_df['state'][0]
+        # if len(state_df) == 0 :
+        #     raise DataNotFound(500)
+        status=state_df['state'][0]
 
-            return status
-            
-        except (DatabaseConnectionFailed,DataNotFound) as exc:
-            logging.error("modeling : ModelStatisticsClass : show_experiments_list : Exception " + str(exc))
-            logging.error("modeling : ModelStatisticsClass : show_experiments_list : " +traceback.format_exc())
-            return exc.msg
+        return status
+        
+        # except (DatabaseConnectionFailed,DataNotFound) as exc:
+        #     logging.error("modeling : ModelStatisticsClass : show_experiments_list : Exception " + str(exc))
+        #     logging.error("modeling : ModelStatisticsClass : show_experiments_list : " +traceback.format_exc())
+        #     return exc.msg
         
         
         
