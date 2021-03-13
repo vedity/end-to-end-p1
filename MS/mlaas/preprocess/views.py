@@ -383,10 +383,10 @@ class ScalingClass(APIView):
                         scaling_operation = request.query_params.get('scaling_op') 
                         split_method = request.query_params.get('split_method')
                         cv = request.query_params.get('cv')
-                        valid_size = request.query_params.get('valid_ratio')
-                        test_size = request.query_params.get('test_ratio')
+                        valid_ratio = request.query_params.get('valid_ratio')
+                        test_ratio = request.query_params.get('test_ratio')
                         random_state = request.query_params.get('random_state')
-                        split_parameters = {'split_method': split_method ,'cv': cv,'valid_size': valid_size, 'test_size': test_size,'random_state': random_state}
+                        split_parameters = {'split_method': split_method ,'cv': cv,'valid_ratio': valid_ratio, 'test_ratio': test_ratio,'random_state': random_state}
                         operation = preprocessObj.handover(dataset_id, schema_id, project_id, user_name,split_parameters, scaling_operation)
                         logging.info("data preprocess : HandoverClass : POST Method : execution stop")
                         return Response({"status_code":"200","error_msg":"Successfull retrival","response":operation})
