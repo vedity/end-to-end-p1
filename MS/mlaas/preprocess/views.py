@@ -329,7 +329,7 @@ class GetColumnListClass(APIView):
                         
                         schema_id = request.query_params.get('schema_id') #get schema id
                         
-                        column_json = preprocessObj.get_col_names(schema_id)
+                        column_json = preprocessObj.get_col_names(schema_id, True)
                         if isinstance(column_json,list): 
                                         
                                         logging.info("data preprocess : GetColumnListClass : POST Method : execution stop")
@@ -358,13 +358,21 @@ class CleanupSave(APIView):
                 '''
                 try:
                         logging.info("data preprocess : CleanupSave : POST Method : execution start")
+                        project_id = request.query_params.get('project_id') #get schema id
                         schema_id = request.query_params.get('schema_id') #get schema id
                         dataset_id = request.query_params.get('dataset_id') #get dataset id
                         data = json.dumps(request.data) #get handling json
                         data = json.loads(data) 
-                        operation = preprocessObj.master_executor(dataset_id,schema_id,data)
+                        operation = preprocessObj.master_executor(project_id, dataset_id,schema_id,data)
                         logging.info("data preprocess : CleanupSave : POST Method : execution stop")
-                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":operation})
+                        if isinstance(operation,int): 
+                                    
+                                logging.info("data preprocess : CleanupSave : POST Method : execution stop")
+                                return Response({"status_code":"200","error_msg":"Successfull retrival","response":"true"})
+                        else:
+                                status_code,error_msg=json_obj.get_Status_code(operation) # extract the status_code and error_msg from schema_data
+                                logging.info("data preprocess : CleanupSave : POST Method : execution stop : status_code :"+status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
 
                 except Exception as e:
                         logging.error("data preprocess : CleanupSave : POST Method : Exception :" + str(e))
