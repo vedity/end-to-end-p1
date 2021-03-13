@@ -5,4 +5,9 @@
     td:first-child {
         display: none;
     }
+    td {
+        max-width: 400px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
 }

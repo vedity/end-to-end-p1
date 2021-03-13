@@ -365,7 +365,14 @@ class CleanupSave(APIView):
                         data = json.loads(data) 
                         operation = preprocessObj.master_executor(project_id, dataset_id,schema_id,data)
                         logging.info("data preprocess : CleanupSave : POST Method : execution stop")
-                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":operation})
+                        if isinstance(operation,int): 
+                                    
+                                logging.info("data preprocess : CleanupSave : POST Method : execution stop")
+                                return Response({"status_code":"200","error_msg":"Successfull retrival","response":"true"})
+                        else:
+                                status_code,error_msg=json_obj.get_Status_code(operation) # extract the status_code and error_msg from schema_data
+                                logging.info("data preprocess : CleanupSave : POST Method : execution stop : status_code :"+status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
 
                 except Exception as e:
                         logging.error("data preprocess : CleanupSave : POST Method : Exception :" + str(e))

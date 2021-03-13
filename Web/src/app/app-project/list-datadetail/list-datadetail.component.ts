@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, Input, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
@@ -37,6 +37,16 @@ export class ListDatadetailComponent implements OnInit {
     transactions: any;
     thead = "";
     dtRendered = false;
+
+    @HostListener('window:resize', ['$event'])
+	onResize(event) {
+    if (this.datatableElement.dtInstance) {
+      this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
+        dtInstance.columns.adjust().draw();
+      })
+    }
+	}
+
     ngOnInit(): void {
         const that = this;
         this.apiService.getColumnList(this.dataset_id,this.schema_id).subscribe(
@@ -60,6 +70,7 @@ export class ListDatadetailComponent implements OnInit {
                 this.apiService.getDataDetails(dataTablesParameters, this.dataset_id,this.schema_id)
                     .subscribe(resp => {
                         this.transactions = resp.data;
+                        
                         if (this.transactions.length == 0) {
                             this.nodatafound = '<tr><td></td><td colspan="6" class="no-data-available">No data available in table</td></tr>';
                             $("#nodatafound").html(this.nodatafound);

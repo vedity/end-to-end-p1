@@ -788,11 +788,9 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
                     flag = True
                 elif op == 13:
-                    #? Getting Dataframe
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.random_sample_imputation(data_df, col)
+                    status = self.random_sample_imputation(DBObject,connection,column_list, dataset_table_name,col)
+                    flag = True
+
                 # elif op == 11:
                 #     data_df = self.get_data_df(dataset_id,schema_id)
                 #     if isinstance(data_df, str):
@@ -816,66 +814,57 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 # # elif op == 15:
                 # #     data_df = self.repl_noise_arbitrary_val(data_df, col, val)
                 elif op == 20:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.rem_outliers_ext_val_analysis(data_df, col)
+                    status = self.rem_outliers_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
+                    flag = True
+
                 elif op == 21:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.rem_outliers_z_score(data_df, col)
+                    status = self.rem_outliers_z_score(DBObject,connection,column_list, dataset_table_name,col)
+                    flag = True
+
                 elif op == 22:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.repl_outliers_mean_ext_val_analysis(data_df, col)
+                    status = self.repl_outliers_mean_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
+                    flag = True
+
                 elif op == 23:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.repl_outliers_mean_z_score(data_df, col)
+                    status = self.repl_outliers_mean_z_score(DBObject,connection,column_list, dataset_table_name,col)
+                    flag = True
+
                 elif op == 24:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.repl_outliers_med_ext_val_analysis(data_df, col)
+                    status = self.repl_outliers_med_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
+                    flag = True
+
                 elif op == 25:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.repl_outliers_med_z_score(data_df, col)
+                    status = self.repl_outliers_med_z_score(DBObject,connection,column_list, dataset_table_name,col)
+                    flag = True
+
                 elif op == 26:
-                    data_df = self.get_data_df(dataset_id,schema_id)
-                    if isinstance(data_df, str):
-                        raise GetDataDfFailed(500)
-                    data_df = self.apply_log_transformation(data_df, col)
+                    status = self.apply_log_transformation(DBObject,connection,column_list, dataset_table_name, col)
+                    flag = True
+
                 elif op == 27:
                     status = self.label_encoding(DBObject,connection,column_list, dataset_table_name, col)
                     flag = True
+
                 elif op == 28:
                     status = self.one_hot_encoding(DBObject,connection,column_list, dataset_table_name, col)
                     flag = True
                 elif op == 29:
                     status = self.add_to_column(DBObject,connection,column_list, dataset_table_name, col, value)
                     flag = True
+
                 elif op == 30:
                     status = self.subtract_from_column(DBObject,connection,column_list, dataset_table_name, col, value)
                     flag = True
+
                 elif op == 31:
                     status = self.multiply_column(DBObject,connection,column_list, dataset_table_name, col, value)
                     flag = True
+
                 elif op == 32:
                     status = self.divide_column(DBObject,connection,column_list, dataset_table_name, col, value)
                     flag = True
                 
 
-                # sql_command = "select dataset_visibility,dataset_table_name,user_name from mlaas.dataset_tbl  where dataset_id='"+str(dataset_id)+"'"
-                
-                # logging.info(str(sql_command))
-                # dataframe = DBObject.select_records(connection,sql_command)
-    
-                # dataset_visibility,dataset_table_name,user_name  = str(dataframe['dataset_visibility'][0]),str(dataframe['dataset_table_name'][0]),str(dataframe['user_name'][0])
                 if status == 1:
                     if flag:
                         #? Sql function Failed
@@ -911,6 +900,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         except (DatabaseConnectionFailed,GetDataDfFailed,SavingFailed) as exc:
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
+            logging.error(str(exc) +" Error")
             return exc.msg
             
     def handover(self, dataset_id, schema_id, project_id, user_name,split_parameters,scaling_type = 0, val = None):
