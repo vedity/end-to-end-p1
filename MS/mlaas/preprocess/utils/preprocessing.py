@@ -644,11 +644,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 {
                 column_id: [1,2]
                 selected_handling: [10,14,17]
-                values: {
-                    10: 25
-                    14: None
-                    17: None
-                }
+                values: ['','','']
                 }
             ]
             
@@ -764,7 +760,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 temp_col = str(temp_col)
                 temp_col = temp_col[1:-1]
                 temp_col = temp_col.replace('"',"'")
-                logging.info("------->"+ temp_col)
                 
                 activity_id = self.operation_start(DBObject, connection, op, user_name, project_id, dataset_id, temp_col)
                 
@@ -853,7 +848,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 elif op == 28:
                     status = self.one_hot_encoding(DBObject,connection,column_list, dataset_table_name, col)
                     flag = True
-
                 elif op == 29:
                     status = self.add_to_column(DBObject,connection,column_list, dataset_table_name, col, value)
                     flag = True
@@ -974,12 +968,12 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 cv = None
             
             random_state = split_parameters['random_state'] #get random_state
-            test_size = split_parameters['test_size'] #get test_size
-            valid_size = split_parameters['valid_size'] #get valid_size
-            if len(valid_size) == 0:
-                valid_size= None
+            test_ratio = split_parameters['test_ratio'] #get test_size
+            valid_ratio = split_parameters['valid_ratio'] #get valid_size
+            if len(valid_ratio) == 0:
+                valid_ratio= None
             else:
-                valid_size=float(valid_size)
+                valid_ratio=float(valid_ratio)
             unique_id = str(uuid.uuid1().time) #genrate unique_id
             scale_dir = "scaled_dataset/scaled_data_" + unique_id  #genrate directory
             CHECK_FOLDER = os.path.isdir(scale_dir) #check directory already exists or not
@@ -996,7 +990,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             valid_X_filename = "None"
             valid_Y_filename = "None"
             Y_valid_count= None
-            X_train, X_valid, X_test, Y_train, Y_valid, Y_test=mt.get_split_data(input_features_df,target_features_df, int(random_state),float(test_size), valid_size, str(split_method))
+            X_train, X_valid, X_test, Y_train, Y_valid, Y_test=mt.get_split_data(input_features_df,target_features_df, int(random_state),float(test_ratio), valid_ratio, str(split_method))
             if split_method != 'cross_validation':
                 Y_valid_count= Y_valid.shape[0]
                 valid_X_filename = scale_dir+"/scaled_valid_X_data_" + unique_id #genrate valid_X file path     
@@ -1010,7 +1004,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             np.save(test_X_filename,X_test.to_numpy())
             np.save(test_Y_filename,Y_test.to_numpy())
         
-            scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_size)+', "test_ratio":'+ str(test_size)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'"}'
+            scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_ratio)+', "test_ratio":'+ str(test_ratio)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'"}'
             logger.info("scaled_split_parameters=="+scaled_split_parameters)
             sql_command = f"update mlaas.project_tbl set target_features= '{target_cols}' ,input_features='{feature_cols}',scaled_split_parameters = '{scaled_split_parameters}',problem_type = '{problem_type_dict}' where dataset_id = '{dataset_id}' and project_id = '{project_id}' and user_name= '{user_name}'"
             status = DBObject.update_records(connection, sql_command)
