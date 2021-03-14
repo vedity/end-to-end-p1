@@ -654,7 +654,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 }
             ]
             
-            Output dictionary:
+            Output dictionaries:
             ------------------
             - First Dictionary has operations as keys & columns as values.
             - Second dictionary has operations as keys and user inputs as values.  
