@@ -240,9 +240,16 @@ class RemoveNoiseClass:
             series = MVH_OBJECT.add_missing_category(series, val)
         
         return series
+    
+    def rmv_noise(self, DBObject, connection, column_name, table_name):
+        '''
+            Makes Null in place of all the Noise.
+        '''
+        column_name = '"' + column_name + '"'
+        sql_command = f"update {table_name} set {column_name} = Null where {column_name} !~ '[0-9.]'"
         
-    def to_string_col(self, Series, cols):
-        pass
+        status = DBObject.update_records(connection,sql_command)
+        return status
     
     def dtct_noise(self, DBObject, connection, column_name, dataset_id = None, table_name = None):
         '''

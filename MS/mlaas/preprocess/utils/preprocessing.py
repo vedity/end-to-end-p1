@@ -553,7 +553,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 for id in column_ids:
                     col = data_df.columns[id]
                     series = data_df[col]
-                    operations = [3,4]
+                    operations = []
 
                     #? Column is both numerical & categorical
                     if (col in num_cols) and (predicted_datatypes[id].startswith('Ca')):
@@ -584,7 +584,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     
                     if noise_status:
                         if col_type == 0 or col_type == 1:
-                            operations += [5,14,15,16,17,18,19]
+                            operations += [2,5,14,15,16,17,18,19]
                     
                     #? Outlier Removal & Scaling Operations for numeric; Encoding ops for Categorical
                     if not missing_values and not noise_status:
