@@ -151,9 +151,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         cols = [column_list[i] for i in col]
         logging.info(str(cols) + " " +str(value))
-        for col_name in cols:
+        for i,col_name in enumerate(cols):
             try:
-                status = self.perform_missing_value_imputation(DBObject,connection, table_name,col_name,value)
+                status = self.perform_missing_value_imputation(DBObject,connection, table_name,col_name,value[i])
             except Exception as exc:
                 return exc
 
@@ -161,7 +161,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         return status
     
     
-    def frequent_category_imputation(self,DBObject,connection,column_list, table_name, col,value):
+    def frequent_category_imputation(self,DBObject,connection,column_list, table_name, col):
         '''
             Operation id: 8
         '''
@@ -216,23 +216,23 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : random_sample_imputation : execution stop")
         return status
     
-    def arbitrary_value_imputation(self, data_df, col, val):
-        '''
-            Operation id: 6
-        '''
+    # def arbitrary_value_imputation(self, data_df, col, val):
+    #     '''
+    #         Operation id: 6
+    #     '''
         
-        logging.info("data preprocessing : CleaningClass : arbitrary_value_imputation : execution start")
+    #     logging.info("data preprocessing : CleaningClass : arbitrary_value_imputation : execution start")
         
-        cols = [data_df.columns[i] for i in col]
+    #     cols = [data_df.columns[i] for i in col]
         
-        for column in cols:
-            try:
-                data_df[column] = super().add_missing_category(data_df[column], val)
-            except:
-                continue
+    #     for column in cols:
+    #         try:
+    #             data_df[column] = super().add_missing_category(data_df[column], val)
+    #         except:
+    #             continue
 
-        logging.info("data preprocessing : CleaningClass : arbitrary_value_imputation : execution stop")
-        return data_df
+    #     logging.info("data preprocessing : CleaningClass : arbitrary_value_imputation : execution stop")
+    #     return data_df
     
     #* NOISE HANDLING
     
@@ -365,10 +365,10 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : delete_below : execution start")
         cols = [column_list[i] for i in col]
         logging.info(str(cols))
-        for col_name in cols:
+        for i,col_name in enumerate(cols):
             try:
 
-                status = super().delete_above(DBObject,connection,table_name,col_name,val)
+                status = super().delete_above(DBObject,connection,table_name,col_name,val[i])
                 logging.info(str(status))
                 
             except Exception as exc:
@@ -384,10 +384,10 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : delete_below : execution start")
         cols = [column_list[i] for i in col]
         logging.info(str(cols))
-        for col_name in cols:
+        for i,col_name in enumerate(cols):
             try:
 
-                status = super().delete_below(DBObject,connection,table_name,col_name,val)
+                status = super().delete_below(DBObject,connection,table_name,col_name,val[i])
                 logging.info(str(status))
                 
             except Exception as exc:

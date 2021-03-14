@@ -685,7 +685,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             Returns:
             --------
             operation_dict [`Dictionary`]: Operation Order optimized dictionary;
-            -   final_dict = {
+            -   operation_dict = {
                     operation: [column(s)]
                 }
                 
@@ -714,6 +714,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             operation_dict = {k: v for k, v in sorted(operation_dict.items(), key=lambda item: item[0])}
             value_dict = {k: v for k, v in sorted(value_dict.items(), key=lambda item: item[0])}
             
+            logging.info(f"data preprocessing : PreprocessingClass : reorder_operations : Operation_dict : {operation_dict}")
+            logging.info(f"data preprocessing : PreprocessingClass : reorder_operations : Values_dict : {value_dict}")
             logging.info("data preprocessing : PreprocessingClass : reorder_operations : execution end")
             
             return operation_dict,value_dict
@@ -762,51 +764,62 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.info(str(column_list) + " column_list")
 
             #? Getting operations in the ordered format
-            operation_ordering = self.reorder_operations(request)
+            op_dict, val_dict = self.reorder_operations(request)
             
-            operations = operation_ordering.keys()
+            operations = op_dict.keys()
             for op in operations:
                 status = 1
-                flag = False
                 
                 #? Getting Columns
-                col = operation_ordering[op]
+                col = op_dict[op]
                 temp_cols = ["'" + str(column_list[i]) + "'" for i in col]
                 # temp_col = str(temp_col)
                 # temp_col = temp_col[1:-1]
                 # temp_col = temp_col.replace('"',"'")
                 
+                #? Getting Values
+                value = val_dict[op]
+                
+                #? Making Entry in the Activity Table
+                activity_ids = []
                 for temp_col_names in temp_cols:
-                    activity_id = self.operation_start(DBObject, connection, op, user_name, project_id, dataset_id, temp_col_names)
+                    activity_ids.append(self.operation_start(DBObject, connection, op, user_name, project_id, dataset_id, temp_col_names))
+                
                 try:
                     if op == 1:
                         status = self.discard_missing_values(DBObject,connection,column_list, dataset_table_name, col)
-                        flag = True
-                    # elif op == 3:
-                    #     data_df = self.delete_above(data_df, col, val)
-                    # elif op == 4:
-                    #     data_df = self.delete_below(data_df, col, val)
+                        
+                    elif op == 3:
+                        status = self.delete_above(DBObject,connection,column_list, dataset_table_name, col, value)
+                        
+                    elif op == 4:
+                        status = self.delete_below(DBObject,connection,column_list, dataset_table_name, col, value)
+                        
                     elif op == 6:
                         status = self.mean_imputation(DBObject,connection,column_list, dataset_table_name, col)
-                        flag = True
+                        
                     elif op == 7:
                         status = self.median_imputation(DBObject,connection,column_list, dataset_table_name, col)
-                        flag = True
-                    # elif op == 6:
-                    #     data_df = self.arbitrary_value_imputation(data_df, col, val)
+                    
+                    elif op == 8:
+                        status = self.mode_imputation(DBObject,connection,column_list, dataset_table_name, col)
+                    
+                    elif op == 9:
+                        #? Reusing the missing category imputation function for the arbitrary value imputation
+                        status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, value)
+                    
                     elif op == 10:
                         status = self.end_of_distribution(DBObject,connection,column_list, dataset_table_name, col)
-                        flag = True
+                        
                     elif op == 11:
-                        status = self.frequent_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
-                        flag = True
+                        status = self.frequent_category_imputation(DBObject,connection,column_list, dataset_table_name, col)
+                        
                     elif op == 12:
                         status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
-                        flag = True
+                        
                     elif op == 13:
                         status = self.random_sample_imputation(DBObject,connection,column_list, dataset_table_name,col)
-                        flag = True
-
+                    
                     # elif op == 11:
                     #     data_df = self.get_data_df(dataset_id,schema_id)
                     #     if isinstance(data_df, str):
@@ -829,61 +842,49 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     #     data_df = self.repl_noise_random_sample(data_df, col)
                     # # elif op == 15:
                     # #     data_df = self.repl_noise_arbitrary_val(data_df, col, val)
+                    
                     elif op == 20:
                         status = self.rem_outliers_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
-                        flag = True
-
+                        
                     elif op == 21:
                         status = self.rem_outliers_z_score(DBObject,connection,column_list, dataset_table_name,col)
-                        flag = True
-
+                        
                     elif op == 22:
                         status = self.repl_outliers_mean_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
-                        flag = True
-
+                        
                     elif op == 23:
                         status = self.repl_outliers_mean_z_score(DBObject,connection,column_list, dataset_table_name,col)
-                        flag = True
-
+                        
                     elif op == 24:
                         status = self.repl_outliers_med_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
-                        flag = True
-
+                        
                     elif op == 25:
                         status = self.repl_outliers_med_z_score(DBObject,connection,column_list, dataset_table_name,col)
-                        flag = True
-
+                        
                     elif op == 26:
                         status = self.apply_log_transformation(DBObject,connection,column_list, dataset_table_name, col)
-                        flag = True
-
+                        
                     elif op == 27:
                         status = self.label_encoding(DBObject,connection,column_list, dataset_table_name, col)
-                        flag = True
-
+                        
                     elif op == 28:
                         status = self.one_hot_encoding(DBObject,connection,column_list, dataset_table_name, col)
-                        flag = True
+                        
                     elif op == 29:
                         status = self.add_to_column(DBObject,connection,column_list, dataset_table_name, col, value)
-                        flag = True
-
+                        
                     elif op == 30:
                         status = self.subtract_from_column(DBObject,connection,column_list, dataset_table_name, col, value)
-                        flag = True
-
+                        
                     elif op == 31:
                         status = self.multiply_column(DBObject,connection,column_list, dataset_table_name, col, value)
-                        flag = True
-
+                        
                     elif op == 32:
                         status = self.divide_column(DBObject,connection,column_list, dataset_table_name, col, value)
-                        flag = True
-                    
+                        
                     if status == 1:
-                        if flag:
-                            #? Sql function Failed
-                            raise SavingFailed(500)
+                        #? Sql function Failed
+                        raise SavingFailed(500)
                         
                         #? Saving the dataframe into the database
                         # data_df.drop(data_df.columns[0],axis=1, inplace = True)
@@ -907,8 +908,9 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                         #     status = update_status
                         #     activity_status = self.operation_end(DBObject, connection, activity_id, op, temp_col)
                     else:
-                        for temp_col_names in temp_cols:
-                            activity_status = self.operation_end(DBObject, connection, activity_id, op, temp_col_names)
+                        #? Updating the Activity table
+                        for i,temp_col_names in enumerate(temp_cols):
+                            activity_status = self.operation_end(DBObject, connection, activity_ids[i], op, temp_col_names)
                 except :
                     continue
                     
@@ -916,9 +918,9 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             return status
 
         except (DatabaseConnectionFailed,GetDataDfFailed,SavingFailed) as exc:
+            logging.error(str(exc) +" Error")
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
-            logging.error(str(exc) +" Error")
             return exc.msg
             
     def handover(self, dataset_id, schema_id, project_id, user_name,split_parameters,scaling_type = 0, val = None):
