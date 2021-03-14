@@ -766,20 +766,18 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             operations = operation_ordering.keys()
             for op in operations:
+                status = 1
+                flag = False
+                
+                #? Getting Columns
+                col = operation_ordering[op]
+                temp_col = [column_list[i] for i in col]
+                temp_col = str(temp_col)
+                temp_col = temp_col[1:-1]
+                temp_col = temp_col.replace('"',"'")
+                
+                activity_id = self.operation_start(DBObject, connection, op, user_name, project_id, dataset_id, temp_col)
                 try:
-                    status = 1
-                    flag = False
-                    
-                    #? Getting Columns
-                    col = operation_ordering[op]
-                    temp_col = [column_list[i] for i in col]
-                    temp_col = str(temp_col)
-                    if len(temp_col) == 1:
-                        temp_col = temp_col[1:-1]
-                    temp_col = temp_col.replace('"',"'")
-                    
-                    activity_id = self.operation_start(DBObject, connection, op, user_name, project_id, dataset_id, temp_col)
-                    
                     if op == 1:
                         status = self.discard_missing_values(DBObject,connection,column_list, dataset_table_name, col)
                         flag = True
@@ -805,11 +803,9 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                         status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
                         flag = True
                     elif op == 13:
-                        #? Getting Dataframe
-                        data_df = self.get_data_df(dataset_id,schema_id)
-                        if isinstance(data_df, str):
-                            raise GetDataDfFailed(500)
-                        data_df = self.random_sample_imputation(data_df, col)
+                        status = self.random_sample_imputation(DBObject,connection,column_list, dataset_table_name,col)
+                        flag = True
+
                     # elif op == 11:
                     #     data_df = self.get_data_df(dataset_id,schema_id)
                     #     if isinstance(data_df, str):
@@ -833,91 +829,82 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     # # elif op == 15:
                     # #     data_df = self.repl_noise_arbitrary_val(data_df, col, val)
                     elif op == 20:
-                        data_df = self.get_data_df(dataset_id,schema_id)
-                        if isinstance(data_df, str):
-                            raise GetDataDfFailed(500)
-                        data_df = self.rem_outliers_ext_val_analysis(data_df, col)
+                        status = self.rem_outliers_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
+                        flag = True
+
                     elif op == 21:
-                        data_df = self.get_data_df(dataset_id,schema_id)
-                        if isinstance(data_df, str):
-                            raise GetDataDfFailed(500)
-                        data_df = self.rem_outliers_z_score(data_df, col)
+                        status = self.rem_outliers_z_score(DBObject,connection,column_list, dataset_table_name,col)
+                        flag = True
+
                     elif op == 22:
-                        data_df = self.get_data_df(dataset_id,schema_id)
-                        if isinstance(data_df, str):
-                            raise GetDataDfFailed(500)
-                        data_df = self.repl_outliers_mean_ext_val_analysis(data_df, col)
+                        status = self.repl_outliers_mean_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
+                        flag = True
+
                     elif op == 23:
-                        data_df = self.get_data_df(dataset_id,schema_id)
-                        if isinstance(data_df, str):
-                            raise GetDataDfFailed(500)
-                        data_df = self.repl_outliers_mean_z_score(data_df, col)
+                        status = self.repl_outliers_mean_z_score(DBObject,connection,column_list, dataset_table_name,col)
+                        flag = True
+
                     elif op == 24:
-                        data_df = self.get_data_df(dataset_id,schema_id)
-                        if isinstance(data_df, str):
-                            raise GetDataDfFailed(500)
-                        data_df = self.repl_outliers_med_ext_val_analysis(data_df, col)
+                        status = self.repl_outliers_med_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
+                        flag = True
+
                     elif op == 25:
-                        data_df = self.get_data_df(dataset_id,schema_id)
-                        if isinstance(data_df, str):
-                            raise GetDataDfFailed(500)
-                        data_df = self.repl_outliers_med_z_score(data_df, col)
+                        status = self.repl_outliers_med_z_score(DBObject,connection,column_list, dataset_table_name,col)
+                        flag = True
+
                     elif op == 26:
-                        data_df = self.get_data_df(dataset_id,schema_id)
-                        if isinstance(data_df, str):
-                            raise GetDataDfFailed(500)
-                        data_df = self.apply_log_transformation(data_df, col)
+                        status = self.apply_log_transformation(DBObject,connection,column_list, dataset_table_name, col)
+                        flag = True
+
                     elif op == 27:
                         status = self.label_encoding(DBObject,connection,column_list, dataset_table_name, col)
                         flag = True
+
                     elif op == 28:
                         status = self.one_hot_encoding(DBObject,connection,column_list, dataset_table_name, col)
                         flag = True
                     elif op == 29:
                         status = self.add_to_column(DBObject,connection,column_list, dataset_table_name, col, value)
                         flag = True
+
                     elif op == 30:
                         status = self.subtract_from_column(DBObject,connection,column_list, dataset_table_name, col, value)
                         flag = True
+
                     elif op == 31:
                         status = self.multiply_column(DBObject,connection,column_list, dataset_table_name, col, value)
                         flag = True
+
                     elif op == 32:
                         status = self.divide_column(DBObject,connection,column_list, dataset_table_name, col, value)
                         flag = True
                     
-
-                    # sql_command = "select dataset_visibility,dataset_table_name,user_name from mlaas.dataset_tbl  where dataset_id='"+str(dataset_id)+"'"
-                    
-                    # logging.info(str(sql_command))
-                    # dataframe = DBObject.select_records(connection,sql_command)
-        
-                    # dataset_visibility,dataset_table_name,user_name  = str(dataframe['dataset_visibility'][0]),str(dataframe['dataset_table_name'][0]),str(dataframe['user_name'][0])
                     if status == 1:
                         if flag:
                             #? Sql function Failed
                             raise SavingFailed(500)
                         
-                        data_df.drop(data_df.columns[0],axis=1, inplace = True)
+                        #? Saving the dataframe into the database
+                        # data_df.drop(data_df.columns[0],axis=1, inplace = True)
 
-                        updated_table_name = DBObject.get_table_name(connection,table_name)
+                        # updated_table_name = DBObject.get_table_name(connection,table_name)
                         
-                        if dataset_visibility == 'public':
-                            user_name='public'
+                        # if dataset_visibility == 'public':
+                        #     user_name='public'
             
-                        status = DBObject.load_df_into_db(connection_string,updated_table_name,data_df,user_name)
+                        # status = DBObject.load_df_into_db(connection_string,updated_table_name,data_df,user_name)
         
-                        sql_command = "update mlaas.dataset_tbl set dataset_table_name='"+str(updated_table_name)+"' where dataset_id='"+str(dataset_id)+"'"
-                        logging.info(str(sql_command))
-                        update_status = DBObject.update_records(connection,sql_command)
-                        status = update_status
-                        if status == 1:
-                            raise SavingFailed(500)
-                        else:
-                            sql_command = f"drop table {dataset_table_name}"
-                            update_status = DBObject.update_records(connection,sql_command)
-                            status = update_status
-                            activity_status = self.operation_end(DBObject, connection, activity_id, op, temp_col)
+                        # sql_command = "update mlaas.dataset_tbl set dataset_table_name='"+str(updated_table_name)+"' where dataset_id='"+str(dataset_id)+"'"
+                        # logging.info(str(sql_command))
+                        # update_status = DBObject.update_records(connection,sql_command)
+                        # status = update_status
+                        # if status == 1:
+                        #     raise SavingFailed(500)
+                        # else:
+                        #     sql_command = f"drop table {dataset_table_name}"
+                        #     update_status = DBObject.update_records(connection,sql_command)
+                        #     status = update_status
+                        #     activity_status = self.operation_end(DBObject, connection, activity_id, op, temp_col)
                     else:
                         activity_status = self.operation_end(DBObject, connection, activity_id, op, temp_col)
                 except :
@@ -929,6 +916,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         except (DatabaseConnectionFailed,GetDataDfFailed,SavingFailed) as exc:
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
+            logging.error(str(exc) +" Error")
             return exc.msg
             
     def handover(self, dataset_id, schema_id, project_id, user_name,split_parameters,scaling_type = 0, val = None):
@@ -996,12 +984,12 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 cv = None
             
             random_state = split_parameters['random_state'] #get random_state
-            test_size = split_parameters['test_size'] #get test_size
-            valid_size = split_parameters['valid_size'] #get valid_size
-            if len(valid_size) == 0:
-                valid_size= None
+            test_ratio = split_parameters['test_ratio'] #get test_size
+            valid_ratio = split_parameters['valid_ratio'] #get valid_size
+            if len(valid_ratio) == 0:
+                valid_ratio= None
             else:
-                valid_size=float(valid_size)
+                valid_ratio=float(valid_ratio)
             unique_id = str(uuid.uuid1().time) #genrate unique_id
             scale_dir = "scaled_dataset/scaled_data_" + unique_id  #genrate directory
             CHECK_FOLDER = os.path.isdir(scale_dir) #check directory already exists or not
@@ -1018,7 +1006,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             valid_X_filename = "None"
             valid_Y_filename = "None"
             Y_valid_count= None
-            X_train, X_valid, X_test, Y_train, Y_valid, Y_test=mt.get_split_data(input_features_df,target_features_df, int(random_state),float(test_size), valid_size, str(split_method))
+            X_train, X_valid, X_test, Y_train, Y_valid, Y_test=mt.get_split_data(input_features_df,target_features_df, int(random_state),float(test_ratio), valid_ratio, str(split_method))
             if split_method != 'cross_validation':
                 Y_valid_count= Y_valid.shape[0]
                 valid_X_filename = scale_dir+"/scaled_valid_X_data_" + unique_id #genrate valid_X file path     
@@ -1032,7 +1020,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             np.save(test_X_filename,X_test.to_numpy())
             np.save(test_Y_filename,Y_test.to_numpy())
         
-            scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_size)+', "test_ratio":'+ str(test_size)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'"}'
+            scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_ratio)+', "test_ratio":'+ str(test_ratio)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'"}'
             logger.info("scaled_split_parameters=="+scaled_split_parameters)
             sql_command = f"update mlaas.project_tbl set target_features= '{target_cols}' ,input_features='{feature_cols}',scaled_split_parameters = '{scaled_split_parameters}',problem_type = '{problem_type_dict}' where dataset_id = '{dataset_id}' and project_id = '{project_id}' and user_name= '{user_name}'"
             status = DBObject.update_records(connection, sql_command)

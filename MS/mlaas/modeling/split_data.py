@@ -31,28 +31,42 @@ class SplitData:
     
     def get_scaled_split_dict(self,DBObject,connection,project_id,dataset_id):
         #TODO This command will change
-        sql_command = 'select scaled_split_parameters from mlaas.project_tbl where project_id = ' + str(project_id) + ' and dataset_id='+str(dataset_id)
-        
-        data_df = DBObject.select_records(connection, sql_command)
+        try:
+            sql_command = 'select scaled_split_parameters from mlaas.project_tbl where project_id = ' + str(project_id) + ' and dataset_id='+str(dataset_id)
+            
+            data_df = DBObject.select_records(connection, sql_command)
+            if data_df is None:
+                    raise DatabaseConnectionFailed(500)
+            if len(data_df) == 0 :
+                    raise DataNotFound(500)
+            
+            scaled_split_params = data_df['scaled_split_parameters'][0]# Add exception
+            scaled_split_params_dict = ast.literal_eval(scaled_split_params)
+            return scaled_split_params_dict
 
-        scaled_split_params = data_df['scaled_split_parameters'][0]# Add exception
-        scaled_split_params_dict = ast.literal_eval(scaled_split_params)
+        except (DatabaseConnectionFailed,DataNotFound) as exc:
+            logging.error("modeling : ModelStatisticsClass : performance_metrics : Exception " + str(exc))
+            logging.error("modeling : ModelStatisticsClass : performance_metrics : " +traceback.format_exc())
+            return exc.msg
         
-        return scaled_split_params_dict
-
-    
+        
     def get_features_list(self, user_id, project_id, dataset_id, DBObject, connection):
         #TODO sql_command will be changed in the future
-        sql_command = 'select input_features,target_features from mlaas.project_tbl where  project_id={} and dataset_id={}'.format(project_id, dataset_id)
-        input_target_df = DBObject.select_records(connection, sql_command)
-        #TODO Add Exception
-        input_features = input_target_df['input_features'][0]# Get the input features list
-        target_features = input_target_df['target_features'][0]# Get the target features list
-        
-        input_features = ast.literal_eval(input_features)
-        target_features = ast.literal_eval(target_features)
+        try:
+            sql_command = 'select input_features,target_features from mlaas.project_tbl where  project_id={} and dataset_id={}'.format(project_id, dataset_id)
+            input_target_df = DBObject.select_records(connection, sql_command)
+            #TODO Add Exception
+            input_features = input_target_df['input_features'][0]# Get the input features list
+            target_features = input_target_df['target_features'][0]# Get the target features list
+            
+            input_features = ast.literal_eval(input_features)
+            target_features = ast.literal_eval(target_features)
 
-        return input_features, target_features
+            return input_features, target_features
+        except (DatabaseConnectionFailed,DataNotFound) as exc:
+            logging.error("modeling : ModelStatisticsClass : performance_metrics : Exception " + str(exc))
+            logging.error("modeling : ModelStatisticsClass : performance_metrics : " +traceback.format_exc())
+            return exc.msg
 
     def get_split_datasets(self, scaled_split_params_dict):
         
@@ -67,7 +81,7 @@ class SplitData:
         else:
             valid_X = None
             valid_y = None
-        return train_X, test_X, valid_X, train_y, test_y, valid_y
+        return train_X,valid_X,test_X,train_y,valid_y,test_y
 
     
     
