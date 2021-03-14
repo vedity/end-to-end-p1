@@ -771,12 +771,13 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 
                 #? Getting Columns
                 col = operation_ordering[op]
-                temp_col = [column_list[i] for i in col]
-                temp_col = str(temp_col)
-                temp_col = temp_col[1:-1]
-                temp_col = temp_col.replace('"',"'")
+                temp_cols = ["'" + str(column_list[i]) + "'" for i in col]
+                # temp_col = str(temp_col)
+                # temp_col = temp_col[1:-1]
+                # temp_col = temp_col.replace('"',"'")
                 
-                activity_id = self.operation_start(DBObject, connection, op, user_name, project_id, dataset_id, temp_col)
+                for temp_col_names in temp_cols:
+                    activity_id = self.operation_start(DBObject, connection, op, user_name, project_id, dataset_id, temp_col_names)
                 try:
                     if op == 1:
                         status = self.discard_missing_values(DBObject,connection,column_list, dataset_table_name, col)
@@ -906,7 +907,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                         #     status = update_status
                         #     activity_status = self.operation_end(DBObject, connection, activity_id, op, temp_col)
                     else:
-                        activity_status = self.operation_end(DBObject, connection, activity_id, op, temp_col)
+                        for temp_col_names in temp_cols:
+                            activity_status = self.operation_end(DBObject, connection, activity_id, op, temp_col_names)
                 except :
                     continue
                     
