@@ -155,6 +155,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
             try:
                 status = self.perform_missing_value_imputation(DBObject,connection, table_name,col_name,value[i])
             except Exception as exc:
+                logging.error(str(exc))
                 return exc
 
         logging.info("data preprocessing : CleaningClass : missing_category_imputation : execution stop")
@@ -236,123 +237,154 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     #* NOISE HANDLING
     
-    def remove_noise(self, data_df, col):
+    def remove_noise(self, DBObject,connection, column_list, table_name, col):
         '''
             Operation id: 11
         '''
         
         logging.info("data preprocessing : CleaningClass : remove_noise : execution start")
-        
+        cols = [column_list[i] for i in col]
+        for col_name in cols:
+            try:
+                status = self.rmv_noise(DBObject, connection, col_name, table_name)
+            except Exception as exc:
+                return exc
+
         logging.info("data preprocessing : CleaningClass : remove_noise : execution stop")
-        return super().remove_noise(dataframe= data_df, column_id= col)
+        return status
     
-    def repl_noise_mean(self, data_df, col):
+    def discard_noise(self, DBObject,connection, column_list, table_name, col):
         '''
             Operation id: 12
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_noise_mean : execution start")
         
-        cols = [data_df.columns[i] for i in col]
-        
-        for column in cols:
+        cols = [column_list[i] for i in col]
+        for col_name in cols:
             try:
-                data_df[column] = self.replace_noise(data_df[column], operation_type= 0)
-            except:
-                continue
+                status = self.rmv_noise(DBObject, connection, col_name, table_name)
+            except Exception as exc:
+                return exc
+        if status == 0:
+            status = self.discard_missing_values(DBObject, connection, column_list, table_name, col)
 
         logging.info("data preprocessing : CleaningClass : repl_noise_mean : execution stop")
-        return data_df
+        return status
     
-    def repl_noise_median(self, data_df, col):
+    def repl_noise_mean(self, DBObject,connection, column_list, table_name, col):
+        '''
+            Operation id: 12
+        '''
+        
+        logging.info("data preprocessing : CleaningClass : repl_noise_mean : execution start")
+        
+        cols = [column_list[i] for i in col]
+        for col_name in cols:
+            try:
+                status = self.rmv_noise(DBObject, connection, col_name, table_name)
+            except Exception as exc:
+                return exc
+        if status == 0:
+            status = self.mean_imputation(DBObject, connection, column_list, table_name, col)
+
+        logging.info("data preprocessing : CleaningClass : repl_noise_mean : execution stop")
+        return status
+    
+    def repl_noise_median(self, DBObject,connection, column_list, table_name, col):
         '''
             Operation id: 13
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_noise_median : execution start")
         
-        cols = [data_df.columns[i] for i in col]
-        
-        for column in cols:
+        cols = [column_list[i] for i in col]
+        for col_name in cols:
             try:
-                data_df[column] = self.replace_noise(data_df[column], operation_type= 1)
-            except:
-                continue
+                status = self.rmv_noise(DBObject, connection, col_name, table_name)
+            except Exception as exc:
+                return exc
+        if status == 0:
+            status = self.median_imputation(DBObject, connection, column_list, table_name, col)
 
         logging.info("data preprocessing : CleaningClass : repl_noise_median : execution stop")
-        return data_df
+        return status
     
-    def repl_noise_mode(self, data_df, col):
+    def repl_noise_mode(self, DBObject,connection, column_list, table_name, col):
         '''
             Operation id: ?
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_noise_mode : execution start")
         
-        cols = [data_df.columns[i] for i in col]
-        
-        for column in cols:
+        cols = [column_list[i] for i in col]
+        for col_name in cols:
             try:
-                data_df[column] = self.replace_noise(data_df[column], operation_type= 2)
-            except:
-                continue
+                status = self.rmv_noise(DBObject, connection, col_name, table_name)
+            except Exception as exc:
+                return exc
+        if status == 0:
+            status = self.mode_imputation(DBObject, connection, column_list, table_name, col)
 
         logging.info("data preprocessing : CleaningClass : repl_noise_mode : execution stop")
-        return data_df
+        return status
     
-    def repl_noise_eod(self, data_df, col):
+    def repl_noise_eod(self, DBObject,connection, column_list, table_name, col):
         '''
             Operation id: ?
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_noise_eod : execution start")
         
-        cols = [data_df.columns[i] for i in col]
-        
-        for column in cols:
+        cols = [column_list[i] for i in col]
+        for col_name in cols:
             try:
-                data_df[column] = self.replace_noise(data_df[column], operation_type= 3)
-            except:
-                continue
+                status = self.rmv_noise(DBObject, connection, col_name, table_name)
+            except Exception as exc:
+                return exc
+        if status == 0:
+            status = self.end_of_distribution(DBObject, connection, column_list, table_name, col)
 
         logging.info("data preprocessing : CleaningClass : repl_noise_eod : execution stop")
-        return data_df
+        return status
     
-    def repl_noise_random_sample(self, data_df, col):
+    def repl_noise_random_sample(self, DBObject,connection, column_list, table_name, col):
         '''
             Operation id: 14
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_noise_random_sample : execution start")
         
-        cols = [data_df.columns[i] for i in col]
-        
-        for column in cols:
+        cols = [column_list[i] for i in col]
+        for col_name in cols:
             try:
-                data_df[column] = self.replace_noise(data_df[column], operation_type= 4)
-            except:
-                continue
+                status = self.rmv_noise(DBObject, connection, col_name, table_name)
+            except Exception as exc:
+                return exc
+        if status == 0:
+            status = self.random_sample_imputation(DBObject, connection, column_list, table_name, col)
 
         logging.info("data preprocessing : CleaningClass : repl_noise_random_sample : execution stop")
-        return data_df
+        return status
     
-    def repl_noise_arbitrary_val(self, data_df, col, val):
+    def repl_noise_arbitrary_val(self, DBObject,connection, column_list, table_name, col, value):
         '''
             Operation id: 15
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_noise_arbitrary_val : execution start")
         
-        cols = [data_df.columns[i] for i in col]
-        
-        for column in cols:
+        cols = [column_list[i] for i in col]
+        for col_name in cols:
             try:
-                data_df[column] = self.replace_noise(data_df[column], operation_type= 5, val= val)
-            except:
-                continue
+                status = self.rmv_noise(DBObject, connection, col_name, table_name)
+            except Exception as exc:
+                return exc
+        if status == 0:
+            status = self.missing_category_imputation(DBObject, connection, column_list, table_name, col, value)
 
         logging.info("data preprocessing : CleaningClass : repl_noise_arbitrary_val : execution stop")
-        return data_df
+        return status
     
     
     #* OUTLIER ANALYSIS
@@ -597,3 +629,4 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 return str(exc)
         logging.info("data preprocessing : CleaningClass : apply_log_transformation : execution stop")
         return status
+    

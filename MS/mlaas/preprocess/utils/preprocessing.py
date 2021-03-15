@@ -583,8 +583,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                             operations += [1,11,12]
                     
                     if noise_status:
-                        if col_type == 0 or col_type == 1:
-                            operations += [2,5,14,15,16,17,18,19]
+                        operations += [2,5,14,15,16,17,18,19]
                     
                     #? Outlier Removal & Scaling Operations for numeric; Encoding ops for Categorical
                     if not missing_values and not noise_status:
@@ -785,64 +784,131 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 for temp_col_names in temp_cols:
                     activity_ids.append(self.operation_start(DBObject, connection, op, user_name, project_id, dataset_id, temp_col_names))
                 
+                col_names = [column_list[i] for i in col]
                 try:
                     if op == 1:
                         status = self.discard_missing_values(DBObject,connection,column_list, dataset_table_name, col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 2:
+                        status = self.discard_noise(DBObject,connection,column_list, dataset_table_name, col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_noise_flag(DBObject,connection, schema_id, col_name)
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
                         
                     elif op == 3:
                         status = self.delete_above(DBObject,connection,column_list, dataset_table_name, col, value)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
                         
                     elif op == 4:
                         status = self.delete_below(DBObject,connection,column_list, dataset_table_name, col, value)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 5:
+                        status = self.remove_noise(DBObject,connection,column_list, dataset_table_name, col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_noise_flag(DBObject,connection, schema_id, col_name)
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name, "True")
                         
                     elif op == 6:
                         status = self.mean_imputation(DBObject,connection,column_list, dataset_table_name, col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
                         
                     elif op == 7:
                         status = self.median_imputation(DBObject,connection,column_list, dataset_table_name, col)
-                    
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                        
                     elif op == 8:
                         status = self.mode_imputation(DBObject,connection,column_list, dataset_table_name, col)
-                    
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                        
                     elif op == 9:
                         #? Reusing the missing category imputation function for the arbitrary value imputation
                         status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, value)
-                    
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                        
                     elif op == 10:
                         status = self.end_of_distribution(DBObject,connection,column_list, dataset_table_name, col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
                         
                     elif op == 11:
                         status = self.frequent_category_imputation(DBObject,connection,column_list, dataset_table_name, col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
                         
                     elif op == 12:
                         status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
                         
                     elif op == 13:
                         status = self.random_sample_imputation(DBObject,connection,column_list, dataset_table_name,col)
-                    
-                    # elif op == 11:
-                    #     data_df = self.get_data_df(dataset_id,schema_id)
-                    #     if isinstance(data_df, str):
-                    #         raise GetDataDfFailed(500)
-                    #     data_df = self.remove_noise(data_df, col)
-                    # elif op == 12:
-                    #     data_df = self.get_data_df(dataset_id,schema_id)
-                    #     if isinstance(data_df, str):
-                    #         raise GetDataDfFailed(500)
-                    #     data_df = self.repl_noise_mean(data_df, col)
-                    # elif op == 13:
-                    #     data_df = self.get_data_df(dataset_id,schema_id)
-                    #     if isinstance(data_df, str):
-                    #         raise GetDataDfFailed(500)
-                    #     data_df = self.repl_noise_median(data_df, col)
-                    # elif op == 14:
-                    #     data_df = self.get_data_df(dataset_id,schema_id)
-                    #     if isinstance(data_df, str):
-                    #         raise GetDataDfFailed(500)
-                    #     data_df = self.repl_noise_random_sample(data_df, col)
-                    # # elif op == 15:
-                    # #     data_df = self.repl_noise_arbitrary_val(data_df, col, val)
-                    
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 14:
+                        status = self.repl_noise_mean(DBObject,connection,column_list, dataset_table_name,col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                                sts = self.update_schema_tbl_noise_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 15:
+                        status = self.repl_noise_median(DBObject,connection,column_list, dataset_table_name,col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                                sts = self.update_schema_tbl_noise_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 16:
+                        status = self.repl_noise_mode(DBObject,connection,column_list, dataset_table_name,col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                                sts = self.update_schema_tbl_noise_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 17:
+                        status = self.repl_noise_eod(DBObject,connection,column_list, dataset_table_name,col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                                sts = self.update_schema_tbl_noise_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 18:
+                        status = self.repl_noise_random_sample(DBObject,connection,column_list, dataset_table_name,col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                                sts = self.update_schema_tbl_noise_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 19:
+                        status = self.repl_noise_arbitrary_val(DBObject,connection,column_list, dataset_table_name,col, value)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                                sts = self.update_schema_tbl_noise_flag(DBObject,connection, schema_id, col_name)
+                        
                     elif op == 20:
                         status = self.rem_outliers_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
                         
@@ -877,12 +943,12 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                         status = self.subtract_from_column(DBObject,connection,column_list, dataset_table_name, col, value)
                         
                     elif op == 31:
-                        status = self.multiply_column(DBObject,connection,column_list, dataset_table_name, col, value)
-                        
-                    elif op == 32:
                         status = self.divide_column(DBObject,connection,column_list, dataset_table_name, col, value)
                         
-                    if status == 1:
+                    elif op == 32:
+                        status = self.multiply_column(DBObject,connection,column_list, dataset_table_name, col, value)
+                        
+                    if status != 0:
                         #? Sql function Failed
                         raise SavingFailed(500)
                         
@@ -1105,6 +1171,30 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         logging.info("data preprocessing : PreprocessingClass : operation_end : execution stop")
         
         return status
-
-
+    
+    def update_schema_tbl_missing_flag(self, DBObject, connection, schema_id, column_name, flag = "False"):
+        
+        logging.info("data preprocessing : PreprocessingClass : update_schema_tbl_missing_flag : execution start")
+        
+        index = '"index"'
+        sql_command = f"update mlaas.schema_tbl set missing_flag = '{flag}' where {index} in (select {index} from mlaas.schema_tbl st where st.schema_id = '{schema_id}' and (st.changed_column_name = '{column_name}' or st.column_name = '{column_name}'))"
+        logging.info("sql_command: "+sql_command)
+        
+        status = DBObject.update_records(connection,sql_command)
+        logging.info("data preprocessing : PreprocessingClass : update_schema_tbl_missing_flag : execution stop")
+        
+        return status
+    
+    def update_schema_tbl_noise_flag(self, DBObject, connection, schema_id, column_name, flag = "False"):
+        
+        logging.info("data preprocessing : PreprocessingClass : update_schema_tbl_noise_flag : execution start")
+        
+        index = '"index"'
+        sql_command = f"update mlaas.schema_tbl set noise_flag = '{flag}' where {index} in (select {index} from mlaas.schema_tbl st where st.schema_id = '{schema_id}' and (st.changed_column_name = '{column_name}' or st.column_name = '{column_name}'))"
+        logging.info("sql_command: "+sql_command)
+        
+        status = DBObject.update_records(connection,sql_command)
+        logging.info("data preprocessing : PreprocessingClass : update_schema_tbl_noise_flag : execution stop")
+        
+        return status
 

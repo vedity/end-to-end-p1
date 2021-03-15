@@ -247,7 +247,7 @@ class RemoveNoiseClass:
         '''
         column_name = '"' + column_name + '"'
         sql_command = f"update {table_name} set {column_name} = Null where {column_name} !~ '[0-9.]'"
-        
+        logging.info(sql_command)
         status = DBObject.update_records(connection,sql_command)
         return status
     
