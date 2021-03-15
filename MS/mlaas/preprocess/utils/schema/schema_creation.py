@@ -576,7 +576,7 @@ class SchemaClass:
         """
         try:
             schema_table_name,_,_ = self.get_schema()
-            sql_command = f'delete from {schema_table_name} where schema_id={str(schema_id)} and column_name ="{col_name}"'
+            sql_command = f"delete from {schema_table_name} where schema_id={str(schema_id)} and column_name = '{col_name}'"
             status = DBObject.update_records(connection,sql_command)
             return status
         except Exception as exc:
