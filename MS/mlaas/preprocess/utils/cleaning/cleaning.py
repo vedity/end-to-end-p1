@@ -130,7 +130,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info(str(cols))
         for col_name in cols:
             try:
-                sql_command = 'select (AVG(cast ("'+str(col_name)+'" as float))+3*STDDEV("'+str(col_name)+'")) AS impute_value from '+str(table_name)
+                sql_command = 'select (AVG(cast ("'+str(col_name)+'" as float))+3*STDDEV(cast ("'+str(col_name)+'" as float))) AS impute_value from '+str(table_name)
                 dataframe = DBObject.select_records(connection,sql_command)
 
                 impute_value = round(dataframe['impute_value'][0],5)
