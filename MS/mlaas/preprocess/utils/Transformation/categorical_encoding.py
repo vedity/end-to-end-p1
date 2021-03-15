@@ -42,7 +42,7 @@ class EncodeClass:
 
     #     return enc_df
 
-    def one_hot_encoding(self,DBObject,connection,column_list, table_name):
+    def one_hot_encoding(self,DBObject,connection,column_list, table_name, schema_id):
         '''This function do one-hot-encoding finds the distinct value and append columns with binary values
         '''
         try:
@@ -58,7 +58,6 @@ class EncodeClass:
                 status1 = DBObject.update_records(connection,sql_command)
                 sql_command1=f'update {table_name} m SET "{value[0]}" = WANT_THIS from (SELECT {column_list[0]},case when "{column_list[1]}"={value1} then 1 else 0 END AS WANT_THIS FROM {table_name} )s where m."{column_list[0]}" = s.{column_list[0]}'
                 status = DBObject.update_records(connection,sql_command1)
-                schema_id = 26
                 schema_update = sc.update_dataset_schema(DBObject,connection,schema_id,[value[0]],['numeric'],missing_flag=['False'],noise_flag=['False'],flag = True)
             # drop_column = f'ALTER TABLE {table_name} DROP COLUMN {column_list[1]};'
             # logging.info("))))))))"+str(drop_column))
