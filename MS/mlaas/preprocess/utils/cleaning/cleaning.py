@@ -597,3 +597,18 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 return str(exc)
         logging.info("data preprocessing : CleaningClass : apply_log_transformation : execution stop")
         return status
+    
+    def delete_duplicate_records(self,DBObject,connection,column_list, table_name):
+        logging.info("data preprocessing : CleaningClass : delete_duplicate_records : execution start")
+        try:
+            
+            col_string = ''
+            for x in column_list:
+                col_string += '"'+str(x)+'",'
+
+            status = super().delete_duplicate_records(DBObject,connection,table_name,col_string[:-1])
+                
+        except Exception as exc:
+                return str(exc)
+        logging.info("data preprocessing : CleaningClass : delete_duplicate_records : execution stop")
+        return status

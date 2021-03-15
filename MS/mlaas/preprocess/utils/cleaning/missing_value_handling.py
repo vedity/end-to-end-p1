@@ -56,6 +56,17 @@ class MissingValueClass:
         logging.info("Preprocess : MissingValueClass : perform_missing_value_imputation : execution stop")
         return status
 
+    def delete_duplicate_records(self,DBObject,connection,table_name,column_string):
+        logging.info("Preprocess : MissingValueClass : delete_duplicate_records : execution start")
+        
+        sql_command = f'delete from {table_name} where index not in (select min(index) from {table_name} group by {column_string})'
+
+        logging.info("Sql_command : Delete query : delete_duplicate_records : "+str(sql_command))
+
+        status = DBObject.update_records(connection,sql_command)
+        logging.info("Preprocess : MissingValueClass : delete_duplicate_records : execution stop")
+        return status
+
     def random_sample_imputation(self,DBObject,connection,table_name,col_name,impute_value):
 
         logging.info("Preprocess : MissingValueClass : random_sample_imputation : execution start")
