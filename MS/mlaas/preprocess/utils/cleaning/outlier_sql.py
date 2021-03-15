@@ -134,7 +134,7 @@ class OutliersTreatmentClass:
             logging.info("data preprocessing : OutliersTreatmentClass : delete_above : execution stop")
 
             #Delete records where column value less then the given value
-            sql_command = 'delete from '+str(table_name)+' where "'+str(col_name)+'" <'+str(val)
+            sql_command = 'delete from '+str(table_name)+' where "'+str(col_name)+'" >'+str(val)
             logging.info("Sql_command : Delete query : delete_above : "+str(sql_command))
 
             status = DBObject.update_records(connection,sql_command)
@@ -160,7 +160,7 @@ class OutliersTreatmentClass:
             logging.info("data preprocessing : OutliersTreatmentClass : delete_below : execution start")
 
             #Delete records where column value greater then the given value
-            sql_command = f'delete from {str(table_name)} where "{str(col_name)}" > {str(val)}'
+            sql_command = f'delete from {str(table_name)} where "{str(col_name)}" < {str(val)}'
             logging.info("Sql_command : Delete query : delete_below : "+str(sql_command))
 
             status = DBObject.update_records(connection,sql_command)

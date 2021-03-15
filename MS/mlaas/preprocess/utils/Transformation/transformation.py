@@ -128,15 +128,14 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         for col_name in cols:
             try:
                 status = super().label_encoding(DBObject, connection, [index,col_name], table_name)
-                return status
-
+                
             except Exception as exc:
                 return exc
 
         logging.info("data preprocessing : TransformationClass : label_encoding : execution stop")
         return status
 
-    def one_hot_encoding(self, DBObject,connection,column_list, table_name, col):
+    def one_hot_encoding(self, DBObject,connection,column_list, table_name, col, schema_id):
         '''
             Operation id: 28
         '''
@@ -147,9 +146,8 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         
         for col_name in cols:
             try:
-                status = super().one_hot_encoding(DBObject, connection, [index,col_name], table_name)
-                return status
-
+                status = super().one_hot_encoding(DBObject, connection, [index,col_name], table_name, schema_id)
+                
             except Exception as exc:
                 return exc
 
@@ -187,9 +185,9 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         operation = '+'
         
         cols = [column_list[i] for i in col]
-        for col_name in cols:
+        for i,col_name in enumerate(cols):
             try:
-                status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value)
+                status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value[i])
             except Exception as exc:
                 return exc
 
@@ -205,9 +203,9 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         operation = '-'
         
         cols = [column_list[i] for i in col]
-        for col_name in cols:
+        for i,col_name in enumerate(cols):
             try:
-                status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value)
+                status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value[i])
             except Exception as exc:
                 return exc
 
@@ -223,9 +221,9 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         operation = '*'
         
         cols = [column_list[i] for i in col]
-        for col_name in cols:
+        for i,col_name in enumerate(cols):
             try:
-                status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value)
+                status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value[i])
             except Exception as exc:
                 return exc
 
@@ -241,9 +239,9 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         operation = '/'
         
         cols = [column_list[i] for i in col]
-        for col_name in cols:
+        for i,col_name in enumerate(cols):
             try:
-                status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value)
+                status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value[i])
             except Exception as exc:
                 return exc
 
