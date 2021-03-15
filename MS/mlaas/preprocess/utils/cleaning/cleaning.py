@@ -62,7 +62,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info(str(cols))
         for col_name in cols:
             try:
-                sql_command = 'select AVG("'+col_name+'") AS impute_value from '+str(table_name)
+                sql_command = 'select AVG(cast ("'+str(col_name)+'" as float)) AS impute_value from '+str(table_name)
                 dataframe = DBObject.select_records(connection,sql_command)
 
                 impute_value = round(dataframe['impute_value'][0],5)
@@ -87,7 +87,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         cols = [column_list[i] for i in col]
         for col_name in cols:
             try:
-                sql_command = 'select PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY "'+str(col_name)+'") AS impute_value from '+str(table_name)
+                sql_command = 'select PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY cast ("'+str(col_name)+'" as float)) AS impute_value from '+str(table_name)
                 logging.info(sql_command)
                 dataframe = DBObject.select_records(connection,sql_command)
 
@@ -109,7 +109,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info(str(cols))
         for col_name in cols:
             try:
-                sql_command = 'select MODE() WITHIN GROUP (ORDER BY "'+str(col_name)+'") AS impute_value from '+str(table_name)
+                sql_command = 'select MODE() WITHIN GROUP (ORDER BY cast ("'+str(col_name)+'" as float)) AS impute_value from '+str(table_name)
                 dataframe = DBObject.select_records(connection,sql_command)
 
                 impute_value = round(dataframe['impute_value'][0],5)
@@ -130,7 +130,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info(str(cols))
         for col_name in cols:
             try:
-                sql_command = 'select (AVG("'+str(col_name)+'")+3*STDDEV("'+str(col_name)+'")) AS impute_value from '+str(table_name)
+                sql_command = 'select (AVG(cast ("'+str(col_name)+'" as float))+3*STDDEV(cast ("'+str(col_name)+'" as float))) AS impute_value from '+str(table_name)
                 dataframe = DBObject.select_records(connection,sql_command)
 
                 impute_value = round(dataframe['impute_value'][0],5)
@@ -176,7 +176,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info(str(cols))
         for col_name in cols:
             try:
-                sql_command = 'select "'+str(col_name)+'" as impute_value,count("'+str(col_name)+'") from '+str(table_name)+' group by "'+col_name+'" order by count desc limit 1'
+                sql_command = 'select "'+str(col_name)+'" as impute_value,count(cast ("'+str(col_name)+'" as float)) from '+str(table_name)+' group by "'+col_name+'" order by count desc limit 1'
                 dataframe = DBObject.select_records(connection,sql_command)
                 impute_value = "'"+str(dataframe['impute_value'][0])+"'"
 

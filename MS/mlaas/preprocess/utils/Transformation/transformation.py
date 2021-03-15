@@ -135,7 +135,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         logging.info("data preprocessing : TransformationClass : label_encoding : execution stop")
         return status
 
-    def one_hot_encoding(self, DBObject,connection,column_list, table_name, col):
+    def one_hot_encoding(self, DBObject,connection,column_list, table_name, col, schema_id):
         '''
             Operation id: 28
         '''
@@ -146,7 +146,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         
         for col_name in cols:
             try:
-                status = super().one_hot_encoding(DBObject, connection, [index,col_name], table_name)
+                status = super().one_hot_encoding(DBObject, connection, [index,col_name], table_name, schema_id)
                 
             except Exception as exc:
                 return exc
