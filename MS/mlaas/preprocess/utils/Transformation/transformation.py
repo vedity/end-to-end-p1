@@ -151,7 +151,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
             except Exception as exc:
                 return exc
 
-        logging.info("data preprocessing : TransformationClass : label_encoding : execution stop")
+        logging.info("data preprocessing : TransformationClass : one_hot_encoding : execution stop")
         return status
 
     # def one_hot_encoding(self, dataframe, col):

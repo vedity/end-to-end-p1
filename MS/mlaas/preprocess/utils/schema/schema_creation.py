@@ -426,16 +426,14 @@ class SchemaClass:
                 if status == True and flag == False :
                     new_cols_lst = change_column_name
                     cols_attribute_lst = column_attribute_list
-                    logging.info("----->"+str(new_cols_lst))
-                    logging.info("----->"+str(cols_attribute_lst))
-                    logging.info("----->"+str(index_list))
+                   
                     for index,new_col,col_attr in zip(index_list,new_cols_lst,cols_attribute_lst): 
 
                         #sql command for updating change_column_name and column_attribute column  based on index column value
                         sql_command = "update "+ schema_table_name + " SET changed_column_name = '" + str(new_col) + "',"\
                                                                     "column_attribute = '" +str(col_attr) +"'"\
                                     " Where index ='"+str(index)+"' "
-                        logging.info("----->"+str(sql_command))
+                        
                         #execute sql query command
                         status = DBObject.update_records(connection,sql_command) 
 

@@ -211,7 +211,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     impute_string += '('+str(value)+'),'
 
                 impute_string = impute_string[:len(impute_string)-1]
-                logging.info(str(impute_string) + " impute_value")
+        
                 status = super().random_sample_imputation(DBObject,connection,table_name,col_name,impute_string)
                  
             except Exception as exc:
