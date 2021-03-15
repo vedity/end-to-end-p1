@@ -127,14 +127,14 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         '''
         logging.info("data preprocessing : CleaningClass : end_of_distribution : execution start")
         cols = [column_list[i] for i in col]
-        logging.info(str(cols))
+        
         for col_name in cols:
             try:
                 sql_command = 'select (AVG(cast ("'+str(col_name)+'" as float))+3*STDDEV(cast ("'+str(col_name)+'" as float))) AS impute_value from '+str(table_name)
                 dataframe = DBObject.select_records(connection,sql_command)
 
                 impute_value = round(dataframe['impute_value'][0],5)
-                logging.info(str(impute_value) + "check")
+                
                 status = self.perform_missing_value_imputation(DBObject,connection, table_name,col_name,impute_value)
             except Exception as exc:
                 return exc
@@ -142,11 +142,11 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : end_of_distribution : execution stop")
         return status
 
-    def missing_category_imputation(self,DBObject,connection,column_list, table_name, col,value = "'Missing'",flag = False):
+    def missing_category_imputation(self,DBObject,connection,column_list, table_name, col,value ,flag = False):
         '''
             Operation id: 8
         '''
-        
+        logging.info(" checking " +str(value))
         logging.info("data preprocessing : CleaningClass : missing_category_imputation : execution start")
         
         cols = [column_list[i] for i in col]
@@ -176,7 +176,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info(str(cols))
         for col_name in cols:
             try:
-                sql_command = 'select "'+str(col_name)+'" as impute_value,count(cast ("'+str(col_name)+'" as float)) from '+str(table_name)+' group by "'+col_name+'" order by count desc limit 1'
+                sql_command = 'select "'+str(col_name)+'" as impute_value,count(*) from '+str(table_name)+' group by "'+col_name+'" order by count desc limit 1'
                 dataframe = DBObject.select_records(connection,sql_command)
                 impute_value = "'"+str(dataframe['impute_value'][0])+"'"
 

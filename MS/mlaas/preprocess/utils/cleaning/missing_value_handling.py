@@ -45,16 +45,19 @@ class MissingValueClass:
                 series[(pandas.Series)] : [return the updated series]  
 
         """
-        logging.info("Preprocess : MissingValueClass : perform_missing_value_imputation : execution start")
+        try:
+            logging.info("Preprocess : MissingValueClass : perform_missing_value_imputation : execution start")
 
-        sql_command = f'Update {table_name} set "{col_name}"={impute_value} where "{col_name}" {condition}' # Get update query
-        logging.info(str(sql_command))
+            sql_command = f'Update {table_name} set "{col_name}"={impute_value} where "{col_name}" {condition}' # Get update query
+            logging.info(str(sql_command))
 
-        status = DBObject.update_records(connection,sql_command)
-        
+            status = DBObject.update_records(connection,sql_command)
+            
 
-        logging.info("Preprocess : MissingValueClass : perform_missing_value_imputation : execution stop")
-        return status
+            logging.info("Preprocess : MissingValueClass : perform_missing_value_imputation : execution stop")
+            return status
+        except Exception as exc:
+            return str(exc)
 
     def delete_duplicate_records(self,DBObject,connection,table_name,column_string):
         logging.info("Preprocess : MissingValueClass : delete_duplicate_records : execution start")
