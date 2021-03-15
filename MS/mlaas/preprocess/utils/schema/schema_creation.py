@@ -565,7 +565,7 @@ class SchemaClass:
 
         return column_count_value,ignore_count_value
     
-    def delete_schema_record(self,DBObject,connection,schema_id,col_name):
+    def delete_schema_record(self,DBObject,connection,schema_id,col_name = None):
         """
         Function used to delete the record from  the schema table
         Args : 
@@ -576,7 +576,10 @@ class SchemaClass:
         """
         try:
             schema_table_name,_,_ = self.get_schema()
-            sql_command = f'delete from {schema_table_name} where schema_id={str(schema_id)} and column_name ="{col_name}"'
+            if col_name is None:
+                sql_command = f'delete from {schema_table_name} where schema_id={str(schema_id)}'
+            else:
+                sql_command = f'delete from {schema_table_name} where schema_id={str(schema_id)} and column_name ="{col_name}"'
             status = DBObject.update_records(connection,sql_command)
             return status
         except Exception as exc:

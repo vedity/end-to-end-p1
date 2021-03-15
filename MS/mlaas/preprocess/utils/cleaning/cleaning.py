@@ -142,7 +142,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : end_of_distribution : execution stop")
         return status
 
-    def missing_category_imputation(self,DBObject,connection,column_list, table_name, col,value = "'Missing'"):
+    def missing_category_imputation(self,DBObject,connection,column_list, table_name, col,value = "'Missing'",flag = False):
         '''
             Operation id: 8
         '''
@@ -153,7 +153,10 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info(str(cols) + " " +str(value))
         for i,col_name in enumerate(cols):
             try:
-                status = self.perform_missing_value_imputation(DBObject,connection, table_name,col_name,value[i])
+                if not flag:
+                    value = "'"+value[i]+"'"
+            
+                status = self.perform_missing_value_imputation(DBObject,connection, table_name,col_name,value)
             except Exception as exc:
                 logging.error(str(exc))
                 return exc

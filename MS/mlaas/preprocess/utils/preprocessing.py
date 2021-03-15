@@ -838,7 +838,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                         
                     elif op == 9:
                         #? Reusing the missing category imputation function for the arbitrary value imputation
-                        status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, value)
+                        status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, value,True)
                         if status == 0:
                             for col_name in col_names:
                                 sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
