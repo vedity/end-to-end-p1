@@ -161,6 +161,8 @@ export class DataCleanupComponent implements OnInit {
     )
   }
 
+ 
+
   holdoutlistsuccessHandler(data) {
     if (data.status_code == "200") {
       this.holdoutList = data.response;
@@ -303,7 +305,7 @@ export class DataCleanupComponent implements OnInit {
     this.removeHandlers(id, column, tabid);
   }
 
-  tabchange(tabid) {
+  tabchange() {
     $(".checkbox:checked").prop("checked", false);
     this.selectedColumn = [];
 
