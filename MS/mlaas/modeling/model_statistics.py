@@ -411,7 +411,7 @@ class ModelStatisticsClass:
                 raise DatabaseConnectionFailed(500)
 
             if len(model_experiment_data_df) == 0 :
-                raise DataNotFound(500)
+                return []
             # Converting final_df to json
             json_data = model_experiment_data_df.to_json(orient='records',date_format='iso')
             final_data = json.loads(json_data)
