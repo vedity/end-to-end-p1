@@ -981,7 +981,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                         missing_value_status,noise_status = self.get_preprocess_cache(dataset_id)
 
                         #Update all the status flag's based on the schema id
-                        status = update_schema_flag_status(self,scheam_id,missing_flag,noise_flag)
+                        status = self.update_schema_flag_status(scheam_id,missing_value_status,noise_status)
 
                         if status ==0:  
                             #? Updating the Activity table
