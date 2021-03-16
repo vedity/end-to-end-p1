@@ -193,11 +193,11 @@ class ModelStatisticsClass:
 
             sql_command = 'select artifact_uri from mlaas.runs where experiment_id='+str(experiment_id)
             artifact_uri = self.DBObject.select_records(self.connection, sql_command)
-            if artifact_uri is None:
-                raise DatabaseConnectionFailed(500)
+            # if artifact_uri is None:
+            #     raise DatabaseConnectionFailed(500)
 
-            if len(artifact_uri) == 0 :
-                raise DataNotFound(500)
+            # if len(artifact_uri) == 0 :
+            #     raise DataNotFound(500)
 
             artifact_uri = artifact_uri.iloc[0,0]
             confusion_matrix_uri = artifact_uri + '/confusion_matrix.json'
@@ -372,11 +372,12 @@ class ModelStatisticsClass:
                           "and met.project_id="+str(project_id) +" and met.status='running'"
                           
             model_experiment_data_df = self.DBObject.select_records(self.connection, sql_command)
+            logging.info("-------------"+str(model_experiment_data_df))
             if model_experiment_data_df is None:
                 raise DatabaseConnectionFailed(500)
 
-            if len(model_experiment_data_df) == 0 :
-                raise ModelIsStillInQueue(500)
+            if len(model_experiment_data_df) == 0:
+                return []
             # Converting final_df to json
             json_data = model_experiment_data_df.to_json(orient='records',date_format='iso')
             final_data = json.loads(json_data)
@@ -410,7 +411,7 @@ class ModelStatisticsClass:
                 raise DatabaseConnectionFailed(500)
 
             if len(model_experiment_data_df) == 0 :
-                raise DataNotFound(500)
+                return []
             # Converting final_df to json
             json_data = model_experiment_data_df.to_json(orient='records',date_format='iso')
             final_data = json.loads(json_data)
@@ -436,38 +437,58 @@ class ModelStatisticsClass:
         
     def check_model_status(self,project_id,experiment_name):
         
-        # try:
+        try:
         
-        sql_command ="select dag_id,run_id from mlaas.model_dags_tbl where project_id='"+str(project_id)+"' and exp_name='"+experiment_name+"'"
-        
-        dag_df = self.DBObject.select_records(self.connection, sql_command)
+            sql_command ="select dag_id,run_id from mlaas.model_dags_tbl where project_id="+str(project_id)+" and exp_name='"+experiment_name+"'"
+            
+            dag_df = self.DBObject.select_records(self.connection, sql_command)
 
-        # if dag_df is None:
-        #     raise DatabaseConnectionFailed(500)
+            if dag_df is None:
+                raise DatabaseConnectionFailed(500)
 
-        # if len(dag_df) == 0 :
-        #     raise DataNotFound(500)
-        
-        dag_id,run_id = dag_df['dag_id'][0],dag_df['run_id'][0]
-        
-        sql_command = "select state from dag_run where dag_id='"+dag_id+"' and run_id='"+run_id +"'"
-        state_df = self.DBObject.select_records(self.connection, sql_command)
-        # if state_df is None:
-        #     raise DatabaseConnectionFailed(500)
+            if len(dag_df) == 0 :
+                raise DataNotFound(500)
+            
+            dag_id,run_id = dag_df['dag_id'][0],dag_df['run_id'][0]
+            
+            sql_command = "select state from dag_run where dag_id='"+dag_id+"' and run_id='"+run_id +"'"
+            state_df = self.DBObject.select_records(self.connection, sql_command)
+            
+            if state_df is None:
+                raise DatabaseConnectionFailed(500)
 
-        # if len(state_df) == 0 :
-        #     raise DataNotFound(500)
-        status=state_df['state'][0]
-
-        return status
+            if len(state_df) == 0 :
+                raise DataNotFound(500)
+            logging.info("========="+str(type(state_df['state'][0])))
+            #status=state_df['state'][0]
+            return state_df
         
-        # except (DatabaseConnectionFailed,DataNotFound) as exc:
-        #     logging.error("modeling : ModelStatisticsClass : show_experiments_list : Exception " + str(exc))
-        #     logging.error("modeling : ModelStatisticsClass : show_experiments_list : " +traceback.format_exc())
-        #     return exc.msg
+        except (DatabaseConnectionFailed,DataNotFound) as exc:
+            logging.error("modeling : ModelStatisticsClass : show_experiments_list : Exception " + str(exc))
+            logging.error("modeling : ModelStatisticsClass : show_experiments_list : " +traceback.format_exc())
+            return exc.msg
         
+def compare_experiments(self, experiment_ids):
+ 
+        exp_ids = tuple(experiment_ids)
+    
+        sql_command = 'select prms.key, prms.value, met.experiment_id from mlaas.params prms,mlaas.model_experiment_tbl met where prms.run_uuid=met.run_uuid and met.experiment_id in'+str(exp_ids)
+        params_df = self.DBObject.select_records(self.connection, sql_command)
+        params_pivot_df = params_df.pivot(index='experiment_id', columns='key', values='value')
         
-        
+        sql_command = 'select mtr.key, mtr.value, met.experiment_id from mlaas.metrics mtr,mlaas.model_experiment_tbl met where mtr.run_uuid=met.run_uuid and met.experiment_id in'+str(exp_ids)
+        metrics_df = self.DBObject.select_records(self.connection, sql_command)
+        metrics_pivot_df = metrics_df.pivot(index='experiment_id', columns='key', values='value')
+ 
+        sql_command = 'select model_name from mlaas.model_master_tbl mmt, mlaas.model_experiment_tbl met where mmt.model_id=met.model_id and met.experiment_id in '+str(exp_ids)
+        model_names = list(self.DBObject.select_records(self.connection, sql_command)['model_name'])
+        exp_list = {}
+        for index, id in enumerate(exp_ids):
+            exp_list[str(id)] = {'metrics': metrics_pivot_df.loc[id, :].to_dict(), 
+                                'params': params_pivot_df.loc[id, :].to_dict(),
+                                'model_name': model_names[index]}
+ 
+        return exp_list     
         
 
     

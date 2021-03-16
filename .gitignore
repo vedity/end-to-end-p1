@@ -11,6 +11,8 @@ __pycache__
 mlruns
 scaled_dataset/*
 *.npy
+dynamic_dags
+
 ### Angular ###
 # compiled output
 dist/
