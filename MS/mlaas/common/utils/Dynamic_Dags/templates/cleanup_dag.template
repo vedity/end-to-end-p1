@@ -1,0 +1,110 @@
+
+#* Relative Imports
+
+#* Library Imports
+from datetime import datetime, timedelta
+
+#* Airflow Imports
+from airflow import DAG
+import airflow
+from airflow.operators.bash_operator import BashOperator
+from airflow.operators.python_operator import PythonOperator
+from airflow.models import Variable
+
+
+
+yesterday_date = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')
+
+main_dag_id = #DAG_ID
+
+args = {
+    'owner': 'airflow',
+    'start_date': airflow.utils.dates.days_ago(1),      
+    'provide_context': True, 
+}
+
+dag = DAG(
+    main_dag_id,
+    default_args=args,    
+    description='A Dynamically Generated DAG.',
+    catchup=False,
+    schedule_interval = '@once',                         
+)
+
+
+def get_params(run_id,**kwargs):
+
+
+    get_dict = kwargs['dag_run'].conf['operation']
+
+    my_var = Variable.set(run_id,get_dict)
+
+
+
+def end_pipeline(dag,run_id,execution_date,ds,**kwargs):
+
+    print("key (run_id): ",kwargs['key'])
+
+
+def dummy(**kwargs):
+
+    print("Ended")
+
+
+
+
+t1 = PythonOperator(task_id='get_params',provide_context=True,python_callable=get_params,dag=dag,)
+
+
+key = "{{ run_id }}"
+
+t2 = PythonOperator(task_id='get_key_operation',provide_context=True,python_callable=end_pipeline,dag=dag,
+                        op_kwargs={"key":key})
+        
+t3 = BashOperator(task_id='End', dag=dag, bash_command='echo task has ended')
+
+        
+
+t1 >> t2
+
+
+# operation=Variable.get(key) # we want to get here dynamically but  getting error here 
+# operation =  ast.literal_eval(operation)
+
+operation= #OPERATION_DICT # this will work statically (we give this dict static this is working properly but we want to get it dynamically by line no 65)
+op_dict = {1:dummy,4:dummy,5:dummy,7:dummy}
+
+t1.set_downstream(t2)
+
+previous_task = t2
+i = 0
+daglist = []    
+
+for index in operation.keys():
+    dynamicTaskOne = BashOperator(
+    task_id='Function_start_' +str(index),
+    bash_command='echo "hello"',
+    dag=dag,)
+
+    for task in daglist:
+        task.set_downstream(dynamicTaskOne)
+
+    previous_task.set_downstream(dynamicTaskOne)
+    daglist = []    
+
+    for col in operation[index]: 
+        dynamicTask = PythonOperator(
+            task_id='Operation_' + str(index) + "_col_" + str(col),
+            dag=dag,
+            provide_context=True,
+            python_callable=op_dict[index],)
+
+        dynamicTaskOne.set_downstream(dynamicTask)
+        daglist.append(dynamicTask)
+        previous_task = dynamicTaskOne
+
+    i+=1
+    if i == len(operation.keys()):
+        previous_task.set_downstream(t3)
+        for task in daglist:
+            task.set_downstream(t3)
