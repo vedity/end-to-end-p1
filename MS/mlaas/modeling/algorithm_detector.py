@@ -42,7 +42,7 @@ class AlgorithmDetector:
             logging.info("modeling : ModelClass : get_dataset_info : execution start")
         
             # SQL query to get the project_name
-            sql_command = 'select input_features,project_name from mlaas.project_tbl where project_id='+str(project_id)
+            sql_command = 'select target_features,project_name from mlaas.project_tbl where project_id='+str(project_id)
             project_df = self.DBObject.select_records(self.connection, sql_command)
             if project_df is None:
                 raise DatabaseConnectionFailed(500)
@@ -51,8 +51,8 @@ class AlgorithmDetector:
                 raise DataNotFound(500)
             
             project_name = project_df['project_name'][0]
-            input_features = project_df['input_features'][0]
-            target_columns= ast.literal_eval(input_features)[1:]
+            target_features = project_df['target_features'][0]
+            target_columns= ast.literal_eval(target_features)[1:]
             
             # SQL query to get the dataset_name
             sql_command = 'select dataset_name from mlaas.dataset_tbl where dataset_id='+str(dataset_id)
