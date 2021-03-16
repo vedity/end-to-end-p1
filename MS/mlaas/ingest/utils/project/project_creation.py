@@ -281,7 +281,13 @@ class ProjectClass:
                 #? Deleting Project Table Entry
                 sql_command = "DELETE FROM "+ table_name + " WHERE PROJECT_ID ='"+ project_id +"'"
                 project_status = DBObject.delete_records(connection,sql_command)
-                
+
+                if project_status == 0:
+                    schema_id = project_id
+                    project_status = schema_obj.delete_schema_record(DBObject,connection,schema_id)
+                    if project_status !=0:
+                        return 4
+                      
             else:
                 logging.debug(f"data ingestion  :  ProjectClass  :  delete_project_details  :  Function failed because the Given user = {user_name} is not authorized to delete the project.")
                 project_status = 2

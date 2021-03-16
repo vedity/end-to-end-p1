@@ -838,8 +838,9 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                                 sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
                         
                     elif op == 9:
+                        
                         #? Reusing the missing category imputation function for the arbitrary value imputation
-                        status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, value)
+                        status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name,col, value[0],flag = True)
                         if status == 0:
                             for col_name in col_names:
                                 sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
@@ -975,9 +976,19 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                         #     status = update_status
                         #     activity_status = self.operation_end(DBObject, connection, activity_id, op, temp_col)
                     else:
-                        #? Updating the Activity table
-                        for i,temp_col_names in enumerate(temp_cols):
-                            activity_status = self.operation_end(DBObject, connection, activity_ids[i], op, temp_col_names)
+
+                        #Get the possible missing and noise status after updating any columns
+                        missing_value_status,noise_status = self.get_preprocess_cache(dataset_id)
+
+                        #Update all the status flag's based on the schema id
+                        status = self.update_schema_flag_status(scheam_id,missing_value_status,noise_status)
+
+                        if status ==0:  
+                            #? Updating the Activity table
+                            for i,temp_col_names in enumerate(temp_cols):
+                                activity_status = self.operation_end(DBObject, connection, activity_ids[i], op, temp_col_names)
+                        else:
+                            return status
                 except :
                     continue
                     
@@ -1198,4 +1209,30 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         logging.info("data preprocessing : PreprocessingClass : update_schema_tbl_noise_flag : execution stop")
         
         return status
+    
+    def update_schema_flag_status(self,scheam_id,missing_flag,noise_flag):
+        try:
+            logging.info("data preprocessing : PreprocessingClass : update_schema_flag_status : execution start")
+            
+            for noise_flag,missing_flag in zip(missing_flag,noise_flag): 
+
+                #sql command for updating change_column_name and column_attribute column  based on index column value
+                sql_command = "update "+ schema_table_name + " SET missing_flag = '" + str(missing_flag) + "',"\
+                                "noise_flag = '" +str(noise_flag) +"'"\
+                                " Where schema_id ='"+str(scheam_id)+"' "
+
+                logging.info("sql_command " + sql_command) 
+                #execute sql query command
+                status = DBObject.update_records(connection,sql_command) 
+
+                if status ==1:
+                    raise SchemaUpdateFailed(500)
+            
+                status = DBObject.update_records(connection,sql_command)
+                logging.info("data preprocessing : PreprocessingClass : update_schema_flag_status : execution stop")
+            
+            return status
+        except (SchemaUpdateFailed) as exc:
+            return exc.msg
+
 
