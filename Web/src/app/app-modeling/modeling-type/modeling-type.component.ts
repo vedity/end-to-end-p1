@@ -17,6 +17,11 @@ export class ModelingTypeComponent implements OnInit {
   timePeriods = [
     'Experiment 1','Experiment 2','Experiment 3','Experiment 4'
   ];
+
+ 
+
+  model_type="Regression";
+  currentuser:any;
   splitmethodselection="crossvalidation";
   hyperparams='sklearn';
   @ViewChild(DataTableDirective, { static: false })
@@ -146,12 +151,12 @@ export class ModelingTypeComponent implements OnInit {
           borderColor: '#f1f1f1'
       }
     };
-    let user = localStorage.getItem("currentUser")
-    this.params.user_id = JSON.parse(user).id;
-    console.log(user);
+    this.currentuser = localStorage.getItem("currentUser")
+    this.params.user_id = JSON.parse(this.currentuser).id;
+    console.log(this.currentuser);
     this.getDatasetInfo();
-  //  this.getModelDescription();
-    this.getAlgorithmList();
+    this.getModelDescription();
+   // this.getAlgorithmList();
   }
 
   drop(event: CdkDragDrop<string[]>) {
@@ -228,7 +233,7 @@ export class ModelingTypeComponent implements OnInit {
     }
   }
   getModelDescription() {
-    this.apiservice.getModelDescription(this.params.dataset_id, this.params.project_id, this.params.user_id).subscribe(
+    this.apiservice.getModelDescription(this.params.dataset_id).subscribe(
       logs => this.descsuccessHandler(logs),
       error => this.errorHandler(error));
   }
@@ -249,18 +254,22 @@ export class ModelingTypeComponent implements OnInit {
     this.experiment_name = this.params.experiment_name;
     this.experiment_desc = this.params.experiment_desc;
     let obj = {
-      user_id:2,// this.params.user_id,
-      dataset_id:2,// this.params.dataset_id,
-      project_id:2,// this.params.project_id,
+      user_name: this.currentuser.user_name,
+      dataset_id:this.params.dataset_id,
+      project_id: this.params.project_id,
       model_mode: "auto",
+      model_type:"Regression / Classification",
       experiment_name: this.params.experiment_name,
       experiment_desc: this.params.experiment_desc
     }
-    this.apiservice.startModeling(obj).subscribe(
-      logs=>this.startsuccessHandler(logs),
-      error=>this.errorHandler(error)
+
+    console.log(obj);
+    
+    // this.apiservice.startModeling(obj).subscribe(
+    //   logs=>this.startsuccessHandler(logs),
+    //   error=>this.errorHandler(error)
       
-    )
+    // )
 
   }
 
