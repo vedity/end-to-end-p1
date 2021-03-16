@@ -18,12 +18,22 @@ export class ModelingTypeApiService {
     return this.httpClient.get(this.baseUrl + "modeling/showdatasetinfo/", { headers: this.headers, params });
   }
 
-  getModelDescription(dataset_id,project_id,user_id): Observable<any> {
+  getModelDescription(project_id): Observable<any> {
     project_id=2;
     var params = new HttpParams().append("project_id", project_id);
-    //.append("dataset_id", dataset_id).append("project_id", project_id).append("user_id",user_id);
-    // return this.httpClient.get(this.baseUrl + "modeling/finalmodeldescription/", { headers: this.headers, params });
     return this.httpClient.get(this.baseUrl + "modeling/showexperimentslist/", { headers: this.headers, params });
+  }
+  
+  showallexperimentslist(project_id): Observable<any> {
+    project_id=2;
+    var params = new HttpParams().append("project_id", project_id);
+    return this.httpClient.get(this.baseUrl + "modeling/showallexperimentslist/", { headers: this.headers, params });
+  }
+
+  showrunningexperimentslist(project_id): Observable<any> {
+    project_id=2;
+    var params = new HttpParams().append("project_id", project_id);
+    return this.httpClient.get(this.baseUrl + "modeling/runningexperimentslist/", { headers: this.headers, params });
   }
 
   startModeling(obj):Observable<any>{

@@ -30,11 +30,11 @@
                         </div>
                         <div class="radio-group">
                             <div class="custom-control custom-radio mr-3">
-                                <input type="radio" id="customRadio1" name="customRadio" class="custom-control-input">
+                                <input type="radio" id="customRadio1" name="customRadio" (click)="model_type='Regression'" checked class="custom-control-input">
                                 <label class="custom-control-label" for="customRadio1">Regression</label>
                             </div>
                             <div class="custom-control custom-radio ">
-                                <input type="radio" id="customRadio2" name="customRadio" class="custom-control-input" checked>
+                                <input type="radio" id="customRadio2" name="customRadio" (click)="model_type='Classification'" class="custom-control-input">
                                 <label class="custom-control-label" for="customRadio2">Classification</label>
                             </div>
                         </div>

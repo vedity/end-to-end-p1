@@ -6,20 +6,31 @@ import { ToastrService } from 'ngx-toastr';
 import { DataCleanupApiService } from '../data-cleanup.service';
 import { Options } from 'ng5-slider';
 import { scaleandsplit } from './data-cleanup.model';
+import { NgForm } from '@angular/forms';
 @Component({
   selector: 'app-data-cleanup',
   templateUrl: './data-cleanup.component.html',
   styleUrls: ['./data-cleanup.component.scss']
 })
 export class DataCleanupComponent implements OnInit {
-  numberrangeregex="^[1-9][0]?$|^10$"
+  numberrangeregex = "^[1-9][0]?$|^10$"
+  randomstateregex = "^[0-9]{1,5}$"
 
+
+
+
+  f: NgForm;
 
   @ViewChild(DataTableDirective, { static: false })
   datatableElement: DataTableDirective;
   dtOptions: DataTables.Settings = {};
   activeId = 1;
-  scaldata: scaleandsplit = new scaleandsplit();
+  scaldata: scaleandsplit = {
+    test_ratio: 20,
+    split_method: 'cross_validation',
+    scaling_op: '0'
+  };
+
   constructor(public apiService: DataCleanupApiService, public toaster: ToastrService, private modalService: NgbModal, public router: Router) { }
   @Input() public dataset_id: any;
   @Input() public title: any;
@@ -30,7 +41,7 @@ export class DataCleanupComponent implements OnInit {
   errorStatus = true;
   operationList: any;
   columnList: any;
-  holdoutList:any;
+  holdoutList: any;
   splitmethodselection = "cross_validation";
   scaleOperations: any;
   hyperparams = 'sklearn';
@@ -43,21 +54,55 @@ export class DataCleanupComponent implements OnInit {
     'animation-duration': '20s'
   };
 
-  visibleSelection = 5;
+  visibleSelection = 20;
   visibleBarOptions: Options = {
     floor: 0,
     ceil: 100,
-    showSelectionBar: true
+    showSelectionBar: true,
+
   };
 
   @HostListener('window:resize', ['$event'])
-	onResize(event) {
+  onResize(event) {
     if (this.datatableElement.dtInstance) {
       this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
         dtInstance.columns.adjust().draw();
       })
     }
-	}
+  }
+
+  checkvalidation(event, type) {
+    var value = event.target.value;
+    console.log(type);
+    var match=true;
+    var regexfortypeinteger = /^[0-9]{1,50}$/;
+    var regexfortypefloat = /^([0-9]*[.])?[0-9]+$/;
+    var regexfortypefloatbutnotzero = /^-?(?!0)\d+(\.\d+)?$/;
+    var regexfortext = /^[A-Za-z]+$/;
+    $("#" + event.target.id).removeClass("errorstatus")
+    if (value != "") {
+      if (type == 1) {
+        match = regexfortypeinteger.test(value);
+      }
+      if (type == 2) {
+        match = regexfortypefloat.test(value);
+      }
+      if (type == 4) {
+        match = regexfortext.test(value);
+      }
+      if (type == 5) {
+        if (value != 0)
+          match = regexfortypefloat.test(value);
+        else
+          match = false
+      }
+      console.log(match);
+      if (!match) {
+        $("#" + event.target.id).addClass("errorstatus")
+      }
+    }
+    
+  }
 
   ngOnInit(): void {
     this.dtOptions = {
@@ -74,8 +119,9 @@ export class DataCleanupComponent implements OnInit {
     this.getColumnList();
     this.getScalingOperations();
     this.getHoldoutList();
-    this.scaldata.test_ratio = 20;
-    this.scaldata.split_method = 'cross_validation';
+    // this.scaldata.test_ratio = 20;
+    // this.scaldata.split_method = 'cross_validation';
+    // this.scaldata.scaling_op='0'
   }
 
 
@@ -108,25 +154,25 @@ export class DataCleanupComponent implements OnInit {
     }
   }
 
-  getHoldoutList(){
-  this.apiService.getHoldoutList().subscribe(
-    logs => this.holdoutlistsuccessHandler(logs),
-    error => this.errorHandler(error)
-  )
-}
+  getHoldoutList() {
+    this.apiService.getHoldoutList().subscribe(
+      logs => this.holdoutlistsuccessHandler(logs),
+      error => this.errorHandler(error)
+    )
+  }
 
-holdoutlistsuccessHandler(data) {
-  if (data.status_code == "200") {
-    this.holdoutList = data.response;
+  holdoutlistsuccessHandler(data) {
+    if (data.status_code == "200") {
+      this.holdoutList = data.response;
+    }
+    else {
+      this.errorHandler(data);
+    }
   }
-  else {
-    this.errorHandler(data);
-  }
-}
   selectedcolumnswithoperation = [];
   selectedColumn = [];
   selectColumn(event) {
-    $(".customInput").prop('disabled',true).val('');
+    $(".customInput").prop('disabled', true).val('').removeClass('errorstatus');
     if (event.target.checked) {
       this.selectedColumn.push(event.target.value);
     }
@@ -199,10 +245,10 @@ holdoutlistsuccessHandler(data) {
 
   handling = [];
   selectHandling(event, id) {
-    $(".customInput").prop('disabled',true).val('');
+    $(".customInput").prop('disabled', true).val('');
     var item = this.handling.find(s => s.column.toString() == this.selectedColumn.toString());
     $("#" + event.target.id).prop('checked', true);
-    $("#customInput_"+event.target.id.split('_')[1]+'_'+event.target.id.split('_')[2]).prop('disabled',false);
+    $("#customInput_" + event.target.id.split('_')[1] + '_' + event.target.id.split('_')[2]).prop('disabled', false);
     if (item == undefined) {
       this.handling.push({ column: this.selectedColumn, operation: [id] })
     }
@@ -238,8 +284,8 @@ holdoutlistsuccessHandler(data) {
   }
 
 
-  removeHandlers(id, columnid) {
-    let tabid = this.activeId;
+  removeHandlers(id, columnid, tabid) {
+    // let tabid = this.activeId;
     var selectedelem = this.columnList.filter(function (e) {
       if (e.column_id == columnid) {
         let val = $("#" + id).val();
@@ -251,15 +297,16 @@ holdoutlistsuccessHandler(data) {
     });
   }
 
-  removeHandling(id, column) {
+  removeHandling(id, column, tabid) {
     if (this.selectedColumn.length == 1)
       $("#" + id).prop('checked', false);
-    this.removeHandlers(id, column);
+    this.removeHandlers(id, column, tabid);
   }
 
   tabchange(tabid) {
     $(".checkbox:checked").prop("checked", false);
     this.selectedColumn = [];
+
     this.getColumnviseOperation();
   }
 
@@ -287,53 +334,59 @@ holdoutlistsuccessHandler(data) {
   };
 
   fianlarray = [];
-  errorflag:boolean;
+  errorflag: boolean;
   saveHanlers() {
-    this.errorflag=false;
+    this.errorflag = false;
     this.fianlarray = [];
     let arrayhandlers = [];
+    if($(".errorstatus").length>0){
+      this.toaster.error("Please enter valid input", 'Error')
+    }else{
     if ($(".handlingitem").length > 0) {
+     
+   
       $(".handlingitem").each(function () {
         var id = $(this).prop('id').split('_');
         var columnid = id[1];
         var operationid = id[2];
 
-        var value=$("#setInput_"+columnid+"_"+operationid).val();
-        arrayhandlers.push({ column_id: columnid, selected_handling: operationid ,values:value});
+        var value = $("#setInput_" + columnid + "_" + operationid).val();
+        arrayhandlers.push({ column_id: columnid, selected_handling: operationid, values: value });
       })
-    
-        var handlers = this.groupBy(arrayhandlers, 'column_id');
-        for (var item in handlers) {
-          let selectedhandling=[];
-          let values=[];
-          for (var childitem of handlers[item]) {
-            selectedhandling.push(parseInt(childitem.selected_handling));
-            if(childitem.values=="")
-            this.errorflag=true;
 
-            if(childitem.values==undefined){
-              childitem.values='';
-            }
-            values.push(childitem.values);
+      var handlers = this.groupBy(arrayhandlers, 'column_id');
+      for (var item in handlers) {
+        let selectedhandling = [];
+        let values = [];
+        for (var childitem of handlers[item]) {
+          selectedhandling.push(parseInt(childitem.selected_handling));
+          if (childitem.values == "")
+            this.errorflag = true;
+
+          if (childitem.values == undefined) {
+            childitem.values = '';
           }
-          this.fianlarray.push({ "column_id": [parseInt(item)], "selected_handling": selectedhandling, "values": values })
+          values.push(childitem.values);
         }
-       console.log(this.fianlarray);
-       if(this.errorflag==true){
+        this.fianlarray.push({ "column_id": [parseInt(item)], "selected_handling": selectedhandling, "values": values })
+      }
+      console.log(this.fianlarray);
+      if (this.errorflag == true) {
         this.toaster.error("Please enter required input", 'Error')
-       }
-       else{
-        this.apiService.saveOperations(this.schema_id, this.dataset_id,this.project_id, this.fianlarray).subscribe(
+      }
+      else {
+        this.apiService.saveOperations(this.schema_id, this.dataset_id, this.project_id, this.fianlarray).subscribe(
           logs => this.saveSuccessHandlers(logs),
           error => this.errorHandler(error)
         )
-       }
-        
-      
-     
+      }
+
+
+
     }
     else
       this.toaster.error("Please select any handlers", 'Error')
+  }
   }
 
   saveSuccessHandlers(data) {
