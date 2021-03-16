@@ -965,13 +965,13 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             split_method =split_parameters['split_method'] #get split_method
             cv = split_parameters['cv'] #get cv
             if len(cv) == 0:
-                cv = None
+                cv = 0
             
             random_state = split_parameters['random_state'] #get random_state
             test_ratio = split_parameters['test_ratio'] #get test_size
             valid_ratio = split_parameters['valid_ratio'] #get valid_size
             if len(valid_ratio) == 0:
-                valid_ratio= None
+                valid_ratio= 0
             else:
                 valid_ratio=float(valid_ratio)
             unique_id = str(uuid.uuid1().time) #genrate unique_id

@@ -94,12 +94,12 @@ activity_id,activity_name,activity_description,language,operation,code,parent_ac
 41,Multiply into column,operation on column(s) * pending,US,Operation,0,6
 41,Multiply into column,operation on column(s) * in process,US,Operation,1,6
 41,Multiply into column,operation on column(s) * completed,US,Operation,2,6
-42,Created Experiment,You have created experiment,Operation,0,1
-43,Selected Auto Modeling,You have selected Auto Modeling for experiment,Operation,0,1
-44,Selected Manual Modeling,You have selected Manual Modeling for experiment,Operation,0,1
-45,Defined Modeling parameters,You have selected the algorithm column(s) and defined the parameters for experiment ABC,Operation,0,1
-46,Started Modeling,Modelling has been started for experiment column(s),Operation,0,1
-47,Stopped Modeling,Modelling has been stopped for experiment column(s),Operation,0,1
-48,Completed Modeling,Modeling of experiment column(s) has been completed successfully,Operation,0,1
+42,Created Experiment,You have created experiment,US,Operation,0,1
+43,Selected Auto Modeling,You have selected Auto Modeling for experiment,US,Operation,0,1
+44,Selected Manual Modeling,You have selected Manual Modeling for experiment,US,Operation,0,1
+45,Defined Modeling parameters,You have selected the algorithm column(s) and defined the parameters for experiment ABC,US,Operation,0,1
+46,Started Modeling,Modelling has been started for experiment,US,Operation,0,1
+47,Stopped Modeling,Modelling has been stopped for experiment,US,Operation,0,1
+48,Completed Modeling,Modeling of experiment column(s) has been completed successfully,US,Operation,0,1
 
 
