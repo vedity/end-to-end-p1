@@ -48,7 +48,7 @@
             <div class="right-box" [hidden]="loaderdiv">
                 <div class="right-inner">
                     <ul ngbNav #justifiednavmissing="ngbNav" [activeId]="activeId" class="nav-tabs nav noise-tabs">
-                        <li [ngbNavItem]="i+1" (click)="activeId=item.tab_id;tabchange(item.tab_id)" *ngFor="let item of operationList;let i=index">
+                        <li [ngbNavItem]="i+1" (click)="activeId=item.tab_id;tabchange()" *ngFor="let item of operationList;let i=index">
                             <a ngbNavLink title="{{item.tab_name}}">
                                 <span>{{item.tab_name}}</span>
                             </a>
@@ -94,7 +94,7 @@
             </div>
         </ng-template>
     </li>
-    <li [ngbNavItem]="2">
+    <li [ngbNavItem]="2" (click)="tabchange()">
         <a ngbNavLink title="Rescaling">
             <span class="">Scale & Split</span>
 
@@ -102,77 +102,97 @@
         <ng-template ngbNavContent>
             <form #f="ngForm">
 
-                <div class="row justify-content-md-left">
-                    <div class="col-md-3">
-                        <h4 class="mb-3 mt-3">Scaling</h4>
+                <div class="row">
+                    <div class="col-md-12">
+                        <h4 class="mb-3  font-size-15">Rescaling</h4>
+                    </div>
 
-
-                        <div class="row mb-4">
-
-                            <div class="col-md-12 mb-3" *ngFor="let item of scaleOperations;let i=index">
-                                <div class="custom-control custom-radio">
-                                    <input type="radio" [(ngModel)]="scaldata.scaling_op" id="rescaling_{{item.id}}" name="rescaling" value="{{item.id}}" class="custom-control-input">
-                                    <label class="custom-control-label" for="rescaling_{{item.id}}">{{item.name}}</label>
-
-                                </div>
-
-                            </div>
-
+                    <div class="col-md-3 mb-3" *ngFor="let item of scaleOperations;let i=index">
+                        <div class="custom-control custom-radio">
+                            <input type="radio" [(ngModel)]="scaldata.scaling_op" id="rescaling_{{item.id}}" name="rescaling" value="{{item.id}}" class="custom-control-input">
+                            <label class="custom-control-label" for="rescaling_{{item.id}}">{{item.name}}</label>
 
                         </div>
                     </div>
-                    <div class="col-md-9">
-                        <h4 class="font-size-18 mt-3 mb-3">Split Dataset</h4>
-                        <div class="form-group">
-                            <label>Select split method</label>
-                            <select class="form-control" [(ngModel)]="scaldata.split_method" name="splitmethod" #splitmethod="ngModel" (change)="splitmethodselection=$event.target.value">
-                            <option value="cross_validation">Cross Validation</option>
-                            <option value="train_valid_holdout">Train - Validation - Holdout</option>
-                        </select>
-                        </div>
-                        <div class="cross-validation" *ngIf="splitmethodselection=='cross_validation'">
-                            <div class="form-group">
-                                <label>Number of cross validation(CV) folds</label>
-                                <input type="text" [(ngModel)]="scaldata.cv" name="cv" [required]="splitmethodselection=='cross_validation'" #cv="ngModel" [pattern]="numberrangeregex" class="form-control">
-                                <div class="invalid-feedback" *ngIf="cv.errors">
-                                    <span *ngIf="cv.errors?.pattern" class="text-red">Please enter CV between 1 and 10</span>
-                                    <span *ngIf="cv.errors?.required && (cv.dirty || cv.touched)" class="text-red">Please Enter Number of cross validation(CV) folds</span>
-                                </div>
 
-                            </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <h4 class="font-size-15 mt-3 mb-3">Split Dataset</h4>
+                    </div>
+
+
+                    <div class="col-md-4">
+                        <div class="form-group">
                             <div class="form-group">
-                                <label>Holdout perecentage</label>
-                                <!-- <input type="range" class="custom-range" min="0" max="100" id="customRange2"> -->
-                                <ng5-slider [(value)]="visibleSelection" [(ngModel)]="scaldata.test_ratio" [options]="visibleBarOptions"></ng5-slider>
-                            </div>
-                            <div class="from-group">
-                                <label>Random state</label>
-                                <input type="number" [required]="splitmethodselection=='cross_validation'" name="randomstate" #randomstate="ngModel" [pattern]="randomstateregex" [(ngModel)]="scaldata.random_state" placeholder="0 - 99999" class="form-control">
-                                <div class="invalid-feedback" *ngIf="randomstate.errors">
-                                    <span *ngIf="randomstate.errors?.pattern" class="text-red">Please enter random state between 0 and 99999</span>
-                                    <span *ngIf="randomstate.errors?.required && (randomstate.dirty || randomstate.touched)" class="text-red">Please Enter random state</span>
-                                </div>
+                                <label>Select split method</label>
+                                <select class="form-control" [(ngModel)]="scaldata.split_method" name="splitmethod" #splitmethod="ngModel" (change)="splitmethodselection=$event.target.value">
+                                    <option value="cross_validation">Cross Validation</option>
+                                    <option value="train_valid_holdout">Train - Validation - Holdout</option>
+                                </select>
                             </div>
                         </div>
-                        <div class="tr-v-h" *ngIf="splitmethodselection=='train_valid_holdout'">
-                            <div class="form-group">
-                                <label>Split ratio</label>
-                                <select class="form-control" [(ngModel)]="scaldata.split_ratio" [required]="splitmethodselection=='train_valid_holdout'" name="holdout" #holdout="ngModel">
+                    </div>
+                    <div class="col-md-4" *ngIf="splitmethodselection=='cross_validation'">
+                        <div class="form-group">
+                            <label>Number of cross validation(CV) folds</label>
+                            <input type="text" [(ngModel)]="scaldata.cv" name="cv" [required]="splitmethodselection=='cross_validation'" #cv="ngModel" [pattern]="numberrangeregex" class="form-control">
+                            <div class="invalid-feedback" *ngIf="cv.errors">
+                                <span *ngIf="cv.errors?.pattern" class="text-red">Please enter CV between 1 and 10</span>
+                                <span *ngIf="cv.errors?.required && (cv.dirty || cv.touched)" class="text-red">Please Enter Number of
+                                    cross validation(CV) folds</span>
+                            </div>
+
+                        </div>
+                    </div>
+
+
+
+                    <div class="col-md-4" *ngIf="splitmethodselection=='cross_validation'">
+                        <div class="from-group">
+                            <label>Random state</label>
+                            <input type="number" [required]="splitmethodselection=='cross_validation'" name="randomstate" #randomstate="ngModel" [pattern]="randomstateregex" [(ngModel)]="scaldata.random_state" placeholder="0 - 99999" class="form-control">
+                            <div class="invalid-feedback" *ngIf="randomstate.errors">
+                                <span *ngIf="randomstate.errors?.pattern" class="text-red">Please enter random state between 0 and
+                                    99999</span>
+                                <span *ngIf="randomstate.errors?.required && (randomstate.dirty || randomstate.touched)" class="text-red">Please Enter random state</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4" *ngIf="splitmethodselection=='train_valid_holdout'">
+                        <div class="form-group">
+                            <label>Split ratio</label>
+                            <select class="form-control" [(ngModel)]="scaldata.split_ratio" [required]="splitmethodselection=='train_valid_holdout'" name="holdout" #holdout="ngModel">
                                 <option>select</option>
                                 <option value="{{item.value}}" *ngFor="let item of holdoutList">{{item.value}}</option>
                             </select>
-                                <div class="invalid-feedback" *ngIf="holdout.errors">
-                                    <span *ngIf="holdout.errors?.required && (holdout.dirty || holdout.touched)" class="text-red">Please select tain valid holdout</span>
-                                </div>
+                            <div class="invalid-feedback" *ngIf="holdout.errors">
+                                <span *ngIf="holdout.errors?.required && (holdout.dirty || holdout.touched)" class="text-red">Please
+                                    select
+                                    tain valid holdout</span>
                             </div>
-                            <div class="form-group">
-                                <label>Random state</label>
-                                <input type="number" class="form-control" [(ngModel)]="scaldata.train_random_state" name="trainrandomstate" [required]="splitmethodselection=='train_valid_holdout'" #trainrandomstate="ngModel" placeholder="0 - 99999" [pattern]="randomstateregex">
-                                <div class="invalid-feedback" *ngIf="trainrandomstate.errors">
-                                    <span *ngIf="trainrandomstate.errors?.pattern" class="text-red">Please enter random state between 0 and 99999</span>
-                                    <span *ngIf="trainrandomstate.errors?.required && (trainrandomstate.dirty || trainrandomstate.touched)" class="text-red">Please Enter random state</span>
-                                </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4" *ngIf="splitmethodselection=='train_valid_holdout'">
+                        <div class="form-group">
+                            <label>Random state</label>
+                            <input type="number" class="form-control" [(ngModel)]="scaldata.train_random_state" name="trainrandomstate" [required]="splitmethodselection=='train_valid_holdout'" #trainrandomstate="ngModel" placeholder="0 - 99999" [pattern]="randomstateregex">
+                            <div class="invalid-feedback" *ngIf="trainrandomstate.errors">
+                                <span *ngIf="trainrandomstate.errors?.pattern" class="text-red">Please enter random state between 0 and
+                                    99999</span>
+                                <span *ngIf="trainrandomstate.errors?.required && (trainrandomstate.dirty || trainrandomstate.touched)" class="text-red">Please Enter random state</span>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12" *ngIf="splitmethodselection=='cross_validation'">
+                        <div class="form-group">
+                            <label>Holdout perecentage</label>
+                            <!-- <input type="range" class="custom-range" min="0" max="100" id="customRange2"> -->
+                            <ng5-slider [(value)]="visibleSelection" [(ngModel)]="scaldata.test_ratio" [options]="visibleBarOptions">
+                            </ng5-slider>
                         </div>
                     </div>
                 </div>
