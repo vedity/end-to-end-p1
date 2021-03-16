@@ -127,6 +127,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.info("data preprocessing : PreprocessingClass : get_exploration_data : execution start")
             
             data_df = self.get_data_df(dataset_id, schema_id)
+            logging.error(str(data_df) + "  chaclking")
             if isinstance(data_df, str):
                 raise GetDataDfFailed(500)
             
@@ -981,12 +982,25 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                         missing_value_status,noise_status = self.get_preprocess_cache(dataset_id)
 
                         #Update all the status flag's based on the schema id
-                        status = update_schema_flag_status(self,scheam_id,missing_flag,noise_flag)
+                        status = self.update_schema_flag_status(schema_id,missing_value_status,noise_status)
 
                         if status ==0:  
                             #? Updating the Activity table
                             for i,temp_col_names in enumerate(temp_cols):
                                 activity_status = self.operation_end(DBObject, connection, activity_ids[i], op, temp_col_names)
+
+                            # if save_as == True:
+                            #     dataset_name = 'checking'
+                            #     file_name = 'checking'
+                            #     dataset_desc = 'checking'
+                            #     page_name = 'checking'
+                            #     status,original_dataset_id,_ = dc.make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,flag=False,row_creation_flag=True)
+                                # if status ==0:
+                                #     sql_command = f'update mlaas.project_tbl set dataset_id={str(original_dataset_id)} where project_id={str(project_id)}'
+                                #     logging.info('sql_command to update dataset_id' +str(sql_command))
+
+                                #     update_status = DBObject.update_records(connection,sql_command)
+
                         else:
                             return status
                 except :

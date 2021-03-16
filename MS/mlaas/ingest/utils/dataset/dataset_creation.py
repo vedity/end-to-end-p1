@@ -187,6 +187,7 @@ class DatasetClass:
             status = 0 # If Successfully.
             if row_creation_flag == True:
                 load_data_status,no_of_rows = self.load_dataset(DBObject,connection,connection_string,file_name,dataset_visibility,user_name)
+            
             else:
                 
                 load_data_status = self.insert_raw_dataset(DBObject,connection,raw_dataset_id,user_name,file_name,dataset_visibility)
@@ -607,7 +608,7 @@ class DatasetClass:
             #get the formated table name of the actual dataset
             original_table_name = self.get_dataset_table_name(file_name)
             
-            #get the updated table name for te raw dataset
+            #get the updated table name for the raw dataset
             raw_table_name = DBObject.get_table_name(connection,original_table_name)
            
             #check the visibility 
@@ -622,7 +623,6 @@ class DatasetClass:
             #form the new table based on te existing table 
             create_status = DBObject.update_records(connection,sql_command)
 
-           
             if create_status == 0:
                 if dataset_visibility == 'private':
                     table_name = user_name+'."'+str(raw_table_name)+'"'
