@@ -241,7 +241,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if connection == None :
                 raise DatabaseConnectionFailed(500)  
                 
-            sql_command = f"select amt.activity_id,amt.activity_name,amt.user_input,pat.parent_activity_name,ptt.tab_name from mlaas.activity_master_tbl amt , mlaas.parent_activity_tbl pat, mlaas.preprocess_tab_tbl ptt where amt.code = '0' and amt.parent_activity_id = pat.parent_activity_id and ptt.tab_id = pat.tab_id order by amt.activity_id"
+            sql_command = f"select amt.activity_id,amt.activity_name,amt.user_input,amt.check_type,pat.parent_activity_name,ptt.tab_name from mlaas.activity_master_tbl amt , mlaas.parent_activity_tbl pat, mlaas.preprocess_tab_tbl ptt where amt.code = '0' and amt.parent_activity_id = pat.parent_activity_id and ptt.tab_id = pat.tab_id order by amt.activity_id"
             operations_df = DBObject.select_records(connection,sql_command) 
             
             if operations_df is None:
@@ -276,6 +276,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                             operation_dict['name'] = data['activity_name']
                             operation_dict['operation_id'] = data['activity_id']
                             operation_dict['user_input'] = data['user_input']
+                            operation_dict['check_type'] = data['check_type']
                             handlers.append(operation_dict)
                             j += 1
                         
@@ -553,7 +554,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 for id in column_ids:
                     col = data_df.columns[id]
                     series = data_df[col]
-                    operations = [3,4]
+                    operations = []
 
                     #? Column is both numerical & categorical
                     if (col in num_cols) and (predicted_datatypes[id].startswith('Ca')):
@@ -583,8 +584,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                             operations += [1,11,12]
                     
                     if noise_status:
-                        if col_type == 0 or col_type == 1:
-                            operations += [5,14,15,16,17,18,19]
+                        operations += [2,5,14,15,16,17,18,19]
                     
                     #? Outlier Removal & Scaling Operations for numeric; Encoding ops for Categorical
                     if not missing_values and not noise_status:
@@ -631,78 +631,95 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         
     def reorder_operations(self, data):
         '''
-            This function accepts list of operations sent by front end &
-            returns a optimized reordered dictionary.
+            This function accepts list of operations & list of values sent by front end &
+            returns a optimized reordered dictionary of operations & values.
             
             Input data format:
+            ------------------
             [
                 {
-                column_id: [1]
-                selected_handling: [12,16,17]
-                values: [15,'',33]
+                    'column_id': [1],
+                    'selected_handling': [44,9,33],
+                    'values': [15,'','']
                 },
                 {
-                column_id: [1,2]
-                selected_handling: [10,14,17]
-                values: ['','','']
+                    'column_id': [2],
+                    'selected_handling': [25,44],
+                    'values': ['',300]
+                },
+                {
+                    'column_id': [3],
+                    'selected_handling': [34,23,15],
+                    'values': ['','','']
                 }
             ]
             
-            Output dictionary:
+            Output dictionaries:
+            ------------------
+            - First Dictionary has operations as keys & columns as values.
+            - Second dictionary has operations as keys and user inputs as values.  
+            
             {
-                10: [1,2],
-                12: [1],
-                14: [1,2],
-                16: [1],
-                17: [1,2]
+                1: [1], 
+                7: [3], 
+                15: [3], 
+                17: [2], 
+                25: [1], 
+                26: [3], 
+                36: [1, 2]
+            },
+            {
+                1: [''], 
+                7: [''], 
+                15: [''], 
+                17: [''], 
+                25: [''], 
+                26: [''], 
+                36: [15, 300]
             }
             
-            args:
-                data[List of Dictionaries]: Data sent by frontend.
+            Args:
+            -----
+            data[List of Dictionaries]: Data sent by frontend.
             
             Returns:
-                final_dict[Dictionary]: Operation Order optimized dictionary;
-                    final_dict = {
-                        operation: [column(s)]
-                    }
+            --------
+            operation_dict [`Dictionary`]: Operation Order optimized dictionary;
+            -   operation_dict = {
+                    operation: [column(s)]
+                }
+                
+            value_dict [`Dictionary`]: Dictionary containing user inputs.
+            -   value_dict = {
+                    operation: [user_input(s)]
+                }
+
         '''
         try:
             logging.info("data preprocessing : PreprocessingClass : reorder_operations : execution start")
             
             #? Getting operations in a cleaned format
             operation_dict = {}
-            for dicts in data:
-                for ids in dicts['column_id']:
-                    operation_dict[ids] = list(set(operation_dict.get(ids,[]) + [i-self.op_diff for i in dicts['selected_handling']]))
-                    #? Important: Above line also handles the renumbering of the operation numbers
-        
-            #? Getting all the operation in the sorted order
-            operations = list(operation_dict.values())
-            all_operations = []
-            for ops in operations:
-                all_operations += ops
-
-            #? Getting all operations   
-            all_operations = list(set(all_operations))
-            #? Sorting Operations
-            all_operations.sort()
-            #? Rearranging the operation numbering such that they start from 1
+            for dic in data:
+                for op in dic['selected_handling']:
+                    operation_dict[op-self.op_diff] = operation_dict.get(op-self.op_diff,[]) + dic['column_id']
             
-            #? Getting final reordered dictionary
-            final_dict = {}
-            for op in all_operations: 
-                cols = []
-                for i,val in operation_dict.items():
-                    if op in val:
-                        cols.append(i)
-
-                final_dict[op] = cols
-                i+=1
+            #? Getting Values in a cleaned formate
+            value_dict = {}
+            for dic in data:
+                for i,op in enumerate(dic['selected_handling']):
+                    value_dict[op-self.op_diff] = value_dict.get(op-self.op_diff,[]) + [dic['values'][i]]
             
+            #? Sorting both dictionaries
+            operation_dict = {k: v for k, v in sorted(operation_dict.items(), key=lambda item: item[0])}
+            value_dict = {k: v for k, v in sorted(value_dict.items(), key=lambda item: item[0])}
+            
+            logging.info(f"data preprocessing : PreprocessingClass : reorder_operations : Operation_dict : {operation_dict}")
+            logging.info(f"data preprocessing : PreprocessingClass : reorder_operations : Values_dict : {value_dict}")
             logging.info("data preprocessing : PreprocessingClass : reorder_operations : execution end")
             
-            return final_dict
-        
+            return operation_dict,value_dict
+
         except Exception as exc:
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc))
             return OperationOrderingFailed(500).msg
@@ -747,160 +764,241 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.info(str(column_list) + " column_list")
 
             #? Getting operations in the ordered format
-            operation_ordering = self.reorder_operations(request)
+            op_dict, val_dict = self.reorder_operations(request)
             
-            operations = operation_ordering.keys()
+            operations = op_dict.keys()
             for op in operations:
                 status = 1
-                flag = False
                 
                 #? Getting Columns
-                col = operation_ordering[op]
-                temp_col = [column_list[i] for i in col]
-                temp_col = str(temp_col)
-                temp_col = temp_col[1:-1]
-                temp_col = temp_col.replace('"',"'")
+                col = op_dict[op]
+                temp_cols = ["'" + str(column_list[i]) + "'" for i in col]
+                # temp_col = str(temp_col)
+                # temp_col = temp_col[1:-1]
+                # temp_col = temp_col.replace('"',"'")
                 
-                activity_id = self.operation_start(DBObject, connection, op, user_name, project_id, dataset_id, temp_col)
+                #? Getting Values
+                value = val_dict[op]
                 
-                if op == 1:
-                    status = self.discard_missing_values(DBObject,connection,column_list, dataset_table_name, col)
-                    flag = True
-                # elif op == 3:
-                #     data_df = self.delete_above(data_df, col, val)
-                # elif op == 4:
-                #     data_df = self.delete_below(data_df, col, val)
-                elif op == 6:
-                    status = self.mean_imputation(DBObject,connection,column_list, dataset_table_name, col)
-                    flag = True
-                elif op == 7:
-                    status = self.median_imputation(DBObject,connection,column_list, dataset_table_name, col)
-                    flag = True
-                # elif op == 6:
-                #     data_df = self.arbitrary_value_imputation(data_df, col, val)
-                elif op == 10:
-                    status = self.end_of_distribution(DBObject,connection,column_list, dataset_table_name, col)
-                    flag = True
-                elif op == 11:
-                    status = self.frequent_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
-                    flag = True
-                elif op == 12:
-                    status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
-                    flag = True
-                elif op == 13:
-                    status = self.random_sample_imputation(DBObject,connection,column_list, dataset_table_name,col)
-                    flag = True
-
-                # elif op == 11:
-                #     data_df = self.get_data_df(dataset_id,schema_id)
-                #     if isinstance(data_df, str):
-                #         raise GetDataDfFailed(500)
-                #     data_df = self.remove_noise(data_df, col)
-                # elif op == 12:
-                #     data_df = self.get_data_df(dataset_id,schema_id)
-                #     if isinstance(data_df, str):
-                #         raise GetDataDfFailed(500)
-                #     data_df = self.repl_noise_mean(data_df, col)
-                # elif op == 13:
-                #     data_df = self.get_data_df(dataset_id,schema_id)
-                #     if isinstance(data_df, str):
-                #         raise GetDataDfFailed(500)
-                #     data_df = self.repl_noise_median(data_df, col)
-                # elif op == 14:
-                #     data_df = self.get_data_df(dataset_id,schema_id)
-                #     if isinstance(data_df, str):
-                #         raise GetDataDfFailed(500)
-                #     data_df = self.repl_noise_random_sample(data_df, col)
-                # # elif op == 15:
-                # #     data_df = self.repl_noise_arbitrary_val(data_df, col, val)
-                elif op == 20:
-                    status = self.rem_outliers_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
-                    flag = True
-
-                elif op == 21:
-                    status = self.rem_outliers_z_score(DBObject,connection,column_list, dataset_table_name,col)
-                    flag = True
-
-                elif op == 22:
-                    status = self.repl_outliers_mean_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
-                    flag = True
-
-                elif op == 23:
-                    status = self.repl_outliers_mean_z_score(DBObject,connection,column_list, dataset_table_name,col)
-                    flag = True
-
-                elif op == 24:
-                    status = self.repl_outliers_med_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
-                    flag = True
-
-                elif op == 25:
-                    status = self.repl_outliers_med_z_score(DBObject,connection,column_list, dataset_table_name,col)
-                    flag = True
-
-                elif op == 26:
-                    status = self.apply_log_transformation(DBObject,connection,column_list, dataset_table_name, col)
-                    flag = True
-
-                elif op == 27:
-                    status = self.label_encoding(DBObject,connection,column_list, dataset_table_name, col)
-                    flag = True
-
-                elif op == 28:
-                    status = self.one_hot_encoding(DBObject,connection,column_list, dataset_table_name, col)
-                    flag = True
-                elif op == 29:
-                    status = self.add_to_column(DBObject,connection,column_list, dataset_table_name, col, value)
-                    flag = True
-
-                elif op == 30:
-                    status = self.subtract_from_column(DBObject,connection,column_list, dataset_table_name, col, value)
-                    flag = True
-
-                elif op == 31:
-                    status = self.multiply_column(DBObject,connection,column_list, dataset_table_name, col, value)
-                    flag = True
-
-                elif op == 32:
-                    status = self.divide_column(DBObject,connection,column_list, dataset_table_name, col, value)
-                    flag = True
+                #? Making Entry in the Activity Table
+                activity_ids = []
+                for temp_col_names in temp_cols:
+                    activity_ids.append(self.operation_start(DBObject, connection, op, user_name, project_id, dataset_id, temp_col_names))
                 
-
-                if status == 1:
-                    if flag:
+                col_names = [column_list[i] for i in col]
+                try:
+                    if op == 1:
+                        status = self.discard_missing_values(DBObject,connection,column_list, dataset_table_name, col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 2:
+                        status = self.discard_noise(DBObject,connection,column_list, dataset_table_name, col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_noise_flag(DBObject,connection, schema_id, col_name)
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 3:
+                        status = self.delete_above(DBObject,connection,column_list, dataset_table_name, col, value)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 4:
+                        status = self.delete_below(DBObject,connection,column_list, dataset_table_name, col, value)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 5:
+                        status = self.remove_noise(DBObject,connection,column_list, dataset_table_name, col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_noise_flag(DBObject,connection, schema_id, col_name)
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name, "True")
+                        
+                    elif op == 6:
+                        status = self.mean_imputation(DBObject,connection,column_list, dataset_table_name, col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 7:
+                        status = self.median_imputation(DBObject,connection,column_list, dataset_table_name, col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 8:
+                        status = self.mode_imputation(DBObject,connection,column_list, dataset_table_name, col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 9:
+                        
+                        #? Reusing the missing category imputation function for the arbitrary value imputation
+                        status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name,col, value[0],flag = True)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 10:
+                        status = self.end_of_distribution(DBObject,connection,column_list, dataset_table_name, col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 11:
+                        status = self.frequent_category_imputation(DBObject,connection,column_list, dataset_table_name, col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 12:
+                        status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 13:
+                        status = self.random_sample_imputation(DBObject,connection,column_list, dataset_table_name,col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 14:
+                        status = self.repl_noise_mean(DBObject,connection,column_list, dataset_table_name,col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                                sts = self.update_schema_tbl_noise_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 15:
+                        status = self.repl_noise_median(DBObject,connection,column_list, dataset_table_name,col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                                sts = self.update_schema_tbl_noise_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 16:
+                        status = self.repl_noise_mode(DBObject,connection,column_list, dataset_table_name,col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                                sts = self.update_schema_tbl_noise_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 17:
+                        status = self.repl_noise_eod(DBObject,connection,column_list, dataset_table_name,col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                                sts = self.update_schema_tbl_noise_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 18:
+                        status = self.repl_noise_random_sample(DBObject,connection,column_list, dataset_table_name,col)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                                sts = self.update_schema_tbl_noise_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 19:
+                        status = self.repl_noise_arbitrary_val(DBObject,connection,column_list, dataset_table_name,col, value)
+                        if status == 0:
+                            for col_name in col_names:
+                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+                                sts = self.update_schema_tbl_noise_flag(DBObject,connection, schema_id, col_name)
+                        
+                    elif op == 20:
+                        status = self.rem_outliers_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
+                        
+                    elif op == 21:
+                        status = self.rem_outliers_z_score(DBObject,connection,column_list, dataset_table_name,col)
+                        
+                    elif op == 22:
+                        status = self.repl_outliers_mean_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
+                        
+                    elif op == 23:
+                        status = self.repl_outliers_mean_z_score(DBObject,connection,column_list, dataset_table_name,col)
+                        
+                    elif op == 24:
+                        status = self.repl_outliers_med_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
+                        
+                    elif op == 25:
+                        status = self.repl_outliers_med_z_score(DBObject,connection,column_list, dataset_table_name,col)
+                        
+                    elif op == 26:
+                        status = self.apply_log_transformation(DBObject,connection,column_list, dataset_table_name, col)
+                        
+                    elif op == 27:
+                        status = self.label_encoding(DBObject,connection,column_list, dataset_table_name, col)
+                        
+                    elif op == 28:
+                        status = self.one_hot_encoding(DBObject,connection,column_list, dataset_table_name, col, schema_id)
+                        
+                    elif op == 29:
+                        status = self.add_to_column(DBObject,connection,column_list, dataset_table_name, col, value)
+                        
+                    elif op == 30:
+                        status = self.subtract_from_column(DBObject,connection,column_list, dataset_table_name, col, value)
+                        
+                    elif op == 31:
+                        status = self.divide_column(DBObject,connection,column_list, dataset_table_name, col, value)
+                        
+                    elif op == 32:
+                        status = self.multiply_column(DBObject,connection,column_list, dataset_table_name, col, value)
+                        
+                    if status != 0:
                         #? Sql function Failed
                         raise SavingFailed(500)
-                    
-                    data_df.drop(data_df.columns[0],axis=1, inplace = True)
+                        
+                        #? Saving the dataframe into the database
+                        # data_df.drop(data_df.columns[0],axis=1, inplace = True)
 
-                    updated_table_name = DBObject.get_table_name(connection,table_name)
-                    
-                    if dataset_visibility == 'public':
-                        user_name='public'
+                        # updated_table_name = DBObject.get_table_name(connection,table_name)
+                        
+                        # if dataset_visibility == 'public':
+                        #     user_name='public'
+            
+                        # status = DBObject.load_df_into_db(connection_string,updated_table_name,data_df,user_name)
         
-                    status = DBObject.load_df_into_db(connection_string,updated_table_name,data_df,user_name)
-    
-                    sql_command = "update mlaas.dataset_tbl set dataset_table_name='"+str(updated_table_name)+"' where dataset_id='"+str(dataset_id)+"'"
-                    logging.info(str(sql_command))
-                    update_status = DBObject.update_records(connection,sql_command)
-                    status = update_status
-                    if status == 1:
-                        raise SavingFailed(500)
+                        # sql_command = "update mlaas.dataset_tbl set dataset_table_name='"+str(updated_table_name)+"' where dataset_id='"+str(dataset_id)+"'"
+                        # logging.info(str(sql_command))
+                        # update_status = DBObject.update_records(connection,sql_command)
+                        # status = update_status
+                        # if status == 1:
+                        #     raise SavingFailed(500)
+                        # else:
+                        #     sql_command = f"drop table {dataset_table_name}"
+                        #     update_status = DBObject.update_records(connection,sql_command)
+                        #     status = update_status
+                        #     activity_status = self.operation_end(DBObject, connection, activity_id, op, temp_col)
                     else:
-                        sql_command = f"drop table {dataset_table_name}"
-                        update_status = DBObject.update_records(connection,sql_command)
-                        status = update_status
-                        activity_status = self.operation_end(DBObject, connection, activity_id, op, temp_col)
-                else:
-                    activity_status = self.operation_end(DBObject, connection, activity_id, op, temp_col)
-                    
+
+                        #Get the possible missing and noise status after updating any columns
+                        missing_value_status,noise_status = self.get_preprocess_cache(dataset_id)
+
+                        #Update all the status flag's based on the schema id
+                        status = self.update_schema_flag_status(scheam_id,missing_value_status,noise_status)
+
+                        if status ==0:  
+                            #? Updating the Activity table
+                            for i,temp_col_names in enumerate(temp_cols):
+                                activity_status = self.operation_end(DBObject, connection, activity_ids[i], op, temp_col_names)
+                        else:
+                            return status
+                except :
+                    continue
                     
             logging.info("data preprocessing : PreprocessingClass : master_executor : execution stop")
             return status
 
         except (DatabaseConnectionFailed,GetDataDfFailed,SavingFailed) as exc:
+            logging.error(str(exc) +" Error")
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
-            logging.error(str(exc) +" Error")
             return exc.msg
             
     def handover(self, dataset_id, schema_id, project_id, user_name,split_parameters,scaling_type = 0, val = None):
@@ -1085,6 +1183,56 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         logging.info("data preprocessing : PreprocessingClass : operation_end : execution stop")
         
         return status
+    
+    def update_schema_tbl_missing_flag(self, DBObject, connection, schema_id, column_name, flag = "False"):
+        
+        logging.info("data preprocessing : PreprocessingClass : update_schema_tbl_missing_flag : execution start")
+        
+        index = '"index"'
+        sql_command = f"update mlaas.schema_tbl set missing_flag = '{flag}' where {index} in (select {index} from mlaas.schema_tbl st where st.schema_id = '{schema_id}' and (st.changed_column_name = '{column_name}' or st.column_name = '{column_name}'))"
+        logging.info("sql_command: "+sql_command)
+        
+        status = DBObject.update_records(connection,sql_command)
+        logging.info("data preprocessing : PreprocessingClass : update_schema_tbl_missing_flag : execution stop")
+        
+        return status
+    
+    def update_schema_tbl_noise_flag(self, DBObject, connection, schema_id, column_name, flag = "False"):
+        
+        logging.info("data preprocessing : PreprocessingClass : update_schema_tbl_noise_flag : execution start")
+        
+        index = '"index"'
+        sql_command = f"update mlaas.schema_tbl set noise_flag = '{flag}' where {index} in (select {index} from mlaas.schema_tbl st where st.schema_id = '{schema_id}' and (st.changed_column_name = '{column_name}' or st.column_name = '{column_name}'))"
+        logging.info("sql_command: "+sql_command)
+        
+        status = DBObject.update_records(connection,sql_command)
+        logging.info("data preprocessing : PreprocessingClass : update_schema_tbl_noise_flag : execution stop")
+        
+        return status
+    
+    def update_schema_flag_status(self,scheam_id,missing_flag,noise_flag):
+        try:
+            logging.info("data preprocessing : PreprocessingClass : update_schema_flag_status : execution start")
+            
+            for noise_flag,missing_flag in zip(missing_flag,noise_flag): 
 
+                #sql command for updating change_column_name and column_attribute column  based on index column value
+                sql_command = "update "+ schema_table_name + " SET missing_flag = '" + str(missing_flag) + "',"\
+                                "noise_flag = '" +str(noise_flag) +"'"\
+                                " Where schema_id ='"+str(scheam_id)+"' "
+
+                logging.info("sql_command " + sql_command) 
+                #execute sql query command
+                status = DBObject.update_records(connection,sql_command) 
+
+                if status ==1:
+                    raise SchemaUpdateFailed(500)
+            
+                status = DBObject.update_records(connection,sql_command)
+                logging.info("data preprocessing : PreprocessingClass : update_schema_flag_status : execution stop")
+            
+            return status
+        except (SchemaUpdateFailed) as exc:
+            return exc.msg
 
 

@@ -101,5 +101,3 @@ activity_id,activity_name,activity_description,language,operation,code,parent_ac
 46,Started Modeling,Modelling has been started for experiment,US,Operation,0,1
 47,Stopped Modeling,Modelling has been stopped for experiment,US,Operation,0,1
 48,Completed Modeling,Modeling of experiment column(s) has been completed successfully,US,Operation,0,1
-
-

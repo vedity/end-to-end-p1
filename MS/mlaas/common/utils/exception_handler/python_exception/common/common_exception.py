@@ -236,3 +236,13 @@ class ActivityUpdateFailed(Exception):
     
     def __str__(self):
         return (self.msg)
+
+class SchemaDeletionFailed(Exception):
+    """  Schema Record Failed Exception"""
+    def __init__(self,status_code):
+        self.msg = "Schema records failed to delete"
+        self.status_code = status_code
+        self.msg = self.msg
+    
+    def __str__(self):
+        return (self.msg)
