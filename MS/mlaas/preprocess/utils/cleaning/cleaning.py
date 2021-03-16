@@ -127,14 +127,14 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         '''
         logging.info("data preprocessing : CleaningClass : end_of_distribution : execution start")
         cols = [column_list[i] for i in col]
-        logging.info(str(cols))
+        
         for col_name in cols:
             try:
                 sql_command = 'select (AVG(cast ("'+str(col_name)+'" as float))+3*STDDEV(cast ("'+str(col_name)+'" as float))) AS impute_value from '+str(table_name)
                 dataframe = DBObject.select_records(connection,sql_command)
 
                 impute_value = round(dataframe['impute_value'][0],5)
-                logging.info(str(impute_value) + "check")
+                
                 status = self.perform_missing_value_imputation(DBObject,connection, table_name,col_name,impute_value)
             except Exception as exc:
                 return exc
@@ -142,18 +142,21 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : end_of_distribution : execution stop")
         return status
 
-    def missing_category_imputation(self,DBObject,connection,column_list, table_name, col,value = "'Missing'"):
+    def missing_category_imputation(self,DBObject,connection,column_list, table_name, col,value ,flag = False):
         '''
             Operation id: 8
         '''
-        
+        logging.info(" checking " +str(value))
         logging.info("data preprocessing : CleaningClass : missing_category_imputation : execution start")
         
         cols = [column_list[i] for i in col]
         logging.info(str(cols) + " " +str(value))
         for i,col_name in enumerate(cols):
             try:
-                status = self.perform_missing_value_imputation(DBObject,connection, table_name,col_name,value[i])
+                if not flag:
+                    value = "'"+value[i]+"'"
+            
+                status = self.perform_missing_value_imputation(DBObject,connection, table_name,col_name,value)
             except Exception as exc:
                 logging.error(str(exc))
                 return exc
@@ -173,7 +176,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info(str(cols))
         for col_name in cols:
             try:
-                sql_command = 'select "'+str(col_name)+'" as impute_value,count(cast ("'+str(col_name)+'" as float)) from '+str(table_name)+' group by "'+col_name+'" order by count desc limit 1'
+                sql_command = 'select "'+str(col_name)+'" as impute_value,count(*) from '+str(table_name)+' group by "'+col_name+'" order by count desc limit 1'
                 dataframe = DBObject.select_records(connection,sql_command)
                 impute_value = "'"+str(dataframe['impute_value'][0])+"'"
 
@@ -208,7 +211,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     impute_string += '('+str(value)+'),'
 
                 impute_string = impute_string[:len(impute_string)-1]
-                logging.info(str(impute_string) + " impute_value")
+        
                 status = super().random_sample_imputation(DBObject,connection,table_name,col_name,impute_string)
                  
             except Exception as exc:
@@ -630,3 +633,17 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : apply_log_transformation : execution stop")
         return status
     
+    def delete_duplicate_records(self,DBObject,connection,column_list, table_name):
+        logging.info("data preprocessing : CleaningClass : delete_duplicate_records : execution start")
+        try:
+            
+            col_string = ''
+            for x in column_list:
+                col_string += '"'+str(x)+'",'
+
+            status = super().delete_duplicate_records(DBObject,connection,table_name,col_string[:-1])
+                
+        except Exception as exc:
+                return str(exc)
+        logging.info("data preprocessing : CleaningClass : delete_duplicate_records : execution stop")
+        return status

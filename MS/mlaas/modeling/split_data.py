@@ -14,7 +14,7 @@ import numpy as np
 
 from common.utils.logger_handler import custom_logger as cl
 from sklearn.model_selection import train_test_split
-
+from common.utils.exception_handler.python_exception.common.common_exception import *
 
 user_name = 'admin'
 log_enable = True
@@ -55,7 +55,10 @@ class SplitData:
         try:
             sql_command = 'select input_features,target_features from mlaas.project_tbl where  project_id={} and dataset_id={}'.format(project_id, dataset_id)
             input_target_df = DBObject.select_records(connection, sql_command)
-            #TODO Add Exception
+            if input_target_df is None:
+                    raise DatabaseConnectionFailed(500)
+            if len(input_target_df) == 0 :
+                    raise DataNotFound(500)
             input_features = input_target_df['input_features'][0]# Get the input features list
             target_features = input_target_df['target_features'][0]# Get the target features list
             

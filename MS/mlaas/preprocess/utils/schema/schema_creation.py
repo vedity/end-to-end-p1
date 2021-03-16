@@ -426,16 +426,14 @@ class SchemaClass:
                 if status == True and flag == False :
                     new_cols_lst = change_column_name
                     cols_attribute_lst = column_attribute_list
-                    logging.info("----->"+str(new_cols_lst))
-                    logging.info("----->"+str(cols_attribute_lst))
-                    logging.info("----->"+str(index_list))
+                   
                     for index,new_col,col_attr in zip(index_list,new_cols_lst,cols_attribute_lst): 
 
                         #sql command for updating change_column_name and column_attribute column  based on index column value
                         sql_command = "update "+ schema_table_name + " SET changed_column_name = '" + str(new_col) + "',"\
                                                                     "column_attribute = '" +str(col_attr) +"'"\
                                     " Where index ='"+str(index)+"' "
-                        logging.info("----->"+str(sql_command))
+                        
                         #execute sql query command
                         status = DBObject.update_records(connection,sql_command) 
 
@@ -565,7 +563,7 @@ class SchemaClass:
 
         return column_count_value,ignore_count_value
     
-    def delete_schema_record(self,DBObject,connection,schema_id,col_name):
+    def delete_schema_record(self,DBObject,connection,schema_id,col_name = None):
         """
         Function used to delete the record from  the schema table
         Args : 
@@ -576,7 +574,10 @@ class SchemaClass:
         """
         try:
             schema_table_name,_,_ = self.get_schema()
-            sql_command = f'delete from {schema_table_name} where schema_id={str(schema_id)} and column_name ="{col_name}"'
+            if col_name is None:
+                sql_command = f'delete from {schema_table_name} where schema_id={str(schema_id)}'
+            else:
+                sql_command = f"delete from {schema_table_name} where schema_id={str(schema_id)} and column_name ='{col_name}'"
             status = DBObject.update_records(connection,sql_command)
             return status
         except Exception as exc:
