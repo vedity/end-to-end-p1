@@ -498,7 +498,7 @@ class ModelStatisticsClass:
             sql_command = "update mlaas.project_tbl set model_status="+str(st)+" where project_id="+str(project_id)
             project_upd_status = self.DBObject.update_records(self.connection,sql_command)
             #status=state_df['state'][0]
-            return state_df
+            return status
         
         except (DatabaseConnectionFailed,DataNotFound) as exc:
             logging.error("modeling : ModelStatisticsClass : show_experiments_list : Exception " + str(exc))
