@@ -109,10 +109,11 @@ for index in operation.keys():
     return file_str
   
 if __name__ == '__main__':
-    dic = {
-    1: [1,2,3,4,5,6,7,8,9,10],
-    4: [3,4,5,6,7]
-    }
+    
+    operation_dict= {1: [1, 2],6: [1,3]} # this will work statically (we give this dict static this is working properly but we want to get it dynamically by line no 65)
+    values_dict = {1: ['',''], 6: ['','']}
+    schema_id = 49
+    dataset_id = 63
     
     # wo = open(r"C:\Users\jshukla\Desktop\My Folders\My Stuff\Gitlab Repos\end-to-end-p1\MS\mlaas\temp_dag.py",'w')
     # wo.write(make_dynamic_file(dic))
@@ -126,13 +127,19 @@ if __name__ == '__main__':
 
     # print(result)
     
-    operation=dic
+    master_dict = {
+        "operation_dict": operation_dict,
+        "values_dict": values_dict,
+        "schema_id": schema_id,
+        "dataset_id": dataset_id
+    }
+    
     id = uuid.uuid1().time
     key='Cleanup_dag_'+str(id)
     template = "cleanup_dag.template"
     namespace = "Cleanup_Dags"
     
-    json_data = {'conf':'{"operation_dict":"'+ str(operation)+'","dag_id":"'+ str(key)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
+    json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(key)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
     print(json_data)
     result = requests.post("http://localhost:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
 

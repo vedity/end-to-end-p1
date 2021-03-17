@@ -34,7 +34,10 @@ urlpatterns = [
     
     path('mlaas/modeling/showallexperimentslist/', ShowAllExperimentsListClass.as_view()),
     
-    path('mlaas/modeling/checkmodelstatus/', CheckModelStatusClass.as_view())
-    
+    path('mlaas/modeling/checkmodelstatus/', CheckModelStatusClass.as_view()),
+
+    path('mlaas/modeling/confusionmatrix/', ConfusionMatrixClass.as_view()),
+
+    path('mlaas/modeling/compareexperiments/', CompareExperimentsClass.as_view())
       
 ]

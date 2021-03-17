@@ -388,7 +388,7 @@ class ConfusionMatrixClass(APIView):
                         # else:
                         #         logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code : 200")
                         #         return Response({"status_code":"200","error_msg":"successfull retrival","response":confusion_matrix_json})
-                        return Response({"status_code":"200","error_msg":"Successfully updated","response":confusion_matrix_json})
+                        return Response({"status_code":"200","error_msg":"Successfully updated","response":json.loads(confusion_matrix_json)})
                         
 
                 except Exception as e:
@@ -578,6 +578,8 @@ class ShowHyperParametersClass(APIView):
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
+
+                        
 class CompareExperimentsClass(APIView):
  
         def get(self, request, format=None):

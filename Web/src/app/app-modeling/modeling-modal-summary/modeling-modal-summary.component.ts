@@ -33,7 +33,7 @@ export class ModelingModalSummaryComponent implements OnInit {
 
   successHandler(data) {
     if (data.status_code == "200") {
-      this.responsedata = JSON.parse(data.response);
+      this.responsedata = data.response;
       // console.log(this.responsedata);
       // this.toaster.success(data.error_msg, 'Success');
     }

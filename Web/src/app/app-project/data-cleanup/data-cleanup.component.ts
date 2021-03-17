@@ -54,7 +54,7 @@ export class DataCleanupComponent implements OnInit {
     'animation-duration': '20s'
   };
 
-  visibleSelection = 20;
+  //visibleSelection = 20;
   visibleBarOptions: Options = {
     floor: 0,
     ceil: 100,
@@ -310,6 +310,10 @@ export class DataCleanupComponent implements OnInit {
     this.selectedColumn = [];
 
     this.getColumnviseOperation();
+  }
+
+  outertabchange(){
+    
   }
 
   getScalingOperations() {
