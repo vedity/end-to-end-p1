@@ -186,28 +186,27 @@ class SchemaClass:
 
             for count in range(len(schema_data)):
 
-                if schema_data[count]["column_name"] != 'index':
 
-                        #check if change column and  prev column are same or not
-                        if schema_data[count]["change_column_name"] == schema_data[count]["column_name"]: 
-                            raise SameColumnNameFound(500)
+                #check if change column and  prev column are same or not
+                if schema_data[count]["change_column_name"] == schema_data[count]["column_name"]: 
+                    raise SameColumnNameFound(500)
 
-                        change_col_name = str(schema_data[count]["change_column_name"])
+                change_col_name = str(schema_data[count]["change_column_name"])
 
-                        if change_col_name.find('(') !=-1 or  change_col_name.find(')') !=-1 or change_col_name.find('%')!=-1:
-                            raise InvalidColumnNames(500)
+                if change_col_name.find('(') !=-1 or  change_col_name.find(')') !=-1 or change_col_name.find('%')!=-1:
+                    raise InvalidColumnNames(500)
                             
-                        if len(schema_data[count]["change_column_name"]) == 0:
+                if len(schema_data[count]["change_column_name"]) == 0:
 
-                            change_column_name.append(schema_data[count]["column_name"]) #append change column name
-                        else:
-                            change_column_name.append(schema_data[count]["change_column_name"])
+                    change_column_name.append(schema_data[count]["column_name"]) #append change column name
+                else:
+                    change_column_name.append(schema_data[count]["change_column_name"])
 
-                        index_list.append(schema_data[count]["index"]) #append  index 
+                index_list.append(schema_data[count]["index"]) #append  index 
 
-                        column_name_list.append(schema_data[count]["column_name"]) #append column_name
+                column_name_list.append(schema_data[count]["column_name"]) #append column_name
 
-                        column_attribute_list.append(schema_data[count]["column_attribute"]) #append attribute type
+                column_attribute_list.append(schema_data[count]["column_attribute"]) #append attribute type
 
             logging.info(str(change_column_name)+" change_column_name")
             logging.info(str(column_name_list)+" column_name_list")
@@ -297,6 +296,7 @@ class SchemaClass:
             if len(ignore_column_lst)!=0:
                 activity_id.append(7)
             
+            status = 0 
             for id in activity_id:
                 
                 #get the activity dataframe based on id
@@ -434,6 +434,7 @@ class SchemaClass:
                                                                     "column_attribute = '" +str(col_attr) +"'"\
                                     " Where index ='"+str(index)+"' "
                         
+                        logging.info(str(sql_command) + " sql")
                         #execute sql query command
                         status = DBObject.update_records(connection,sql_command) 
 

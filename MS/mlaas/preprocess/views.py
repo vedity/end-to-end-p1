@@ -361,9 +361,17 @@ class CleanupSave(APIView):
                         project_id = request.query_params.get('project_id') #get schema id
                         schema_id = request.query_params.get('schema_id') #get schema id
                         dataset_id = request.query_params.get('dataset_id') #get dataset id
+                        method_flag = request.query_params.get('flag') #get dataset id
+                        logging.info(str(method_flag) +" checking")
+                        if method_flag == 'True':
+                                visibility = request.query_params.get('visibility') #get schema id
+                                dataset_name = request.query_params.get('dataset_name') #get dataset id
+                                dataset_desc = request.query_params.get('dataset_desc') #get dataset id
+                        else:
+                                visibility = dataset_name = dataset_desc = None
                         data = json.dumps(request.data) #get handling json
                         data = json.loads(data) 
-                        operation = preprocessObj.master_executor(project_id, dataset_id,schema_id,data)
+                        operation = preprocessObj.master_executor(project_id, dataset_id,schema_id,data,method_flag,visibility ,dataset_name ,dataset_desc )
                         logging.info("data preprocess : CleanupSave : POST Method : execution stop")
                         if isinstance(operation,int): 
                                     
