@@ -62,14 +62,6 @@
                                                     class="custom-control-input radiobutton">
                                                 <label class="custom-control-label" for="customRadio_{{k}}_{{j}}" id="radiolabel_{{k}}_{{j}}">{{childitem.name}}</label>
                                                 <input type="text" name="input_{{k}}_{{j}}" class="form-control inline-textbox customInput" disabled id="customInput_{{k}}_{{j}}" (change)="setInput(childitem.operation_id,$event.target.value)" (keyup)="checkvalidation($event,childitem.check_type)" *ngIf="childitem.user_input==1">
-                                                <!-- <input type="text" name="input_{{k}}_{{j}}" class="form-control inline-textbox customInput" disabled id="customInput_{{k}}_{{j}}" (change)="setInput(childitem.operation_id,$event.target.value)" (keyup)="checkvalidation($event,check_type)"  *ngIf="childitem.user_input==1 && childitem.check_type==1">
-                                                <input type="text" name="input_{{k}}_{{j}}" class="form-control inline-textbox customInput" disabled id="customInput_{{k}}_{{j}}" (change)="setInput(childitem.operation_id,$event.target.value)" [pattern]="regexfortypefloat" *ngIf="childitem.user_input==1 && childitem.check_type==2">
-                                                <input type="text" name="input_{{k}}_{{j}}" class="form-control inline-textbox customInput" disabled id="customInput_{{k}}_{{j}}" (change)="setInput(childitem.operation_id,$event.target.value)" *ngIf="childitem.user_input==1 && childitem.check_type==3">
-                                                <input type="text" name="input_{{k}}_{{j}}" class="form-control inline-textbox customInput" disabled id="customInput_{{k}}_{{j}}" (change)="setInput(childitem.operation_id,$event.target.value)" [pattern]="regexfortext" *ngIf="childitem.user_input==1 && childitem.check_type==4">
-                                                <input type="text" name="input_{{k}}_{{j}}" class="form-control inline-textbox customInput" disabled id="customInput_{{k}}_{{j}}" (change)="setInput(childitem.operation_id,$event.target.value)" [pattern]="regexfortypefloatbutnotzero" *ngIf="childitem.user_input==1 && childitem.check_type==5">
-                                                 <div class="invalid-feedback" *ngIf="input_{{k}}_{{j}}.errors">
-                                                    <span *ngIf="input_{{k}}_{{j}}.errors?.pattern" class="text-red">Please enter valid input</span>
-                                                </div> -->
                                             </div>
                                         </div>
                                     </div>
@@ -94,7 +86,7 @@
             </div>
         </ng-template>
     </li>
-    <li [ngbNavItem]="2" (click)="tabchange()">
+    <li [ngbNavItem]="2" (click)="outertabchange()">
         <a ngbNavLink title="Rescaling">
             <span class="">Scale & Split</span>
 
@@ -109,7 +101,7 @@
 
                     <div class="col-md-3 mb-3" *ngFor="let item of scaleOperations;let i=index">
                         <div class="custom-control custom-radio">
-                            <input type="radio" [(ngModel)]="scaldata.scaling_op" id="rescaling_{{item.id}}" name="rescaling" value="{{item.id}}" class="custom-control-input">
+                            <input type="radio" [(ngModel)]="scaldata.scaling_op" id="rescaling_{{item.id}}" name="rescaling" #rescaling="ngModel" value="{{item.id}}" class="custom-control-input">
                             <label class="custom-control-label" for="rescaling_{{item.id}}">{{item.name}}</label>
 
                         </div>
@@ -191,10 +183,12 @@
                         <div class="form-group">
                             <label>Holdout perecentage</label>
                             <!-- <input type="range" class="custom-range" min="0" max="100" id="customRange2"> -->
-                            <ng5-slider [(value)]="visibleSelection" [(ngModel)]="scaldata.test_ratio" [options]="visibleBarOptions">
+                            <ng5-slider [(ngModel)]="scaldata.test_ratio" name="testratio" #testratio="ngModel" [options]="visibleBarOptions">
                             </ng5-slider>
                         </div>
                     </div>
+
+
                 </div>
                 <div class="row">
                     <div class="col-md-12">
