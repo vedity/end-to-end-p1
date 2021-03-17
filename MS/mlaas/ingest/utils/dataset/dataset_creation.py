@@ -187,6 +187,7 @@ class DatasetClass:
             status = 0 # If Successfully.
             if row_creation_flag == True:
                 load_data_status,no_of_rows = self.load_dataset(DBObject,connection,connection_string,file_name,dataset_visibility,user_name)
+            
             else:
                 
                 load_data_status = self.insert_raw_dataset(DBObject,connection,raw_dataset_id,user_name,file_name,dataset_visibility)
@@ -602,44 +603,64 @@ class DatasetClass:
         except Exception as exc:
             return exc
     
-    def insert_raw_dataset(self,DBObject,connection,dataset_id,user_name,file_name,dataset_visibility):
+    def insert_raw_dataset(self,DBObject,connection,dataset_id,user_name,file_name,dataset_visibility,selected_visibility = None):
+        '''
+        
+        '''
         try:
-            #get the formated table name of the actual dataset
+            # Get the formated table name of the actual dataset
             original_table_name = self.get_dataset_table_name(file_name)
             
-            #get the updated table name for te raw dataset
-            raw_table_name = DBObject.get_table_name(connection,original_table_name)
+            # Get the updated table name for the raw dataset
+            new_table_name = DBObject.get_table_name(connection,original_table_name)
            
-            #check the visibility 
             if dataset_visibility=='private':
-
-                sql_command = 'CREATE TABLE '+str(user_name)+'."'+str(raw_table_name)+'" AS SELECT * FROM '+str(user_name)+'."'+str(original_table_name)+'"'
-                logging.info(str(sql_command)+ " private")
-            else:
-                sql_command = 'CREATE TABLE public."'+str(raw_table_name)+'" AS SELECT * FROM public."'+str(original_table_name)+'"'
-                logging.info(str(sql_command)+ " public")
-            
-            #form the new table based on te existing table 
-            create_status = DBObject.update_records(connection,sql_command)
-
-           
-            if create_status == 0:
-                if dataset_visibility == 'private':
-                    table_name = user_name+'."'+str(raw_table_name)+'"'
+                original_table_name = str(user_name)+'."'+str(original_table_name)+'"'
+                if selected_visibility != None and selected_visibility =='public':
+                    raw_table_name = 'public."'+str(new_table_name)+'"'
                 else:
-                    table_name = 'public."'+str(raw_table_name)+'"'
-                
-                sql_command = "SELECT count(*) from "+str(table_name)
-                
-                dataframe = DBObject.select_records(connection,sql_command)
-                no_of_rows = int(dataframe['count'][0])
-                
-            #update the dataset table name of the raw dataset
-            sql_command = "UPDATE mlaas.dataset_tbl SET dataset_table_name='"+str(raw_table_name)+"',no_of_rows = '"+str(no_of_rows)+"' where dataset_id ='"+str(dataset_id)+"'"
-            create_status = DBObject.update_records(connection,sql_command)
+                    raw_table_name = str(user_name)+'."'+str(new_table_name)+'"'
+                    
+            else:
+                original_table_name = 'public."'+str(original_table_name)+'"'
+                if selected_visibility != None and selected_visibility =='private':
+                    raw_table_name = str(user_name)+'."'+str(new_table_name)+'"'
+                else:
+                    raw_table_name = 'public."'+str(new_table_name)+'"'
+                    
+
+            # Create the new table based on the existing table
+            sql_command = 'CREATE TABLE '+str(raw_table_name)+' AS SELECT * FROM '+str(original_table_name)
             
+            logging.info(str(sql_command) + " sql")
+            # Execute the sql query
+            create_status = DBObject.update_records(connection,sql_command)
+
+            if create_status == 0:
+                
+                # Get count of rows for the given table name
+                sql_command = "SELECT count(*) from "+str(raw_table_name)
+
+                # Execute the sql query
+                dataframe = DBObject.select_records(connection,sql_command)
+
+                # Extract the number of rows from dataframe
+                no_of_rows = str(dataframe['count'][0])
+            else:
+                raise DatasetCreationFailed(500)
+                
+            # update the "dataset table name"  and "no_of _rows" of the given dataset id
+            sql_command = "UPDATE mlaas.dataset_tbl SET dataset_table_name='"+str(new_table_name)+"',no_of_rows = '"+str(no_of_rows)+"' where dataset_id ='"+str(dataset_id)+"'"
+            
+            logging.info(str(sql_command) + " sql")
+
+            # Execute the sql query
+            create_status = DBObject.update_records(connection,sql_command)
+            if create_status !=0:
+                raise DatasetColumnUpdateFailed
+           
             return create_status
-        except Exception as exc:
+        except (DatasetCreationFailed,DatasetColumnUpdateFailed) as exc:
             return exc
 
 
