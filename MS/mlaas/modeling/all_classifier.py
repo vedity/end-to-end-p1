@@ -47,7 +47,7 @@ def get_model_data(user_id, project_id, dataset_id):
     #TODO Optimize this.
     scaled_split_dict = SplitData().get_scaled_split_dict(DBObject,connection,project_id, dataset_id)
     
-    X_train,X_test,X_valid,y_train,y_test,y_valid = SplitData().get_split_datasets(scaled_split_dict)
+    X_train,X_valid,X_test,y_train,y_valid,y_test = SplitData().get_split_datasets(scaled_split_dict)
     
     input_features_list, target_features_list = SplitData().get_features_list(user_id, project_id, dataset_id, DBObject, connection)
     
@@ -134,7 +134,7 @@ def logistic_regression_sklearn(run_id,**kwargs):
         print("experiment_status == ",upd_exp_status)
         
         
-        
+
 def manual_algorithm_identifier(run_id, **kwargs):
     
     model_name = kwargs['dag_run'].conf['model_name']
