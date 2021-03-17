@@ -67,6 +67,8 @@ class ProjectClass:
                 "original_dataset_id  bigint,"\
                 "dataset_id bigint,"\
                 "schema_id bigserial,"\
+                "cleanup_dag text"\
+                "modelling_dag text"\
                 "input_features text,"\
                 "target_features text,"\
                 "scaled_split_parameters text ,"\
