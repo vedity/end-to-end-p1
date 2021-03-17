@@ -117,45 +117,45 @@ class StartModelClass(APIView):
                         experiment_name = request.query_params.get('experiment_name')
                         experiment_desc ='this is for testing'
 
-                        activity_id = 46
-                        activity_df = timeline_Obj.get_activity(activity_id,"US")
-                        activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
-                        end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
-                        activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time) 
+                        # activity_id = 46
+                        # activity_df = timeline_Obj.get_activity(activity_id,"US")
+                        # activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
+                        # end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                        # activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time) 
                 
-                        activity_id = 42
-                        activity_df = timeline_Obj.get_activity(activity_id,"US")
-                        activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
-                        end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
-                        activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time) 
+                        # activity_id = 42
+                        # activity_df = timeline_Obj.get_activity(activity_id,"US")
+                        # activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
+                        # end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                        # activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time) 
                         
                         ModelObject = ModelClass(Model_Mode,user_id, project_id,dataset_id,
                                                 DBObject,connection,connection_string)# Initializing the ModelClass
 
                         if Model_Mode == 'Auto': 
-                                activity_id = 43
-                                activity_df = timeline_Obj.get_activity(activity_id,"US")
-                                activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
-                                end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
-                                activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time) 
+                                # activity_id = 43
+                                # activity_df = timeline_Obj.get_activity(activity_id,"US")
+                                # activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
+                                # end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                                # activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time) 
                                 # SplitDataObject = ModelObject.split_dataset(basic_split_parameters)
                                 ModelObject.algorithm_identifier(model_type,experiment_name,experiment_desc)
                                 
 
-                                activity_id = 48
-                                activity_df = timeline_Obj.get_activity(activity_id,"US")
-                                activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
-                                end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
-                                activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time) 
+                                # activity_id = 48
+                                # activity_df = timeline_Obj.get_activity(activity_id,"US")
+                                # activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
+                                # end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                                # activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time) 
 
                                 logging.info("modeling : ModelClass : GET Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully updated","response":"pipeline started"})
                         else:
-                                activity_id = 44
-                                activity_df = timeline_Obj.get_activity(activity_id,"US")
-                                activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
-                                end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
-                                activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time)
+                                # activity_id = 44
+                                # activity_df = timeline_Obj.get_activity(activity_id,"US")
+                                # activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
+                                # end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                                # activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time)
                                 model_id = int(request.query_params.get('model_id'))
                                 # hyperparameters = request.query_params.get('hyperparameters')
                                 if model_id == 2:
@@ -174,11 +174,11 @@ class StartModelClass(APIView):
                                 # model_type = 'Regression'
                                 ModelObject.run_model(model_type, model_id, experiment_name, experiment_desc)
 
-                                activity_id = 48
-                                activity_df = timeline_Obj.get_activity(activity_id,"US")
-                                activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
-                                end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
-                                activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time) 
+                                # activity_id = 48
+                                # activity_df = timeline_Obj.get_activity(activity_id,"US")
+                                # activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
+                                # end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                                # activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time) 
 
                                 logging.info("modeling : ModelClass : GET Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully updated","response":"True"})
@@ -466,7 +466,7 @@ class ShowAllExperimentsListClass(APIView):
                 
                 
 class CheckModelStatusClass(APIView):
-
+ 
         def get(self, request, format=None):
                 """
                 This function is used to check status of particular model.
@@ -486,21 +486,26 @@ class CheckModelStatusClass(APIView):
                         
                         experiment_name = request.query_params.get('experiment_name')
         
-                        experiment_data =ModelStatObject.check_model_status(project_id,experiment_name)
-                        status = experiment_data['state'][0]
-                        if isinstance(experiment_data,str): #check the instance of dataset_df
-                                status_code,error_msg=json_obj.get_Status_code(experiment_data) # extract the status_code and error_msg from project_df
+                        model_status = ModelStatObject.check_model_status(project_id,experiment_name)
+                        if model_status == 0:
+                                status = 'running'
+                        elif model_status == 1:
+                                status = 'success'
+                        else:
+                                status = 'failed'
+                        # status = experiment_data['state'][0]
+                        if isinstance(model_status,str): #check the instance of dataset_df
+                                status_code,error_msg=json_obj.get_Status_code(model_status) # extract the status_code and error_msg from project_df
                                 logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code :"+ status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
                                 logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code : 200")
-                                return Response({"status_code":"200","error_msg":"successfull retrival","response":experiment_data})
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":status})
                         
                 except Exception as e:
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
-
 
 
 class SelectAlgorithmClass(APIView):
