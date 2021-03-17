@@ -363,7 +363,7 @@ class CleanupSave(APIView):
                         dataset_id = request.query_params.get('dataset_id') #get dataset id
                         data = json.dumps(request.data) #get handling json
                         data = json.loads(data) 
-                        operation = preprocessObj.master_executor(project_id, dataset_id,schema_id,data)
+                        operation = preprocessObj.dag_executor(project_id, dataset_id,schema_id,data)
                         logging.info("data preprocess : CleanupSave : POST Method : execution stop")
                         if isinstance(operation,int): 
                                     

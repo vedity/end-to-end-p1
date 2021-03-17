@@ -42,7 +42,7 @@ def start_pipeline(dag,run_id,execution_date,ds,**kwargs):
 t2 = PythonOperator(task_id='get_key_operation',provide_context=True,python_callable=start_pipeline,dag=dag,
                         )
         
-t3 = BashOperator(task_id='Delete_Dag', dag=dag, bash_command= f'airflow delete_dag {main_dag_id}')
+t3 = BashOperator(task_id='Delete_Dag', dag=dag, bash_command= 'echo Task Ends')
 
 master_dict = #MASTER_DICT # this will work statically (we give this dict static this is working properly but we want to get it dynamically by line no 65)
 

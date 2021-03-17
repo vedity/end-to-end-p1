@@ -35,6 +35,11 @@ import numpy as np
 import pandas as pd
 import uuid
 from sklearn.model_selection import train_test_split
+import requests
+import uuid
+import json
+import time
+
 
 user_name = 'admin'
 log_enable = True
@@ -1235,4 +1240,55 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         except (SchemaUpdateFailed) as exc:
             return exc.msg
 
+    def get_cleanup_dag_name(self):
+        id = uuid.uuid1().time
+        dag_id='Cleanup_dag_'+str(id)
+
+        template = "cleanup_dag.template"
+        namespace = "Cleanup_Dags"
+        
+        master_dict = {}
+        
+        json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
+        
+        result = requests.post("http://airflow:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
+
+        return dag_id
+    
+    def dag_executor(self,project_id, dataset_id, schema_id, request):
+        
+        logging.info("data preprocessing : PreprocessingClass : dag_executor : execution start")
+        
+        DBObject,connection,connection_string = self.get_db_connection()
+        if connection == None :
+            raise DatabaseConnectionFailed(500)
+            
+        sql_command = f"select pt.cleanup_dag_id from mlaas.project_tbl pt where pt.project_id = '{project_id}'"
+        dag_id_df = DBObject.select_records(connection,sql_command) 
+        dag_id = dag_id_df['cleanup_dag_id'][0]
+        
+        op_dict, val_dict = self.reorder_operations(request)
+        
+        template = "cleanup_dag.template"
+        namespace = "Cleanup_Dags"
+        
+        master_dict = {
+        "operation_dict": op_dict,
+        "values_dict": val_dict,
+        "schema_id": schema_id,
+        "dataset_id": dataset_id
+        }
+        
+        json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
+        result = requests.post("http://localhost:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
+        
+        time.sleep(5)
+        json_data = {}
+        result = requests.post(f"http://localhost:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False)#owner
+        
+        logging.info("DAG RUN RESULT: "+str(result))
+        
+        logging.info("data preprocessing : PreprocessingClass : dag_executor : execution start")
+            
+        return 0
 
