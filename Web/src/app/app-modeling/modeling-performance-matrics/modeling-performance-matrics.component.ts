@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ModelingTypeApiService } from '../modeling-type.service';
@@ -9,7 +9,7 @@ import { ModelingTypeApiService } from '../modeling-type.service';
   styleUrls: ['./modeling-performance-matrics.component.scss']
 })
 export class ModelingPerformanceMatricsComponent implements OnInit {
-  experiment_id: any;
+  @Input() public experiment_id: any;
   responsedata: any;
   animation = "progress-dark";
   theme = {

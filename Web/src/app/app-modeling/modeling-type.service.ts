@@ -30,6 +30,13 @@ export class ModelingTypeApiService {
     return this.httpClient.get(this.baseUrl + "modeling/showallexperimentslist/", { headers: this.headers, params });
   }
 
+  checkexperimentname(experiment_name): Observable<any> {
+    // project_id=2;
+     var params = new HttpParams().append("experiment_name", experiment_name);
+     return this.httpClient.get(this.baseUrl + "modeling/checkexperimentname/", { headers: this.headers, params });
+   }
+    
+
   showrunningexperimentslist(project_id): Observable<any> {
    // project_id=2;
     var params = new HttpParams().append("project_id", project_id);
