@@ -48,7 +48,7 @@
             <div class="right-box" [hidden]="loaderdiv">
                 <div class="right-inner">
                     <ul ngbNav #justifiednavmissing="ngbNav" [activeId]="activeId" class="nav-tabs nav noise-tabs">
-                        <li [ngbNavItem]="i+1" (click)="activeId=item.tab_id;tabchange()" *ngFor="let item of operationList;let i=index">
+                        <li [ngbNavItem]="i+1" (click)="activeId=item.tab_id;tabchange($event)" *ngFor="let item of operationList;let i=index">
                             <a ngbNavLink title="{{item.tab_name}}">
                                 <span>{{item.tab_name}}</span>
                             </a>
@@ -86,7 +86,7 @@
             </div>
         </ng-template>
     </li>
-    <li [ngbNavItem]="2" (click)="outertabchange()">
+    <li [ngbNavItem]="2" (click)="reset()">
         <a ngbNavLink title="Rescaling">
             <span class="">Scale & Split</span>
 
