@@ -11,7 +11,6 @@ from airflow import DAG
 import airflow
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.python_operator import PythonOperator
-from airflow.models import Variable
 
 #* Defining Objects
 PC_OBJ = PreprocessingClass(database,user,password,host,port)
@@ -98,7 +97,12 @@ op_dict = {
 
 #? Making Dynamic Tasks
 t1= DummyOperator(task_id='start',dag=dag)
-t2= DummyOperator(task_id='end',dag=dag)
+t2= PythonOperator(
+            task_id='Finishing_Up',
+            dag=dag,
+            provide_context=True,
+            python_callable=PC_OBJ.update_schema_flag_status,
+            op_args=[DBObject,connection,schema_id,dataset_id])
 
 previous_task = t1
 i = 0

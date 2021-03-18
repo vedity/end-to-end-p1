@@ -984,11 +984,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                         #     activity_status = self.operation_end(DBObject, connection, activity_id, op, temp_col)
                     else:
 
-                        #Get the possible missing and noise status after updating any columns
-                        missing_value_status,noise_status = self.get_preprocess_cache(dataset_id)
-
                         #Update all the status flag's based on the schema id
-                        status = self.update_schema_flag_status(DBObject,connection,schema_id,missing_value_status,noise_status)
+                        status = self.update_schema_flag_status(DBObject,connection,schema_id,dataset_id)
                         
                         if status ==0:  
                             #? Updating the Activity table
@@ -1259,9 +1256,12 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         
         return status
     
-    def update_schema_flag_status(self,DBObject,connection,schema_id,missing_flag,noise_flag):
+    def update_schema_flag_status(self,DBObject,connection,schema_id,dataset_id, **kwargs):
         try:
             logging.info("data preprocessing : PreprocessingClass : update_schema_flag_status : execution start")
+            
+            missing_flag,noise_flag = self.get_preprocess_cache(dataset_id)
+
             
             for noise_flag,missing_flag in zip(missing_flag,noise_flag): 
 
