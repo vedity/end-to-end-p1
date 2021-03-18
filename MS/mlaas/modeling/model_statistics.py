@@ -1,6 +1,7 @@
 
 import json
 import pandas as pd
+import ast
 
 from pandas import DataFrame
 import logging
@@ -423,7 +424,7 @@ class ModelStatisticsClass:
         """
         try:
             # Get everything from model_experiment_tbl and, experiment name, model_name and dataset_name associated with a particular project_id.
-            sql_command = "select met.*,e.name as experiment_name,mmt.model_name,dt.dataset_name,"\
+            sql_command = "select met.*,e.name as experiment_name,mmt.model_name, mmt.model_type,dt.dataset_name,"\
                           "round(cast(sv.cv_score as numeric),3) as cv_score,round(cast(sv.holdout_score as numeric),3) as holdout_score "\
                           " from mlaas.model_experiment_tbl met,mlaas.model_master_tbl mmt,mlaas.score_view sv,mlaas.dataset_tbl dt,mlaas.experiments e"\
                           " where met.model_id = mmt.model_id and met.experiment_id=sv.experiment_id and met.dataset_id=dt.dataset_id and met.experiment_id=e.experiment_id "\
@@ -486,8 +487,8 @@ class ModelStatisticsClass:
                 raise DataNotFound(500)
 
             # Update Project Status 
-            status=state_df['state'][0]
-            
+            status = state_df['state'][0]
+            logging.info("'''''''''''''''''''''''''-----------------------" + status)
             if status == 'running':
                 st=0
             elif status == 'success':
@@ -498,7 +499,7 @@ class ModelStatisticsClass:
             sql_command = "update mlaas.project_tbl set model_status="+str(st)+" where project_id="+str(project_id)
             project_upd_status = self.DBObject.update_records(self.connection,sql_command)
             #status=state_df['state'][0]
-            return status
+            return st
         
         except (DatabaseConnectionFailed,DataNotFound) as exc:
             logging.error("modeling : ModelStatisticsClass : show_experiments_list : Exception " + str(exc))
