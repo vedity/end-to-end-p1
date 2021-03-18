@@ -212,20 +212,12 @@ class SchemaClass:
             logging.info(str(column_name_list)+" column_name_list")
             logging.info(str(column_attribute_list)+" column_attribute_list")
 
-            # logging.info(str(change_column_name)+" column_attribute_list")
-
             for value in change_column_name:
                 if value != '':
                     if str(change_column_name).strip().count(str(value).strip()) > 1 :
                         raise ChangeColumnNameSame(500)
             
-
-            
             column_count_value,ignore_count_value = self.get_count_value(DBObject,connection,schema_id)
-            logging.info(str(column_attribute_list)+" column_attribute_list")
-            logging.info(str(column_count_value)+" column_count_value")
-            logging.info(str(ignore_count_value)+" ignore_count_value")
-            logging.info(str(len(column_attribute_list))+" column_attribute_list")
 
             if (column_count_value-ignore_count_value)== column_attribute_list.count('Ignore') and column_attribute_list.count('Select')==0 and column_attribute_list.count('Target')==0 :
                 raise IgnoreColumns(500)
@@ -312,18 +304,9 @@ class SchemaClass:
                     column_string = activity_description+" <br/>"
                     for count in range(len(change_column_lst)):
                         column_string += str(column_lst[count])+" <-> "+str(change_column_lst[count])+"<br/> "
-                    # if len(change_column_lst)>2:
-                        
-                    #     change_column_name=",".join(change_column_lst[:len(change_column_lst)-1])+' and '+change_column_lst[-1]+' Respectively.'
-                    #     column_name=",".join(column_lst[:len(column_lst)-1])+' and '+column_lst[-1]+''
-                    # else:
-                    #     change_column_name=",".join(change_column_lst)
-                    #     column_name=",".join(column_lst)
-
-                    # activity = activity_description.replace('*',column_name).replace('$',dataset_name)
                     activity = column_string
-                elif id==6:
 
+                elif id==6:
                     column_target=",".join(target_column_lst)
                     activity = activity_description.replace('*',column_target).replace('$',dataset_name)+","
 
@@ -551,18 +534,22 @@ class SchemaClass:
         Return:
             [Integer,Integer] : [return the count value of column name,return the count value of Ignore type in column attribute ]
         """
-        #get the table name and columns,and schema of the table
-        schema_table_name,_,_ = self.get_schema()
+        try:
+            #get the table name and columns,and schema of the table
+            schema_table_name,_,_ = self.get_schema()
 
-        #get the total column count and Ignore count for the perticular schema id
-        sql_command = "select count(schema_id) as column_count,(select count(column_attribute) from "+str(schema_table_name)+" where schema_id ='"+str(schema_id)+"' and column_attribute ='Ignore') as ignore_count from "+str(schema_table_name)+" where schema_id ='"+str(schema_id)+"'"
-        #Execute te sql command
-        dataframe = DBObject.select_records(connection,sql_command)
+            #get the total column count and Ignore count for the perticular schema id
+            sql_command = "select count(schema_id) as column_count,(select count(column_attribute) from "+str(schema_table_name)+" where schema_id ='"+str(schema_id)+"' and column_attribute ='Ignore') as ignore_count from "+str(schema_table_name)+" where schema_id ='"+str(schema_id)+"'"
+            
+            #Execute the sql command
+            dataframe = DBObject.select_records(connection,sql_command)
 
-        #get the total count value where index column will not be considered
-        column_count_value,ignore_count_value = int(dataframe['column_count'][0])-1,int(dataframe['ignore_count'][0])
+            #get the total count value where index column will not be considered
+            column_count_value,ignore_count_value = int(dataframe['column_count'][0])-1,int(dataframe['ignore_count'][0])
 
-        return column_count_value,ignore_count_value
+            return column_count_value,ignore_count_value
+        except Exception as exc:
+            return str(exc)
     
     def delete_schema_record(self,DBObject,connection,schema_id,col_name = None):
         """
@@ -576,13 +563,18 @@ class SchemaClass:
         try:
             schema_table_name,_,_ = self.get_schema()
             if col_name is None:
+                #this command will delete all records based on the schema_id
                 sql_command = f'delete from {schema_table_name} where schema_id={str(schema_id)}'
             else:
+                #this command will delete the record based on the schema_id and column_name if found
                 sql_command = f"delete from {schema_table_name} where schema_id={str(schema_id)} and column_name ='{col_name}'"
+            
+            #Execute the sql command
             status = DBObject.update_records(connection,sql_command)
             return status
         except Exception as exc:
             return str(exc)
+    
 
 
 

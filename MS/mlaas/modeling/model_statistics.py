@@ -424,16 +424,22 @@ class ModelStatisticsClass:
     
     def check_existing_experiment(self,experiment_name):
         
-        sql_command="select * from mlaas.model_dags_tbl where exp_name='"+experiment_name+"'"
-        experiment_data_df = self.DBObject.select_records(self.connection, sql_command)
-        
-        if experiment_data_df is None :
-            return 0
-        elif len(experiment_data_df) > 0:
-            return 1
-        else:
-            return 0
-        
+        try:
+            sql_command="select * from mlaas.model_dags_tbl where exp_name='"+experiment_name+"'"
+            experiment_data_df = self.DBObject.select_records(self.connection, sql_command)
+            
+            if experiment_data_df is None :
+                return 0
+            elif len(experiment_data_df) > 0:
+                raise ExperimentAlreadyExist(500)
+            else:
+                return 0
+
+        except (ExperimentAlreadyExist) as exc:
+            logging.error("modeling : ModelStatisticsClass : check_existing_experiment : Exception " + str(exc))
+            logging.error("modeling : ModelStatisticsClass : check_existing_experiment : " +traceback.format_exc())
+            return exc.msg
+            
         
     def check_model_status(self,project_id,experiment_name):
         
@@ -447,7 +453,7 @@ class ModelStatisticsClass:
                 raise DatabaseConnectionFailed(500)
 
             if len(dag_df) == 0 :
-                raise DataNotFound(500)
+                raise DataNotFound(200)
             
             dag_id,run_id = dag_df['dag_id'][0],dag_df['run_id'][0]
             
@@ -458,8 +464,7 @@ class ModelStatisticsClass:
                 raise DatabaseConnectionFailed(500)
 
             if len(state_df) == 0 :
-                raise DataNotFound(500)
-            logging.info("========="+str(type(state_df['state'][0])))
+                raise DataNotFound(200)
             #status=state_df['state'][0]
             return state_df
         

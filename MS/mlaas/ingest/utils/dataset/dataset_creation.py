@@ -19,6 +19,8 @@ import traceback
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.ingest.ingest_exception import *
 from common.utils.logger_handler import custom_logger as cl
+
+
 #from common.utils.database.db import DBClass
 user_name = 'admin'
 log_enable = True
@@ -189,7 +191,6 @@ class DatasetClass:
                 load_data_status,no_of_rows = self.load_dataset(DBObject,connection,connection_string,file_name,dataset_visibility,user_name)
             
             else:
-                
                 load_data_status = self.insert_raw_dataset(DBObject,connection,raw_dataset_id,user_name,file_name,dataset_visibility)
             
     
@@ -603,13 +604,23 @@ class DatasetClass:
         except Exception as exc:
             return exc
     
-    def insert_raw_dataset(self,DBObject,connection,dataset_id,user_name,file_name,dataset_visibility,selected_visibility = None):
+    def insert_raw_dataset(self,DBObject,connection,dataset_id,user_name,table_name,dataset_visibility,selected_visibility = None):
         '''
+        Function used to create the new table based on existing table and update the "number of rows" and "table name" of the perticular dataset id
         
+        Args:
+                dataset_id[(Integer)] : [Id of the dataset record]
+                user_name[(String)] : [Name of the user]
+                table_name[(String)] : [Name of the table]
+                dataset_visibility[(String)] : [Existing dataset_visibility]
+                selected_visibility[(String)] : [User Entered visibility]
+        Return:
+                [Integer] : [Return 0 if successfully inserted else 1]
         '''
         try:
+            logging.info("data ingestion : DatasetClass : insert_raw_dataset : execution start")
             # Get the formated table name of the actual dataset
-            original_table_name = self.get_dataset_table_name(file_name)
+            original_table_name = self.get_dataset_table_name(table_name)
             
             # Get the updated table name for the raw dataset
             new_table_name = DBObject.get_table_name(connection,original_table_name)
@@ -652,16 +663,16 @@ class DatasetClass:
             # update the "dataset table name"  and "no_of _rows" of the given dataset id
             sql_command = "UPDATE mlaas.dataset_tbl SET dataset_table_name='"+str(new_table_name)+"',no_of_rows = '"+str(no_of_rows)+"' where dataset_id ='"+str(dataset_id)+"'"
             
-            logging.info(str(sql_command) + " sql")
-
             # Execute the sql query
-            create_status = DBObject.update_records(connection,sql_command)
+            update_status = DBObject.update_records(connection,sql_command)
+
             if create_status !=0:
                 raise DatasetColumnUpdateFailed
-           
-            return create_status
+                
+            logging.info("data ingestion : DatasetClass : insert_raw_dataset : execution stop")
+            return update_status
         except (DatasetCreationFailed,DatasetColumnUpdateFailed) as exc:
-            return exc
+            return exc.msg
 
 
 
