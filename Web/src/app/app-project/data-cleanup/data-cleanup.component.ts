@@ -305,16 +305,27 @@ export class DataCleanupComponent implements OnInit {
     this.removeHandlers(id, column, tabid);
   }
 
-  tabchange() {
+  tabchange(event) {
+    event.stopPropagation();
     $(".checkbox:checked").prop("checked", false);
     this.selectedColumn = [];
-
     this.getColumnviseOperation();
   }
 
-  outertabchange(){
+  outertabchange(event){
     
   }
+
+reset()
+{
+  $(".checkbox:checked").prop("checked", false);
+  $(".customInput").prop('disabled', true).val('').removeClass('errorstatus');
+  $(".radiobutton:checked").prop('checked', false);
+  this.selectedColumn = [];
+  this.getColumnList();
+  this.getColumnviseOperation();
+  
+}
 
   getScalingOperations() {
     this.apiService.getScalingOperations().subscribe(

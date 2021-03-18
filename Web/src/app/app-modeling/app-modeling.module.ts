@@ -31,6 +31,7 @@ import { ModelingPerformanceMatricsComponent } from './modeling-performance-matr
 import { ModelingModalSummaryComponent } from './modeling-modal-summary/modeling-modal-summary.component';
 import { ModelingActualPredictionComponent } from './modeling-actual-prediction/modeling-actual-prediction.component';
 import {DragDropModule} from '@angular/cdk/drag-drop';
+import { ModelingConfusionMatricsComponent } from './modeling-confusion-matrics/modeling-confusion-matrics.component';
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   suppressScrollX: true,
   wheelSpeed: 0.3
@@ -43,7 +44,8 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     ModelingFeatureImportanceComponent,
     ModelingPerformanceMatricsComponent,
     ModelingModalSummaryComponent,
-    ModelingActualPredictionComponent
+    ModelingActualPredictionComponent,
+    ModelingConfusionMatricsComponent
   ],
   imports: [
     CommonModule,

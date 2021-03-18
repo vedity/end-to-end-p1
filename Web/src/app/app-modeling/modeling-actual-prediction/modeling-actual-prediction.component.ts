@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ModelingTypeApiService } from '../modeling-type.service';
@@ -34,7 +34,7 @@ export class ModelingActualPredictionComponent implements OnInit {
   constructor(public router: Router, public apiservice: ModelingTypeApiService, public toaster: ToastrService) { }
   public simpleline: any;
   classname = "expand-block";
-  experiment_id:any;
+  @Input() public experiment_id: any;
   responsedata:any;
   ngOnInit(): void {
     this.getActualVsPreidiction();

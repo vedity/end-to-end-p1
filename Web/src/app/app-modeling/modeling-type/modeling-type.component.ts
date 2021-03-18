@@ -226,7 +226,7 @@ export class ModelingTypeComponent implements OnInit {
     }
   }
   getRunningExperimentList() {
-    this.apiservice.showrunningexperimentslist(this.params.dataset_id).subscribe(
+    this.apiservice.showrunningexperimentslist(this.params.project_id).subscribe(
       logs => this.runningexpListsuccessHandler(logs),
       error => this.errorHandler(error));
   }
@@ -243,7 +243,7 @@ runningExpList: any = [];
   }
 
   getAllExperimentList() {
-    this.apiservice.showallexperimentslist(this.params.dataset_id).subscribe(
+    this.apiservice.showallexperimentslist(this.params.project_id).subscribe(
       logs => this.allexpListsuccessHandler(logs),
       error => this.errorHandler(error));
   }
@@ -348,8 +348,12 @@ runningExpList: any = [];
   }
 
   modeltitle: any;
-  extraLarge(exlargeModal: any, name) {
-    this.modeltitle = name;
+  current_experiment_id:any;
+  current_model_type:any;
+  extraLarge(exlargeModal: any, obj) {
+    this.modeltitle = obj.experiment_name;
+    this.current_experiment_id=obj.experiment_id;
+    this.current_model_type=obj.model_type;
     this.modalService.open(exlargeModal, { size: 'xl', windowClass: 'modal-holder', centered: true });
   };
 

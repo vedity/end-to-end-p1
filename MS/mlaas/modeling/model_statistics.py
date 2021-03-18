@@ -399,7 +399,7 @@ class ModelStatisticsClass:
             
         """
         try:
-            sql_command = "select met.*,e.name as experiment_name,mmt.model_name,dt.dataset_name,"\
+            sql_command = "select met.*,e.name as experiment_name,mmt.model_name,mmt.model_type,dt.dataset_name,"\
                           "round(cast(sv.cv_score as numeric),3) as cv_score,round(cast(sv.holdout_score as numeric),3) as holdout_score "\
                           " from mlaas.model_experiment_tbl met,mlaas.model_master_tbl mmt,mlaas.score_view sv,mlaas.dataset_tbl dt,mlaas.experiments e"\
                           " where met.model_id = mmt.model_id and met.experiment_id=sv.experiment_id and met.dataset_id=dt.dataset_id and met.experiment_id=e.experiment_id "\
