@@ -106,6 +106,11 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             elif project_status == 0:
                 status = super(IngestClass,self).update_dataset_status(DBObject,connection,project_id)
                 
+                if status ==0:
+                    connection.commit()
+                else:
+                    connection.rollback()
+                
                 
         except (DatabaseConnectionFailed,DatasetAlreadyExist,ProjectAlreadyExist,LoadCSVDataFailed,ProjectCreationFailed,Exception) as exc:
             logging.error("data ingestion : ingestclass : create_project : Exception " + str(exc.msg))
@@ -540,23 +545,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 
                 if ALL_SET == False:
                     raise InvalidColumnName(500)
-                # logging.debug("data ingestion : ingestclass : check_file : rows =="+str(file_data_df.shape[0]) + " columns =="+ str(file_data_df.shape[1]))
-                # if file_data_df.shape[0] > 0 and file_data_df.shape[1] >= 2:
-                #     All_SET_Count = 0
-                #     logging.debug("data ingestion : ingestclass : check_file : column list value =="+str(file_data_df.columns.to_list()))   
-                #     col_names = file_data_df.columns.to_list()
-                #     for col in col_names:
-                #         # it will check column names into the files.
-                #         if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',col))==True):
-                            
-                #             All_SET_Count = All_SET_Count + 1
-                #         else:
-                #             #All_SET_Count = All_SET_Count - 1
-                #     logging.debug("data ingestion : ingestclass : check_file : count value =="+str(All_SET_Count))        
-                #     if All_SET_Count == len(col_names):
-                #         ALL_SET = True
-                
-                         
+             
             logging.debug("data ingestion : ingestclass : check_file : return value =="+str(ALL_SET))        
             logging.info("data ingestion : ingestclass : check_file : execution end")          
             return ALL_SET
@@ -576,19 +565,33 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         return:
                 [String]:[return name of the file]
         """
-        logging.info("data ingestion : ingestclass : save_file : execution start")
-        if dataset_visibility.lower()=='private':
-            file_path += user_name
-        else:
-            file_path += dataset_visibility
-        fs = FileSystemStorage(location=file_path)
-        check_sequence = DBObject.is_exist_sequence(connection,seq_name="dataset_sequence")
-        if check_sequence =="True":
-            seq = DBObject.get_sequence(connection) 
-        file_name = file.name.split(".")[0]+"_"+ str(seq['nextval'][0]) + '.csv'
-        fs.save(file_name, file)
-        logging.info("data ingestion : ingestclass : save_file : execution ")
-        return file_name
+        try:
+            logging.info("data ingestion : ingestclass : save_file : execution start")
+            if dataset_visibility.lower()=='private':
+                file_path += user_name
+            else:
+                file_path += dataset_visibility
+
+            #Make the Directory for thegiven path
+            fs = FileSystemStorage(location=file_path)
+
+            #Get the updated sequence 
+            check_sequence = DBObject.is_exist_sequence(connection,seq_name="dataset_sequence")
+            if check_sequence =="True":
+                seq = DBObject.get_sequence(connection) 
+
+            #Append the Sequence in the file name
+            file_name = file.name.split(".")[0]+"_"+ str(seq['nextval'][0]) + '.csv'
+
+            #Save the file in the specified directory with the given name
+            fs.save(file_name, file)
+
+            logging.info("data ingestion : ingestclass : save_file : execution ")
+            return file_name
+        except Exception as exc:
+            logging.error("data ingestion : ingestclass : save_file : Exception " + str(exc))
+            logging.error("data ingestion : ingestclass : save_file : " +traceback.format_exc())
+            return exc
     
     
 
