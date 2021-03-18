@@ -4,15 +4,12 @@ import { ToastrService } from 'ngx-toastr';
 import { ModelingTypeApiService } from '../modeling-type.service';
 
 @Component({
-  selector: 'app-modeling-modal-summary',
-  templateUrl: './modeling-modal-summary.component.html',
-  styleUrls: ['./modeling-modal-summary.component.scss']
+  selector: 'app-modeling-confusion-matrics',
+  templateUrl: './modeling-confusion-matrics.component.html',
+  styleUrls: ['./modeling-confusion-matrics.component.scss']
 })
-export class ModelingModalSummaryComponent implements OnInit {
-
+export class ModelingConfusionMatricsComponent implements OnInit {
   @Input() public experiment_id: any;
-  constructor(public router: Router, public apiservice: ModelingTypeApiService, public toaster: ToastrService) { }
-  //experiment_id: any;
   responsedata: any;
   animation = "progress-dark";
   theme = {
@@ -22,12 +19,14 @@ export class ModelingModalSummaryComponent implements OnInit {
     'border': '1px solid #32394e',
     'animation-duration': '20s'
   };
+  constructor(public router: Router, public apiservice: ModelingTypeApiService, public toaster: ToastrService) { }
+
   ngOnInit(): void {
-    this.getModelSummary();
+    this.getConfusionMatrics();
   }
 
-  getModelSummary() {
-    this.apiservice.getModelSummary(this.experiment_id).subscribe(
+  getConfusionMatrics() {
+    this.apiservice.getConfusionMatrix(this.experiment_id).subscribe(
       logs => this.successHandler(logs),
       error => this.errorHandler(error));
   }
