@@ -185,6 +185,10 @@ class DBClass:
                 query = "INSERT INTO %s(%s) VALUES %%s " % (table_name, cols) # Make query
                 extras.execute_values(cursor, query, tuples) # Excute insert query.
                 index = 0
+            elif Flag==1 :
+                query = "INSERT INTO %s(%s) VALUES %%s RETURNING dataset_id" % (table_name, cols) # Make query
+                extras.execute_values(cursor, query, tuples) # Excute insert query.
+                index = [row[0] for row in cursor.fetchall()][0]
             else:
                 query = "INSERT INTO %s(%s) VALUES %%s RETURNING index" % (table_name, cols) # Make query
                 extras.execute_values(cursor, query, tuples) # Excute insert query.
@@ -615,7 +619,7 @@ class DBClass:
         '''
         sql_command = "SELECT dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows,dataset_desc from mlaas.dataset_tbl Where dataset_id =" + str(dataset_id)
         
-        dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+        dataset_df=self.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         return dataset_df 
     
     def get_project_detail(self,DBObject,connection,project_id):
@@ -627,7 +631,7 @@ class DBClass:
         '''
         sql_command = "SELECT original_dataset_id,dataset_id from mlaas.project_tbl where project_id='"+str(project_id)+"'"
        
-        dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+        dataset_df=self.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         return dataset_df
     
     def get_table_name(self,connection,table_name):

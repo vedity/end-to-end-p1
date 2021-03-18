@@ -36,7 +36,6 @@ class MathOperationsClass:
         logging.info("Preprocess : MathOperationsClass : perform_operation : execution start")
         
         sql_command = f'update {table_name} set "{col_name}" = "{col_name}" {operation} {value}' # Get update query
-        # logging.info("-------->>>>>>"+str(sql_command))
 
         status = DBObject.update_records(connection,sql_command)
         
