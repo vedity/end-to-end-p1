@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 #* Airflow Imports
 from airflow import DAG
 import airflow
-from airflow.operators.bash_operator import BashOperator
+from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.python_operator import PythonOperator
 from airflow.models import Variable
 
@@ -34,17 +34,9 @@ dag = DAG(
     schedule_interval = '@once',                         
 )
 
-def start_pipeline(dag,run_id,execution_date,ds,**kwargs):
+#? Getting Required Parameters
 
-    print("Pipeline Started.")
-
-
-t2 = PythonOperator(task_id='get_key_operation',provide_context=True,python_callable=start_pipeline,dag=dag,
-                        )
-        
-t3 = BashOperator(task_id='Delete_Dag', dag=dag, bash_command= 'echo Task Ends')
-
-master_dict = #MASTER_DICT # this will work statically (we give this dict static this is working properly but we want to get it dynamically by line no 65)
+master_dict = #MASTER_DICT 
 
 operation = master_dict['operation_dict']
 value_dict = master_dict['values_dict']
@@ -104,14 +96,17 @@ op_dict = {
     32 : PC_OBJ.multiply_column
 }
 
-previous_task = t2
+#? Making Dynamic Tasks
+t1= DummyOperator(task_id='start',dag=dag)
+t2= DummyOperator(task_id='end',dag=dag)
+
+previous_task = t1
 i = 0
 daglist = []    
 
 for index in operation.keys():
-    dynamicTaskOne = BashOperator(
+    dynamicTaskOne = DummyOperator(
     task_id='Function_' +str(index) + '_Start',
-    bash_command='echo "hello"',
     dag=dag,)
 
     for task in daglist:
@@ -123,6 +118,7 @@ for index in operation.keys():
     value = value_dict[index]
     for j,col in enumerate(operation[index]): 
         
+        #? Which parameters should be given to which function
         param_dict = {
             1 : [DBObject,connection,column_list, dataset_table_name, [col]],
             2 : [DBObject,connection,column_list, dataset_table_name, [col]],
@@ -171,6 +167,6 @@ for index in operation.keys():
 
     i+=1
     if i == len(operation.keys()):
-        previous_task.set_downstream(t3)
+        previous_task.set_downstream(t2)
         for task in daglist:
-            task.set_downstream(t3)
+            task.set_downstream(t2)

@@ -63,7 +63,7 @@ class OutliersTreatmentClass:
 
             else:
                 # Replace the with mean/median/mode of the column
-                sql_command = f'Update {table_name} set "{col_name}"={impute_value} where "{col_name}" < {str(lower_limit)} and "{col_name}" > {str(upper_limit)}' # Get update query
+                sql_command = f'Update {table_name} set "{col_name}"={impute_value} where "{col_name}" < {str(lower_limit)} or "{col_name}" > {str(upper_limit)}' # Get update query
                 logging.info("Sql_command : update record using  : extreme_value_analysis : "+str(sql_command))
 
             status = DBObject.update_records(connection,sql_command)

@@ -986,7 +986,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                         missing_value_status,noise_status = self.get_preprocess_cache(dataset_id)
 
                         #Update all the status flag's based on the schema id
-                        status = self.update_schema_flag_status(scheam_id,missing_value_status,noise_status)
+                        status = self.update_schema_flag_status(schema_id,missing_value_status,noise_status)
 
                         if status ==0:  
                             #? Updating the Activity table
@@ -1280,15 +1280,14 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         }
         
         json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
-        result = requests.post("http://localhost:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
+        result = requests.post("http://airflow:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
         
-        time.sleep(5)
         json_data = {}
-        result = requests.post(f"http://localhost:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False)#owner
+        result = requests.post(f"http://airflow:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False)#owner
         
         logging.info("DAG RUN RESULT: "+str(result))
         
-        logging.info("data preprocessing : PreprocessingClass : dag_executor : execution start")
+        logging.info("data preprocessing : PreprocessingClass : dag_executor : execution stop")
             
         return 0
 
