@@ -12,7 +12,7 @@ class RestToTemplateWrapperOperator(TemplateOperator):
         super().__init__(*args, **kwargs)
         self.script_dir = os.path.dirname(__file__)
         self.dynamic_dag_dir = os.environ.get(
-            'DYNAMIC_DAG_DIR', '/usr/local/airflow/dags/dynamic_dags')  # TODO this should go to config
+            'DYNAMIC_DAG_DIR', '/usr/local/airflow/dags/dynamic_dags')
         
     def execute(self, context):
         
@@ -28,12 +28,12 @@ class RestToTemplateWrapperOperator(TemplateOperator):
         Path(os.path.join(self.dynamic_dag_dir, namespace)).mkdir(parents=True, exist_ok=True)
         
         self.template_file_path = os.path.join(
-            self.script_dir, '..', 'templates', template)  # TODO should go into config
+            self.script_dir, '..', 'templates', template) 
         
         self.destination_file_path = os.path.join(self.dynamic_dag_dir, namespace, '{}.py'.format(dag_id))
 
         self.search_and_replace = {
-            '#OPERATION_DICT': conf["operation_dict"],
+            '#MASTER_DICT': conf["master_dict"],
             '#DAG_ID': '"'+dag_id+'"'
         }
         TemplateOperator.execute(self)

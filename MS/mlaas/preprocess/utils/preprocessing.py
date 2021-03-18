@@ -35,6 +35,11 @@ import numpy as np
 import pandas as pd
 import uuid
 from sklearn.model_selection import train_test_split
+import requests
+import uuid
+import json
+import time
+
 
 user_name = 'admin'
 log_enable = True
@@ -127,6 +132,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.info("data preprocessing : PreprocessingClass : get_exploration_data : execution start")
             
             data_df = self.get_data_df(dataset_id, schema_id)
+            logging.error(str(data_df) + "  chaclking")
             if isinstance(data_df, str):
                 raise GetDataDfFailed(500)
             
@@ -212,7 +218,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             #? For FrontEnd 
             json_data = [{"column_id": count, "col_name": column_name[count],"is_missing":flag_value[count]} for count in range(1,len(column_name))]
-            logging.info("AAAAAAAAAAAAAAAAAAAA" + str(json_data))
+            
             logging.info("data preprocessing : PreprocessingClass : get_col_names : execution stop")
             
             return json_data
@@ -725,7 +731,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             return OperationOrderingFailed(500).msg
         
         
-    def master_executor(self, project_id,dataset_id, schema_id,request, save_as = False,value = None):
+    def master_executor(self, project_id,dataset_id, schema_id,request, flag ,selected_visibility,dataset_name ,dataset_desc):
         '''
             It takes the request from the frontend and executes the cleanup operations.
             
@@ -742,7 +748,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         '''
         
         try:
-            logging.info("data preprocessing : PreprocessingClass : master_executor : execution start")
+            logging.info("data preprocessing : PreprocessingClass : master_executor : execution start" + str(type(flag))+ str(flag))
             DBObject,connection,connection_string = self.get_db_connection()
             if connection == None :
                 raise DatabaseConnectionFailed(500)
@@ -760,7 +766,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 dataset_table_name = 'public'+'."'+table_name+'"'
 
             #get the Column list
-            column_list = self.get_col_names(schema_id)
+            column_list = DBObject.get_column_names( connection, table_name)
+            # column_list = self.get_col_names(schema_id)
             logging.info(str(column_list) + " column_list")
 
             #? Getting operations in the ordered format
@@ -840,7 +847,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     elif op == 9:
                         
                         #? Reusing the missing category imputation function for the arbitrary value imputation
-                        status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name,col, value[0],flag = True)
+                        status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name,col, value,flag = True)
                         if status == 0:
                             for col_name in col_names:
                                 sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
@@ -981,15 +988,57 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                         missing_value_status,noise_status = self.get_preprocess_cache(dataset_id)
 
                         #Update all the status flag's based on the schema id
-                        status = self.update_schema_flag_status(scheam_id,missing_value_status,noise_status)
-
+                        status = self.update_schema_flag_status(DBObject,connection,schema_id,missing_value_status,noise_status)
+                        
                         if status ==0:  
                             #? Updating the Activity table
                             for i,temp_col_names in enumerate(temp_cols):
                                 activity_status = self.operation_end(DBObject, connection, activity_ids[i], op, temp_col_names)
+
+                            if flag == 'True':
+                                
+                                # Get table name,schema and columns from dataset class.
+                                tbl_name,schema,cols = dc.make_dataset_schema() 
+                                file_name = None
+                                file_size = None
+                                page_name = 'Cleanup'
+
+                                # Make record for dataset table.
+                                row=dataset_name,file_name,file_size,table_name,selected_visibility,user_name,dataset_desc,page_name 
+                                
+                                # Convert row record into list of tuple.
+                                row_tuples = [tuple(row)] 
+
+                                logging.info("row tuples error"+str(row_tuples))
+
+                                # Insert the records into table and return status and dataset_id of the inserted values
+                                insert_status,dataset_id = DBObject.insert_records(connection,tbl_name,row_tuples,cols,Flag =1)
+                                
+                                if insert_status == 0:
+                                    
+                                    table_name = table_name.replace('di_',"").replace('_tbl',"")
+
+                                    # Create the new table based on the existing table and return status 0 if successfull else 1 
+                                    dataset_insert_status = dc.insert_raw_dataset(DBObject,connection,dataset_id,user_name,table_name,dataset_visibility,selected_visibility)
+                                   
+                                    if dataset_insert_status == 0:
+
+                                        # Command will update the dataset id  in the project table
+                                        sql_command = f'update mlaas.project_tbl set dataset_id={str(dataset_id)} where project_id={str(project_id)}'
+                                        
+                                        # Execute the sql query
+                                        update_status = DBObject.update_records(connection,sql_command)
+
+                                        return update_status
+                                    else:
+                                        return dataset_insert_status
+
+                                else:
+                                    return insert_status
                         else:
+                            
                             return status
-                except :
+                except Exception as exc :
                     continue
                     
             logging.info("data preprocessing : PreprocessingClass : master_executor : execution stop")
@@ -1210,16 +1259,16 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         
         return status
     
-    def update_schema_flag_status(self,scheam_id,missing_flag,noise_flag):
+    def update_schema_flag_status(self,DBObject,connection,schema_id,missing_flag,noise_flag):
         try:
             logging.info("data preprocessing : PreprocessingClass : update_schema_flag_status : execution start")
             
             for noise_flag,missing_flag in zip(missing_flag,noise_flag): 
 
                 #sql command for updating change_column_name and column_attribute column  based on index column value
-                sql_command = "update "+ schema_table_name + " SET missing_flag = '" + str(missing_flag) + "',"\
+                sql_command = "update mlaas.schema_tbl SET missing_flag = '" + str(missing_flag) + "',"\
                                 "noise_flag = '" +str(noise_flag) +"'"\
-                                " Where schema_id ='"+str(scheam_id)+"' "
+                                " Where schema_id ='"+str(schema_id)+"' "
 
                 logging.info("sql_command " + sql_command) 
                 #execute sql query command
@@ -1235,4 +1284,55 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         except (SchemaUpdateFailed) as exc:
             return exc.msg
 
+    def get_cleanup_dag_name(self):
+        id = uuid.uuid1().time
+        dag_id='Cleanup_dag_'+str(id)
+
+        template = "cleanup_dag.template"
+        namespace = "Cleanup_Dags"
+        
+        master_dict = {}
+        
+        json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
+        
+        result = requests.post("http://airflow:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
+
+        return dag_id
+    
+    def dag_executor(self,project_id, dataset_id, schema_id, request):
+        
+        logging.info("data preprocessing : PreprocessingClass : dag_executor : execution start")
+        
+        DBObject,connection,connection_string = self.get_db_connection()
+        if connection == None :
+            raise DatabaseConnectionFailed(500)
+            
+        sql_command = f"select pt.cleanup_dag_id from mlaas.project_tbl pt where pt.project_id = '{project_id}'"
+        dag_id_df = DBObject.select_records(connection,sql_command) 
+        dag_id = dag_id_df['cleanup_dag_id'][0]
+        
+        op_dict, val_dict = self.reorder_operations(request)
+        
+        template = "cleanup_dag.template"
+        namespace = "Cleanup_Dags"
+        
+        master_dict = {
+        "operation_dict": op_dict,
+        "values_dict": val_dict,
+        "schema_id": schema_id,
+        "dataset_id": dataset_id
+        }
+        
+        json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
+        result = requests.post("http://localhost:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
+        
+        time.sleep(5)
+        json_data = {}
+        result = requests.post(f"http://localhost:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False)#owner
+        
+        logging.info("DAG RUN RESULT: "+str(result))
+        
+        logging.info("data preprocessing : PreprocessingClass : dag_executor : execution start")
+            
+        return 0
 

@@ -56,7 +56,7 @@ class EncodeClass:
             sql_command = f'select distinct "{column_list[1]}" from {table_name} dcat where "{column_list[1]}" is not null'
             df = DBObject.select_records(connection,sql_command)
 
-            logging.info(" dataframe " +str(df))
+            
             if len(df[column_list[1]].to_list()) > 5:
                 raise EcondingFailed(500) 
             

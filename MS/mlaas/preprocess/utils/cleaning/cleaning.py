@@ -38,7 +38,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     #* MISSING VALUE HANDLING
     
-    def discard_missing_values(self,DBObject,connection,column_list, table_name, col):
+    def discard_missing_values(self,DBObject,connection,column_list, table_name, col, **kwargs):
         '''
             Operation id: 1
         '''
@@ -51,7 +51,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : discard_missing_values : execution stop")
         return status
     
-    def mean_imputation(self, DBObject,connection,column_list, table_name, col,flag = False):
+    def mean_imputation(self, DBObject,connection,column_list, table_name, col,flag = False, **kwargs):
         '''
             Operation id: 6
         '''
@@ -77,7 +77,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : mean_imputation : execution stop")
         return status
     
-    def median_imputation(self, DBObject,connection,column_list, table_name, col):
+    def median_imputation(self, DBObject,connection,column_list, table_name, col, **kwargs):
         '''
             Operation id: 5
         '''
@@ -100,7 +100,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : median_imputation : execution stop")
         return status
     
-    def mode_imputation(self,  DBObject,connection,column_list, table_name, col):
+    def mode_imputation(self,  DBObject,connection,column_list, table_name, col, **kwargs):
         '''
             Operation id: ?
         '''
@@ -121,7 +121,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : mode_imputation : execution stop")
         return status
     
-    def end_of_distribution(self,DBObject,connection,column_list, table_name, col):
+    def end_of_distribution(self,DBObject,connection,column_list, table_name, col, **kwargs):
         '''
             Operation id: ?
         '''
@@ -142,7 +142,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : end_of_distribution : execution stop")
         return status
 
-    def missing_category_imputation(self,DBObject,connection,column_list, table_name, col,value ,flag = False):
+    def missing_category_imputation(self,DBObject,connection,column_list, table_name, col,value ,flag = False, **kwargs):
         '''
             Operation id: 8
         '''
@@ -165,7 +165,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         return status
     
     
-    def frequent_category_imputation(self,DBObject,connection,column_list, table_name, col):
+    def frequent_category_imputation(self,DBObject,connection,column_list, table_name, col, **kwargs):
         '''
             Operation id: 8
         '''
@@ -189,7 +189,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : frequent_category_imputation : execution stop")
         return status
     
-    def random_sample_imputation(self, DBObject,connection,column_list, table_name,col):
+    def random_sample_imputation(self, DBObject,connection,column_list, table_name,col, **kwargs):
         '''
             Operation id: 10
         '''
@@ -240,7 +240,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     #* NOISE HANDLING
     
-    def remove_noise(self, DBObject,connection, column_list, table_name, col):
+    def remove_noise(self, DBObject,connection, column_list, table_name, col, **kwargs):
         '''
             Operation id: 11
         '''
@@ -256,7 +256,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : remove_noise : execution stop")
         return status
     
-    def discard_noise(self, DBObject,connection, column_list, table_name, col):
+    def discard_noise(self, DBObject,connection, column_list, table_name, col, **kwargs):
         '''
             Operation id: 12
         '''
@@ -275,7 +275,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : repl_noise_mean : execution stop")
         return status
     
-    def repl_noise_mean(self, DBObject,connection, column_list, table_name, col):
+    def repl_noise_mean(self, DBObject,connection, column_list, table_name, col, **kwargs):
         '''
             Operation id: 12
         '''
@@ -294,7 +294,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : repl_noise_mean : execution stop")
         return status
     
-    def repl_noise_median(self, DBObject,connection, column_list, table_name, col):
+    def repl_noise_median(self, DBObject,connection, column_list, table_name, col, **kwargs):
         '''
             Operation id: 13
         '''
@@ -313,7 +313,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : repl_noise_median : execution stop")
         return status
     
-    def repl_noise_mode(self, DBObject,connection, column_list, table_name, col):
+    def repl_noise_mode(self, DBObject,connection, column_list, table_name, col, **kwargs):
         '''
             Operation id: ?
         '''
@@ -332,7 +332,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : repl_noise_mode : execution stop")
         return status
     
-    def repl_noise_eod(self, DBObject,connection, column_list, table_name, col):
+    def repl_noise_eod(self, DBObject,connection, column_list, table_name, col, **kwargs):
         '''
             Operation id: ?
         '''
@@ -351,7 +351,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : repl_noise_eod : execution stop")
         return status
     
-    def repl_noise_random_sample(self, DBObject,connection, column_list, table_name, col):
+    def repl_noise_random_sample(self, DBObject,connection, column_list, table_name, col, **kwargs):
         '''
             Operation id: 14
         '''
@@ -370,7 +370,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : repl_noise_random_sample : execution stop")
         return status
     
-    def repl_noise_arbitrary_val(self, DBObject,connection, column_list, table_name, col, value):
+    def repl_noise_arbitrary_val(self, DBObject,connection, column_list, table_name, col, value, **kwargs):
         '''
             Operation id: 15
         '''
@@ -392,7 +392,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     #* OUTLIER ANALYSIS
     
-    def delete_above(self, DBObject,connection,column_list, table_name,col,val):
+    def delete_above(self, DBObject,connection,column_list, table_name,col,val, **kwargs):
         '''
             Operation id: 2
         '''
@@ -411,7 +411,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : delete_below : execution stop")
         return status
     
-    def delete_below(self, DBObject,connection,column_list, table_name,col,val):
+    def delete_below(self, DBObject,connection,column_list, table_name,col,val, **kwargs):
         '''
             Operation id: 3
         '''
@@ -430,7 +430,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : delete_below : execution stop")
         return status
     
-    def rem_outliers_ext_val_analysis(self, DBObject,connection,column_list, dataset_table_name,col):
+    def rem_outliers_ext_val_analysis(self, DBObject,connection,column_list, dataset_table_name,col, **kwargs):
         '''
             Operation id: 16
         '''
@@ -451,7 +451,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : rem_outliers_ext_val_analysis : execution stop")
         return status
     
-    def rem_outliers_z_score(self,DBObject,connection,column_list, dataset_table_name,col):
+    def rem_outliers_z_score(self,DBObject,connection,column_list, dataset_table_name,col, **kwargs):
         '''
             Operation id: 17
         '''
@@ -473,7 +473,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         return status
 
     
-    def repl_outliers_mean_ext_val_analysis(self, DBObject,connection,column_list, table_name,col):
+    def repl_outliers_mean_ext_val_analysis(self, DBObject,connection,column_list, table_name,col, **kwargs):
         '''
             Operation id: 18
         '''
@@ -497,7 +497,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : repl_outliers_mean_ext_val_analysis : execution stop")
         return status
     
-    def repl_outliers_mean_z_score(self, DBObject,connection,column_list, table_name, col):
+    def repl_outliers_mean_z_score(self, DBObject,connection,column_list, table_name, col, **kwargs):
         '''
             Operation id: 19
         '''
@@ -521,7 +521,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : repl_outliers_mean_z_score : execution stop")
         return status
     
-    def repl_outliers_med_ext_val_analysis(self, DBObject,connection,column_list, table_name,col):
+    def repl_outliers_med_ext_val_analysis(self, DBObject,connection,column_list, table_name,col, **kwargs):
         '''
             Operation id: 20
         '''
@@ -546,7 +546,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : repl_outliers_med_ext_val_analysis : execution stop")
         return status
     
-    def repl_outliers_med_z_score(self,DBObject,connection,column_list, table_name,col):
+    def repl_outliers_med_z_score(self,DBObject,connection,column_list, table_name,col, **kwargs):
         '''
             Operation id: 21
         '''
@@ -568,7 +568,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : repl_outliers_med_z_score : execution stop")
         return status
     
-    def repl_outliers_mode_ext_val_analysis(self, DBObject,connection,column_list, table_name,col):
+    def repl_outliers_mode_ext_val_analysis(self, DBObject,connection,column_list, table_name,col, **kwargs):
         '''
             Operation id: ?
         '''
@@ -592,7 +592,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : repl_outliers_mode_ext_val_analysis : execution stop")
         return status
     
-    def repl_outliers_mode_z_score(self, DBObject,connection,column_list, table_name,col):
+    def repl_outliers_mode_z_score(self, DBObject,connection,column_list, table_name,col, **kwargs):
         '''
             Operation id: ?
         '''
@@ -615,7 +615,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : repl_outliers_mode_z_score : execution stop")
         return status
     
-    def apply_log_transformation(self,DBObject,connection,column_list, table_name, col):
+    def apply_log_transformation(self,DBObject,connection,column_list, table_name, col, **kwargs):
         '''
             Operation id: 22
         '''
@@ -633,7 +633,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : apply_log_transformation : execution stop")
         return status
     
-    def delete_duplicate_records(self,DBObject,connection,column_list, table_name):
+    def delete_duplicate_records(self,DBObject,connection,column_list, table_name, **kwargs):
         logging.info("data preprocessing : CleaningClass : delete_duplicate_records : execution start")
         try:
             
