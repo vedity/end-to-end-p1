@@ -993,45 +993,9 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                                 activity_status = self.operation_end(DBObject, connection, activity_ids[i], op, temp_col_names)
 
                             if flag == 'True':
-                                
-                                # Get table name,schema and columns from dataset class.
-                                tbl_name,schema,cols = dc.make_dataset_schema() 
-                                file_name = None
-                                file_size = None
-                                page_name = 'Cleanup'
-
-                                # Make record for dataset table.
-                                row=dataset_name,file_name,file_size,table_name,selected_visibility,user_name,dataset_desc,page_name 
-                                
-                                # Convert row record into list of tuple.
-                                row_tuples = [tuple(row)] 
-
-                                logging.info("row tuples error"+str(row_tuples))
-
-                                # Insert the records into table and return status and dataset_id of the inserted values
-                                insert_status,dataset_id = DBObject.insert_records(connection,tbl_name,row_tuples,cols,Flag =1)
-                                
-                                if insert_status == 0:
-                                    
-                                    table_name = table_name.replace('di_',"").replace('_tbl',"")
-
-                                    # Create the new table based on the existing table and return status 0 if successfull else 1 
-                                    dataset_insert_status = dc.insert_raw_dataset(DBObject,connection,dataset_id,user_name,table_name,dataset_visibility,selected_visibility)
-                                   
-                                    if dataset_insert_status == 0:
-
-                                        # Command will update the dataset id  in the project table
-                                        sql_command = f'update mlaas.project_tbl set dataset_id={str(dataset_id)} where project_id={str(project_id)}'
-                                        
-                                        # Execute the sql query
-                                        update_status = DBObject.update_records(connection,sql_command)
-
-                                        return update_status
-                                    else:
-                                        return dataset_insert_status
-
-                                else:
-                                    return insert_status
+                                logging.info(" call <>")
+                                save_as_status = self.SaveAs(DBObject,connection,project_id,table_name,user_name,dataset_visibility,dataset_name,selected_visibility,dataset_desc)
+                                return save_as_status
                         else:
                             
                             return status
@@ -1334,4 +1298,50 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         logging.info("data preprocessing : PreprocessingClass : dag_executor : execution stop")
             
         return 0
+    
+    def SaveAs(self,DBObject,connection,project_id,table_name,user_name,dataset_visibility,dataset_name,selected_visibility,dataset_desc):
+        '''
+        Function used to create a new table with updated changes and insert a new record into dataset table and update the dataset_id into the project_tbl
+        '''
+        try:
+            # Get table name,schema and columns from dataset class.
+            tbl_name,schema,cols = dc.make_dataset_schema() 
+            file_name = None
+            file_size = None
+            page_name = 'Cleanup'
+
+            # Make record for dataset table.
+            row = dataset_name,file_name,file_size,table_name,selected_visibility,user_name,dataset_desc,page_name 
+                                
+            # Convert row record into list of tuple.
+            row_tuples = [tuple(row)] 
+
+            logging.info("row tuples error"+str(row_tuples))
+
+            # Insert the records into table and return status and dataset_id of the inserted values
+            insert_status,dataset_id = DBObject.insert_records(connection,tbl_name,row_tuples,cols,Flag =1)
+                                
+            if insert_status == 0:
+                                    
+                table_name = table_name.replace('di_',"").replace('_tbl',"")
+
+                # Create the new table based on the existing table and return status 0 if successfull else 1 
+                dataset_insert_status = dc.insert_raw_dataset(DBObject,connection,dataset_id,user_name,table_name,dataset_visibility,selected_visibility)
+                                   
+                if dataset_insert_status == 0:
+
+                    # Command will update the dataset id  in the project table
+                    sql_command = f'update mlaas.project_tbl set dataset_id={str(dataset_id)} where project_id={str(project_id)}'
+                                        
+                    # Execute the sql query
+                    update_status = DBObject.update_records(connection,sql_command)
+
+                    return update_status
+                else:
+                    return dataset_insert_status
+
+            else:
+                return insert_status
+        except Exception as exc:
+            return str(exc)
 

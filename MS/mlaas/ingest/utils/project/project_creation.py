@@ -137,6 +137,8 @@ class ProjectClass:
 
         if original_dataset_id == None:
             status,original_dataset_id,raw_dataset_id  = DatasetObject.make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name)   
+            logging.info(str(raw_dataset_id) + " <> raw_dataset_id")
+            logging.info(str(original_dataset_id) + " <> raw_dataset_id")
             if status ==2:
                 return 2,None,None
             else:
