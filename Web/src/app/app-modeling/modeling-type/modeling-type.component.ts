@@ -357,6 +357,33 @@ runningExpList: any = [];
     this.modalService.open(exlargeModal, { size: 'xl', windowClass: 'modal-holder', centered: true });
   };
 
+  checkexperimentname(event)
+{
+  var val=event.target.value;
+  if(val!=""){
+    this.apiservice.checkexperimentname(val).subscribe(
+      logs=>this.checksuccessHandler(logs,event.target),
+      error=>this.errorHandler(error)
+    )
+  }
+  else
+  this.checkuniuqename = false;
+}
+
+checkuniuqename=true;
+checksuccessHandler(data,target){
+  if (data.status_code == '200') {
+    this.checkuniuqename = true;
+    target.className = target.className.replace("ng-invalid", " ");
+    target.className = target.className + " ng-valid";
+  }
+  else {
+    this.checkuniuqename = false;
+    target.className = target.className.replace("ng-valid", " ");
+    target.className = target.className + " ng-invalid";
+  }
+}
+
   smallModal(modelingmodal: any) {
     this.modalService.open(modelingmodal, { size: 'md', windowClass: 'modal-holder', centered: true });
   }
