@@ -57,3 +57,13 @@ class ModelIsStillInQueue(Exception):
 
     def __str__(self):
         return (self.msg)
+        
+class ExperimentAlreadyExist(Exception):
+    """Experiment Does not Exist Exception"""
+    def __init__(self,status_code):
+        self.msg = "Experiment Already Exist"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+
+    def __str__(self):
+        return (self.msg)
