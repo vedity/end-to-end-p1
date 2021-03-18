@@ -34,7 +34,6 @@ logger = logging.getLogger('dataset_creation')
 
 #? Dataset Class Object
 DatasetObject = dc.DatasetClass()
-
 class DBClass:
 
     def read_data(self,file_path):
@@ -183,8 +182,17 @@ class DBClass:
         try:
             if Flag == 0 :
                 query = "INSERT INTO %s(%s) VALUES %%s " % (table_name, cols) # Make query
+                logging.info(str(table_name) + " <> table_name")
+                logging.info(str(cols) + " <> columns")
+                logging.info(str(query) + " <> Query")
+                logging.info(str(query) + " <> tuples")
                 extras.execute_values(cursor, query, tuples) # Excute insert query.
                 index = 0
+
+            elif Flag==1 :
+                query = "INSERT INTO %s(%s) VALUES %%s RETURNING dataset_id" % (table_name, cols) # Make query
+                extras.execute_values(cursor, query, tuples) # Excute insert query.
+                index = [row[0] for row in cursor.fetchall()][0]
             else:
                 query = "INSERT INTO %s(%s) VALUES %%s RETURNING index" % (table_name, cols) # Make query
                 extras.execute_values(cursor, query, tuples) # Excute insert query.
@@ -468,7 +476,8 @@ class DBClass:
     
     def get_query_string(self,connection,schema_id):
         try:
-            logging.info("data preprocess : SchemaClass : get_query_string : execution start")
+            logging.info("database : DBClass : get_query_string : Execution start")
+
             # sql command to get details from schema table  based on  schema id 
             sql_command = "select column_name,case when changed_column_name = '' then column_name else changed_column_name end column_list  from mlaas.schema_tbl where schema_id ="+str(schema_id)+"and column_attribute !='Ignore' order by index"
             
@@ -483,11 +492,11 @@ class DBClass:
                 #append string column name as alias  column list name
                 string_query +='"'+column_name[count]+'" as "'+column_list[count]+'",'
             
-            logging.info("data preprocess : SchemaClass : get_query_string : execution stop")
+            logging.info("database : DBClass : get_query_string : Execution stop")
             return string_query[:len(string_query)-1]
         except  Exception as exc:
-            logging.error("data preprocess : SchemaClass : get_query_string : Exception " + str(exc))
-            return exc
+            logging.error("database : DBClass : get_query_string : Exception " + str(exc))
+            return str(exc)
 
     
     def pagination(self,connection,table_name,start_index,length,sort_type,sort_index,global_search_value,customefilter,schema_id):
@@ -615,7 +624,7 @@ class DBClass:
         '''
         sql_command = "SELECT dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows,dataset_desc from mlaas.dataset_tbl Where dataset_id =" + str(dataset_id)
         
-        dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+        dataset_df=self.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         return dataset_df 
     
     def get_project_detail(self,DBObject,connection,project_id):
@@ -627,7 +636,7 @@ class DBClass:
         '''
         sql_command = "SELECT original_dataset_id,dataset_id from mlaas.project_tbl where project_id='"+str(project_id)+"'"
        
-        dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+        dataset_df=self.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         return dataset_df
     
     def get_table_name(self,connection,table_name):
@@ -780,16 +789,21 @@ class DBClass:
             -------
             target_cols (`List`): List of the Names of Target Columns.
         '''
-        
-        logging.info("database : DBClass : get_target_col : Execution Start")
-        
-        sql_command = f"select st.column_name from mlaas.schema_tbl st where st.schema_id = '{schema_id}' and st.column_attribute = 'Target'"
-        target_df = self.select_records(connection,sql_command)
-        
-        target_lst = target_df['column_name']
-        
-        logging.info("database : DBClass : get_target_col : Execution Stop")
-        return target_lst.tolist()
+        try:
+            logging.info("database : DBClass : get_target_col : Execution Start")
+            
+            sql_command = f"select st.column_name from mlaas.schema_tbl st where st.schema_id = '{schema_id}' and st.column_attribute = 'Target'"
+            target_df = self.select_records(connection,sql_command)
+            
+            target_lst = target_df['column_name']
+            
+            logging.info("database : DBClass : get_target_col : Execution Stop")
+            return target_lst.tolist()
+
+        except Exception as exc:
+            logging.error("database : DBClass : get_target_col : Exception " + str(exc))
+            return str(exc)
+
     
     def get_active_table_name(self, connection, dataset_id):
         '''
@@ -804,20 +818,24 @@ class DBClass:
             --------
             dataset_table_name (`String`): Name of the raw data table.
         '''
-        
-        logging.info("database : DBClass : get_active_table_name : Execution Start")
-        
-        dataframe = self.get_dataset_detail(self,connection,dataset_id)
+        try:
+            logging.info("database : DBClass : get_active_table_name : Execution Start")
+            
+            dataframe = self.get_dataset_detail(self,connection,dataset_id)
 
-        #Extract the dataframe based on its column name as key
-        table_name,dataset_visibility,user_name = str(dataframe['dataset_table_name'][0]),str(dataframe['dataset_visibility'][0]),str(dataframe['user_name'][0])
-        
-        if dataset_visibility == 'private':
-            dataset_table_name = user_name+'."'+table_name+'"'
-        else:
-            dataset_table_name = 'public'+'."'+table_name+'"'
+            #Extract the dataframe based on its column name as key
+            table_name,dataset_visibility,user_name = str(dataframe['dataset_table_name'][0]),str(dataframe['dataset_visibility'][0]),str(dataframe['user_name'][0])
+            
+            if dataset_visibility == 'private':
+                dataset_table_name = user_name+'."'+table_name+'"'
+            else:
+                dataset_table_name = 'public'+'."'+table_name+'"'
 
-        logging.info("database : DBClass : get_active_table_name : Execution Stop")
-        return dataset_table_name
+            logging.info("database : DBClass : get_active_table_name : Execution Stop")
+            return dataset_table_name
+
+        except Exception as exc:
+            logging.error("database : DBClass : get_active_table_name : Exception " + str(exc))
+            return str(exc)
 
     

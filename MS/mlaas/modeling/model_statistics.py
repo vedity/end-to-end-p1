@@ -520,6 +520,7 @@ class ModelStatisticsClass:
             Dictionary: It contains the accuracy_metrics, model_name, model_params, and the associated experiment_id.
         """
             # Get the model parameters for the associated experiment_ids.
+        exp_ids = tuple(experiment_ids)
         sql_command = 'select prms.key, prms.value, met.experiment_id from mlaas.params prms,mlaas.model_experiment_tbl met where prms.run_uuid=met.run_uuid and met.experiment_id in'+str(exp_ids)
         params_df = self.DBObject.select_records(self.connection, sql_command)
         if params_df is None:

@@ -1,5 +1,7 @@
 
 #* Relative Imports
+from preprocess.utils.preprocessing import PreprocessingClass
+from database import *
 
 #* Library Imports
 from datetime import datetime, timedelta
@@ -7,11 +9,12 @@ from datetime import datetime, timedelta
 #* Airflow Imports
 from airflow import DAG
 import airflow
-from airflow.operators.bash_operator import BashOperator
+from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.python_operator import PythonOperator
 from airflow.models import Variable
 
-
+#* Defining Objects
+PC_OBJ = PreprocessingClass(database,user,password,host,port)
 
 yesterday_date = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')
 
@@ -31,59 +34,79 @@ dag = DAG(
     schedule_interval = '@once',                         
 )
 
+#? Getting Required Parameters
 
-def get_params(run_id,**kwargs):
+master_dict = #MASTER_DICT 
 
+operation = master_dict['operation_dict']
+value_dict = master_dict['values_dict']
+schema_id = int(master_dict['schema_id'])
+dataset_id = int(master_dict['dataset_id'])
 
-    get_dict = kwargs['dag_run'].conf['operation']
+DBObject,connection,connection_string = PC_OBJ.get_db_connection()
+if connection == None :
+    raise DatabaseConnectionFailed(500)
 
-    my_var = Variable.set(run_id,get_dict)
+#Get the dataframe of dataset detail based on the dataset id
+dataframe = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
 
+#Extract the dataframe based on its column name as key
+table_name,dataset_visibility,user_name = str(dataframe['dataset_table_name'][0]),str(dataframe['dataset_visibility'][0]),str(dataframe['user_name'][0])
 
+if dataset_visibility == 'private':
+    dataset_table_name = user_name+'."'+table_name+'"'
+else:
+    dataset_table_name = 'public'+'."'+table_name+'"'
 
-def end_pipeline(dag,run_id,execution_date,ds,**kwargs):
+#get the Column list
+column_list = PC_OBJ.get_col_names(schema_id)
 
-    print("key (run_id): ",kwargs['key'])
+op_dict = {
+    1 : PC_OBJ.discard_missing_values,
+    2 : PC_OBJ.discard_noise,
+    3 : PC_OBJ.delete_above,
+    4 : PC_OBJ.delete_below,
+    5 : PC_OBJ.remove_noise,
+    6 : PC_OBJ.mean_imputation,
+    7 : PC_OBJ.median_imputation,
+    8 : PC_OBJ.mode_imputation,
+    9 : PC_OBJ.missing_category_imputation,
+    10 : PC_OBJ.end_of_distribution,
+    11 : PC_OBJ.frequent_category_imputation,
+    12 : PC_OBJ.missing_category_imputation,
+    13 : PC_OBJ.random_sample_imputation,
+    14 : PC_OBJ.repl_noise_mean,
+    15 : PC_OBJ.repl_noise_median,
+    16 : PC_OBJ.repl_noise_mode,
+    17 : PC_OBJ.repl_noise_eod,
+    18 : PC_OBJ.repl_noise_random_sample,
+    19 : PC_OBJ.repl_noise_arbitrary_val,
+    20 : PC_OBJ.rem_outliers_ext_val_analysis,
+    21 : PC_OBJ.rem_outliers_z_score,
+    22 : PC_OBJ.repl_outliers_mean_ext_val_analysis,
+    23 : PC_OBJ.repl_outliers_mean_z_score,
+    24 : PC_OBJ.repl_outliers_med_ext_val_analysis,
+    25 : PC_OBJ.repl_outliers_med_z_score,
+    26 : PC_OBJ.apply_log_transformation,
+    27 : PC_OBJ.label_encoding,
+    28 : PC_OBJ.one_hot_encoding,
+    29 : PC_OBJ.add_to_column,
+    30 : PC_OBJ.subtract_from_column,
+    31 : PC_OBJ.divide_column,
+    32 : PC_OBJ.multiply_column
+}
 
+#? Making Dynamic Tasks
+t1= DummyOperator(task_id='start',dag=dag)
+t2= DummyOperator(task_id='end',dag=dag)
 
-def dummy(**kwargs):
-
-    print("Ended")
-
-
-
-
-t1 = PythonOperator(task_id='get_params',provide_context=True,python_callable=get_params,dag=dag,)
-
-
-key = "{{ run_id }}"
-
-t2 = PythonOperator(task_id='get_key_operation',provide_context=True,python_callable=end_pipeline,dag=dag,
-                        op_kwargs={"key":key})
-        
-t3 = BashOperator(task_id='End', dag=dag, bash_command='echo task has ended')
-
-        
-
-t1 >> t2
-
-
-# operation=Variable.get(key) # we want to get here dynamically but  getting error here 
-# operation =  ast.literal_eval(operation)
-
-operation= #OPERATION_DICT # this will work statically (we give this dict static this is working properly but we want to get it dynamically by line no 65)
-op_dict = {1:dummy,4:dummy,5:dummy,7:dummy}
-
-t1.set_downstream(t2)
-
-previous_task = t2
+previous_task = t1
 i = 0
 daglist = []    
 
 for index in operation.keys():
-    dynamicTaskOne = BashOperator(
-    task_id='Function_start_' +str(index),
-    bash_command='echo "hello"',
+    dynamicTaskOne = DummyOperator(
+    task_id='Function_' +str(index) + '_Start',
     dag=dag,)
 
     for task in daglist:
@@ -92,12 +115,51 @@ for index in operation.keys():
     previous_task.set_downstream(dynamicTaskOne)
     daglist = []    
 
-    for col in operation[index]: 
+    value = value_dict[index]
+    for j,col in enumerate(operation[index]): 
+        
+        #? Which parameters should be given to which function
+        param_dict = {
+            1 : [DBObject,connection,column_list, dataset_table_name, [col]],
+            2 : [DBObject,connection,column_list, dataset_table_name, [col]],
+            3 : [DBObject,connection,column_list, dataset_table_name, [col], value[j]],
+            4 : [DBObject,connection,column_list, dataset_table_name, [col], value[j]],
+            5 : [DBObject,connection,column_list, dataset_table_name, [col]],
+            6 : [DBObject,connection,column_list, dataset_table_name, [col]],
+            7 : [DBObject,connection,column_list, dataset_table_name, [col]],
+            8 : [DBObject,connection,column_list, dataset_table_name, [col]],
+            9 : [DBObject,connection,column_list, dataset_table_name, [col], value[j], True],
+            10 : [DBObject,connection,column_list, dataset_table_name, [col]],
+            11 : [DBObject,connection,column_list, dataset_table_name, [col]],
+            12 : [DBObject,connection,column_list, dataset_table_name, [col], value[j]],
+            13 : [DBObject,connection,column_list, dataset_table_name, [col]],
+            14 : [DBObject,connection,column_list, dataset_table_name, [col]],
+            15 : [DBObject,connection,column_list, dataset_table_name, [col]],
+            16 : [DBObject,connection,column_list, dataset_table_name, [col]],
+            17 : [DBObject,connection,column_list, dataset_table_name, [col]],
+            18 : [DBObject,connection,column_list, dataset_table_name, [col]],
+            19 : [DBObject,connection,column_list, dataset_table_name, [col], value[j]],
+            20 : [DBObject,connection,column_list, dataset_table_name, [col]],
+            21 : [DBObject,connection,column_list, dataset_table_name, [col]],
+            22 : [DBObject,connection,column_list, dataset_table_name, [col]],
+            23 : [DBObject,connection,column_list, dataset_table_name, [col]],
+            24 : [DBObject,connection,column_list, dataset_table_name, [col]],
+            25 : [DBObject,connection,column_list, dataset_table_name, [col]],
+            26 : [DBObject,connection,column_list, dataset_table_name, [col]],
+            27 : [DBObject,connection,column_list, dataset_table_name, [col]],
+            28 : [DBObject,connection,column_list, dataset_table_name, [col], schema_id],
+            29 : [DBObject,connection,column_list, dataset_table_name, [col], value[j]],
+            30 : [DBObject,connection,column_list, dataset_table_name, [col], value[j]],
+            31 : [DBObject,connection,column_list, dataset_table_name, [col], value[j]],
+            32 : [DBObject,connection,column_list, dataset_table_name, [col], value[j]]
+        }
+        
         dynamicTask = PythonOperator(
             task_id='Operation_' + str(index) + "_col_" + str(col),
             dag=dag,
             provide_context=True,
-            python_callable=op_dict[index],)
+            python_callable=op_dict[index],
+            op_args=param_dict[index])
 
         dynamicTaskOne.set_downstream(dynamicTask)
         daglist.append(dynamicTask)
@@ -105,6 +167,6 @@ for index in operation.keys():
 
     i+=1
     if i == len(operation.keys()):
-        previous_task.set_downstream(t3)
+        previous_task.set_downstream(t2)
         for task in daglist:
-            task.set_downstream(t3)
+            task.set_downstream(t2)
