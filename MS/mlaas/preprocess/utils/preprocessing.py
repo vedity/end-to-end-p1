@@ -1034,37 +1034,37 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         try:
             logging.info("data preprocessing : PreprocessingClass : handover : execution start")
             
-            DBObject,connection,connection_string = self.get_db_connection()
+            DBObject,connection,connection_string = self.get_db_connection() #get db connection
             if connection == None :
                 raise DatabaseConnectionFailed(500)  
             
             #? Getting Dataframe
-            data_df = self.get_data_df(dataset_id,schema_id)
+            data_df = self.get_data_df(dataset_id,schema_id) #get dataframe
             if isinstance(data_df, str):
                 raise GetDataDfFailed(500)
             
             if scaling_type == 0:
-                data_df[:,1:] = self.standard_scaling(data_df[:,1:])
+                data_df[:,1:] = self.standard_scaling(data_df[:,1:]) #standard_scaling
             elif scaling_type == 1:
-                data_df[:,1:] = self.min_max_scaling(data_df[:,1:])
+                data_df[:,1:] = self.min_max_scaling(data_df[:,1:]) #min_max_scaling
             elif scaling_type == 2:
-                data_df[:,1:] = self.robust_scaling(data_df[:,1:])
+                data_df[:,1:] = self.robust_scaling(data_df[:,1:]) #robust_scaling
                     
-            feature_cols = list(data_df.columns)
-            tg_cols = DBObject.get_target_col(connection, schema_id)
+            feature_cols = list(data_df.columns) #get list of the columns
+            tg_cols = DBObject.get_target_col(connection, schema_id) #get list of the target columns
             for col in tg_cols:
-                feature_cols.remove(col)
+                feature_cols.remove(col) #remove target columns from list
             target_cols = [data_df.columns[0]]
-            target_cols += tg_cols
+            target_cols += tg_cols #add index column from target columns list
             
             input_features_df = data_df[feature_cols] #input_features_df
             target_features_df=data_df[target_cols] #target_features_df
             mt = ModelType()
-            problem_type = mt.get_model_type(target_features_df)
-            model_type = problem_type[0]
-            algorithm_type = problem_type[1]
-            target_type = problem_type[2]
-            problem_type_dict = '{"model_type": "'+str(model_type)+'","algorithm_type": "'+str(algorithm_type)+'","target_type": "'+str(target_type)+'"}'
+            problem_type = mt.get_model_type(target_features_df) #call get_model_type
+            model_type = problem_type[0] #model_type
+            algorithm_type = problem_type[1] #algorithm type
+            target_type = problem_type[2] #target type
+            problem_type_dict = '{"model_type": "'+str(model_type)+'","algorithm_type": "'+str(algorithm_type)+'","target_type": "'+str(target_type)+'"}' #create problem type dict
             
             feature_cols = str(feature_cols) #input feature_cols
             target_cols = str(target_cols) #target feature_cols
@@ -1077,7 +1077,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             cv = split_parameters['cv'] #get cv
             if len(cv) == 0:
                 cv = 0
-            
             random_state = split_parameters['random_state'] #get random_state
             test_ratio = split_parameters['test_ratio'] #get test_size
             valid_ratio = split_parameters['valid_ratio'] #get valid_size
@@ -1098,30 +1097,33 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             train_Y_filename = scale_dir+"/scaled_train_Y_data_" + unique_id #genrate train_Y file path
             test_X_filename =  scale_dir+"/scaled_test_X_data_" + unique_id  #genrate test_X file path  
             test_Y_filename =  scale_dir+"/scaled_test_Y_data_" + unique_id  #genrate test_Y file path     
-            valid_X_filename = "None"
-            valid_Y_filename = "None"
-            Y_valid_count= None
+            valid_X_filename = "None" #genrate valid_X file path     
+            valid_Y_filename = "None" #genrate valid_Y file path     
+            Y_valid_count= None #Initilize valid count
             X_train, X_valid, X_test, Y_train, Y_valid, Y_test=mt.get_split_data(input_features_df,target_features_df, int(random_state),float(test_ratio), valid_ratio, str(split_method))
             if split_method != 'cross_validation':
                 Y_valid_count= Y_valid.shape[0]
                 valid_X_filename = scale_dir+"/scaled_valid_X_data_" + unique_id #genrate valid_X file path     
                 valid_Y_filename = scale_dir+"/scaled_valid_Y_data_" + unique_id #genrate valid_Y file path     
-                np.save(valid_X_filename,X_valid.to_numpy()) #sa
-                np.save(valid_Y_filename,Y_valid.to_numpy())    
-            Y_train_count=Y_train.shape[0]
-            Y_test_count =Y_test.shape[0]        
-            np.save(train_X_filename,X_train.to_numpy())
-            np.save(train_Y_filename,Y_train.to_numpy())
-            np.save(test_X_filename,X_test.to_numpy())
-            np.save(test_Y_filename,Y_test.to_numpy())
+                np.save(valid_X_filename,X_valid.to_numpy()) #save X_valid
+                np.save(valid_Y_filename,Y_valid.to_numpy()) #save Y_valid   
+            Y_train_count=Y_train.shape[0] #train count
+            Y_test_count =Y_test.shape[0]  #test count      
+            np.save(train_X_filename,X_train.to_numpy()) #save X_train
+            np.save(train_Y_filename,Y_train.to_numpy()) #save Y_train
+            np.save(test_X_filename,X_test.to_numpy()) #save X_test
+            np.save(test_Y_filename,Y_test.to_numpy()) #save Y_test
         
-            scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_ratio)+', "test_ratio":'+ str(test_ratio)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'"}'
+            scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_ratio)+', "test_ratio":'+ str(test_ratio)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'"}' #genrate scaled split parameters
             logger.info("scaled_split_parameters=="+scaled_split_parameters)
             sql_command = f"update mlaas.project_tbl set target_features= '{target_cols}' ,input_features='{feature_cols}',scaled_split_parameters = '{scaled_split_parameters}',problem_type = '{problem_type_dict}' where dataset_id = '{dataset_id}' and project_id = '{project_id}' and user_name= '{user_name}'"
             status = DBObject.update_records(connection, sql_command)
+            if status==1:
+                raise ProjectUpdateFailed(500)
+                
             return status
             
-        except (DatabaseConnectionFailed,GetDataDfFailed) as exc:
+        except (DatabaseConnectionFailed,GetDataDfFailed,ProjectUpdateFailed) as exc:
             logging.error("data preprocessing : PreprocessingClass : handover : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : handover : " +traceback.format_exc())
             return exc.msg
