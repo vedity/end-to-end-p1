@@ -1014,9 +1014,27 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
             return exc.msg
             
-    def handover(self, dataset_id, schema_id, project_id, user_name,split_parameters,scaling_type = 0, val = None):
+    def handover(self, dataset_id, schema_id, project_id, user_name,split_parameters,scaling_type = 0):
+        """[This function is used to scaled data and store numpy file into the scaled dataset folder.]
+
+        Args:
+            dataset_id ([type]): [to get the dataframe for scaling and split]
+            schema_id ([type]): [to get column name]
+            project_id ([type]): [to update the entry in project_tble]
+            user_name ([type]): [to update the entry in project_tble]
+            split_parameters ([type]): [for spliling]
+            scaling_type (int, optional): [get scaling type]. Defaults to 0.
+
+        Raises:
+            DatabaseConnectionFailed: [description]
+            GetDataDfFailed: [description]
+            ProjectUpdateFailed: [description]
+
+        Returns:
+            status (`Intiger`): Status of the upload.
+        """
         '''
-            This function is used to store the scaled numpy file into the scaled dataset folder.
+            This function is used to scaled data and store numpy file into the scaled dataset folder.
             
             Args:
             -----
@@ -1072,7 +1090,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             target_cols = target_cols.replace("'",'"')
 
 
-            # #splitting parameters
+            #splitting parameters
             split_method =split_parameters['split_method'] #get split_method
             cv = split_parameters['cv'] #get cv
             if len(cv) == 0:
@@ -1120,7 +1138,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             status = DBObject.update_records(connection, sql_command)
             if status==1:
                 raise ProjectUpdateFailed(500)
-                
             return status
             
         except (DatabaseConnectionFailed,GetDataDfFailed,ProjectUpdateFailed) as exc:
