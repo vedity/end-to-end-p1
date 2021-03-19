@@ -486,12 +486,16 @@ class CheckModelStatusClass(APIView):
                         
                         experiment_name = request.query_params.get('experiment_name')
         
-                        experiment_data =ModelStatObject.check_model_status(project_id,experiment_name)
-                        # if len(experiment_data) != 0:
-                        # if isinstance(experiment_data, pd.DataFrame):
-                        #         status = experiment_data['state'][0]
-                        if isinstance(experiment_data,str): #check the instance of dataset_df
-                                status_code,error_msg=json_obj.get_Status_code(experiment_data) # extract the status_code and error_msg from project_df
+                        model_status = ModelStatObject.check_model_status(project_id,experiment_name)
+                        if model_status == 0:
+                                status = 'running'
+                        elif model_status == 1:
+                                status = 'success'
+                        else:
+                                status = 'failed'
+                        # status = experiment_data['state'][0]
+                        if isinstance(model_status,str): #check the instance of dataset_df
+                                status_code,error_msg=json_obj.get_Status_code(model_status) # extract the status_code and error_msg from project_df
                                 logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code :"+ status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
