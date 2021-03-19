@@ -107,3 +107,4 @@ export class ModelingTypeApiService {
     return this.httpClient.get(this.baseUrl + "modeling/hyperparameters/", { headers: this.headers, params });
   }
 }
+
