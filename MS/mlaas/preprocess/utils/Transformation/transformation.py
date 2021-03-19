@@ -10,6 +10,7 @@
 #* Library Imports
 import logging
 import traceback
+import pandas as pd
 
 #* Relative Imports
 from . import duplicate_data_handling as ddh
@@ -20,6 +21,9 @@ from . import math_functions as mf
 #* Commong Utilities
 from common.utils.database import db
 from common.utils.logger_handler import custom_logger as cl
+from common.utils.activity_timeline import activity_timeline
+from database import *
+
 
 #* Defining Logger
 user_name = 'admin'
@@ -36,6 +40,10 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
     '''
         Handles orchastration of the transforamtion related Functions.
     '''
+    
+    def __init__(self):
+        self.op_diff = 8
+        self.AT = activity_timeline.ActivityTimelineClass(database, user, password, host, port)
     
     #* DUPLICATE DATA REMOVAL
     
@@ -115,7 +123,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
     #     logging.info("data preprocessing : TransformationClass : label_encoding : execution stop")
     #     return dataframe
     
-    def label_encoding(self, DBObject,connection,column_list, table_name, col, **kwargs):
+    def label_encoding(self, DBObject,connection,project_id,column_list, table_name, col, **kwargs):
         '''
             Operation id: 27
         '''
@@ -135,7 +143,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         logging.info("data preprocessing : TransformationClass : label_encoding : execution stop")
         return status
 
-    def one_hot_encoding(self, DBObject,connection,column_list, table_name, col, schema_id, **kwargs):
+    def one_hot_encoding(self, DBObject,connection,project_id,column_list, table_name, col, schema_id, **kwargs):
         '''
             Operation id: 28
         '''
@@ -176,7 +184,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
     
     #* MATH OPERATIONS
     
-    def add_to_column(self, DBObject,connection,column_list, table_name, col, value, **kwargs):
+    def add_to_column(self, DBObject,connection,project_id,column_list, table_name, col, value, **kwargs):
         '''
             Operation id: 30
         '''
@@ -194,7 +202,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         logging.info("data preprocessing : TransformationClass : add_to_column : execution stop")
         return status
     
-    def subtract_from_column(self, DBObject,connection,column_list, table_name, col, value, **kwargs):
+    def subtract_from_column(self, DBObject,connection,project_id,column_list, table_name, col, value, **kwargs):
         '''
             Operation id: 31
         '''
@@ -212,7 +220,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         logging.info("data preprocessing : TransformationClass : subtract_from_column : execution stop")
         return status
     
-    def multiply_column(self, DBObject,connection,column_list, table_name, col, value, **kwargs):
+    def multiply_column(self, DBObject,connection,project_id,column_list, table_name, col, value, **kwargs):
         '''
             Operation id: 32
         '''
@@ -230,7 +238,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         logging.info("data preprocessing : TransformationClass : multiply_column : execution stop")
         return status
     
-    def divide_column(self, DBObject,connection,column_list, table_name, col, value, **kwargs):
+    def divide_column(self, DBObject,connection,project_id,column_list, table_name, col, value, **kwargs):
         '''
             Operation id: 33
         '''
@@ -246,5 +254,84 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
                 return exc
 
         logging.info("data preprocessing : TransformationClass : divide_column : execution stop")
+        return status
+    
+    
+    #* ACTIVITY TIMELINE FUNCTIONS
+    
+    def get_activity_desc(self, DBObject, connection, operation_id, col_name, code = 1):
+        '''
+            Used to get preprocess activity description from the activity master table.
+        
+            Returns:
+            --------
+            description (`String`): Description for the activity.
+        '''
+        logging.info("data preprocessing : PreprocessingClass : get_activity_desc : execution start")
+        
+        #? Getting Description
+        sql_command = f"select replace (amt.activity_name || ' ' || amt.activity_description, '*', {col_name}) as description from mlaas.activity_master_tbl amt where amt.activity_id = '{operation_id}' and amt.code = '{code}'"
+        
+        desc_df = DBObject.select_records(connection,sql_command)
+        if not isinstance(desc_df, pd.DataFrame):
+            return "Failed to Extract Activity Description."
+        
+        #? Fatching the description
+        description = desc_df['description'].tolist()[0]
+        
+        logging.info("data preprocessing : PreprocessingClass : get_activity_desc : execution stop")
+        
+        return description
+            
+    def operation_start(self, DBObject, connection, operation_id, project_id, col_name):
+        '''
+            Used to Insert Activity in the Activity Timeline Table.
+            
+            Returns:
+            --------
+            activity_id (`Intiger`): index of the activity in the activity transection table.
+        '''
+        logging.info("data preprocessing : PreprocessingClass : operation_start : execution start")
+            
+        #? Transforming the operation_id to the operation id stored in the activity timeline table. 
+        operation_id += self.op_diff
+        
+        #? Getting Activity Description
+        desc = self.get_activity_desc(DBObject, connection, operation_id, col_name, code = 1)
+        
+        #? Getting Dataset_id & User_Name
+        sql_command = f"select pt.dataset_id,pt.user_name from mlaas.project_tbl pt  where pt.project_id = '{project_id}'"
+        details_df = DBObject.select_records(connection,sql_command) 
+        dataset_id,user_name = details_df['dataset_id'][0],details_df['user_name'][0]
+        
+        #? Inserting the activity in the activity_detail_table
+        _,activity_id = self.AT.insert_user_activity(operation_id,user_name,project_id,dataset_id,desc,column_id =col_name)
+        
+        logging.info("data preprocessing : PreprocessingClass : operation_start : execution stop")
+        
+        return activity_id
+    
+    def operation_end(self, DBObject, connection, activity_id, operation_id, col_name):
+        '''
+            Used to update Activity description when the Activity ends.
+            
+            Returns:
+            --------
+            status (`Intiger`): Status of the updation.
+        '''
+        
+        logging.info("data preprocessing : PreprocessingClass : operation_end : execution start")
+        
+        #? Transforming the operation_id to the operation id stored in the activity timeline table. 
+        operation_id += self.op_diff
+        
+        #? Getting Activity Description
+        desc = self.get_activity_desc(DBObject, connection, operation_id, col_name, code = 2)
+        
+        #? Changing the activity description in the activity detail table 
+        status = self.AT.update_activity(activity_id,desc)
+        
+        logging.info("data preprocessing : PreprocessingClass : operation_end : execution stop")
+        
         return status
     

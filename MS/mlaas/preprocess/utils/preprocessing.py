@@ -1147,7 +1147,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         
         return description
             
-    def operation_start(self, DBObject, connection, operation_id, user_name, project_id, dataset_id, col_name):
+    def operation_start(self, DBObject, connection, operation_id, project_id, col_name):
         '''
             Used to Insert Activity in the Activity Timeline Table.
             
@@ -1162,6 +1162,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         
         #? Getting Activity Description
         desc = self.get_activity_desc(DBObject, connection, operation_id, col_name, code = 1)
+        
+        #? Getting Dataset_id & User_Name
+        sql_command = f"select pt.dataset_id,pt.user_name from mlaas.project_tbl pt  where pt.project_id = '{project_id}'"
+        details_df = DBObject.select_records(connection,sql_command) 
+        dataset_id,user_name = details_df['dataset_id'][0],details_df['user_name'][0]
         
         #? Inserting the activity in the activity_detail_table
         _,activity_id = self.AT.insert_user_activity(operation_id,user_name,project_id,dataset_id,desc,column_id =col_name)
@@ -1263,7 +1268,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
 
         return dag_id
     
-    def dag_executor(self,project_id, dataset_id, schema_id, request):
+    def dag_executor(self,project_id, dataset_id, schema_id, request, flag ,selected_visibility,dataset_name ,dataset_desc):
         
         logging.info("data preprocessing : PreprocessingClass : dag_executor : execution start")
         
@@ -1284,7 +1289,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         "operation_dict": op_dict,
         "values_dict": val_dict,
         "schema_id": schema_id,
-        "dataset_id": dataset_id
+        "dataset_id": dataset_id,
+        "project_id": project_id
         }
         
         json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
