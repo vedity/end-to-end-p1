@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { DataTableDirective } from 'angular-datatables';
 import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
@@ -8,6 +8,7 @@ import bsCustomFileInput from 'bs-custom-file-input';
 import { createdataset } from './dataset.model'
 import { NgForm } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-list-database',
   templateUrl: './list-database.component.html',
@@ -20,14 +21,25 @@ export class ListDatabaseComponent implements OnInit {
   dtOptions: DataTables.Settings = {
     scrollCollapse: true,
     scrollY: "calc(100vh - 520px)",
+    autoWidth:false
   };
   dtTrigger: Subject<any> = new Subject<any>();
   data: createdataset = new createdataset();
   filter: boolean = true;
   loaderdiv = false;
   f: NgForm;
-  constructor(public apiService: ProjectApiService, public toaster: ToastrService,private modalService: NgbModal) { }
+  constructor(public apiService: ProjectApiService, public toaster: ToastrService,private modalService: NgbModal,public router:Router) { }
   transactions: any = [];
+
+	@HostListener('window:resize', ['$event'])
+	onResize(event) {
+    if (this.datatableElement.dtInstance) {
+      this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
+        dtInstance.columns.adjust().draw();
+      })
+    }
+	}
+
   ngOnInit(): void {
     this.data.isprivate = true;
     bsCustomFileInput.init();
@@ -53,7 +65,9 @@ export class ListDatabaseComponent implements OnInit {
       this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
         dtInstance.columns().every(function () {
           const that = this;
+          
           $('#input_'+ this.index("visible")).on('keyup change', function () {
+            console.log(this['value']);
             if (that.search() !== this['value']) {
               that
                 .search(this['value'])
@@ -61,11 +75,12 @@ export class ListDatabaseComponent implements OnInit {
             }
           });
         });
+        dtInstance.columns.adjust();
       });
     }
     else {
       this.rendered();
-      this.dtTrigger.next();
+     // this.dtTrigger.next();
     }
   }
 
@@ -148,20 +163,28 @@ export class ListDatabaseComponent implements OnInit {
     });
   }
 
+  
+
   rendered() {
-    this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
-      dtInstance.columns().every(function () {
-        const that = this;
-        $('#input_'+ this.index("visible")).on('keyup change', function () {
-          if (that.search() !== this['value']) {
-            that
-              .search(this['value'])
-              .draw();
-          }
-        });
-      });
-      dtInstance.destroy();
-    });
+    let currentUrl = this.router.url;
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+    this.router.onSameUrlNavigation = 'reload';
+    this.router.navigate([currentUrl]);
+
+    // this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
+    //   dtInstance.destroy();
+    //   dtInstance.columns().every(function () {
+    //     const that = this;
+    //     $('#input_'+ this.index("visible")).on('keyup change', function () {
+    //       if (that.search() !== this['value']) {
+    //         that
+    //           .search(this['value'])
+    //           .draw();
+    //       }
+    //     });
+    //   });
+    // });
+    // this.dtTrigger.next();
   }
 
   errorStatus: boolean = true

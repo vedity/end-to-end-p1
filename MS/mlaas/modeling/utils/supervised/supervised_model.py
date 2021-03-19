@@ -15,6 +15,8 @@ import datetime
 from .regression.regression_model import RegressionClass as RC
 from .classification.classification_model import ProbabilisticClass as PC
 from common.utils.logger_handler import custom_logger as cl
+from modeling.algorithm_detector import AlgorithmDetector
+from modeling.split_data import SplitData
 
 user_name = 'admin'
 log_enable = True
@@ -25,74 +27,31 @@ LogObject.log_setting()
 logger = logging.getLogger('model_identifier')
 
 class SupervisedClass(RC,PC):
-    
-
-    def supervised_algorithm(self,Model_Mode,input_features_list,target_features_list,
-                             input_df,target_df, SplitDataObject, model_type, algorithm_type, DBObject, connection, 
-                             connection_string, project_id,dataset_id,user_id):
+   
+    def supervised_algorithm(self, Model_Mode, user_id, project_id, dataset_id, 
+                             DBObject, connection,experiment_name,experiment_desc,model_type):
         
         """This function is used to call supervised algorithm.
         """
         logging.info("modeling : SupervisedClass : supervised_algorithm : execution start")
-    
-        # reg_type = 0
-        # cls_type = 0
-        
-        # for i in range(1,len(target_df.columns)):
-        #     Total_Length = len(target_df.iloc[:,i])
-        #     Unq_Length = len(target_df.iloc[:,i].unique())
-            
-        #     Thresh_Hold = int((Total_Length * 10) / 100)
-            
-        #     if Thresh_Hold < Unq_Length :
-        #         reg_type = 1
-        #     else:
-        #         cls_type = 1
 
-        # It will check whether target is regressor or classifier.
-        X_train, X_valid, X_test, y_train, y_valid, y_test = SplitDataObject.get_split_data(input_df, target_df)
+        AlgorithmDetectorObject = AlgorithmDetector(DBObject, connection)
         
+        model_type_dict = AlgorithmDetectorObject.get_model_type(project_id,dataset_id)
+        
+        algorithm_type = model_type_dict['algorithm_type']
+        target_type = model_type_dict['target_type']
+
         if model_type == "Regression" :
             # Call Regression Class's method
-            super(SupervisedClass,self).regression_model(Model_Mode,
-                                                        input_features_list,
-                                                        target_features_list,
-                                                        X_train, 
-                                                        X_valid,
-                                                        X_test, 
-                                                        y_train, 
-                                                        y_valid, 
-                                                        y_test,
-                                                        SplitDataObject,
-                                                        model_type,
-                                                        algorithm_type,
-                                                        DBObject, 
-                                                        connection, 
-                                                        connection_string,
-                                                        project_id,
-                                                        dataset_id,
-                                                        user_id)
+            super(SupervisedClass,self).regression_model(Model_Mode, user_id, project_id, dataset_id,
+                                                        model_type, algorithm_type,target_type,DBObject,connection,experiment_name,experiment_desc)
                 
                                                 
         elif model_type == "Classification" :
-            
             # Call Probabilistic Class's method
-            super(SupervisedClass,self).classification_model(Model_Mode,
-                                                         input_features_list,
-                                                         target_features_list,
-                                                         X_train, 
-                                                         X_valid,
-                                                         X_test, 
-                                                         y_train, 
-                                                         y_valid, 
-                                                         y_test,
-                                                         SplitDataObject, 
-                                                         DBObject, 
-                                                         connection, 
-                                                         connection_string,
-                                                         project_id,
-                                                         dataset_id,
-                                                         user_id)
+            super(SupervisedClass,self).classification_model(Model_Mode, user_id, project_id, dataset_id,
+                                                        model_type, algorithm_type,target_type,DBObject,connection,experiment_name,experiment_desc)
         
         else:
             print("please select appropriate target")
@@ -100,68 +59,23 @@ class SupervisedClass(RC,PC):
         logging.info("modeling : SupervisedClass : supervised_algorithm : execution end")
         
         
-    def run_regression_model(self,model_id,model_name,model_type,Model_Mode, input_features_list,
-                target_features_list,input_df,target_df,split_data_object, DBObject, connection, 
-                connection_string,project_id,dataset_id,user_id):
         
-        """This function is used to run model when it is in manual mode.
-
-        Args:
-            model_id ([integer]): [unique id of the model.]
-            model_name ([string]): [unique name of the model.]
-            model_type ([string]): [type of the model.]
-            model_parameters ([dict]): [parameters for the model.]
-            Model_Mode ([type]): [mode of the model.]
-            input_features_list ([list]): [input features list]
-            target_features_list ([list]): [target features list]
-            input_df ([dataframe]): [input features dataframe.]
-            target_df ([dataframe]): [target features dataframe.]
-            project_id ([integer]): [unique id of the project.]
-            dataset_id ([integer]): [unique id of the dataset.]
-            user_id ([integer]): [unique id of the user.]
-        """
+        
+    def run_supervised_model(self, Model_Mode,user_id,project_id,dataset_id,DBObject,connection,model_type, 
+                            model_id, experiment_name,experiment_desc):
+        
         logging.info("modeling : SupervisedClass : run_regression_model : execution start") 
         # Call the super class method.
-        X_train, X_valid, X_test, Y_train, Y_valid, Y_test = split_data_object.get_split_data(input_df, target_df)
-        super(SupervisedClass,self).run_regression_model(model_id,model_name,model_type,
-                                                        Model_Mode, input_features_list, target_features_list, 
-                                                        X_train, X_valid, X_test, Y_train, Y_valid, Y_test, split_data_object,
-                                                        project_id,dataset_id,user_id)
+        if model_type == 'Regression':
+            
+            super(SupervisedClass, self).run_regression_model(Model_Mode,user_id,project_id,dataset_id,
+                                        DBObject,connection,model_id, experiment_name,experiment_desc)
+        else:
+            print("Classification is to be implemented")
         
         logging.info("modeling : SupervisedClass : run_regression_model : execution end") 
-         
-         
-        
-    def run_classification_model(self,model_id,model_name,model_type,Model_Mode,input_features_list,
-                target_features_list,input_df,target_df,split_data_object,DBObject, connection, 
-                connection_string,project_id,dataset_id,user_id):
-        
-        """This function is used to run model when it is in manual mode.
 
-        Args:
-            model_id ([integer]): [unique id of the model.]
-            model_name ([string]): [unique name of the model.]
-            model_type ([string]): [type of the model.]
-            model_parameters ([dict]): [parameters for the model.]
-            Model_Mode ([type]): [mode of the model.]
-            input_features_list ([list]): [input features list]
-            target_features_list ([list]): [target features list]
-            input_df ([dataframe]): [input features dataframe.]
-            target_df ([dataframe]): [target features dataframe.]
-            project_id ([integer]): [unique id of the project.]
-            dataset_id ([integer]): [unique id of the dataset.]
-            user_id ([integer]): [unique id of the user.]
-        """
-        logging.info("modeling : SupervisedClass : run_classification_model : execution start") 
-        # Call super class's method.
-        X_train, X_valid, X_test, Y_train, Y_valid, Y_test = split_data_object.get_split_data(input_df, target_df)
-        super(SupervisedClass,self).run_classification_model(model_id,model_name,model_type,split_data_object,
-                                                          Model_Mode,input_features_list,target_features_list,
-                                                          X_train, X_valid, X_test, Y_train, Y_valid, Y_test,
-                                                          project_id,dataset_id,user_id)
-        
-        logging.info("modeling : SupervisedClass : run_classification_model : execution end") 
-         
+
          
         
         

@@ -1,6 +1,10 @@
 from selenium import webdriver  
 import time  
-from selenium.webdriver.common.keys import Keys  
+#from selenium.webdriver.common.keys import Keys  
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 import os
 print("sample test case started")  
 #driver = webdriver.Chrome()  
@@ -9,16 +13,25 @@ print("sample test case started")
 driver=webdriver.Firefox()
 
 #maximize the window size  
-driver.maximize_window()
+driver.maximize_window() 
 
 #navigate to the url  
-driver.get("localhost:4200/")  #get login page
+driver.get("localhost:4200/")  #get login page 
 #identify the login page  text box and enter the value 
 driver.find_element_by_id("email").clear() #clear the input
 driver.find_element_by_id("email").send_keys("nisha") #send value for email
 driver.find_element_by_id("password").clear()
 driver.find_element_by_id("password").send_keys("nisha") #send value for password 
 driver.find_element_by_id("btnsubmit").click()
+
+# try:
+#     WebDriverWait(driver, 3).until(EC.alert_is_present(),'Timed out waiting for PA creation ' +'confirmation popup to appear.')
+
+#     alert = driver.switch_to.alert
+#     alert.accept()
+#     print("alert accepted")
+# except TimeoutException:
+#     print("no alert")
 
 time.sleep(3)  #sleep time for page loading
 time.sleep(3)

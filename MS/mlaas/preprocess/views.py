@@ -16,7 +16,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .utils.Exploration import dataset_exploration
 from .utils import preprocessing
-
+from .utils.cleaning import missing_value_handling
 from .utils.schema.schema_creation import *
 from common.utils.json_format.json_formater import *
 from common.utils.database import db
@@ -35,6 +35,8 @@ logger = logging.getLogger('preprocess_view')
 DBObject=db.DBClass() #Get DBClass object
 connection,connection_string=DBObject.database_connection(database,user,password,host,port) #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 preprocessObj =  preprocessing.PreprocessingClass(database,user,password,host,port) #initialize Preprocess class object
+
+
 
 
 class DatasetExplorationClass(APIView):
@@ -89,7 +91,6 @@ class DatasetExplorationClass(APIView):
 #            return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 
 
 
-
 class SchemaSaveClass(APIView):
 
         def post(self,request,format=None):
@@ -129,11 +130,6 @@ class SchemaSaveClass(APIView):
                         logging.error("data preprocess : SchemaSaveClass : POST Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
                         
-
-
-
-
-
 
 # Class to retrive & insert for Schema data
 # It will take url string as mlaas/ingest/dataset_schema/. 
@@ -245,6 +241,7 @@ class ScheamColumnListClass(APIView):
                                 logging.error("data preprocess : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
                                 return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
+#preprocessing Rest API
 class OperationListClass(APIView):
         
         def post(self, request, format=None):
@@ -264,13 +261,14 @@ class OperationListClass(APIView):
                 '''
                 try:
                         logging.info("data preprocess : OperationListClass : POST Method : execution start")
-                        
-                        dataset_id = request.query_params.get('dataset_id') #get dataset id
-                        schema_id = request.query_params.get('schema_id') #get schema id
-                        column_ids = request.query_params.get('column_ids') #get column_id
-                        column_ids = column_ids[1:-1].split(",") #split columnids by comma sepration
-                        column_ids = [int(i) for i in column_ids] #convert all ids to int
+                        data = json.dumps(request.data) #get handling json
+                        data = json.loads(data) 
+                        dataset_id = data['dataset_id']
+                        schema_id = data['schema_id']
 
+                        column_ids = data['column_ids']
+                        column_ids = column_ids.split(",") #split columnids by comma sepration
+                        column_ids = [int(i) for i in column_ids] #convert all ids to int
                         operation = preprocessObj.get_possible_operations(dataset_id,schema_id,column_ids) #call get_possible_operation class
                         if isinstance(operation,list):  
                                         logging.info("data preprocess : OperationListClass : POST Method : execution stop")
@@ -315,9 +313,8 @@ class MasterOperationListClass(APIView):
                                 logging.error("data preprocess : MasterOperationListClass : GET Method : "+ traceback.format_exc())
                                 return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
-class GetColumnListClass(APIView):
-        
-        def post(self, request, format=None):
+class GetColumnListClass(APIView):        
+        def get(self, request, format=None):
                 '''
                 This class is used get column names for the data cleanup page.
                 Args  : 
@@ -332,11 +329,11 @@ class GetColumnListClass(APIView):
                         
                         schema_id = request.query_params.get('schema_id') #get schema id
                         
-                        columns = preprocessObj.get_col_names(schema_id)
-                        if isinstance(columns,list): 
-                                        response = [{"column_id": i, "col_name": name} for i,name in enumerate(columns)]
+                        column_json = preprocessObj.get_col_names(schema_id, True)
+                        if isinstance(column_json,list): 
+                                        
                                         logging.info("data preprocess : GetColumnListClass : POST Method : execution stop")
-                                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":response})
+                                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":column_json})
                         else:
                                         status_code,error_msg=json_obj.get_Status_code(columns) # extract the status_code and error_msg from schema_data
                                         logging.info("data preprocess : GetColumnListClass : POST Method : execution stop : status_code :"+status_code)
@@ -346,3 +343,100 @@ class GetColumnListClass(APIView):
                                 logging.error("data preprocess : GetColumnListClass : POST Method : "+ traceback.format_exc())
                                 return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
+class CleanupSave(APIView):
+        def post(self, request, format=None):
+                '''
+                This class is used to save clean data for the data cleanup page.
+                Args  : 
+                        schema_id(Integer): schema id of the dataset.
+                        datasetid(Integer): dataset id of the dataset.
+                        data(JSON Body): column id, handling id. 
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival failed or successfull),
+                        Response(return false if failed otherwise json data)
+                '''
+                try:
+                        logging.info("data preprocess : CleanupSave : POST Method : execution start")
+                        project_id = request.query_params.get('project_id') #get schema id
+                        schema_id = request.query_params.get('schema_id') #get schema id
+                        dataset_id = request.query_params.get('dataset_id') #get dataset id
+                        method_flag = request.query_params.get('flag') #get dataset id
+                        logging.info(str(method_flag) +" checking")
+                        if method_flag == 'True':
+                                visibility = request.query_params.get('visibility') #get schema id
+                                dataset_name = request.query_params.get('dataset_name') #get dataset id
+                                dataset_desc = request.query_params.get('dataset_desc') #get dataset id
+                        else:
+                                visibility = dataset_name = dataset_desc = None
+                        data = json.dumps(request.data) #get handling json
+                        data = json.loads(data) 
+                        operation = preprocessObj.master_executor(project_id, dataset_id,schema_id,data,method_flag,visibility ,dataset_name ,dataset_desc )
+                        logging.info("data preprocess : CleanupSave : POST Method : execution stop")
+                        if isinstance(operation,int): 
+                                    
+                                logging.info("data preprocess : CleanupSave : POST Method : execution stop")
+                                return Response({"status_code":"200","error_msg":"Successfull retrival","response":"true"})
+                        else:
+                                status_code,error_msg=json_obj.get_Status_code(operation) # extract the status_code and error_msg from schema_data
+                                logging.info("data preprocess : CleanupSave : POST Method : execution stop : status_code :"+status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+
+                except Exception as e:
+                        logging.error("data preprocess : CleanupSave : POST Method : Exception :" + str(e))
+                        logging.error("data preprocess : CleanupSave : POST Method : "+ traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+                
+class ScalingSplitClass(APIView):
+        def post(self, request, format=None):
+                try:
+                        logging.info("data preprocess : HandoverClass : POST Method : execution start")
+                        schema_id = request.query_params.get('schema_id') #get schema id
+                        dataset_id = request.query_params.get('dataset_id') #get dataset id
+                        project_id = request.query_params.get('project_id') #get dataset id
+                        user_name = request.query_params.get('user_name') #get dataset id
+                        scaling_operation = request.query_params.get('scaling_op') #get scaling op
+                        split_method = request.query_params.get('split_method') #get scaling method
+                        cv = request.query_params.get('cv')  #get scaling method
+                        valid_ratio = request.query_params.get('valid_ratio')  #get valid ratio
+                        test_ratio = request.query_params.get('test_ratio') #get test ratio
+                        random_state = request.query_params.get('random_state') #get random state
+                        split_parameters = {'split_method': split_method ,'cv': cv,'valid_ratio': valid_ratio, 'test_ratio': test_ratio,'random_state': random_state} #split parameters
+                        status = preprocessObj.handover(dataset_id, schema_id, project_id, user_name,split_parameters, scaling_operation)
+                        logging.info("data preprocess : ScalingSplitClass : POST Method : execution stop")
+                        if isinstance(status,int):     
+                                logging.info("data preprocess : ScalingSplitClass : POST Method : execution stop")
+                                return Response({"status_code":"200","error_msg":"Successfull retrival","response":"true"})
+                        else:
+                                status_code,error_msg=json_obj.get_Status_code(status) # extract the status_code and error_msg from schema_data
+                                logging.info("data preprocess : ScalingSplitClass : POST Method : execution stop : status_code :"+status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                except Exception as e:
+                        logging.error("data preprocess : ScalingSplitClass : POST Method : Exception :" + str(e))
+                        logging.error("data preprocess : ScalingSplitClass : POST Method : "+ traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+        
+
+class Scalingtype(APIView):
+        def get(self,request,format=None):
+                try :
+                        logging.info("data preprocess : ScheamAttributeListClass : POST Method : execution start")
+                        column_attribute = [{"id" : 0,"name": "Standard Scaler"},{"id" : 1,"name": "Min-Max"},{"id": 2,"name": "Robust"}]
+                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":column_attribute})
+                except Exception as e:
+                        logging.error("data preprocess : ScheamAttributeListClass : POST Method : Exception :" + str(e))
+                        logging.error("data preprocess : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+
+class TrainValidHoldout(APIView):
+        def get(self,request,format=None):
+                try :
+                        logging.info("data preprocess : TrainValidHoldout : GET Method : execution start")
+                        holdout = [{"id" : 1,"value": "95-0-5"},{"id" : 2,"value": "90-5-5"},{"id" : 3,"value": "85-5-10"},{"id" : 4,"value": "80-10-10"},{"id" : 5,"value": "75-10-15"},{"id" : 6,"value": "70-15-15"},{"id" : 7,"value": "65-15-20"},{"id" : 8,"value": "60-20-20"}]
+                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":holdout})
+                except Exception as e:
+                        logging.error("data preprocess : TrainValidHoldout : GET Method : Exception :" + str(e))
+                        logging.error("data preprocess : TrainValidHoldout : POST Method : "+ traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+
+                

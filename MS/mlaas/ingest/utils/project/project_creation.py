@@ -55,7 +55,7 @@ class ProjectClass:
         # Project table name
         table_name = 'mlaas.project_tbl'
         # Columns for project table
-        cols = 'project_name,project_desc,user_name,original_dataset_id,dataset_id' 
+        cols = 'project_name,project_desc,user_name,original_dataset_id,dataset_id,cleanup_dag_id' 
         # Schema for project table.
         schema ="project_id bigserial,"\
                 "project_name  text,"\
@@ -66,7 +66,13 @@ class ProjectClass:
                 "user_name  text,"\
                 "original_dataset_id  bigint,"\
                 "dataset_id bigint,"\
-                "schema_id bigserial ,"\
+                "schema_id bigserial,"\
+                "cleanup_dag_id text,"\
+                "model_dag_id text,"\
+                "input_features text,"\
+                "target_features text,"\
+                "scaled_split_parameters text ,"\
+                "problem_type text,"\
                 "created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()" 
                 
         logging.info("data ingestion : ProjectClass : make_project_schema : execution end")
@@ -86,7 +92,10 @@ class ProjectClass:
             [tuple]: [it will return records in the form of tuple.]
         """
         logging.info("data ingestion : ProjectClass : make_project_records : execution start")
-        row = project_name,project_desc,user_name,original_dataset_id,dataset_id
+        
+        cleanup_dag_id = preprocessObj.get_cleanup_dag_name()
+        logging.info("---------->"+str(cleanup_dag_id))
+        row = project_name,project_desc,user_name,original_dataset_id,dataset_id,cleanup_dag_id
         row_tuples = [tuple(row)] # Make record for project table.
         logging.info("data ingestion : ProjectClass : make_project_records : execution end")
         return row_tuples
@@ -127,8 +136,13 @@ class ProjectClass:
         DatasetObject = dataset_creation.DatasetClass()
 
         if original_dataset_id == None:
-            _,original_dataset_id,raw_dataset_id  = DatasetObject.make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name)
-            dataset_id = raw_dataset_id
+            status,original_dataset_id,raw_dataset_id  = DatasetObject.make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name)   
+            logging.info(str(raw_dataset_id) + " <> raw_dataset_id")
+            logging.info(str(original_dataset_id) + " <> raw_dataset_id")
+            if status ==2:
+                return 2,None,None
+            else:
+                dataset_id = raw_dataset_id
             
         else:
             
@@ -153,11 +167,10 @@ class ProjectClass:
             column_name_list,column_datatype_list = schema_obj.get_dataset_schema(DBObject,connection,dataset_id) 
             
             missing_value_lst,noise_status_lst = preprocessObj.get_preprocess_cache(dataset_id)
-            logging.info(str(missing_value_lst) + " find")
-            logging.info(str(noise_status_lst))
+            
             missing_value_lst,noise_status_lst = list(missing_value_lst),list(noise_status_lst)
             # column name and datatype will be inserted into schema table with schema id
-
+            
             status=schema_obj.update_dataset_schema(DBObject,connection,schema_id,column_name_list,column_datatype_list,missing_flag=missing_value_lst,noise_flag=noise_status_lst)
             
         else :
@@ -235,7 +248,7 @@ class ProjectClass:
         logging.debug("data ingestion : ProjectClass : show_project_details : this will excute select query on table name : "+table_name +" based on user name : "+user_name)
         
         sql_command = "SELECT p.*,d.dataset_name FROM "+ table_name + " p,mlaas.dataset_tbl d WHERE p.USER_NAME ='"+ user_name +"' and p.dataset_id = d.dataset_id"
-        logging.info(str(sql_command)+"  command")
+        
         project_df=DBObject.select_records(connection,sql_command) # Get project details in the form of dataframe.
         logging.info("data ingestion : ProjectClass : show_project_details : execution end")
         return project_df
@@ -275,7 +288,13 @@ class ProjectClass:
                 #? Deleting Project Table Entry
                 sql_command = "DELETE FROM "+ table_name + " WHERE PROJECT_ID ='"+ project_id +"'"
                 project_status = DBObject.delete_records(connection,sql_command)
-                
+
+                if project_status == 0:
+                    schema_id = project_id
+                    project_status = schema_obj.delete_schema_record(DBObject,connection,schema_id)
+                    if project_status !=0:
+                        return 4
+                      
             else:
                 logging.debug(f"data ingestion  :  ProjectClass  :  delete_project_details  :  Function failed because the Given user = {user_name} is not authorized to delete the project.")
                 project_status = 2
@@ -310,9 +329,12 @@ class ProjectClass:
             #? Checking if Same project_name exists for the same user
             project_name=str(project_name).replace("'","''")
             sql_command = f"SELECT PROJECT_ID FROM {table_name} WHERE PROJECT_NAME = '{project_name}' AND USER_NAME = '{user_name}'"
+            #logging.info(str(sql_command) + " check error")
+
             data=DBObject.select_records(connection,sql_command)
             data=len(data)
-            
+
+            #logging.info(str(data) + " check error")
             logging.info("data ingestion : ProjectClass : project_exists : execution end")
             
             #! Same project_name exists for the same user, then return status True

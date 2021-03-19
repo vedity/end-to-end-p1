@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ModelingTypeApiService } from '../modeling-type.service';
@@ -10,8 +10,9 @@ import { ModelingTypeApiService } from '../modeling-type.service';
 })
 export class ModelingModalSummaryComponent implements OnInit {
 
+  @Input() public experiment_id: any;
   constructor(public router: Router, public apiservice: ModelingTypeApiService, public toaster: ToastrService) { }
-  experiment_id: any;
+  //experiment_id: any;
   responsedata: any;
   animation = "progress-dark";
   theme = {
@@ -33,7 +34,7 @@ export class ModelingModalSummaryComponent implements OnInit {
 
   successHandler(data) {
     if (data.status_code == "200") {
-      this.responsedata = JSON.parse(data.response);
+      this.responsedata = data.response;
       // console.log(this.responsedata);
       // this.toaster.success(data.error_msg, 'Success');
     }

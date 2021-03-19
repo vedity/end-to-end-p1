@@ -13,7 +13,7 @@ import pandas as pd
 import json
 import mlflow
 import mlflow.sklearn
-
+from common.utils.logger_handler import custom_logger as cl
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import learning_curve
 
@@ -26,33 +26,39 @@ from sklearn.model_selection import ( train_test_split,
 from sklearn.metrics import ( mean_squared_error,
                              mean_absolute_error,
                              r2_score )
-# from MS.mlaas.modeling.views import SplitDataClass
 
+import logging
+user_name = 'admin'
+log_enable = True
+
+LogObject = cl.LogClass(user_name,log_enable)
+LogObject.log_setting()
+
+logger = logging.getLogger('view')
 
 
  
 class LinearRegressionClass:
     
     def __init__(self, input_features_list, target_features_list, X_train, X_valid, X_test, 
-                y_train, y_valid, y_test, SplitDataObject):
+                y_train, y_valid, y_test, scaled_split_dict):
         
         """This is used to initialise the model input parameter when model class is called.
         """
-
-        self.input_features_list = input_features_list
-        self.target_features_list = target_features_list
-        self.SplitDataObject = SplitDataObject
-        # self.input_features_list.remove('index')
-        self.input_features_list = input_features_list[1:]
-        self.target_features_list = target_features_list[1:]
-        # self.input_features_list.remove('index')
-        self.X_train = X_train
+        self.dataset_split_dict = scaled_split_dict # This object stores the variables used to split the data.
+        # List of input features(which are used to train the model)
+        self.input_features_list = input_features_list[1:] 
+        # list of target features (features to be predicted)
+        self.target_features_list = target_features_list[1:] 
+       
+        self.X_train = X_train 
         self.X_test = X_test
         self.X_valid = X_valid
         self.y_train = y_train
         self.y_test = y_test
         self.y_valid = y_valid
-          
+        
+        
     def train_model(self,X_train,y_train):
         
         """This function is used to train the model.
@@ -64,40 +70,39 @@ class LinearRegressionClass:
         Returns:
             [object]: [it will return train model object.]
         """
-        
         # get Input Training Features
-        X_train = X_train[self.input_features_list] 
-        # get Target Tarining Features
-        y_train = y_train[self.target_features_list] 
+        X_train = X_train[:,1:] 
+        # get Target Training Features
+        y_train = y_train[:,-1].reshape(len(y_train[:,-1]),1)
         # define the model
         model = LinearRegression() 
         # fit the model
         model.fit(X_train, y_train) 
-
         return model
     
     def get_learning_curve(self,model,X_train,y_train):
         
-        """This function is get learning curve.
+        """This function gets learning curve generated while training the data.
 
         Args:
             model ([object]): [train model object]
             X_train ([dataframe]): [input train data]
             y_train ([dataframe]): [target train data]
         """
-        
-        X_train = X_train[self.input_features_list]
-        y_train = y_train[self.target_features_list]
-        
+        X_train = X_train[:,1:] 
+        y_train = y_train[:,-1].reshape(-1,1)
+        # Dividing train data size into bins.
         train_sizes=np.linspace(0.10, 1.0, 5)
         train_sizes, train_scores, test_scores, fit_times, _ = \
         learning_curve(estimator = model, X=X_train, y=y_train, cv=None, scoring='r2',n_jobs=None,
                        train_sizes=train_sizes,
                        return_times=True)
         
+        # Average of train score(accuracy).
         train_mean = train_scores.mean(axis=1)
+        # Average of train score(accuracy).
         test_mean = test_scores.mean(axis=1)
-        
+        # Create the learning curve dictionary.
         learning_curve_dict = {"train_size":train_sizes.tolist(),"train_score":train_mean.tolist(),"test_score":test_mean.tolist()}
         
         return learning_curve_dict
@@ -111,16 +116,14 @@ class LinearRegressionClass:
             [dict]: [it will return features impact dictionary.]
         """
         
-        
-        X_train = X_train[self.input_features_list]
+        X_train = X_train[:,1:] 
+        # X_train = X_train[self.input_features_list]
         stddev = []
         importance = model.coef_.tolist()[0]
-        
         features = pd.DataFrame(importance, self.input_features_list,columns = ['coefficient'])
         features.coefficient = features.coefficient.abs()
-        
-        for i in self.input_features_list:
-            stdev = X_train[i].std()
+        for i in range(0,len(self.input_features_list)):
+            stdev = np.std(X_train[:,i])
             stddev.append(stdev)
          
         features['stddev'] = np.array(stddev).reshape(-1,1)
@@ -128,14 +131,13 @@ class LinearRegressionClass:
         features['norm_importance'] = 100 * features['importance'] / features['importance'].max()
         
         features['features_name'] = features.index
-        sorted_df = features.sort_values(by='norm_importance')
+        sorted_df = features.sort_values(by='norm_importance',ascending = False)
         
         features_impact_dict = sorted_df[['features_name','norm_importance']].to_dict(orient='list')
         
         return features_impact_dict
  
-    
-
+   
     def get_actual_prediction(self,model,X_test,y_test):
         
         """This function is used to get actuals and predictions.
@@ -143,24 +145,24 @@ class LinearRegressionClass:
         Returns:
             [list]: [it will return actual and prediction list.]
         """
-        
-        X_test = X_test[self.input_features_list]
+        X_train = self.X_train[:,1:]
+        X_test = X_test[:, 1:]
   
         prediction_arr = model.predict(X_test)
         prediction_lst = prediction_arr.tolist()
 
-        actual_df= y_test[self.target_features_list]
-        actual_lst = actual_df.values.tolist()
+        actual_values = y_test[:,1]
+        actual_lst = actual_values.tolist()
         
         if len(self.target_features_list) == 1 :
             
-            prediction_flat_lst = [int(item) for elem in prediction_lst for item in elem]
-            actual_flat_lst = [int(item) for elem in actual_lst for item in elem]
+            prediction_flat_lst = [item for elem in prediction_lst for item in elem]
+            actual_flat_lst = actual_lst 
             return actual_flat_lst,prediction_flat_lst
         
         else:
-            prediction_flat_lst =  [ list(map(int,sub_lst)) for sub_lst in prediction_lst ]
-            actual_flat_lst =  [ list(map(int,sub_lst)) for sub_lst in actual_lst ]
+            prediction_flat_lst =  [ list(map(sub_lst)) for sub_lst in prediction_lst ]
+            actual_flat_lst =  [ list(map(sub_lst)) for sub_lst in actual_lst ]
             return actual_flat_lst,prediction_flat_lst
         
         
@@ -169,14 +171,18 @@ class LinearRegressionClass:
         """This function is used to save test results or predictions.
         """
          
-        y_test.reset_index(inplace = True, drop = True)
+        y_df = pd.DataFrame(y_test[:,1],columns=self.target_features_list)
+        
+        y_df.reset_index(inplace = True, drop = True)
+        y_df['index']=y_test[:,0]
         append_str = '_prediction'
         target_features_suf_res = [sub + append_str for sub in self.target_features_list]
         test_results_df = pd.DataFrame(prediction_lst, columns = target_features_suf_res) 
         
-        final_result_df = pd.concat([y_test,test_results_df],axis=1)
+        final_result_df = pd.concat([y_df,test_results_df],axis=1)
+        print("final results ==",final_result_df)
         final_result_dict = final_result_df.to_dict(orient='list') 
-        
+        print("final results dict ==",final_result_dict)
         return final_result_dict
         
         
@@ -210,23 +216,19 @@ class LinearRegressionClass:
         Returns:
             [dict]: [it will return model summary.]
         """
-        
-        X_train = X_train[self.input_features_list]
-        X_test = X_test[self.input_features_list]
-        y_train = y_train[self.target_features_list]
             
         train_size = X_train.shape[0]
         test_size = X_test.shape[0]
         
-        # json does not recognize NumPy data types. 
-        # Convert the number to a Python int before serializing the object:
-        model_summary = {"Model Name":"linear Regression",
+        model_summary = {"Model Name":"Linear_Regression_Sklearn",
                          "Input Features":self.input_features_list,
                          "Target Features":self.target_features_list,
                          "Train Size":int(train_size),"Test Size":int(test_size),
-                         "Train Split":1-float(self.SplitDataObject.test_size),"Test Split":float(self.SplitDataObject.test_size),
-                         "Random State":int(self.SplitDataObject.random_state),
-                         "CV (K-Fold )":int(self.SplitDataObject.cv)}
+                         "Train Split":self.dataset_split_dict['train_size'],"Test Split":float(self.dataset_split_dict['test_size']),
+                         "Random State":int(self.dataset_split_dict['random_state']),
+                         "Valid Split":self.dataset_split_dict['valid_size'],
+                         "CV (K-Fold )":self.dataset_split_dict['cv']}
+        
         
         return model_summary
       
@@ -239,15 +241,13 @@ class LinearRegressionClass:
         Returns:
             [float]: [it will return cv score.]
         """
+
+        X_train = X_train[:,1:] 
+        y_train = y_train[:,-1].reshape(len(y_train[:,-1]),1)
         
-        
-        
-        X_train = X_train[self.input_features_list]
-        y_train = y_train[self.target_features_list]
-        
-        shuffle = KFold(n_splits=self.SplitDataObject.cv,
+        shuffle = KFold(n_splits=self.dataset_split_dict['cv'],
                     shuffle=True,
-                    random_state=self.SplitDataObject.cv)
+                    random_state=self.dataset_split_dict['random_state'])
         
         cv_scores = cross_val_score(estimator=LinearRegression(),
                                 X=X_train,
@@ -257,7 +257,6 @@ class LinearRegressionClass:
         cv_score_mean = cv_scores.mean()
 
         return cv_score_mean
-        
         
         
     def holdout_score(self,model,X_test,y_test):
@@ -272,18 +271,14 @@ class LinearRegressionClass:
         Returns:
             [float]: [it will return holdout score.]
         """
-        
-        
-        X_test = X_test[self.input_features_list]
-        actual = y_test[self.target_features_list]
+        X_test = X_test[:, 1:]
+        actual = y_test[:, 1]
         
         prediction = model.predict(X_test)
         holdout_score = r2_score(actual,prediction)
 
         return holdout_score
 
-        
-        
         
     def run_pipeline(self):
         
@@ -300,7 +295,10 @@ class LinearRegressionClass:
         # all evaluation matrix
         r2score,mse,mae,mape = self.get_evaluation_matrix(actual_lst,prediction_lst)  
         # get cv score
-        cv_score = self.cv_score(self.X_train,self.y_train) # default k-fold with 5 (r2-score)
+        if self.dataset_split_dict['split_method'] == 'cross_validation':
+            cv_score = self.cv_score(self.X_train,self.y_train) # default k-fold with 5 (r2-score)
+        else:
+            cv_score = 0
         # get holdout score
         holdout_score = self.holdout_score(model,self.X_test,self.y_test) # default 80:20 splits (r2-score)
         # get model summary
@@ -309,11 +307,17 @@ class LinearRegressionClass:
         learning_curve_dict = self.get_learning_curve(model,self.X_train,self.y_train)
         
         
+        
         # log mlflow parameter
-        mlflow.log_param("random state", self.SplitDataObject.random_state)
-        mlflow.log_param("train size", 1-self.SplitDataObject.test_size)
-        mlflow.log_param("test size", self.SplitDataObject.test_size)
-        mlflow.log_param("k-fold", self.SplitDataObject.cv)
+        mlflow.log_param("split method", self.dataset_split_dict['split_method'])
+        mlflow.log_param("train ratio", 1-(self.dataset_split_dict['test_ratio'] + self.dataset_split_dict['valid_ratio']))
+        mlflow.log_param("test ratio", self.dataset_split_dict['test_ratio'])
+        mlflow.log_param("valid ratio", self.dataset_split_dict['valid_ratio'])
+        mlflow.log_param("random state", self.dataset_split_dict['random_state'])
+        mlflow.log_param("k-fold", self.dataset_split_dict['cv'])
+        mlflow.log_param("train size", self.dataset_split_dict['train_size'])
+        mlflow.log_param("test size", self.dataset_split_dict['test_size'])
+        mlflow.log_param("valid size", self.dataset_split_dict['valid_size'])
         
         # log mlflow matrix
         mlflow.log_metric("r2 score", r2score)
@@ -329,6 +333,9 @@ class LinearRegressionClass:
         mlflow.log_dict(features_impact_dict,"features_importance.json")
         mlflow.log_dict(model_summary,"model_summary.json")
         mlflow.log_dict(final_result_dict,"predictions.json")
+        print("ENDING\n\n\n\n\n DONE--------------------------------------------")
+        
+        
         
         
         

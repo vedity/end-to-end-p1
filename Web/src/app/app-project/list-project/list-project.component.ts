@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
@@ -23,6 +23,15 @@ export class ListProjectComponent implements OnInit {
   filter: boolean = true;
   constructor(public router: Router, public http: HttpClient, public apiService: ProjectApiService, public toaster: ToastrService) { }
   transactions: any = [];
+  @HostListener('window:resize', ['$event'])
+	onResize(event) {
+    if (this.datatableElement.dtInstance) {
+      this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
+        dtInstance.columns.adjust().draw();
+      })
+    }
+	}
+
   ngOnInit(): void {
     this.getproject();
   }
@@ -46,9 +55,6 @@ export class ListProjectComponent implements OnInit {
       this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
         dtInstance.columns().every(function () {
           const that = this;
-         
-          // console.log( );
-          
           $('#input_'+ this.index("visible")).on('keyup change', function () {
             if (that.search() !== this['value']) {
               that

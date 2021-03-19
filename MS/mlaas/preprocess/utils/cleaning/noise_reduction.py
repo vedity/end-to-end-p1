@@ -7,9 +7,27 @@
 */
 '''
 
+#* Importing Libraries
 import pandas as pd
 import numpy as np
 from collections import Counter
+
+#* Relative Imports
+from . import missing_value_handling as mvh
+
+#* Initializing Objects
+MVH_OBJECT = mvh.MissingValueClass()
+
+#* Logging
+import logging
+from common.utils.logger_handler import custom_logger as cl
+
+user_name = 'admin'
+log_enable = True
+LogObject = cl.LogClass(user_name,log_enable)
+LogObject.log_setting()
+logger = logging.getLogger('noise_reduction')
+
 
 class RemoveNoiseClass:
     
@@ -133,14 +151,142 @@ class RemoveNoiseClass:
 
             return noisy, cleanable, valid_str
         
-    def remove_noise(self, series, noisy_cols = None):
-        pass
+    def drop_noise(self, series):
+        '''
+            Takes in noisy series & replaces the string noise with the `np.NaN` value.
+            
+            Args:
+            -----
+            series (`pandas.Series`): the column data.
+            
+            Returns:
+            -------
+            series (`pandas.Series`): the column data with noise replaced with `np.NaN`.
+        '''
+        
+        series = pd.to_numeric(series, errors = 'coerce')
+        
+        return series
+        
+    def remove_noise(self, dataframe, column_id = None):
+        '''
+            Removes the rows where given columns contains noise.
+            
+            Args:
+            -----
+            dataframe (`pandas.DataFrame`): Whole dataframe.
+            column_id (`List`) (default = `None`): List containing the column ids. if `None` then takes whole dataframe.
+            
+            Returns:
+            --------
+            dataframe (`pandas.DataFrame`): Dataframe with noise removed.
+        '''
+        
+        if column_id:
+            for i in column_id:
+                dataframe.iloc[:,i] = self.drop_noise(dataframe.iloc[:,i])
+        else:
+            for i in dataframe.columns:
+                dataframe.iloc[:,i] = self.drop_noise(dataframe.iloc[:,i])
+        
+        return MVH_OBJECT.discard_missing_values(dataframe= dataframe, column_id= column_id)
+        
+    def replace_noise(self, series, operation_type = 0, val = np.NaN):
+        '''
+            This function replaces the noise by performing the operation you specified on given columns.
+            
+            Args:
+            -----
+            series (`pandas.Series`): the whole series.
+            operation_type (`Intiger`): Type of the operation.
+                - 0 : Replace with Mean.
+                - 1 : Replace with Median.
+                - 2 : Replace with Mode.
+                - 3 : Replace with End of Distribution.
+                - 4 : Replace with a random sample.
+                - 5 : Replace with an arbitrary value. \n
+            val (`Intiger`) (default = `numpy.NaN`): Value to be replaced in place of the noise in the case of the arbitrary value imputation.  
+            
+            Returns:
+            --------
+            series (`pandas.Series`): Updated series.
+        '''
+        
+        #? Replacing noise with NaN
+        series = self.drop_noise(series)
+        
+        if operation_type == 0:
+            #? Handling with Mean
+            series = MVH_OBJECT.mean_imputation(series)
+        
+        elif operation_type == 1:
+            #? Handling with Median
+            series = MVH_OBJECT.median_imputation(series)
+        
+        elif operation_type == 2:
+            #? Handling with Mode
+            series = MVH_OBJECT.mode_imputation(series)
+        
+        elif operation_type == 3:
+            #? Handling with end of distribution
+            series = MVH_OBJECT.end_of_distribution(series)
+        
+        elif operation_type == 4:
+            #? Handling with random sample imputation
+            series = MVH_OBJECT.random_sample_imputation(series)
+        
+        elif operation_type == 5:
+            #? Handling with Arbitrary value
+            series = MVH_OBJECT.add_missing_category(series, val)
+        
+        return series
     
-    def replace_noise(self, series, noisy_cols = None, operation_type = 0, val = None):
-        pass
+    def rmv_noise(self, DBObject, connection, column_name, table_name):
+        '''
+            Makes Null in place of all the Noise.
+        '''
+        column_name = '"' + column_name + '"'
+        sql_command = f"update {table_name} set {column_name} = Null where {column_name} !~ '[0-9.]'"
+        logging.info(sql_command)
+        status = DBObject.update_records(connection,sql_command)
+        return status
     
-    def to_numeric_col(self, Series, string_cols):
-        pass
+    def dtct_noise(self, DBObject, connection, column_name, dataset_id = None, table_name = None):
+        '''
+            Detects if there is removable noise present in the column. 
+            dataset_id here is not necessary but you can give it to improve the performance.
+            
+            Args:
+            -----
+            DBObject,
+            connection,
+            column_name,
+            dataset_id,
+            table_name 
+            
+            Returns:
+            --------
+            noise_status (`Intiger`): Intiger representing the status of the noise.
+                - `0` : No Noise
+                - `1` : Removable amount of noise
+                - `2` : Too Much Noise
+        '''
+        column_name = '"' + column_name + '"'
+        if dataset_id is None:
+            sql_command = f"select (count(*)*100)/(select count(*) from {table_name}) as noise_percentage from {table_name} where {column_name} !~ '[0-9.]';"
+            
+        noise_df = DBObject.select_records(connection,sql_command)
+        if not isinstance(noise_df, pd.DataFrame):
+            return 0
+        
+        noise_percentage = noise_df['noise_percentage'].tolist()[0]
+        
+        if noise_percentage == 0:
+            noise_status =  0
+        elif noise_percentage <= 33:
+            noise_status = 1
+        else:
+            noise_status = 2
+            
+        return noise_status
     
-    def to_string_col(self, Series, cols):
-        pass

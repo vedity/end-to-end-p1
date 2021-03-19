@@ -130,12 +130,13 @@ class ActivityTimelineClass:
                 raise DatabaseConnectionFailed(500)
 
             #command to get the all activity based on the user_name 
-            sql_command = ("SELECT at.user_name,amt.activity_name,at.activity_description,date(at.start_time),at.start_time,amt.operation from "+str(table_name)+" at, mlaas.activity_master_tbl amt where at.user_name='"+str(user_name)+"' and at.activity_id=amt.activity_id order by at.start_time desc")
+            sql_command = ("SELECT at.user_name,amt.activity_name,at.activity_description,date(at.start_time),at.start_time,amt.operation from "+str(table_name)+" at, mlaas.activity_master_tbl amt where at.user_name='"+str(user_name)+"' and at.activity_id=amt.activity_id and amt.code in (-1,0) order by at.start_time desc")
             logging.info(str(sql_command)+ " sql command")
 
             #excute the sql query
             activity_df = DBObject.select_records(connection,sql_command)  
-
+            if activity_df is None:
+                raise DataNotFound(500)
             length_df = activity_df['user_name']            
             if len(length_df)==0:
                 raise DataNotFound(500)
@@ -205,13 +206,13 @@ class ActivityTimelineClass:
 
             #get the connection stablish to postgressql  
             connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port)
-            logging.info("####>"+str(connection))
+            
             if connection == None :
                 raise DatabaseConnectionFailed(500)
 
             #command to get the activity master table details based on activity id and language and code
             sql_command = ("SELECT activity_name,activity_description,operation from mlaas.activity_master_tbl where activity_id='"+str(id)+"' and language='"+str(language)+"' and code ='"+str(code)+"'")
-            logging.info("####>"+str(sql_command))
+            
             #excute the sql query
             activity_df = DBObject.select_records(connection,sql_command)  
 

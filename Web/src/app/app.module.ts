@@ -31,6 +31,8 @@ import * as more from 'highcharts/highcharts-more.src';
 import * as exporting from 'highcharts/modules/exporting.src';
 
 import { ToastrModule } from 'ngx-toastr';
+import {DragDropModule} from '@angular/cdk/drag-drop';
+import { Ng5SliderModule } from 'ng5-slider';
 
 if (environment.defaultauth === 'firebase') {
   initFirebaseBackend(environment.firebaseConfig);
@@ -77,8 +79,11 @@ export function createTranslateLoader(http: HttpClient): any {
     SharedModule,
     ScrollToModule.forRoot(),
     DataTablesModule,
-    NgxSkeletonLoaderModule.forRoot()
+    NgxSkeletonLoaderModule.forRoot(),
+    DragDropModule,
+    Ng5SliderModule
     
+
   ],
   bootstrap: [AppComponent],
   providers: [

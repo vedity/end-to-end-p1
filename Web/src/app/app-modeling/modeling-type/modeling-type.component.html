@@ -6,33 +6,6 @@
                 <h4 class="mb-0 font-size-18">Modeling</h4>
                 <a href="javascript:void(0);" [routerLink]="['/schema']" [state]="{activeId:5,navigate_to:'modeling'}" title="back" class="back-btn">Back</a>
                 <div class="page-title-right">
-
-                    <!-- <div class="tab-menu">
-
-                        <ul ngbNav #justifiednav="ngbNav" [activeId]="1" class="nav-tabs nav-tabs-custom nav-justified nav">
-                            <li [ngbNavItem]="1">
-                                <a ngbNavLink>
-                                    <span class="d-block d-sm-none"><i class="fas fa-home"></i></span>
-                                    <span class="d-none d-sm-block">Modelling</span>
-                                </a>
-                                <ng-template ngbNavContent>
-                                   
-
-                                </ng-template>
-                            </li>
-                            <li [ngbNavItem]="2">
-                                <a ngbNavLink>
-                                    <span class="d-block d-sm-none"><i class="far fa-user"></i></span>
-                                    <span class="d-none d-sm-block">Experiment List</span>
-                                </a>
-                                <ng-template ngbNavContent>
-                                    <h4>One111</h4>
-                                </ng-template>
-                            </li>
-
-                        </ul>
-
-                    </div> -->
                 </div>
             </div>
         </div>
@@ -54,15 +27,21 @@
                                     (click)="LargeModal(largeModal,$event.target.checked)">
                                 <label for="switcher-1"></label>
                             </span>
-
                         </div>
-
+                        <div class="radio-group">
+                            <div class="custom-control custom-radio mr-3">
+                                <input type="radio" id="customRadio1" name="customRadio" (click)="model_type='Regression'" checked class="custom-control-input">
+                                <label class="custom-control-label" for="customRadio1">Regression</label>
+                            </div>
+                            <div class="custom-control custom-radio ">
+                                <input type="radio" id="customRadio2" name="customRadio" (click)="model_type='Classification'" class="custom-control-input">
+                                <label class="custom-control-label" for="customRadio2">Classification</label>
+                            </div>
+                        </div>
                     </div>
-
                 </div>
             </div>
         </div>
-
         <div class="col-md-4 ">
             <div class="card project-detail">
                 <div class="card-body" *ngIf="datasetdata">
@@ -76,7 +55,6 @@
                             <p class="target_column" *ngFor="let item of datasetdata.target_columns">{{item}}
                             </p>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -90,100 +68,140 @@
                 </div>
             </div>
         </div>
-
     </div>
-
     <div class="row">
         <div class="col-md-12 model-detail-main">
             <h4 class="mb-4">Experiment List</h4>
             <ngx-skeleton-loader [hidden]="contentloaded" count="7" [animation]="animation" [theme]="theme">
             </ngx-skeleton-loader>
-
-            <button type="button" [disabled]="!iscompare" class="btn btn-success comper-btn">Comparison</button>
-
+            <button type="button" class="btn btn-success comper-btn" [disabled]="!iscompare" (click)="compareLarge(compareModal)">Comparison</button>
             <div class="right-detail-box">
                 <span class="switcher switcher-1">
-                    <input type="checkbox" id="switcher-1" value="true">
+                    <input type="checkbox" id="switcher-1" value="true" (click)="changeDisplay()">
                     <label for="switcher-1"></label>
                 </span>
-
             </div>
-
-
             <ul ngbNav #justifiednavnew="ngbNav" [activeId]="1" class="nav-pills nav-justified">
                 <li [ngbNavItem]="1">
                     <a ngbNavLink>
                         <span class="d-block"><i class="fas fa-border-all"></i></span>
-
                     </a>
                     <ng-template ngbNavContent>
-                        <!-- <perfect-scrollbar style="height: 490px;"> -->
-                        <div class="row">
-                            <div class="col-md-4" *ngFor="let item of modeldata;let i=index">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h4 class="card-title mb-4">
-                                            <div class="custom-control custom-checkbox">
-                                                <input type="checkbox" class="custom-control-input" (change)="setCopmareIds($event.target.checked,item.experiment_id)" id="customCheck_{{i}}">
-                                                <label class="custom-control-label" for="customCheck_{{i}}">{{item.experiment_name}}</label>
-                                            </div> <span class="date-time">{{item.exp_created_on | date}}</span>
-                                        </h4>
-                                        <div class="model-status">
-                                            <i *ngIf="item.status=='running'" title="{{item.status}}" style="color: #34c38f;" class="dripicons-browser-upload Blink"></i>
-                                            <i *ngIf="item.status=='error'" title="{{item.status}}" style="color: #f14646;" class="dripicons-browser-upload"></i>
-                                            <i *ngIf="item.status=='pending'" title="{{item.status}}" style="color: #a6b0cf;" class="dripicons-browser-upload"></i>
-                                            <i *ngIf="item.status=='completed'" title="{{item.status}}" style="color: #3e6aec;" class="dripicons-browser-upload"></i>
 
+                        <perfect-scrollbar style="height:470px;" scrollable="yaxis">
+                            <div class="row allexp" *ngIf="!isDisplayRunning && allExpList.length>0">
+                                <div class="col-md-4" *ngFor="let item of allExpList;let i=index">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h4 class="card-title mb-4">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input type="checkbox" class="custom-control-input" (change)="setCopmareIds($event.target.checked,item.experiment_id)" id="customCheck_{{i}}">
+                                                    <label class="custom-control-label" for="customCheck_{{i}}">{{item.experiment_name}}</label>
+                                                </div> <span class="date-time">{{item.exp_created_on | date: 'MMM dd, yyyy, hh:mm a'}}</span>
+                                            </h4>
+                                            <div class="model-status">
+                                                <i *ngIf="item.status=='running'" title="{{item.status}}" style="color: #34c38f;" class="dripicons-browser-upload Blink"></i>
+                                                <i *ngIf="item.status=='failed'" title="{{item.status}}" style="color: #f14646;" class="dripicons-browser-upload"></i>
+                                                <i *ngIf="item.status=='pending'" title="{{item.status}}" style="color: #a6b0cf;" class="dripicons-browser-upload"></i>
+                                                <i *ngIf="item.status=='success'" title="{{item.status}}" style="color: #3e6aec;" class="dripicons-browser-upload"></i>
+                                            </div>
+                                            <div class="model-type">
+                                                <p>{{item.model_mode}}</p>
+                                            </div>
+                                            <div class="detail-line">
+                                                <label>Model</label>
+                                                <p>{{item.model_name}}</p>
+                                            </div>
+                                            <div class="detail-line">
+                                                <label>Dataset</label>
+                                                <p>{{item.dataset_name}}</p>
+                                            </div>
+                                            <div class="detail-line small-line">
+                                                <label>Holdout</label>
+                                                <p>{{item.holdout_score}}</p>
+                                            </div>
+                                            <div class="detail-line small-line">
+                                                <label>Cross Validation</label>
+                                                <p>{{item.cv_score}}</p>
+                                            </div>
+                                            <div class="text-right">
+                                                <button class="btn btn-outline-success" (click)="extraLarge(exlargeModal,item)">View
+                                                    Detail </button>
+                                            </div>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row allexp" *ngIf="!isDisplayRunning && allExpList.length==0">
+                                <div class="ocean">
+                                    <div class="wave"></div>
+                                    <div class="wave"></div>
+                                </div>
+                            </div>
 
-                                        <div class="model-type">
-                                            <p>{{item.model_mode}}</p>
-                                        </div>
-
-                                        <div class="detail-line">
-                                            <label>Model</label>
-                                            <p>{{item.model_name}}</p>
-                                        </div>
-
-                                        <div class="detail-line">
-                                            <label>Dataset</label>
-                                            <p>{{item.dataset_name}}</p>
-                                        </div>
-                                        <div class="detail-line small-line">
-                                            <label>Holdout</label>
-                                            <p>{{item.holdout_score}}</p>
-                                        </div>
-
-                                        <div class="detail-line small-line">
-                                            <label>Cross Validation</label>
-                                            <p>{{item.cv_score}}</p>
-                                        </div>
-
-                                        <div class="text-right">
-                                            <button class="btn btn-outline-success" (click)="extraLarge(exlargeModal,item.experiment_name)">View
-                                                Detail </button>
-
-
+                            <div class="row runningexp" *ngIf="isDisplayRunning && runningExpList.length>0">
+                                <div class="col-md-4" *ngFor="let item of runningExpList;let i=index">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h4 class="card-title mb-4">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input type="checkbox" class="custom-control-input" (change)="setCopmareIds($event.target.checked,item.experiment_id)" id="customCheck_{{i}}">
+                                                    <label class="custom-control-label" for="customCheck_{{i}}">{{item.experiment_name}}</label>
+                                                </div> <span class="date-time">{{item.exp_created_on | date:'short'}}</span>
+                                            </h4>
+                                            <div class="model-status">
+                                                <i *ngIf="item.status=='running'" title="{{item.status}}" style="color: #34c38f;" class="dripicons-browser-upload Blink"></i>
+                                                <i *ngIf="item.status=='failed'" title="{{item.status}}" style="color: #f14646;" class="dripicons-browser-upload"></i>
+                                                <!-- <i *ngIf="item.status=='pending'" title="{{item.status}}" style="color: #a6b0cf;" class="dripicons-browser-upload"></i> -->
+                                                <i *ngIf="item.status=='success'" title="{{item.status}}" style="color: #3e6aec;" class="dripicons-browser-upload"></i>
+                                            </div>
+                                            <div class="model-type">
+                                                <p>{{item.model_mode}}</p>
+                                            </div>
+                                            <div class="detail-line">
+                                                <label>Model</label>
+                                                <p>{{item.model_name}}</p>
+                                            </div>
+                                            <div class="detail-line">
+                                                <label>Dataset</label>
+                                                <p>{{item.dataset_name}}</p>
+                                            </div>
+                                            <div class="detail-line small-line">
+                                                <label>Holdout</label>
+                                                <p>{{item.holdout_score}}</p>
+                                            </div>
+                                            <div class="detail-line small-line">
+                                                <label>Cross Validation</label>
+                                                <p>{{item.cv_score}}</p>
+                                            </div>
+                                            <div class="text-right">
+                                                <button class="btn btn-outline-success" (click)="extraLarge(exlargeModal,item)">View
+                                                    Detail </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                        </div>
-                        <!-- </perfect-scrollbar> -->
+                            <div class="row runningexp" *ngIf="isDisplayRunning && runningExpList.length==0">
+                                <div class="ocean">
+                                    <div class="wave"></div>
+                                    <div class="wave"></div>
+                                </div>
+                            </div>
+                        </perfect-scrollbar>
                     </ng-template>
                 </li>
                 <li [ngbNavItem]="2">
                     <a ngbNavLink>
                         <span class="d-block "><i class="fas fa-bars"></i></span>
-
                     </a>
                     <ng-template ngbNavContent>
-                        <div class="row">
+                        <div class="row allexp" *ngIf="!isDisplayRunning">
                             <div class="col-md-12">
                                 <div class="card list-view">
                                     <div class="card-body">
-                                        <table datatable [dtOptions]="dtOptions" class="table table-centered">
+                                        <table datatable [dtOptions]="dtOptions" style="width: 100%;" class="table table-centered">
                                             <thead>
                                                 <tr>
                                                     <th></th>
@@ -195,11 +213,10 @@
                                                     <th>Cross Validation</th>
                                                     <th>Holdout</th>
                                                     <th>Start Date</th>
-                                                    <!-- <th>Detail</th> -->
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <tr *ngFor="let item of modeldata;let i=index" id="tr_{{item.experiment_id}}">
+                                                <tr *ngFor="let item of allExpList;let i=index" id="tr_{{item.experiment_id}}">
                                                     <td>
                                                         <div class="custom-control custom-checkbox mb-3">
                                                             <input type="checkbox" class="custom-control-input" name="isprivate" id="customCheck_{{i}}">
@@ -207,11 +224,63 @@
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <a href="javascript:void(0);" title="View Detail" (click)="extraLarge(exlargeModal,item.experiment_name)">{{item.experiment_name}}</a>
+                                                        <a href="javascript:void(0);" title="View Detail" (click)="extraLarge(exlargeModal,item)">{{item.experiment_name}}</a>
                                                     </td>
                                                     <td class="model_desc">
                                                         <p>{{item.model_name}}</p>
-                                                        <!-- <p class="discription">{{item.model_desc}} </p> -->
+                                                    </td>
+                                                    <td>{{item.dataset_name}}</td>
+                                                    <td>{{item.model_mode}}</td>
+                                                    <td>
+                                                        <i *ngIf="item.status=='running'" title="{{item.status}}" style="color: #34c38f;" class="dripicons-browser-upload Blink"></i>
+                                                        <i *ngIf="item.status=='failed'" title="{{item.status}}" style="color: #f14646;" class="dripicons-browser-upload"></i>
+                                                        <!-- <i *ngIf="item.status=='pending'" title="{{item.status}}" style="color: #a6b0cf;" class="dripicons-browser-upload"></i> -->
+                                                        <i *ngIf="item.status=='success'" title="{{item.status}}" style="color: #3e6aec;" class="dripicons-browser-upload"></i>
+                                                    </td>
+                                                    <td>{{item.cv_score}}</td>
+                                                    <td>{{item.holdout_score}}</td>
+                                                    <td>{{item.exp_created_on | date:'short'}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                        <div class="row runningexp" *ngIf="isDisplayRunning">
+                            <div class="col-md-12">
+                                <div class="card list-view">
+                                    <div class="card-body">
+                                        <table datatable [dtOptions]="dtOptions" style="width: 100%;" class="table table-centered">
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th>Experiment</th>
+                                                    <th class="model_desc">Model</th>
+                                                    <th>Dataset</th>
+                                                    <th>Modeling Type</th>
+                                                    <th>Status</th>
+                                                    <th>Cross Validation</th>
+                                                    <th>Holdout</th>
+                                                    <th>Start Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let item of runningExpList;let i=index" id="tr_{{item.experiment_id}}">
+                                                    <td>
+                                                        <div class="custom-control custom-checkbox mb-3">
+                                                            <input type="checkbox" class="custom-control-input" name="isprivate" id="customCheck_{{i}}">
+                                                            <label class="custom-control-label" for="customCheck_{{i}}"></label>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <a href="javascript:void(0);" title="View Detail" (click)="extraLarge(exlargeModal,item)">{{item.experiment_name}}</a>
+                                                    </td>
+                                                    <td class="model_desc">
+                                                        <p>{{item.model_name}}</p>
                                                     </td>
                                                     <td>{{item.dataset_name}}</td>
                                                     <td>{{item.model_mode}}</td>
@@ -220,38 +289,26 @@
                                                         <i *ngIf="item.status=='error'" title="{{item.status}}" style="color: #f14646;" class="dripicons-browser-upload"></i>
                                                         <i *ngIf="item.status=='pending'" title="{{item.status}}" style="color: #a6b0cf;" class="dripicons-browser-upload"></i>
                                                         <i *ngIf="item.status=='completed'" title="{{item.status}}" style="color: #3e6aec;" class="dripicons-browser-upload"></i>
-
-
                                                     </td>
                                                     <td>{{item.cv_score}}</td>
                                                     <td>{{item.holdout_score}}</td>
-                                                    <td>{{item.exp_created_on | date}}</td>
-                                                    <!-- <td><a href="javascript:void(0);" title="View Detail" (click)="extraLarge(exlargeModal)">View
-                                                            Detail</a></td> -->
+                                                    <td>{{item.exp_created_on | date:'short'}}</td>
                                                 </tr>
-
                                             </tbody>
                                         </table>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                     </ng-template>
                 </li>
-
             </ul>
             <div [ngbNavOutlet]="justifiednavnew" [hidden]="!contentloaded"></div>
         </div>
     </div>
     <button class="btn btn-outline-success openmodal" hidden (click)="ProjectData(projectModal)">View
         Detail </button>
-    <!-- <div [ngbNavOutlet]="justifiednav">
-
-    </div> -->
 </div>
-
-
 
 <ng-template #exlargeModal let-modal class="model-detail">
     <div class="modal-header">
@@ -261,10 +318,9 @@
         </button>
     </div>
     <div class="modal-body statistics">
-        <app-modeling-view-detail></app-modeling-view-detail>
+        <app-modeling-view-detail [experiment_id]="current_experiment_id" [model_type]="current_model_type"></app-modeling-view-detail>
     </div>
 </ng-template>
-
 
 <ng-template #modelingmodal let-modal class="modeling-modal">
     <div class="modal-header">
@@ -273,14 +329,15 @@
     </div>
     <div class="modal-body">
         <form #f="ngForm">
-
             <div class="form-group">
                 <label for="example-text-input" class="col-form-label">Experiment Name<span
                         class="required-label">&nbsp;*</span></label>
-
-                <input class="form-control" required type="text" [(ngModel)]="params.experiment_name" name="experiment_name" #experiment_name="ngModel" maxlength="200">
+                <input class="form-control" required type="text" [(ngModel)]="params.experiment_name" (change)="checkexperimentname($event)" name="experiment_name" #experiment_name="ngModel" maxlength="200">
                 <div class="invalid-feedback" *ngIf="experiment_name.errors?.required && (experiment_name.dirty || experiment_name.touched)">
                     <span *ngIf="experiment_name.errors?.required && (experiment_name.dirty || experiment_name.touched)" class="text-red">Please enter experiment name</span>
+                </div>
+                <div class="invalid-feedback" *ngIf="!checkuniuqename && !experiment_name.errors">
+                    <span class="text-red">Experiment name already exist</span>
                 </div>
             </div>
             <div class="form-group">
@@ -291,14 +348,12 @@
                     <span *ngIf="experiment_desc.errors?.required && (experiment_desc.dirty || experiment_desc.touched)" class="text-red">Please enter description</span>
                 </div>
             </div>
-
             <div class="button-items text-center">
-                <button class="btn btn-success" [disabled]="!f.form.valid" (click)="startModel()" (click)="modal.dismiss('Cross click')">Start</button>
+                <button class="btn btn-success" [disabled]="!f.form.valid || !checkuniuqename" (click)="startModel()" (click)="modal.dismiss('Cross click')">Start</button>
             </div>
         </form>
     </div>
 </ng-template>
-
 
 <ng-template #largeModal let-modal>
     <div class="modal-header">
@@ -326,10 +381,6 @@
                     <div class="form-group">
                         <label>Holdout perecentage</label>
                         <input type="range" class="custom-range" min="0" max="100" id="customRange2">
-                        <!-- <div class="range-wrap">
-            <input type="range" class="range">
-            <output class="bubble" value="50"></output>
-          </div> -->
                     </div>
                     <div class="from-group">
                         <label>Random status</label>
@@ -364,28 +415,22 @@
             <div class="col-md-12">
                 <div class="form-group">
                     <label>Select model</label>
-                    <!-- <select class="form-control" (change)="hyperparams=$event.target.value">
-                        <option value="sklearn">Linear Regression with SK Learn</option>
-                        <option value="keras">Linear Regression with Keras</option>
-                    </select> -->
                     <select class="form-control" (change)="getHyperParams($event.target.value)">
                         <option value=""> Select </option>
-                        <option value="{{item}}" *ngFor="let item of algorithmlist">{{item}}</option>
+                        <option value="{{algorithmlist.model_id[i]}}"
+                            *ngFor="let item of algorithmlist.model_name;let i=index">{{item}}</option>
                     </select>
-
                 </div>
             </div>
-            <div class="col-md-12" *ngIf="paramsList!=null">
-                <h4 class="font-size-18 mt-3 mb-3">Hyperparameter</h4>
+            <div class="col-md-12" *ngIf="paramsList!=undefined">
+                <h4 class="font-size-18 mt-3 mb-3" *ngIf="paramsList.length>0">Hyperparameter</h4>
             </div>
-
             <div class="col-md-6" *ngFor="let item of paramsList">
                 <div class="form-group">
                     <label>{{item}}</label>
                     <input type="text" class="form-control">
                 </div>
             </div>
-
             <div class="col-md-12">
                 <div class="text-center mb-4">
                     <button class="btn btn-success mr-3" type="submit" (click)="showContent(1)">Previous</button>
@@ -396,6 +441,91 @@
     </div>
 </ng-template>
 
+<ng-template #compareModal let-modal>
+    <div class="modal-header">
+        <h5> Model Name </h5>
+        <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Close click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body compare-model">
+        <ul ngbNav #justifiednavcompare="ngbNav" [activeId]="1" class="nav-pills nav-justified nav">
+            <li [ngbNavItem]="1">
+                <a ngbNavLink>
+                    <span class="font-size-18"><i class="bx bx-line-chart"></i></span>
+                </a>
+                <ng-template ngbNavContent>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h4>Loss</h4>
+
+                            <apx-chart class="apex-charts" dir="ltr" [series]="lineColumAreaChart.series" [chart]="lineColumAreaChart.chart" [tooltip]="lineColumAreaChart.tooltip" [yaxis]="lineColumAreaChart.yaxis" [legend]="lineColumAreaChart.legend" [plotOptions]="lineColumAreaChart.plotOptions"
+                                [grid]="lineColumAreaChart.grid" [stroke]="lineColumAreaChart.stroke" [xaxis]="lineColumAreaChart.xaxis" [colors]="lineColumAreaChart.colors" [fill]="lineColumAreaChart.fill" [labels]="lineColumAreaChart.labels" [markers]="lineColumAreaChart.markers">
+                            </apx-chart>
+                        </div>
+                        <div class="col-md-12">
+                            <h4>Accuracy</h4>
+                            <apx-chart class="apex-charts" dir="ltr" [series]="lineColumAreaChart.series" [chart]="lineColumAreaChart.chart" [tooltip]="lineColumAreaChart.tooltip" [yaxis]="lineColumAreaChart.yaxis" [legend]="lineColumAreaChart.legend" [plotOptions]="lineColumAreaChart.plotOptions"
+                                [grid]="lineColumAreaChart.grid" [stroke]="lineColumAreaChart.stroke" [xaxis]="lineColumAreaChart.xaxis" [colors]="lineColumAreaChart.colors" [fill]="lineColumAreaChart.fill" [labels]="lineColumAreaChart.labels" [markers]="lineColumAreaChart.markers">
+                            </apx-chart>
+                        </div>
+                    </div>
+                </ng-template>
+            </li>
+            <li [ngbNavItem]="2">
+                <a ngbNavLink>
+                    <span class="font-size-18"><i class="bx bx-spreadsheet"></i></span>
+                </a>
+                <ng-template ngbNavContent>
+                    <div class="detail-compare">
+                        <div class="box title-box">
+                            <ul>
+                                <li>Experiment Fields</li>
+                                <li>Number of epoch</li>
+                                <li>Learning rate</li>
+                                <li>Batch size</li>
+                                <li>Loss</li>
+                                <li>Optimizer</li>
+                                <li>Activation</li>
+                            </ul>
+                        </div>
+                        <div cdkDropList cdkDropListOrientation="horizontal" class="example-list" (cdkDropListDropped)="drop($event)">
+
+                            <div class="box box-one example-box" *ngFor="let item of timePeriods" cdkDrag>
+                                <ul>
+                                    <li class="name">{{item}} <a href="javascript:void(0)" title="Remove"><i
+                                                class="mdi mdi-close"></i></a></li>
+                                    <li>2.2333</li>
+                                    <li>25</li>
+                                    <li>25333</li>
+                                    <li>25335</li>
+                                    <li>342</li>
+                                    <li>3242</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+                </ng-template>
+            </li>
+        </ul>
+        <div class="experiment-list">
+            <div class="expe-name">
+                <p>Experiment 1 <a href="javascript:void(0)" title="Remove"><i class="mdi mdi-close"></i></a></p>
+            </div>
+            <div class="expe-name">
+                <p>Experiment 2 <a href="javascript:void(0)" title="Remove"><i class="mdi mdi-close"></i></a></p>
+            </div>
+            <div class="expe-name">
+                <p>Experiment 3 <a href="javascript:void(0)" title="Remove"><i class="mdi mdi-close"></i></a></p>
+            </div>
+            <div class="expe-name">
+                <p>Experiment 4 <a href="javascript:void(0)" title="Remove"><i class="mdi mdi-close"></i></a></p>
+            </div>
+        </div>
+        <div [ngbNavOutlet]="justifiednavcompare"></div>
+    </div>
+</ng-template>
 
 <ng-template #projectModal let-modal>
     <div class="modal-header">
@@ -410,18 +540,18 @@
                 <div class="form-group">
                     <label>Select Project</label>
                     <select class="form-control" (change)="hyperparams=$event.target.value">
-                    <option value="sklearn">Project 1</option>
-                    <option value="keras">Project 2</option>
-                </select>
+                        <option value="sklearn">Project 1</option>
+                        <option value="keras">Project 2</option>
+                    </select>
                 </div>
             </div>
             <div class="col-md-12">
                 <div class="form-group">
                     <label>Select Dataset</label>
                     <select class="form-control" (change)="hyperparams=$event.target.value">
-                    <option value="sklearn">Dataset 1</option>
-                    <option value="keras">Dataset 2</option>
-                </select>
+                        <option value="sklearn">Dataset 1</option>
+                        <option value="keras">Dataset 2</option>
+                    </select>
                 </div>
             </div>
             <div class="col-md-12">

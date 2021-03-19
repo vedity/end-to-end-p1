@@ -34,7 +34,6 @@ logger = logging.getLogger('dataset_creation')
 
 #? Dataset Class Object
 DatasetObject = dc.DatasetClass()
-
 class DBClass:
 
     def read_data(self,file_path):
@@ -46,17 +45,19 @@ class DBClass:
         Returns:
             [dataframe]: [it will return read csv file data in the form of dataframe.]
         """
-        read_df=pd.read_csv(file_path, na_filter= False,encoding = 'utf8') #  Read csv file and load data into dataframe.
+
+        read_df=pd.read_csv(file_path) #  Read csv file and load data into dataframe.
+        logging.info(str(read_df) + " read dataframe")
+
         column_name_list = read_df.columns.values.tolist()
     
         column_list = []
         for name in column_name_list:
             if read_df.dtypes.to_dict()[name] == 'object':
                 column_list.append(name)
-        read_df=pd.read_csv(file_path,na_filter= False,parse_dates=column_list) #  Read csv file and load data into dataframe.
+        read_df=pd.read_csv(file_path,parse_dates=column_list) #  Read csv file and load data into dataframe.
         return read_df
-
-
+    
     def database_connection(self,database,user,password,host,port):
         """This function is used to make connection with database.
 
@@ -176,12 +177,22 @@ class DBClass:
         cols = cols # Get columns name for database insert query.
         tuples = row_tuples # Get record for database insert query.
 
+
         cursor = connection.cursor() # Open cursor for database.
         try:
             if Flag == 0 :
                 query = "INSERT INTO %s(%s) VALUES %%s " % (table_name, cols) # Make query
+                logging.info(str(table_name) + " <> table_name")
+                logging.info(str(cols) + " <> columns")
+                logging.info(str(query) + " <> Query")
+                logging.info(str(query) + " <> tuples")
                 extras.execute_values(cursor, query, tuples) # Excute insert query.
                 index = 0
+
+            elif Flag==1 :
+                query = "INSERT INTO %s(%s) VALUES %%s RETURNING dataset_id" % (table_name, cols) # Make query
+                extras.execute_values(cursor, query, tuples) # Excute insert query.
+                index = [row[0] for row in cursor.fetchall()][0]
             else:
                 query = "INSERT INTO %s(%s) VALUES %%s RETURNING index" % (table_name, cols) # Make query
                 extras.execute_values(cursor, query, tuples) # Excute insert query.
@@ -194,7 +205,7 @@ class DBClass:
         except (Exception, psycopg2.DatabaseError) as error:
             connection.rollback() # Rollback the changes.
             cursor.close() # Close the cursor.
-            logging.info(str(error))
+            logging.error(str(error))
             return 1,None # If failed.
 
     
@@ -208,15 +219,16 @@ class DBClass:
         Returns:
             [dataframe]: [it will return dataframe of the selected data from the database table.]
         """
-        sql_command = sql_command # Get sql command.
+        sql_command = str(sql_command).replace('%',"%%") # Get sql command.
         try :
-           
+        
             connection_string = "postgresql://" + user + ":" + password + "@" + host + ":" + port + "/" + database # Make database connection string.
             engine = create_engine(connection_string) # Create database engine.
             data = pd.read_sql_query(sql_command, engine) #method of sqlalchemy
-    
+            
             return data   
         except(Exception, psycopg2.DatabaseError) as error:
+            logging.info(str(error) + "check")
             return None
         
        
@@ -231,7 +243,7 @@ class DBClass:
         Returns:
             [integer]: [it will return stauts of deleted record. if successfully then 0 else 1.]
         """
-        logging.info("--->"+str(connection))
+        
         cursor = connection.cursor() # Open the cursor.
         sql_command = sql_command # Get delete query
         try:
@@ -255,7 +267,7 @@ class DBClass:
         Returns:
             [integer]: [status of updated records. if successfully then 1 else 0.]
         """
-        logging.info("call")
+        
         cursor = connection.cursor() # Open the cursor.
         sql_command = sql_command # Get update query
         try:
@@ -263,13 +275,13 @@ class DBClass:
             connection.commit() # Commit the changes.
             cursor.close() # Close the cursor.
             status = 0 # If Successfully.
-            logging.info("in")
+            
         except (Exception, psycopg2.DatabaseError) as error:
             connection.rollback() # Rollback the changes.
             cursor.close() # Close the cursor.
             status = 1 # If failed
-            logging.info("out")
-            logging.info(str(error))
+            
+            logging.error(str(error))
         return status
 
     def column_rename(self,file_data_df):
@@ -318,10 +330,12 @@ class DBClass:
         engine = create_engine(connection_string) # Create database engine.
         schema_name = user_name.lower()
         try :
+            
             file_data_df.to_sql(table_name,engine,schema=schema_name,) # Load data into database with table structure.
+            
             status = 0 # If successfully.
         except Exception as e:
-            logging.info("Exception: "+str(e))
+            logging.error("Exception: "+str(e))
             status = 1 # If failed.
             
         return status
@@ -462,10 +476,11 @@ class DBClass:
     
     def get_query_string(self,connection,schema_id):
         try:
-            logging.info("data preprocess : SchemaClass : get_query_string : execution start")
+            logging.info("database : DBClass : get_query_string : Execution start")
+
             # sql command to get details from schema table  based on  schema id 
             sql_command = "select column_name,case when changed_column_name = '' then column_name else changed_column_name end column_list  from mlaas.schema_tbl where schema_id ="+str(schema_id)+"and column_attribute !='Ignore' order by index"
-            logging.info(str(sql_command) + " get_query_string")
+            
             #execute sql commnad if data exist then return dataframe else return None
             schema_df = self.select_records(connection,sql_command) 
 
@@ -473,15 +488,15 @@ class DBClass:
             column_name,column_list = schema_df['column_name'],schema_df['column_list']
 
             string_query = ""
-            for count in range(1,len(column_name)):
+            for count in range(0,len(column_name)):
                 #append string column name as alias  column list name
                 string_query +='"'+column_name[count]+'" as "'+column_list[count]+'",'
             
-            logging.info("data preprocess : SchemaClass : get_query_string : execution stop")
+            logging.info("database : DBClass : get_query_string : Execution stop")
             return string_query[:len(string_query)-1]
         except  Exception as exc:
-            logging.error("data preprocess : SchemaClass : get_query_string : Exception " + str(exc))
-            return exc
+            logging.error("database : DBClass : get_query_string : Exception " + str(exc))
+            return str(exc)
 
     
     def pagination(self,connection,table_name,start_index,length,sort_type,sort_index,global_search_value,customefilter,schema_id):
@@ -513,14 +528,15 @@ class DBClass:
                 select_clause="*"
             else:
                 query = self.get_query_string(connection,schema_id)
-                select_clause=str(columns_list[0])+","+str(query)
+                # select_clause=str(columns_list[0])+","+str(query)
+                select_clause=str(query)
             if customefilter!='()':
                 customefilter_clause="where "+customefilter #add where to customefilter_clause 
             if str(sort_index) != "0" or global_search_value!="" or customefilter_clause!="":  
                 if start_index==0:                              #checking column
                     if customefilter_clause !="":
-                       sql_data = f'select * from (SELECT {str(select_clause)} From {table_name} {global_search_clause} {order_clause}) as dt {customefilter_clause} {order_clause} limit {length}'   #sql Query with customefilter_clause
-                       sql_filtercount = f'select count(*) from (SELECT {str(select_clause)} From {table_name} {global_search_clause} ) as dt {customefilter_clause} ' #sql Query for filter row count                             
+                        sql_data = f'select * from (SELECT {str(select_clause)} From {table_name} {global_search_clause} {order_clause}) as dt {customefilter_clause} {order_clause} limit {length}'   #sql Query with customefilter_clause
+                        sql_filtercount = f'select count(*) from (SELECT {str(select_clause)} From {table_name} {global_search_clause} ) as dt {customefilter_clause} ' #sql Query for filter row count                             
                     else:
                         sql_data = f'SELECT {str(select_clause)} From {table_name} {global_search_clause} {order_clause} limit {length}'  #sql Query without customefilter_clause 
                         sql_filtercount = f'SELECT count(*) From {table_name} {global_search_clause}'   #sql Query for filter row count                             
@@ -536,6 +552,7 @@ class DBClass:
                 sql_data = f'SELECT {str(select_clause)} From {table_name} where "{columns_list[0]}" between {start_index} and {end_index}  {order_clause}' # sql Query without any filter and clause
                 sql_filtercount = f'SELECT count(*) From {table_name}' #sql Query with customefilter_clause
 
+            
             return sql_data,sql_filtercount
         except Exception as exc:
             return str(exc) 
@@ -551,6 +568,7 @@ class DBClass:
         """
         sql_command = "SELECT 1 FROM information_schema.tables WHERE table_schema ='"+schema+"' AND table_name = '"+table_name+"'"
         data=self.select_records(connection,sql_command) #call select_records which return data if found else None
+        print(str(data) + "checking")
         if len(data) == 0: # check whether length of data is empty or not
             self.create_schema(connection)
             return "False"
@@ -595,7 +613,8 @@ class DBClass:
         return column_list
     
 
-    
+    #! The Function of the DB Class is itself taking DBObject as an input... which is unnecessary & logically wrong. 
+    #TODO: We will have to remove DBObject from the function parameters. Because 'self' itself means DBObject.
     def get_dataset_detail(self,DBObject,connection,dataset_id):
         '''This function is used to get dataset table name from dataset id
         Args:
@@ -604,8 +623,8 @@ class DBClass:
                 [Dataframe] : [return the dataframe of dataset table ]
         '''
         sql_command = "SELECT dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows,dataset_desc from mlaas.dataset_tbl Where dataset_id =" + str(dataset_id)
-        logging.info(str(sql_command) + " command")
-        dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+        
+        dataset_df=self.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         return dataset_df 
     
     def get_project_detail(self,DBObject,connection,project_id):
@@ -616,8 +635,8 @@ class DBClass:
                 [Dataframe] : [return the dataframe of project table]
         '''
         sql_command = "SELECT original_dataset_id,dataset_id from mlaas.project_tbl where project_id='"+str(project_id)+"'"
-        logging.info(str(sql_command)+" get_project_detail")
-        dataset_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+       
+        dataset_df=self.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         return dataset_df
     
     def get_table_name(self,connection,table_name):
@@ -673,7 +692,6 @@ class DBClass:
                 dataset_table_name[String] : [Name of the table ] 
 
         """
-        logging.info("call")
         try:
             #sql command to get dataset_name based on original dataset id
             sql_Command = "SELECT dataset_name from mlaas.dataset_tbl where dataset_id ='"+str(original_dataset_id)+"' "
@@ -686,7 +704,7 @@ class DBClass:
             
             #sql command to get Raw dataset id based on the dataset_name and page_name 
             sql_Command = "SELECT dataset_id,dataset_table_name from mlaas.dataset_tbl where dataset_name='"+str(dataset_name)+"' and page_name ='schema mapping'"
-            logging.info(str(sql_Command) + " query")
+            
 
             #execute the sql command and get te dataframe if found else None
             dataframe = self.select_records(connection,sql_Command)
@@ -694,8 +712,7 @@ class DBClass:
             #get the dataset id
             dataset_id = int(dataframe['dataset_id'][0])
             table_name = str(dataframe['dataset_table_name'][0])
-            logging.info(str(dataset_id) + " query")
-            logging.info(str(table_name) + " query")
+           
 
             return dataset_id,table_name
         except Exception as exc:
@@ -746,7 +763,7 @@ class DBClass:
                 query = self.get_query_string(connection,schema_id)
                 #? Getting all the data
                 sql_command = f"SELECT {str(query)} FROM {user_name}.{dataset_table_name}"
-            
+                
             data_df = self.select_records(connection,sql_command)    
             data_df = data_df.replace([''],np.NaN)
             
@@ -759,6 +776,66 @@ class DBClass:
             logging.error("database : DBClass : get_dataset_df : " +traceback.format_exc())
             return exc.msg
         
+    def get_target_col(self, connection, schema_id):
+        '''
+            Returns a list containing target columns.
+            
+            Args:
+            -----
+            connection (`Object`): Postgres Connection Object.
+            schema_id (`Intiger`): id of dataset in the schema table.
+            
+            Returns:
+            -------
+            target_cols (`List`): List of the Names of Target Columns.
+        '''
+        try:
+            logging.info("database : DBClass : get_target_col : Execution Start")
+            
+            sql_command = f"select st.column_name from mlaas.schema_tbl st where st.schema_id = '{schema_id}' and st.column_attribute = 'Target'"
+            target_df = self.select_records(connection,sql_command)
+            
+            target_lst = target_df['column_name']
+            
+            logging.info("database : DBClass : get_target_col : Execution Stop")
+            return target_lst.tolist()
 
+        except Exception as exc:
+            logging.error("database : DBClass : get_target_col : Exception " + str(exc))
+            return str(exc)
 
-     
+    
+    def get_active_table_name(self, connection, dataset_id):
+        '''
+            Returns the Name of the raw data table thats currently associated with the project.
+            
+            Args:
+            -----
+            connection (`Object`): Postgres Connection Object.
+            dataset_id (`Intiger`): id of the dataset.
+            
+            Returns:
+            --------
+            dataset_table_name (`String`): Name of the raw data table.
+        '''
+        try:
+            logging.info("database : DBClass : get_active_table_name : Execution Start")
+            
+            dataframe = self.get_dataset_detail(self,connection,dataset_id)
+
+            #Extract the dataframe based on its column name as key
+            table_name,dataset_visibility,user_name = str(dataframe['dataset_table_name'][0]),str(dataframe['dataset_visibility'][0]),str(dataframe['user_name'][0])
+            
+            if dataset_visibility == 'private':
+                dataset_table_name = user_name+'."'+table_name+'"'
+            else:
+                dataset_table_name = 'public'+'."'+table_name+'"'
+
+            logging.info("database : DBClass : get_active_table_name : Execution Stop")
+            return dataset_table_name
+
+        except Exception as exc:
+            logging.error("database : DBClass : get_active_table_name : Exception " + str(exc))
+            return str(exc)
+
+    

@@ -7,6 +7,9 @@
  Abhishek Negi            13-JAN-2021                 1.2             Added SchemaCreationFailed class exception
  */
 '''
+
+
+
 class DatasetCreationFailed(Exception):
     """Dataset Creation Failed Exception"""
     def __init__(self,status_code):
@@ -164,6 +167,16 @@ class RawDatasetDeletionFailed(Exception):
     """Dataset Deletion Failed Exception"""
     def __init__(self,status_code):
         self.msg = " Raw dataset deletion failed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+
+    def __str__(self):
+        return (self.msg)
+
+class DatasetColumnUpdateFailed(Exception):
+    """Dataset Updation Failed Exception"""
+    def __init__(self,status_code):
+        self.msg = "Dataset column update failed"
         self.status_code = status_code
         self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
 

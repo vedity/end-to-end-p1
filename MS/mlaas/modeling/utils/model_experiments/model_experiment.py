@@ -8,76 +8,55 @@
 '''
 
 
-# import pandas as pd
 import json
 from pandas import DataFrame
+import mlflow
+import re
 
 class ExperimentClass:
     
-    def __init__(self,experiment_id,experiment_name,run_uuid,project_id,dataset_id,
-                user_id,model_id,model_mode):
+    def __init__(self,DBObject, connection, connection_string):
         
-        self.run_uuid = run_uuid
-        self.experiment_id = experiment_id
-        self.experiment_name = experiment_name
-        self.project_id = project_id
-        self.dataset_id = dataset_id
-        self.user_id = user_id
-        self.model_id = model_id
-        self.model_mode = model_mode
+        self.DBObject = DBObject
+        self.connection = connection
+        self.connection_string = connection_string
+        self.table_name='mlaas.model_experiment_tbl'
+        self.cols = 'experiment_id,run_uuid,project_id,dataset_id,user_id,model_id,model_mode,dag_run_id' 
         
        
-          
-    def add_experiments(self, DBObject, connection, connection_string):
+         
+    def add_experiments(self,experiment_id,experiment_name,run_uuid,
+                        project_id,dataset_id,user_id,model_id,model_mode,dag_run_id):
         
-        table_name='mlaas.model_experiment_tbl'
-        cols = 'experiment_id,run_uuid,project_id,dataset_id,user_id,model_id,model_mode' 
-        
-        row = self.experiment_id,self.run_uuid,self.project_id ,self.dataset_id,self.user_id,self.model_id,self.model_mode    
+        row = experiment_id,run_uuid,project_id ,dataset_id,user_id,model_id,model_mode,dag_run_id
         row_tuples = [tuple(row)]
         
-        experiment_status = DBObject.insert_records(connection,table_name,row_tuples,cols)
-        
+        experiment_status = self.DBObject.insert_records(self.connection,self.table_name,row_tuples,self.cols)
         return experiment_status
+    
+    def update_experiment(self,experiment_id,status):
+        
+        sql_command = "UPDATE "+self.table_name+" SET status='"+status+"' WHERE experiment_id="+str(experiment_id)
+        upd_exp_status = self.DBObject.update_records(self.connection,sql_command)
+        
+        return upd_exp_status
+
+
+    def get_mlflow_experiment(self, experiment_name):
+        sql_command = "select nextval('unq_num_seq') as ids"
+        counter = self.DBObject.select_records(self.connection, sql_command)
+        # print("counter==",counter)
+        counter = counter['ids'][0]
+
+        # print("updated counter =",counter)
+        experiment_name = experiment_name.upper() + "_" + str(counter)
+        
+        # create experiment 
+        experiment_id = mlflow.create_experiment(experiment_name)
+        experiment = mlflow.get_experiment(experiment_id)
+        
+        return experiment, experiment_id
+        
            
             
-  
-
-
-
-    def accuracy_metrics(self, experiment_id, DBObject, connection):
-        
-        sql_command = 'select run_uuid from runs where experiment_id='+str(experiment_id)
-        run_uuid = DBObject.select_records(connection, sql_command).iloc[0, 0]
-        
-        sql_command = "select key,value from metrics where run_uuid='"+str(run_uuid)+"' and (key='cv_score' or key='holdout_score')"
-        accuracy_df = DBObject.select_records(connection, sql_command).set_index('key') 
-        return accuracy_df
-    
-    def show_model_details(self, experiment_id, DBObject, connection):
-        sql_command = 'select ms.model_id,ms.model_name,ms.model_desc,exp.experiment_id from mlaas.model_experiment_tbl exp,mlaas.model_master_tbl ms where exp.model_id = ms.model_id and exp.experiment_id ='+str(experiment_id)
-        model_details_df = DBObject.select_records(connection, sql_command)
-        
-        accuracy_df = self.accuracy_metrics(experiment_id, DBObject, connection)
-        
-        model_details_json = model_details_df.to_json()
-        accuracy_json = accuracy_df.to_json()
-       
-        return model_details_json,accuracy_json
-
-
-
-
-
-
-
-    # def get_hyperparameters_values(self, experiment_id, DBObject, connection):
-    #     # DbObject,connection,connection_string = self.get_db_connection()
-    #     sql_command = 'select run_uuid from runs where experiment_id='+experiment_id
-    #     run_uuid = DBObject.select_records(connection, sql_command).iloc[0, 0]
-
-    #     sql_command = 'select key, value from params where run_uuid='+run_uuid
-    #     hyperparameters = DBObject.select_records(connection, sql_command)
-    #     hyperparameters_json = hyperparameters.set_index('key')['value'].to_json()
-    #     return hyperparameters_json
-    
+   

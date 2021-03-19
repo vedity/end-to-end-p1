@@ -14,7 +14,9 @@ export const environment = {
     messagingSenderId: '',
     appId: '',
     measurementId: ''
-  }
+  },
+  baseUrl:'http://127.0.0.1:8000/mlaas/'
+ // baseUrl:'http://isg.loginto.me:8000/mlaas/'
 };
 
 /*

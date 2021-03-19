@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, Input, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
@@ -37,6 +37,16 @@ export class ListDatadetailComponent implements OnInit {
     transactions: any;
     thead = "";
     dtRendered = false;
+
+    @HostListener('window:resize', ['$event'])
+	onResize(event) {
+    if (this.datatableElement.dtInstance) {
+      this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
+        dtInstance.columns.adjust().draw();
+      })
+    }
+	}
+
     ngOnInit(): void {
         const that = this;
         this.apiService.getColumnList(this.dataset_id,this.schema_id).subscribe(
@@ -69,7 +79,6 @@ export class ListDatadetailComponent implements OnInit {
                             recordsFiltered: resp.recordsFiltered,
                             data: []
                         });
-
                     });
             },
             drawCallback: (settings) => {
@@ -82,7 +91,6 @@ export class ListDatadetailComponent implements OnInit {
                     $(".main-datatable").trigger('resize')
                    setTimeout(() => {
                     this.contentloaded = true;
-                        
                    }, 100); 
                 });
               
@@ -108,6 +116,9 @@ export class ListDatadetailComponent implements OnInit {
 
     displayfilter() {
         this.filter = !this.filter;
-        $('.filter').val('').trigger('change');
+        $('.filter').val('').trigger('keyup');
+        this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
+            dtInstance.draw();
+        });
     }
 }

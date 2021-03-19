@@ -95,7 +95,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
 
             logging.debug("data ingestion : ingestclass : create_project : we get status of project : "+str(project_status)+ " and Project id : "+str(project_id)+" and original_dataset_id : "+str(original_dataset_id))
             if project_status == 2:
-                raise ProjectAlreadyExist(500)
+                raise DatasetAlreadyExist(500)
                 
             elif project_status == 1:
                 raise ProjectCreationFailed(500) # If Failed.
@@ -106,8 +106,13 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             elif project_status == 0:
                 status = super(IngestClass,self).update_dataset_status(DBObject,connection,project_id)
                 
+                if status ==0:
+                    connection.commit()
+                else:
+                    connection.rollback()
                 
-        except (DatabaseConnectionFailed,ProjectAlreadyExist,LoadCSVDataFailed,ProjectCreationFailed,Exception) as exc:
+                
+        except (DatabaseConnectionFailed,DatasetAlreadyExist,ProjectAlreadyExist,LoadCSVDataFailed,ProjectCreationFailed,Exception) as exc:
             logging.error("data ingestion : ingestclass : create_project : Exception " + str(exc.msg))
             logging.error("data ingestion : ingestclass : create_project : " +traceback.format_exc())
             return exc.msg,None,None
@@ -205,10 +210,12 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             if data_details_df is None :
                 raise DataNotFound(500)
             data_type = data_details_df.dtypes.to_dict()
-            logging.info(data_details_df)  
+              
+            data_details_df.update(data_details_df.loc[:, data_details_df.dtypes.astype(str).str.contains('date')].astype(str))
+              
 
             data_details_df=data_details_df.to_json(orient='records',date_format='iso')
-            logging.info(data_details_df)
+            
             data_details_df = json.loads(data_details_df)
             if len(data_details_df) == 0 :
                 raise DataNotFound(500)
@@ -277,11 +284,12 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise UserAuthenticationFailed(500)
             elif deletion_status == 3:
                 raise EntryNotFound(500)
-            
+            elif deletion_status == 4:
+                raise SchemaDeletionFailed(500)
             logging.info("data ingestion : ingestclass : delete_project_details : execution end")
             return deletion_status,original_dataset_id,project_name
         
-        except (DatabaseConnectionFailed,ProjectDeletionFailed,UserAuthenticationFailed,EntryNotFound) as exc:
+        except (DatabaseConnectionFailed,SchemaDeletionFailed,ProjectDeletionFailed,UserAuthenticationFailed,EntryNotFound) as exc:
             logging.error("data ingestion : ingestclass : delete_project_details : Exception " + str(exc.msg))
             logging.error("data ingestion : ingestclass : delete_project_details : " +traceback.format_exc())
             return exc.msg,None,None
@@ -445,7 +453,9 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             table_name,schema,cols = super(IngestClass, self).make_dataset_schema()
         
             sql_command = f"SELECT DATASET_VISIBILITY FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND USER_NAME = '{user_name}'"
+            logging.info(str(sql_command) + " check error")
             visibility_df = DBObject.select_records(connection,sql_command) 
+            
             if visibility_df is None:
                 return False
             if len(visibility_df) == 0:
@@ -535,23 +545,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 
                 if ALL_SET == False:
                     raise InvalidColumnName(500)
-                # logging.debug("data ingestion : ingestclass : check_file : rows =="+str(file_data_df.shape[0]) + " columns =="+ str(file_data_df.shape[1]))
-                # if file_data_df.shape[0] > 0 and file_data_df.shape[1] >= 2:
-                #     All_SET_Count = 0
-                #     logging.debug("data ingestion : ingestclass : check_file : column list value =="+str(file_data_df.columns.to_list()))   
-                #     col_names = file_data_df.columns.to_list()
-                #     for col in col_names:
-                #         # it will check column names into the files.
-                #         if(bool(re.match('^[a-zA-Z_]+[a-zA-Z0-9_]*$',col))==True):
-                            
-                #             All_SET_Count = All_SET_Count + 1
-                #         else:
-                #             #All_SET_Count = All_SET_Count - 1
-                #     logging.debug("data ingestion : ingestclass : check_file : count value =="+str(All_SET_Count))        
-                #     if All_SET_Count == len(col_names):
-                #         ALL_SET = True
-                
-                         
+             
             logging.debug("data ingestion : ingestclass : check_file : return value =="+str(ALL_SET))        
             logging.info("data ingestion : ingestclass : check_file : execution end")          
             return ALL_SET
@@ -571,19 +565,33 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         return:
                 [String]:[return name of the file]
         """
-        logging.info("data ingestion : ingestclass : save_file : execution start")
-        if dataset_visibility.lower()=='private':
-            file_path += user_name
-        else:
-            file_path += dataset_visibility
-        fs = FileSystemStorage(location=file_path)
-        check_sequence = DBObject.is_exist_sequence(connection,seq_name="dataset_sequence")
-        if check_sequence =="True":
-            seq = DBObject.get_sequence(connection) 
-        file_name = file.name.split(".")[0]+"_"+ str(seq['nextval'][0]) + '.csv'
-        fs.save(file_name, file)
-        logging.info("data ingestion : ingestclass : save_file : execution ")
-        return file_name
+        try:
+            logging.info("data ingestion : ingestclass : save_file : execution start")
+            if dataset_visibility.lower()=='private':
+                file_path += user_name
+            else:
+                file_path += dataset_visibility
+
+            #Make the Directory for thegiven path
+            fs = FileSystemStorage(location=file_path)
+
+            #Get the updated sequence 
+            check_sequence = DBObject.is_exist_sequence(connection,seq_name="dataset_sequence")
+            if check_sequence =="True":
+                seq = DBObject.get_sequence(connection) 
+
+            #Append the Sequence in the file name
+            file_name = file.name.split(".")[0]+"_"+ str(seq['nextval'][0]) + '.csv'
+
+            #Save the file in the specified directory with the given name
+            fs.save(file_name, file)
+
+            logging.info("data ingestion : ingestclass : save_file : execution ")
+            return file_name
+        except Exception as exc:
+            logging.error("data ingestion : ingestclass : save_file : Exception " + str(exc))
+            logging.error("data ingestion : ingestclass : save_file : " +traceback.format_exc())
+            return exc
     
     
 

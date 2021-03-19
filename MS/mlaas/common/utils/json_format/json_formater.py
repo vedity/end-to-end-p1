@@ -116,7 +116,7 @@ class JsonFormatClass:
             for x in dataset_json1:
                 outer_dict={}
                 for y in dataset_json2: 
-                    if str(x['id'])==str(y['parentId']):
+                    if x['id']==y['parentId']:
                         y_keys=list(y.keys())
                         y_data=list(y.values())
                         inner_dict={}

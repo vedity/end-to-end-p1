@@ -4,7 +4,7 @@
             <span class="font-size-12">Learning Curves</span>
         </a>
         <ng-template ngbNavContent>
-            <app-modeling-learning-curve></app-modeling-learning-curve>
+            <app-modeling-learning-curve [experiment_id]="experiment_id"></app-modeling-learning-curve>
         </ng-template>
     </li>
     <li [ngbNavItem]="2">
@@ -12,7 +12,7 @@
             <span class="font-size-12">Feature Importance</span>
         </a>
         <ng-template ngbNavContent>
-            <app-modeling-feature-importance></app-modeling-feature-importance>
+            <app-modeling-feature-importance [experiment_id]="experiment_id"></app-modeling-feature-importance>
         </ng-template>
     </li>
     <li [ngbNavItem]="3">
@@ -20,15 +20,16 @@
             <span class="font-size-12">Performance Metrics</span>
         </a>
         <ng-template ngbNavContent>
-            <app-modeling-performance-matrics></app-modeling-performance-matrics>
+            <app-modeling-performance-matrics [experiment_id]="experiment_id"></app-modeling-performance-matrics>
         </ng-template>
     </li>
+
     <li [ngbNavItem]="4">
         <a ngbNavLink>
             <span class="font-size-12">Modal Summary</span>
         </a>
         <ng-template ngbNavContent>
-            <app-modeling-modal-summary></app-modeling-modal-summary>
+            <app-modeling-modal-summary [experiment_id]="experiment_id"></app-modeling-modal-summary>
         </ng-template>
     </li>
     <li [ngbNavItem]="5">
@@ -36,7 +37,15 @@
             <span class="font-size-12">Actual Vs Prediction</span>
         </a>
         <ng-template ngbNavContent>
-            <app-modeling-actual-prediction></app-modeling-actual-prediction>
+            <app-modeling-actual-prediction [experiment_id]="experiment_id"></app-modeling-actual-prediction>
+        </ng-template>
+    </li>
+    <li [ngbNavItem]="6" *ngIf="model_type=='Classification'">
+        <a ngbNavLink>
+            <span class="font-size-12">Confusion Metrics</span>
+        </a>
+        <ng-template ngbNavContent>
+            <app-modeling-confusion-matrics [experiment_id]="experiment_id"></app-modeling-confusion-matrics>
         </ng-template>
     </li>
 </ul>

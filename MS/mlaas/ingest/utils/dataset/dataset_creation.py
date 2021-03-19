@@ -20,6 +20,8 @@ from common.utils.exception_handler.python_exception.common.common_exception imp
 from common.utils.exception_handler.python_exception.ingest.ingest_exception import *
 from common.utils.logger_handler import custom_logger as cl
 
+
+#from common.utils.database.db import DBClass
 user_name = 'admin'
 log_enable = True
 LogObject = cl.LogClass(user_name,log_enable)
@@ -187,16 +189,19 @@ class DatasetClass:
             status = 0 # If Successfully.
             if row_creation_flag == True:
                 load_data_status,no_of_rows = self.load_dataset(DBObject,connection,connection_string,file_name,dataset_visibility,user_name)
+            
             else:
                 load_data_status = self.insert_raw_dataset(DBObject,connection,raw_dataset_id,user_name,file_name,dataset_visibility)
-                
+            
+    
             if load_data_status == 1:
                 return 1,None,None
             else:
                 if row_creation_flag == True:
                     sql_command = "UPDATE "+str(table_name)+" set no_of_rows="+str(no_of_rows)+" where dataset_id="+str(original_dataset_id)
                     update_status = DBObject.update_records(connection,sql_command)
-
+            
+                
             if flag == True:
                 if row_creation_flag == True:
                     page_name='schema mapping'
@@ -231,10 +236,10 @@ class DatasetClass:
         # Get dataframe of the file data.
         
         file_data_df = DBObject.read_data(file_path)
-        logging.info("---->"+str(file_data_df))
+        
         # Get number of rows.
         no_of_rows = file_data_df.shape[0]
-        logger.info("no_of_rows:===="+str(no_of_rows))
+        
         # Get table name.
         
         table_name = self.get_dataset_table_name(file_name)
@@ -351,7 +356,10 @@ class DatasetClass:
         # Get dataframe of loaded csv.
         data_details_df = DBObject.select_records(connection,sql_data) 
         data_details_count_df = DBObject.select_records(connection,sql_filtercount) 
-        filtercount=data_details_count_df["count"]
+        
+        logging.info(str(data_details_count_df) + "check")
+
+        filtercount= data_details_count_df["count"]
         logging.info("data ingestion : DatasetClass : show_data_details : execution end")
         return data_details_df,filtercount
 
@@ -508,10 +516,12 @@ class DatasetClass:
             if dataset_visibility == 'public':
                 #? Is there any(public & private) dataset with same name?
                 sql_command = f"SELECT dataset_id FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' and page_name in ('Create dataset','Create Project','schema save')"
+                logging.info(str(sql_command) + "check file")
                 #! Possible Security Issue: User will get to know that some other user has private dataset with same name
             else:
                 #? Is there any public dataset with same name?
                 sql_command = f"SELECT dataset_id FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND DATASET_VISIBILITY = 'public' and page_name in ('Create dataset','Create Project','schema save')"
+                logging.info(str(sql_command) + "check file")
                 data_df=DBObject.select_records(connection,sql_command)
                 data=len(data_df)
 
@@ -519,6 +529,7 @@ class DatasetClass:
                     #? No public dataset with same name
                     #? Is there any private dataset from you with same name?
                     sql_command = f"SELECT dataset_id FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND USER_NAME = '{user_name}' and page_name in ('Create dataset','Create Project','schema save')"
+                    logging.info(str(sql_command) + "check file")
                 else:
                     #! There is a public dataset with your name
                     logging.debug(f"data ingestion  :  DatasetClass  :  dataset_exist  :  A public dataset with the same dataset_name exists at dataset_id = {int(data_df['dataset_id'][0])}")
@@ -593,34 +604,75 @@ class DatasetClass:
         except Exception as exc:
             return exc
     
-    def insert_raw_dataset(self,DBObject,connection,dataset_id,user_name,file_name,dataset_visibility):
+    def insert_raw_dataset(self,DBObject,connection,dataset_id,user_name,table_name,dataset_visibility,selected_visibility = None):
+        '''
+        Function used to create the new table based on existing table and update the "number of rows" and "table name" of the perticular dataset id
+        
+        Args:
+                dataset_id[(Integer)] : [Id of the dataset record]
+                user_name[(String)] : [Name of the user]
+                table_name[(String)] : [Name of the table]
+                dataset_visibility[(String)] : [Existing dataset_visibility]
+                selected_visibility[(String)] : [User Entered visibility]
+        Return:
+                [Integer] : [Return 0 if successfully inserted else 1]
+        '''
         try:
-            #get the formated table name of the actual dataset
-            original_table_name = self.get_dataset_table_name(file_name)
+            logging.info("data ingestion : DatasetClass : insert_raw_dataset : execution start")
+            # Get the formated table name of the actual dataset
+            original_table_name = self.get_dataset_table_name(table_name)
             
-            #get the updated table name for te raw dataset
-            raw_table_name = DBObject.get_table_name(connection,original_table_name)
+            # Get the updated table name for the raw dataset
+            new_table_name = DBObject.get_table_name(connection,original_table_name)
            
-            #check the visibility 
             if dataset_visibility=='private':
-
-                sql_command = 'CREATE TABLE '+str(user_name)+'."'+str(raw_table_name)+'" AS SELECT * FROM '+str(user_name)+'."'+str(original_table_name)+'"'
-                logging.info(str(sql_command)+ " private")
+                original_table_name = str(user_name)+'."'+str(original_table_name)+'"'
+                if selected_visibility != None and selected_visibility =='public':
+                    raw_table_name = 'public."'+str(new_table_name)+'"'
+                else:
+                    raw_table_name = str(user_name)+'."'+str(new_table_name)+'"'
+                    
             else:
-                sql_command = 'CREATE TABLE public."'+str(raw_table_name)+'" AS SELECT * FROM public."'+str(original_table_name)+'"'
-                logging.info(str(sql_command)+ " public")
+                original_table_name = 'public."'+str(original_table_name)+'"'
+                if selected_visibility != None and selected_visibility =='private':
+                    raw_table_name = str(user_name)+'."'+str(new_table_name)+'"'
+                else:
+                    raw_table_name = 'public."'+str(new_table_name)+'"'
+                    
+
+            # Create the new table based on the existing table
+            sql_command = 'CREATE TABLE '+str(raw_table_name)+' AS SELECT * FROM '+str(original_table_name)
             
-            #form the new table based on te existing table 
-            
+            logging.info(str(sql_command) + " sql")
+            # Execute the sql query
             create_status = DBObject.update_records(connection,sql_command)
 
-            #update the dataset table name of the raw dataset
-            sql_command = "UPDATE mlaas.dataset_tbl SET dataset_table_name='"+str(raw_table_name)+"' where dataset_id ='"+str(dataset_id)+"'"
-            create_status = DBObject.update_records(connection,sql_command)
+            if create_status == 0:
+                
+                # Get count of rows for the given table name
+                sql_command = "SELECT count(*) from "+str(raw_table_name)
+
+                # Execute the sql query
+                dataframe = DBObject.select_records(connection,sql_command)
+
+                # Extract the number of rows from dataframe
+                no_of_rows = str(dataframe['count'][0])
+            else:
+                raise DatasetCreationFailed(500)
+                
+            # update the "dataset table name"  and "no_of _rows" of the given dataset id
+            sql_command = "UPDATE mlaas.dataset_tbl SET dataset_table_name='"+str(new_table_name)+"',no_of_rows = '"+str(no_of_rows)+"' where dataset_id ='"+str(dataset_id)+"'"
             
-            return create_status
-        except Exception as exc:
-            return exc
+            # Execute the sql query
+            update_status = DBObject.update_records(connection,sql_command)
+
+            if create_status !=0:
+                raise DatasetColumnUpdateFailed
+                
+            logging.info("data ingestion : DatasetClass : insert_raw_dataset : execution stop")
+            return update_status
+        except (DatasetCreationFailed,DatasetColumnUpdateFailed) as exc:
+            return exc.msg
 
 
 

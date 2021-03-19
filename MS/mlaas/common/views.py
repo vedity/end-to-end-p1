@@ -54,7 +54,7 @@ class UserLoginClass(APIView):
                         logging.info("--->"+str(connection))
                         check_user_auth_tbl=DBObject.is_existing_table(connection,'user_auth_tbl','mlaas') #check user_auth_tbl exists
                         if check_user_auth_tbl == "False":
-                                user_df=DBObject.read_data('common/user_registration_tbl.csv') #read user_registration_tbl.csv
+                                user_df=DBObject.read_data('common/user_registration_tbl.csv') #read user_registration_tbl.csv    
                                 status=DBObject.load_df_into_db(connection_string,'user_auth_tbl',user_df,'mlaas')   #creare table user_auth_tbl    
                         check_menu_tbl=DBObject.is_existing_table(connection,'menu_tbl','mlaas')#check menu_tbl exists
                         if check_menu_tbl == "False":
@@ -68,6 +68,10 @@ class UserLoginClass(APIView):
                         if check_parent_activity_tbl == "False":
                                 parent_activity_df=DBObject.read_data('common/parent_activity_tbl.csv')#read parent_activity_tbl.csv
                                 status=DBObject.load_df_into_db(connection_string,'parent_activity_tbl',parent_activity_df,'mlaas') #creare table parent_activity_tbl         
+                        check_preprocess_tab_tbl=DBObject.is_existing_table(connection,'preprocess_tab_tbl','mlaas')#check activity_master_tbl exists
+                        if check_preprocess_tab_tbl == "False":
+                                preprocess_tab_df=DBObject.read_data('common/preprocess_tab_tbl.csv')#read parent_activity_tbl.csv
+                                status=DBObject.load_df_into_db(connection_string,'preprocess_tab_tbl',preprocess_tab_df,'mlaas') #creare table parent_activity_tbl         
                         user_status = DBObject.user_authentication(connection,user_name,password) #check the user user authenticated or not
                         if user_status != True:
                                 status_code,error_msg=json_obj.get_Status_code(user_status)
@@ -92,7 +96,9 @@ class UserLoginClass(APIView):
                 """
                 try:
                         logging.info("Common  : UserLoginClass : POST Method : execution start")
+                        
                         user_df=DBObject.read_data('common/user_registration_tbl.csv') #read the data from csv file store into dataframe variable
+                        logging.info("get data frame from read data=="+str(user_df))
                         status=DBObject.load_df_into_db(connection_string,'user_auth_tbl',user_df,'mlaas') # this function will insert the csv data into  user_auth table
                         return Response({"Status":status})
                 except Exception as e:
@@ -139,13 +145,18 @@ class MenuClass(APIView):
                 """
                 try:
                         logging.info("Common  : MenuClass : POST Method : execution start")
-                        sql_command1='select id,modulename,menuname as "label",url as "link",parent_id as "parentId",icon from mlaas.menu_tbl where parent_id ='+"'null'"
+                        sql_command1='select id,modulename,menuname as "label",url as "link",parent_id as "parentId",icon from mlaas.menu_tbl where parent_id is null'
+                        
                         dataset_df1=DBObject.select_records(connection,sql_command1) #call show_data_details and it will return dataset detail data in dataframe
+                        
                         dataset_json1=json.loads(dataset_df1.to_json(orient='records'))  # convert datafreame into json
-                        sql_command2='select id,modulename,menuname as "label",url as "link",parent_id as "parentId",icon from mlaas.menu_tbl where parent_id !='+"'null'"
+                        
+                        sql_command2='select id,modulename,menuname as "label",url as "link",parent_id as "parentId",icon from mlaas.menu_tbl where parent_id is not null'
+                        
                         dataset_df2=DBObject.select_records(connection,sql_command2) #call show_data_details and it will return dataset detail data in dataframe
+                        
                         dataset_json2=json.loads(dataset_df2.to_json(orient='records'))  # convert datafreame into json
-                
+
                         json_data=json_obj.menu_nested_format(dataset_json1,dataset_json2)   
                         return Response({"status_code":"200","error_msg":"Menu Data","response":json_data})
                 except Exception as e:
@@ -215,4 +226,4 @@ class ActivityTimelineClass(APIView):
                         logging.error("Common  : ActivityTimelineClass : GET Method : Exception :" + str(e))
                         logging.error("Common  : ActivityTimelineClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
- 
+

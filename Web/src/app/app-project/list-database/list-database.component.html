@@ -63,7 +63,7 @@
                     <div class="main-datatable">
                         <a href="javascript:void(0)" (click)="displayfilter()" id="filter_btn" class="filter-btn"><i
                                 class="dripicons-experiment" id="filtericon"></i></a>
-                        <table datatable [dtTrigger]="dtTrigger" [dtOptions]="dtOptions" class="table table-centered table-nowrap">
+                        <table datatable [dtTrigger]="dtTrigger" [dtOptions]="dtOptions" style="width: 100%;" class="table table-centered table-nowrap" id="datatable">
                             <thead class="thead-light">
                                 <tr>
                                     <th>Dataset
@@ -116,16 +116,15 @@
                                     </td>
                                     <td>
                                         <input class="form-control filter" id="input_2" type="text" name="search-total_rows" />
-
                                     </td>
                                     <td>
-                                        <select class="form-control filter" id="input_4" name="search-visibility">
+                                        <select class="form-control filter" id="input_3" name="search-visibility">
                                             <option value="">None</option>
-                                            <option value="public">Public</option>
-                                            <option value="private">Private</option>
+                                            <option value="Public">Public</option>
+                                            <option value="Private">Private</option>
                                         </select>
                                     </td>
-                                    <td><input class="form-control filter" type="text" id="input_5" name="search-created-by" /></td>
+                                    <td><input class="form-control filter" type="text" id="input_4" name="search-created-by" /></td>
                                     <td></td>
                                     <td></td>
                                 </tr>
@@ -138,7 +137,8 @@
                                     <td>{{data.no_of_rows}}
                                     </td>
                                     <td class="text-center">
-                                        <span style="display:none;">{{data.dataset_visibility}}</span>
+                                        <span style="display:none;" *ngIf="data.dataset_visibility==='public'">Public</span>
+                                        <span style="display:none;" *ngIf="data.dataset_visibility==='private'">Private</span>
 
                                         <i *ngIf="data.dataset_visibility==='public'" class="bx bx-globe"></i>
                                         <i *ngIf="data.dataset_visibility==='private'" class="bx bx-lock-alt"></i>
