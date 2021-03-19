@@ -23,9 +23,8 @@ from .schema import schema_creation as sc
 from .cleaning import noise_reduction as nr
 from .cleaning import cleaning
 from .Transformation import transformation as trs
-from .model_type import ModelType
-# from modeling.split_data import SplitData as sd
-#from model_type import ModelType
+from .Transformation import split_data 
+from .Transformation.model_type_identifier import ModelType
 
 #* Library Imports
 import os
@@ -51,7 +50,7 @@ logger = logging.getLogger('preprocessing')
 
 #* Object Definition
 dc = dataset_creation.DatasetClass()
-
+sp = split_data.Split_Data()
 class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass, trs.TransformationClass):
     def __init__(self,database,user,password,host,port):
         """This constructor is used to initialize database credentials.
@@ -1115,10 +1114,10 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             train_Y_filename = scale_dir+"/scaled_train_Y_data_" + unique_id #genrate train_Y file path
             test_X_filename =  scale_dir+"/scaled_test_X_data_" + unique_id  #genrate test_X file path  
             test_Y_filename =  scale_dir+"/scaled_test_Y_data_" + unique_id  #genrate test_Y file path     
-            valid_X_filename = "None" #genrate valid_X file path     
-            valid_Y_filename = "None" #genrate valid_Y file path     
-            Y_valid_count= None #Initilize valid count
-            X_train, X_valid, X_test, Y_train, Y_valid, Y_test=mt.get_split_data(input_features_df,target_features_df, int(random_state),float(test_ratio), valid_ratio, str(split_method))
+            valid_X_filename = "None"
+            valid_Y_filename = "None"
+            Y_valid_count= None
+            X_train, X_valid, X_test, Y_train, Y_valid, Y_test=sp.get_split_data(input_features_df,target_features_df, int(random_state),float(test_ratio), valid_ratio, str(split_method))
             if split_method != 'cross_validation':
                 Y_valid_count= Y_valid.shape[0]
                 valid_X_filename = scale_dir+"/scaled_valid_X_data_" + unique_id #genrate valid_X file path     
