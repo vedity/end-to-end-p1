@@ -226,7 +226,7 @@ export class ModelingTypeComponent implements OnInit {
     }
   }
   getRunningExperimentList() {
-    this.apiservice.showrunningexperimentslist(this.params.dataset_id).subscribe(
+    this.apiservice.showrunningexperimentslist(this.params.project_id).subscribe(
       logs => this.runningexpListsuccessHandler(logs),
       error => this.errorHandler(error));
   }
@@ -243,7 +243,7 @@ runningExpList: any = [];
   }
 
   getAllExperimentList() {
-    this.apiservice.showallexperimentslist(this.params.dataset_id).subscribe(
+    this.apiservice.showallexperimentslist(this.params.project_id).subscribe(
       logs => this.allexpListsuccessHandler(logs),
       error => this.errorHandler(error));
   }
@@ -348,10 +348,41 @@ runningExpList: any = [];
   }
 
   modeltitle: any;
-  extraLarge(exlargeModal: any, name) {
-    this.modeltitle = name;
+  current_experiment_id:any;
+  current_model_type:any;
+  extraLarge(exlargeModal: any, obj) {
+    this.modeltitle = obj.experiment_name;
+    this.current_experiment_id=obj.experiment_id;
+    this.current_model_type=obj.model_type;
     this.modalService.open(exlargeModal, { size: 'xl', windowClass: 'modal-holder', centered: true });
   };
+
+  checkexperimentname(event)
+{
+  var val=event.target.value;
+  if(val!=""){
+    this.apiservice.checkexperimentname(val).subscribe(
+      logs=>this.checksuccessHandler(logs,event.target),
+      error=>this.errorHandler(error)
+    )
+  }
+  else
+  this.checkuniuqename = false;
+}
+
+checkuniuqename=true;
+checksuccessHandler(data,target){
+  if (data.status_code == '200') {
+    this.checkuniuqename = true;
+    target.className = target.className.replace("ng-invalid", " ");
+    target.className = target.className + " ng-valid";
+  }
+  else {
+    this.checkuniuqename = false;
+    target.className = target.className.replace("ng-valid", " ");
+    target.className = target.className + " ng-invalid";
+  }
+}
 
   smallModal(modelingmodal: any) {
     this.modalService.open(modelingmodal, { size: 'md', windowClass: 'modal-holder', centered: true });

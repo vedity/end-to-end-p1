@@ -240,7 +240,8 @@ export class DataCleanupComponent implements OnInit {
     this.selectedColumn.forEach(element => {
       var input = $("#setInput_" + element + "_" + operationid).val();
       if (input != undefined) {
-        $("#setInput_" + element + "_" + operationid).val(value);
+
+        $("#setInput_" + element + "_" + operationid).val(value).addClass("error");
       }
     });
   }
@@ -305,16 +306,26 @@ export class DataCleanupComponent implements OnInit {
     this.removeHandlers(id, column, tabid);
   }
 
-  tabchange() {
+
+  errorothertag=false;
+  tabchange(event,tabid) {
+   console.log($(".errorstatus").length);
     $(".checkbox:checked").prop("checked", false);
     this.selectedColumn = [];
-
     this.getColumnviseOperation();
   }
 
-  outertabchange(){
-    
-  }
+ 
+
+reset()
+{
+  $(".checkbox:checked").prop("checked", false);
+  $(".customInput").prop('disabled', true).val('').removeClass('errorstatus');
+  $(".radiobutton:checked").prop('checked', false);
+  this.selectedColumn = [];
+  this.getColumnList();
+  this.getColumnviseOperation();
+}
 
   getScalingOperations() {
     this.apiService.getScalingOperations().subscribe(
@@ -349,6 +360,7 @@ export class DataCleanupComponent implements OnInit {
       this.toaster.error("Please enter valid input", 'Error')
     }else{
     if ($(".handlingitem").length > 0) {
+     if($(".error").length==0){
      
    
       $(".handlingitem").each(function () {
@@ -386,8 +398,9 @@ export class DataCleanupComponent implements OnInit {
           error => this.errorHandler(error)
         )
       }
-
-
+    }
+      else
+      this.toaster.error("Please enter valid input", 'Error')
 
     }
     else

@@ -70,7 +70,6 @@ export class ListDatadetailComponent implements OnInit {
                 this.apiService.getDataDetails(dataTablesParameters, this.dataset_id,this.schema_id)
                     .subscribe(resp => {
                         this.transactions = resp.data;
-                        
                         if (this.transactions.length == 0) {
                             this.nodatafound = '<tr><td></td><td colspan="6" class="no-data-available">No data available in table</td></tr>';
                             $("#nodatafound").html(this.nodatafound);
@@ -80,7 +79,6 @@ export class ListDatadetailComponent implements OnInit {
                             recordsFiltered: resp.recordsFiltered,
                             data: []
                         });
-
                     });
             },
             drawCallback: (settings) => {
@@ -93,7 +91,6 @@ export class ListDatadetailComponent implements OnInit {
                     $(".main-datatable").trigger('resize')
                    setTimeout(() => {
                     this.contentloaded = true;
-                        
                    }, 100); 
                 });
               
@@ -119,6 +116,9 @@ export class ListDatadetailComponent implements OnInit {
 
     displayfilter() {
         this.filter = !this.filter;
-        $('.filter').val('').trigger('change');
+        $('.filter').val('').trigger('keyup');
+        this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
+            dtInstance.draw();
+        });
     }
 }
