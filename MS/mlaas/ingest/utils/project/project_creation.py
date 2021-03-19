@@ -94,7 +94,6 @@ class ProjectClass:
         logging.info("data ingestion : ProjectClass : make_project_records : execution start")
         
         cleanup_dag_id = preprocessObj.get_cleanup_dag_name()
-        logging.info("---------->"+str(cleanup_dag_id))
         row = project_name,project_desc,user_name,original_dataset_id,dataset_id,cleanup_dag_id
         row_tuples = [tuple(row)] # Make record for project table.
         logging.info("data ingestion : ProjectClass : make_project_records : execution end")

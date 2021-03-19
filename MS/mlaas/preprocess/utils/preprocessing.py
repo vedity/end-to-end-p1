@@ -23,9 +23,8 @@ from .schema import schema_creation as sc
 from .cleaning import noise_reduction as nr
 from .cleaning import cleaning
 from .Transformation import transformation as trs
-from .model_type import ModelType
-# from modeling.split_data import SplitData as sd
-#from model_type import ModelType
+from .Transformation import split_data 
+from .Transformation.model_type_identifier import ModelType
 
 #* Library Imports
 import os
@@ -51,7 +50,7 @@ logger = logging.getLogger('preprocessing')
 
 #* Object Definition
 dc = dataset_creation.DatasetClass()
-
+sp = split_data.Split_Data()
 class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass, trs.TransformationClass):
     def __init__(self,database,user,password,host,port):
         """This constructor is used to initialize database credentials.
@@ -984,11 +983,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                         #     activity_status = self.operation_end(DBObject, connection, activity_id, op, temp_col)
                     else:
 
-                        #Get the possible missing and noise status after updating any columns
-                        missing_value_status,noise_status = self.get_preprocess_cache(dataset_id)
-
                         #Update all the status flag's based on the schema id
-                        status = self.update_schema_flag_status(DBObject,connection,schema_id,missing_value_status,noise_status)
+                        status = self.update_schema_flag_status(DBObject,connection,schema_id,dataset_id)
                         
                         if status ==0:  
                             #? Updating the Activity table
@@ -1089,53 +1085,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             feature_cols = feature_cols.replace("'",'"')
             target_cols = target_cols.replace("'",'"')
 
-
-            #splitting parameters
-            split_method =split_parameters['split_method'] #get split_method
-            cv = split_parameters['cv'] #get cv
-            if len(cv) == 0:
-                cv = 0
-            random_state = split_parameters['random_state'] #get random_state
-            test_ratio = split_parameters['test_ratio'] #get test_size
-            valid_ratio = split_parameters['valid_ratio'] #get valid_size
-            if len(valid_ratio) == 0:
-                valid_ratio= 0
-            else:
-                valid_ratio=float(valid_ratio)
-            unique_id = str(uuid.uuid1().time) #genrate unique_id
-            scale_dir = "scaled_dataset/scaled_data_" + unique_id  #genrate directory
-            CHECK_FOLDER = os.path.isdir(scale_dir) #check directory already exists or not
-            # If folder doesn't exist, then create it.
-            if not CHECK_FOLDER:
-                os.makedirs(scale_dir) #create directory
-                logger.info("Directory  Created")
-            else:
-                logger.info("Directory  already exists")
-            train_X_filename = scale_dir+"/scaled_train_X_data_" + unique_id #genrate train_X file path
-            train_Y_filename = scale_dir+"/scaled_train_Y_data_" + unique_id #genrate train_Y file path
-            test_X_filename =  scale_dir+"/scaled_test_X_data_" + unique_id  #genrate test_X file path  
-            test_Y_filename =  scale_dir+"/scaled_test_Y_data_" + unique_id  #genrate test_Y file path     
-            valid_X_filename = "None" #genrate valid_X file path     
-            valid_Y_filename = "None" #genrate valid_Y file path     
-            Y_valid_count= None #Initilize valid count
-            X_train, X_valid, X_test, Y_train, Y_valid, Y_test=mt.get_split_data(input_features_df,target_features_df, int(random_state),float(test_ratio), valid_ratio, str(split_method))
-            if split_method != 'cross_validation':
-                Y_valid_count= Y_valid.shape[0]
-                valid_X_filename = scale_dir+"/scaled_valid_X_data_" + unique_id #genrate valid_X file path     
-                valid_Y_filename = scale_dir+"/scaled_valid_Y_data_" + unique_id #genrate valid_Y file path     
-                np.save(valid_X_filename,X_valid.to_numpy()) #save X_valid
-                np.save(valid_Y_filename,Y_valid.to_numpy()) #save Y_valid   
-            Y_train_count=Y_train.shape[0] #train count
-            Y_test_count =Y_test.shape[0]  #test count      
-            np.save(train_X_filename,X_train.to_numpy()) #save X_train
-            np.save(train_Y_filename,Y_train.to_numpy()) #save Y_train
-            np.save(test_X_filename,X_test.to_numpy()) #save X_test
-            np.save(test_Y_filename,Y_test.to_numpy()) #save Y_test
-        
-            scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_ratio)+', "test_ratio":'+ str(test_ratio)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'"}' #genrate scaled split parameters
+            scaled_split_parameters=self.split_data(input_features_df, target_features_df, split_parameters) #call split_data function
+            
             logger.info("scaled_split_parameters=="+scaled_split_parameters)
             sql_command = f"update mlaas.project_tbl set target_features= '{target_cols}' ,input_features='{feature_cols}',scaled_split_parameters = '{scaled_split_parameters}',problem_type = '{problem_type_dict}' where dataset_id = '{dataset_id}' and project_id = '{project_id}' and user_name= '{user_name}'"
-            status = DBObject.update_records(connection, sql_command)
+            status=DBObject.update_records(connection, sql_command)
             if status==1:
                 raise ProjectUpdateFailed(500)
             return status
@@ -1144,6 +1098,63 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.error("data preprocessing : PreprocessingClass : handover : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : handover : " +traceback.format_exc())
             return exc.msg
+        
+    def split_data(self,input_features_df,target_features_df,split_parameters):
+        """
+        [it will split data and store the numpy file and return scaled split parameters dictionary ]
+
+        Args:
+            input_features_df ([type]): [input df]
+            target_features_df ([type]): [target df]
+            split_parameters ([type]): [split parameters]
+
+        Returns:
+            [scaled_split_parameters]: [scaled_split_parameters description]
+        """
+        #splitting parameters
+        split_method =split_parameters['split_method'] #get split_method
+        cv = split_parameters['cv'] #get cv
+        if len(cv) == 0:
+            cv = 0
+        random_state = split_parameters['random_state'] #get random_state
+        test_ratio = split_parameters['test_ratio'] #get test_size
+        valid_ratio = split_parameters['valid_ratio'] #get valid_size
+        if len(valid_ratio) == 0:
+            valid_ratio= 0
+        else:
+            valid_ratio=float(valid_ratio)
+        unique_id = str(uuid.uuid1().time) #genrate unique_id
+        scale_dir = "scaled_dataset/scaled_data_" + unique_id  #genrate directory
+        CHECK_FOLDER = os.path.isdir(scale_dir) #check directory already exists or not
+        # If folder doesn't exist, then create it.
+        if not CHECK_FOLDER:
+            os.makedirs(scale_dir) #create directory
+            logger.info("Directory  Created")
+        else:
+            logger.info("Directory  already exists")
+        train_X_filename = scale_dir+"/scaled_train_X_data_" + unique_id #genrate train_X file path
+        train_Y_filename = scale_dir+"/scaled_train_Y_data_" + unique_id #genrate train_Y file path
+        test_X_filename =  scale_dir+"/scaled_test_X_data_" + unique_id  #genrate test_X file path  
+        test_Y_filename =  scale_dir+"/scaled_test_Y_data_" + unique_id  #genrate test_Y file path     
+        valid_X_filename = "None"
+        valid_Y_filename = "None"
+        Y_valid_count= None
+        X_train, X_valid, X_test, Y_train, Y_valid, Y_test=sp.get_split_data(input_features_df,target_features_df, int(random_state),float(test_ratio), valid_ratio, str(split_method))
+        if split_method != 'cross_validation':
+            Y_valid_count= Y_valid.shape[0]
+            valid_X_filename = scale_dir+"/scaled_valid_X_data_" + unique_id #genrate valid_X file path     
+            valid_Y_filename = scale_dir+"/scaled_valid_Y_data_" + unique_id #genrate valid_Y file path     
+            np.save(valid_X_filename,X_valid.to_numpy()) #save X_valid
+            np.save(valid_Y_filename,Y_valid.to_numpy()) #save Y_valid   
+        Y_train_count=Y_train.shape[0] #train count
+        Y_test_count =Y_test.shape[0]  #test count      
+        np.save(train_X_filename,X_train.to_numpy()) #save X_train
+        np.save(train_Y_filename,Y_train.to_numpy()) #save Y_train
+        np.save(test_X_filename,X_test.to_numpy()) #save X_test
+        np.save(test_Y_filename,Y_test.to_numpy()) #save Y_test
+        scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_ratio)+', "test_ratio":'+ str(test_ratio)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'"}' #genrate scaled split parameters
+        return scaled_split_parameters
+        
         
     def get_activity_desc(self, DBObject, connection, operation_id, col_name, code = 1):
         '''
@@ -1169,7 +1180,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         
         return description
             
-    def operation_start(self, DBObject, connection, operation_id, user_name, project_id, dataset_id, col_name):
+    def operation_start(self, DBObject, connection, operation_id, project_id, col_name):
         '''
             Used to Insert Activity in the Activity Timeline Table.
             
@@ -1184,6 +1195,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         
         #? Getting Activity Description
         desc = self.get_activity_desc(DBObject, connection, operation_id, col_name, code = 1)
+        
+        #? Getting Dataset_id & User_Name
+        sql_command = f"select pt.dataset_id,pt.user_name from mlaas.project_tbl pt  where pt.project_id = '{project_id}'"
+        details_df = DBObject.select_records(connection,sql_command) 
+        dataset_id,user_name = details_df['dataset_id'][0],details_df['user_name'][0]
         
         #? Inserting the activity in the activity_detail_table
         _,activity_id = self.AT.insert_user_activity(operation_id,user_name,project_id,dataset_id,desc,column_id =col_name)
@@ -1242,9 +1258,12 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         
         return status
     
-    def update_schema_flag_status(self,DBObject,connection,schema_id,missing_flag,noise_flag):
+    def update_schema_flag_status(self,DBObject,connection,schema_id,dataset_id, **kwargs):
         try:
             logging.info("data preprocessing : PreprocessingClass : update_schema_flag_status : execution start")
+            
+            missing_flag,noise_flag = self.get_preprocess_cache(dataset_id)
+
             
             for noise_flag,missing_flag in zip(missing_flag,noise_flag): 
 
@@ -1282,7 +1301,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
 
         return dag_id
     
-    def dag_executor(self,project_id, dataset_id, schema_id, request):
+    def dag_executor(self,project_id, dataset_id, schema_id, request, flag ,selected_visibility,dataset_name ,dataset_desc):
         
         logging.info("data preprocessing : PreprocessingClass : dag_executor : execution start")
         
@@ -1303,7 +1322,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         "operation_dict": op_dict,
         "values_dict": val_dict,
         "schema_id": schema_id,
-        "dataset_id": dataset_id
+        "dataset_id": dataset_id,
+        "project_id": project_id
         }
         
         json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
