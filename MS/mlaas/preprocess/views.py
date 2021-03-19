@@ -361,9 +361,17 @@ class CleanupSave(APIView):
                         project_id = request.query_params.get('project_id') #get schema id
                         schema_id = request.query_params.get('schema_id') #get schema id
                         dataset_id = request.query_params.get('dataset_id') #get dataset id
+                        method_flag = request.query_params.get('flag') #get dataset id
+                        logging.info(str(method_flag) +" checking")
+                        if method_flag == 'True':
+                                visibility = request.query_params.get('visibility') #get schema id
+                                dataset_name = request.query_params.get('dataset_name') #get dataset id
+                                dataset_desc = request.query_params.get('dataset_desc') #get dataset id
+                        else:
+                                visibility = dataset_name = dataset_desc = None
                         data = json.dumps(request.data) #get handling json
                         data = json.loads(data) 
-                        operation = preprocessObj.master_executor(project_id, dataset_id,schema_id,data)
+                        operation = preprocessObj.master_executor(project_id, dataset_id,schema_id,data,method_flag,visibility ,dataset_name ,dataset_desc )
                         logging.info("data preprocess : CleanupSave : POST Method : execution stop")
                         if isinstance(operation,int): 
                                     
@@ -379,7 +387,7 @@ class CleanupSave(APIView):
                         logging.error("data preprocess : CleanupSave : POST Method : "+ traceback.format_exc())
                         return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
                 
-class ScalingClass(APIView):
+class ScalingSplitClass(APIView):
         def post(self, request, format=None):
                 try:
                         logging.info("data preprocess : HandoverClass : POST Method : execution start")
@@ -387,20 +395,25 @@ class ScalingClass(APIView):
                         dataset_id = request.query_params.get('dataset_id') #get dataset id
                         project_id = request.query_params.get('project_id') #get dataset id
                         user_name = request.query_params.get('user_name') #get dataset id
-                        scaling_operation = request.query_params.get('scaling_op') 
-                        split_method = request.query_params.get('split_method')
-                        cv = request.query_params.get('cv')
-                        valid_ratio = request.query_params.get('valid_ratio')
-                        test_ratio = request.query_params.get('test_ratio')
-                        random_state = request.query_params.get('random_state')
-                        split_parameters = {'split_method': split_method ,'cv': cv,'valid_ratio': valid_ratio, 'test_ratio': test_ratio,'random_state': random_state}
-                        operation = preprocessObj.handover(dataset_id, schema_id, project_id, user_name,split_parameters, scaling_operation)
-                        logging.info("data preprocess : HandoverClass : POST Method : execution stop")
-                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":operation})
-
+                        scaling_operation = request.query_params.get('scaling_op') #get scaling op
+                        split_method = request.query_params.get('split_method') #get scaling method
+                        cv = request.query_params.get('cv')  #get scaling method
+                        valid_ratio = request.query_params.get('valid_ratio')  #get valid ratio
+                        test_ratio = request.query_params.get('test_ratio') #get test ratio
+                        random_state = request.query_params.get('random_state') #get random state
+                        split_parameters = {'split_method': split_method ,'cv': cv,'valid_ratio': valid_ratio, 'test_ratio': test_ratio,'random_state': random_state} #split parameters
+                        status = preprocessObj.handover(dataset_id, schema_id, project_id, user_name,split_parameters, scaling_operation)
+                        logging.info("data preprocess : ScalingSplitClass : POST Method : execution stop")
+                        if isinstance(status,int):     
+                                logging.info("data preprocess : ScalingSplitClass : POST Method : execution stop")
+                                return Response({"status_code":"200","error_msg":"Successfull retrival","response":"true"})
+                        else:
+                                status_code,error_msg=json_obj.get_Status_code(status) # extract the status_code and error_msg from schema_data
+                                logging.info("data preprocess : ScalingSplitClass : POST Method : execution stop : status_code :"+status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                 except Exception as e:
-                        logging.error("data preprocess : HandoverClass : POST Method : Exception :" + str(e))
-                        logging.error("data preprocess : HandoverClass : POST Method : "+ traceback.format_exc())
+                        logging.error("data preprocess : ScalingSplitClass : POST Method : Exception :" + str(e))
+                        logging.error("data preprocess : ScalingSplitClass : POST Method : "+ traceback.format_exc())
                         return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
         
 

@@ -333,6 +333,7 @@ class LinearRegressionClass:
         mlflow.log_dict(features_impact_dict,"features_importance.json")
         mlflow.log_dict(model_summary,"model_summary.json")
         mlflow.log_dict(final_result_dict,"predictions.json")
+        print("ENDING\n\n\n\n\n DONE--------------------------------------------")
         
         
         

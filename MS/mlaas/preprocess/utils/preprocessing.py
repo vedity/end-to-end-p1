@@ -34,6 +34,11 @@ import numpy as np
 import pandas as pd
 import uuid
 from sklearn.model_selection import train_test_split
+import requests
+import uuid
+import json
+import time
+
 
 user_name = 'admin'
 log_enable = True
@@ -126,6 +131,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.info("data preprocessing : PreprocessingClass : get_exploration_data : execution start")
             
             data_df = self.get_data_df(dataset_id, schema_id)
+            logging.error(str(data_df) + "  chaclking")
             if isinstance(data_df, str):
                 raise GetDataDfFailed(500)
             
@@ -211,7 +217,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             #? For FrontEnd 
             json_data = [{"column_id": count, "col_name": column_name[count],"is_missing":flag_value[count]} for count in range(1,len(column_name))]
-            logging.info("AAAAAAAAAAAAAAAAAAAA" + str(json_data))
+            
             logging.info("data preprocessing : PreprocessingClass : get_col_names : execution stop")
             
             return json_data
@@ -724,7 +730,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             return OperationOrderingFailed(500).msg
         
         
-    def master_executor(self, project_id,dataset_id, schema_id,request, save_as = False,value = None):
+    def master_executor(self, project_id,dataset_id, schema_id,request, flag ,selected_visibility,dataset_name ,dataset_desc):
         '''
             It takes the request from the frontend and executes the cleanup operations.
             
@@ -741,7 +747,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         '''
         
         try:
-            logging.info("data preprocessing : PreprocessingClass : master_executor : execution start")
+            logging.info("data preprocessing : PreprocessingClass : master_executor : execution start" + str(type(flag))+ str(flag))
             DBObject,connection,connection_string = self.get_db_connection()
             if connection == None :
                 raise DatabaseConnectionFailed(500)
@@ -759,7 +765,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 dataset_table_name = 'public'+'."'+table_name+'"'
 
             #get the Column list
-            column_list = self.get_col_names(schema_id)
+            column_list = DBObject.get_column_names( connection, table_name)
+            # column_list = self.get_col_names(schema_id)
             logging.info(str(column_list) + " column_list")
 
             #? Getting operations in the ordered format
@@ -839,7 +846,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     elif op == 9:
                         
                         #? Reusing the missing category imputation function for the arbitrary value imputation
-                        status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name,col, value[0],flag = True)
+                        status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name,col, value,flag = True)
                         if status == 0:
                             for col_name in col_names:
                                 sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
@@ -980,15 +987,21 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                         missing_value_status,noise_status = self.get_preprocess_cache(dataset_id)
 
                         #Update all the status flag's based on the schema id
-                        status = self.update_schema_flag_status(scheam_id,missing_value_status,noise_status)
-
+                        status = self.update_schema_flag_status(DBObject,connection,schema_id,missing_value_status,noise_status)
+                        
                         if status ==0:  
                             #? Updating the Activity table
                             for i,temp_col_names in enumerate(temp_cols):
                                 activity_status = self.operation_end(DBObject, connection, activity_ids[i], op, temp_col_names)
+
+                            if flag == 'True':
+                                logging.info(" call <>")
+                                save_as_status = self.SaveAs(DBObject,connection,project_id,table_name,user_name,dataset_visibility,dataset_name,selected_visibility,dataset_desc)
+                                return save_as_status
                         else:
+                            
                             return status
-                except :
+                except Exception as exc :
                     continue
                     
             logging.info("data preprocessing : PreprocessingClass : master_executor : execution stop")
@@ -1000,9 +1013,27 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
             return exc.msg
             
-    def handover(self, dataset_id, schema_id, project_id, user_name,split_parameters,scaling_type = 0, val = None):
+    def handover(self, dataset_id, schema_id, project_id, user_name,split_parameters,scaling_type = 0):
+        """[This function is used to scaled data and store numpy file into the scaled dataset folder.]
+
+        Args:
+            dataset_id ([type]): [to get the dataframe for scaling and split]
+            schema_id ([type]): [to get column name]
+            project_id ([type]): [to update the entry in project_tble]
+            user_name ([type]): [to update the entry in project_tble]
+            split_parameters ([type]): [for spliling]
+            scaling_type (int, optional): [get scaling type]. Defaults to 0.
+
+        Raises:
+            DatabaseConnectionFailed: [description]
+            GetDataDfFailed: [description]
+            ProjectUpdateFailed: [description]
+
+        Returns:
+            status (`Intiger`): Status of the upload.
+        """
         '''
-            This function is used to store the scaled numpy file into the scaled dataset folder.
+            This function is used to scaled data and store numpy file into the scaled dataset folder.
             
             Args:
             -----
@@ -1020,37 +1051,37 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         try:
             logging.info("data preprocessing : PreprocessingClass : handover : execution start")
             
-            DBObject,connection,connection_string = self.get_db_connection()
+            DBObject,connection,connection_string = self.get_db_connection() #get db connection
             if connection == None :
                 raise DatabaseConnectionFailed(500)  
             
             #? Getting Dataframe
-            data_df = self.get_data_df(dataset_id,schema_id)
+            data_df = self.get_data_df(dataset_id,schema_id) #get dataframe
             if isinstance(data_df, str):
                 raise GetDataDfFailed(500)
             
             if scaling_type == 0:
-                data_df[:,1:] = self.standard_scaling(data_df[:,1:])
+                data_df[:,1:] = self.standard_scaling(data_df[:,1:]) #standard_scaling
             elif scaling_type == 1:
-                data_df[:,1:] = self.min_max_scaling(data_df[:,1:])
+                data_df[:,1:] = self.min_max_scaling(data_df[:,1:]) #min_max_scaling
             elif scaling_type == 2:
-                data_df[:,1:] = self.robust_scaling(data_df[:,1:])
+                data_df[:,1:] = self.robust_scaling(data_df[:,1:]) #robust_scaling
                     
-            feature_cols = list(data_df.columns)
-            tg_cols = DBObject.get_target_col(connection, schema_id)
+            feature_cols = list(data_df.columns) #get list of the columns
+            tg_cols = DBObject.get_target_col(connection, schema_id) #get list of the target columns
             for col in tg_cols:
-                feature_cols.remove(col)
+                feature_cols.remove(col) #remove target columns from list
             target_cols = [data_df.columns[0]]
-            target_cols += tg_cols
+            target_cols += tg_cols #add index column from target columns list
             
             input_features_df = data_df[feature_cols] #input_features_df
             target_features_df=data_df[target_cols] #target_features_df
             mt = ModelType()
-            problem_type = mt.get_model_type(target_features_df)
-            model_type = problem_type[0]
-            algorithm_type = problem_type[1]
-            target_type = problem_type[2]
-            problem_type_dict = '{"model_type": "'+str(model_type)+'","algorithm_type": "'+str(algorithm_type)+'","target_type": "'+str(target_type)+'"}'
+            problem_type = mt.get_model_type(target_features_df) #call get_model_type
+            model_type = problem_type[0] #model_type
+            algorithm_type = problem_type[1] #algorithm type
+            target_type = problem_type[2] #target type
+            problem_type_dict = '{"model_type": "'+str(model_type)+'","algorithm_type": "'+str(algorithm_type)+'","target_type": "'+str(target_type)+'"}' #create problem type dict
             
             feature_cols = str(feature_cols) #input feature_cols
             target_cols = str(target_cols) #target feature_cols
@@ -1058,17 +1089,16 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             target_cols = target_cols.replace("'",'"')
 
 
-            # #splitting parameters
+            #splitting parameters
             split_method =split_parameters['split_method'] #get split_method
             cv = split_parameters['cv'] #get cv
             if len(cv) == 0:
-                cv = None
-            
+                cv = 0
             random_state = split_parameters['random_state'] #get random_state
             test_ratio = split_parameters['test_ratio'] #get test_size
             valid_ratio = split_parameters['valid_ratio'] #get valid_size
             if len(valid_ratio) == 0:
-                valid_ratio= None
+                valid_ratio= 0
             else:
                 valid_ratio=float(valid_ratio)
             unique_id = str(uuid.uuid1().time) #genrate unique_id
@@ -1092,22 +1122,24 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 Y_valid_count= Y_valid.shape[0]
                 valid_X_filename = scale_dir+"/scaled_valid_X_data_" + unique_id #genrate valid_X file path     
                 valid_Y_filename = scale_dir+"/scaled_valid_Y_data_" + unique_id #genrate valid_Y file path     
-                np.save(valid_X_filename,X_valid.to_numpy()) #sa
-                np.save(valid_Y_filename,Y_valid.to_numpy())    
-            Y_train_count=Y_train.shape[0]
-            Y_test_count =Y_test.shape[0]        
-            np.save(train_X_filename,X_train.to_numpy())
-            np.save(train_Y_filename,Y_train.to_numpy())
-            np.save(test_X_filename,X_test.to_numpy())
-            np.save(test_Y_filename,Y_test.to_numpy())
+                np.save(valid_X_filename,X_valid.to_numpy()) #save X_valid
+                np.save(valid_Y_filename,Y_valid.to_numpy()) #save Y_valid   
+            Y_train_count=Y_train.shape[0] #train count
+            Y_test_count =Y_test.shape[0]  #test count      
+            np.save(train_X_filename,X_train.to_numpy()) #save X_train
+            np.save(train_Y_filename,Y_train.to_numpy()) #save Y_train
+            np.save(test_X_filename,X_test.to_numpy()) #save X_test
+            np.save(test_Y_filename,Y_test.to_numpy()) #save Y_test
         
-            scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_ratio)+', "test_ratio":'+ str(test_ratio)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'"}'
+            scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_ratio)+', "test_ratio":'+ str(test_ratio)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'"}' #genrate scaled split parameters
             logger.info("scaled_split_parameters=="+scaled_split_parameters)
             sql_command = f"update mlaas.project_tbl set target_features= '{target_cols}' ,input_features='{feature_cols}',scaled_split_parameters = '{scaled_split_parameters}',problem_type = '{problem_type_dict}' where dataset_id = '{dataset_id}' and project_id = '{project_id}' and user_name= '{user_name}'"
             status = DBObject.update_records(connection, sql_command)
+            if status==1:
+                raise ProjectUpdateFailed(500)
             return status
             
-        except (DatabaseConnectionFailed,GetDataDfFailed) as exc:
+        except (DatabaseConnectionFailed,GetDataDfFailed,ProjectUpdateFailed) as exc:
             logging.error("data preprocessing : PreprocessingClass : handover : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : handover : " +traceback.format_exc())
             return exc.msg
@@ -1209,16 +1241,16 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         
         return status
     
-    def update_schema_flag_status(self,scheam_id,missing_flag,noise_flag):
+    def update_schema_flag_status(self,DBObject,connection,schema_id,missing_flag,noise_flag):
         try:
             logging.info("data preprocessing : PreprocessingClass : update_schema_flag_status : execution start")
             
             for noise_flag,missing_flag in zip(missing_flag,noise_flag): 
 
                 #sql command for updating change_column_name and column_attribute column  based on index column value
-                sql_command = "update "+ schema_table_name + " SET missing_flag = '" + str(missing_flag) + "',"\
+                sql_command = "update mlaas.schema_tbl SET missing_flag = '" + str(missing_flag) + "',"\
                                 "noise_flag = '" +str(noise_flag) +"'"\
-                                " Where schema_id ='"+str(scheam_id)+"' "
+                                " Where schema_id ='"+str(schema_id)+"' "
 
                 logging.info("sql_command " + sql_command) 
                 #execute sql query command
@@ -1234,4 +1266,100 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         except (SchemaUpdateFailed) as exc:
             return exc.msg
 
+    def get_cleanup_dag_name(self):
+        id = uuid.uuid1().time
+        dag_id='Cleanup_dag_'+str(id)
+
+        template = "cleanup_dag.template"
+        namespace = "Cleanup_Dags"
+        
+        master_dict = {}
+        
+        json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
+        
+        result = requests.post("http://airflow:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
+
+        return dag_id
+    
+    def dag_executor(self,project_id, dataset_id, schema_id, request):
+        
+        logging.info("data preprocessing : PreprocessingClass : dag_executor : execution start")
+        
+        DBObject,connection,connection_string = self.get_db_connection()
+        if connection == None :
+            raise DatabaseConnectionFailed(500)
+            
+        sql_command = f"select pt.cleanup_dag_id from mlaas.project_tbl pt where pt.project_id = '{project_id}'"
+        dag_id_df = DBObject.select_records(connection,sql_command) 
+        dag_id = dag_id_df['cleanup_dag_id'][0]
+        
+        op_dict, val_dict = self.reorder_operations(request)
+        
+        template = "cleanup_dag.template"
+        namespace = "Cleanup_Dags"
+        
+        master_dict = {
+        "operation_dict": op_dict,
+        "values_dict": val_dict,
+        "schema_id": schema_id,
+        "dataset_id": dataset_id
+        }
+        
+        json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
+        result = requests.post("http://airflow:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
+        
+        json_data = {}
+        result = requests.post(f"http://airflow:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False)#owner
+        
+        logging.info("DAG RUN RESULT: "+str(result))
+        
+        logging.info("data preprocessing : PreprocessingClass : dag_executor : execution stop")
+            
+        return 0
+    
+    def SaveAs(self,DBObject,connection,project_id,table_name,user_name,dataset_visibility,dataset_name,selected_visibility,dataset_desc):
+        '''
+        Function used to create a new table with updated changes and insert a new record into dataset table and update the dataset_id into the project_tbl
+        '''
+        try:
+            # Get table name,schema and columns from dataset class.
+            tbl_name,schema,cols = dc.make_dataset_schema() 
+            file_name = None
+            file_size = None
+            page_name = 'Cleanup'
+
+            # Make record for dataset table.
+            row = dataset_name,file_name,file_size,table_name,selected_visibility,user_name,dataset_desc,page_name 
+                                
+            # Convert row record into list of tuple.
+            row_tuples = [tuple(row)] 
+
+            logging.info("row tuples error"+str(row_tuples))
+
+            # Insert the records into table and return status and dataset_id of the inserted values
+            insert_status,dataset_id = DBObject.insert_records(connection,tbl_name,row_tuples,cols,Flag =1)
+                                
+            if insert_status == 0:
+                                    
+                table_name = table_name.replace('di_',"").replace('_tbl',"")
+
+                # Create the new table based on the existing table and return status 0 if successfull else 1 
+                dataset_insert_status = dc.insert_raw_dataset(DBObject,connection,dataset_id,user_name,table_name,dataset_visibility,selected_visibility)
+                                   
+                if dataset_insert_status == 0:
+
+                    # Command will update the dataset id  in the project table
+                    sql_command = f'update mlaas.project_tbl set dataset_id={str(dataset_id)} where project_id={str(project_id)}'
+                                        
+                    # Execute the sql query
+                    update_status = DBObject.update_records(connection,sql_command)
+
+                    return update_status
+                else:
+                    return dataset_insert_status
+
+            else:
+                return insert_status
+        except Exception as exc:
+            return str(exc)
 

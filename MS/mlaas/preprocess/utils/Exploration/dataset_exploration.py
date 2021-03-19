@@ -79,7 +79,7 @@ class ExploreClass:
         #? Logical Code Begins
         try:
             data_df.reset_index(drop=True,inplace = True)
-            
+            logging.error(str(data_df) + "  1-cha")
             added_col = False
             if (type(data_df) is pd.Series):
                 arr = [0]*len(data_df)
@@ -134,13 +134,16 @@ class ExploreClass:
             stats_df['Left Outlier Values'] = stats_df['Left Outlier Values'].astype('object')
             stats_df['Outliers'] = 0
             stats_df['Outliers'] = stats_df['Outliers'].astype('object')
-            #data_df = data_df.dropna()
+            # logging.info(str(data_df) + " datadf 1")
+            data_df = data_df.dropna()
             
+            # logging.info(str(stats_df) + " checking")
             #? Getting Column Names, Plotting Values of the histogram & Lest Frequent Values
             i = 0
-            axislist =[]
-            
+            axislist = []
+            # logging.info(str(data_df) + " datadf")
             for col in data_df.columns:
+                # logging.error(str(data_df[col]) + " \n "+str(numerical_columns) +  str(col))
                 #? Merging Column Names
                 stats_df.iloc[i,-5] = col
                 #? Getting Histogram/CountPlot Values
@@ -170,6 +173,7 @@ class ExploreClass:
             stats_df['open'] = stats_df['open'].astype(float)
             stats_df['close'] = stats_df['close'].astype(float)
             
+            logging.info(str(stats_df) + " checking 0.1")
             #? Getting Outlier Values
             i = 0
             outliers_list = []
@@ -177,12 +181,13 @@ class ExploreClass:
             upper_outliers_list = []
             updated_plot_list = []
             unique_list = []
-        
+            logging.error(str(stats_df['Plot Values']) +" checking ")
             for col in data_df.columns:
                 #? Getting Lower & Upper Limits for the Histogram
                 lower_limit = stats_df.iloc[i]['open']
                 upper_limit = stats_df.iloc[i]['close']
                 #? Getting Edges of the Bins and Values of Each Bins
+                
                 bin_edges, hists = stats_df.iloc[i]['Plot Values']
                 #? Getting Arrays of the Outliers to be plotted
                 lower_outliers, upper_outliers, lower_clip, upper_clip = self.get_outlier_hist(hists, bin_edges, upper_limit, lower_limit)
@@ -227,19 +232,24 @@ class ExploreClass:
             
             #? Adding a column needed for the frontend
             stats_df['IsinContinuous'] = [True if stats_df.loc[i,'Datatype'] == 'Continuous' else False for i in stats_df.index]
-            
+            logging.info(str(stats_df) + " checking 0.2")
             #? Dataset Contains both Categorical & Continuous Data
             try:
+
+                logging.info(str(stats_df) + " checking 0")
                 stats_df = stats_df[['Plot Values','Left Outlier Values','Right Outlier Values','Outliers','IsinContinuous','Column Name','Datatype','DataCount','Mean','Std','Min Value','25%','50%','75%','Max Value','Most Frequent','Most Frequency','Least Frequent','Least Frequency','Unique Values','Null Values','Non-Null Values','open','close']]
             
             except KeyError:
                 try:
                     #? Dataset Contains only Continuous Data
                     stats_df = stats_df[['Plot Values','Left Outlier Values','Right Outlier Values','Outliers','IsinContinuous','Column Name','Datatype','DataCount','Mean','Std','Min Value','25%','50%','75%','Max Value','Null Values','Non-Null Values','open','close']]
+                    logging.info(str(stats_df) + " checking 1")
                 except KeyError:
                     #? Dataset Contains only Categorical Data
                     stats_df = stats_df[['Plot Values','Left Outlier Values','Right Outlier Values','Outliers','IsinContinuous','Column Name','Datatype','DataCount','Most Frequent','Most Frequency','Least Frequent','Least Frequency','Unique Values','Null Values','Non-Null Values']]
-        except:
+                    logging.info(str(stats_df) + " checking 2")
+        except Exception as exc:
+            logging.info(str(exc) + " error")
             return 2
         
         if added_col:
@@ -278,7 +288,8 @@ class ExploreClass:
         if sort: arr.sort()
         i_q_r = self.iqr(arr)
         n = len(arr)
-        
+        if n==0:
+            return 0
         #? Getting optimal number of bins
         number_of_bins = (2*(i_q_r/(n**(1/3))))
         number_of_bins = math.ceil(number_of_bins)

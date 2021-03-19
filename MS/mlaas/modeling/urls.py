@@ -9,7 +9,7 @@ urlpatterns = [
     #URL For Create Dataset
     #path('mlaas/modeling/split_data/',SplitDataClass.as_view()),
 
-    #URL For Data Detail(CSV File)
+    #URL For Data Detail(CSV File)git 
     path('mlaas/modeling/showdatasetinfo/',ShowDatasetInfoClass.as_view()),
     
     path('mlaas/modeling/startmodel/',StartModelClass.as_view()),
@@ -30,11 +30,16 @@ urlpatterns = [
 
     path('mlaas/modeling/hyperparameters/', ShowHyperParametersClass.as_view()),
 
-    path('mlaas/modeling/runningexperimentslist/', ShowExperimentsListClass.as_view()),
+    path('mlaas/modeling/runningexperimentslist/', ShowRunningExperimentsListClass.as_view()),
     
     path('mlaas/modeling/showallexperimentslist/', ShowAllExperimentsListClass.as_view()),
     
-    path('mlaas/modeling/checkmodelstatus/', CheckModelStatusClass.as_view())
-    
+    path('mlaas/modeling/checkmodelstatus/', CheckModelStatusClass.as_view()),
+
+    path('mlaas/modeling/confusionmatrix/', ConfusionMatrixClass.as_view()),
+
+    path('mlaas/modeling/compareexperiments/', CompareExperimentsClass.as_view()),
+
+    path('mlaas/modeling/checkexperimentname/', CheckExperimentNameClass.as_view())
       
 ]

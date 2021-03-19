@@ -396,7 +396,7 @@ table {
     display: inline-block;
     vertical-align: middle;
     height: 24px;
-    width: 50px;
+    width: 100px;
     margin-left: 15px;
 }
 
@@ -411,5 +411,9 @@ table {
 
 .ng-dirty.ng-invalid,
 .ng-touched.ng-invalid {
+    border-color: #f46a6a !important;
+}
+
+.errorstatus {
     border-color: #f46a6a !important;
 }

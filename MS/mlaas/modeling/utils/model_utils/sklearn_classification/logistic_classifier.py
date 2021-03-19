@@ -238,7 +238,7 @@ class LogisticClassifierClass:
                     shuffle=True,
                     random_state=self.dataset_split_dict['random_state'])
         
-        cv_scores = cross_val_score(estimator=LinearRegression(),
+        cv_scores = cross_val_score(estimator=LogisticRegression(),
                                 X=X_train,
                                 y=y_train,
                                 cv=shuffle,
@@ -291,8 +291,8 @@ class LogisticClassifierClass:
         holdout_score = self.holdout_score(model,self.X_test,self.y_test) # default 80:20 splits (r2-score)
         # get model summary
 
-        MLPipelineClass.store_model_metrics(accuracy=accuracy, recall=recall, precision=precision, cv_score=cv_score,
-                                            holdout_score=holdout_score)
+        # MLPipelineClass.store_model_metrics(accuracy=accuracy, recall=recall, precision=precision, cv_score=cv_score,
+        #                                     holdout_score=holdout_score)
         model_summary = self.model_summary(self.X_train, self.X_test,self.y_train) # high level model summary
         # get model learning curve
         learning_curve_dict = self.get_learning_curve(model,self.X_train,self.y_train)
@@ -324,4 +324,4 @@ class LogisticClassifierClass:
         mlflow.log_dict(model_summary,"model_summary.json")
         mlflow.log_dict(final_result_dict,"predictions.json")
         mlflow.log_dict(confusion_matrix, "confusion_matrix.json")
-        
+        print("DONEEE-     \n\n\n OKKK------------------------------")
