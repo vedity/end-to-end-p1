@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ModelingTypeApiService } from '../modeling-type.service';
@@ -12,7 +12,7 @@ export class ModelingLearningCurveComponent implements OnInit {
 
   constructor(public router: Router, public apiservice: ModelingTypeApiService, public toaster: ToastrService) { }
   public lineColumAreaChart: any;
-  experiment_id: any;
+  @Input() public experiment_id: any;
   responsedata: any;
   animation = "progress-dark";
   theme = {
