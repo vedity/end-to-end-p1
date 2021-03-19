@@ -149,7 +149,7 @@ export class ModelingTypeComponent implements OnInit {
     this.getDatasetInfo();
     this.getRunningExperimentList();
     this.getAllExperimentList();
-   // this.getAlgorithmList();
+    this.getAlgorithmList();
   }
 
   drop(event: CdkDragDrop<string[]>) {

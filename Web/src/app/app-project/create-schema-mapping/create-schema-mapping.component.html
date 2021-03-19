@@ -57,8 +57,8 @@
                     </table>
                     <!-- </perfect-scrollbar> -->
                     <div class="button-items text-center">
-                        <button type="button" class="btn btn-secondary" (click)="reset()">Reset</button>
-                        <button type="button" class="btn btn-success" (click)="save()">Save</button>
+                        <button type="button" id="resetbtn" class="btn btn-secondary" (click)="reset()">Reset</button>
+                        <button type="button" id="savebtn" class="btn btn-success" (click)="save()">Save</button>
                         <!-- <button type="button" class="btn btn-secondary" (click)="smallModal(smallDataModal)">Save
                             As</button> -->
                     </div>
@@ -96,7 +96,7 @@
             <textarea class="form-control" id="example-text-input" [(ngModel)]="saveAs.description"></textarea>
         </div>
         <div class="button-items text-center">
-            <button type="button" class="btn btn-success" (click)="savaAs()">Submit</button>
+            <button type="button" class="btn btn-success" id="btnSaveas" (click)="savaAs()">Submit</button>
         </div>
     </div>
 </ng-template>

@@ -1,12 +1,5 @@
-'''
-/*CHANGE HISTORY
 
---CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
- Vipul Prajapati      25-JAN-2021           1.0         Initial Version 
- Mann Purohit         02-FEB-2021           1.1           
-
-*/
-'''
+#* Library Imports
 import airflow
 from airflow import DAG
 from datetime import datetime, timedelta
@@ -16,16 +9,18 @@ from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.mysql_operator import MySqlOperator
 from airflow.operators.email_operator import EmailOperator
 
-### Import function from main file
-from modeling.all_classifier import start_pipeline
-from modeling.all_classifier import logistic_regression_sklearn
-from modeling.all_classifier import get_classification_models
+#* Relative Imports
+from modeling.all_regressor import start_pipeline
+from modeling.all_regressor import linear_regression_sklearn
+from modeling.all_regressor import get_regression_models
+
 
 
 args = {'owner': 'airflow','start_date': airflow.utils.dates.days_ago(1),'provide_context': True,}
 
+main_dag_id = #DAG_ID
 
-dag = DAG(dag_id='auto_classification_pipeline',default_args=args,catchup=False,)
+dag = DAG(dag_id=main_dag_id,default_args=args,catchup=False,schedule_interval = '@once',)
 
 
 
@@ -33,18 +28,28 @@ start_task = PythonOperator(task_id='start_pipeline',python_callable=start_pipel
     
 end_task = BashOperator(task_id='end_pipeline',bash_command="echo 'regression pipeline end'",dag=dag,)
 
+
 # Get model dict 
 
-model_dict = get_classification_models()
+model_dict = ##MASTER_DICT
 
-model_id = model_dict['model_id']
+model_id = int(model_dict['model_id'])
 model_name = model_dict['model_name']
-function_name = 'Logistic_Regression_SKlearn' #TODO we will get dynamic when we are developing more models.
+model_param = model_dict['model_param']
+function_name = model_name.lower() #TODO we will get dynamic when we are developing more models.
 
 for model_id,model_name in zip(model_id,model_name):
     dynamic_task = PythonOperator(task_id=model_name,
-                                  python_callable=eval(function_name.lower()),
-                                  op_kwargs={'model_mode':'Auto', 'model_id':model_id},
+                                  python_callable=eval(function_name),
+                                  op_kwargs={'model_mode':'Manual', 
+                                             'model_id':model_id,
+                                             'model_param':model_param},
                                   dag=dag)
     
     start_task >> dynamic_task >> end_task
+
+
+    
+
+ 
+

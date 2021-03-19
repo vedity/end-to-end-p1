@@ -6,7 +6,7 @@ This workflow listens for Triggers. Based on config parameters passed., It creat
 from datetime import timedelta, datetime
 from airflow import DAG
 from airflow.utils.dates import days_ago
-from common.utils.Dynamic_Dags.operators.request_formatter import RestToTemplateWrapperOperator
+from common.utils.dynamic_dag.operators.request_formatter import RestToTemplateWrapperOperator
 
 # These args will get passed on to each operator
 # You can override them on a per-task basis during operator initialization

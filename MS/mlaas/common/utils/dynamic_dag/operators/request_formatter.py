@@ -1,4 +1,4 @@
-from common.utils.Dynamic_Dags.operators.template_operator import TemplateOperator
+from common.utils.dynamic_dag.operators.template_operator import TemplateOperator
 from airflow.utils.decorators import apply_defaults
 from airflow.utils.dates import days_ago
 import os

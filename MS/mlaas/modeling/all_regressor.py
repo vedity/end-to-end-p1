@@ -43,6 +43,13 @@ DBObject=db.DBClass()
 connection,connection_string=DBObject.database_connection(database,user,password,host,port) 
 
 
+def get_regression_models():
+    sql_command = "select model_id,model_name from mlaas.model_master_tbl where model_type='Regression'"
+    model_df = DBObject.select_records(connection,sql_command)
+    model_dict = model_df.to_dict(orient="list")
+    return model_dict
+
+
 def get_model_data(user_id, project_id, dataset_id):
     #TODO Optimize this.
     scaled_split_dict = SplitData().get_scaled_split_dict(DBObject,connection,project_id, dataset_id)
