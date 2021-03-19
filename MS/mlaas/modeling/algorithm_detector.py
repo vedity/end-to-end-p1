@@ -103,7 +103,7 @@ class AlgorithmDetector:
                 elif len(target_features) == 2:
                     algorithm_type = 'Single_Target'
     
-                sql_command = "select * from mlaas.model_master_tbl where model_type='"+model_type+"'"+" and algorithm_type='"+algorithm_type+"'"
+                sql_command = "select model_id,model_name from mlaas.model_master_tbl where model_type='"+model_type+"'"+" and algorithm_type='"+algorithm_type+"'"
             elif model_type == 'Unsupervised':
     
                 sql_command = "select * from mlaas.model_master_tbl where model_type='"+model_type+"'"
@@ -127,14 +127,14 @@ class AlgorithmDetector:
         """
         try:
 
-            sql_command = 'select hyperparameter, value, type from mlaas.model_hyperparams_tbl where model_id='+str(model_id)
+            sql_command = 'select hyperparameter, param_value, display_type from mlaas.model_hyperparams_tbl where model_id='+str(model_id)
             model_hyperparams_df = self.DBObject.select_records(self.connection, sql_command)
             if model_hyperparams_df is None:
                 raise DatabaseConnectionFailed(500)
 
             if len(model_hyperparams_df) == 0 :
                 raise DataNotFound(500)
-            model_hyperparams_df['value'] = model_hyperparams_df['value'].apply(lambda x: ast.literal_eval(x))
+            model_hyperparams_df['param_value'] = model_hyperparams_df['param_value'].apply(lambda x: ast.literal_eval(x))
             logging.info("Model_hyperparams_df dtypes = " + str(model_hyperparams_df))
             # if model_hyperparams_df == None or (len(model_hyperparams_df) == 0):
             #     # Raise Error of model_id not found

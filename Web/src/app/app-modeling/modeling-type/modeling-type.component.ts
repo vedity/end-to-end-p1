@@ -149,7 +149,7 @@ export class ModelingTypeComponent implements OnInit {
     this.getDatasetInfo();
     this.getRunningExperimentList();
     this.getAllExperimentList();
-    this.getAlgorithmList();
+    
   }
 
   drop(event: CdkDragDrop<string[]>) {
@@ -186,7 +186,7 @@ export class ModelingTypeComponent implements OnInit {
   } 
   
   getAlgorithmList() {
-    this.apiservice.getAlgorithmList().subscribe(
+    this.apiservice.getAlgorithmList(this.params.dataset_id, this.params.project_id,this.model_type).subscribe(
       logs => this.successAlgorithmListHandler(logs),
       error => this.errorHandler(error));
   }
@@ -391,7 +391,9 @@ checksuccessHandler(data,target){
   contentid = 0;
   LargeModal(largeModal: any, val) {
     if (val) {
+
       this.contentid = 1;
+      this.getAlgorithmList();
       this.modalService.open(largeModal, { size: 'lg', windowClass: 'modal-holder', centered: true });
     }
   };
