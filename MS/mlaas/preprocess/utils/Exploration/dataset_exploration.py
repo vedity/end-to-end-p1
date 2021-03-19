@@ -134,7 +134,7 @@ class ExploreClass:
             stats_df['Left Outlier Values'] = stats_df['Left Outlier Values'].astype('object')
             stats_df['Outliers'] = 0
             stats_df['Outliers'] = stats_df['Outliers'].astype('object')
-            data_df = data_df.dropna()
+            #data_df = data_df.dropna()
             
             #? Getting Column Names, Plotting Values of the histogram & Lest Frequent Values
             i = 0
