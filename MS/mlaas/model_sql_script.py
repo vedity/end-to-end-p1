@@ -77,9 +77,9 @@ class ModelSqlClass:
         cols = 'model_id, hyperparameter, param_value, display_type'
 
         model_id = 1
-        hyperparameter = '[]'
-        param_value = '[]'
-        display_type = '[]'
+        hyperparameter = ''
+        param_value = ''
+        display_type = ''
         row=model_id,hyperparameter, param_value, display_type
         row_tuples = [tuple(row)] 
 
@@ -88,8 +88,8 @@ class ModelSqlClass:
 
         model_id = 2
         hyperparameter = 'epochs'
-        param_value = '[]'
-        display_type = '[]'
+        param_value = ''
+        display_type = ''
         row=model_id,hyperparameter, param_value, display_type
         row_tuples = [tuple(row)] 
 
