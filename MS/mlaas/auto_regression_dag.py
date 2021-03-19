@@ -17,15 +17,15 @@ from airflow.operators.mysql_operator import MySqlOperator
 from airflow.operators.email_operator import EmailOperator
 
 ### Import function from main file
-from modeling.all_classifier import start_pipeline
-from modeling.all_classifier import logistic_regression_sklearn
-from modeling.all_classifier import get_classification_models
+from modeling.all_regressor import start_pipeline
+from modeling.all_regressor import linear_regression_sklearn
+from modeling.all_regressor import get_regression_models
+
 
 
 args = {'owner': 'airflow','start_date': airflow.utils.dates.days_ago(1),'provide_context': True,}
 
-
-dag = DAG(dag_id='auto_classification_pipeline',default_args=args,catchup=False,)
+dag = DAG(dag_id='auto_regression_pipeline',default_args=args,catchup=False,)
 
 
 
@@ -33,13 +33,14 @@ start_task = PythonOperator(task_id='start_pipeline',python_callable=start_pipel
     
 end_task = BashOperator(task_id='end_pipeline',bash_command="echo 'regression pipeline end'",dag=dag,)
 
+
 # Get model dict 
 
-model_dict = get_classification_models()
+model_dict = get_regression_models()
 
 model_id = model_dict['model_id']
 model_name = model_dict['model_name']
-function_name = 'Logistic_Regression_SKlearn' #TODO we will get dynamic when we are developing more models.
+function_name = 'Linear_Regression_Sklearn' #TODO we will get dynamic when we are developing more models.
 
 for model_id,model_name in zip(model_id,model_name):
     dynamic_task = PythonOperator(task_id=model_name,
@@ -48,3 +49,9 @@ for model_id,model_name in zip(model_id,model_name):
                                   dag=dag)
     
     start_task >> dynamic_task >> end_task
+
+
+    
+
+ 
+
