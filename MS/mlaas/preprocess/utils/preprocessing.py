@@ -1085,53 +1085,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             feature_cols = feature_cols.replace("'",'"')
             target_cols = target_cols.replace("'",'"')
 
-
-            #splitting parameters
-            split_method =split_parameters['split_method'] #get split_method
-            cv = split_parameters['cv'] #get cv
-            if len(cv) == 0:
-                cv = 0
-            random_state = split_parameters['random_state'] #get random_state
-            test_ratio = split_parameters['test_ratio'] #get test_size
-            valid_ratio = split_parameters['valid_ratio'] #get valid_size
-            if len(valid_ratio) == 0:
-                valid_ratio= 0
-            else:
-                valid_ratio=float(valid_ratio)
-            unique_id = str(uuid.uuid1().time) #genrate unique_id
-            scale_dir = "scaled_dataset/scaled_data_" + unique_id  #genrate directory
-            CHECK_FOLDER = os.path.isdir(scale_dir) #check directory already exists or not
-            # If folder doesn't exist, then create it.
-            if not CHECK_FOLDER:
-                os.makedirs(scale_dir) #create directory
-                logger.info("Directory  Created")
-            else:
-                logger.info("Directory  already exists")
-            train_X_filename = scale_dir+"/scaled_train_X_data_" + unique_id #genrate train_X file path
-            train_Y_filename = scale_dir+"/scaled_train_Y_data_" + unique_id #genrate train_Y file path
-            test_X_filename =  scale_dir+"/scaled_test_X_data_" + unique_id  #genrate test_X file path  
-            test_Y_filename =  scale_dir+"/scaled_test_Y_data_" + unique_id  #genrate test_Y file path     
-            valid_X_filename = "None"
-            valid_Y_filename = "None"
-            Y_valid_count= None
-            X_train, X_valid, X_test, Y_train, Y_valid, Y_test=sp.get_split_data(input_features_df,target_features_df, int(random_state),float(test_ratio), valid_ratio, str(split_method))
-            if split_method != 'cross_validation':
-                Y_valid_count= Y_valid.shape[0]
-                valid_X_filename = scale_dir+"/scaled_valid_X_data_" + unique_id #genrate valid_X file path     
-                valid_Y_filename = scale_dir+"/scaled_valid_Y_data_" + unique_id #genrate valid_Y file path     
-                np.save(valid_X_filename,X_valid.to_numpy()) #save X_valid
-                np.save(valid_Y_filename,Y_valid.to_numpy()) #save Y_valid   
-            Y_train_count=Y_train.shape[0] #train count
-            Y_test_count =Y_test.shape[0]  #test count      
-            np.save(train_X_filename,X_train.to_numpy()) #save X_train
-            np.save(train_Y_filename,Y_train.to_numpy()) #save Y_train
-            np.save(test_X_filename,X_test.to_numpy()) #save X_test
-            np.save(test_Y_filename,Y_test.to_numpy()) #save Y_test
-        
-            scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_ratio)+', "test_ratio":'+ str(test_ratio)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'"}' #genrate scaled split parameters
+            scaled_split_parameters=self.split_data(input_features_df, target_features_df, split_parameters) #call split_data function
+            
             logger.info("scaled_split_parameters=="+scaled_split_parameters)
             sql_command = f"update mlaas.project_tbl set target_features= '{target_cols}' ,input_features='{feature_cols}',scaled_split_parameters = '{scaled_split_parameters}',problem_type = '{problem_type_dict}' where dataset_id = '{dataset_id}' and project_id = '{project_id}' and user_name= '{user_name}'"
-            status = DBObject.update_records(connection, sql_command)
+            status=DBObject.update_records(connection, sql_command)
             if status==1:
                 raise ProjectUpdateFailed(500)
             return status
@@ -1140,6 +1098,63 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.error("data preprocessing : PreprocessingClass : handover : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : handover : " +traceback.format_exc())
             return exc.msg
+        
+    def split_data(self,input_features_df,target_features_df,split_parameters):
+        """
+        [it will split data and store the numpy file and return scaled split parameters dictionary ]
+
+        Args:
+            input_features_df ([type]): [input df]
+            target_features_df ([type]): [target df]
+            split_parameters ([type]): [split parameters]
+
+        Returns:
+            [scaled_split_parameters]: [scaled_split_parameters description]
+        """
+        #splitting parameters
+        split_method =split_parameters['split_method'] #get split_method
+        cv = split_parameters['cv'] #get cv
+        if len(cv) == 0:
+            cv = 0
+        random_state = split_parameters['random_state'] #get random_state
+        test_ratio = split_parameters['test_ratio'] #get test_size
+        valid_ratio = split_parameters['valid_ratio'] #get valid_size
+        if len(valid_ratio) == 0:
+            valid_ratio= 0
+        else:
+            valid_ratio=float(valid_ratio)
+        unique_id = str(uuid.uuid1().time) #genrate unique_id
+        scale_dir = "scaled_dataset/scaled_data_" + unique_id  #genrate directory
+        CHECK_FOLDER = os.path.isdir(scale_dir) #check directory already exists or not
+        # If folder doesn't exist, then create it.
+        if not CHECK_FOLDER:
+            os.makedirs(scale_dir) #create directory
+            logger.info("Directory  Created")
+        else:
+            logger.info("Directory  already exists")
+        train_X_filename = scale_dir+"/scaled_train_X_data_" + unique_id #genrate train_X file path
+        train_Y_filename = scale_dir+"/scaled_train_Y_data_" + unique_id #genrate train_Y file path
+        test_X_filename =  scale_dir+"/scaled_test_X_data_" + unique_id  #genrate test_X file path  
+        test_Y_filename =  scale_dir+"/scaled_test_Y_data_" + unique_id  #genrate test_Y file path     
+        valid_X_filename = "None"
+        valid_Y_filename = "None"
+        Y_valid_count= None
+        X_train, X_valid, X_test, Y_train, Y_valid, Y_test=sp.get_split_data(input_features_df,target_features_df, int(random_state),float(test_ratio), valid_ratio, str(split_method))
+        if split_method != 'cross_validation':
+            Y_valid_count= Y_valid.shape[0]
+            valid_X_filename = scale_dir+"/scaled_valid_X_data_" + unique_id #genrate valid_X file path     
+            valid_Y_filename = scale_dir+"/scaled_valid_Y_data_" + unique_id #genrate valid_Y file path     
+            np.save(valid_X_filename,X_valid.to_numpy()) #save X_valid
+            np.save(valid_Y_filename,Y_valid.to_numpy()) #save Y_valid   
+        Y_train_count=Y_train.shape[0] #train count
+        Y_test_count =Y_test.shape[0]  #test count      
+        np.save(train_X_filename,X_train.to_numpy()) #save X_train
+        np.save(train_Y_filename,Y_train.to_numpy()) #save Y_train
+        np.save(test_X_filename,X_test.to_numpy()) #save X_test
+        np.save(test_Y_filename,Y_test.to_numpy()) #save Y_test
+        scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_ratio)+', "test_ratio":'+ str(test_ratio)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'"}' #genrate scaled split parameters
+        return scaled_split_parameters
+        
         
     def get_activity_desc(self, DBObject, connection, operation_id, col_name, code = 1):
         '''
