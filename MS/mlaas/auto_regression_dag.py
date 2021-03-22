@@ -17,9 +17,10 @@ from airflow.operators.mysql_operator import MySqlOperator
 from airflow.operators.email_operator import EmailOperator
 
 ### Import function from main file
-from modeling.all_regressor import start_pipeline
-from modeling.all_regressor import linear_regression_sklearn
+from modeling.utils.modeling_dag_utils.dag_common_utils import start_pipeline
 from modeling.all_regressor import get_regression_models
+from modeling.all_regressor import linear_regression_sklearn
+
 
 
 
@@ -45,7 +46,7 @@ function_name = 'Linear_Regression_Sklearn' #TODO we will get dynamic when we ar
 for model_id,model_name in zip(model_id,model_name):
     dynamic_task = PythonOperator(task_id=model_name,
                                   python_callable=eval(function_name.lower()),
-                                  op_kwargs={'model_mode':'Auto', 'model_id':model_id},
+                                  op_kwargs={'model_id':model_id},
                                   dag=dag)
     
     start_task >> dynamic_task >> end_task

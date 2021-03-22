@@ -26,9 +26,11 @@ logger = logging.getLogger('project_creation')
 
 class AlgorithmDetector:
 
-    def __init__(self, DBObject, connection):
-        self.DBObject = DBObject
-        self.connection = connection
+    def __init__(self,db_param_dict):
+        
+        self.DBObject = db_param_dict['DBObject']
+        self.connection = db_param_dict['connection']
+        
     
     
     def get_dataset_info(self,project_id,dataset_id,user_id):
@@ -73,6 +75,7 @@ class AlgorithmDetector:
 
             sql_command = 'select problem_type from mlaas.project_tbl where project_id={} and dataset_id={}'.format(project_id, dataset_id)
             model_type_literal = self.DBObject.select_records(self.connection, sql_command)
+            
             if model_type_literal is None:
                 raise DatabaseConnectionFailed(500)
 

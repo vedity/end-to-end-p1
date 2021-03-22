@@ -22,7 +22,7 @@ import os
 from database import *
 from common.utils.database import db
 
-from sklearn.model_selection import train_test_split
+
 from modeling.utils.model_utils.sklearn_regression import linear_regressor
 from modeling.utils.model_experiments import model_experiment
 from modeling.split_data import SplitData
@@ -60,57 +60,24 @@ def get_model_data(user_id, project_id, dataset_id):
     
     return input_features_list, target_features_list, X_train, X_test, X_valid, y_train, y_test, y_valid, scaled_split_dict
 
-    
-    
-######################################## Regression Pipeline Code ###################################################
-
-def start_pipeline(dag,run_id,execution_date,ds,**kwargs):
-    print("regressor pipeline start")
-
-    model_mode = kwargs['dag_run'].conf['model_mode']
-    dag_id = dag.dag_id
-    project_id = int(kwargs['dag_run'].conf['project_id'])
-    dataset_id = int(kwargs['dag_run'].conf['dataset_id'])
-    user_id = int(kwargs['dag_run'].conf['user_id'])
-    exp_name  = kwargs['dag_run'].conf['exp_name']
-    
-    table_name='mlaas.model_dags_tbl'
-    cols = 'dag_id,exp_name,run_id,execution_date,project_id,dataset_id,user_id,model_mode' 
-        
-    row = dag_id,exp_name ,run_id,execution_date,project_id,dataset_id,user_id,model_mode    
-    row_tuples = [tuple(row)]
-    
-    dag_status = DBObject.insert_records(connection,table_name,row_tuples,cols)
-    print("dag status ==",dag_status)
-    
-
              
 def linear_regression_sklearn(run_id,**kwargs):
         
-        mlflow.set_tracking_uri("postgresql+psycopg2://airflow:airflow@postgresql:5432/airflow?options=-csearch_path%3Ddbo,mlaas")
-       
-        #TODO Later On model id may be changed
-     
-        model_mode = kwargs['model_mode']
+        mlflow.set_tracking_uri("postgresql+psycopg2://airflow:airflow@postgresql:5432/airflow?options=-csearch_path%3Ddbo,mlflow")
+    
         model_id = kwargs['model_id']
-        if model_mode == 'Auto':
-            project_id = int(kwargs['dag_run'].conf['project_id'])
-            dataset_id = int(kwargs['dag_run'].conf['dataset_id'])
-            user_id = int(kwargs['dag_run'].conf['user_id'])
-            experiment_name = kwargs['dag_run'].conf['exp_name']
- 
-        else:
-            project_id = kwargs['project_id']
-            dataset_id = kwargs['dataset_id']
-            user_id = kwargs['user_id']
-            experiment_name = kwargs['exp_name']
+        
+        model_param_dict = ast.literal_eval(kwargs['dag_run'].conf['model_param_dict'])
+    
+        model_mode = model_param_dict['model_mode']
+        project_id = int(model_param_dict['project_id'])
+        dataset_id = int(model_param_dict['dataset_id'])
+        user_id = int(model_param_dict['user_id'])
+        experiment_name  = model_param_dict['experiment_name']
         
         input_features_list, target_features_list, X_train, X_test, X_valid, y_train, y_test, y_valid, scaled_split_dict= get_model_data(user_id, project_id, dataset_id)
            
-        # TODO : experiment name and experiment_desc coming from frontend.
-        
         # Create an experiment name, which must be unique and case sensitive
-        # experiment_name = kwargs['dag_run'].conf['exp_name']
         ExpObject = model_experiment.ExperimentClass(DBObject, connection, connection_string)
         experiment, experiment_id = ExpObject.get_mlflow_experiment(experiment_name)
         # mlflow set_experiment and run the model.
@@ -119,14 +86,13 @@ def linear_regression_sklearn(run_id,**kwargs):
             run_uuid = run.info.run_id
             experiment_id = experiment.experiment_id
             dag_run_id = run_id
-            ################### Add Experiment ################################
-            
+            # Add experiment
             add_exp_status = ExpObject.add_experiments(experiment_id,experiment_name,run_uuid,
                                                           project_id,dataset_id,user_id,
                                                           model_id,model_mode,dag_run_id)
             
             try:
-                ## Declare Object
+                # Declare Object
                 LRObject = linear_regressor.LinearRegressionClass(input_features_list, target_features_list, 
                                                                 X_train, X_valid, X_test, y_train, y_valid, 
                                                                 y_test, scaled_split_dict)
@@ -142,19 +108,7 @@ def linear_regression_sklearn(run_id,**kwargs):
         
         
         
-def manual_algorithm_identifier(run_id, **kwargs):
-    
-    model_name = kwargs['dag_run'].conf['model_name']
-    model_mode = kwargs['model_mode']
-    project_id = int(kwargs['dag_run'].conf['project_id'])
-    dataset_id = int(kwargs['dag_run'].conf['dataset_id'])
-    user_id = int(kwargs['dag_run'].conf['user_id'])
-    exp_name = kwargs['dag_run'].conf['exp_name']
-    model_id = int(kwargs['dag_run'].conf['model_id'])
- 
-    if model_id == 1:
-        linear_regression_sklearn(run_id, user_id=user_id, project_id=project_id, dataset_id=dataset_id, exp_name=exp_name, 
-                            model_mode=model_mode, model_id=model_id)
+
         
         
 

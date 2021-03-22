@@ -22,6 +22,8 @@ from common.utils.activity_timeline import activity_timeline
 user_name = 'admin'
 log_enable = True
 
+#Initialize Global Object
+
 LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
 
@@ -30,14 +32,16 @@ logger = logging.getLogger('view')
 timeline_Obj=activity_timeline.ActivityTimelineClass(database,user,password,host,port) #initialize the ActivityTimeline Class
 json_obj = JsonFormatClass() #initialize the JsonFormat Class 
 
-DBObject=db.DBClass()     #Get DBClass object
+DBObject=db.DBClass()    
 connection,connection_string=DBObject.database_connection(database,user,password,host,port)      #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 
-AlgorithmDetectorObj = AlgorithmDetector(DBObject, connection)
+db_param_dict = {'DBObject':DBObject,'connection':connection,'connection_string':connection_string}
 
-ModelStatObject = ModelStatisticsClass(DBObject,connection)
+AlgorithmDetectorObj = AlgorithmDetector(db_param_dict)
 
-json_obj = JsonFormatClass()
+ModelStatObject = ModelStatisticsClass(db_param_dict)
+
+
 
 class ShowDatasetInfoClass(APIView):
         
@@ -105,11 +109,12 @@ class StartModelClass(APIView):
                 """
                 try:
                         logging.info("modeling : ExperimentClass : GET Method : execution start")
-                        # We will get it from the front-end
-                        Model_Mode = request.query_params.get('model_mode')
-                        # NEED TO GET USER ID
+                        
+                        model_mode = request.query_params.get('model_mode')
+                        
                         user_name = request.query_params.get('user_name')
                         user_id = 1 # get user id from user auth table
+                        
                         project_id = int(request.query_params.get('project_id'))
                         dataset_id = int(request.query_params.get('dataset_id'))
                         model_type = request.query_params.get('model_type')
@@ -117,68 +122,28 @@ class StartModelClass(APIView):
                         experiment_name = request.query_params.get('experiment_name')
                         experiment_desc ='this is for testing'
 
-                        # activity_id = 46
-                        # activity_df = timeline_Obj.get_activity(activity_id,"US")
-                        # activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
-                        # end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
-                        # activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time) 
-                
-                        # activity_id = 42
-                        # activity_df = timeline_Obj.get_activity(activity_id,"US")
-                        # activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
-                        # end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
-                        # activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time) 
                         
-                        ModelObject = ModelClass(Model_Mode,user_id, project_id,dataset_id,
-                                                DBObject,connection,connection_string)# Initializing the ModelClass
+                        # Initializing the ModelClass
+                        ModelObject = ModelClass(db_param_dict)
+                        
+                        model_param_dict = {'model_mode':model_mode,'model_type':model_type,
+                                                    'experiment_name':experiment_name,'experiment_desc':experiment_desc,
+                                                    'user_id':user_id,'project_id':project_id,'dataset_id':dataset_id}
 
-                        if Model_Mode == 'Auto': 
-                                # activity_id = 43
-                                # activity_df = timeline_Obj.get_activity(activity_id,"US")
-                                # activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
-                                # end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
-                                # activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time) 
-                                # # SplitDataObject = ModelObject.split_dataset(basic_split_parameters)
-                                ModelObject.algorithm_identifier(model_type,experiment_name,experiment_desc)
+                        if model_mode == 'Auto': 
                                 
-
-                                # activity_id = 48
-                                # activity_df = timeline_Obj.get_activity(activity_id,"US")
-                                # activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
-                                # end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
-                                # activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time) 
-
+                                ModelObject.algorithm_identifier(model_param_dict)
+        
                                 logging.info("modeling : ModelClass : GET Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully updated","response":"pipeline started"})
                         else:
-                                # activity_id = 44
-                                # activity_df = timeline_Obj.get_activity(activity_id,"US")
-                                # activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
-                                # end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
-                                # activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time)
-                                model_id = int(request.query_params.get('model_id'))
-                                # hyperparameters = request.query_params.get('hyperparameters')
-                                if model_id == 2:
-                                        hyperparameters = {"epochs": 10, "learning_rate": 0.01, "batch_size": 32, "loss": "mean_absolute_error", "optimizer": "Adam", 
-                                                "activation": "relu"}
-                                else:
-                                        hyperparameters = ""
                                 
-                                ModelObject = ModelClass(Model_Mode,user_id, project_id,dataset_id,
-                                                DBObject,connection,connection_string)
+                                model_id = 4
+                                model_name = 'logistic_regression_sklearn'
+                                model_param = None
+                                # model_hyper_param_dict = request.query_params.get('hyperparameters')
                                 
-                                manual_model_params_dict = {'model_id':model_id, 'hyperparameters': hyperparameters,
-                                                        'experiment_name': experiment_name}
-
-                                ModelObject.store_manual_model_params(manual_model_params_dict)
-                                # model_type = 'Regression'
-                                ModelObject.run_model(model_type, model_id, experiment_name, experiment_desc)
-
-                                # activity_id = 48
-                                # activity_df = timeline_Obj.get_activity(activity_id,"US")
-                                # activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
-                                # end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
-                                # activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time) 
+                                ModelObject.run_model(model_param_dict,model_id,model_name,model_param)
 
                                 logging.info("modeling : ModelClass : GET Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully updated","response":"True"})

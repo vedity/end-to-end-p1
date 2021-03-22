@@ -22,6 +22,7 @@ class ModelSqlClass:
         model_type = "Regression"
         algorithm_type = "Single_Target"
         
+        
         row=model_id,model_name,model_desc,model_parameter,model_type,algorithm_type 
         row_tuples = [tuple(row)] 
 
@@ -154,8 +155,8 @@ ModelSqlObject = ModelSqlClass(database,user,password,host,port)
 # ref_status = ModelSqlObject.add_model_records()
 # print("ref_status for model_master_tbl== ",ref_status)
 
-ref_status = ModelSqlObject.add_data_model_hyperparams_tbl()
-print("ref_status for model_hyperparams_tbl== ",ref_status)
+# ref_status = ModelSqlObject.add_data_model_hyperparams_tbl()
+# print("ref_status for model_hyperparams_tbl== ",ref_status)
 
 
 
