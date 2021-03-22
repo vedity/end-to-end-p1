@@ -40,6 +40,8 @@ urlpatterns = [
 
     path('mlaas/modeling/compareexperiments/', CompareExperimentsClass.as_view()),
 
-    path('mlaas/modeling/checkexperimentname/', CheckExperimentNameClass.as_view())
+    path('mlaas/modeling/checkexperimentname/', CheckExperimentNameClass.as_view()),
+
+    path('mlaas/modeling/rough/', RoughAPI.as_view()),
       
 ]
