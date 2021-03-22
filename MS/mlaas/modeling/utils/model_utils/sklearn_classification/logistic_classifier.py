@@ -210,7 +210,7 @@ class LogisticClassifierClass:
         train_size = X_train.shape[0]
         test_size = X_test.shape[0]
         
-        model_summary = {"Model Name":"Linear_Regression_Sklearn",
+        model_summary = {"Model Name":"Logistic_Regression_SKlearn",
                          "Input Features":self.input_features_list,
                          "Target Features":self.target_features_list,
                          "Train Size":int(train_size),"Test Size":int(test_size),
@@ -318,7 +318,7 @@ class LogisticClassifierClass:
         
        
         # log artifacts (output files)
-        mlflow.sklearn.log_model(model,"Linear_Regressor_Model")
+        mlflow.sklearn.log_model(model,"Logistic_Regression_SKlearn")
         mlflow.log_dict(learning_curve_dict,"learning_curve.json")
         mlflow.log_dict(features_impact_dict,"features_importance.json")
         mlflow.log_dict(model_summary,"model_summary.json")

@@ -35,18 +35,20 @@ end_task = BashOperator(task_id='end_pipeline',bash_command="echo 'regression pi
 
 model_dict = #MASTER_DICT
 
-model_id = model_dict['model_id']
-model_name = model_dict['model_name']
-model_param = model_dict['model_param']
+if len(model_dict) != 0:
 
-for model_id,model_name in zip(model_id,model_name):
-    dynamic_task = PythonOperator(task_id=model_name,
-                                  python_callable=eval(model_name),
-                                  op_kwargs={'model_id':model_id,
-                                             'model_param':model_param},
-                                  dag=dag)
-    
-    start_task >> dynamic_task >> end_task
+    model_id = model_dict['model_id']
+    model_name = model_dict['model_name']
+    model_param = model_dict['model_param']
+
+    for model_id,model_name in zip(model_id,model_name):
+        dynamic_task = PythonOperator(task_id=model_name,
+                                    python_callable=eval(model_name),
+                                    op_kwargs={'model_id':model_id,
+                                                'model_param':model_param},
+                                    dag=dag)
+        
+        start_task >> dynamic_task >> end_task
 
 
     

@@ -10,7 +10,7 @@ CREATE TABLE mlaas.user_auth_table (
 
 
 
-CREATE TABLE mlflow.model_experiment_tbl
+CREATE TABLE mlaas.model_experiment_tbl
 (
 	exp_unq_id bigserial,
 	experiment_id  integer,
@@ -30,14 +30,14 @@ CREATE TABLE mlaas.model_master_tbl
 	model_id integer,
 	model_name text,
 	model_desc text,
-	model_parameter text,
 	model_type text,
 	algorithm_type text,
+	target_type text,
 	model_created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 
-CREATE TABLE mlflow.model_dags_tbl
+CREATE TABLE mlaas.model_dags_tbl
 (
 	unq_id bigserial,
 	dag_id varchar,
@@ -111,6 +111,8 @@ CREATE TABLE mlaas.project_tbl (
 	original_dataset_id int8 NULL,
 	dataset_id int8 NULL,
 	schema_id bigserial NOT NULL ,
+	cleanup_dag_id text,
+	model_dag_id text,
 	input_features text NULL,
 	target_features text NULL,
 	scaled_split_parameters text NULL,
