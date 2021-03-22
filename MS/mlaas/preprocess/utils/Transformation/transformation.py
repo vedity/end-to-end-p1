@@ -45,24 +45,9 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         self.op_diff = 8
         self.AT = activity_timeline.ActivityTimelineClass(database, user, password, host, port)
     
-    #* DUPLICATE DATA REMOVAL
-    
-    def duplicate_data_removal(self, data_df):
-        '''
-            Operation id: ?
-        '''
-        
-        logging.info("data preprocessing : TransformationClass : duplicate_data_removal : execution start")
-        
-        logging.info("data preprocessing : TransformationClass : duplicate_data_removal : execution stop")
-        return super().remove_duplicate_records(dataframe= data_df)
-    
     #* RESCALING
     
     def standard_scaling(self, dataframe):
-        '''
-            Operation id: 23
-        '''
         
         logging.info("data preprocessing : TransformationClass : duplicate_data_removal : execution start")
         
@@ -71,9 +56,6 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         return super().standard_scaling(dataframe)
     
     def min_max_scaling(self, dataframe):
-        '''
-            Operation id: 24
-        '''
         
         logging.info("data preprocessing : TransformationClass : duplicate_data_removal : execution start")
         
@@ -82,9 +64,6 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         return super().min_max_scaling(dataframe)
     
     def robust_scaling(self, dataframe):
-        '''
-            Operation id: 25
-        '''
         
         logging.info("data preprocessing : TransformationClass : duplicate_data_removal : execution start")
         
@@ -93,9 +72,6 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         return super().robust_scaling(dataframe)
     
     def custom_scaling(self, dataframe, max, min):
-        '''
-            Operation id: 26
-        '''
         
         logging.info("data preprocessing : TransformationClass : duplicate_data_removal : execution start")
         
@@ -186,7 +162,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
     
     def add_to_column(self, DBObject,connection,project_id,column_list, table_name, col, value, **kwargs):
         '''
-            Operation id: 30
+            Operation id: 29
         '''
         logging.info("data preprocessing : TransformationClass : add_to_column : execution start")
         
@@ -204,7 +180,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
     
     def subtract_from_column(self, DBObject,connection,project_id,column_list, table_name, col, value, **kwargs):
         '''
-            Operation id: 31
+            Operation id: 30
         '''
         logging.info("data preprocessing : TransformationClass : subtract_from_column : execution start")
         
@@ -222,7 +198,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
     
     def multiply_column(self, DBObject,connection,project_id,column_list, table_name, col, value, **kwargs):
         '''
-            Operation id: 32
+            Operation id: 31
         '''
         logging.info("data preprocessing : TransformationClass : multiply_column : execution start")
         
@@ -240,7 +216,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
     
     def divide_column(self, DBObject,connection,project_id,column_list, table_name, col, value, **kwargs):
         '''
-            Operation id: 33
+            Operation id: 32
         '''
         logging.info("data preprocessing : TransformationClass : divide_column : execution start")
         
@@ -259,7 +235,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
     
     #* ACTIVITY TIMELINE FUNCTIONS
     
-    def get_activity_desc(self, DBObject, connection, operation_id, col_name, code = 1):
+    def get_act_desc(self, DBObject, connection, operation_id, col_name, code = 1):
         '''
             Used to get preprocess activity description from the activity master table.
         
@@ -267,7 +243,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
             --------
             description (`String`): Description for the activity.
         '''
-        logging.info("data preprocessing : PreprocessingClass : get_activity_desc : execution start")
+        logging.info("data preprocessing : TransformationClass : get_activity_desc : execution start")
         
         #? Getting Description
         sql_command = f"select replace (amt.activity_name || ' ' || amt.activity_description, '*', '{col_name}') as description from mlaas.activity_master_tbl amt where amt.activity_id = '{operation_id}' and amt.code = '{code}'"
@@ -279,7 +255,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         #? Fatching the description
         description = desc_df['description'].tolist()[0]
         
-        logging.info("data preprocessing : PreprocessingClass : get_activity_desc : execution stop")
+        logging.info("data preprocessing : TransformationClass : get_activity_desc : execution stop")
         
         return description
             
@@ -291,13 +267,13 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
             --------
             activity_id (`Intiger`): index of the activity in the activity transection table.
         '''
-        logging.info("data preprocessing : PreprocessingClass : operation_start : execution start")
+        logging.info("data preprocessing : TransformationClass : operation_start : execution start")
             
         #? Transforming the operation_id to the operation id stored in the activity timeline table. 
         operation_id += self.op_diff
         
         #? Getting Activity Description
-        desc = self.get_activity_desc(DBObject, connection, operation_id, col_name, code = 1)
+        desc = self.get_act_desc(DBObject, connection, operation_id, col_name, code = 1)
         
         #? Getting Dataset_id & User_Name
         sql_command = f"select pt.dataset_id,pt.user_name from mlaas.project_tbl pt  where pt.project_id = '{project_id}'"
@@ -307,7 +283,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         #? Inserting the activity in the activity_detail_table
         _,activity_id = self.AT.insert_user_activity(operation_id,user_name,project_id,dataset_id,desc,column_id =col_name)
         
-        logging.info("data preprocessing : PreprocessingClass : operation_start : execution stop")
+        logging.info("data preprocessing : TransformationClass : operation_start : execution stop")
         
         return activity_id
     
@@ -320,18 +296,18 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
             status (`Intiger`): Status of the updation.
         '''
         
-        logging.info("data preprocessing : PreprocessingClass : operation_end : execution start")
+        logging.info("data preprocessing : TransformationClass : operation_end : execution start")
         
         #? Transforming the operation_id to the operation id stored in the activity timeline table. 
         operation_id += self.op_diff
         
         #? Getting Activity Description
-        desc = self.get_activity_desc(DBObject, connection, operation_id, col_name, code = 2)
+        desc = self.get_act(DBObject, connection, operation_id, col_name, code = 2)
         
         #? Changing the activity description in the activity detail table 
         status = self.AT.update_activity(activity_id,desc)
         
-        logging.info("data preprocessing : PreprocessingClass : operation_end : execution stop")
+        logging.info("data preprocessing : TransformationClass : operation_end : execution stop")
         
         return status
     
