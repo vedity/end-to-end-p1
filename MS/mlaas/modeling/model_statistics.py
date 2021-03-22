@@ -206,8 +206,8 @@ class ModelStatisticsClass:
             artifact_uri = artifact_uri.iloc[0,0]
             confusion_matrix_uri = artifact_uri + '/confusion_matrix.json'
 
-            json_data = open(confusion_matrix_uri, 'r') # Read the confusion matrix data from mlaas.runs
-            confusion_matrix = json_data.read()
+            with open(confusion_matrix_uri, "r") as rf: # Read the model_summary's data from mlaas.runs
+                confusion_matrix = json.load(rf)
             return confusion_matrix
 
         except Exception as exc:
