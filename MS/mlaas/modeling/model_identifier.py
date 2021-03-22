@@ -68,7 +68,7 @@ class ModelClass(SC, SplitData):
         
 
         
-    def run_model(self,model_param_dict,model_id):
+    def run_model(self,model_param_dict,model_id,model_name,model_param):
         """This function is used to run model when model mode is in manual. 
  
         Args:

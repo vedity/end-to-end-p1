@@ -138,8 +138,8 @@ class StartModelClass(APIView):
                                 return Response({"status_code":"200","error_msg":"Successfully updated","response":"pipeline started"})
                         else:
                                 
-                                model_id = 1
-                                model_name = 'linear_regression_sklearn'
+                                model_id = 4
+                                model_name = 'logistic_regression_sklearn'
                                 model_param = None
                                 # model_hyper_param_dict = request.query_params.get('hyperparameters')
                                 
