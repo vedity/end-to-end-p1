@@ -12,18 +12,17 @@ class ModelSqlClass:
     def add_model_records(self):
         
         table_name = 'mlaas.model_master_tbl'
-        cols = 'model_id,model_name,model_desc,model_parameter,model_type,algorithm_type'
+        cols = 'model_id,model_name,model_desc,model_type,algorithm_type, target_type'
         
         # First Model
         model_id = 1
         model_name = "Linear_Regression_Sklearn"
         model_desc = "This is simple linear model"
-        model_parameter = None
         model_type = "Regression"
-        algorithm_type = "Single_Target"
+        algorithm_type = "MultiClass"
+        target_type = 'Single_Target'
         
-        
-        row=model_id,model_name,model_desc,model_parameter,model_type,algorithm_type 
+        row=model_id,model_name,model_desc,model_type,algorithm_type, target_type
         row_tuples = [tuple(row)] 
 
         ref_status = self.DBObject.insert_records(self.connection,table_name,row_tuples,cols)
@@ -33,11 +32,11 @@ class ModelSqlClass:
         model_id = 2
         model_name = "Linear_Regression_Keras"
         model_desc = "This is simple linear model with keras"
-        model_parameter = "['lr','batch_size','epoch','optimizer','loss','activation']"
         model_type = "Regression"
-        algorithm_type = "Single_Target"
+        algorithm_type = "MultiClass"
+        target_type = 'Single_Target'
         
-        row=model_id,model_name,model_desc,model_parameter,model_type,algorithm_type 
+        row=model_id,model_name,model_desc,model_type,algorithm_type, target_type
         row_tuples = [tuple(row)] 
         
         ref_status = self.DBObject.insert_records(self.connection,table_name,row_tuples,cols)
@@ -48,11 +47,11 @@ class ModelSqlClass:
         model_id = 3
         model_name = "XGBoost_Regressor"
         model_desc = "This is simple linear ensemble model"
-        model_parameter = None
         model_type = "Regression"
-        algorithm_type = "Single_Target"
+        algorithm_type = "MultiClass"
+        target_type = 'Single_Target'
         
-        row=model_id,model_name,model_desc,model_parameter,model_type,algorithm_type 
+        row=model_id,model_name,model_desc,model_type,algorithm_type, target_type
         row_tuples = [tuple(row)] 
 
         ref_status = self.DBObject.insert_records(self.connection,table_name,row_tuples,cols)
@@ -61,11 +60,11 @@ class ModelSqlClass:
         model_id = 4
         model_name = "Logistic_Regression_SKlearn"
         model_desc = "This is a logistic regressor"
-        model_parameter = None
         model_type = "Classification"
-        algorithm_type = "Single_Target"
+        algorithm_type = "BinaryClass"
+        target_type = 'Single_Target'
         
-        row=model_id,model_name,model_desc,model_parameter,model_type,algorithm_type 
+        row=model_id,model_name,model_desc,model_type,algorithm_type, target_type
         row_tuples = [tuple(row)] 
 
         ref_status = self.DBObject.insert_records(self.connection,table_name,row_tuples,cols)
@@ -75,73 +74,73 @@ class ModelSqlClass:
     def add_data_model_hyperparams_tbl(self):
 
         table_name = 'mlaas.model_hyperparams_tbl'
-        cols = 'model_id, hyperparameter, param_value, display_type'
+        cols = 'model_id, param_name, param_value, display_type'
 
         model_id = 1
-        hyperparameter = ""
+        param_name = ''
         param_value = "[]"
-        display_type = ""
-        row=model_id,hyperparameter, param_value, display_type
+        display_type = ''
+        row=model_id,param_name, param_value, display_type
         row_tuples = [tuple(row)] 
 
         ref_status = self.DBObject.insert_records(self.connection,table_name,row_tuples,cols)
 
 
         model_id = 2
-        hyperparameter = 'epochs'
-        param_value = "[]"
-        display_type = ""
-        row=model_id,hyperparameter, param_value, display_type
+        param_name = 'epochs'
+        param_value = '[]'
+        display_type = ''
+        row=model_id,param_name, param_value, display_type
         row_tuples = [tuple(row)] 
 
         ref_status = self.DBObject.insert_records(self.connection,table_name,row_tuples,cols)
 
 
         model_id = 2
-        hyperparameter = 'learning_rate'
+        param_name = 'learning_rate'
         param_value = '[0.001, 1]'
         display_type = 'validation'
-        row=model_id,hyperparameter, param_value, display_type
+        row=model_id,param_name, param_value, display_type
         row_tuples = [tuple(row)] 
 
         ref_status = self.DBObject.insert_records(self.connection,table_name,row_tuples,cols)
 
         
         model_id = 2
-        hyperparameter = 'batch_size'
+        param_name = 'batch_size'
         param_value = '[8, 16, 32, 64, 128, 256]'
         display_type = 'dropdown'
-        row=model_id,hyperparameter, param_value, display_type
+        row=model_id,param_name, param_value, display_type
         row_tuples = [tuple(row)] 
 
         ref_status = self.DBObject.insert_records(self.connection,table_name,row_tuples,cols)
 
         
         model_id = 2
-        hyperparameter = 'loss'
+        param_name = 'loss'
         param_value =  '["Mean_Absolute_Error", "Mean_Squared_Error", "Mean_Absolute_Percentage_Error"]'
         display_type = 'dropdown'
-        row=model_id,hyperparameter, param_value, display_type
+        row=model_id,param_name, param_value, display_type
         row_tuples = [tuple(row)] 
 
         ref_status = self.DBObject.insert_records(self.connection,table_name,row_tuples,cols)
 
         
         model_id = 2
-        hyperparameter = 'optimizer'
+        param_name = 'optimizer'
         param_value = '["SGD", "RMSProp", "Adam"]'
         display_type = 'dropdown'
-        row=model_id,hyperparameter, param_value, display_type
+        row=model_id,param_name, param_value, display_type
         row_tuples = [tuple(row)] 
 
         ref_status = self.DBObject.insert_records(self.connection,table_name,row_tuples,cols)
 
         
         model_id = 2
-        hyperparameter = 'activation'
+        param_name = 'activation'
         param_value = '["Relu", "Sigmoid", "Tanh"]'
         display_type = 'dropdown'
-        row=model_id,hyperparameter, param_value, display_type
+        row=model_id,param_name, param_value, display_type
         row_tuples = [tuple(row)] 
 
         ref_status = self.DBObject.insert_records(self.connection,table_name,row_tuples,cols)
@@ -152,11 +151,11 @@ class ModelSqlClass:
  
 # DataBase Credintials  
 ModelSqlObject = ModelSqlClass(database,user,password,host,port)
-# ref_status = ModelSqlObject.add_model_records()
-# print("ref_status for model_master_tbl== ",ref_status)
+ref_status = ModelSqlObject.add_model_records()
+print("ref_status for model_master_tbl== ",ref_status)
 
-# ref_status = ModelSqlObject.add_data_model_hyperparams_tbl()
-# print("ref_status for model_hyperparams_tbl== ",ref_status)
+ref_status = ModelSqlObject.add_data_model_hyperparams_tbl()
+print("ref_status for model_hyperparams_tbl== ",ref_status)
 
 
 
