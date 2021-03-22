@@ -24,9 +24,10 @@ logger = logging.getLogger('view')
 
 class ModelStatisticsClass:
 
-    def __init__(self, DBObject, connection):
-        self.DBObject = DBObject
-        self.connection = connection
+    def __init__(self, db_param_dict):
+        
+        self.DBObject = db_param_dict['DBObject']
+        self.connection = db_param_dict['connection']
 
     
     def learning_curve(self, experiment_id):
@@ -41,7 +42,7 @@ class ModelStatisticsClass:
         """
         try:
             logging.info("modeling : ModelStatisticsClass : learning_curve : execution start")
-            sql_command = 'select artifact_uri from mlaas.runs where experiment_id='+str(experiment_id)
+            sql_command = 'select artifact_uri from mlflow.runs where experiment_id='+str(experiment_id)
             # Get the learning curve's data path from mlaas.runs with the associated experiment id
             artifact_uri = self.DBObject.select_records(self.connection, sql_command) 
             if artifact_uri is None:
@@ -81,7 +82,7 @@ class ModelStatisticsClass:
         try:
             logging.info("modeling : ModelStatisticsClass : actual_vs_prediction : execution start")
 
-            sql_command = 'select artifact_uri from mlaas.runs where experiment_id='+str(experiment_id)
+            sql_command = 'select artifact_uri from mlflow.runs where experiment_id='+str(experiment_id)
             # Get the actual_vs_predction's data path from mlaas.runs with the associated experiment id
             artifact_uri = self.DBObject.select_records(self.connection, sql_command)
             if artifact_uri is None:
@@ -117,7 +118,7 @@ class ModelStatisticsClass:
         """
         try:
             logging.info("modeling : ModelStatisticsClass : features_importance : execution end")
-            sql_command = 'select artifact_uri from mlaas.runs where experiment_id='+str(experiment_id)
+            sql_command = 'select artifact_uri from mlflow.runs where experiment_id='+str(experiment_id)
             # Get the features importance's data path from mlaas.runs with the associated experiment id
             artifact_uri = self.DBObject.select_records(self.connection, sql_command)
     
@@ -157,7 +158,7 @@ class ModelStatisticsClass:
         """
         try:
 
-            sql_command = 'select artifact_uri from mlaas.runs where experiment_id='+str(experiment_id)
+            sql_command = 'select artifact_uri from mlflow.runs where experiment_id='+str(experiment_id)
             # Get the model summary's data path from mlaas.runs with the associated experiment id
             artifact_uri = self.DBObject.select_records(self.connection, sql_command)
             
@@ -193,7 +194,7 @@ class ModelStatisticsClass:
         """
         try:
 
-            sql_command = 'select artifact_uri from mlaas.runs where experiment_id='+str(experiment_id)
+            sql_command = 'select artifact_uri from mlflow.runs where experiment_id='+str(experiment_id)
             # Get the confusion matrix's data path from mlaas.runs with the associated experiment id
             artifact_uri = self.DBObject.select_records(self.connection, sql_command)
             if artifact_uri is None:
@@ -229,7 +230,7 @@ class ModelStatisticsClass:
         """
         try:
             logging.info("modeling : ModelStatisticsClass : performance_metrics : execution start")            
-            sql_command = 'select run_uuid from mlaas.runs where experiment_id='+str(experiment_id)
+            sql_command = 'select run_uuid from mlflow.runs where experiment_id='+str(experiment_id)
             # Get the run_uuid associated with a particular experiment.
             run_uuid = self.DBObject.select_records(self.connection, sql_command)
             if run_uuid is None:
@@ -240,7 +241,7 @@ class ModelStatisticsClass:
             
             run_uuid=run_uuid.iloc[0,0]
 
-            sql_command = "select key, value from mlaas.metrics where run_uuid='"+str(run_uuid) +"'"
+            sql_command = "select key, value from mlflow.metrics where run_uuid='"+str(run_uuid) +"'"
             # Get all the performance metrics associated with a particular run_uuid
             metrics_df = self.DBObject.select_records(self.connection, sql_command).set_index('key')
             if metrics_df is None:
@@ -315,11 +316,11 @@ class ModelStatisticsClass:
             if len(experiment_ids) > 1:
                 logging.info(' greater')
                 # Get all the performance metrics associated with a particular run_uuid.
-                sql_command = "select key, value from mlaas.metrics where run_uuid in (select run_uuid from mlaas.runs where experiment_id in (select experiment_id from mlaas.model_experiment_tbl where project_id = " + str(project_id ) + ")) and (key='cv_score' or key='holdout_score')"
+                sql_command = "select key, value from mlflow.metrics where run_uuid in (select run_uuid from mlflow.runs where experiment_id in (select experiment_id from mlaas.model_experiment_tbl where project_id = " + str(project_id ) + ")) and (key='cv_score' or key='holdout_score')"
             else:
                 logging.info(' SMALLER' + str(experiment_ids[0]))
                 # Get all the performance metrics associated with a particular run_uuid
-                sql_command = "select key, value from mlaas.metrics where run_uuid= (select run_uuid from mlaas.runs where experiment_id={}) and (key='cv_score' or key='holdout_score')".format(str(experiment_ids[0]))
+                sql_command = "select key, value from mlflow.metrics where run_uuid= (select run_uuid from mlflow.runs where experiment_id={}) and (key='cv_score' or key='holdout_score')".format(str(experiment_ids[0]))
             df = self.DBObject.select_records(self.connection, sql_command)
             if df is None:
                 raise DatabaseConnectionFailed(500)
@@ -354,7 +355,7 @@ class ModelStatisticsClass:
         try:
             # Get the necessary values from the mlaas.model_experiment_tbl where the state of the experiment is 'running'.
             sql_command = "select met.*,e.name as experiment_name,mmt.model_name, mmt.model_type,dt.dataset_name, 0.0 as cv_score, 0.0 as holdout_score"\
-                          " from mlaas.model_experiment_tbl met,mlaas.model_master_tbl mmt,mlaas.dataset_tbl dt,mlaas.experiments e"\
+                          " from mlaas.model_experiment_tbl met,mlaas.model_master_tbl mmt,mlaas.dataset_tbl dt,mlflow.experiments e"\
                           " where met.model_id = mmt.model_id and met.dataset_id=dt.dataset_id and met.experiment_id=e.experiment_id "\
                           " and met.project_id="+str(project_id)+" and status='running'"
                           
@@ -388,7 +389,7 @@ class ModelStatisticsClass:
             # Get everything from model_experiment_tbl and, experiment name, model_name and dataset_name associated with a particular project_id.
             sql_command = "select met.*,e.name as experiment_name,mmt.model_name, mmt.model_type,dt.dataset_name,"\
                           "round(cast(sv.cv_score as numeric),3) as cv_score,round(cast(sv.holdout_score as numeric),3) as holdout_score "\
-                          " from mlaas.model_experiment_tbl met,mlaas.model_master_tbl mmt,mlaas.score_view sv,mlaas.dataset_tbl dt,mlaas.experiments e"\
+                          " from mlaas.model_experiment_tbl met,mlaas.model_master_tbl mmt,mlaas.score_view sv,mlaas.dataset_tbl dt,mlflow.experiments e"\
                           " where met.model_id = mmt.model_id and met.experiment_id=sv.experiment_id and met.dataset_id=dt.dataset_id and met.experiment_id=e.experiment_id "\
                           " and met.project_id="+str(project_id)+" order by met.exp_created_on desc"
                           
@@ -515,7 +516,7 @@ class ModelStatisticsClass:
             # Get the model parameters for the associated experiment_ids.
         try:
             exp_ids = tuple(experiment_ids)
-            sql_command = 'select prms.key, prms.value, met.experiment_id from mlaas.params prms,mlaas.model_experiment_tbl met where prms.run_uuid=met.run_uuid and met.experiment_id in'+str(exp_ids)
+            sql_command = 'select prms.key, prms.value, met.experiment_id from mlflow.params prms,mlaas.model_experiment_tbl met where prms.run_uuid=met.run_uuid and met.experiment_id in'+str(exp_ids)
             params_df = self.DBObject.select_records(self.connection, sql_command)
             if params_df is None:
                 raise DatabaseConnectionFailed(500)
@@ -526,7 +527,7 @@ class ModelStatisticsClass:
             params_pivot_df = params_df.pivot(index='experiment_id', columns='key', values='value')
             
             # Get the accuracy metrics for the associated experiment_ids.
-            sql_command = 'select mtr.key, mtr.value, met.experiment_id from mlaas.metrics mtr,mlaas.model_experiment_tbl met where mtr.run_uuid=met.run_uuid and met.experiment_id in'+str(exp_ids)
+            sql_command = 'select mtr.key, mtr.value, met.experiment_id from mlflow.metrics mtr,mlaas.model_experiment_tbl met where mtr.run_uuid=met.run_uuid and met.experiment_id in'+str(exp_ids)
             metrics_df = self.DBObject.select_records(self.connection, sql_command)
             if metrics_df is None:
                 raise DatabaseConnectionFailed(500)

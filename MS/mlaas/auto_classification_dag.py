@@ -17,7 +17,7 @@ from airflow.operators.mysql_operator import MySqlOperator
 from airflow.operators.email_operator import EmailOperator
 
 ### Import function from main file
-from modeling.all_classifier import start_pipeline
+from modeling.utils.modeling_dag_utils.dag_common_utils import start_pipeline
 from modeling.all_classifier import logistic_regression_sklearn
 from modeling.all_classifier import get_classification_models
 
@@ -44,7 +44,7 @@ function_name = 'Logistic_Regression_SKlearn' #TODO we will get dynamic when we 
 for model_id,model_name in zip(model_id,model_name):
     dynamic_task = PythonOperator(task_id=model_name,
                                   python_callable=eval(function_name.lower()),
-                                  op_kwargs={'model_mode':'Auto', 'model_id':model_id},
+                                  op_kwargs={'model_id':model_id},
                                   dag=dag)
     
     start_task >> dynamic_task >> end_task
