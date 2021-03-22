@@ -55,7 +55,7 @@ services:
     mlflow:
         build: './MS'
         #command: mlflow server --backend-store-uri ./mlflow --host 0.0.0.0 --port 5400
-        command: mlflow server --backend-store-uri postgresql://airflow:airflow@postgresql:5432/airflow?options=-csearch_path%3Ddbo,mlflow --default-artifact-root file:///mlaas/mlruns --host 0.0.0.0 --port 5400
+        command: mlflow server --backend-store-uri postgresql://airflow:airflow@postgresql:5432/airflow?options=-csearch_path%3Ddbo,mlaas --default-artifact-root file:///mlaas/mlruns --host 0.0.0.0 --port 5400
         volumes: 
             - "./MS/mlaas:/mlaas"
         ports:

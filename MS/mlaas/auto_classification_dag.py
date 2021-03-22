@@ -17,34 +17,51 @@ from airflow.operators.mysql_operator import MySqlOperator
 from airflow.operators.email_operator import EmailOperator
 
 ### Import function from main file
-from modeling.utils.modeling_dag_utils.dag_common_utils import start_pipeline
+
+from modeling.all_classifier import start_pipeline
 from modeling.all_classifier import logistic_regression_sklearn
-from modeling.all_classifier import get_classification_models
 
 
-args = {'owner': 'airflow','start_date': airflow.utils.dates.days_ago(1),'provide_context': True,}
+args = {
+'owner': 'airflow',
+'start_date': airflow.utils.dates.days_ago(1),      
+'provide_context': True,}
 
 
-dag = DAG(dag_id='auto_classification_pipeline',default_args=args,catchup=False,)
+dag = DAG(
+    dag_id='auto_classification_pipeline',
+    default_args=args,         
+    catchup=False,                         
+)
 
+##### One dag for auto #########
 
-
-start_task = PythonOperator(task_id='start_pipeline',python_callable=start_pipeline,dag=dag,)
+t1 = PythonOperator(
+    task_id='start_pipeline',
+    python_callable=start_pipeline,
+    dag=dag,
+)
     
-end_task = BashOperator(task_id='end_pipeline',bash_command="echo 'regression pipeline end'",dag=dag,)
 
-# Get model dict 
+t2 = PythonOperator(
+    task_id='Logistic_Regression_Sklearn', 
+    python_callable=logistic_regression_sklearn,
+    dag=dag,
+    op_kwargs={'model_mode':'Auto', 'model_id':4}
+)
 
-model_dict = get_classification_models()
+t1 >> t2
+# t3 = PythonOperator(
+#     task_id='Linear_Regression_Keras', 
+#     python_callable=linear_regression_sklearn,
+#     dag=dag,
+#     op_kwargs={'model_mode':'Auto', 'model_id':2}
+# )
 
-model_id = model_dict['model_id']
-model_name = model_dict['model_name']
-function_name = 'Logistic_Regression_SKlearn' #TODO we will get dynamic when we are developing more models.
+# t4 = PythonOperator(
+#     task_id='XGBoost_Regressor', 
+#     python_callable=linear_regression_sklearn,
+#     dag=dag,
+#     op_kwargs={'model_mode':'Auto', 'model_id':3}
+# )
 
-for model_id,model_name in zip(model_id,model_name):
-    dynamic_task = PythonOperator(task_id=model_name,
-                                  python_callable=eval(function_name.lower()),
-                                  op_kwargs={'model_id':model_id},
-                                  dag=dag)
-    
-    start_task >> dynamic_task >> end_task
