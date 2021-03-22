@@ -137,7 +137,7 @@ class AlgorithmDetector:
 
             if len(model_hyperparams_df) == 0 :
                 raise DataNotFound(500)
-            model_hyperparams_df['value'] = model_hyperparams_df['value'].apply(lambda x: ast.literal_eval(x))
+            model_hyperparams_df['param_value'] = model_hyperparams_df['param_value'].apply(lambda x: ast.literal_eval(x) if len(x) < 3 else x)
             logging.info("Model_hyperparams_df dtypes = " + str(model_hyperparams_df))
             # if model_hyperparams_df == None or (len(model_hyperparams_df) == 0):
             #     # Raise Error of model_id not found

@@ -229,118 +229,32 @@ class ModelStatisticsClass:
             
         """
         try:
-            logging.info("modeling : ModelStatisticsClass : performance_metrics : execution start")            
-            sql_command = 'select run_uuid from mlflow.runs where experiment_id='+str(experiment_id)
-            # Get the run_uuid associated with a particular experiment.
-            run_uuid = self.DBObject.select_records(self.connection, sql_command)
-            if run_uuid is None:
+            sql_command = 'select mtr.key, mtr.value, met.experiment_id from mlflow.metrics mtr, mlaas.model_experiment_tbl met where mtr.run_uuid=met.run_uuid and met.experiment_id='+str(experiment_id)
+            perform_metrics_df = self.DBObject.select_records(self.connection, sql_command)
+            if perform_metrics_df is None:
                 raise DatabaseConnectionFailed(500)
 
-            if len(run_uuid) == 0 : # If the experiment_id is not present in the mlaas.runs.
+            if len(perform_metrics_df) == 0: # If the experiment_id is not present in the mlaas.runs.
                 raise DataNotFound(500)
-            
-            run_uuid=run_uuid.iloc[0,0]
 
-            sql_command = "select key, value from mlflow.metrics where run_uuid='"+str(run_uuid) +"'"
-            # Get all the performance metrics associated with a particular run_uuid
-            metrics_df = self.DBObject.select_records(self.connection, sql_command).set_index('key')
-            if metrics_df is None:
+            perform_pivot_df = perform_metrics_df.pivot(columns='key', values='value', index='experiment_id').round(2)
+            sql_command = 'select met.experiment_id, met.exp_created_on, mmt.model_name from mlaas.model_experiment_tbl met, mlaas.model_master_tbl mmt where mmt.model_id=met.model_id and met.experiment_id='+str(experiment_id)
+            experiment_df = self.DBObject.select_records(self.connection, sql_command)
+            if experiment_df is None:
                 raise DatabaseConnectionFailed(500)
 
-            if len(metrics_df) == 0: 
+            if len(experiment_df) == 0: # If the experiment_id is not present in the mlaas.runs.
                 raise DataNotFound(500)
-            
-            metrics_rounded_df = DataFrame(metrics_df, columns = ['value']).round(decimals = 2)
+            experiment_df = experiment_df.set_index('experiment_id')
+            merged_df = pd.merge(experiment_df, perform_pivot_df, left_index=True, right_index=True)
 
-            sql_command = 'select model_id, exp_created_on from mlaas.model_experiment_tbl where experiment_id='+str(experiment_id)
-            # Get the model id and experiment created date for a particular experiment id.
-            model_experiment_tbl_data = self.DBObject.select_records(self.connection, sql_command)
-
-            if model_experiment_tbl_data is None:
-                raise DatabaseConnectionFailed(500)
-
-            if len(model_experiment_tbl_data) == 0: # If the experiment_id is not present in the mlaas.model_experiment_tbl.
-                raise DataNotFound(500)
-
-            model_experiment_tbl_data=model_experiment_tbl_data.iloc[0, :]
-            sql_command = 'select model_name from mlaas.model_master_tbl where model_id='+str(model_experiment_tbl_data['model_id'])
-            # Get the model_name associated with it's model_id.
-            model_name = self.DBObject.select_records(self.connection, sql_command)
-
-            if model_name is None:
-                raise DatabaseConnectionFailed(500)
-
-            if len(model_name) == 0: # If the model_id is not present in the mlaas.model_master_tbl.
-                raise DataNotFound(500)
-            
-            model_name=model_name.iloc[0,0]
-            
-            metrics_json = json.loads(metrics_rounded_df.to_json())
-            model_desc = {'model_name': model_name, 'exp_created_on': model_experiment_tbl_data['exp_created_on']}
-            metrics_json.update(model_desc)
-
-            logging.info("modeling : ModelStatisticsClass : performance_metrics : execution end")
-            return metrics_json
+            return merged_df.to_dict(orient='index')
 
         except (DatabaseConnectionFailed,DataNotFound) as exc:
             logging.error("modeling : ModelStatisticsClass : performance_metrics : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : performance_metrics : " +traceback.format_exc())
             return exc.msg
         
-
-
-    def accuracy_metrics(self, project_id): #TODO Optimize.
-        """This function is used to get accuracy_metrics of particular experiment.
-
-        Args:
-            experiment_id ([object]): [Experiment id of particular experiment.]
-
-        Returns:
-            [data_frame]: [it will return the dataframe for accuracy_metrics.]
-            
-        """
-        try:
-            logging.info("modeling : ModelStatisticsClass : accuracy_metrics : execution start")
-            sql_command = 'select experiment_id from mlaas.model_experiment_tbl where project_id='+str(project_id)
-            # Get all the experiment ids associated with a particular project_id.
-            experiment_ids_df = self.DBObject.select_records(self.connection, sql_command)
-
-            if experiment_ids is None:
-                raise DatabaseConnectionFailed(500)
-
-            if len(experiment_ids) == 0: # If the project_id is not present in the mlaas.model_experiment_tbl.
-                raise DataNotFound(500)
-            
-            experiment_ids = tuple(experiment_ids_df['experiment_id'])
-
-            if len(experiment_ids) > 1:
-                logging.info(' greater')
-                # Get all the performance metrics associated with a particular run_uuid.
-                sql_command = "select key, value from mlflow.metrics where run_uuid in (select run_uuid from mlflow.runs where experiment_id in (select experiment_id from mlaas.model_experiment_tbl where project_id = " + str(project_id ) + ")) and (key='cv_score' or key='holdout_score')"
-            else:
-                logging.info(' SMALLER' + str(experiment_ids[0]))
-                # Get all the performance metrics associated with a particular run_uuid
-                sql_command = "select key, value from mlflow.metrics where run_uuid= (select run_uuid from mlflow.runs where experiment_id={}) and (key='cv_score' or key='holdout_score')".format(str(experiment_ids[0]))
-            df = self.DBObject.select_records(self.connection, sql_command)
-            if df is None:
-                raise DatabaseConnectionFailed(500)
-
-            if len(df) == 0: # If the experiment_id is not present in the mlaas.metrics.
-                raise DataNotFound(500)
-            # This will be changed in future.
-            cv_score_df = df[df['key'] == 'cv_score'].reset_index(drop=True).rename(columns={'value': 'cv_score'})['cv_score']
-            holdout_score_df = df[df['key'] == 'holdout_score'].reset_index(drop=True).rename(columns={'value': 'holdout_score'})['holdout_score']
-            cv_score_rounded_df = DataFrame(cv_score_df, columns = ['cv_score']).round(decimals = 2)
-            holdout_score_rounded_df = DataFrame(holdout_score_df, columns = ['holdout_score']).round(decimals = 2)
-            accuracy_df = pd.merge(cv_score_rounded_df, holdout_score_rounded_df, left_index=True, right_index=True)
-
-            logging.info("modeling : ModelStatisticsClass : accuracy_metrics : execution end")
-            return accuracy_df
-        except (DatabaseConnectionFailed,DataNotFound) as exc:
-            logging.error("modeling : ModelStatisticsClass : accuracy_metrics : Exception " + str(exc))
-            logging.error("modeling : ModelStatisticsClass : accuracy_metrics : " +traceback.format_exc())
-            return exc.msg
-
 
     def show_running_experiments(self, project_id):
         """This function is used to get experiments_list of particular project.
@@ -561,3 +475,5 @@ class ModelStatisticsClass:
             logging.error("modeling : ModelStatisticsClass : check_existing_experiment : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : check_existing_experiment : " +traceback.format_exc())
         return exc.msg
+
+
