@@ -50,15 +50,19 @@ export class ModelingTypeApiService {
   }
 
   startModeling(obj):Observable<any>{
-    var params = new HttpParams().
-    append("user_name", obj.user_name).
-    append("dataset_id", obj.dataset_id).
-    append("project_id", obj.project_id).
-    append("model_mode", obj.model_mode).
-    append("model_type", obj.model_type).
-    append("experiment_name", obj.experiment_name).
-    append("experiment_desc", obj.experiment_desc);
-    return this.httpClient.post(this.baseUrl + "modeling/startmodel/",obj, { headers: this.headers ,params});
+   
+      var params = new HttpParams().
+      append("user_name", obj.user_name).
+      append("dataset_id", obj.dataset_id).
+      append("project_id", obj.project_id).
+      append("model_mode", obj.model_mode).
+      append("model_type", obj.model_type).
+      append("experiment_name", obj.experiment_name).
+      append("experiment_desc", obj.experiment_desc)
+      .append("model_id",obj.model_id);
+      return this.httpClient.post(this.baseUrl + "modeling/startmodel/",obj, { headers: this.headers ,params});
+    
+   
   }
 
 

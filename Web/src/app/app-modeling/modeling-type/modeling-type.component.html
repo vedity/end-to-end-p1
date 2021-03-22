@@ -16,7 +16,7 @@
                 <div class="card-body">
                     <div class="left-box ">
                         <div class="loader {{processclass}}">Loading...</div>
-                        <button type="submit" class="btn btn-success" *ngIf="processclass=='stop'" (click)="smallModal(modelingmodal)">Start</button>
+                        <button type="submit" class="btn btn-success" id="createExperiment" *ngIf="processclass=='stop'" (click)="smallModal(modelingmodal)">Start</button>
                         <button type="submit" class="btn btn-success" *ngIf="processclass=='start'" (click)="processclass='stop'">Stop</button>
                     </div>
                     <div class="right-box">
@@ -96,7 +96,7 @@
                                         <div class="card-body">
                                             <h4 class="card-title mb-4">
                                                 <div class="custom-control custom-checkbox">
-                                                    <input type="checkbox" class="custom-control-input" (change)="setCopmareIds($event.target.checked,item.experiment_id)" id="customCheck_{{i}}">
+                                                    <input type="checkbox" class="custom-control-input" [disabled]="item.status!='success'" (change)="setCopmareIds($event.target.checked,item.experiment_id)" id="customCheck_{{i}}">
                                                     <label class="custom-control-label" for="customCheck_{{i}}">{{item.experiment_name}}</label>
                                                 </div> <span class="date-time">{{item.exp_created_on | date: 'MMM dd,
                                                     yyyy, hh:mm a'}}</span>
@@ -353,7 +353,7 @@
                 </div>
             </div>
             <div class="button-items text-center">
-                <button class="btn btn-success" [disabled]="!f.form.valid || !checkuniuqename" (click)="startModel()" (click)="modal.dismiss('Cross click')">Start</button>
+                <button class="btn btn-success" [disabled]="!f.form.valid || !checkuniuqename" (click)="startModel('Auto')" (click)="modal.dismiss('Cross click')">Start</button>
             </div>
         </form>
     </div>
@@ -367,109 +367,75 @@
         </button>
     </div>
     <div class="modal-body manul-modeling">
-        <div class="row content-1" *ngIf="contentid==1">
-            <!-- <div class="col-md-12">
-                <h4 class="font-size-18 mt-3 mb-3">Split Dataset</h4>
-                <div class="form-group">
-                    <label>Select split method</label>
-                    <select class="form-control" (change)="splitmethodselection=$event.target.value">
-                        <option value="crossvalidation">Cross Validation</option>
-                        <option value="trainvalidation">Train - Validation - Holdout</option>
-                    </select>
-                </div>
-                <div class="cross-validation" *ngIf="splitmethodselection=='crossvalidation'">
+        <form #m="ngForm">
+            <!-- [hidden]="contentid!=1" -->
+            <div class="row content-1">
+                <div class="col-md-12">
+                    <h4 class="font-size-18 mt-3 mb-3">Select model</h4>
                     <div class="form-group">
-                        <label>Number of cross validation(CV) folds</label>
-                                    <input type="text" class="form-control">
-                                </div>
-                                <div class="form-group">
-                        <label>Holdout perecentage</label>
-                                    <input type="range" class="custom-range" min="0" max="100" id="customRange2">
-                                </div>
-                                <div class="from-group">
-                                    <label>Random status</label>
-                                    <input type="number" class="form-control">
-                                </div>
-                            </div>
-                            <div class="tr-v-h" *ngIf="splitmethodselection=='trainvalidation'">
-                                <div class="form-group">
-                                    <label>Split ratio</label>
-                        <select class="form-control">
-                                        <option>60% - 20% - 20%</option>
-                                        <option>70% - 15% - 15%</option>
-                                        <option>80% - 10% - 10%</option>
-                                        <option>90% - 5% - 5%</option>
-                      
-                  <option>95% - 5% - 0%</option>
-                                </div>
-                    <div class="form-group">
-                        <label>Random status</label>
-                        <input type="number" class="form-control">
-                    </div>
-                </div>
-                <div class="text-center mb-4 mt-3">
-                    <button class="btn btn-success" type="submit" (click)="showContent(2)">Next</button>
-                </div>
-            </div> -->
-
-            <div class="col-md-12">
-                <h4 class="font-size-18 mt-3 mb-3">Select model</h4>
-            </div>
-            <div class="col-md-12">
-                <div class="form-group">
-                    <label>Select model</label>
-                    <select class="form-control" (change)="getHyperParams($event.target.value)">
+                        <label>Select model</label>
+                        <select class="form-control" (change)="getHyperParams($event.target.value)" name="algorithm" [required]>
                         <option value=""> Select </option>
                         <option value="{{item.model_id}}"
                             *ngFor="let item of algorithmlist;let i=index">{{item.model_name}}</option>
                     </select>
-                </div>
-            </div>
-            <div class="col-md-12" *ngIf="paramsList!=undefined">
-                <h4 class="font-size-18 mt-3 mb-3" *ngIf="paramsList.length>0">Hyperparameter</h4>
-            </div>
-            <div class="col-md-6" *ngFor="let item of paramsList">
-                <div class="form-group">
-                    <label>{{item}}</label>
-                    <input type="text" class="form-control">
-                </div>
-            </div>
-            <div class="text-center mb-4 mt-3">
-                <button class="btn btn-success" type="submit" (click)="showContent(2)">Next</button>
-            </div>
-        </div>
-        <div class="row content-2" *ngIf="contentid==2">
-            <div class="col-md-12">
-                <div class="form-group">
-                    <label for="example-text-input" class="col-form-label">Experiment Name<span
-                            class="required-label">&nbsp;*</span></label>
-                    <input class="form-control" required type="text" [(ngModel)]="params.experiment_name" (change)="checkexperimentname($event)" name="experiment_name" #experiment_name="ngModel" maxlength="200">
-                    <div class="invalid-feedback" *ngIf="experiment_name.errors?.required && (experiment_name.dirty || experiment_name.touched)">
-                        <span *ngIf="experiment_name.errors?.required && (experiment_name.dirty || experiment_name.touched)" class="text-red">Please enter experiment name</span>
-                    </div>
-                    <div class="invalid-feedback" *ngIf="!checkuniuqename && !experiment_name.errors">
-                        <span class="text-red">Experiment name already exist</span>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="example-text-input" class="col-form-label">Experiment Description<span
-                            class="required-label">&nbsp;*</span></label>
-                    <textarea class="form-control" maxlength="500" [(ngModel)]="params.experiment_desc" name="experiment_desc" #experiment_desc="ngModel" required></textarea>
-                    <div class="invalid-feedback" *ngIf="experiment_desc.errors?.required && (experiment_desc.dirty || experiment_desc.touched)">
-                        <span *ngIf="experiment_desc.errors?.required && (experiment_desc.dirty || experiment_desc.touched)" class="text-red">Please enter description</span>
+                <div class="col-md-12" *ngIf="paramsList!=undefined">
+                    <h4 class="font-size-18 mt-3 mb-3" *ngIf="paramsList[0].hyperparameter!=''">Hyperparameter</h4>
+                </div>
+                <div class="col-md-6" *ngFor="let item of paramsList">
+                    <div class="form-group" *ngIf="item.hyperparameter!=''">
+                        <label>{{item.hyperparameter}} <span class="required-label">&nbsp;*</span></label>
+
+                        <input type="text" class="form-control hyperparamsinput" name="{{item.hyperparameter}}" id="txt_{{item.hyperparameter}}" [required] *ngIf="item.display_type =='validation'">
+                        <input type="text" class="form-control hyperparamsinput" name="{{item.hyperparameter}}" id="txt_{{item.hyperparameter}}" [required] *ngIf="item.display_type == ''">
+                        <select class="form-control hyperparamsinput" name="{{item.hyperparameter}}" id="txt_{{item.hyperparameter}}" [required] *ngIf="item.display_type=='dropdown'">
+                        <option value="">select</option>
+                        <option value="{{childitem}}" *ngFor="let childitem of item.param_value">
+                            {{childitem}}
+                        </option>
+                    </select>
                     </div>
+                </div>
+                <div class="col-md-12 text-center mb-4 mt-3">
+                    <button class="btn btn-success" type="submit" (click)="nextValidate()">Start</button>
                 </div>
 
             </div>
+        </form>
+        <!-- <form #f="ngForm">
+            <div class="row content-2" [hidden]="contentid!=2">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="example-text-input" class="col-form-label">Experiment Name<span
+                            class="required-label">&nbsp;*</span></label>
+                        <input class="form-control" required type="text" [(ngModel)]="params.experiment_name" (change)="checkexperimentname($event)" name="experiment_name" #experiment_name="ngModel" maxlength="200">
+                        <div class="invalid-feedback" *ngIf="experiment_name.errors?.required && (experiment_name.dirty || experiment_name.touched)">
+                            <span *ngIf="experiment_name.errors?.required && (experiment_name.dirty || experiment_name.touched)" class="text-red">Please enter experiment name</span>
+                        </div>
+                        <div class="invalid-feedback" *ngIf="!checkuniuqename && !experiment_name.errors">
+                            <span class="text-red">Experiment name already exist</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="example-text-input" class="col-form-label">Experiment Description<span
+                            class="required-label">&nbsp;*</span></label>
+                        <textarea class="form-control" maxlength="500" [(ngModel)]="params.experiment_desc" name="experiment_desc" #experiment_desc="ngModel" required></textarea>
+                        <div class="invalid-feedback" *ngIf="experiment_desc.errors?.required && (experiment_desc.dirty || experiment_desc.touched)">
+                            <span *ngIf="experiment_desc.errors?.required && (experiment_desc.dirty || experiment_desc.touched)" class="text-red">Please enter description</span>
+                        </div>
+                    </div>
+                </div>
 
-            <div class="col-md-12">
-                <div class="text-center mb-4">
-                    <button class="btn btn-success mr-3" type="submit" (click)="showContent(1)">Previous</button>
-                    <button class="btn btn-success" type="submit" (click)="modal.dismiss('Cross click')">Save</button>
-                    <button class="btn btn-success" (click)="startModel()" (click)="modal.dismiss('Cross click')">Start</button>
+                <div class="col-md-12">
+                    <div class="text-center mb-4">
+                        <button class="btn btn-success mr-3" type="submit" (click)="showContent(1)">Previous</button>
+                        <button class="btn btn-success" [disabled]="!f.form.valid || !checkuniuqename" (click)="startModel('Manual')">Start</button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </form> -->
     </div>
 </ng-template>
 
