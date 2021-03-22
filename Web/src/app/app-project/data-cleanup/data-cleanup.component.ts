@@ -239,8 +239,8 @@ export class DataCleanupComponent implements OnInit {
   setInput(operationid, value) {
     this.selectedColumn.forEach(element => {
       var input = $("#setInput_" + element + "_" + operationid).val();
+      $("#setInput_" + element + "_" + operationid).val(value).removeClass("error")
       if (input != undefined) {
-
         $("#setInput_" + element + "_" + operationid).val(value).addClass("error");
       }
     });

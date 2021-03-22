@@ -769,6 +769,15 @@ a {
     border-color: #f46a6a !important;
 }
 
+.errorinput {
+    border-color: #f46a6a !important;
+}
+
 .invalid-feedback {
     display: block !important;
+}
+
+.custom-control-input[disabled]~.custom-control-label::before,
+.custom-control-input:disabled~.custom-control-label::before {
+    background-color: #5a6074 !important;
 }
