@@ -103,10 +103,10 @@ class AlgorithmDetector:
                 elif len(target_features) == 2:
                     algorithm_type = 'Single_Target'
     
-                sql_command = "select model_id, model_name from mlaas.model_master_tbl where model_type='"+model_type+"'"+" and algorithm_type='"+algorithm_type+"'"
+                sql_command = "select * from mlaas.model_master_tbl where model_type='"+model_type+"'"+" and algorithm_type='"+algorithm_type+"'"
             elif model_type == 'Unsupervised':
     
-                sql_command = "select model_id, model_name from mlaas.model_master_tbl where model_type='"+model_type+"'"
+                sql_command = "select * from mlaas.model_master_tbl where model_type='"+model_type+"'"
             models_list = self.DBObject.select_records(self.connection, sql_command)# Add exception
             models_list_json = json.loads(models_list.to_json(orient='records', date_format='iso'))
         except (DatabaseConnectionFailed,DataNotFound) as exc:
@@ -127,7 +127,7 @@ class AlgorithmDetector:
         """
         try:
 
-            sql_command = 'select hyperparameter, param_value, display_type from mlaas.model_hyperparams_tbl where model_id='+str(model_id)
+            sql_command = 'select hyperparameter, value, type from mlaas.model_hyperparams_tbl where model_id='+str(model_id)
             model_hyperparams_df = self.DBObject.select_records(self.connection, sql_command)
             if model_hyperparams_df is None:
                 raise DatabaseConnectionFailed(500)

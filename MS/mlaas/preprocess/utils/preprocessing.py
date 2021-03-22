@@ -8,6 +8,7 @@
 '''
 
 #* Exceptions
+from common.utils import dynamic_dag
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
 from common.utils.activity_timeline import activity_timeline
@@ -350,9 +351,9 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 
                 #? Checking if there is noise in the column
                 noise = self.dtct_noise(DBObject, connection, col, table_name= table_name)
-                if noise == 1:
-                    noise = True
-                else: noise = False
+                if noise == 0:
+                    noise = False
+                else: noise = True
                 noise_status.append(noise)
             
             logging.info("data preprocessing : PreprocessingClass : get_preprocess_cache : execution stop")
@@ -403,123 +404,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.info(f"data preprocessing : PreprocessingClass : retrive_preprocess_cache : function failed : {str(exc)}")
             return str(exc)
             
-    # def get_possible_operations(self, dataset_id, schema_id, column_ids):
-    #     '''
-    #         This function returns all possible operations for given columns.
-            
-    #         Args:
-    #             schema_id(int): Id of the dataset's schema.
-    #             column_ids(list of intigers): Selected columns.
-                
-    #         Returns:
-    #             operations[List]: List of possible operations.
-    #     '''
-    #     try:
-    #         logging.info("data preprocessing : PreprocessingClass : get_possible_operations : execution start")
-            
-    #         #TODO: THIS NEEDS TO BE REMOVED LATER BECAUSE IT TAKES MORE TIME TO GET WHOLE DATAFRAME
-            
-    #         #? Getting Dataframe
-    #         data_df = self.get_data_df(dataset_id,schema_id)
-    #         if isinstance(data_df, str):
-    #             raise GetDataDfFailed(500)
-            
-    #         #TODO: Remove Until HERE
-            
-    #         #? Getting DB object & connection object
-    #         DBObject,connection,connection_string = self.get_db_connection()
-    #         if connection == None :
-    #             raise DatabaseConnectionFailed(500)
-
-    #         num_cols = [data_df.columns.get_loc(i) for i in data_df._get_numeric_data().columns]
-    #         data_types, missing_val_list, noise_list = self.retrive_preprocess_cache(DBObject,connection,schema_id)
-    #         data_types = data_types[1:]
-    #         missing_val_list = missing_val_list[1:]
-    #         noise_list = noise_list[1:]
-            
-    #         missing_val_list = [bool(i) for i in missing_val_list]
-    #         noise_list = [bool(i) for i in noise_list]
-            
-    #         #? Logical function starts
-    #         try:
-    #             all_col_operations = []
-
-    #             for id in column_ids:
-    #                 operations = [1,2,3,6,10]
-
-    #                 #? Column is both numerical & categorical
-    #                 if (id in num_cols) and (data_types[id].startswith('c') and data_types[id].endswith('l')):
-    #                     col_type = 0
-    #                 #? Column is Numerical
-    #                 elif id in num_cols:
-    #                     col_type = 1
-    #                 #? Column is categorical
-    #                 elif data_types[id].startswith('c') and data_types[id].endswith('l'):
-    #                     col_type = 2
-    #                 else:
-    #                     col_type = 3
-
-    #                 #? Column is text column
-    #                 if col_type == 3:
-    #                     all_col_operations.append(operations)
-    #                     continue
-                    
-    #                 #? Adding Missing Value Operations
-    #                 if col_type == 0:
-    #                     operations += [4,5,7,8,9]
-    #                 elif col_type == 1:
-    #                     operations += [4,5,7]
-    #                 elif col_type == 2:
-    #                     operations += [8,9]
-                    
-    #                 #? Adding Noise Reduction Operations
-    #                 if not missing_val_list[id]:
-    #                     operations += [11,14,15]
-    #                     if col_type == 0 or col_type == 1:
-    #                         operations += [12,13]
-                    
-    #                 #? Outlier Removal & Scaling Operations for numeric; Encoding ops for Categorical
-    #                 if not missing_val_list[id] and not noise_list[id]:
-    #                     if col_type == 0 or col_type == 1:
-    #                         operations += [16,17,18,19,20,21,22,23,24,25,26]
-    #                     if col_type == 0 or col_type == 2:
-    #                         operations += [27,28,29]
-                        
-    #                 #? Math operations
-    #                 if not noise_list[id]:
-    #                     if col_type == 0 or col_type == 1:
-    #                         operations += [30,31,32,33]
-                            
-    #                 all_col_operations.append(operations)
-                
-    #             #? Getting Final Common Operation List
-    #             final_op_list = []
-    #             for ops in all_col_operations:
-    #                 for op in ops:
-    #                     flag = True
-    #                     for other_ops in all_col_operations:
-    #                         if op not in other_ops:
-    #                             flag = False
-    #                             break
-    #                     if flag == True:
-    #                         final_op_list.append(op)
-    #             final_op_list = list(set(final_op_list))
-    #             final_op_list.sort()
-                
-    #             logging.info("data preprocessing : PreprocessingClass : get_possible_operations : execution End")
-                
-    #             return [i+8 for i in final_op_list]    
-            
-    #         except Exception as exc:
-    #             logging.info(f"data preprocessing : PreprocessingClass : get_possible_operations : Function failed : {str(exc)}")
-    #             return exc
-            
-    #     except (DatabaseConnectionFailed,GetDataDfFailed) as exc:
-    #         logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
-    #         logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
-    #         return exc.msg
-        
-        
     def get_possible_operations(self, dataset_id, schema_id, column_ids):
         '''
             This function returns all possible operations for given columns.
@@ -778,7 +662,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 
                 #? Getting Columns
                 col = op_dict[op]
-                temp_cols = ["'" + str(column_list[i]) + "'" for i in col]
+                temp_cols = [str(column_list[i]) for i in col]
                 # temp_col = str(temp_col)
                 # temp_col = temp_col[1:-1]
                 # temp_col = temp_col.replace('"',"'")
@@ -1085,11 +969,53 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             feature_cols = feature_cols.replace("'",'"')
             target_cols = target_cols.replace("'",'"')
 
-            scaled_split_parameters=self.split_data(input_features_df, target_features_df, split_parameters) #call split_data function
-            
+
+            #splitting parameters
+            split_method =split_parameters['split_method'] #get split_method
+            cv = split_parameters['cv'] #get cv
+            if len(cv) == 0:
+                cv = 0
+            random_state = split_parameters['random_state'] #get random_state
+            test_ratio = split_parameters['test_ratio'] #get test_size
+            valid_ratio = split_parameters['valid_ratio'] #get valid_size
+            if len(valid_ratio) == 0:
+                valid_ratio= 0
+            else:
+                valid_ratio=float(valid_ratio)
+            unique_id = str(uuid.uuid1().time) #genrate unique_id
+            scale_dir = "scaled_dataset/scaled_data_" + unique_id  #genrate directory
+            CHECK_FOLDER = os.path.isdir(scale_dir) #check directory already exists or not
+            # If folder doesn't exist, then create it.
+            if not CHECK_FOLDER:
+                os.makedirs(scale_dir) #create directory
+                logger.info("Directory  Created")
+            else:
+                logger.info("Directory  already exists")
+            train_X_filename = scale_dir+"/scaled_train_X_data_" + unique_id #genrate train_X file path
+            train_Y_filename = scale_dir+"/scaled_train_Y_data_" + unique_id #genrate train_Y file path
+            test_X_filename =  scale_dir+"/scaled_test_X_data_" + unique_id  #genrate test_X file path  
+            test_Y_filename =  scale_dir+"/scaled_test_Y_data_" + unique_id  #genrate test_Y file path     
+            valid_X_filename = "None"
+            valid_Y_filename = "None"
+            Y_valid_count= None
+            X_train, X_valid, X_test, Y_train, Y_valid, Y_test=sp.get_split_data(input_features_df,target_features_df, int(random_state),float(test_ratio), valid_ratio, str(split_method))
+            if split_method != 'cross_validation':
+                Y_valid_count= Y_valid.shape[0]
+                valid_X_filename = scale_dir+"/scaled_valid_X_data_" + unique_id #genrate valid_X file path     
+                valid_Y_filename = scale_dir+"/scaled_valid_Y_data_" + unique_id #genrate valid_Y file path     
+                np.save(valid_X_filename,X_valid.to_numpy()) #save X_valid
+                np.save(valid_Y_filename,Y_valid.to_numpy()) #save Y_valid   
+            Y_train_count=Y_train.shape[0] #train count
+            Y_test_count =Y_test.shape[0]  #test count      
+            np.save(train_X_filename,X_train.to_numpy()) #save X_train
+            np.save(train_Y_filename,Y_train.to_numpy()) #save Y_train
+            np.save(test_X_filename,X_test.to_numpy()) #save X_test
+            np.save(test_Y_filename,Y_test.to_numpy()) #save Y_test
+        
+            scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_ratio)+', "test_ratio":'+ str(test_ratio)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'"}' #genrate scaled split parameters
             logger.info("scaled_split_parameters=="+scaled_split_parameters)
             sql_command = f"update mlaas.project_tbl set target_features= '{target_cols}' ,input_features='{feature_cols}',scaled_split_parameters = '{scaled_split_parameters}',problem_type = '{problem_type_dict}' where dataset_id = '{dataset_id}' and project_id = '{project_id}' and user_name= '{user_name}'"
-            status=DBObject.update_records(connection, sql_command)
+            status = DBObject.update_records(connection, sql_command)
             if status==1:
                 raise ProjectUpdateFailed(500)
             return status
@@ -1099,138 +1025,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.error("data preprocessing : PreprocessingClass : handover : " +traceback.format_exc())
             return exc.msg
         
-    def split_data(self,input_features_df,target_features_df,split_parameters):
-        """
-        [it will split data and store the numpy file and return scaled split parameters dictionary ]
-
-        Args:
-            input_features_df ([type]): [input df]
-            target_features_df ([type]): [target df]
-            split_parameters ([type]): [split parameters]
-
-        Returns:
-            [scaled_split_parameters]: [scaled_split_parameters description]
-        """
-        #splitting parameters
-        split_method =split_parameters['split_method'] #get split_method
-        cv = split_parameters['cv'] #get cv
-        if len(cv) == 0:
-            cv = 0
-        random_state = split_parameters['random_state'] #get random_state
-        test_ratio = split_parameters['test_ratio'] #get test_size
-        valid_ratio = split_parameters['valid_ratio'] #get valid_size
-        if len(valid_ratio) == 0:
-            valid_ratio= 0
-        else:
-            valid_ratio=float(valid_ratio)
-        unique_id = str(uuid.uuid1().time) #genrate unique_id
-        scale_dir = "scaled_dataset/scaled_data_" + unique_id  #genrate directory
-        CHECK_FOLDER = os.path.isdir(scale_dir) #check directory already exists or not
-        # If folder doesn't exist, then create it.
-        if not CHECK_FOLDER:
-            os.makedirs(scale_dir) #create directory
-            logger.info("Directory  Created")
-        else:
-            logger.info("Directory  already exists")
-        train_X_filename = scale_dir+"/scaled_train_X_data_" + unique_id #genrate train_X file path
-        train_Y_filename = scale_dir+"/scaled_train_Y_data_" + unique_id #genrate train_Y file path
-        test_X_filename =  scale_dir+"/scaled_test_X_data_" + unique_id  #genrate test_X file path  
-        test_Y_filename =  scale_dir+"/scaled_test_Y_data_" + unique_id  #genrate test_Y file path     
-        valid_X_filename = "None"
-        valid_Y_filename = "None"
-        Y_valid_count= None
-        X_train, X_valid, X_test, Y_train, Y_valid, Y_test=sp.get_split_data(input_features_df,target_features_df, int(random_state),float(test_ratio), valid_ratio, str(split_method))
-        if split_method != 'cross_validation':
-            Y_valid_count= Y_valid.shape[0]
-            valid_X_filename = scale_dir+"/scaled_valid_X_data_" + unique_id #genrate valid_X file path     
-            valid_Y_filename = scale_dir+"/scaled_valid_Y_data_" + unique_id #genrate valid_Y file path     
-            np.save(valid_X_filename,X_valid.to_numpy()) #save X_valid
-            np.save(valid_Y_filename,Y_valid.to_numpy()) #save Y_valid   
-        Y_train_count=Y_train.shape[0] #train count
-        Y_test_count =Y_test.shape[0]  #test count      
-        np.save(train_X_filename,X_train.to_numpy()) #save X_train
-        np.save(train_Y_filename,Y_train.to_numpy()) #save Y_train
-        np.save(test_X_filename,X_test.to_numpy()) #save X_test
-        np.save(test_Y_filename,Y_test.to_numpy()) #save Y_test
-        scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_ratio)+', "test_ratio":'+ str(test_ratio)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'"}' #genrate scaled split parameters
-        return scaled_split_parameters
-        
-        
-    def get_activity_desc(self, DBObject, connection, operation_id, col_name, code = 1):
-        '''
-            Used to get preprocess activity description from the activity master table.
-        
-            Returns:
-            --------
-            description (`String`): Description for the activity.
-        '''
-        logging.info("data preprocessing : PreprocessingClass : get_activity_desc : execution start")
-        
-        #? Getting Description
-        sql_command = f"select replace (amt.activity_name || ' ' || amt.activity_description, '*', {col_name}) as description from mlaas.activity_master_tbl amt where amt.activity_id = '{operation_id}' and amt.code = '{code}'"
-        
-        desc_df = DBObject.select_records(connection,sql_command)
-        if not isinstance(desc_df, pd.DataFrame):
-            return "Failed to Extract Activity Description."
-        
-        #? Fatching the description
-        description = desc_df['description'].tolist()[0]
-        
-        logging.info("data preprocessing : PreprocessingClass : get_activity_desc : execution stop")
-        
-        return description
-            
-    def operation_start(self, DBObject, connection, operation_id, project_id, col_name):
-        '''
-            Used to Insert Activity in the Activity Timeline Table.
-            
-            Returns:
-            --------
-            activity_id (`Intiger`): index of the activity in the activity transection table.
-        '''
-        logging.info("data preprocessing : PreprocessingClass : operation_start : execution start")
-            
-        #? Transforming the operation_id to the operation id stored in the activity timeline table. 
-        operation_id += self.op_diff
-        
-        #? Getting Activity Description
-        desc = self.get_activity_desc(DBObject, connection, operation_id, col_name, code = 1)
-        
-        #? Getting Dataset_id & User_Name
-        sql_command = f"select pt.dataset_id,pt.user_name from mlaas.project_tbl pt  where pt.project_id = '{project_id}'"
-        details_df = DBObject.select_records(connection,sql_command) 
-        dataset_id,user_name = details_df['dataset_id'][0],details_df['user_name'][0]
-        
-        #? Inserting the activity in the activity_detail_table
-        _,activity_id = self.AT.insert_user_activity(operation_id,user_name,project_id,dataset_id,desc,column_id =col_name)
-        
-        logging.info("data preprocessing : PreprocessingClass : operation_start : execution stop")
-        
-        return activity_id
-    
-    def operation_end(self, DBObject, connection, activity_id, operation_id, col_name):
-        '''
-            Used to update Activity description when the Activity ends.
-            
-            Returns:
-            --------
-            status (`Intiger`): Status of the updation.
-        '''
-        
-        logging.info("data preprocessing : PreprocessingClass : operation_end : execution start")
-        
-        #? Transforming the operation_id to the operation id stored in the activity timeline table. 
-        operation_id += self.op_diff
-        
-        #? Getting Activity Description
-        desc = self.get_activity_desc(DBObject, connection, operation_id, col_name, code = 2)
-        
-        #? Changing the activity description in the activity detail table 
-        status = self.AT.update_activity(activity_id,desc)
-        
-        logging.info("data preprocessing : PreprocessingClass : operation_end : execution stop")
-        
-        return status
     
     def update_schema_tbl_missing_flag(self, DBObject, connection, schema_id, column_name, flag = "False"):
         
@@ -1287,13 +1081,25 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             return exc.msg
 
     def get_cleanup_dag_name(self):
+        '''
+            This Function is used to get the unique cleanup dag name for the project_tbl entry.
+
+            Args:
+            -----
+            None
+
+            Returns:
+            --------
+            dag_id (`String`): the Cleanup dag id.
+        '''
+        
         id = uuid.uuid1().time
         dag_id='Cleanup_dag_'+str(id)
 
         template = "cleanup_dag.template"
         namespace = "Cleanup_Dags"
         
-        master_dict = {}
+        master_dict = {'active': 0}
         
         json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
         
@@ -1302,47 +1108,149 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         return dag_id
     
     def dag_executor(self,project_id, dataset_id, schema_id, request, flag ,selected_visibility,dataset_name ,dataset_desc):
+        '''
+            This Function is used to trigger the dag at the save time.
+
+            Args:
+            -----
+            project_id (`Integer`): Id of the project.
+            dataset_id (`Integer`): Id of the dataset.
+            schema_id (`Integer`): Id of the schema.
+            request (`Dictionary`): Request from the frontend.
+            flag (`Boolean`): Is it save or save_as?
+            selected_visibility (`String`): public or private.
+            dataset_name (`String`): Name of the new dataset.
+            dataset_desc (`String`): Description for the dataset.
+        '''
         
-        logging.info("data preprocessing : PreprocessingClass : dag_executor : execution start")
-        
-        DBObject,connection,connection_string = self.get_db_connection()
-        if connection == None :
-            raise DatabaseConnectionFailed(500)
+        try:
+            logging.info("data preprocessing : PreprocessingClass : dag_executor : execution start")
             
-        sql_command = f"select pt.cleanup_dag_id from mlaas.project_tbl pt where pt.project_id = '{project_id}'"
-        dag_id_df = DBObject.select_records(connection,sql_command) 
-        dag_id = dag_id_df['cleanup_dag_id'][0]
-        
-        op_dict, val_dict = self.reorder_operations(request)
-        
-        template = "cleanup_dag.template"
-        namespace = "Cleanup_Dags"
-        
-        master_dict = {
-        "operation_dict": op_dict,
-        "values_dict": val_dict,
-        "schema_id": schema_id,
-        "dataset_id": dataset_id,
-        "project_id": project_id
-        }
-        
-        json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
-        result = requests.post("http://airflow:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
-        
-        json_data = {}
-        result = requests.post(f"http://airflow:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False)#owner
-        
-        logging.info("DAG RUN RESULT: "+str(result))
-        
-        logging.info("data preprocessing : PreprocessingClass : dag_executor : execution stop")
+            DBObject,connection,connection_string = self.get_db_connection()
+            if connection == None :
+                raise DatabaseConnectionFailed(500)
+                
+            sql_command = f"select pt.cleanup_dag_id from mlaas.project_tbl pt where pt.project_id = '{project_id}'"
+            dag_id_df = DBObject.select_records(connection,sql_command) 
+            dag_id = dag_id_df['cleanup_dag_id'][0]
             
-        return 0
-    
-    def SaveAs(self,DBObject,connection,project_id,table_name,user_name,dataset_visibility,dataset_name,selected_visibility,dataset_desc):
+            op_dict, val_dict = self.reorder_operations(request)
+            
+            template = "cleanup_dag.template"
+            namespace = "Cleanup_Dags"
+            file_name = dag_id + ".py"
+
+            master_dict = {
+            'active': 1,
+            "operation_dict": op_dict,
+            "values_dict": val_dict,
+            "schema_id": schema_id,
+            "dataset_id": dataset_id,
+            "project_id": project_id,
+            "save_as": flag,
+            "visibility": selected_visibility,
+            "dataset_name": dataset_name,
+            "dataset_desc": dataset_desc
+            }
+            
+            # json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
+            # result = requests.post("http://airflow:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
+            
+            status = self.dag_updater(master_dict, file_name, namespace)
+            if not isinstance(status,int):
+                logging.error(f"Dag Updation Failed : Error : {str(status)}")
+                raise DagUpdateFailed(500)
+
+            json_data = {}
+            result = requests.post(f"http://airflow:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False)#owner
+            
+            logging.info("DAG RUN RESULT: "+str(result))
+            
+            logging.info("data preprocessing : PreprocessingClass : dag_executor : execution stop")
+                
+            return 0
+        
+        except (DatabaseConnectionFailed,DagUpdateFailed) as exc:
+            logging.error(str(exc) +" Error")
+            logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
+            logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
+            return exc.msg
+        
+
+    def dag_updater(self, dic, file, namespace = '.'):
+        '''
+            Updates the dag.
+
+            Args:
+            -----
+            dic (`dictionary`): Python dictionary that you want to place in the file.
+            file (`string`): Name of the file.
+            namespace (`string`): Name of the folder inside of the dynamic_dags directory.
+
+            Returns:
+            --------
+            status (`integer | Exception`): `0` if updation was successful else error.
+        '''
+        try:
+            logging.info("data preprocessing : PreprocessingClass : dag_updater : execution start")
+            
+            #? Reading the file
+            with open(f"dynamic_dags/{namespace}/{file}","r") as ro:
+                content = ro.read()
+        
+            new_dic = str(dic)
+
+            point = content.find("master")
+            bracket_start = content.find("{",point) 
+            
+            def bracket_end_finder(string, length = 0):
+                '''
+                    A Subfunction to find the ending bracket.
+                '''
+                
+                opening_count = 0
+                length -= 1
+                flag = False
+                
+                for i in string:
+                    if i == '{':
+                        opening_count += 1
+                        flag = True
+                    elif i == '}':
+                        opening_count -= 1
+                    length += 1
+                        
+                    if flag:
+                        if opening_count == 0:
+                            return length
+                else:
+                    #? Closing bracket not found
+                    return -1    
+            
+            bracket_end = bracket_end_finder(content[bracket_start:],bracket_start)
+
+            new_str = content[:bracket_start] + new_dic + content[bracket_end + 1:]
+        
+            #? Writing into the file
+            with open(f"dynamic_dags/{namespace}/{file}", 'w') as wo:
+                wo.write(new_str)
+
+            logging.info("data preprocessing : PreprocessingClass : dag_updater : execution stop")
+            
+            return 0
+
+        except Exception as e:
+            return e
+
+    def SaveAs(self,DBObject,connection,project_id,table_name,user_name,dataset_visibility,dataset_name,selected_visibility,dataset_desc, **kwargs):
         '''
         Function used to create a new table with updated changes and insert a new record into dataset table and update the dataset_id into the project_tbl
         '''
         try:
+            #? Safety measure in case if DAG calls this method with None parameters
+            if dataset_name is None:
+                return 1
+
             # Get table name,schema and columns from dataset class.
             tbl_name,schema,cols = dc.make_dataset_schema() 
             file_name = None

@@ -631,10 +631,8 @@ class CheckExperimentNameClass(APIView):
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
                         
                         experiment_name = request.query_params.get('experiment_name')
-
-                        project_id = request.query_params.get('project_id')
  
-                        experiment_data = ModelStatObject.check_existing_experiment(project_id, experiment_name)
+                        experiment_data = ModelStatObject.check_existing_experiment(experiment_name)
                         
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200"+str(experiment_data))
                         if isinstance(experiment_data,str): #check the instance of dataset_df
