@@ -476,9 +476,11 @@ class CheckModelStatusClass(APIView):
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
                         
                         project_id = int(request.query_params.get('project_id')) #get Username
-                        dataset_id = int(request.query_params.get('dataset_id')) #get Username
+                        # dataset_id = int(request.query_params.get('dataset_id')) #get Username
                         experiment_name = request.query_params.get('experiment_name')
-                        user_name = request.query_params.get('user_name')
+                        dataset_id = 2
+                        user_name = 'mann'
+                        # user_name = request.query_params.get('user_name')
         
                         experiment_status = ModelStatObject.check_model_status(project_id,experiment_name)
                         # if len(experiment_data) != 0:
@@ -501,6 +503,7 @@ class CheckModelStatusClass(APIView):
                                         activity_id = 47
                                         timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
                                 elif(status == 'failed'):
+                                        logging.info('LOG FOR Failed status----------------------------------')
                                         activity_id = 48
                                         timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
                                         
@@ -634,8 +637,10 @@ class CheckExperimentNameClass(APIView):
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
                         
                         experiment_name = request.query_params.get('experiment_name')
+
+                        project_id = request.query_params.get('project_id')
  
-                        experiment_data = ModelStatObject.check_existing_experiment(experiment_name)
+                        experiment_data = ModelStatObject.check_existing_experiment(project_id, experiment_name)
 
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200"+str(experiment_data))
                         if isinstance(experiment_data,str): #check the instance of dataset_df

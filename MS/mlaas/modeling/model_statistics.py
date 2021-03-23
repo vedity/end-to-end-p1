@@ -349,7 +349,7 @@ class ModelStatisticsClass:
                 raise DatabaseConnectionFailed(500)
 
             if len(dag_df) == 0 :
-                raise DataNotFound(500)
+                return 0
             
             dag_id,run_id = dag_df['dag_id'][0],dag_df['run_id'][0]
             
