@@ -288,7 +288,7 @@ class ModelStatisticsClass:
         
 
 
-    def accuracy_metrics(self, project_id): #TODO Optimize.
+    def accuracy_metrics(self, project_id):
         """This function is used to get accuracy_metrics of particular experiment.
 
         Args:
@@ -326,7 +326,7 @@ class ModelStatisticsClass:
 
             if len(df) == 0: # If the experiment_id is not present in the mlaas.metrics.
                 raise DataNotFound(500)
-            # This will be changed in future.
+                
             cv_score_df = df[df['key'] == 'cv_score'].reset_index(drop=True).rename(columns={'value': 'cv_score'})['cv_score']
             holdout_score_df = df[df['key'] == 'holdout_score'].reset_index(drop=True).rename(columns={'value': 'holdout_score'})['holdout_score']
             cv_score_rounded_df = DataFrame(cv_score_df, columns = ['cv_score']).round(decimals = 2)
@@ -338,6 +338,44 @@ class ModelStatisticsClass:
         except (DatabaseConnectionFailed,DataNotFound) as exc:
             logging.error("modeling : ModelStatisticsClass : accuracy_metrics : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : accuracy_metrics : " +traceback.format_exc())
+            return exc.msg
+
+
+
+    def show_model_details(self, project_id):
+        """This function is used to get show_model_details of particular experiment.
+
+        Args:
+            experiment_id ([object]): [Experiment id of particular experiment.]
+
+        Returns:
+            [data_frame]: [it will return the dataframe for show_model_details.]
+            
+        """
+        try:
+            logging.info("modeling : ModelStatisticsClass : show_model_details : execution start")
+            # Get model_id, model_name, model_description, experiment_id for a particular project_id.
+            sql_command = 'select ms.model_id,ms.model_name,ms.model_desc,exp.experiment_id from mlaas.model_experiment_tbl exp,mlaas.model_master_tbl ms where exp.model_id = ms.model_id and exp.project_id ='+str(project_id)
+            model_details_df = self.DBObject.select_records(self.connection, sql_command)
+            if model_details_df is None:
+                raise DatabaseConnectionFailed(500)
+
+            if len(model_details_df) == 0:# If there are no experiments for a particular project_id.
+                raise DataNotFound(500)
+            # Get all the accuracy metrics for all the experiments associated with a particular project_id.
+            accuracy_df = self.accuracy_metrics(project_id)
+
+            # Merge the model_details and accuracy dataframes.
+            final_df = pd.merge(accuracy_df, model_details_df, right_index=True, left_index=True)
+            json_data = final_df.to_json(orient='records',date_format='iso')
+            final_model_data = json.loads(json_data)
+
+            return final_model_data
+
+            logging.info("modeling : ModelStatisticsClass : show_model_details : execution end")
+        except (DatabaseConnectionFailed,DataNotFound) as exc:
+            logging.error("modeling : ModelStatisticsClass : show_model_details : Exception " + str(exc))
+            logging.error("modeling : ModelStatisticsClass : show_model_details : " +traceback.format_exc())
             return exc.msg
 
 
@@ -353,10 +391,10 @@ class ModelStatisticsClass:
         """
         try:
             # Get the necessary values from the mlaas.model_experiment_tbl where the state of the experiment is 'running'.
-            sql_command = "select met.*,e.name as experiment_name,mmt.model_name, mmt.model_type,dt.dataset_name, 0.0 as cv_score, 0.0 as holdout_score"\
-                          " from mlaas.model_experiment_tbl met,mlaas.model_master_tbl mmt,mlaas.dataset_tbl dt,mlaas.experiments e"\
-                          " where met.model_id = mmt.model_id and met.dataset_id=dt.dataset_id and met.experiment_id=e.experiment_id "\
-                          " and met.project_id="+str(project_id)+" and status='running'"
+            sql_command = "select met.*,e.name as experiment_name,mmt.model_name,dt.dataset_name,round(cast(sv.cv_score as numeric),3) as cv_score,round(cast(sv.holdout_score as numeric),3) as holdout_score "\
+                          "from mlaas.model_experiment_tbl met,mlaas.model_master_tbl mmt,mlaas.score_view sv,mlaas.dataset_tbl dt,mlaas.experiments e "\
+                          "where met.model_id = mmt.model_id and met.experiment_id=sv.experiment_id and met.dataset_id=dt.dataset_id and met.experiment_id=e.experiment_id "\
+                          "and met.project_id="+str(project_id) +" and met.status='running'"
                           
             model_experiment_data_df = self.DBObject.select_records(self.connection, sql_command)
             if model_experiment_data_df is None:
@@ -390,7 +428,7 @@ class ModelStatisticsClass:
                           "round(cast(sv.cv_score as numeric),3) as cv_score,round(cast(sv.holdout_score as numeric),3) as holdout_score "\
                           " from mlaas.model_experiment_tbl met,mlaas.model_master_tbl mmt,mlaas.score_view sv,mlaas.dataset_tbl dt,mlaas.experiments e"\
                           " where met.model_id = mmt.model_id and met.experiment_id=sv.experiment_id and met.dataset_id=dt.dataset_id and met.experiment_id=e.experiment_id "\
-                          " and met.project_id="+str(project_id)+" order by met.exp_created_on desc"
+                          " and met.project_id="+str(project_id)
                           
             model_experiment_data_df = self.DBObject.select_records(self.connection, sql_command)
 
@@ -450,14 +488,14 @@ class ModelStatisticsClass:
 
             # Update Project Status 
             status = state_df['state'][0]
+            logging.info("'''''''''''''''''''''''''-----------------------" + status)
             if status == 'running':
                 st=0
             elif status == 'success':
                 st=1
             else:
                 st=2
-            
-            # Update the model_status in the project table.
+                
             sql_command = "update mlaas.project_tbl set model_status="+str(st)+" where project_id="+str(project_id)
             project_upd_status = self.DBObject.update_records(self.connection,sql_command)
             #status=state_df['state'][0]
@@ -467,37 +505,6 @@ class ModelStatisticsClass:
             logging.error("modeling : ModelStatisticsClass : show_experiments_list : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : show_experiments_list : " +traceback.format_exc())
             return exc.msg
-    
-
-    def check_existing_experiment(self,project_id, experiment_name):
-        """Checks if the experiment_name entered by the user already exists in a particular project id or not.
-
-        Args:
-            experiment_name ([string]): User entered experiment name.
-
-        Raises:
-            ExperimentAlreadyExist: [This experiment already exist, so enter a new,unique experiment name.]
-
-        Returns:
-            integer: status code of the experiment_name exists.
-        """
-        try:
-            # Get the experiment's name from the model_dag_tbl
-            sql_command="select * from mlaas.model_dags_tbl where exp_name='"+experiment_name+"' and project_id="+str(project_id)
-            experiment_data_df = self.DBObject.select_records(self.connection, sql_command)
-
-            if experiment_data_df is None: # If the database connection fails.
-                return 0
-            elif len(experiment_data_df) > 0: # If the experiment name already exists.
-                raise ExperimentAlreadyExist(500)
-            else:
-                return 0
-    
-        except (ExperimentAlreadyExist) as exc:
-            logging.error("modeling : ModelStatisticsClass : check_existing_experiment : Exception " + str(exc))
-            logging.error("modeling : ModelStatisticsClass : check_existing_experiment : " +traceback.format_exc())
-            return exc.msg
-
         
     def compare_experiments(self, experiment_ids):
         """This function is called when user wants to compare multiple experiments.
@@ -513,50 +520,44 @@ class ModelStatisticsClass:
             Dictionary: It contains the accuracy_metrics, model_name, model_params, and the associated experiment_id.
         """
             # Get the model parameters for the associated experiment_ids.
-        try:
-            exp_ids = tuple(experiment_ids)
-            sql_command = 'select prms.key, prms.value, met.experiment_id from mlaas.params prms,mlaas.model_experiment_tbl met where prms.run_uuid=met.run_uuid and met.experiment_id in'+str(exp_ids)
-            params_df = self.DBObject.select_records(self.connection, sql_command)
-            if params_df is None:
-                raise DatabaseConnectionFailed(500)
+        exp_ids = tuple(experiment_ids)
+        sql_command = 'select prms.key, prms.value, met.experiment_id from mlaas.params prms,mlaas.model_experiment_tbl met where prms.run_uuid=met.run_uuid and met.experiment_id in'+str(exp_ids)
+        params_df = self.DBObject.select_records(self.connection, sql_command)
+        if params_df is None:
+            raise DatabaseConnectionFailed(500)
 
-            if len(params_df) == 0 :
-                raise DataNotFound(500)
-            # Rearraging Dataframe according to our requirement.
-            params_pivot_df = params_df.pivot(index='experiment_id', columns='key', values='value')
-            
-            # Get the accuracy metrics for the associated experiment_ids.
-            sql_command = 'select mtr.key, mtr.value, met.experiment_id from mlaas.metrics mtr,mlaas.model_experiment_tbl met where mtr.run_uuid=met.run_uuid and met.experiment_id in'+str(exp_ids)
-            metrics_df = self.DBObject.select_records(self.connection, sql_command)
-            if metrics_df is None:
-                raise DatabaseConnectionFailed(500)
+        if len(params_df) == 0 :
+            raise DataNotFound(500)
+        # Rearraging Dataframe according to our requirement.
+        params_pivot_df = params_df.pivot(index='experiment_id', columns='key', values='value')
+        
+        # Get the accuracy metrics for the associated experiment_ids.
+        sql_command = 'select mtr.key, mtr.value, met.experiment_id from mlaas.metrics mtr,mlaas.model_experiment_tbl met where mtr.run_uuid=met.run_uuid and met.experiment_id in'+str(exp_ids)
+        metrics_df = self.DBObject.select_records(self.connection, sql_command)
+        if metrics_df is None:
+            raise DatabaseConnectionFailed(500)
 
-            if len(metrics_df) == 0 :
-                raise DataNotFound(500)
-            # Rearraging Dataframe according to our requirement.
-            metrics_pivot_df = metrics_df.pivot(index='experiment_id', columns='key', values='value')
-            experiment_ids_index = tuple(metrics_pivot_df.index.values)
-            
-            # Get the model_name for the associated experiment_ids.
-            sql_command = 'select mmt.model_name, met.experiment_id from mlaas.model_master_tbl mmt, mlaas.model_experiment_tbl met where mmt.model_id=met.model_id and met.experiment_id in '+str(experiment_ids_index)
-            model_names_df = self.DBObject.select_records(self.connection, sql_command)
-            if model_names_df is None:
-                raise DatabaseConnectionFailed(500)
+        if len(metrics_df) == 0 :
+            raise DataNotFound(500)
+        # Rearraging Dataframe according to our requirement.
+        metrics_pivot_df = metrics_df.pivot(index='experiment_id', columns='key', values='value')
+        experiment_ids_index = tuple(metrics_pivot_df.index.values)
+        
+        # Get the model_name for the associated experiment_ids.
+        sql_command = 'select mmt.model_name, met.experiment_id from mlaas.model_master_tbl mmt, mlaas.model_experiment_tbl met where mmt.model_id=met.model_id and met.experiment_id in '+str(experiment_ids_index)
+        model_names_df = self.DBObject.select_records(self.connection, sql_command)
+        if model_names_df is None:
+            raise DatabaseConnectionFailed(500)
 
-            if len(model_names_df) == 0 :
-                raise DataNotFound(500)
-            
-            model_names_df = model_names_df.set_index('experiment_id') # Set index to experiment_id
+        if len(model_names_df) == 0 :
+            raise DataNotFound(500)
+        
+        model_names_df = model_names_df.set_index('experiment_id') # Set index to experiment_id
 
-            experiments_data = {}
-            for id in exp_ids:
-                experiments_data[str(id)] = {'metrics': metrics_pivot_df.loc[id, :].to_dict(), 
-                                    'params': params_pivot_df.loc[id, :].to_dict(),
-                                    'model_name': model_names_df.loc[id, :]}
+        experiments_data = {}
+        for id in exp_ids:
+            experiments_data[str(id)] = {'metrics': metrics_pivot_df.loc[id, :].to_dict(), 
+                                'params': params_pivot_df.loc[id, :].to_dict(),
+                                'model_name': model_names_df.loc[id, :]}
 
-            return experiments_data
-
-        except (ExperimentAlreadyExist) as exc:
-            logging.error("modeling : ModelStatisticsClass : check_existing_experiment : Exception " + str(exc))
-            logging.error("modeling : ModelStatisticsClass : check_existing_experiment : " +traceback.format_exc())
-        return exc.msg
+        return experiments_data

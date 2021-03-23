@@ -50,15 +50,19 @@ export class ModelingTypeApiService {
   }
 
   startModeling(obj):Observable<any>{
-    var params = new HttpParams().
-    append("user_name", obj.user_name).
-    append("dataset_id", obj.dataset_id).
-    append("project_id", obj.project_id).
-    append("model_mode", obj.model_mode).
-    append("model_type", obj.model_type).
-    append("experiment_name", obj.experiment_name).
-    append("experiment_desc", obj.experiment_desc);
-    return this.httpClient.post(this.baseUrl + "modeling/startmodel/",obj, { headers: this.headers ,params});
+   
+      var params = new HttpParams().
+      append("user_name", obj.user_name).
+      append("dataset_id", obj.dataset_id).
+      append("project_id", obj.project_id).
+      append("model_mode", obj.model_mode).
+      append("model_type", obj.model_type).
+      append("experiment_name", obj.experiment_name).
+      append("experiment_desc", obj.experiment_desc)
+      .append("model_id",obj.model_id);
+      return this.httpClient.post(this.baseUrl + "modeling/startmodel/",obj, { headers: this.headers ,params});
+    
+   
   }
 
 
@@ -98,12 +102,13 @@ export class ModelingTypeApiService {
     return this.httpClient.get(this.baseUrl + "modeling/actualvsprediction/", { headers: this.headers, params });
   }
 
-  getAlgorithmList(): Observable<any> {
-    return this.httpClient.get(this.baseUrl + "modeling/selectalgorithm/", { headers: this.headers });
+  getAlgorithmList(dataset_id,project_id,model_type): Observable<any> {
+    var params = new HttpParams().append("dataset_id", dataset_id).append("project_id", project_id).append("model_type", model_type);
+    return this.httpClient.get(this.baseUrl + "modeling/selectalgorithm/", { headers: this.headers,params });
   }
 
-  getHyperparamsList(model_name): Observable<any> {
-    var params = new HttpParams().append("model_name", model_name);
+  getHyperparamsList(model_id): Observable<any> {
+    var params = new HttpParams().append("model_id", model_id);
     return this.httpClient.get(this.baseUrl + "modeling/hyperparameters/", { headers: this.headers, params });
   }
 }

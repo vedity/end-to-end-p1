@@ -78,7 +78,7 @@ class ModelSqlClass:
 
         model_id = 1
         hyperparameter = ''
-        param_value = ''
+        param_value = '[]'
         display_type = ''
         row=model_id,hyperparameter, param_value, display_type
         row_tuples = [tuple(row)] 
@@ -88,7 +88,7 @@ class ModelSqlClass:
 
         model_id = 2
         hyperparameter = 'epochs'
-        param_value = ''
+        param_value = '[]'
         display_type = ''
         row=model_id,hyperparameter, param_value, display_type
         row_tuples = [tuple(row)] 
@@ -151,8 +151,8 @@ class ModelSqlClass:
  
 # DataBase Credintials  
 ModelSqlObject = ModelSqlClass(database,user,password,host,port)
-ref_status = ModelSqlObject.add_model_records()
-print("ref_status for model_master_tbl== ",ref_status)
+# ref_status = ModelSqlObject.add_model_records()
+# print("ref_status for model_master_tbl== ",ref_status)
 
 ref_status = ModelSqlObject.add_data_model_hyperparams_tbl()
 print("ref_status for model_hyperparams_tbl== ",ref_status)
