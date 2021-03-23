@@ -12,6 +12,7 @@ mlruns
 scaled_dataset/*
 *.npy
 dynamic_dags
+dynamic_dags/*
 
 ### Angular ###
 # compiled output

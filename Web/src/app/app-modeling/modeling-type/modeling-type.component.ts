@@ -149,7 +149,7 @@ export class ModelingTypeComponent implements OnInit {
     this.getDatasetInfo();
     this.getRunningExperimentList();
     this.getAllExperimentList();
-    this.getAlgorithmList();
+    
   }
 
   drop(event: CdkDragDrop<string[]>) {
@@ -186,7 +186,7 @@ export class ModelingTypeComponent implements OnInit {
   } 
   
   getAlgorithmList() {
-    this.apiservice.getAlgorithmList().subscribe(
+    this.apiservice.getAlgorithmList(this.params.dataset_id, this.params.project_id,this.model_type).subscribe(
       logs => this.successAlgorithmListHandler(logs),
       error => this.errorHandler(error));
   }
@@ -203,9 +203,11 @@ export class ModelingTypeComponent implements OnInit {
     }
   }
 
-
+  selectedalgorithm:any;
   getHyperParams(val){
+    this.selectedalgorithm=val;
     if(val!=""){
+
       this.apiservice.getHyperparamsList(val).subscribe(
         logs => this.successParamsListHandler(logs),
         error => this.errorHandler(error));
@@ -217,7 +219,7 @@ export class ModelingTypeComponent implements OnInit {
   paramsList: any;
   successParamsListHandler(data) {
     if (data.status_code == "200") {
-      this.paramsList = data.response.model_parameters;
+      this.paramsList = data.response;
       console.log(this.paramsList);
       
     }
@@ -261,23 +263,41 @@ runningExpList: any = [];
   }
 
 
-  startModel() {
+  startModel(model_mode) {
     this.processclass = "start";
     this.experiment_name = this.params.experiment_name;
     this.experiment_desc = this.params.experiment_desc;
     console.log(this.currentuser);
     let currentuser = localStorage.getItem("currentUser")
     let username = JSON.parse(currentuser).username;
-    let obj = {
-      user_name: username,
-      dataset_id:this.params.dataset_id,
-      project_id: this.params.project_id,
-      model_mode: "Auto",
-      model_type:this.model_type,
-      experiment_name: this.params.experiment_name,
-      experiment_desc: this.params.experiment_desc
+    let obj;
+    if(model_mode=="Auto"){
+      obj = {
+        user_name: username,
+        dataset_id:this.params.dataset_id,
+        project_id: this.params.project_id,
+        model_mode: model_mode,
+        model_type:this.model_type,
+        experiment_name: this.params.experiment_name,
+        experiment_desc: this.params.experiment_desc,
+        model_id:0
+      }
     }
-
+    else{
+      obj = {
+        user_name: username,
+        dataset_id:this.params.dataset_id,
+        project_id: this.params.project_id,
+        model_mode: model_mode,
+        model_type:this.model_type,
+        experiment_name: this.params.experiment_name,
+        experiment_desc: this.params.experiment_desc,
+        model_id:this.responsearray["model_id"],
+        hyperparameters:this.responsearray["hyperparameters"]
+      }
+      this.modalService.dismissAll();
+    }
+    
     console.log(obj);
     
     this.apiservice.startModeling(obj).subscribe(
@@ -384,14 +404,18 @@ checksuccessHandler(data,target){
   }
 }
 
+
   smallModal(modelingmodal: any) {
+   
     this.modalService.open(modelingmodal, { size: 'md', windowClass: 'modal-holder', centered: true });
   }
 
   contentid = 0;
   LargeModal(largeModal: any, val) {
     if (val) {
+
       this.contentid = 1;
+      this.getAlgorithmList();
       this.modalService.open(largeModal, { size: 'lg', windowClass: 'modal-holder', centered: true });
     }
   };
@@ -408,4 +432,57 @@ checksuccessHandler(data,target){
   showContent(id) {
     this.contentid = id;
   };
+
+  responsearray={};
+  nextValidate(){
+    var errorflag=false;
+    var hyperparameters={};
+    if(this.selectedalgorithm!=""){
+      $(".hyperparamsinput").removeClass("errorinput")
+      if(this.paramsList.length>0){
+        var hyperparameters={};
+          this.paramsList.forEach(element => {
+            let val;
+            if(element.display_type==""){
+              val = $("#txt_"+element.hyperparameter).val();
+            }
+            if(element.display_type=="validation"){
+              val = $("#txt_"+element.hyperparameter).val();
+              var valid=element.param_value;
+              if(val>=valid[0] && val<=valid[1]){
+              }
+              else{
+                errorflag=true;
+                $("#txt_"+element.hyperparameter).addClass("errorinput")
+              }
+            }
+            if(element.display_type=="dropdown"){
+              val = $("#txt_"+element.hyperparameter).val();
+            }
+            if(val!=""){
+            element.value=val;
+            hyperparameters[element.hyperparameter]=val;
+            }
+            else
+            {
+            $("#txt_"+element.hyperparameter).addClass("errorinput")
+            errorflag=true;
+            }
+          });
+        if(errorflag)
+      this.toaster.error("Please enter all valid input",'Error');
+          
+      }
+      this.responsearray["model_id"]=this.selectedalgorithm;
+      this.responsearray["hyperparameters"]=hyperparameters;
+    }
+    else{
+      this.toaster.error("Please select model",'Error');
+      errorflag=true
+    }
+    if(!errorflag){
+      this.modalService.dismissAll();
+      $("#createExperiment").trigger('click');
+    }
+  }
 }

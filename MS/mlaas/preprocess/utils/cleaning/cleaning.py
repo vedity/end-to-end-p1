@@ -96,7 +96,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def median_imputation(self, DBObject,connection,project_id,column_list, table_name, col, **kwargs):
         '''
-            Operation id: 5
+            Operation id: 7
         '''
         
         logging.info("data preprocessing : CleaningClass : median_imputation : execution start")
@@ -125,7 +125,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def mode_imputation(self,  DBObject,connection,project_id,column_list, table_name, col, **kwargs):
         '''
-            Operation id: ?
+            Operation id: 8
         '''
         logging.info("data preprocessing : CleaningClass : mode_imputation : execution start")
         cols = [column_list[i] for i in col]
@@ -151,7 +151,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def end_of_distribution(self,DBObject,connection,project_id,column_list, table_name, col, **kwargs):
         '''
-            Operation id: ?
+            Operation id: 10
         '''
         logging.info("data preprocessing : CleaningClass : end_of_distribution : execution start")
         cols = [column_list[i] for i in col]
@@ -176,7 +176,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
 
     def missing_category_imputation(self,DBObject,connection,project_id,column_list, table_name, col,value ,flag = False, **kwargs):
         '''
-            Operation id: 8
+            Operation id: 12
         '''
         logging.info(" checking " +str(value))
         logging.info("data preprocessing : CleaningClass : missing_category_imputation : execution start")
@@ -204,7 +204,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def frequent_category_imputation(self,DBObject,connection,project_id,column_list, table_name, col, **kwargs):
         '''
-            Operation id: 8
+            Operation id: 11
         '''
         
         logging.info("data preprocessing : CleaningClass : frequent_category_imputation : execution start")
@@ -233,7 +233,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def random_sample_imputation(self, DBObject,connection,project_id,column_list, table_name,col, **kwargs):
         '''
-            Operation id: 10
+            Operation id: 13
         '''
         
         logging.info("data preprocessing : CleaningClass : random_sample_imputation : execution start")
@@ -289,7 +289,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def remove_noise(self, DBObject,connection,project_id, column_list, table_name, col, **kwargs):
         '''
-            Operation id: 11
+            Operation id: 5
         '''
         
         logging.info("data preprocessing : CleaningClass : remove_noise : execution start")
@@ -310,7 +310,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def discard_noise(self, DBObject,connection,project_id, column_list, table_name, col, **kwargs):
         '''
-            Operation id: 12
+            Operation id: 2
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_noise_mean : execution start")
@@ -334,7 +334,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def repl_noise_mean(self, DBObject,connection,project_id, column_list, table_name, col, **kwargs):
         '''
-            Operation id: 12
+            Operation id: 14
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_noise_mean : execution start")
@@ -358,7 +358,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def repl_noise_median(self, DBObject,connection,project_id, column_list, table_name, col, **kwargs):
         '''
-            Operation id: 13
+            Operation id: 15
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_noise_median : execution start")
@@ -382,7 +382,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def repl_noise_mode(self, DBObject,connection,project_id, column_list, table_name, col, **kwargs):
         '''
-            Operation id: ?
+            Operation id: 16
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_noise_mode : execution start")
@@ -406,7 +406,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def repl_noise_eod(self, DBObject,connection,project_id, column_list, table_name, col, **kwargs):
         '''
-            Operation id: ?
+            Operation id: 17
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_noise_eod : execution start")
@@ -430,7 +430,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def repl_noise_random_sample(self, DBObject,connection,project_id, column_list, table_name, col, **kwargs):
         '''
-            Operation id: 14
+            Operation id: 18
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_noise_random_sample : execution start")
@@ -454,7 +454,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def repl_noise_arbitrary_val(self, DBObject,connection,project_id, column_list, table_name, col, value, **kwargs):
         '''
-            Operation id: 15
+            Operation id: 19
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_noise_arbitrary_val : execution start")
@@ -481,7 +481,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def delete_above(self, DBObject,connection,project_id,column_list, table_name,col,val, **kwargs):
         '''
-            Operation id: 2
+            Operation id: 3
         '''
         
         logging.info("data preprocessing : CleaningClass : delete_below : execution start")
@@ -505,7 +505,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def delete_below(self, DBObject,connection,project_id,column_list, table_name,col,val, **kwargs):
         '''
-            Operation id: 3
+            Operation id: 4
         '''
         
         logging.info("data preprocessing : CleaningClass : delete_below : execution start")
@@ -529,7 +529,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def rem_outliers_ext_val_analysis(self, DBObject,connection,project_id,column_list, dataset_table_name,col, **kwargs):
         '''
-            Operation id: 16
+            Operation id: 20
         '''
         
         logging.info("data preprocessing : CleaningClass : rem_outliers_ext_val_analysis : execution start")
@@ -555,7 +555,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def rem_outliers_z_score(self,DBObject,connection,project_id,column_list, dataset_table_name,col, **kwargs):
         '''
-            Operation id: 17
+            Operation id: 21
         '''
         
         logging.info("data preprocessing : CleaningClass : rem_outliers_z_score : execution start")
@@ -582,7 +582,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def repl_outliers_mean_ext_val_analysis(self, DBObject,connection,project_id,column_list, table_name,col, **kwargs):
         '''
-            Operation id: 18
+            Operation id: 22
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_outliers_mean_ext_val_analysis : execution start")
@@ -611,7 +611,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def repl_outliers_mean_z_score(self, DBObject,connection,project_id,column_list, table_name, col, **kwargs):
         '''
-            Operation id: 19
+            Operation id: 23
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_outliers_mean_z_score : execution start")
@@ -640,7 +640,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def repl_outliers_med_ext_val_analysis(self, DBObject,connection,project_id,column_list, table_name,col, **kwargs):
         '''
-            Operation id: 20
+            Operation id: 24
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_outliers_med_ext_val_analysis : execution start")
@@ -670,7 +670,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def repl_outliers_med_z_score(self,DBObject,connection,project_id,column_list, table_name,col, **kwargs):
         '''
-            Operation id: 21
+            Operation id: 25
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_outliers_med_z_score : execution start")
@@ -754,7 +754,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def apply_log_transformation(self,DBObject,connection,project_id,column_list, table_name, col, **kwargs):
         '''
-            Operation id: 22
+            Operation id: 26
         '''
         logging.info("data preprocessing : CleaningClass : apply_log_transformation : execution start")
         try:
@@ -776,6 +776,10 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         return status
     
     def delete_duplicate_records(self,DBObject,connection,project_id,column_list, table_name, **kwargs):
+        '''
+            Operation id: ?
+        '''
+        
         logging.info("data preprocessing : CleaningClass : delete_duplicate_records : execution start")
         try:
             
@@ -798,7 +802,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
 
     #* ACTIVITY TIMELINE FUNCTIONS
     
-    def get_activity_desc(self, DBObject, connection, operation_id, col_name, code = 1):
+    def get_act_desc(self, DBObject, connection, operation_id, col_name, code = 1):
         '''
             Used to get preprocess activity description from the activity master table.
         
@@ -806,7 +810,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
             --------
             description (`String`): Description for the activity.
         '''
-        logging.info("data preprocessing : PreprocessingClass : get_activity_desc : execution start")
+        logging.info("data preprocessing : CleaningClass : get_activity_desc : execution start")
         
         #? Getting Description
         sql_command = f"select replace (amt.activity_name || ' ' || amt.activity_description, '*', '{col_name}') as description from mlaas.activity_master_tbl amt where amt.activity_id = '{operation_id}' and amt.code = '{code}'"
@@ -818,7 +822,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         #? Fatching the description
         description = desc_df['description'].tolist()[0]
         
-        logging.info("data preprocessing : PreprocessingClass : get_activity_desc : execution stop")
+        logging.info("data preprocessing : CleaningClass : get_activity_desc : execution stop")
         
         return description
             
@@ -830,13 +834,13 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
             --------
             activity_id (`Intiger`): index of the activity in the activity transection table.
         '''
-        logging.info("data preprocessing : PreprocessingClass : operation_start : execution start")
+        logging.info("data preprocessing : CleaningClass : operation_start : execution start")
             
         #? Transforming the operation_id to the operation id stored in the activity timeline table. 
         operation_id += self.op_diff
         
         #? Getting Activity Description
-        desc = self.get_activity_desc(DBObject, connection, operation_id, col_name, code = 1)
+        desc = self.get_act_desc(DBObject, connection, operation_id, col_name, code = 1)
         
         #? Getting Dataset_id & User_Name
         sql_command = f"select pt.dataset_id,pt.user_name from mlaas.project_tbl pt where pt.project_id = '{project_id}'"
@@ -846,7 +850,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         #? Inserting the activity in the activity_detail_table
         _,activity_id = self.AT.insert_user_activity(operation_id,user_name,project_id,dataset_id,desc,column_id =col_name)
         
-        logging.info("data preprocessing : PreprocessingClass : operation_start : execution stop")
+        logging.info("data preprocessing : CleaningClass : operation_start : execution stop")
         
         return activity_id
     
@@ -859,18 +863,18 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
             status (`Intiger`): Status of the updation.
         '''
         
-        logging.info("data preprocessing : PreprocessingClass : operation_end : execution start")
+        logging.info("data preprocessing : CleaningClass : operation_end : execution start")
         
         #? Transforming the operation_id to the operation id stored in the activity timeline table. 
         operation_id += self.op_diff
         
         #? Getting Activity Description
-        desc = self.get_activity_desc(DBObject, connection, operation_id, col_name, code = 2)
+        desc = self.get_act_desc(DBObject, connection, operation_id, col_name, code = 2)
         
         #? Changing the activity description in the activity detail table 
         status = self.AT.update_activity(activity_id,desc)
         
-        logging.info("data preprocessing : PreprocessingClass : operation_end : execution stop")
+        logging.info("data preprocessing : CleaningClass : operation_end : execution stop")
         
         return status
     
