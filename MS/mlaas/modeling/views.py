@@ -33,11 +33,9 @@ json_obj = JsonFormatClass() #initialize the JsonFormat Class
 DBObject=db.DBClass()     #Get DBClass object
 connection,connection_string=DBObject.database_connection(database,user,password,host,port)      #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 
-db_param_dict = {'DBObject':DBObject,'connection':connection,'connection_string':connection_string}
+AlgorithmDetectorObj = AlgorithmDetector(DBObject, connection)
 
-AlgorithmDetectorObj = AlgorithmDetector(db_param_dict)
-
-ModelStatObject = ModelStatisticsClass(db_param_dict)
+ModelStatObject = ModelStatisticsClass(DBObject,connection)
 
 json_obj = JsonFormatClass()
 
@@ -63,9 +61,9 @@ class ShowDatasetInfoClass(APIView):
                         logging.info("modeling : ModelStatisticsClass : GET Method : execution start")
                         
                        
-                        project_id = request.query_params.get('project_id')#get project id
-                        dataset_id = request.query_params.get('dataset_id')#get dataset id
-                        user_id=request.query_params.get('user_id')#get user id
+                        project_id = request.query_params.get('project_id')
+                        dataset_id = request.query_params.get('dataset_id')
+                        user_id=request.query_params.get('user_id')
 
                         
                         project_name, dataset_name, target_columns = AlgorithmDetectorObj.get_dataset_info(project_id, dataset_id, user_id)
@@ -97,11 +95,6 @@ class StartModelClass(APIView):
  
                 Args  : 
                         mode[(String)] :[mode of model]
-                        project_id[(String)] :[Id of project]
-                        dataset_id[(String)] :[Id of dataset]
-                        user_name[(String)] :[name of user]
-                        model_type[(String)] : [Type of Model (Regression/Classification)]
-                        experiment_name[(String)] :[name of experiment]
                                 
  
                 Return : 
@@ -113,63 +106,79 @@ class StartModelClass(APIView):
                 try:
                         logging.info("modeling : ExperimentClass : GET Method : execution start")
                         # We will get it from the front-end
-                        model_mode = request.query_params.get('model_mode')#get model_mode
-                        model_name = request.query_params.get('model_name')#get model_mode
-                        user_name = request.query_params.get('user_name')#get user name
+                        Model_Mode = request.query_params.get('model_mode')
+                        # NEED TO GET USER ID
+                        user_name = request.query_params.get('user_name')
                         user_id = 1 # get user id from user auth table
-                        project_id = int(request.query_params.get('project_id'))#get project id
-                        dataset_id = int(request.query_params.get('dataset_id'))#get dataset id
-                        model_type = request.query_params.get('model_type')#model_type
-                        experiment_name = request.query_params.get('experiment_name')#experiment_name
+                        project_id = int(request.query_params.get('project_id'))
+                        dataset_id = int(request.query_params.get('dataset_id'))
+                        model_type = request.query_params.get('model_type')
+                        
+                        experiment_name = request.query_params.get('experiment_name')
                         experiment_desc ='this is for testing'
 
-                        #will store created experiment activity in activity_detail_tbl
-                        activity_id = 41
-                        timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
+                        # activity_id = 46
+                        # activity_df = timeline_Obj.get_activity(activity_id,"US")
+                        # activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
+                        # end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                        # activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time) 
+                
+                        # activity_id = 42
+                        # activity_df = timeline_Obj.get_activity(activity_id,"US")
+                        # activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
+                        # end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                        # activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time) 
                         
+                        ModelObject = ModelClass(Model_Mode,user_id, project_id,dataset_id,
+                                                DBObject,connection,connection_string)# Initializing the ModelClass
 
-                        #will store started experiment activity in activity_detail_tbl
-                        activity_id = 45
-                        timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
-                        
-                        ModelObject = ModelClass(db_param_dict)# Initializing the ModelClass
-
-                        model_param_dict = {'model_mode':model_mode,'model_type':model_type,
-                                'experiment_name':experiment_name,'experiment_desc':experiment_desc,
-                                'user_id':user_id,'project_id':project_id,'dataset_id':dataset_id}
-
-                        if model_mode == 'Auto':
-                                #will add 'Selected Auto modeling' activity in activity_detail_tbl 
-                                activity_id = 42
-                                timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
-
-                                ModelObject.algorithm_identifier(model_param_dict)
+                        if Model_Mode == 'Auto': 
+                                # activity_id = 43
+                                # activity_df = timeline_Obj.get_activity(activity_id,"US")
+                                # activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
+                                # end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                                # activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time) 
+                                # # SplitDataObject = ModelObject.split_dataset(basic_split_parameters)
+                                ModelObject.algorithm_identifier(model_type,experiment_name,experiment_desc)
                                 
+
+                                # activity_id = 48
+                                # activity_df = timeline_Obj.get_activity(activity_id,"US")
+                                # activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
+                                # end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                                # activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time) 
+
                                 logging.info("modeling : ModelClass : GET Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully updated","response":"pipeline started"})
                         else:
-                                #will add 'selected manual modeling' activity in activity_detail_tbl
-                                activity_id = 43
-                                timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
-
-                                activity_id = 44
-                                timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name,model_name)
-
-                                data = json.dumps(request.data)
-                                request_body = json.loads(data) #get all the request body parameter
-                                # hyperparameters = request.query_params.get('hyperparameters')
-                                hyperparameters = request_body["hyperparameters"]
-                                # if model_id == 2:
-                                #         hyperparameters = {"epochs": 10, "learning_rate": 0.01, "batch_size": 32, "loss": "mean_absolute_error", "optimizer": "Adam", 
-                                #                 "activation": "relu"}
-                                # else:
-                                #         hyperparameters = ""
+                                # activity_id = 44
+                                # activity_df = timeline_Obj.get_activity(activity_id,"US")
+                                # activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
+                                # end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                                # activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time)
                                 model_id = int(request.query_params.get('model_id'))
-                                model_name = request.query_params.get('model_name')
-                                model_params = None                                
+                                # hyperparameters = request.query_params.get('hyperparameters')
+                                if model_id == 2:
+                                        hyperparameters = {"epochs": 10, "learning_rate": 0.01, "batch_size": 32, "loss": "mean_absolute_error", "optimizer": "Adam", 
+                                                "activation": "relu"}
+                                else:
+                                        hyperparameters = ""
+                                
+                                ModelObject = ModelClass(Model_Mode,user_id, project_id,dataset_id,
+                                                DBObject,connection,connection_string)
+                                
+                                manual_model_params_dict = {'model_id':model_id, 'hyperparameters': hyperparameters,
+                                                        'experiment_name': experiment_name}
 
+                                ModelObject.store_manual_model_params(manual_model_params_dict)
                                 # model_type = 'Regression'
-                                ModelObject.run_model(model_param_dict,model_id,model_name,model_param)
+                                ModelObject.run_model(model_type, model_id, experiment_name, experiment_desc)
+
+                                # activity_id = 48
+                                # activity_df = timeline_Obj.get_activity(activity_id,"US")
+                                # activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
+                                # end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                                # activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time) 
 
                                 logging.info("modeling : ModelClass : GET Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully updated","response":"True"})
@@ -198,9 +207,9 @@ class LearningCurveClass(APIView):
                 try:
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
                         
-                        experiment_id  = request.query_params.get('experiment_id') #get experiment id
+                        experiment_id  = request.query_params.get('experiment_id') #get Username
                         
-                        learning_curve_json =ModelStatObject.learning_curve(experiment_id)#call learning curve method which will return train size,test size and test score
+                        learning_curve_json =ModelStatObject.learning_curve(experiment_id)
                         logging.info("modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
                         if isinstance(learning_curve_json,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(learning_curve_json) # extract the status_code and error_msg from project_df
@@ -233,8 +242,8 @@ class FeatureImportanceClass(APIView):
                 try:
                 
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
-                        experiment_id  = request.query_params.get('experiment_id') #get experiment id
-                        feature_importance_json =ModelStatObject.features_importance(experiment_id)# will call feature_importance method which will return features names and norm importance
+                        experiment_id  = request.query_params.get('experiment_id') #get Username
+                        feature_importance_json =ModelStatObject.features_importance(experiment_id)
                         if isinstance(feature_importance_json,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(feature_importance_json) # extract the status_code and error_msg from project_df
                                 logging.info("modeling : ModelStatisticsClass : GET Method : execution stop: status_code :"+ status_code)
@@ -265,8 +274,8 @@ class PerformanceMetricsClass(APIView):
                 """
                 try:
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
-                        experiment_id  = request.query_params.get('experiment_id') #get experiment id
-                        performance_metrics_json =ModelStatObject.performance_metrics(experiment_id)#will call performance metrics meethod
+                        experiment_id  = request.query_params.get('experiment_id') #get Username
+                        performance_metrics_json =ModelStatObject.performance_metrics(experiment_id)
                         logging.info("modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
                         # print(learning_curve_json)
                         if isinstance(performance_metrics_json,str): #check the instance of dataset_df
@@ -300,8 +309,8 @@ class ModelSummaryClass(APIView):
                 try:
                        
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
-                        experiment_id = request.query_params.get('experiment_id') #get experiment_id
-                        model_summary_json =ModelStatObject.model_summary(experiment_id)#will call model_summary method which will return summary of model
+                        experiment_id = request.query_params.get('experiment_id') #get Username
+                        model_summary_json =ModelStatObject.model_summary(experiment_id)
                         logging.info("modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
                         # print(learning_curve_json)
                         if isinstance(model_summary_json,str): #check the instance of dataset_df
@@ -335,8 +344,8 @@ class ActualVsPredictionClass(APIView):
                 try:
                        
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
-                        experiment_id = request.query_params.get('experiment_id') #get experiment_id
-                        actual_vs_prediction_json =ModelStatObject.actual_vs_prediction(experiment_id)#will call actual_vs_prediction method
+                        experiment_id = request.query_params.get('experiment_id') #get Username
+                        actual_vs_prediction_json =ModelStatObject.actual_vs_prediction(experiment_id)
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
                         if isinstance(actual_vs_prediction_json,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(actual_vs_prediction_json) # extract the status_code and error_msg from project_df
@@ -357,7 +366,7 @@ class ConfusionMatrixClass(APIView):
 
         def get(self, request, format=None):
                 """
-                This function is used to get Confusion Matrix of particular experiement
+                This function is used to get Actual VS Predicated value of particular experiement
         
                 Args  : 
                         experiment_id[(Integer)]   :[Id of Experiment]
@@ -369,16 +378,16 @@ class ConfusionMatrixClass(APIView):
                 try:
                        
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
-                        experiment_id = request.query_params.get('experiment_id') #get experiment_id
-                        confusion_matrix_json = ModelStatObject.confusion_matrix(experiment_id)# will call confusion matrix method
+                        experiment_id = request.query_params.get('experiment_id') #get Username
+                        confusion_matrix_json = ModelStatObject.confusion_matrix(experiment_id)
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
-                        if isinstance(confusion_matrix_json,str): #check the instance of dataset_df
-                                status_code,error_msg=json_obj.get_Status_code(confusion_matrix_json) # extract the status_code and error_msg from project_df
-                                logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code :"+ status_code)
-                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
-                        else:
-                                logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code : 200")
-                                return Response({"status_code":"200","error_msg":"successfull retrival","response":confusion_matrix_json})
+                        # if isinstance(confusion_matrix_json,str): #check the instance of dataset_df
+                        #         status_code,error_msg=json_obj.get_Status_code(confusion_matrix_json) # extract the status_code and error_msg from project_df
+                        #         logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code :"+ status_code)
+                        #         return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        # else:
+                        #         logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code : 200")
+                        #         return Response({"status_code":"200","error_msg":"successfull retrival","response":confusion_matrix_json})
                         return Response({"status_code":"200","error_msg":"Successfully updated","response":json.loads(confusion_matrix_json)})
                         
 
@@ -388,12 +397,12 @@ class ConfusionMatrixClass(APIView):
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
 
 
-#class to get actual vs prediction 
-#It will take url string as mlaas/modeling/actualvsprediction/.
+
 class ShowRunningExperimentsListClass(APIView):
+
         def get(self, request, format=None):
                 """
-                This function is used to get running experiment of particular project.
+                This function is used to get PerformanceMetrics of particular experiement.
         
                 Args  : 
                         experiment_id[(Integer)]   :[Id of Experiment]
@@ -405,8 +414,8 @@ class ShowRunningExperimentsListClass(APIView):
                 try:
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
                         
-                        project_id = int(request.query_params.get('project_id'))#get project id
-                        experiment_data =ModelStatObject.show_running_experiments(project_id)# will call show_running_experiments
+                        project_id = int(request.query_params.get('project_id')) 
+                        experiment_data =ModelStatObject.show_running_experiments(project_id)
                         if isinstance(experiment_data,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(experiment_data) # extract the status_code and error_msg from project_df
                                 logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code :"+ status_code)
@@ -422,16 +431,15 @@ class ShowRunningExperimentsListClass(APIView):
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
                 
-#class to get all experiment list 
-#It will take url string as mlaas/modeling/showallexperimentslist/.              
+                
 class ShowAllExperimentsListClass(APIView):
 
         def get(self, request, format=None):
                 """
-                This function is used to get all Experiment.
+                This function is used to get PerformanceMetrics of particular experiment.
         
                 Args  : 
-                        project_id[(Integer)]   :[Id of Experiment]
+                        experiment_id[(Integer)]   :[Id of Experiment]
                 Return : 
                         status_code(500 or 200),
                         error_msg(Error message for retrival & insertions failed or successfull),
@@ -440,7 +448,7 @@ class ShowAllExperimentsListClass(APIView):
                 try:
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
                         
-                        project_id = int(request.query_params.get('project_id'))# get project id
+                        project_id = int(request.query_params.get('project_id')) 
                 
                         experiment_data =ModelStatObject.show_all_experiments(project_id)
                         if isinstance(experiment_data,str): #check the instance of dataset_df
@@ -456,8 +464,7 @@ class ShowAllExperimentsListClass(APIView):
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
                 
-#class to get all experiment list 
-#It will take url string as mlaas/modeling/checkmodelstatus/.                          
+                
 class CheckModelStatusClass(APIView):
 
         def get(self, request, format=None):
@@ -466,7 +473,7 @@ class CheckModelStatusClass(APIView):
         
                 Args  : 
                         experiment_name[(String)]   :[Name of Experiment]
-                        project_id[(Integer)]   :[Id of project]
+                        project_id[(Integer)]   :[Id of Experiment]
                 Return : 
                         status_code(500 or 200),
                         error_msg(Error message for retrival & insertions failed or successfull),
@@ -476,34 +483,23 @@ class CheckModelStatusClass(APIView):
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
                         
                         project_id = int(request.query_params.get('project_id')) #get Username
-                        dataset_id = int(request.query_params.get('dataset_id')) #get Username
+                        
                         experiment_name = request.query_params.get('experiment_name')
-                        user_name = request.query_params.get('user_name')
         
-                        experiment_status = ModelStatObject.check_model_status(project_id,experiment_name)
-                        # if len(experiment_data) != 0:
-                        # if isinstance(experiment_data, pd.DataFrame):
-                        #         status = experiment_data['state'][0]
-                        if isinstance(experiment_status,str): #check the instance of dataset_df
-                                status_code,error_msg=json_obj.get_Status_code(experiment_status) # extract the status_code and error_msg from project_df
+                        model_status = ModelStatObject.check_model_status(project_id,experiment_name)
+                        if model_status == 0:
+                                status = 'running'
+                        elif model_status == 1:
+                                status = 'success'
+                        else:
+                                status = 'failed'
+                        # status = experiment_data['state'][0]
+                        if isinstance(model_status,str): #check the instance of dataset_df
+                                status_code,error_msg=json_obj.get_Status_code(model_status) # extract the status_code and error_msg from project_df
                                 logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code :"+ status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
-                                if experiment_status == 0:
-                                        status = 'running'
-                                elif experiment_status == 1:
-                                        status = 'success'
-                                else:
-                                        status = 'failed'
-
-                                if(status == 'success'):
-                                        #will add 'Completed modeling' activity in activity_detail_tbl
-                                        activity_id = 47
-                                        timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
-                                elif(status == 'failed'):
-                                        activity_id = 48
-                                        timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
-                                        
+                                status = experiment_data['state'][0]
                                 logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code : 200")
                                 return Response({"status_code":"200","error_msg":"successfull retrival","response":status})
                         
@@ -513,18 +509,15 @@ class CheckModelStatusClass(APIView):
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
 
 
-#class to get all experiment list 
-#It will take url string as mlaas/modeling/selectalgorithm/.                          
+
 class SelectAlgorithmClass(APIView):
 
         def get(self, request, format=None):
                 """
-                This function is used to get algorithm list.
+                This function is used to show list of models.
         
                 Args  : 
-                        model_type[(String)]   :[Type of model]
-                        project_id[(Integer)]   :[Id of project]
-                        dataset_id[(Integer)]   :[Id of dataset]
+                        algorithm_name[(String)]   :[Name of Algorithm]
                 Return : 
                         status_code(500 or 200),
                         error_msg(Error message for retrival & insertions failed or successfull),
@@ -547,23 +540,24 @@ class SelectAlgorithmClass(APIView):
                         else:
                                 logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code : 200")
                                 return Response({"status_code":"200","error_msg":"successfull retrival","response":models_list})
+                        #return Response({"status_code":"200","error_msg":"Successfully updated","response":models_list})
                         
                 except Exception as e:
-                        logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
+                        logging.error(" modelinggggggg : ModelStatisticsClass : GET Method : " + str(e))
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
 
 
-#class to show hyperparameters
-#It will take url string as mlaas/modeling/hyperparameters/.                                 
+#class to start and stop model
+#It will take url string as mlaas/modeling/featureimportance/.                                 
 class ShowHyperParametersClass(APIView):
 
         def get(self, request, format=None):
                 """
-                This function is used to get HyperParameters 
+                This function is used to get Actual and Predicated value of project uploaded uploaded by te user.
         
                 Args  : 
-                        model_id[(Integer)]   :[Id of Model]
+                        experiment_id[(Integer)]   :[Id of Experiment]
                 Return : 
                         status_code(500 or 200),
                         error_msg(Error message for retrival & insertions failed or successfull),
@@ -573,7 +567,13 @@ class ShowHyperParametersClass(APIView):
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
                         model_id  = request.query_params.get('model_id')
                         hyperparams_dict = AlgorithmDetectorObj.get_hyperparameters(model_id)
+                        # h1 = hyperparameters_json.to_json(orient='records',date_format='iso')
+                        # logging.info("aaaaaaaaa"+str(h1))
+                        # x = '[ "A","B","C" , " D"]'
+                        # if hyperparams != 'none':
+                        #         hyperparams = ast.literal_eval(hyperparams)
 
+                        # hyperparams_dict = {'model_parameters': hyperparams}
                         if isinstance(hyperparams_dict,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(hyperparams_dict) # extract the status_code and error_msg from project_df
                                 logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code :"+ status_code)
@@ -586,16 +586,15 @@ class ShowHyperParametersClass(APIView):
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
 
-#class to show experiments list for comparision
-#It will take url string as mlaas/modeling/compareexperiments/.                                 
+                        
 class CompareExperimentsClass(APIView):
  
         def get(self, request, format=None):
                 """
-                This function is used to get all Experiment to compare
+                This function is used to get PerformanceMetrics of particular experiment.
         
                 Args  : 
-                        experiment_ids[(Integer)]   :[Id of Experiment]
+                        experiment_id[(Integer)]   :[Id of Experiment]
                 Return : 
                         status_code(500 or 200),
                         error_msg(Error message for retrival & insertions failed or successfull),
@@ -615,16 +614,14 @@ class CompareExperimentsClass(APIView):
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
 
-#class to check experiment name already exist or not
-#It will take url string as mlaas/modeling/checkexperimentname/. 
 class CheckExperimentNameClass(APIView):
  
         def get(self, request, format=None):
                 """
-                This function is used to check name of particular experiment exist or not
+                This function is used to get PerformanceMetrics of particular experiment.
         
                 Args  : 
-                        experiment_name[(Integer)]   :[Id of Experiment]
+                        experiment_id[(Integer)]   :[Id of Experiment]
                 Return : 
                         status_code(500 or 200),
                         error_msg(Error message for retrival & insertions failed or successfull),
@@ -636,10 +633,12 @@ class CheckExperimentNameClass(APIView):
                         experiment_name = request.query_params.get('experiment_name')
  
                         experiment_data = ModelStatObject.check_existing_experiment(experiment_name)
-
+                        
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200"+str(experiment_data))
                         if isinstance(experiment_data,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(experiment_data) # extract the status_code and error_msg from project_df
+                                logging.info(" -------"+str(status_code))
+                                logging.info(" -------"+str(error_msg))
                                 logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code :"+ status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
