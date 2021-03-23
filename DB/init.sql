@@ -1,6 +1,22 @@
 CREATE schema mlaas;
+CREATE schema mlflow;
+CREATE TABLE mlaas.menu_table (
+ 	id int,
+ 	firstName varchar(255),
+ 	lastName varchar(255),
+ 	address text
+ 	);
 
-CREATE TABLE mlaas.model_experiment_tbl
+CREATE TABLE mlaas.user_auth_table (
+ 	id int,
+ 	firstName varchar(255),
+ 	lastName varchar(255),
+ 	address text
+ 	);
+
+
+
+CREATE TABLE mlflow.model_experiment_tbl
 (
    exp_unq_id bigserial,
    experiment_id  integer,
@@ -15,7 +31,7 @@ CREATE TABLE mlaas.model_experiment_tbl
    exp_created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()              
 );
 
-CREATE TABLE mlaas.model_master_tbl (
+CREATE TABLE mlflow.model_master_tbl (
  	model_id integer,
    model_name text,
    model_desc text,
@@ -25,7 +41,7 @@ CREATE TABLE mlaas.model_master_tbl (
    model_created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
 
-CREATE TABLE mlaas.cleaned_ref_tbl (
+CREATE TABLE mlflow.cleaned_ref_tbl (
  	unq_id bigserial,
     project_id integer,
     dataset_id integer,
@@ -35,7 +51,7 @@ CREATE TABLE mlaas.cleaned_ref_tbl (
     scaled_data_table text
     );
 
-CREATE TABLE mlaas.model_dags_tbl
+CREATE TABLE mlflow.model_dags_tbl
 (
 unq_id bigserial,
 dag_id varchar,
@@ -303,7 +319,7 @@ Insert into mlaas.activity_master_tbl values (104,40,'Multiply into column','ope
 -- mlaas.metrics mr
 -- WHERE a.run_uuid = mr.run_uuid AND mr.key = 'holdout_score';
 
-CREATE TABLE mlaas.manual_model_params_tbl (
+CREATE TABLE mlflow.manual_model_params_tbl (
 	user_id int4 NULL,
 	project_id int4 NULL,
 	dataset_id int4 NULL,
@@ -312,7 +328,7 @@ CREATE TABLE mlaas.manual_model_params_tbl (
 	hyperparameters varchar null
 );
 
-CREATE TABLE mlaas.model_hyperparams_tbl (
+CREATE TABLE mlflow.model_hyperparams_tbl (
 	model_id int4 NULL,
 	hyperparameter varchar NULL,
 	param_value varchar NULL,
