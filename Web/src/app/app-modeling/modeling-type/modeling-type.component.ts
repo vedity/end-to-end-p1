@@ -196,7 +196,6 @@ export class ModelingTypeComponent implements OnInit {
     if (data.status_code == "200") {
       this.algorithmlist = data.response;
       console.log(this.algorithmlist);
-      
     }
     else {
       this.errorHandler(data);
@@ -204,10 +203,13 @@ export class ModelingTypeComponent implements OnInit {
   }
 
   selectedalgorithm:any;
-  getHyperParams(val){
+  selectedalgorithmname:any;
+  getHyperParams(event){
+    let val=event.target.value;
     this.selectedalgorithm=val;
+    this.selectedalgorithmname=event.target.selectedOptions[0].innerText;
+    console.log(this.selectedalgorithmname);
     if(val!=""){
-
       this.apiservice.getHyperparamsList(val).subscribe(
         logs => this.successParamsListHandler(logs),
         error => this.errorHandler(error));
@@ -263,7 +265,7 @@ runningExpList: any = [];
   }
 
 
-  startModel(model_mode) {
+  startModel() {
     this.processclass = "start";
     this.experiment_name = this.params.experiment_name;
     this.experiment_desc = this.params.experiment_desc;
@@ -271,16 +273,17 @@ runningExpList: any = [];
     let currentuser = localStorage.getItem("currentUser")
     let username = JSON.parse(currentuser).username;
     let obj;
-    if(model_mode=="Auto"){
+    if(this.model_mode=="Auto"){
       obj = {
         user_name: username,
         dataset_id:this.params.dataset_id,
         project_id: this.params.project_id,
-        model_mode: model_mode,
+        model_mode: this.model_mode,
         model_type:this.model_type,
         experiment_name: this.params.experiment_name,
         experiment_desc: this.params.experiment_desc,
-        model_id:0
+        model_id:0,
+        model_name:undefined
       }
     }
     else{
@@ -288,11 +291,12 @@ runningExpList: any = [];
         user_name: username,
         dataset_id:this.params.dataset_id,
         project_id: this.params.project_id,
-        model_mode: model_mode,
+        model_mode: this.model_mode,
         model_type:this.model_type,
         experiment_name: this.params.experiment_name,
         experiment_desc: this.params.experiment_desc,
         model_id:this.responsearray["model_id"],
+        model_name:this.responsearray["model_name"],
         hyperparameters:this.responsearray["hyperparameters"]
       }
       this.modalService.dismissAll();
@@ -319,7 +323,9 @@ runningExpList: any = [];
   }
 
   checkstatus(){
-    this.apiservice.checkmodelstatus(this.params.project_id,this.experiment_name).subscribe(
+    let currentuser = localStorage.getItem("currentUser")
+    let username = JSON.parse(currentuser).username;
+    this.apiservice.checkmodelstatus(this.params.project_id,this.experiment_name,this.params.dataset_id,username).subscribe(
       logs=>this.statusSuccessHandler(logs),
       error=>this.errorHandler(error)
     )
@@ -342,7 +348,7 @@ runningExpList: any = [];
         this.getRunningExperimentList();
         this.getAllExperimentList();
         this.checkstatus();
-      }, 5000);
+      }, 1500);
     }
     else {
       this.errorHandler(data);
@@ -381,7 +387,7 @@ runningExpList: any = [];
 {
   var val=event.target.value;
   if(val!=""){
-    this.apiservice.checkexperimentname(val).subscribe(
+    this.apiservice.checkexperimentname(val,this.params.project_id).subscribe(
       logs=>this.checksuccessHandler(logs,event.target),
       error=>this.errorHandler(error)
     )
@@ -406,13 +412,18 @@ checksuccessHandler(data,target){
 
 
   smallModal(modelingmodal: any) {
-   
+   this.params.experiment_name=''
+   this.params.experiment_desc=''
     this.modalService.open(modelingmodal, { size: 'md', windowClass: 'modal-holder', centered: true });
   }
 
+  model_mode='Auto';
   contentid = 0;
   LargeModal(largeModal: any, val) {
+  this.model_mode='Auto';
+
     if (val) {
+      this.model_mode='Manual';
 
       this.contentid = 1;
       this.getAlgorithmList();
@@ -433,6 +444,7 @@ checksuccessHandler(data,target){
     this.contentid = id;
   };
 
+  
   responsearray={};
   nextValidate(){
     var errorflag=false;
@@ -444,28 +456,28 @@ checksuccessHandler(data,target){
           this.paramsList.forEach(element => {
             let val;
             if(element.display_type==""){
-              val = $("#txt_"+element.hyperparameter).val();
+              val = $("#txt_"+element.param_name).val();
             }
             if(element.display_type=="validation"){
-              val = $("#txt_"+element.hyperparameter).val();
+              val = $("#txt_"+element.param_name).val();
               var valid=element.param_value;
               if(val>=valid[0] && val<=valid[1]){
               }
               else{
                 errorflag=true;
-                $("#txt_"+element.hyperparameter).addClass("errorinput")
+                $("#txt_"+element.param_name).addClass("errorinput")
               }
             }
             if(element.display_type=="dropdown"){
-              val = $("#txt_"+element.hyperparameter).val();
+              val = $("#txt_"+element.param_name).val();
             }
             if(val!=""){
             element.value=val;
-            hyperparameters[element.hyperparameter]=val;
+            hyperparameters[element.param_name]=val;
             }
             else
             {
-            $("#txt_"+element.hyperparameter).addClass("errorinput")
+            $("#txt_"+element.param_name).addClass("errorinput")
             errorflag=true;
             }
           });
@@ -474,6 +486,7 @@ checksuccessHandler(data,target){
           
       }
       this.responsearray["model_id"]=this.selectedalgorithm;
+      this.responsearray["model_name"]=this.selectedalgorithm;
       this.responsearray["hyperparameters"]=hyperparameters;
     }
     else{

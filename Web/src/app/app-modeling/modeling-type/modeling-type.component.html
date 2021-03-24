@@ -16,7 +16,7 @@
                 <div class="card-body">
                     <div class="left-box ">
                         <div class="loader {{processclass}}">Loading...</div>
-                        <button type="submit" class="btn btn-success" id="createExperiment" *ngIf="processclass=='stop'" (click)="smallModal(modelingmodal)">Start</button>
+                        <button type="submit" class="btn btn-success" id="createExperiment" *ngIf="processclass=='stop'" (click)="smallModal(modelingmodal);">Start</button>
                         <button type="submit" class="btn btn-success" *ngIf="processclass=='start'" (click)="processclass='stop'">Stop</button>
                     </div>
                     <div class="right-box">
@@ -353,7 +353,7 @@
                 </div>
             </div>
             <div class="button-items text-center">
-                <button class="btn btn-success" [disabled]="!f.form.valid || !checkuniuqename" (click)="startModel('Auto')" (click)="modal.dismiss('Cross click')">Start</button>
+                <button class="btn btn-success" [disabled]="!f.form.valid || !checkuniuqename" (click)="startModel()" (click)="modal.dismiss('Cross click')">Start</button>
             </div>
         </form>
     </div>
@@ -374,7 +374,7 @@
                     <h4 class="font-size-18 mt-3 mb-3">Select model</h4>
                     <div class="form-group">
                         <label>Select model</label>
-                        <select class="form-control" (change)="getHyperParams($event.target.value)" name="algorithm" [required]>
+                        <select class="form-control" (change)="getHyperParams($event)" name="algorithm" [required]>
                         <option value=""> Select </option>
                         <option value="{{item.model_id}}"
                             *ngFor="let item of algorithmlist;let i=index">{{item.model_name}}</option>
@@ -382,15 +382,15 @@
                     </div>
                 </div>
                 <div class="col-md-12" *ngIf="paramsList!=undefined">
-                    <h4 class="font-size-18 mt-3 mb-3" *ngIf="paramsList[0].hyperparameter!=''">Hyperparameter</h4>
+                    <h4 class="font-size-18 mt-3 mb-3" *ngIf="paramsList[0].param_name!=''">Hyperparameter</h4>
                 </div>
                 <div class="col-md-6" *ngFor="let item of paramsList">
-                    <div class="form-group" *ngIf="item.hyperparameter!=''">
-                        <label>{{item.hyperparameter}} <span class="required-label">&nbsp;*</span></label>
+                    <div class="form-group" *ngIf="item.param_name!=''">
+                        <label>{{item.param_name}} <span class="required-label">&nbsp;*</span></label>
 
-                        <input type="text" class="form-control hyperparamsinput" name="{{item.hyperparameter}}" id="txt_{{item.hyperparameter}}" [required] *ngIf="item.display_type =='validation'">
-                        <input type="text" class="form-control hyperparamsinput" name="{{item.hyperparameter}}" id="txt_{{item.hyperparameter}}" [required] *ngIf="item.display_type == ''">
-                        <select class="form-control hyperparamsinput" name="{{item.hyperparameter}}" id="txt_{{item.hyperparameter}}" [required] *ngIf="item.display_type=='dropdown'">
+                        <input type="text" class="form-control hyperparamsinput" name="{{item.param_name}}" id="txt_{{item.param_name}}" [required] *ngIf="item.display_type =='validation'">
+                        <input type="text" class="form-control hyperparamsinput" name="{{item.param_name}}" id="txt_{{item.param_name}}" [required] *ngIf="item.display_type == ''">
+                        <select class="form-control hyperparamsinput" name="{{item.param_name}}" id="txt_{{item.param_name}}" [required] *ngIf="item.display_type=='dropdown'">
                         <option value="">select</option>
                         <option value="{{childitem}}" *ngFor="let childitem of item.param_value">
                             {{childitem}}

@@ -58,11 +58,11 @@ export class ModelingLearningCurveComponent implements OnInit {
         //   },
         colors: ['#f46a6a', '#34c38f'],
         series: [{
-          name: 'Team A',
+          name: 'Test Score',
           //   type: 'line',
           data: this.responsedata.test_score
         }, {
-          name: 'Team B',
+          name: 'Train Score',
           //   type: 'line',
           data: this.responsedata.train_score
         }],
