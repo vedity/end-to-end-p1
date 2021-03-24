@@ -149,6 +149,8 @@ class StartModelClass(APIView):
                                 return Response({"status_code":"200","error_msg":"Successfully updated","response":"pipeline started"})
                         else:
                                 #will add 'selected manual modeling' activity in activity_detail_tbl
+                                model_id = int(request.query_params.get('model_id'))
+                                model_name = request.query_params.get('model_name')
                                 activity_id = 43
                                 timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
 
@@ -157,18 +159,9 @@ class StartModelClass(APIView):
 
                                 data = json.dumps(request.data)
                                 request_body = json.loads(data) #get all the request body parameter
-                                # hyperparameters = request.query_params.get('hyperparameters')
-                                hyperparameters = request_body["hyperparameters"]
-                                # if model_id == 2:
-                                #         hyperparameters = {"epochs": 10, "learning_rate": 0.01, "batch_size": 32, "loss": "mean_absolute_error", "optimizer": "Adam", 
-                                #                 "activation": "relu"}
-                                # else:
-                                #         hyperparameters = ""
-                                model_id = int(request.query_params.get('model_id'))
-                                model_name = request.query_params.get('model_name')
-                                model_params = None                                
-
-                                # model_type = 'Regression'
+                                
+                                model_param = request_body["hyperparameters"]
+                                
                                 ModelObject.run_model(model_param_dict,model_id,model_name,model_param)
 
                                 logging.info("modeling : ModelClass : GET Method : execution stop : status_code :200")

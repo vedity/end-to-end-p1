@@ -92,18 +92,25 @@ class LinearRegressionClass:
         X_train = X_train[:,1:] 
         y_train = y_train[:,-1].reshape(-1,1)
         # Dividing train data size into bins.
-        train_sizes=np.linspace(0.10, 1.0, 5)
+        train_sizes = np.linspace(0.10, 1.0, 10)
         train_sizes, train_scores, test_scores, fit_times, _ = \
         learning_curve(estimator = model, X=X_train, y=y_train, cv=None, scoring='r2',n_jobs=None,
                        train_sizes=train_sizes,
                        return_times=True)
         
+        train_sizes_2, train_loss, test_loss, fit_times_2, _ = \
+        learning_curve(estimator = model, X=X_train, y=y_train, cv=None, scoring='neg_mean_squared_error',n_jobs=None,
+                       train_sizes=train_sizes,
+                       return_times=True)
+        
+
         # Average of train score(accuracy).
         train_mean = train_scores.mean(axis=1)
         # Average of train score(accuracy).
         test_mean = test_scores.mean(axis=1)
         # Create the learning curve dictionary.
-        learning_curve_dict = {"train_size":train_sizes.tolist(),"train_score":train_mean.tolist(),"test_score":test_mean.tolist()}
+        learning_curve_dict = {"train_size":train_sizes.tolist(),"train_score":train_mean.tolist(),"test_score":test_mean.tolist(),
+                                "train_loss": abs(train_loss.mean(axis=1)).tolist(), "test_loss": abs(test_loss.mean(axis=1)).tolist()}
         
         return learning_curve_dict
         
@@ -223,8 +230,9 @@ class LinearRegressionClass:
         model_summary = {"Model Name":"Linear_Regression_Sklearn",
                          "Input Features":self.input_features_list,
                          "Target Features":self.target_features_list,
-                         "Train Size":int(train_size),"Test Size":int(test_size),
-                         "Train Split":self.dataset_split_dict['train_size'],"Test Split":float(self.dataset_split_dict['test_size']),
+                         "Train Size":float(train_size),"Test Size":int(test_size),
+                         "Train Split":1-(self.dataset_split_dict['test_ratio'] + self.dataset_split_dict['valid_ratio']),
+                         "Test Split":float(self.dataset_split_dict['test_ratio']),
                          "Random State":int(self.dataset_split_dict['random_state']),
                          "Valid Split":self.dataset_split_dict['valid_size'],
                          "CV (K-Fold )":self.dataset_split_dict['cv']}

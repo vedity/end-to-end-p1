@@ -43,7 +43,7 @@ if len(model_dict) != 0:
 
     for model_id,model_name in zip(model_id,model_name):
         dynamic_task = PythonOperator(task_id=model_name,
-                                    python_callable=eval(model_name),
+                                    python_callable=eval(model_name.lower()),
                                     op_kwargs={'model_id':model_id,
                                                 'model_param':model_param},
                                     dag=dag)
