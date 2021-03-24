@@ -49,7 +49,7 @@ class RegressionClass:
             logging.info("modeling : RegressionClass : all_regression_model : execution"+str(json_data))
             
             result = requests.post("http://airflow:8080/api/experimental/dags/auto_regression_pipeline/dag_runs",data=json.dumps(json_data),verify=False)#owner
-            
+    
         else:
             print("yet not tested")
             

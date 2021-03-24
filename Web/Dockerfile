@@ -1,6 +1,6 @@
 #Create image based on the official Node 6 image from dockerhub
-FROM node:14.16.0-alpine as build-step
- 
+FROM node:12.18.1-alpine as build-step
+
 # Create a directory where our app will be placed
 #RUN mkdir -p /angular
  

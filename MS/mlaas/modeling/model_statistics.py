@@ -248,7 +248,7 @@ class ModelStatisticsClass:
             experiment_df = experiment_df.set_index('experiment_id')
             merged_df = pd.merge(experiment_df, perform_pivot_df, left_index=True, right_index=True)
 
-            return merged_df.to_dict(orient='index')
+            return merged_df.to_dict(orient='records')[0]
 
         except (DatabaseConnectionFailed,DataNotFound) as exc:
             logging.error("modeling : ModelStatisticsClass : performance_metrics : Exception " + str(exc))
@@ -349,7 +349,7 @@ class ModelStatisticsClass:
                 raise DatabaseConnectionFailed(500)
 
             if len(dag_df) == 0 :
-                raise DataNotFound(500)
+                return 0
             
             dag_id,run_id = dag_df['dag_id'][0],dag_df['run_id'][0]
             

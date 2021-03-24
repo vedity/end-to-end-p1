@@ -149,6 +149,8 @@ class StartModelClass(APIView):
                                 return Response({"status_code":"200","error_msg":"Successfully updated","response":"pipeline started"})
                         else:
                                 #will add 'selected manual modeling' activity in activity_detail_tbl
+                                model_id = int(request.query_params.get('model_id'))
+                                model_name = request.query_params.get('model_name')
                                 activity_id = 43
                                 timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
 
@@ -157,18 +159,9 @@ class StartModelClass(APIView):
 
                                 data = json.dumps(request.data)
                                 request_body = json.loads(data) #get all the request body parameter
-                                # hyperparameters = request.query_params.get('hyperparameters')
-                                hyperparameters = request_body["hyperparameters"]
-                                # if model_id == 2:
-                                #         hyperparameters = {"epochs": 10, "learning_rate": 0.01, "batch_size": 32, "loss": "mean_absolute_error", "optimizer": "Adam", 
-                                #                 "activation": "relu"}
-                                # else:
-                                #         hyperparameters = ""
-                                model_id = int(request.query_params.get('model_id'))
-                                model_name = request.query_params.get('model_name')
-                                model_params = None                                
-
-                                # model_type = 'Regression'
+                                
+                                model_param = request_body["hyperparameters"]
+                                
                                 ModelObject.run_model(model_param_dict,model_id,model_name,model_param)
 
                                 logging.info("modeling : ModelClass : GET Method : execution stop : status_code :200")
@@ -476,9 +469,11 @@ class CheckModelStatusClass(APIView):
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
                         
                         project_id = int(request.query_params.get('project_id')) #get Username
-                        dataset_id = int(request.query_params.get('dataset_id')) #get Username
+                        # dataset_id = int(request.query_params.get('dataset_id')) #get Username
                         experiment_name = request.query_params.get('experiment_name')
-                        user_name = request.query_params.get('user_name')
+                        dataset_id = 2
+                        user_name = 'mann'
+                        # user_name = request.query_params.get('user_name')
         
                         experiment_status = ModelStatObject.check_model_status(project_id,experiment_name)
                         # if len(experiment_data) != 0:
@@ -501,6 +496,7 @@ class CheckModelStatusClass(APIView):
                                         activity_id = 47
                                         timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
                                 elif(status == 'failed'):
+                                        logging.info('LOG FOR Failed status----------------------------------')
                                         activity_id = 48
                                         timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
                                         
@@ -634,8 +630,10 @@ class CheckExperimentNameClass(APIView):
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
                         
                         experiment_name = request.query_params.get('experiment_name')
+
+                        project_id = request.query_params.get('project_id')
  
-                        experiment_data = ModelStatObject.check_existing_experiment(experiment_name)
+                        experiment_data = ModelStatObject.check_existing_experiment(project_id, experiment_name)
 
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200"+str(experiment_data))
                         if isinstance(experiment_data,str): #check the instance of dataset_df

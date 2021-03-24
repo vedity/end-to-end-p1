@@ -838,4 +838,19 @@ class DBClass:
             logging.error("database : DBClass : get_active_table_name : Exception " + str(exc))
             return str(exc)
 
+
+    def create_score_view(self,connection):
+        
+        sql_command = "CREATE OR REPLACE VIEW mlaas.score_view "\
+                      "AS SELECT a.experiment_id,a.project_id,"\
+                      "a.run_uuid,a.cv_score,mr.value AS holdout_score "\
+                      "FROM ( SELECT met.experiment_id,met.project_id,"\
+                      "met.run_uuid,m.key,m.value AS cv_score "\
+                      "FROM mlaas.model_experiment_tbl met,mlflow.metrics m "\
+                      "WHERE met.run_uuid = m.run_uuid AND m.key = 'cv_score') a,mlflow.metrics mr "\
+                      "WHERE a.run_uuid = mr.run_uuid AND mr.key = 'holdout_score';"
+                      
+        status = self.update_records(connection,sql_command)
+        
+        return status
     
