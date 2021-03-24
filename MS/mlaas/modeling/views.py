@@ -469,11 +469,9 @@ class CheckModelStatusClass(APIView):
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
                         
                         project_id = int(request.query_params.get('project_id')) #get Username
-                        # dataset_id = int(request.query_params.get('dataset_id')) #get Username
+                        dataset_id = int(request.query_params.get('dataset_id')) #get Username
                         experiment_name = request.query_params.get('experiment_name')
-                        dataset_id = 2
-                        user_name = 'mann'
-                        # user_name = request.query_params.get('user_name')
+                        user_name = request.query_params.get('user_name')
         
                         experiment_status = ModelStatObject.check_model_status(project_id,experiment_name)
                         # if len(experiment_data) != 0:
