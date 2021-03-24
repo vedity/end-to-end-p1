@@ -26,9 +26,11 @@ logger = logging.getLogger('project_creation')
 
 class AlgorithmDetector:
 
-    def __init__(self, DBObject, connection):
-        self.DBObject = DBObject
-        self.connection = connection
+    def __init__(self,db_param_dict):
+        
+        self.DBObject = db_param_dict['DBObject']
+        self.connection = db_param_dict['connection']
+        
     
     
     def get_dataset_info(self,project_id,dataset_id,user_id):
@@ -73,6 +75,7 @@ class AlgorithmDetector:
 
             sql_command = 'select problem_type from mlaas.project_tbl where project_id={} and dataset_id={}'.format(project_id, dataset_id)
             model_type_literal = self.DBObject.select_records(self.connection, sql_command)
+            
             if model_type_literal is None:
                 raise DatabaseConnectionFailed(500)
 
@@ -99,14 +102,14 @@ class AlgorithmDetector:
             target_features = ast.literal_eval(self.DBObject.select_records(self.connection, sql_command).iloc[0, 0])
             if model_type != 'Unsupervised':
                 if len(target_features) > 2:
-                    algorithm_type = 'Multi_Target'
+                    target_type = 'Multi_Target'
                 elif len(target_features) == 2:
-                    algorithm_type = 'Single_Target'
+                    target_type = 'Single_Target'
     
-                sql_command = "select * from mlaas.model_master_tbl where model_type='"+model_type+"'"+" and algorithm_type='"+algorithm_type+"'"
+                sql_command = "select model_id, model_name from mlaas.model_master_tbl where model_type='"+model_type+"'"+" and target_type='"+target_type+"'"
             elif model_type == 'Unsupervised':
     
-                sql_command = "select * from mlaas.model_master_tbl where model_type='"+model_type+"'"
+                sql_command = "select model_id, model_name from mlaas.model_master_tbl where model_type='"+model_type+"'"
             models_list = self.DBObject.select_records(self.connection, sql_command)# Add exception
             models_list_json = json.loads(models_list.to_json(orient='records', date_format='iso'))
         except (DatabaseConnectionFailed,DataNotFound) as exc:
@@ -127,7 +130,7 @@ class AlgorithmDetector:
         """
         try:
 
-            sql_command = 'select hyperparameter, value, type from mlaas.model_hyperparams_tbl where model_id='+str(model_id)
+            sql_command = 'select param_name, param_value, display_type from mlaas.model_hyperparams_tbl where model_id='+str(model_id)
             model_hyperparams_df = self.DBObject.select_records(self.connection, sql_command)
             if model_hyperparams_df is None:
                 raise DatabaseConnectionFailed(500)

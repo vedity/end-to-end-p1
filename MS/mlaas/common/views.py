@@ -78,7 +78,8 @@ class UserLoginClass(APIView):
                                 logging.info("Common  : UserLoginClass : GET Method : execution : status_code :"+ status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else: 
-                                logging.info("Common  : UserLoginClass : POST Method : execution stop : status_code : 200")
+                                status = DBObject.create_score_view(connection)
+                                logging.info("Common  : UserLoginClass : POST Method : execution stop : status_code : 200 : "+str(status))
                                 return Response({"status_code":"200","error_msg":"Login Successfull","response":"true"})
                 except Exception as e:
                         logging.error("Common  : UserLoginClass : GET Method : Exception :" + str(e))

@@ -10,9 +10,11 @@ from airflow.operators.mysql_operator import MySqlOperator
 from airflow.operators.email_operator import EmailOperator
 
 #* Relative Imports
-from modeling.all_regressor import start_pipeline
-from modeling.all_regressor import linear_regression_sklearn
+from modeling.utils.modeling_dag_utils.dag_common_utils import start_pipeline
 from modeling.all_regressor import get_regression_models
+from modeling.all_classifier import get_classification_models
+from modeling.all_regressor import linear_regression_sklearn
+from modeling.all_classifier import logistic_regression_sklearn
 
 
 
@@ -31,22 +33,22 @@ end_task = BashOperator(task_id='end_pipeline',bash_command="echo 'regression pi
 
 # Get model dict 
 
-model_dict = ##MASTER_DICT
+model_dict = #MASTER_DICT
 
-model_id = int(model_dict['model_id'])
-model_name = model_dict['model_name']
-model_param = model_dict['model_param']
-function_name = model_name.lower() #TODO we will get dynamic when we are developing more models.
+if len(model_dict) != 0:
 
-for model_id,model_name in zip(model_id,model_name):
-    dynamic_task = PythonOperator(task_id=model_name,
-                                  python_callable=eval(function_name),
-                                  op_kwargs={'model_mode':'Manual', 
-                                             'model_id':model_id,
-                                             'model_param':model_param},
-                                  dag=dag)
-    
-    start_task >> dynamic_task >> end_task
+    model_id = model_dict['model_id']
+    model_name = model_dict['model_name']
+    model_param = model_dict['model_param']
+
+    for model_id,model_name in zip(model_id,model_name):
+        dynamic_task = PythonOperator(task_id=model_name,
+                                    python_callable=eval(model_name.lower()),
+                                    op_kwargs={'model_id':model_id,
+                                                'model_param':model_param},
+                                    dag=dag)
+        
+        start_task >> dynamic_task >> end_task
 
 
     
