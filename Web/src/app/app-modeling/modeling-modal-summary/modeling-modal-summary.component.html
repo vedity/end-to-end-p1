@@ -6,6 +6,9 @@
             <label>Model Name :</label> <span>{{responsedata["Model Name"]}}</span>
         </div>
         <div class="line">
+            <label>Model Description :</label> <span>{{responsedata["Model_Description"]}}</span>
+        </div>
+        <div class="line">
             <label>Input Features :</label>
             <span class="detail-txt">
                 <span *ngFor="let item of responsedata['Input Features']">{{item}}</span>
