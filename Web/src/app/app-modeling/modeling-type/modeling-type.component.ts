@@ -241,9 +241,9 @@ runningExpList: any = [];
       this.runningExpList = data.response;
       this.contentloaded = true;
     }
-    else {
-      this.errorHandler(data);
-    }
+    // else {
+    //   this.errorHandler(data);
+    // }
   }
 
   getAllExperimentList() {
@@ -259,9 +259,9 @@ runningExpList: any = [];
       this.allExpList = data.response;
       this.contentloaded = true;
     }
-    else {
-      this.errorHandler(data);
-    }
+    // else {
+    //   this.errorHandler(data);
+    // }
   }
 
 
@@ -348,7 +348,7 @@ runningExpList: any = [];
         this.getRunningExperimentList();
         this.getAllExperimentList();
         this.checkstatus();
-      }, 1500);
+      }, 4000);
     }
     else {
       this.errorHandler(data);
@@ -486,7 +486,7 @@ checksuccessHandler(data,target){
           
       }
       this.responsearray["model_id"]=this.selectedalgorithm;
-      this.responsearray["model_name"]=this.selectedalgorithm;
+      this.responsearray["model_name"]=this.selectedalgorithmname;
       this.responsearray["hyperparameters"]=hyperparameters;
     }
     else{
