@@ -300,10 +300,26 @@ ul {
 }
 
 .modal-summary {
-    label {
-        margin-left: 10px;
-        margin-right: 10px;
-        color: #a6b0cf;
+    .line {
+        margin-bottom: 10px;
+        label {
+            margin-left: 10px;
+            margin-right: 10px;
+            color: #a6b0cf;
+            width: 130px;
+            vertical-align: top;
+        }
+        .detail-txt {
+            width: calc(100% - 170px);
+            display: inline-block;
+            span {
+                background: #32394e;
+                padding: 5px 10px;
+                margin-right: 10px;
+                display: inline-block;
+                margin-bottom: 7px;
+            }
+        }
     }
 }
 
