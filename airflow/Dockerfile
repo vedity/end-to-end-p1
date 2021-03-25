@@ -6,4 +6,5 @@ COPY airflow.cfg .
 RUN pip install -r requirements.txt
 USER 0
 RUN pip install -r requirements.txt
+USER 1000
 
