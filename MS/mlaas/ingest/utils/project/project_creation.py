@@ -97,8 +97,8 @@ class ProjectClass:
         logging.info("data ingestion : ProjectClass : make_project_records : execution start")
         
         #TODO : both dag are not run together
-        model_dag_id = get_modeling_dag_name()
         cleanup_dag_id = preprocessObj.get_cleanup_dag_name()
+        model_dag_id = get_modeling_dag_name()
         
         row = project_name,project_desc,user_name,original_dataset_id,dataset_id,cleanup_dag_id,model_dag_id
         row_tuples = [tuple(row)] # Make record for project table.
