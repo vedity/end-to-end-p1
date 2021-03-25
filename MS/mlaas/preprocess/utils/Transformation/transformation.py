@@ -103,7 +103,9 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         '''
             Operation id: 27
         '''
-        
+        #Operation Id to get activity details
+        operation_id = 27
+
         logging.info("data preprocessing : TransformationClass : label_encoding : execution start" + str(col))
 
         index = column_list[0]
@@ -111,7 +113,13 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         
         for col_name in cols:
             try:
+                #Insert the activity for the operation
+                activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
+
                 status = super().label_encoding(DBObject, connection, [index,col_name], table_name)
+
+                #Update the activity status for the operation performed
+                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
                 
             except Exception as exc:
                 return exc
@@ -126,11 +134,22 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         
         logging.info("data preprocessing : TransformationClass : one_hot_encoding : execution start")
         index = column_list[0]
+
         cols = [column_list[i] for i in col]
-        
+
+        #Operation Id to get activity details
+        operation_id = 28
+
         for col_name in cols:
             try:
+
+                #Insert the activity for the operation
+                activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
+
                 status = super().one_hot_encoding(DBObject, connection, [index,col_name], table_name, schema_id)
+
+                #Update the activity status for the operation performed
+                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
                 
             except Exception as exc:
                 return exc
@@ -166,12 +185,22 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         '''
         logging.info("data preprocessing : TransformationClass : add_to_column : execution start")
         
+        #Operation Id to get activity details
+        operation_id = 29
+
         operation = '+'
         
         cols = [column_list[i] for i in col]
         for i,col_name in enumerate(cols):
             try:
+                #Insert the activity for the operation
+                activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
+
                 status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value[i])
+
+                #Update the activity status for the operation performed
+                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+
             except Exception as exc:
                 return exc
 
@@ -183,13 +212,21 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
             Operation id: 30
         '''
         logging.info("data preprocessing : TransformationClass : subtract_from_column : execution start")
-        
+        #Operation Id to get activity details
+        operation_id = 30
+
         operation = '-'
         
         cols = [column_list[i] for i in col]
         for i,col_name in enumerate(cols):
             try:
+                #Insert the activity for the operation
+                activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
+
                 status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value[i])
+
+                #Update the activity status for the operation performed
+                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
             except Exception as exc:
                 return exc
 
@@ -203,11 +240,20 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         logging.info("data preprocessing : TransformationClass : multiply_column : execution start")
         
         operation = '*'
-        
+        #Operation Id to get activity details
+        operation_id = 31
+
         cols = [column_list[i] for i in col]
         for i,col_name in enumerate(cols):
             try:
+                #Insert the activity for the operation
+                activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
+
                 status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value[i])
+
+                #Update the activity status for the operation performed
+                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+
             except Exception as exc:
                 return exc
 
@@ -221,11 +267,20 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         logging.info("data preprocessing : TransformationClass : divide_column : execution start")
         
         operation = '/'
-        
+        #Operation Id to get activity details
+        operation_id = 32
+
         cols = [column_list[i] for i in col]
         for i,col_name in enumerate(cols):
             try:
+                #Insert the activity for the operation
+                activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
+
                 status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value[i])
+
+                #Update the activity status for the operation performed
+                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+
             except Exception as exc:
                 return exc
 

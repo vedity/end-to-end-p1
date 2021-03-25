@@ -610,7 +610,6 @@ class CompareExperimentsClass(APIView):
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
 
 #class to check experiment name already exist or not
-#It will take url string as mlaas/modeling/checkexperimentname/. 
 class CheckExperimentNameClass(APIView):
  
         def get(self, request, format=None):
