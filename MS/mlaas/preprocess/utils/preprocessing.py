@@ -868,7 +868,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     else:
 
                         #Update all the status flag's based on the schema id
-                        status = self.update_schema_flag_status(DBObject,connection,schema_id,dataset_id)
+                        status = self.update_schema_flag_status(DBObject,connection,schema_id,dataset_id,column_list)
                         
                         if status ==0:  
                             #? Updating the Activity table
@@ -1052,19 +1052,19 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         
         return status
     
-    def update_schema_flag_status(self,DBObject,connection,schema_id,dataset_id, **kwargs):
+    def update_schema_flag_status(self,DBObject,connection,schema_id,dataset_id,column_list, **kwargs):
         try:
             logging.info("data preprocessing : PreprocessingClass : update_schema_flag_status : execution start")
             
             missing_flag,noise_flag = self.get_preprocess_cache(dataset_id)
 
             
-            for noise_flag,missing_flag in zip(missing_flag,noise_flag): 
+            for noise_flag,missing_flag,col_name in zip(missing_flag,noise_flag,column_list): 
 
                 #sql command for updating change_column_name and column_attribute column  based on index column value
                 sql_command = "update mlaas.schema_tbl SET missing_flag = '" + str(missing_flag) + "',"\
                                 "noise_flag = '" +str(noise_flag) +"'"\
-                                " Where schema_id ='"+str(schema_id)+"' "
+                                " Where schema_id ='"+str(schema_id)+"' and column_name = '"+str(col_name)+"'"
 
                 logging.info("sql_command " + sql_command) 
                 #execute sql query command
