@@ -351,9 +351,9 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 
                 #? Checking if there is noise in the column
                 noise = self.dtct_noise(DBObject, connection, col, table_name= table_name)
-                if noise == 0:
-                    noise = False
-                else: noise = True
+                if noise == 1:
+                    noise = True
+                else: noise = False
                 noise_status.append(noise)
             
             logging.info("data preprocessing : PreprocessingClass : get_preprocess_cache : execution stop")
@@ -1093,6 +1093,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             dag_id (`String`): the Cleanup dag id.
         '''
         
+
         id = uuid.uuid1().time
         dag_id='Cleanup_dag_'+str(id)
 

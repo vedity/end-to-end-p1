@@ -259,6 +259,8 @@ class ActivityTimelineClass:
             #command will update the end_time based on the index id
             sql_command = "update "+str(table_name)+" set end_time='"+end_time+"',activity_description='"+description+"' where index='"+str(index)+"'"
             
+            logging.info("--------->" + sql_command)
+
             #execute sql query command
             status = DBObject.update_records(connection,sql_command)
 
