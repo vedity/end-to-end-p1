@@ -65,6 +65,7 @@
 #         model.add(Dense(32, activation= self.activation))
 #         model.add(Dense(1, activation='sigmoid'))
         
+        
 #         #model.summary() #Print model Summary
         
 #         if self.optimizer == "adam":
