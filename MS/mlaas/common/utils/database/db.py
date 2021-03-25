@@ -189,11 +189,7 @@ class DBClass:
                 extras.execute_values(cursor, query, tuples) # Excute insert query.
                 index = 0
 
-            elif Flag==1 :
-                query = "INSERT INTO %s(%s) VALUES %%s RETURNING dataset_id" % (table_name, cols) # Make query
-                extras.execute_values(cursor, query, tuples) # Excute insert query.
-                index = [row[0] for row in cursor.fetchall()][0]
-            else:
+            else :
                 query = "INSERT INTO %s(%s) VALUES %%s RETURNING index" % (table_name, cols) # Make query
                 extras.execute_values(cursor, query, tuples) # Excute insert query.
                 index = [row[0] for row in cursor.fetchall()][0]

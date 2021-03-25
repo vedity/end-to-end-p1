@@ -333,7 +333,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         #? Getting Dataset_id & User_Name
         sql_command = f"select pt.dataset_id,pt.user_name from mlaas.project_tbl pt  where pt.project_id = '{project_id}'"
         details_df = DBObject.select_records(connection,sql_command) 
-        dataset_id,user_name = details_df['dataset_id'][0],details_df['user_name'][0]
+        dataset_id,user_name = int(details_df['dataset_id'][0]),details_df['user_name'][0]
         
         #? Inserting the activity in the activity_detail_table
         _,activity_id = self.AT.insert_user_activity(operation_id,user_name,project_id,dataset_id,desc,column_id =col_name)
