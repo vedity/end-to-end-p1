@@ -13,6 +13,8 @@ import pandas as pd
 import json
 import mlflow
 import mlflow.sklearn
+import shap
+
 from common.utils.logger_handler import custom_logger as cl
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import learning_curve
@@ -123,28 +125,26 @@ class LinearRegressionClass:
             [dict]: [it will return features impact dictionary.]
         """
         
-        X_train = X_train[:,1:] 
-        # X_train = X_train[self.input_features_list]
-        stddev = []
-        importance = model.coef_.tolist()[0]
-        features = pd.DataFrame(importance, self.input_features_list,columns = ['coefficient'])
-        features.coefficient = features.coefficient.abs()
-        for i in range(0,len(self.input_features_list)):
-            stdev = np.std(X_train[:,i])
-            stddev.append(stdev)
-         
-        features['stddev'] = np.array(stddev).reshape(-1,1)
-        features['importance'] = features['coefficient'] * features['stddev']
-        features['norm_importance'] = 100 * features['importance'] / features['importance'].max()
+        shap_data = X_train[:min(1000, X_train.shape[0]), 1:]
+        LinearExplainer = shap.LinearExplainer(model, shap_data)
+        shap_values = abs(LinearExplainer.shap_values(shap_data)).mean(axis=0)
+
+        features_importance_values = shap_values / shap_values.sum()
+
+        features_df = pd.DataFrame(data=features_importance_values, index=self.input_features_list, columns=['features_importance'])
+
+        features_df = features_df.sort_values(by='features_importance', ascending=False)*100
+
+        features_dict = features_df.T.to_dict(orient='records')[0]
+
+        features_names = list(features_dict.keys())
+        norm_importance = np.array(list(features_dict.values())).round(2).tolist()
+
+        features_importance_dict = {'features_name': features_names, 'norm_importance': norm_importance}
+
+        return features_importance_dict
+
         
-        features['features_name'] = features.index
-        sorted_df = features.sort_values(by='norm_importance',ascending = False)
-        
-        features_impact_dict = sorted_df[['features_name','norm_importance']].to_dict(orient='list')
-        
-        return features_impact_dict
- 
-   
     def get_actual_prediction(self,model,X_test,y_test):
         
         """This function is used to get actuals and predictions.

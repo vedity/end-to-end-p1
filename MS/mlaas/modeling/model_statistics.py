@@ -55,12 +55,14 @@ class ModelStatisticsClass:
             learning_curve_uri = artifact_uri + '/learning_curve.json'
             
             with open(learning_curve_uri, "r") as rf: # Read the learning curve's data from mlruns.
-                learning_curve_df = json.load(rf)
+                learning_curve_json = json.load(rf)
            
-            learning_curve_rounded_df = DataFrame(learning_curve_df).round(decimals = 3) # Round the values to 3 decimal points
+
+            learning_curve_rounded_df = pd.DataFrame(learning_curve_json).round(3)
+            learning_curve_json = learning_curve_rounded_df.to_dict(orient='list')
            
             logging.info("modeling : ModelStatisticsClass : learning_curve : execution end")
-            return learning_curve_rounded_df
+            return learning_curve_json
 
         except (DatabaseConnectionFailed,DataNotFound) as exc:
             logging.error("modeling : ModelStatisticsClass : learning_curve : Exception " + str(exc))
@@ -95,12 +97,14 @@ class ModelStatisticsClass:
             actual_vs_prediction_uri = artifact_uri + '/predictions.json'
 
             with open(actual_vs_prediction_uri, "r") as rf: # Read the actual vs prediction data from mlaas.runs
-                actual_vs_prediction_df = json.load(rf)
+                actual_vs_prediction_json = json.load(rf)
                 
-            actual_vs_prediction_df = DataFrame(actual_vs_prediction_df).round(decimals = 3) #Round to the nearest 3 decimals.
+            actual_vs_prediction_df = DataFrame(actual_vs_prediction_json).round(decimals = 3) #Round to the nearest 3 decimals.
+            actual_vs_prediction_json = actual_vs_prediction_df.to_dict(orient='list')
 
             logging.info("modeling : ModelStatisticsClass : actual_vs_prediction : execution end")
-            return actual_vs_prediction_df
+            return actual_vs_prediction_json
+
         except (DatabaseConnectionFailed,DataNotFound) as exc:
             logging.error("modeling : ModelStatisticsClass : actual_vs_prediction : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : actual_vs_prediction : " +traceback.format_exc())
@@ -132,12 +136,13 @@ class ModelStatisticsClass:
             features_importance_uri = artifact_uri + '/features_importance.json'
             
             with open(features_importance_uri, "r") as rf:# Read the features importance data from mlruns.
-                features_importance_df = json.load(rf)
+                features_importance_json = json.load(rf)
 
-            features_importance_rounded_df = pd.DataFrame(features_importance_df).round(decimals = 2)
-            #features_importance_rounded_df = features_importance_rounded_df.sort_values('norm_importance',ascending = False)
+            # features_importance_rounded_df = pd.DataFrame(features_importance_json).round(decimals = 2)
+            # features_importance_json = features_importance_rounded_df.to_dict(orient='list')
+            
             logging.info("modeling : ModelStatisticsClass : actual_vs_prediction : execution end")
-            return features_importance_rounded_df
+            return features_importance_json
         except (DatabaseConnectionFailed,DataNotFound) as exc:
             logging.error("modeling : ModelStatisticsClass : features_importance : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : features_importance : " +traceback.format_exc())
@@ -450,10 +455,10 @@ class ModelStatisticsClass:
                 raise DataNotFound(500)
             # Rearraging Dataframe according to our requirement.
             metrics_pivot_df = metrics_df.pivot(index='experiment_id', columns='key', values='value')
-            experiment_ids_index = tuple(metrics_pivot_df.index.values)
+            
             
             # Get the model_name for the associated experiment_ids.
-            sql_command = 'select mmt.model_name, met.experiment_id from mlaas.model_master_tbl mmt, mlaas.model_experiment_tbl met where mmt.model_id=met.model_id and met.experiment_id in '+str(experiment_ids_index)
+            sql_command = 'select mmt.model_name, met.experiment_id from mlaas.model_master_tbl mmt, mlaas.model_experiment_tbl met where mmt.model_id=met.model_id and met.experiment_id in '+str(exp_ids)
             model_names_df = self.DBObject.select_records(self.connection, sql_command)
             if model_names_df is None:
                 raise DatabaseConnectionFailed(500)
@@ -463,13 +468,19 @@ class ModelStatisticsClass:
             
             model_names_df = model_names_df.set_index('experiment_id') # Set index to experiment_id
 
-            experiments_data = {}
-            for id in exp_ids:
-                experiments_data[str(id)] = {'metrics': metrics_pivot_df.loc[id, :].to_dict(), 
-                                    'params': params_pivot_df.loc[id, :].to_dict(),
-                                    'model_name': model_names_df.loc[id, :]}
+            metrics_params_df = metrics_pivot_df.merge(params_pivot_df, left_index=True, right_index=True)
 
-            return experiments_data
+            final_df = model_names_df.merge(metrics_params_df, left_index=True, right_index=True)
+            
+            sql_command = "select exp_name from mlaas.model_dags_tbl mdt, mlaas.model_experiment_tbl met where mdt.run_id=met.dag_run_id"\
+                          " and met.experiment_id in "+str(exp_ids)
+
+            exp_names = tuple(self.DBObject.select_records(self.connection, sql_command)['exp_name'])
+
+            final_df['experiment_name'] = exp_names
+            columns = final_df.columns.values
+
+            return {'column_names': columns, 'responsedata': final_df.to_dict(orient='records')}
 
         except (ExperimentAlreadyExist) as exc:
             logging.error("modeling : ModelStatisticsClass : check_existing_experiment : Exception " + str(exc))
