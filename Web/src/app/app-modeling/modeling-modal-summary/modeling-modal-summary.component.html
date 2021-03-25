@@ -3,7 +3,24 @@
 <div class="row modal-summary" *ngIf="responsedata">
     <div class="col-md-12">
         <div class="line">
-            <label>Name :</label> <span>{{responsedata["Model Name"]}}</span>
+            <label>Model Name :</label> <span>{{responsedata["Model Name"]}}</span>
+        </div>
+        <div class="line">
+            <label>Model Description :</label> <span>{{responsedata["Model_Description"]}}</span>
+        </div>
+        <div class="line">
+            <label>Input Features :</label>
+            <span class="detail-txt">
+                <span *ngFor="let item of responsedata['Input Features']">{{item}}</span>
+            </span>
+
+        </div>
+        <div class="line">
+            <label>Target Features :</label>
+            <span class="detail-txt">
+                <span *ngFor="let item of responsedata['Target Features']">{{item}}</span>
+            </span>
+
         </div>
         <div class="line">
             <label>Input Features :</label> <span *ngFor="let item of responsedata['Input Features']">{{item}}, &nbsp;</span>

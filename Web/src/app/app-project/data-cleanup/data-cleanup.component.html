@@ -1,4 +1,4 @@
-<a class="btn btn-success modeling-btn" [routerLink]="['/modeling']" style="right: 290px" [state]="{selectproject:false}"> Modeling</a>
+<!-- <a class="btn btn-success modeling-btn" [routerLink]="['/modeling']" style="right: 290px" [state]="{selectproject:false}"> Modeling</a> -->
 <a class="btn btn-success modeling-btn" [routerLink]="['/modeling']" [state]="{dataset_id: dataset_id ,project_id:project_id,selectproject:true}">Modeling</a>
 
 <ul ngbNav #justifiednavdatacleanup="ngbNav" [activeId]="1" class="nav-tabs nav cleanup-tabs">
@@ -55,31 +55,33 @@
                                 <span>{{item.tab_name}}</span>
                             </a>
                             <ng-template ngbNavContent>
-                                <div *ngFor="let operations of item.operation_classes;let k=index">
-                                    <h4 class="mb-3">{{operations.title}}</h4>
-                                    <div class="row">
-                                        <div class="col-md-4" *ngFor="let childitem of operations.operations;let j=index" [ngClass]="{'displaychilditem':operationIds.indexOf(childitem.operation_id)!=-1}">
-                                            <div class="custom-control custom-radio mb-3 ">
-                                                <input type="radio" id="customRadio_{{k}}_{{j}}" name="customRadio_{{k}}" value="{{childitem.operation_id}}" title="{{childitem.name}}" data-waschecked="false" [disabled]="operationIds.indexOf(childitem.operation_id)==-1" (click)="selectHandling($event,childitem.operation_id)"
-                                                    class="custom-control-input radiobutton">
-                                                <label class="custom-control-label" for="customRadio_{{k}}_{{j}}" id="radiolabel_{{k}}_{{j}}">{{childitem.name}}</label>
-                                                <input type="text" name="input_{{k}}_{{j}}" class="form-control inline-textbox customInput" disabled id="customInput_{{k}}_{{j}}" (change)="setInput(childitem.operation_id,$event.target.value)" (keyup)="checkvalidation($event,childitem.check_type)" *ngIf="childitem.user_input==1">
+                                <perfect-scrollbar style="height: 450px;">
+                                    <div *ngFor="let operations of item.operation_classes;let k=index">
+                                        <h4 class="mb-3">{{operations.title}}</h4>
+                                        <div class="row">
+                                            <div class="col-md-4" *ngFor="let childitem of operations.operations;let j=index" [ngClass]="{'displaychilditem':operationIds.indexOf(childitem.operation_id)!=-1}">
+                                                <div class="custom-control custom-radio mb-3 ">
+                                                    <input type="radio" id="customRadio_{{k}}_{{j}}" name="customRadio_{{k}}" value="{{childitem.operation_id}}" title="{{childitem.name}}" data-waschecked="false" [disabled]="operationIds.indexOf(childitem.operation_id)==-1" (click)="selectHandling($event,childitem.operation_id)"
+                                                        class="custom-control-input radiobutton">
+                                                    <label class="custom-control-label" for="customRadio_{{k}}_{{j}}" id="radiolabel_{{k}}_{{j}}">{{childitem.name}}</label>
+                                                    <input type="text" name="input_{{k}}_{{j}}" class="form-control inline-textbox customInput" disabled id="customInput_{{k}}_{{j}}" (change)="setInput(childitem.operation_id,$event.target.value)" (keyup)="checkvalidation($event,childitem.check_type)" *ngIf="childitem.user_input==1">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="button-items text-center" *ngIf="i+1==operationList.length">
-                                    <button type="button" class="btn btn-secondary" (click)="reset()">Reset</button>
-                                    <div class="btn-group me-1 dropdown" ngbDropdown>
-                                        <button type="button" class="btn btn-success" (click)="saveHanlers();">Save</button>
-                                        <button type="button" class="btn btn-success dropdown-toggle dropdown-toggle-split" ngbDropdownToggle>
+                                    <div class="button-items text-center" *ngIf="i+1==operationList.length">
+                                        <button type="button" class="btn btn-secondary" (click)="reset()">Reset</button>
+                                        <div class="btn-group me-1 dropdown" ngbDropdown>
+                                            <button type="button" class="btn btn-success" (click)="saveHanlers();">Save</button>
+                                            <button type="button" class="btn btn-success dropdown-toggle dropdown-toggle-split" ngbDropdownToggle>
                                                               <i class="mdi mdi-chevron-down"></i>
                                                             </button>
-                                        <div class="dropdown-menu" ngbDropdownMenu>
-                                            <a class="dropdown-item" href="javascript: void(0);">Save As</a>
+                                            <div class="dropdown-menu" ngbDropdownMenu>
+                                                <a class="dropdown-item" href="javascript: void(0);">Save As</a>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                </perfect-scrollbar>
                             </ng-template>
                         </li>
                     </ul>

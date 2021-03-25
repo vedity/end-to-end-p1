@@ -234,7 +234,7 @@ class LinearRegressionClass:
                          "Train Split":1-(self.dataset_split_dict['test_ratio'] + self.dataset_split_dict['valid_ratio']),
                          "Test Split":float(self.dataset_split_dict['test_ratio']),
                          "Random State":int(self.dataset_split_dict['random_state']),
-                         "Valid Split":self.dataset_split_dict['valid_size'],
+                         "Valid Split":self.dataset_split_dict['valid_ratio'],
                          "CV (K-Fold )":self.dataset_split_dict['cv']}
         
         
