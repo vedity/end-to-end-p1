@@ -65,13 +65,14 @@
 #         model.add(Dense(32, activation= self.activation))
 #         model.add(Dense(1, activation='sigmoid'))
         
+        
 #         #model.summary() #Print model Summary
         
 #         if self.optimizer == "adam":
 #             opt = keras.optimizers.Adam(learning_rate=self.learning_rate)
             
 #         elif self.optimizer == "sgd":
-#             opt = keras.optimizers.SGD(learning_rate=self.learning_rate1)
+#             opt = keras.optimizers.SGD(learning_rate=self.learning_rate)
             
 #         model.compile(loss= self.loss , optimizer=opt, metrics=["accuracy"])
 #         H = model.fit(X_train, y_train, epochs=self.epoch,batch_size=self.batch_size,validation_split=0.2)#Need To change this

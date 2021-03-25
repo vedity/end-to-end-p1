@@ -150,7 +150,7 @@ class StartModelClass(APIView):
                         else:
                                 #will add 'selected manual modeling' activity in activity_detail_tbl
                                 model_id = int(request.query_params.get('model_id'))
-                                model_name = request.query_params.get('model_name')
+                                model_name = request.query_params.get('model_name') #ASK
                                 activity_id = 43
                                 timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
 
@@ -610,7 +610,6 @@ class CompareExperimentsClass(APIView):
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
 
 #class to check experiment name already exist or not
-#It will take url string as mlaas/modeling/checkexperimentname/. 
 class CheckExperimentNameClass(APIView):
  
         def get(self, request, format=None):

@@ -12,6 +12,7 @@ import pandas as pd
 import json
 import mlflow
 import mlflow.sklearn
+import shap
 
 from sklearn.linear_model import LogisticRegression 
 from sklearn.model_selection import learning_curve
@@ -92,12 +93,19 @@ class LogisticClassifierClass:
                        train_sizes=train_sizes,
                        return_times=True)
         
+        train_sizes_2, train_loss, test_loss, fit_times_2, _ = \
+        learning_curve(estimator = model, X=X_train, y=y_train, cv=None, scoring='accuracy',n_jobs=None,
+                       train_sizes=train_sizes,
+                       return_times=True)
+        
+
         # Average of train score(accuracy).
         train_mean = train_scores.mean(axis=1)
         # Average of train score(accuracy).
         test_mean = test_scores.mean(axis=1)
         # Create the learning curve dictionary.
-        learning_curve_dict = {"train_size":train_sizes.tolist(),"train_score":train_mean.tolist(),"test_score":test_mean.tolist()}
+        learning_curve_dict = {"train_size":train_sizes.tolist(),"train_score":train_mean.tolist(),"test_score":test_mean.tolist(),
+                                "train_loss": abs(train_loss.mean(axis=1)).tolist(), "test_loss": abs(test_loss.mean(axis=1)).tolist()}
         
         return learning_curve_dict
         
@@ -110,25 +118,24 @@ class LogisticClassifierClass:
             [dict]: [it will return features impact dictionary.]
         """
         
-        X_train = X_train[:,1:] 
-        stddev = []
-        importance = model.coef_.tolist()[0]
-        features = pd.DataFrame(importance, self.input_features_list,columns = ['coefficient'])
-        features.coefficient = features.coefficient.abs()
-        for i in range(0,len(self.input_features_list)):
-            stdev = np.std(X_train[:,i])
-            stddev.append(stdev)
-         
-        features['stddev'] = np.array(stddev).reshape(-1,1)
-        features['importance'] = features['coefficient'] * features['stddev']
-        features['norm_importance'] = 100 * features['importance'] / features['importance'].max()
-        
-        features['features_name'] = features.index
-        sorted_df = features.sort_values(by='norm_importance',ascending = False)
-        
-        features_impact_dict = sorted_df[['features_name','norm_importance']].to_dict(orient='list')
-        
-        return features_impact_dict
+        shap_data = X_train[:min(1000, X_train.shape[0]), 1:]
+        LinearExplainer = shap.LinearExplainer(model, shap_data)
+        shap_values = abs(LinearExplainer.shap_values(shap_data)).mean(axis=0)
+
+        features_importance_values = shap_values / shap_values.sum()
+
+        features_df = pd.DataFrame(data=features_importance_values, index=self.input_features_list, columns=['features_importance'])
+
+        features_df = features_df.sort_values(by='features_importance', ascending=False)*100
+
+        features_dict = features_df.T.to_dict(orient='records')[0]
+
+        features_names = list(features_dict.keys())
+        norm_importance = np.array(list(features_dict.values())).round(2).tolist()
+
+        features_importance_dict = {'features_name': features_names, 'norm_importance': norm_importance}
+
+        return features_importance_dict
 
 
     def get_actual_prediction(self,model):
@@ -151,7 +158,6 @@ class LogisticClassifierClass:
             return actual_lst,prediction_lst
         
         else:
-            print("LEN IS TWOOOOOOOOOOOOOOOOOOOOooo--------------------")
             prediction_flat_lst =  [ list(map(sub_lst)) for sub_lst in prediction_lst ]
             actual_flat_lst =  [ list(map(sub_lst)) for sub_lst in actual_lst ]
             return actual_flat_lst,prediction_flat_lst
@@ -210,11 +216,12 @@ class LogisticClassifierClass:
         train_size = X_train.shape[0]
         test_size = X_test.shape[0]
         
-        model_summary = {"Model Name":"Logistic_Regression_SKlearn",
+        model_summary = {"Model Name":"Linear_Regression_Sklearn",
                          "Input Features":self.input_features_list,
                          "Target Features":self.target_features_list,
-                         "Train Size":int(train_size),"Test Size":int(test_size),
-                         "Train Split":self.dataset_split_dict['train_size'],"Test Split":float(self.dataset_split_dict['test_size']),
+                         "Train Size":float(train_size),"Test Size":int(test_size),
+                         "Train Split":1-(self.dataset_split_dict['test_ratio'] + self.dataset_split_dict['valid_ratio']),
+                         "Test Split":float(self.dataset_split_dict['test_ratio']),
                          "Random State":int(self.dataset_split_dict['random_state']),
                          "Valid Split":self.dataset_split_dict['valid_size'],
                          "CV (K-Fold )":self.dataset_split_dict['cv']}
