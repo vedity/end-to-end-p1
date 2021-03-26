@@ -20,6 +20,7 @@ from .utils.cleaning import missing_value_handling
 from .utils.schema.schema_creation import *
 from common.utils.json_format.json_formater import *
 from common.utils.database import db
+from common.utils.activity_timeline import activity_timeline
 from database import *
 from .utils.Transformation import split_data
 #from .utils.Visual import data_visualization
@@ -37,7 +38,7 @@ connection,connection_string=DBObject.database_connection(database,user,password
 preprocessObj =  preprocessing.PreprocessingClass(database,user,password,host,port) #initialize Preprocess class object
 sd = split_data.Split_Data()
 
-
+AT_OBJ = activity_timeline.ActivityTimelineClass(database, user, password, host, port)
 
 class DatasetExplorationClass(APIView):
     def get(self,request,format=None):
@@ -405,6 +406,11 @@ class ScalingSplitClass(APIView):
                         split_parameters = {'split_method': split_method ,'cv': cv,'valid_ratio': valid_ratio, 'test_ratio': test_ratio,'random_state': random_state} #split parameters
                         status = preprocessObj.handover(dataset_id, schema_id, project_id, user_name,split_parameters, scaling_operation)
                         logging.info("data preprocess : ScalingSplitClass : POST Method : execution stop")
+                        # activity_id = 49
+                        # activity_df = AT_OBJ.get_activity(activity_id,"US")
+                        # activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= project_name)
+                        # end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                        # activity_status,index = AT_OBJ.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
                         if isinstance(status,int):     
                                 logging.info("data preprocess : ScalingSplitClass : POST Method : execution stop")
                                 return Response({"status_code":"200","error_msg":"Successfull retrival","response":"true"})
