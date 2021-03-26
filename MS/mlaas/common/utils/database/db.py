@@ -189,11 +189,7 @@ class DBClass:
                 extras.execute_values(cursor, query, tuples) # Excute insert query.
                 index = 0
 
-            elif Flag==1 :
-                query = "INSERT INTO %s(%s) VALUES %%s RETURNING dataset_id" % (table_name, cols) # Make query
-                extras.execute_values(cursor, query, tuples) # Excute insert query.
-                index = [row[0] for row in cursor.fetchall()][0]
-            else:
+            else :
                 query = "INSERT INTO %s(%s) VALUES %%s RETURNING index" % (table_name, cols) # Make query
                 extras.execute_values(cursor, query, tuples) # Excute insert query.
                 index = [row[0] for row in cursor.fetchall()][0]
@@ -549,7 +545,7 @@ class DBClass:
                         sql_filtercount = f'select count(*) from (SELECT {str(select_clause)} From {table_name} {global_search_clause}) as dt'  #sql Query for filter row count                                 
             
             else:
-                sql_data = f'SELECT {str(select_clause)} From {table_name} where "{columns_list[0]}" between {start_index} and {end_index}  {order_clause}' # sql Query without any filter and clause
+                sql_data =  f'SELECT {str(select_clause)} From {table_name} where "{columns_list[0]}" >= {start_index} {order_clause} limit {length}' # sql Query without any filter and clause 
                 sql_filtercount = f'SELECT count(*) From {table_name}' #sql Query with customefilter_clause
 
             
@@ -838,4 +834,19 @@ class DBClass:
             logging.error("database : DBClass : get_active_table_name : Exception " + str(exc))
             return str(exc)
 
+
+    def create_score_view(self,connection):
+        
+        sql_command = "CREATE OR REPLACE VIEW mlaas.score_view "\
+                      "AS SELECT a.experiment_id,a.project_id,"\
+                      "a.run_uuid,a.cv_score,mr.value AS holdout_score "\
+                      "FROM ( SELECT met.experiment_id,met.project_id,"\
+                      "met.run_uuid,m.key,m.value AS cv_score "\
+                      "FROM mlaas.model_experiment_tbl met left outer join mlflow.metrics m "\
+                      "ON met.run_uuid = m.run_uuid AND m.key = 'cv_score') a left outer join mlflow.metrics mr "\
+                      "ON a.run_uuid = mr.run_uuid AND mr.key = 'holdout_score';"
+                      
+        status = self.update_records(connection,sql_command)
+        
+        return status
     

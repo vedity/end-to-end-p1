@@ -259,6 +259,8 @@ class ActivityTimelineClass:
             #command will update the end_time based on the index id
             sql_command = "update "+str(table_name)+" set end_time='"+end_time+"',activity_description='"+description+"' where index='"+str(index)+"'"
             
+            logging.info("--------->" + sql_command)
+
             #execute sql query command
             status = DBObject.update_records(connection,sql_command)
 
@@ -269,6 +271,49 @@ class ActivityTimelineClass:
             return status
 
         except (DatabaseConnectionFailed,ActivityUpdateFailed) as exc:
+            logging.error("Common : ActivityTimelineClass : update_activity : Exception " + str(exc.msg))
+            logging.error("Common : ActivityTimelineClass : update_activity : " +traceback.format_exc())
+            return exc.msg
+
+
+    def user_activity(self,activity_id,experiment_name,project_id,dataset_id,user_name,model_name=None):
+        """
+         this function is used to add activity description 
+        Args : 
+                activity_id[(Integer)] : [Id of the activity] 
+                project_id[(Integer)] : [Id of the project] 
+                dataset_id[(Integer)] : [Id of the dataset] 
+                experiment_name[(string)] : [Name of experiment] 
+                user_name[(string)] : [name of user]
+                model_name[(string)] : [name of model]
+        Return:
+                [Integer] : [return 0 if successfully updated else return 1 if failed]
+        """
+        try:
+            logging.info("Common : ActivityTimelineClass : update_activity : execution start")
+            activity_df = self.get_activity(activity_id,"US")
+            if activity_df is None:
+                raise DatabaseConnectionFailed(500)
+ 
+            if len(activity_df) == 0 :
+                raise DataNotFound(500)
+ 
+            if activity_id == 47 or activity_id == 48:
+                activity_str= activity_df[0]["activity_description"]
+                activity_description = activity_str.replace('*',experiment_name)
+            elif activity_id == 44:
+                activity_str= activity_df[0]["activity_description"]
+                activity_description = activity_str.replace('#',experiment_name)
+                activity_description = activity_description.replace('*',model_name)
+                # activity_description = activity_str.replace('#',experiment_name)
+            else:
+                activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
+ 
+            end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+            self.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time) 
+                    
+ 
+        except (DatabaseConnectionFailed,DataNotFound) as exc:
             logging.error("Common : ActivityTimelineClass : update_activity : Exception " + str(exc.msg))
             logging.error("Common : ActivityTimelineClass : update_activity : " +traceback.format_exc())
             return exc.msg

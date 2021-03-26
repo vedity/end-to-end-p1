@@ -31,6 +31,9 @@ from common.utils.database import db
 from preprocess.utils import preprocessing
 from preprocess.utils.schema.schema_creation import *
 
+#Manual modeling file imports
+from modeling.utils.modeling_dag_utils.dag_common_utils import get_modeling_dag_name
+
 # Object Initialization
 preprocessObj =  preprocessing.PreprocessingClass(database,user,password,host,port) #initialize Preprocess class object
 schema_obj=SchemaClass() #initialize Schema object from schema class
@@ -55,7 +58,7 @@ class ProjectClass:
         # Project table name
         table_name = 'mlaas.project_tbl'
         # Columns for project table
-        cols = 'project_name,project_desc,user_name,original_dataset_id,dataset_id,cleanup_dag_id' 
+        cols = 'project_name,project_desc,user_name,original_dataset_id,dataset_id,cleanup_dag_id,model_dag_id' 
         # Schema for project table.
         schema ="project_id bigserial,"\
                 "project_name  text,"\
@@ -93,9 +96,11 @@ class ProjectClass:
         """
         logging.info("data ingestion : ProjectClass : make_project_records : execution start")
         
+        #TODO : both dag are not run together
         cleanup_dag_id = preprocessObj.get_cleanup_dag_name()
-        logging.info("---------->"+str(cleanup_dag_id))
-        row = project_name,project_desc,user_name,original_dataset_id,dataset_id,cleanup_dag_id
+        model_dag_id = get_modeling_dag_name()
+        
+        row = project_name,project_desc,user_name,original_dataset_id,dataset_id,cleanup_dag_id,model_dag_id
         row_tuples = [tuple(row)] # Make record for project table.
         logging.info("data ingestion : ProjectClass : make_project_records : execution end")
         return row_tuples

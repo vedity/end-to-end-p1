@@ -312,7 +312,7 @@ class DataDetailClass(APIView):
                                 return Response({"draw":draw,"recordsTotal":0,"recordsFiltered":0,"data":[]})  #return Data
                         else:
                                 logging.info("data ingestion : DataDetailClass : POST Method : execution stop : status_code :200")
-                                return Response({"draw":draw,"recordsTotal":rowcount,"recordsFiltered":filtercount,"data":dataset_df})  #return Data             
+                                return Response({"draw":draw,"recordsTotal":filtercount,"recordsFiltered":filtercount,"data":dataset_df})  #return Data             
                 except Exception as e:
                         logging.error("data ingestion : DataDetailClass : GET Method : Exception :" + str(e))
                         logging.error("data ingestion : DataDetailClass : GET Method : " +traceback.format_exc())

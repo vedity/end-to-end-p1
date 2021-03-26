@@ -257,3 +257,13 @@ class ProjectUpdateFailed(Exception):
     
     def __str__(self):
         return (self.msg)
+
+class DagUpdateFailed(Exception):
+    """  DAG Update Failed Exception"""
+    def __init__(self,status_code):
+        self.msg = "Dag update failed"
+        self.status_code = status_code
+        self.msg = self.msg
+    
+    def __str__(self):
+        return (self.msg)

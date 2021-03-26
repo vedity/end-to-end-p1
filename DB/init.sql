@@ -1,52 +1,90 @@
 CREATE schema mlaas;
+CREATE schema mlflow;
+
+CREATE TABLE mlaas.user_auth_table (
+ 	id int,
+ 	firstName varchar(255),
+ 	lastName varchar(255),
+ 	address text
+ 	);
+
+
 
 CREATE TABLE mlaas.model_experiment_tbl
 (
-   exp_unq_id bigserial,
-   experiment_id  integer,
-   run_uuid text,
-   project_id bigint,
-   dataset_id bigint,
-   user_id integer,
-   model_id  integer,
-   model_mode  text,
-   dag_run_id varchar,
-   status varchar NOT NULL DEFAULT 'running', 
-   exp_created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()              
+	exp_unq_id bigserial,
+	experiment_id  integer,
+	run_uuid text,
+	project_id bigint,
+	dataset_id bigint,
+	user_id integer,
+	model_id  integer,
+	model_mode  text,
+	dag_run_id varchar,
+	status varchar NOT NULL DEFAULT 'running', 
+	exp_created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()              
 );
 
-CREATE TABLE mlaas.model_master_tbl (
- 	model_id integer,
-   model_name text,
-   model_desc text,
-   model_parameter text,
-   model_type text,
-   algorithm_type text,
-   model_created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    );
+CREATE TABLE mlaas.model_master_tbl 
+(
+	model_id integer,
+	model_name text,
+	model_desc text,
+	model_type text,
+	algorithm_type text,
+	target_type text,
+	model_created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
 
-CREATE TABLE mlaas.cleaned_ref_tbl (
- 	unq_id bigserial,
-    project_id integer,
-    dataset_id integer,
-    user_id integer,
-    input_features text,
-    target_features text,
-    scaled_data_table text
-    );
+-- Inserting Data into the model_master table.
+insert into mlaas.model_master_tbl values (1,'Linear_Regression_Sklearn','Simple Linear Regression Model','Regression', 'Multi','Single_Target');
+
+insert into mlaas.model_master_tbl values (2,'Linear_Regression_Keras','Simple Linear Regression Model Using Nueral Network','Regression', 'Multi', 'Single_Target');
+
+insert into mlaas.model_master_tbl values (3,'XGB_Regressor','Ensemble Regression Model','Regression', 'Multi', 'Single_Target');
+
+insert into mlaas.model_master_tbl values (4,'Logistic_Regression_Sklearn','Simple Logistic Regression Model','Classification','Binary','Single_Target');
+
+CREATE TABLE mlaas.model_hyperparams_tbl
+(
+	model_id int4 NULL,
+	param_name varchar NULL,
+	param_value varchar NULL,
+	display_type varchar NULL
+);
+
+
+insert into mlaas.model_hyperparams_tbl values (1, '', '[]', '');
+
+insert into mlaas.model_hyperparams_tbl values (2, 'epochs', '[]', '');
+
+insert into mlaas.model_hyperparams_tbl values (2, 'learning_rate', '[0.001, 1]', 'validation');
+
+insert into mlaas.model_hyperparams_tbl values (2, 'batch_size', '[8, 16, 32, 64, 128, 256]', 'dropdown');
+
+insert into mlaas.model_hyperparams_tbl values (2, 'loss', '["Mean_Absolute_Error", "Mean_Squared_Error", "Mean_Absolute_Percentage_Error"]', 'dropdown');
+
+insert into mlaas.model_hyperparams_tbl values (2, 'optimizer', '["SGD", "RMSProp", "Adam"]', 'dropdown');
+
+insert into mlaas.model_hyperparams_tbl values (2, 'activation', '["Relu", "Sigmoid", "Tanh"]', 'dropdown');
+
+insert into mlaas.model_hyperparams_tbl values (3, '', '[]', '');
+
+insert into mlaas.model_hyperparams_tbl values (4, '', '[]', '');
+
 
 CREATE TABLE mlaas.model_dags_tbl
 (
-unq_id bigserial,
-dag_id varchar,
-exp_name varchar,
-run_id varchar,
-execution_date timestamptz,
-project_id bigint,
-dataset_id bigint,
-user_id integer,
-model_mode varchar,
-dag_created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	unq_id bigserial,
+	dag_id varchar,
+	exp_name varchar,
+	run_id varchar,
+	execution_date timestamptz,
+	project_id bigint,
+	dataset_id bigint,
+	user_id integer,
+	model_mode varchar,
+	dag_created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 
@@ -109,6 +147,8 @@ CREATE TABLE mlaas.project_tbl (
 	original_dataset_id int8 NULL,
 	dataset_id int8 NULL,
 	schema_id bigserial NOT NULL ,
+	cleanup_dag_id text,
+	model_dag_id text,
 	input_features text NULL,
 	target_features text NULL,
 	scaled_split_parameters text NULL,
@@ -282,42 +322,14 @@ Insert into mlaas.activity_master_tbl values (101,39,'Divide from column','opera
 Insert into mlaas.activity_master_tbl values (102,40,'Multiply into column','operation on column * pending','US','Operation',0,6,1,2);
 Insert into mlaas.activity_master_tbl values (103,40,'Multiply into column','operation on column * in process','US','Operation',1,6,1,2);
 Insert into mlaas.activity_master_tbl values (104,40,'Multiply into column','operation on column * completed','US','Operation',2,6,1,2);
-
-
-
-
--- CREATE OR REPLACE VIEW mlaas.score_view
--- AS SELECT a.experiment_id,
--- a.project_id,
--- a.run_uuid,
--- a.cv_score,
--- mr.value AS holdout_score
--- FROM ( SELECT met.experiment_id,
--- met.project_id,
--- met.run_uuid,
--- m.key,
--- m.value AS cv_score
--- FROM mlaas.model_experiment_tbl met,
--- mlaas.metrics m
--- WHERE met.run_uuid = m.run_uuid AND m.key = 'cv_score') a,
--- mlaas.metrics mr
--- WHERE a.run_uuid = mr.run_uuid AND mr.key = 'holdout_score';
-
-CREATE TABLE mlaas.manual_model_params_tbl (
-	user_id int4 NULL,
-	project_id int4 NULL,
-	dataset_id int4 NULL,
-	exp_name varchar NULL,
-	model_id int4 NULL,
-	hyperparameters varchar null
-);
-
-CREATE TABLE mlaas.model_hyperparams_tbl (
-	model_id int4 NULL,
-	hyperparameter varchar NULL,
-	param_value varchar NULL,
-	display_type varchar NULL
-);
+Insert into mlaas.activity_master_tbl values (105,41,'Created Experiment','You have created experiment','US','Operation',0,-1,0,0);
+Insert into mlaas.activity_master_tbl values (106,42,'Selected Auto Modeling','You have selected Auto Modeling for experiment','US','Operation',0,-1,0,0);
+Insert into mlaas.activity_master_tbl values (107,43,'Selected Manual Modeling','You have selected Manual Modeling for experiment','US','Operation',0,-1,0,0);
+Insert into mlaas.activity_master_tbl values (108,44,'Defined Modeling parameters','You have selected the algorithm * and defined the parameters for experiment #','US','Operation',0,-1,0,0);
+Insert into mlaas.activity_master_tbl values (109,45,'Started Modeling','Modelling has been started for experiment','US','Operation',0,-1,0,0);
+Insert into mlaas.activity_master_tbl values (110,46,'Stopped Modeling','Modelling has been stopped for experiment','US','Operation',0,-1,0,0);
+Insert into mlaas.activity_master_tbl values (111,47,'Completed Modeling','Modeling of experiment * has been completed successfully','US','Operation',0,-1,0,0);
+Insert into mlaas.activity_master_tbl values (112,48,'Completed Modeling','Modeling of experiment * has been completed with an error','US','Operation',0,-1,0,0);
 
 
 

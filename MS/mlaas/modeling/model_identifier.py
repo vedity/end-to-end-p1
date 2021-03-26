@@ -40,20 +40,14 @@ class ModelClass(SC, SplitData):
         SC (Class): Supervised Algorithm Class, which stores all the supervised algorithms.
         SplitData ([Class]): [Stores the variables required at the time of splitting the train,test, validation data]
     """
-    def __init__(self,Model_Mode=None, user_id=None, project_id=None,dataset_id=None, DBObject=None,
-                 connection=None,connection_string=None):
+    def __init__(self,db_param_dict):
         
         """This is used to initialise the basic input parameter for the model. 
         """
-        
-        self.Model_Mode = Model_Mode # Get Mode Mode
-        self.user_id = user_id # Get User Id
-        self.project_id = project_id # Get Project Id
-        self.dataset_id = dataset_id # Get Datset Id
-        self.DBObject, self.connection, self.connection_string = DBObject,connection,connection_string# Get Database Object,Connection And Connection String
-        
+        # Get Database Object,Connection And Connection String
+        self.db_param_dict = db_param_dict
     
-    def algorithm_identifier(self,model_type,experiment_name,experiment_desc):
+    def algorithm_identifier(self,model_param_dict):
         
         logging.info("modeling : ModelClass : algorithm_identifier : execution start")
         
@@ -61,24 +55,20 @@ class ModelClass(SC, SplitData):
             if target is selected then call superived algorithm.
             else call the unsupervised algorithm. 
         """
-        
         # It will check wheather it is supervised algorithm or not.
-        if model_type == 'Regression' or model_type == 'Classification':
+        if model_param_dict['model_type'] in ('Regression','Classification'):
              # call  supervised algorithm method
-            super(ModelClass,self).supervised_algorithm(self.Model_Mode,
-                                                    self.user_id,self.project_id,self.dataset_id,
-                                                    self.DBObject,self.connection,
-                                                    experiment_name,experiment_desc,model_type)
+            super(ModelClass,self).supervised_algorithm(model_param_dict,self.db_param_dict)
             
         else:
             # call  unsupervised algorithm method
-            super(ModelClass,self).unsupervised_algorithm(experiment_name,experiment_desc)
+            super(ModelClass,self).unsupervised_algorithm(model_param_dict,self.db_param_dict)
             
         logging.info("modeling : ModelClass : algorithm_identifier : execution end")
         
 
         
-    def run_model(self, model_type, model_id, experiment_name, experiment_desc):
+    def run_model(self,model_param_dict,model_id,model_name,model_param):
         """This function is used to run model when model mode is in manual. 
  
         Args:
@@ -90,33 +80,17 @@ class ModelClass(SC, SplitData):
         logging.info("modeling : ModelClass : run_model : execution start")
         
         # Check Whether Model Type Is Regression Or Classification.
-        if model_type == 'Regression' or model_type == 'Classification':
+        if model_param_dict['model_type'] in ('Regression','Classification'):
             # Call The Super Class (SupervisedClass) Method's. 
-            super(ModelClass,self).run_supervised_model(self.Model_Mode,
-                                                    self.user_id,self.project_id,self.dataset_id,
-                                                    self.DBObject,
-                                                    self.connection,
-                                                    model_type, model_id, experiment_name,experiment_desc)
+            super(ModelClass,self).run_supervised_model(model_param_dict,self.db_param_dict,model_id,model_name,model_param)
         else:
-            print("Unsupervised ML, to be impemented.")
+            print("Unsupervised ML, to be implemented.")
         
         
-    def store_manual_model_params(self, manual_model_params_dict):
-        # dataset_split_params = manual_model_params_dict['dataset_split_params']
-        # model_type = manual_model_params_dict['model_type']
-        model_id = manual_model_params_dict['model_id']
-        # model_name = manual_model_params_dict['model_name']
-        hyperparameters = str(manual_model_params_dict['hyperparameters'])
-        experiment_name = manual_model_params_dict['experiment_name']
  
-        table_name = 'mlaas.manual_model_params_tbl'
-        cols = 'user_id, project_id, dataset_id, exp_name, model_id, hyperparameters'
- 
-        row = self.user_id, self.project_id, self.dataset_id, experiment_name, model_id, hyperparameters
-        row_tuples = [tuple(row)]
- 
-        store_manual_model_params_status = self.DBObject.insert_records(self.connection,table_name,row_tuples,cols)
-        print("store_manual_model_params status ==",store_manual_model_params_status)
+        
+        
+    
 
     
 

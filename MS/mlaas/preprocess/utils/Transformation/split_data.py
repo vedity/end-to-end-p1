@@ -3,14 +3,15 @@ import pandas as pd
 import logging
 from sklearn.model_selection import train_test_split
 from common.utils.logger_handler import custom_logger as cl
-
+from common.utils.database import db
+from database import *
 user_name = 'admin'
 log_enable = True
 LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
 logger = logging.getLogger('project_creation')
-
-
+DBObject = db.DBClass()
+connection,connection_string = DBObject.database_connection(database,user,password,host,port)
 class Split_Data():
     
     def get_split_data(self, input_df, target_df, random_state, test_size, valid_size, split_method):
@@ -36,3 +37,14 @@ class Split_Data():
                                                                 random_state=random_state)
 
                 return X_train, X_valid, X_test, Y_train, Y_valid, Y_test
+
+    def check_split_exist(self,projectid):
+
+        sql_command = f'select "scaled_split_parameters" from mlaas.project_tbl pt where project_id  ='+projectid
+        df = DBObject.select_records(connection,sql_command)
+        if (df.iloc[0]['scaled_split_parameters']) == None:
+            flag = False
+        else:
+            flag = True
+    
+        return flag
