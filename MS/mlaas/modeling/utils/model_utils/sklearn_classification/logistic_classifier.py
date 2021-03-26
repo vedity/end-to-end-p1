@@ -161,8 +161,6 @@ class LogisticClassifierClass:
             prediction_flat_lst =  [ list(map(sub_lst)) for sub_lst in prediction_lst ]
             actual_flat_lst =  [ list(map(sub_lst)) for sub_lst in actual_lst ]
             return actual_flat_lst,prediction_flat_lst
-        
-
     
     def save_prediction(self,y_test,prediction_lst):
         
