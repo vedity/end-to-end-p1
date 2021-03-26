@@ -273,10 +273,11 @@ class ModelStatisticsClass:
         """
         try:
             # Get the necessary values from the mlaas.model_experiment_tbl where the state of the experiment is 'running'.
-            sql_command = "select met.*,e.name as experiment_name,mmt.model_name, mmt.model_type,dt.dataset_name, 0.0 as cv_score, 0.0 as holdout_score"\
-                          " from mlaas.model_experiment_tbl met,mlaas.model_master_tbl mmt,mlaas.dataset_tbl dt,mlflow.experiments e"\
-                          " where met.model_id = mmt.model_id and met.dataset_id=dt.dataset_id and met.experiment_id=e.experiment_id "\
-                          " and met.project_id="+str(project_id)+" and status='running'"
+            sql_command = "select e.name as experiment_name,mv.* from (select met.*,mmt.model_name, mmt.model_type,dt.dataset_name, 0.0 as cv_score, 0.0 as holdout_score"\
+                          " from mlaas.model_experiment_tbl met,mlaas.model_master_tbl mmt,mlaas.dataset_tbl dt"\
+                          " where met.model_id = mmt.model_id and met.dataset_id=dt.dataset_id and met.project_id="+str(project_id)+" and status='running' )"\
+                          " as mv left outer join mlflow.experiments e"\
+                          " on mv.experiment_id=e.experiment_id"
                           
             model_experiment_data_df = self.DBObject.select_records(self.connection, sql_command)
             if model_experiment_data_df is None:
