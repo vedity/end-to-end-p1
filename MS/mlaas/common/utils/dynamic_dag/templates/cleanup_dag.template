@@ -112,7 +112,7 @@ t2= PythonOperator(
             dag=dag,
             provide_context=True,
             python_callable=PC_OBJ.update_schema_flag_status,
-            op_args=[DBObject,connection,schema_id,dataset_id])
+            op_args=[DBObject,connection,schema_id,dataset_id,column_list])
 
 if save_as == 'True':
     t3 = PythonOperator(
