@@ -188,7 +188,7 @@ Insert into  mlaas.menu_tbl values (3,'DI','Datasets','2','/dataset',null);
 Insert into  mlaas.menu_tbl values (4,'DI','Projects','2','/project',null);
 Insert into  mlaas.menu_tbl values (5,'DP','Data Pre-Proecessing',null,null,'bx-home-circle');
 Insert into  mlaas.menu_tbl values (6,'DP','Schema Mapping','5','/schema',null);
-Insert into  mlaas.menu_tbl values (7,'DP','Data Cleanup','5',' /cleanup',null);
+Insert into  mlaas.menu_tbl values (7,'DP','Data Cleanup','5','/cleanup',null);
 
 --Insert user_auth_tbl
 Insert into mlaas.user_auth_tbl values(1,'mehul','mehul');
