@@ -266,7 +266,13 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
-                sql_command = 'select "'+str(col_name)+'" as impute_value,count(*) from '+str(table_name)+' group by "'+col_name+'" order by count desc limit 1'
+                sql_command = 'select "'+str(col_name)+'" as impute_value,count(*) from '+str(table_name)+' where "'+col_name+'" is not null group by "'+col_name+'" order by count desc limit 1'
+                dataframe = DBObject.select_records(connection,sql_command)
+                if len(dataframe['impute_value'])==0:
+                    impute_value = "'-'"
+                else:
+                    impute_value = "'"+str(dataframe['impute_value'])+"'"
+
                 dataframe = DBObject.select_records(connection,sql_command)
                 impute_value = "'"+str(dataframe['impute_value'][0])+"'"
 

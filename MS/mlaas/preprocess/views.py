@@ -21,7 +21,7 @@ from .utils.schema.schema_creation import *
 from common.utils.json_format.json_formater import *
 from common.utils.database import db
 from database import *
-
+from .utils.Transformation import split_data
 #from .utils.Visual import data_visualization
 # from .utils import data_visualization as dv
 
@@ -35,7 +35,7 @@ logger = logging.getLogger('preprocess_view')
 DBObject=db.DBClass() #Get DBClass object
 connection,connection_string=DBObject.database_connection(database,user,password,host,port) #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 preprocessObj =  preprocessing.PreprocessingClass(database,user,password,host,port) #initialize Preprocess class object
-
+sd = split_data.Split_Data()
 
 
 
@@ -440,4 +440,17 @@ class TrainValidHoldout(APIView):
                         logging.error("data preprocess : TrainValidHoldout : POST Method : "+ traceback.format_exc())
                         return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
 
-                
+
+class Check_Split(APIView):
+
+        def post(self, request, format=None):
+                try:
+                        logging.info(" modeling : Check_Split : GET Method : execution start")
+                        project_id = request.query_params.get('project_id')
+                        flag = sd.check_split_exist(project_id)
+                        return Response({"status_code":"500","error_msg":"Successfull retrival","response":flag})    
+
+                except Exception as e:
+                        logging.error("modeling : Check_Split : GET Method  " + str(e))
+                        logging.error(" modeling : Check_Split : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})    

@@ -24,15 +24,15 @@ class ExperimentClass:
         self.cols = 'experiment_id,run_uuid,project_id,dataset_id,user_id,model_id,model_mode,dag_run_id' 
         
        
-         
     def add_experiments(self,experiment_id,experiment_name,run_uuid,
                         project_id,dataset_id,user_id,model_id,model_mode,dag_run_id):
         
-        row = experiment_id,run_uuid,project_id ,dataset_id,user_id,model_id,model_mode,dag_run_id
-        row_tuples = [tuple(row)]
+        sql_command = "UPDATE "+self.table_name+" SET experiment_id="+str(experiment_id)+",run_uuid='"+ run_uuid +"' "\
+                      "WHERE project_id="+str(project_id) + " and model_id="+str(model_id)+" and dag_run_id='"+str(dag_run_id)+"'"
+                      
+        upd_exp_status = self.DBObject.update_records(self.connection,sql_command)
         
-        experiment_status = self.DBObject.insert_records(self.connection,self.table_name,row_tuples,self.cols)
-        return experiment_status
+        return upd_exp_status
     
     def update_experiment(self,experiment_id,status):
         

@@ -545,7 +545,7 @@ class DBClass:
                         sql_filtercount = f'select count(*) from (SELECT {str(select_clause)} From {table_name} {global_search_clause}) as dt'  #sql Query for filter row count                                 
             
             else:
-                sql_data = f'SELECT {str(select_clause)} From {table_name} where "{columns_list[0]}" between {start_index} and {end_index}  {order_clause}' # sql Query without any filter and clause
+                sql_data =  f'SELECT {str(select_clause)} From {table_name} where "{columns_list[0]}" >= {start_index} {order_clause} limit {length}' # sql Query without any filter and clause 
                 sql_filtercount = f'SELECT count(*) From {table_name}' #sql Query with customefilter_clause
 
             
@@ -842,9 +842,9 @@ class DBClass:
                       "a.run_uuid,a.cv_score,mr.value AS holdout_score "\
                       "FROM ( SELECT met.experiment_id,met.project_id,"\
                       "met.run_uuid,m.key,m.value AS cv_score "\
-                      "FROM mlaas.model_experiment_tbl met,mlflow.metrics m "\
-                      "WHERE met.run_uuid = m.run_uuid AND m.key = 'cv_score') a,mlflow.metrics mr "\
-                      "WHERE a.run_uuid = mr.run_uuid AND mr.key = 'holdout_score';"
+                      "FROM mlaas.model_experiment_tbl met left outer join mlflow.metrics m "\
+                      "ON met.run_uuid = m.run_uuid AND m.key = 'cv_score') a left outer join mlflow.metrics mr "\
+                      "ON a.run_uuid = mr.run_uuid AND mr.key = 'holdout_score';"
                       
         status = self.update_records(connection,sql_command)
         
