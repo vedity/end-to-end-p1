@@ -14,6 +14,7 @@ import mlflow.sklearn
 import uuid
 import logging
 import requests
+import time
 
 from .regression.regression_model import RegressionClass as RC
 from .classification.classification_model import ProbabilisticClass as PC
@@ -77,10 +78,45 @@ class SupervisedClass(RC,PC):
         
         json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
         result = requests.post("http://airflow:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
+
         
+        time.sleep(10)
+
+        sql_command = "select run_id from dag_run where dag_id='dag_creator' and state='running' order by start_date desc limit 1"
+        DBObject = db_param_dict['DBObject']
+        connection = db_param_dict['connection']
+        run_id = DBObject.select_records(connection, sql_command)
+        if run_id is None:
+            # raise DatabaseConnectionFailed(500)
+            logging.info('DB CONNECTION FAILED ')
+
+        if len(run_id) == 0:# If there are no experiments for a particular project_id.
+            logging.info('DB LENGTH ZERO')
+
+        else:
+            run_id = run_id['run_id'][0]
+            logging.info('RUN ID_------------------------------------------'+str(run_id))
+            state = 'running'
+            while state == 'running':
+                sql_command = "select state from dag_run where run_id='{}'".format(run_id)
+                state = DBObject.select_records(connection, sql_command)
+
+                if state is None:
+                # raise DatabaseConnectionFailed(500)
+                    logging.info('STATE DB CONNECTION FAILED')
+                    break
+
+                if len(state) == 0:# If there are no experiments for a particular project_id.
+                    logging.info('STATE LENGTH ZERO')
+                    break
+
+                state = state['state'][0]
+                time.sleep(4)
+
         json_data = {'conf':'{"model_param_dict":"'+str(model_param_dict)+'","master_dict":"'+str(master_dict)+'"}'}
         result = requests.post(f"http://airflow:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False)#owner
-        
+
+
         logging.info("dag run result: "+str(result))
         logging.info("modeling : SupervisedClass : run_supervised_model : execution end")
         
