@@ -221,7 +221,7 @@ class DBClass:
             connection_string = "postgresql://" + user + ":" + password + "@" + host + ":" + port + "/" + database # Make database connection string.
             engine = create_engine(connection_string) # Create database engine.
             data = pd.read_sql_query(sql_command, engine) #method of sqlalchemy
-            
+            engine.dispose()
             return data   
         except(Exception, psycopg2.DatabaseError) as error:
             logging.info(str(error) + "check")
