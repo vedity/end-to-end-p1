@@ -16,7 +16,10 @@ const routes: Routes = [
   {path: 'project', component: ManageProjectComponent},
   {path: 'upload', component: DetailviewProjectComponent},
   {path: 'create', component: CreateProjectComponent},
-  {path: 'schema', component: ManageSchemaMappingComponent},
+  {path: 'schema', component: ManageSchemaMappingComponent,data: { Activeid: 2 }},
+  {path: 'cleanup', component: ManageSchemaMappingComponent,data: { Activeid: 5 }},
+  {path: 'exploration', component: ManageSchemaMappingComponent,data: { Activeid: 3 }},
+  {path: 'datadetail', component: ManageSchemaMappingComponent,data: { Activeid: 1 }},
 ];
 @NgModule({
   imports: [RouterModule.forChild(routes)],

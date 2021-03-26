@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, ActivatedRouteSnapshot, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { SchemaMappingApiService } from '../schema-mapping-api.service';
 @Component({
@@ -13,13 +13,16 @@ export class ManageSchemaMappingComponent implements OnInit {
   schemamapping=false;
   navigate_to = "";
   activeId=1;
-  constructor(public apiService: SchemaMappingApiService, public router: Router, private toaster: ToastrService, private http: HttpClient) { }
+  constructor(public apiService: SchemaMappingApiService,public activatedroute: ActivatedRoute, public router: Router, private toaster: ToastrService, private http: HttpClient) { }
   title = "Data Detail List";
   dataset_id: any;
   columnlist: any = [];
   project_id: any;
   schema_id:any;
+  activatedroutedata:any;
   async ngOnInit() {
+   
+
     var params = history.state;
     let navigate=params.navigate_to;
     if (params.dataset_id != undefined)
@@ -51,5 +54,12 @@ export class ManageSchemaMappingComponent implements OnInit {
     }
     this.dataset_id = params.dataset_id;
     this.schema_id=params.schema_id;
+
+    
+    this.activatedroute.data.subscribe(data => {
+      this.activatedroutedata=data;
+      if(this.activatedroutedata.Activeid!=undefined)
+      this.activeId=this.activatedroutedata.Activeid;
+    })
   }
 }

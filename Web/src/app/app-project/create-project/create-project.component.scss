@@ -11,3 +11,13 @@
 .invalid-feedback {
     display: block !important;
 }
+
+// .custom-file-input:disabled {
+//     background-color: #485067 !important;
+//     cursor: not-allowed !important;
+// }
+.disabled-label,
+.disabled-label::after {
+    background-color: #485067 !important;
+    cursor: not-allowed !important;
+}

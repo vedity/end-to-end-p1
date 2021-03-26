@@ -49,3 +49,11 @@
     height: calc(100vh - 420px);
     overflow-y: auto;
 }
+
+.icon-box {
+    a {
+        margin-right: 7px;
+        font-size: 20px;
+        display: inline-block;
+    }
+}
