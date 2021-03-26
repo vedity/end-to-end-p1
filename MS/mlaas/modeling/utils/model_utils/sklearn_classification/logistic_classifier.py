@@ -94,7 +94,7 @@ class LogisticClassifierClass:
                        return_times=True)
         
         train_sizes_2, train_loss, test_loss, fit_times_2, _ = \
-        learning_curve(estimator = model, X=X_train, y=y_train, cv=None, scoring='accuracy',n_jobs=None,
+        learning_curve(estimator = model, X=X_train, y=y_train, cv=None, scoring='neg_mean_squared_error',n_jobs=None,
                        train_sizes=train_sizes,
                        return_times=True)
         
@@ -161,8 +161,6 @@ class LogisticClassifierClass:
             prediction_flat_lst =  [ list(map(sub_lst)) for sub_lst in prediction_lst ]
             actual_flat_lst =  [ list(map(sub_lst)) for sub_lst in actual_lst ]
             return actual_flat_lst,prediction_flat_lst
-        
-
     
     def save_prediction(self,y_test,prediction_lst):
         
@@ -223,7 +221,7 @@ class LogisticClassifierClass:
                          "Train Split":1-(self.dataset_split_dict['test_ratio'] + self.dataset_split_dict['valid_ratio']),
                          "Test Split":float(self.dataset_split_dict['test_ratio']),
                          "Random State":int(self.dataset_split_dict['random_state']),
-                         "Valid Split":self.dataset_split_dict['valid_size'],
+                         "Valid Split":self.dataset_split_dict['valid_ratio'],
                          "CV (K-Fold )":self.dataset_split_dict['cv']}
         
         

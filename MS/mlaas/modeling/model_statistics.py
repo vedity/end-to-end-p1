@@ -179,6 +179,19 @@ class ModelStatisticsClass:
             with open(model_summary_uri, "r") as rf: # Read the model_summary's data from mlaas.runs
                 model_summary = json.load(rf)
 
+            sql_command = 'select model_desc from mlaas.model_master_tbl mmt, mlaas.model_experiment_tbl met where mmt.model_id=met.model_id and met.experiment_id='+str(experiment_id)
+
+            model_desc = self.DBObject.select_records(self.connection, sql_command)
+            if model_desc is None:
+                raise DatabaseConnectionFailed(500)
+
+            elif len(model_desc) == 0: # If the experiment_id is not present in the mlaas.runs.
+                raise DataNotFound(500)
+            
+            model_desc = model_desc.iloc[0, 0]
+
+            model_summary.update({'Model_Description': model_desc})
+
             return model_summary
 
         except (DatabaseConnectionFailed,DataNotFound) as exc:
@@ -283,6 +296,7 @@ class ModelStatisticsClass:
                 raise DatabaseConnectionFailed(500)
 
             if len(model_experiment_data_df) == 0:# If there are no experiments for a particular project_id.
+                sql_command = ''
                 return []
             # Converting final_df to json
             json_data = model_experiment_data_df.to_json(orient='records',date_format='iso')
@@ -292,8 +306,24 @@ class ModelStatisticsClass:
             logging.error("modeling : ModelStatisticsClass : show_experiments_list : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : show_experiments_list : " +traceback.format_exc())
             return exc.msg
+
+    def check_running_experiments(self, project_id):
         
-    
+        sql_command = "select exp_name from mlaas.model_dags_tbl mdt,dag_run dr where mdt.run_id=dr.run_id"\
+                      " and dr.state in ('running') and mdt.project_id={}".format(project_id)
+        exp_name = self.DBObject.select_records(self.connection, sql_command)
+
+        if exp_name is None:
+            raise DatabaseConnectionFailed(500)
+
+        if len(exp_name) == 0:# If there are no experiments for a particular project_id.
+            return {'exp_name': ''}
+        
+        exp_name = exp_name['exp_name'][0]
+        
+        return {'exp_name': exp_name}
+
+
     def show_all_experiments(self, project_id):
         """This function is used to get experiments_list of particular project.
 
