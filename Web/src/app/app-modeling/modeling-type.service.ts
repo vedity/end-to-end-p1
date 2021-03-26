@@ -35,7 +35,6 @@ export class ModelingTypeApiService {
      var params = new HttpParams().append("experiment_name", experiment_name).append("project_id", project_id);
      return this.httpClient.get(this.baseUrl + "modeling/checkexperimentname/", { headers: this.headers, params });
    }
-    
 
   showrunningexperimentslist(project_id): Observable<any> {
    // project_id=2;
@@ -52,7 +51,6 @@ export class ModelingTypeApiService {
   }
 
   startModeling(obj):Observable<any>{
-   
       var params = new HttpParams().
       append("user_name", obj.user_name).
       append("dataset_id", obj.dataset_id).
@@ -67,7 +65,6 @@ export class ModelingTypeApiService {
     
    
   }
-
 
   getLearningCurves(experiment_id): Observable<any> {
    // experiment_id=2;
@@ -114,5 +111,9 @@ export class ModelingTypeApiService {
     var params = new HttpParams().append("model_id", model_id);
     return this.httpClient.get(this.baseUrl + "modeling/hyperparameters/", { headers: this.headers, params });
   }
-}
 
+  compareExperiment(exp_ids): Observable<any> {
+    var params = new HttpParams().append("experiment_ids", exp_ids);
+    return this.httpClient.get(this.baseUrl + "modeling/compareexperiments/", { headers: this.headers, params });
+  }
+}

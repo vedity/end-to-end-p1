@@ -189,11 +189,7 @@ class DBClass:
                 extras.execute_values(cursor, query, tuples) # Excute insert query.
                 index = 0
 
-            elif Flag==1 :
-                query = "INSERT INTO %s(%s) VALUES %%s RETURNING dataset_id" % (table_name, cols) # Make query
-                extras.execute_values(cursor, query, tuples) # Excute insert query.
-                index = [row[0] for row in cursor.fetchall()][0]
-            else:
+            else :
                 query = "INSERT INTO %s(%s) VALUES %%s RETURNING index" % (table_name, cols) # Make query
                 extras.execute_values(cursor, query, tuples) # Excute insert query.
                 index = [row[0] for row in cursor.fetchall()][0]
@@ -846,9 +842,9 @@ class DBClass:
                       "a.run_uuid,a.cv_score,mr.value AS holdout_score "\
                       "FROM ( SELECT met.experiment_id,met.project_id,"\
                       "met.run_uuid,m.key,m.value AS cv_score "\
-                      "FROM mlaas.model_experiment_tbl met,mlflow.metrics m "\
-                      "WHERE met.run_uuid = m.run_uuid AND m.key = 'cv_score') a,mlflow.metrics mr "\
-                      "WHERE a.run_uuid = mr.run_uuid AND mr.key = 'holdout_score';"
+                      "FROM mlaas.model_experiment_tbl met left outer join mlflow.metrics m "\
+                      "ON met.run_uuid = m.run_uuid AND m.key = 'cv_score') a left outer join mlflow.metrics mr "\
+                      "ON a.run_uuid = mr.run_uuid AND mr.key = 'holdout_score';"
                       
         status = self.update_records(connection,sql_command)
         

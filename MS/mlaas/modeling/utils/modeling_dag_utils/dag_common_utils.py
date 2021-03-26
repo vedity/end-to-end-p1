@@ -47,4 +47,32 @@ def start_pipeline(dag,run_id,execution_date,ds,**kwargs):
     row_tuples = [tuple(row)]
     
     dag_status = DBObject.insert_records(connection,table_name,row_tuples,cols)
-
+    
+    ### New Code Added #####
+    table_name = 'mlaas.model_experiment_tbl'
+    cols = 'project_id,dataset_id,user_id,model_id,model_mode,dag_run_id'
+    
+    if model_mode == 'Auto' :
+        
+        if model_param_dict['model_type'] == 'Regression':
+            
+            sql_command = "select model_id from mlaas.model_master_tbl where model_type='Regression'"
+        else:
+            sql_command = "select model_id from mlaas.model_master_tbl where model_type='Classification'"
+            
+        model_df = DBObject.select_records(connection,sql_command)
+        model_ids = model_df['model_id'].to_list()
+            
+    else:
+        master_dict = ast.literal_eval(kwargs['dag_run'].conf['master_dict'])
+        model_ids = master_dict['model_id']
+        
+    for model_id in model_ids:
+        
+        row = project_id,dataset_id ,user_id,model_id,model_mode,run_id
+        row_tuples = [tuple(row)]
+        exp_status = DBObject.insert_records(connection,table_name,row_tuples,cols)
+        
+         
+    ### End Changes ######
+        

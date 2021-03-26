@@ -153,47 +153,47 @@ class ModelStatisticsClass:
     
     def model_summary(self, experiment_id):
         """This function is used to get model_summary of particular experiment.
-
+ 
         Args:
             experiment_id ([object]): [Experiment id of particular experiment.]
-
+ 
         Returns:
             [data_frame]: [it will return the dataframe for model_summary.]
             
         """
         try:
-
+ 
             sql_command = 'select artifact_uri from mlflow.runs where experiment_id='+str(experiment_id)
             # Get the model summary's data path from mlaas.runs with the associated experiment id
             artifact_uri = self.DBObject.select_records(self.connection, sql_command)
             
             if artifact_uri is None:
                 raise DatabaseConnectionFailed(500)
-
+ 
             if len(artifact_uri) == 0: # If the experiment_id is not present in the mlaas.runs.
                 raise DataNotFound(500)
-
+ 
             artifact_uri=artifact_uri.iloc[0,0]
             model_summary_uri = artifact_uri + '/model_summary.json'
             
             with open(model_summary_uri, "r") as rf: # Read the model_summary's data from mlaas.runs
                 model_summary = json.load(rf)
-
+ 
             sql_command = 'select model_desc from mlaas.model_master_tbl mmt, mlaas.model_experiment_tbl met where mmt.model_id=met.model_id and met.experiment_id='+str(experiment_id)
-
+ 
             model_desc = self.DBObject.select_records(self.connection, sql_command)
             if model_desc is None:
                 raise DatabaseConnectionFailed(500)
-
+ 
             elif len(model_desc) == 0: # If the experiment_id is not present in the mlaas.runs.
                 raise DataNotFound(500)
             
             model_desc = model_desc.iloc[0, 0]
-
+ 
             model_summary.update({'Model_Description': model_desc})
-
+ 
             return model_summary
-
+ 
         except (DatabaseConnectionFailed,DataNotFound) as exc:
             logging.error("modeling : ModelStatisticsClass : model_summary : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : model_summary : " +traceback.format_exc())
@@ -286,10 +286,11 @@ class ModelStatisticsClass:
         """
         try:
             # Get the necessary values from the mlaas.model_experiment_tbl where the state of the experiment is 'running'.
-            sql_command = "select met.*,e.name as experiment_name,mmt.model_name, mmt.model_type,dt.dataset_name, 0.0 as cv_score, 0.0 as holdout_score"\
-                          " from mlaas.model_experiment_tbl met,mlaas.model_master_tbl mmt,mlaas.dataset_tbl dt,mlflow.experiments e"\
-                          " where met.model_id = mmt.model_id and met.dataset_id=dt.dataset_id and met.experiment_id=e.experiment_id "\
-                          " and met.project_id="+str(project_id)+" and status='running'"
+            sql_command = "select e.name as experiment_name,mv.* from (select met.*,mmt.model_name, mmt.model_type,dt.dataset_name, 0.0 as cv_score, 0.0 as holdout_score"\
+                          " from mlaas.model_experiment_tbl met,mlaas.model_master_tbl mmt,mlaas.dataset_tbl dt"\
+                          " where met.model_id = mmt.model_id and met.dataset_id=dt.dataset_id and met.project_id="+str(project_id)+" and status='running' )"\
+                          " as mv left outer join mlflow.experiments e"\
+                          " on mv.experiment_id=e.experiment_id"
                           
             model_experiment_data_df = self.DBObject.select_records(self.connection, sql_command)
             if model_experiment_data_df is None:
