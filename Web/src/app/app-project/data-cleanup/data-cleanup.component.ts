@@ -112,7 +112,7 @@ export class DataCleanupComponent implements OnInit {
       info: false,
       searching: false,
       //scrollX: true,
-      scrollY: "52vh",
+      scrollY: "57.5vh",
     }
     this.loaderdiv = true;
     this.getOpertion();
@@ -236,12 +236,15 @@ export class DataCleanupComponent implements OnInit {
     }
   }
 
-  setInput(operationid, value) {
+  setInput(operationid, event) {
+    var value=event.target.value;
     this.selectedColumn.forEach(element => {
       var input = $("#setInput_" + element + "_" + operationid).val();
-      $("#setInput_" + element + "_" + operationid).val(value).removeClass("error")
       if (input != undefined) {
-        $("#setInput_" + element + "_" + operationid).val(value).addClass("error");
+      $("#setInput_" + element + "_" + operationid).val(value).removeClass("error")
+
+      if($("#"+event.target.id).hasClass('errorstatus'))
+        $("#setInput_" + element + "_" + operationid).addClass("error");
       }
     });
   }
