@@ -57,6 +57,7 @@ export class ModelingTypeComponent implements OnInit {
   }
 
   ngOnInit(): void {
+   // this.checkrunningExperiment()
     let projectdatamodel;
     this.dtOptions = {
       paging: false,
@@ -151,6 +152,29 @@ export class ModelingTypeComponent implements OnInit {
     this.getAllExperimentList();
 
   }
+
+  checkrunningExperiment(){
+    this.apiservice.checkrunningExperiment(this.params.project_id).subscribe(
+      logs=>this.checkrunningexpuccessHandler(logs),
+    //  error=>this.errorHandler(error)
+    )
+  }
+
+  checkrunningexpuccessHandler(data) {
+    if (data.status_code == "200") {
+      if (data.response.exp_name != "") {
+        this.processInterval = setInterval(() => {
+          this.getRunningExperimentList();
+          this.getAllExperimentList();
+          this.checkstatus();
+        }, 4000);
+      }
+    }
+    // else {
+    //   this.errorHandler(data);
+    // }
+  }
+
 
   drop(event: CdkDragDrop<string[]>) {
     moveItemInArray(this.timePeriods, event.previousIndex, event.currentIndex);

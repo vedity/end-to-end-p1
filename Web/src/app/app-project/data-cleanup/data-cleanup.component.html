@@ -64,7 +64,7 @@
                                                     <input type="radio" id="customRadio_{{k}}_{{j}}" name="customRadio_{{k}}" value="{{childitem.operation_id}}" title="{{childitem.name}}" data-waschecked="false" [disabled]="operationIds.indexOf(childitem.operation_id)==-1" (click)="selectHandling($event,childitem.operation_id)"
                                                         class="custom-control-input radiobutton">
                                                     <label class="custom-control-label" for="customRadio_{{k}}_{{j}}" id="radiolabel_{{k}}_{{j}}">{{childitem.name}}</label>
-                                                    <input type="text" name="input_{{k}}_{{j}}" class="form-control inline-textbox customInput" disabled id="customInput_{{k}}_{{j}}" (change)="setInput(childitem.operation_id,$event.target.value)" (keyup)="checkvalidation($event,childitem.check_type)" *ngIf="childitem.user_input==1">
+                                                    <input type="text" name="input_{{k}}_{{j}}" class="form-control inline-textbox customInput" disabled id="customInput_{{k}}_{{j}}" (change)="setInput(childitem.operation_id,$event)" (keyup)="checkvalidation($event,childitem.check_type)" *ngIf="childitem.user_input==1">
                                                 </div>
                                             </div>
                                         </div>
