@@ -346,8 +346,9 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 series = data_df[col]
                 
                 #? Checking if there are missing values in the column
-                is_missing_value = series.isnull().any()
-                missing_value_status.append(is_missing_value)
+                # is_missing_value = series.isnull().any()
+                # missing_value_status.append(is_missing_value)
+                missing_value_status.append(self.detect_missing_values(DBObject, connection, table_name, col))
                 
                 #? Checking if there is noise in the column
                 noise = self.dtct_noise(DBObject, connection, col, table_name= table_name)
@@ -457,7 +458,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     else:
                         col_type = 3
 
-                    missing_values = data_df[col].isnull().any()
+                    missing_values = self.detect_missing_values(DBObject, connection, table_name, col)
                     noise_status = self.dtct_noise(DBObject, connection, col, table_name= table_name)
                     if noise_status == 1:
                         noise_status = True
@@ -1092,21 +1093,40 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             --------
             dag_id (`String`): the Cleanup dag id.
         '''
-        
+        try:
+            logging.info("data preprocessing : PreprocessingClass : get_cleanup_dag_name : execution start")
+            
+            DBObject,connection,connection_string = self.get_db_connection() #get db connection
+            if connection == None :
+                raise DatabaseConnectionFailed(500)  
 
-        id = uuid.uuid1().time
-        dag_id='Cleanup_dag_'+str(id)
+            id = uuid.uuid1().time
+            dag_id='Cleanup_dag_'+str(id)
 
-        template = "cleanup_dag.template"
-        namespace = "Cleanup_Dags"
-        
-        master_dict = {'active': 0}
-        
-        json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
-        
-        result = requests.post("http://airflow:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
+            template = "cleanup_dag.template"
+            namespace = "Cleanup_Dags"
 
-        return dag_id
+            #? Inserting into Dag_Status Table
+            col = "dag_id,status"
+            row_data = [tuple((dag_id,'0'))]
+            table_name = "mlaas.cleanup_dag_status"
+            insert_status,_ = DBObject.insert_records(connection,table_name,row_data,col)
+            
+            master_dict = {'active': 0}
+            
+            json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
+            
+            result = requests.post("http://airflow:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
+
+            logging.info("data preprocessing : PreprocessingClass : get_cleanup_dag_name : execution stop")
+            
+            return dag_id
+        
+        except (DatabaseConnectionFailed) as exc:
+            logging.error("data preprocessing : PreprocessingClass : get_cleanup_dag_name : Exception " + str(exc.msg))
+            logging.error("data preprocessing : PreprocessingClass : get_cleanup_dag_name : " +traceback.format_exc())
+            return exc.msg
+            
     
     def dag_executor(self,project_id, dataset_id, schema_id, request, flag ,selected_visibility,dataset_name ,dataset_desc):
         '''
@@ -1131,10 +1151,16 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if connection == None :
                 raise DatabaseConnectionFailed(500)
                 
+            
             sql_command = f"select pt.cleanup_dag_id from mlaas.project_tbl pt where pt.project_id = '{project_id}'"
             dag_id_df = DBObject.select_records(connection,sql_command) 
+            if not isinstance(dag_id_df,pd.DataFrame): return 1
             dag_id = dag_id_df['cleanup_dag_id'][0]
             
+            #? Setting the dag as busy
+            sql_command = f"update mlaas.cleanup_dag_status set status = (case when status = '1' then '0' else '1' end) where dag_id = '{dag_id}'"
+            update_status = DBObject.update_records(connection,sql_command)
+
             op_dict, val_dict = self.reorder_operations(request)
             
             template = "cleanup_dag.template"
@@ -1172,7 +1198,12 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             return 0
         
         except (DatabaseConnectionFailed,DagUpdateFailed) as exc:
-            logging.error(str(exc) +" Error")
+            
+            #? Resetting the dag status, else if will be in running state always
+            if update_status == 0:
+                sql_command = f"update mlaas.cleanup_dag_status set status = (case when status = '1' then '0' else '1' end) where dag_id = '{dag_id}'"
+                update_status = DBObject.update_records(connection,sql_command)
+
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
             return exc.msg
@@ -1293,3 +1324,36 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         except Exception as exc:
             return str(exc)
 
+    def get_dag_status(self, project_id):
+        '''
+            Used to get the dag status
+        '''
+        try:
+            logging.info("data preprocessing : PreprocessingClass : get_dag_status : execution stop")
+            
+            DBObject,connection,connection_string = self.get_db_connection()
+            if connection == None :
+                raise DatabaseConnectionFailed(500)
+            
+            #? Getting Dag id
+            sql_command = f"select pt.cleanup_dag_id from mlaas.project_tbl pt where pt.project_id = '{project_id}'"
+            dag_id_df = DBObject.select_records(connection,sql_command) 
+            dag_id = dag_id_df['cleanup_dag_id'][0]
+
+            #? Getting Dag Status
+            sql_command = f"select cds.status from mlaas.cleanup_dag_status cds where cds.dag_id = '{dag_id}';"
+            status_df = DBObject.select_records(connection,sql_command) 
+            status = status_df['status'][0]
+            
+            logging.info("data preprocessing : PreprocessingClass : get_dag_status : execution stop")
+
+            if status == '1':
+                return True
+            else:
+                return False
+        
+        except (DatabaseConnectionFailed) as exc:
+            logging.error("data preprocessing : PreprocessingClass : get_dag_status : Exception " + str(exc.msg))
+            logging.error("data preprocessing : PreprocessingClass : get_dag_status : " +traceback.format_exc())
+            return exc.msg
+        

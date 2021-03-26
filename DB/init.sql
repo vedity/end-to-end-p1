@@ -9,7 +9,6 @@ CREATE TABLE mlaas.user_auth_table (
  	);
 
 
-
 CREATE TABLE mlaas.model_experiment_tbl
 (
 	exp_unq_id bigserial,
@@ -134,7 +133,11 @@ CREATE TABLE mlaas.user_auth_tbl (
 	"password" text NULL
 );
 
-
+CREATE TABLE mlaas.cleanup_dag_status (
+	dag_index bigserial NOT NULL,
+	dag_id text,
+	status varchar(1) NOT NULL DEFAULT '0'
+);
 
 CREATE TABLE mlaas.project_tbl (
 	project_id bigserial NOT NULL ,
