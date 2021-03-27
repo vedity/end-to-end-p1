@@ -64,44 +64,46 @@ def get_model_data(user_id, project_id, dataset_id):
              
 def logistic_regression_sklearn(run_id,**kwargs):
         
-        mlflow.set_tracking_uri("postgresql+psycopg2://airflow:airflow@postgresql:5432/airflow?options=-csearch_path%3Ddbo,mlflow")
-       
-        model_id = kwargs['model_id']
+        try:
+            mlflow.set_tracking_uri("postgresql+psycopg2://{}:{}@{}:{}/{}?options=-csearch_path%3Ddbo,mlflow".format(user, password, host, port, database))
         
-        model_param_dict = ast.literal_eval(kwargs['dag_run'].conf['model_param_dict'])
-        model_mode = model_param_dict['model_mode']
-        project_id = int(model_param_dict['project_id'])
-        dataset_id = int(model_param_dict['dataset_id'])
-        user_id = int(model_param_dict['user_id'])
-        experiment_name  = model_param_dict['experiment_name']
-        
-        input_features_list, target_features_list, X_train, X_test, X_valid, y_train, y_test, y_valid, scaled_split_dict= get_model_data(user_id, project_id, dataset_id)
-           
-        
-        ExpObject = model_experiment.ExperimentClass(DBObject, connection, connection_string)
-        experiment, experiment_id = ExpObject.get_mlflow_experiment(experiment_name)
-        # mlflow set_experiment and run the model.
-        with mlflow.start_run(experiment_id=experiment_id) as run:
-            # Get experiment id and run id from the experiment set.
-            run_uuid = run.info.run_id
-            experiment_id = experiment.experiment_id
-            dag_run_id = run_id
-            ################### Add Experiment ################################
+            model_id = kwargs['model_id']
             
-            add_exp_status = ExpObject.add_experiments(experiment_id,experiment_name,run_uuid,
-                                                          project_id,dataset_id,user_id,
-                                                          model_id,model_mode,dag_run_id)
+            model_param_dict = ast.literal_eval(kwargs['dag_run'].conf['model_param_dict'])
+            model_mode = model_param_dict['model_mode']
+            project_id = int(model_param_dict['project_id'])
+            dataset_id = int(model_param_dict['dataset_id'])
+            user_id = int(model_param_dict['user_id'])
+            experiment_name  = model_param_dict['experiment_name']
             
-            try:
+            input_features_list, target_features_list, X_train, X_test, X_valid, y_train, y_test, y_valid, scaled_split_dict= get_model_data(user_id, project_id, dataset_id)
+            
+            
+            ExpObject = model_experiment.ExperimentClass(DBObject, connection, connection_string)
+            experiment, experiment_id = ExpObject.get_mlflow_experiment(experiment_name)
+            # mlflow set_experiment and run the model.
+            with mlflow.start_run(experiment_id=experiment_id) as run:
+                # Get experiment id and run id from the experiment set.
+                run_uuid = run.info.run_id
+                experiment_id = experiment.experiment_id
+                dag_run_id = run_id
+                ################### Add Experiment ################################
+                
+                add_exp_status = ExpObject.add_experiments(experiment_id,experiment_name,run_uuid,
+                                                            project_id,dataset_id,user_id,
+                                                            model_id,model_mode,dag_run_id)
+                
+        
                 ## Declare Object
                 LCObject = logistic_classifier.LogisticClassifierClass(input_features_list, target_features_list, X_train, X_test, X_valid,
                                                         y_train, y_test, y_valid, scaled_split_dict)
                 LCObject.run_pipeline()
                 status = "success"
-            except:
-                status = "failed"
-                
+        except:
+            status = "failed"
+                    
             ## Update Experiment ########
+        finally:
             upd_exp_status = ExpObject.update_experiment(experiment_id,status)
         
         print("experiment_status == ",upd_exp_status)

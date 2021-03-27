@@ -87,7 +87,7 @@ class LogisticClassifierClass:
         X_train = X_train[:,1:] 
         y_train = y_train[:,-1].reshape(len(y_train[:,-1]),1)
         # Dividing train data size into bins.
-        train_sizes=np.linspace(0.10, 1.0, 5)
+        train_sizes=np.linspace(0.10, 1.0, 10)
         train_sizes, train_scores, test_scores, fit_times, _ = \
         learning_curve(estimator = model, X=X_train, y=y_train, cv=None, scoring='accuracy',n_jobs=None,
                        train_sizes=train_sizes,
@@ -214,7 +214,7 @@ class LogisticClassifierClass:
         train_size = X_train.shape[0]
         test_size = X_test.shape[0]
         
-        model_summary = {"Model Name":"Linear_Regression_Sklearn",
+        model_summary = {"Model Name":"Logistic_Regression_SKlearn",
                          "Input Features":self.input_features_list,
                          "Target Features":self.target_features_list,
                          "Train Size":float(train_size),"Test Size":int(test_size),
