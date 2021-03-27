@@ -222,8 +222,11 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info(str(cols) + " " +str(value))
         
         #Operation Id to get activity details
-        operation_id = 12
-        
+        if not flag:
+            operation_id = 12
+        else:
+            operation_id = 9
+
         for i,col_name in enumerate(cols):
             try:
 
