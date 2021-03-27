@@ -41,4 +41,6 @@ urlpatterns = [
     path('mlaas/preprocess/cleanup/holdout/',TrainValidHoldout.as_view()),
 
     path('mlaas/modeling/checksplit/',Check_Split.as_view()),
+    
+    path('mlaas/preprocess/cldag_status/',CheckCleanupDagStatus.as_view()),
 ]

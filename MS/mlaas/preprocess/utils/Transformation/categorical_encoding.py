@@ -72,13 +72,12 @@ class EncodeClass:
             else:
                 flag = True
             
-            
             dist_val,alter_val,select_val,val_list,dtype,missing_lst,noise_lst = self.query_string( df,DBObject,connection,table_name,column_list,flag)
-            
+        
             alter_col = self.add_column(DBObject,connection,table_name,alter_val)
-
+            
             status = self.update_column(DBObject,connection,table_name,dist_val,column_list,select_val)
-            schema_update = sc.update_dataset_schema(DBObject,connection,int(schema_id),val_list,dtype,missing_flag=missing_lst,noise_flag=noise_lst,flag = True)
+            schema_update = sc.update_dataset_schema(DBObject,connection,schema_id,val_list,dtype,missing_flag=missing_lst,noise_flag=noise_lst,flag = True)
             
             status = self.drop_column(DBObject,connection,table_name,column_list)
             schema_delete = sc.delete_schema_record(DBObject,connection,schema_id,column_list[1])          
@@ -128,7 +127,7 @@ class EncodeClass:
             for val in range(len(df)):
                 value = df.loc[val, {column_list[1]}]
                 value1 = "'"+str(value[0])+"'"
-                val_list.append(str(value[0]))
+                val_list.append(value[0])
                 dtype.append('numeric')
                 missing_lst.append('False')
                 noise_lst.append('False') 
@@ -141,7 +140,7 @@ class EncodeClass:
             for val in range(len(most_occure)):
                 value = most_occure.loc[val, {column_list[1]}]
                 value1 = "'"+str(value[0])+"'"
-                val_list.append(str(value[0]))
+                val_list.append(value[0])
                 dtype.append('numeric')
                 missing_lst.append('False')
                 noise_lst.append('False') 

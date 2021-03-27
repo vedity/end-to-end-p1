@@ -241,7 +241,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         
         operation = '*'
         #Operation Id to get activity details
-        operation_id = 31
+        operation_id = 32
 
         cols = [column_list[i] for i in col]
         for i,col_name in enumerate(cols):
@@ -268,7 +268,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         
         operation = '/'
         #Operation Id to get activity details
-        operation_id = 32
+        operation_id = 31
 
         cols = [column_list[i] for i in col]
         for i,col_name in enumerate(cols):
