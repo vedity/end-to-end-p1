@@ -12,7 +12,7 @@ const routes: Routes = [
   { path: '', redirectTo: 'project' },
   { path: 'manage', component: ListProjectComponent },
   {path: 'dataset', component: ListDatabaseComponent},
-  {path: 'datadetail', component: ListDatadetailComponent},
+  // {path: 'datadetail', component: ListDatadetailComponent},
   {path: 'project', component: ManageProjectComponent},
   {path: 'upload', component: DetailviewProjectComponent},
   {path: 'create', component: CreateProjectComponent},
