@@ -121,4 +121,10 @@ export class ModelingTypeApiService {
     var params = new HttpParams().append("project_id", project_id);
     return this.httpClient.get(this.baseUrl + "modeling/checkrunningexperiments/", { headers: this.headers, params });
   }
+
+  getproject(): Observable<any> {
+    this.user = JSON.parse(localStorage.getItem("currentUser"));
+    var params = new HttpParams().set("user_name", this.user.username);
+    return this.httpClient.get(this.baseUrl + "ingest/project/create/", { headers: this.headers, params });
+  }
 }
