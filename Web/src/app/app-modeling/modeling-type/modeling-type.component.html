@@ -4,7 +4,7 @@
         <div class="col-12">
             <div class="page-title-box d-flex align-items-center justify-content-between">
                 <h4 class="mb-0 font-size-18">Modeling</h4>
-                <a href="javascript:void(0);" [routerLink]="['/schema']" [state]="{activeId:5,navigate_to:'modeling'}" title="back" class="back-btn">Back</a>
+                <a href="javascript:void(0);" [routerLink]="['/cleanup']" title="back" class="back-btn">Back</a>
                 <div class="page-title-right">
                 </div>
             </div>
@@ -503,18 +503,9 @@
                 </ng-template>
             </li>
         </ul>
-        <div class="experiment-list">
-            <div class="expe-name">
-                <p>Experiment 1 <a href="javascript:void(0)" title="Remove"><i class="mdi mdi-close"></i></a></p>
-            </div>
-            <div class="expe-name">
-                <p>Experiment 2 <a href="javascript:void(0)" title="Remove"><i class="mdi mdi-close"></i></a></p>
-            </div>
-            <div class="expe-name">
-                <p>Experiment 3 <a href="javascript:void(0)" title="Remove"><i class="mdi mdi-close"></i></a></p>
-            </div>
-            <div class="expe-name">
-                <p>Experiment 4 <a href="javascript:void(0)" title="Remove"><i class="mdi mdi-close"></i></a></p>
+        <div class="experiment-list" *ngIf="comparedata">
+            <div class="expe-name" *ngFor="let item of comparedata.responsedata">
+                <p>{{item.experiment_name}} <a href="javascript:void(0)" title="Remove" *ngIf="compareIds.length>2"><i class="mdi mdi-close"></i></a></p>
             </div>
         </div>
         <div [ngbNavOutlet]="justifiednavcompare"></div>
@@ -524,33 +515,26 @@
 <ng-template #projectModal let-modal>
     <div class="modal-header">
         <h5> Project Detail </h5>
-        <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Close click')">
+        <!-- <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Close click')">
             <span aria-hidden="true">&times;</span>
-        </button>
+        </button> -->
     </div>
     <div class="modal-body">
         <div class="row">
             <div class="col-md-12">
                 <div class="form-group">
                     <label>Select Project</label>
-                    <select class="form-control" (change)="hyperparams=$event.target.value">
-                        <option value="sklearn">Project 1</option>
-                        <option value="keras">Project 2</option>
+                    <select class="form-control" (change)="setproject($event.target.value)">
+                        <option value="">select</option>
+
+                        <option value="{{item.project_id}}" *ngFor="let item of projectList">{{item.project_name}}</option>
                     </select>
                 </div>
             </div>
-            <div class="col-md-12">
-                <div class="form-group">
-                    <label>Select Dataset</label>
-                    <select class="form-control" (change)="hyperparams=$event.target.value">
-                        <option value="sklearn">Dataset 1</option>
-                        <option value="keras">Dataset 2</option>
-                    </select>
-                </div>
-            </div>
+
             <div class="col-md-12">
                 <div class="text-center mb-4">
-                    <button class="btn btn-success" type="submit" (click)="modal.dismiss('Cross click')">Next</button>
+                    <button class="btn btn-success" type="submit" (click)="setModeling()">Next</button>
                 </div>
             </div>
         </div>

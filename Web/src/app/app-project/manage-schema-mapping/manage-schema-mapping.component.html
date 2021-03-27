@@ -2,29 +2,29 @@
     <div class="tab-menu" [hidden]="displaytitle">
         <ul ngbNav #justifiednav="ngbNav" [activeId]="activeId" class="nav-pills nav-justified">
             <li [ngbNavItem]="1">
-                <a ngbNavLink title="Data Detail">
+                <a ngbNavLink title="Data Detail" (click)="navigatePage(1)">
                     <span class="font-size-18"><i class="bx bx-spreadsheet"></i></span>
                 </a>
                 <ng-template ngbNavContent>
-                    <app-list-datadetail [title]="title" [dataset_id]="dataset_id" [schema_id]="schema_id" [navigate_to]="navigate_to" [displaytitle]="displaytitle"></app-list-datadetail>
+                    <!-- <app-list-datadetail [title]="title" [dataset_id]="dataset_id" [schema_id]="schema_id" [navigate_to]="navigate_to" [displaytitle]="displaytitle"></app-list-datadetail> -->
                 </ng-template>
             </li>
             <li [ngbNavItem]="2">
-                <a ngbNavLink title="Schema Mapping">
+                <a ngbNavLink title="Schema Mapping" (click)="navigatePage(2)">
                     <span class="font-size-18"><i class="bx bx-message-square-add"></i></span>
                 </a>
                 <ng-template ngbNavContent>
-                    <app-create-schema-mapping [dataset_id]="dataset_id" [project_id]="project_id" [schema_id]="schema_id" [title]="title">
-                    </app-create-schema-mapping>
+                    <!-- <app-create-schema-mapping [dataset_id]="dataset_id" [project_id]="project_id" [schema_id]="schema_id" [title]="title">
+                    </app-create-schema-mapping> -->
                 </ng-template>
             </li>
             <li [ngbNavItem]="3">
-                <a ngbNavLink title="Data Exploration">
+                <a ngbNavLink title="Data Exploration" (click)="navigatePage(3)">
                     <span class="font-size-18"><i class="bx bx-screenshot"></i></span>
                 </a>
                 <ng-template ngbNavContent>
-                    <app-data-exploration [dataset_id]="dataset_id" [schema_id]="schema_id" [project_id]="project_id" [title]="title">
-                    </app-data-exploration>
+                    <!-- <app-data-exploration [dataset_id]="dataset_id" [schema_id]="schema_id" [project_id]="project_id" [title]="title">
+                    </app-data-exploration> -->
                 </ng-template>
             </li>
             <!-- <li [ngbNavItem]="4">
@@ -37,14 +37,48 @@
                 </ng-template>
             </li> -->
             <li [ngbNavItem]="5">
-                <a ngbNavLink title="Data Cleanup">
+                <a ngbNavLink title="Data Cleanup" (click)="navigatePage(5)">
                     <span class="font-size-18"><i class="bx bx-brush"></i></span>
                 </a>
                 <ng-template ngbNavContent>
-                    <app-data-cleanup [dataset_id]="dataset_id" [schema_id]="schema_id" [project_id]="project_id" [title]="title"></app-data-cleanup>
+                    <!-- <app-data-cleanup [dataset_id]="dataset_id" [schema_id]="schema_id" [project_id]="project_id" [title]="title"></app-data-cleanup> -->
                 </ng-template>
             </li>
         </ul>
     </div>
     <div [ngbNavOutlet]="justifiednav"></div>
+    <div>
+        <app-list-datadetail *ngIf="activeId==1" [title]="title" [dataset_id]="dataset_id" [schema_id]="schema_id" [navigate_to]="navigate_to" [displaytitle]="displaytitle"></app-list-datadetail>
+        <app-create-schema-mapping *ngIf="activeId==2" [dataset_id]="dataset_id" [project_id]="project_id" [schema_id]="schema_id" [title]="title"></app-create-schema-mapping>
+        <app-data-exploration *ngIf="activeId==3" [dataset_id]="dataset_id" [schema_id]="schema_id" [project_id]="project_id" [title]="title"></app-data-exploration>
+        <app-data-cleanup *ngIf="activeId==5" [dataset_id]="dataset_id" [schema_id]="schema_id" [project_id]="project_id" [title]="title"></app-data-cleanup>
+    </div>
+    <button class="btn btn-outline-success openmodal" hidden (click)="ProjectData(projectModal)">View
+        Detail </button>
 </div>
+
+<ng-template #projectModal let-modal>
+    <div class="modal-header">
+        <h5> Project Detail </h5>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label>Select Project</label>
+                    <select class="form-control" (change)="setproject($event.target.value)">
+                        <option value="">select</option>
+
+                        <option value="{{item.project_id}}" *ngFor="let item of projectList">{{item.project_name}}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <div class="text-center mb-4">
+                    <button class="btn btn-success" type="submit" (click)="setParams()">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-template>

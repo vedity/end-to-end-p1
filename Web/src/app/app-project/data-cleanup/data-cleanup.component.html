@@ -1,5 +1,5 @@
 <!-- <a class="btn btn-success modeling-btn" [routerLink]="['/modeling']" style="right: 290px" [state]="{selectproject:false}"> Modeling</a> -->
-<a class="btn btn-success modeling-btn" [routerLink]="['/modeling']" [state]="{dataset_id: dataset_id ,project_id:project_id,selectproject:true}">Modeling</a>
+<a class="btn btn-success modeling-btn" [routerLink]="['/modeling']" [ngClass]="{'disabled':!isEnableModeling}" [state]="{dataset_id: dataset_id ,project_id:project_id,selectproject:true}">Modeling</a>
 
 <ul ngbNav #justifiednavdatacleanup="ngbNav" [activeId]="1" class="nav-tabs nav cleanup-tabs">
     <li [ngbNavItem]="1">

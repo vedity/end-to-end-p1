@@ -150,7 +150,7 @@
                                         {{data.created_on|date}}
                                     </td>
                                     <td class="text-center" style="font-size: 20px;font-weight: 700;">
-                                        <a href="javascript:void(0);" [routerLink]="['/schema']" id="detail_{{data.dataset_id}}" [state]="{dataset_id: data.dataset_id ,project_id:data.project_id,dataset_name:data.dataset_name,navigate_to:'/dataset',schema_id:data.schema_id }">
+                                        <a href="javascript:void(0);" [routerLink]="['/datadetail']" id="detail_{{data.dataset_id}}" [state]="{dataset_id: data.dataset_id ,project_id:data.project_id,dataset_name:data.dataset_name,navigate_to:'/dataset',schema_id:data.schema_id }">
                                             <i class=" bx bx-file" id="detailicon"></i></a>
                                         <a href="javascript:void(0);" class="sa-warning" id="delete_{{data.dataset_id}}" (click)="confirm(data.dataset_id,data.dataset_name)"> <i class=" bx bx-trash" id="deleteicon"></i></a>
                                     </td>
