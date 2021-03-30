@@ -142,6 +142,7 @@ class JsonFormatClass:
                 "icon": 'bx-home-circle',
                 "subItems": []
             })
+            
             logging.info("Common : JsonFormatClass : menu_nested_format : execution stop")
             return final_json_data
         except Exception as exc:
