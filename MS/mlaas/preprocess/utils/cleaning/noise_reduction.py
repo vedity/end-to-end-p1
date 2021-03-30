@@ -273,7 +273,7 @@ class RemoveNoiseClass:
         '''
         column_name = '"' + column_name + '"'
         if dataset_id is None:
-            sql_command = f"select (count(*)*100)/(select count(*) from {table_name}) as noise_percentage from {table_name} where {column_name} !~ '[0-9.]';"
+            sql_command = f"select cast((count(*)*100) as float)/(select count(*) from {table_name}) as noise_percentage from {table_name} where {column_name} !~ '[0-9.]';"
             
         noise_df = DBObject.select_records(connection,sql_command)
         if not isinstance(noise_df, pd.DataFrame):
