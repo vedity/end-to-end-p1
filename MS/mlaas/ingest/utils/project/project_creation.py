@@ -14,6 +14,7 @@
 import pandas as pd
 import logging
 import traceback
+import time 
 
 #Ingest util/dataset file import
 from ..dataset import dataset_creation 
@@ -97,8 +98,9 @@ class ProjectClass:
         logging.info("data ingestion : ProjectClass : make_project_records : execution start")
         
         #TODO : both dag are not run together
-        model_dag_id = get_modeling_dag_name()
         cleanup_dag_id = preprocessObj.get_cleanup_dag_name()
+        time.sleep(3)
+        model_dag_id = get_modeling_dag_name()
         
         row = project_name,project_desc,user_name,original_dataset_id,dataset_id,cleanup_dag_id,model_dag_id
         row_tuples = [tuple(row)] # Make record for project table.
