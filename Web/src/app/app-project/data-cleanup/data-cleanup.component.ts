@@ -17,7 +17,6 @@ export class DataCleanupComponent implements OnInit {
   numberrangeregex = "^[1-9][0]?$|^10$"
   randomstateregex = "^[0-9]{1,5}$"
   f: NgForm;
-
   @ViewChild(DataTableDirective, { static: false })
   datatableElement: DataTableDirective;
   dtOptions: DataTables.Settings = {};
@@ -27,11 +26,11 @@ export class DataCleanupComponent implements OnInit {
     split_method: 'cross_validation',
     scaling_op: '0'
   };
+
   saveAs: any = {
     isPrivate: false,
     dataset_name: "",
     description: ""
-
   }
   constructor(public apiService: DataCleanupApiService, public toaster: ToastrService, private modalService: NgbModal, public router: Router) { }
   @Input() public dataset_id: any;
@@ -55,6 +54,9 @@ export class DataCleanupComponent implements OnInit {
     'border': '1px solid #32394e',
     'animation-duration': '20s'
   };
+
+  setCleanUpInterval:any;
+  setModelingInterval:any;
 
   //visibleSelection = 20;
   visibleBarOptions: Options = {
@@ -103,11 +105,11 @@ export class DataCleanupComponent implements OnInit {
         $("#" + event.target.id).addClass("errorstatus")
       }
     }
-
   }
 
   ngOnInit(): void {
     this.getCheckSplit();
+    this.getCldagStatus();
     this.dtOptions = {
       paging: false,
       ordering: false,
@@ -133,12 +135,50 @@ export class DataCleanupComponent implements OnInit {
     )
   }
 
+  getCldagStatus(){
+    this.apiService.getCldagStatus(this.project_id).subscribe(
+      logs=>this.CldagSuccessHandler(logs)
+    )
+  }
+
+  isEnableCleanup=true;
+  CldagSuccessHandler(data){
+    if(data.status_code=="200"){
+      this.isEnableCleanup=data.response;
+      if(this.isEnableCleanup){
+        if(!this.setCleanUpInterval){
+          this.setCleanUpInterval= setInterval(() => {
+           this.getCldagStatus();
+          }, 10000);
+        }
+      }
+      else{
+        if (this.setCleanUpInterval) {
+          clearInterval(this.setCleanUpInterval);
+        }
+      }
+    }
+  }
+
   isEnableModeling=true;
   checksplitSuccessHandler(data){
     if(data.status_code=="200"){
       this.isEnableModeling=data.response;
+      if(!this.isEnableModeling){
+        if(!this.setModelingInterval){
+          this.setModelingInterval= setInterval(() => {
+           this.getCheckSplit();
+          }, 10000);
+        }
+      }
+      else{
+        if (this.setModelingInterval) {
+          clearInterval(this.setModelingInterval);
+        }
+      }
     }
   }
+
   successHandler(logs) {
     this.loaderdiv = false;
   }
@@ -175,8 +215,6 @@ export class DataCleanupComponent implements OnInit {
     )
   }
 
-
-
   holdoutlistsuccessHandler(data) {
     if (data.status_code == "200") {
       this.holdoutList = data.response;
@@ -185,6 +223,7 @@ export class DataCleanupComponent implements OnInit {
       this.errorHandler(data);
     }
   }
+
   selectedcolumnswithoperation = [];
   selectedColumn = [];
   selectColumn(event) {
@@ -303,7 +342,6 @@ export class DataCleanupComponent implements OnInit {
     });
   }
 
-
   removeHandlers(id, columnid, tabid) {
     // let tabid = this.activeId;
     var selectedelem = this.columnList.filter(function (e) {
@@ -322,7 +360,6 @@ export class DataCleanupComponent implements OnInit {
       $("#" + id).prop('checked', false);
     this.removeHandlers(id, column, tabid);
   }
-
 
   errorothertag = false;
   tabchange(event, tabid) {
@@ -430,11 +467,14 @@ export class DataCleanupComponent implements OnInit {
   saveSuccessHandlers(data) {
     if (data.status_code == "200") {
       this.toaster.success(data.error_msg, 'Success')
+      this.getCldagStatus();
+      this.getCheckSplit();
     }
     else {
       this.errorHandler(data);
     }
   }
+
   response: any;
   saveScale() {
     var user = JSON.parse(localStorage.getItem("currentUser"));
@@ -510,7 +550,7 @@ export class DataCleanupComponent implements OnInit {
   }
 
   saveAsDataset(flag){
-    this.apiService.saveasOperations(this.saveAs.dataset_name,this.saveAs.visibility,this.saveAs.dataset_desc,flag,this.fianlarray)
+    this.apiService.saveasOperations(this.schema_id, this.dataset_id, this.project_id,this.saveAs.dataset_name,this.saveAs.visibility,this.saveAs.dataset_desc,flag,this.fianlarray)
     .subscribe(
       logs=>this.saveAsSuccessHandlers(logs),
     error=>this.errorHandler(error)
