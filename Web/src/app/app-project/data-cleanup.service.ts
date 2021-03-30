@@ -35,10 +35,17 @@ export class DataCleanupApiService
     return this.httpClient.get(this.baseUrl + "preprocess/cleanup/holdout/", { headers: this.headers });
   }
 
+  getCheckSplit(project_id){
+    var params = new HttpParams().append("project_id", project_id)
+    return this.httpClient.get(this.baseUrl + "modeling/checksplit/", { headers: this.headers,params });
+  }
+
+
   saveOperations(schema_id,dataset_id,project_id,data){
     var params = new HttpParams().append("schema_id", schema_id).append("dataset_id", dataset_id).append("project_id", project_id)
     return this.httpClient.post(this.baseUrl + "preprocess/cleanup/save/", data,{ headers: this.headers, params });
   }
+
 
   savescalingOpertion(data){
 

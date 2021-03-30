@@ -24,6 +24,12 @@ export class SchemaMappingApiService {
     return this.httpClient.get(this.baseUrl + "ingest/dataset/columns/", { headers: this.headers, params });
   }
 
+  getproject(): Observable<any> {
+    this.user = JSON.parse(localStorage.getItem("currentUser"));
+    var params = new HttpParams().set("user_name", this.user.username);
+    return this.httpClient.get(this.baseUrl + "ingest/project/create/", { headers: this.headers, params });
+  }
+  
   getColumnAttributes(): Observable<any> {
     return this.httpClient.get(this.baseUrl + "preprocess/schema/attribute/list/", { headers: this.headers });
   }

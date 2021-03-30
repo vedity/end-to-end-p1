@@ -105,6 +105,15 @@ op_dict = {
     32 : PC_OBJ.multiply_column
 }
 
+def dag_resetter(DBObject,connection,dag_id,**kwargs):
+    '''
+        To reset the dag status
+    '''
+    sql_command = f"update mlaas.cleanup_dag_status set status = (case when status = '1' then '0' else '1' end) where dag_id = '{dag_id}'"
+    update_status = DBObject.update_records(connection,sql_command)
+
+    return update_status
+
 #? Making Dynamic Tasks
 t1= DummyOperator(task_id='start',dag=dag)
 t2= PythonOperator(
@@ -113,6 +122,12 @@ t2= PythonOperator(
             provide_context=True,
             python_callable=PC_OBJ.update_schema_flag_status,
             op_args=[DBObject,connection,schema_id,dataset_id,column_list])
+t4= PythonOperator(
+            task_id='Enable_Cleanup_Page',
+            dag=dag,
+            provide_context=True,
+            python_callable=dag_resetter,
+            op_args=[DBObject,connection,main_dag_id])
 
 if save_as == 'True':
     t3 = PythonOperator(
@@ -122,6 +137,10 @@ if save_as == 'True':
                 python_callable=PC_OBJ.SaveAs,
                 op_args=[DBObject,connection,project_id,table_name,user_name,dataset_visibility,dataset_name,visibility,dataset_desc])
     t2.set_downstream(t3)
+    t3.set_downstream(t4)
+else:
+    t2.set_downstream(t4)
+
 
 previous_task = t1
 i = 0
@@ -145,23 +164,23 @@ for index in operation.keys():
         param_dict = {
             1 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
             2 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            3 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value[j]],
-            4 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value[j]],
+            3 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value],
+            4 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value],
             5 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
             6 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
             7 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
             8 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            9 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value[j], True],
+            9 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value, True],
             10 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
             11 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            12 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value[j]],
+            12 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value],
             13 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
             14 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
             15 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
             16 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
             17 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
             18 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            19 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value[j]],
+            19 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value],
             20 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
             21 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
             22 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
@@ -171,10 +190,10 @@ for index in operation.keys():
             26 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
             27 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
             28 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], schema_id],
-            29 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value[j]],
-            30 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value[j]],
-            31 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value[j]],
-            32 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value[j]]
+            29 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value],
+            30 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value],
+            31 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value],
+            32 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value]
         }
         
         dynamicTask = PythonOperator(

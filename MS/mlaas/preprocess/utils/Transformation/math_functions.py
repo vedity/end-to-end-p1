@@ -37,6 +37,8 @@ class MathOperationsClass:
         
         sql_command = f'update {table_name} set "{col_name}" = "{col_name}" {operation} {value}' # Get update query
 
+        logging.info("Math Operation Command: "+ sql_command)
+
         status = DBObject.update_records(connection,sql_command)
         
         logging.info("Preprocess : MathOperationsClass : perform_operation : execution stop")

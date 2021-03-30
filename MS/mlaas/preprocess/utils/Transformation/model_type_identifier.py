@@ -23,7 +23,7 @@ class ModelType():
          target_df=np.array(target_df)
          target_shape = target_df.shape
          total_length = target_shape[0]
-         unq_length = len(np.unique(target_df[:, 1]))
+         unq_length = len(np.unique(target_df[:,-1]))
          threshold = int((total_length * 0.01) / 100) # Subject to change, further research.
          target_type = ""
          if threshold < unq_length:

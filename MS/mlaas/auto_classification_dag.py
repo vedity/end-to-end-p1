@@ -30,8 +30,6 @@ dag = DAG(dag_id='auto_classification_pipeline',default_args=args,catchup=False,
 
 
 start_task = PythonOperator(task_id='start_pipeline',python_callable=start_pipeline,dag=dag,)
-    
-end_task = BashOperator(task_id='end_pipeline',bash_command="echo 'regression pipeline end'",dag=dag,)
 
 # Get model dict 
 
@@ -47,4 +45,4 @@ for model_id,model_name in zip(model_id,model_name):
                                   op_kwargs={'model_id':model_id},
                                   dag=dag)
     
-    start_task >> dynamic_task >> end_task
+    start_task >> dynamic_task

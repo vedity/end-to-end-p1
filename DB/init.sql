@@ -9,7 +9,6 @@ CREATE TABLE mlaas.user_auth_table (
  	);
 
 
-
 CREATE TABLE mlaas.model_experiment_tbl
 (
 	exp_unq_id bigserial,
@@ -134,7 +133,11 @@ CREATE TABLE mlaas.user_auth_tbl (
 	"password" text NULL
 );
 
-
+CREATE TABLE mlaas.cleanup_dag_status (
+	dag_index bigserial NOT NULL,
+	dag_id text,
+	status varchar(1) NOT NULL DEFAULT '0'
+);
 
 CREATE TABLE mlaas.project_tbl (
 	project_id bigserial NOT NULL ,
@@ -184,9 +187,11 @@ CREATE TABLE mlaas.schema_tbl (
 
 --Insert menu_tbl
 Insert into  mlaas.menu_tbl values (2,'DI','Data Ingestion',null,null,'bx-home-circle');
-Insert into  mlaas.menu_tbl values (3,'DI','Create Dataset','2','/dataset',null);
-Insert into  mlaas.menu_tbl values (4,'DI','Create Project','2','/create',null);
-Insert into  mlaas.menu_tbl values (5,'DI','All Projects','2','/project',null);
+Insert into  mlaas.menu_tbl values (3,'DI','Datasets','2','/dataset',null);
+Insert into  mlaas.menu_tbl values (4,'DI','Projects','2','/project',null);
+Insert into  mlaas.menu_tbl values (5,'DP','Data Pre-Proecessing',null,null,'bx-home-circle');
+Insert into  mlaas.menu_tbl values (6,'DP','Schema Mapping','5','/schema',null);
+Insert into  mlaas.menu_tbl values (7,'DP','Data Cleanup','5','/cleanup',null);
 
 --Insert user_auth_tbl
 Insert into mlaas.user_auth_tbl values(1,'mehul','mehul');
@@ -330,7 +335,7 @@ Insert into mlaas.activity_master_tbl values (109,45,'Started Modeling','Modelli
 Insert into mlaas.activity_master_tbl values (110,46,'Stopped Modeling','Modelling has been stopped for experiment','US','Operation',0,-1,0,0);
 Insert into mlaas.activity_master_tbl values (111,47,'Completed Modeling','Modeling of experiment * has been completed successfully','US','Operation',0,-1,0,0);
 Insert into mlaas.activity_master_tbl values (112,48,'Completed Modeling','Modeling of experiment * has been completed with an error','US','Operation',0,-1,0,0);
-
+Insert into mlaas.activity_master_tbl values (113,49,'Completed Scale And Split','Scaling and Spliting of * has been completed','US','Operation',0,-1,0,0);
 
 
 

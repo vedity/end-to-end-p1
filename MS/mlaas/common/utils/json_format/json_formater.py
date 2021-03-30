@@ -134,7 +134,13 @@ class JsonFormatClass:
                 json_data=[]
             final_json_data.insert(0,{"id": 1,
                 "label": 'MENU',
-                "isTitle": 'true'
+                "isTitle": 'true'      
+            })
+            final_json_data.insert(7,{"id": 7,
+                "label": 'Modeling',
+                "link":"/modeling/type",
+                "icon": 'bx-home-circle',
+                "subItems": []
             })
             
             logging.info("Common : JsonFormatClass : menu_nested_format : execution stop")

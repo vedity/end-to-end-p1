@@ -7,6 +7,7 @@ import { DataCleanupApiService } from '../data-cleanup.service';
 import { Options } from 'ng5-slider';
 import { scaleandsplit } from './data-cleanup.model';
 import { NgForm } from '@angular/forms';
+import { isInteractionValid } from '@fullcalendar/core/validation';
 @Component({
   selector: 'app-data-cleanup',
   templateUrl: './data-cleanup.component.html',
@@ -15,10 +16,6 @@ import { NgForm } from '@angular/forms';
 export class DataCleanupComponent implements OnInit {
   numberrangeregex = "^[1-9][0]?$|^10$"
   randomstateregex = "^[0-9]{1,5}$"
-
-
-
-
   f: NgForm;
 
   @ViewChild(DataTableDirective, { static: false })
@@ -74,7 +71,7 @@ export class DataCleanupComponent implements OnInit {
   checkvalidation(event, type) {
     var value = event.target.value;
     console.log(type);
-    var match=true;
+    var match = true;
     var regexfortypeinteger = /^[0-9]{1,50}$/;
     var regexfortypefloat = /^([0-9]*[.])?[0-9]+$/;
     var regexfortypefloatbutnotzero = /^-?(?!0)\d+(\.\d+)?$/;
@@ -101,10 +98,11 @@ export class DataCleanupComponent implements OnInit {
         $("#" + event.target.id).addClass("errorstatus")
       }
     }
-    
+
   }
 
   ngOnInit(): void {
+    this.getCheckSplit();
     this.dtOptions = {
       paging: false,
       ordering: false,
@@ -124,7 +122,18 @@ export class DataCleanupComponent implements OnInit {
     // this.scaldata.scaling_op='0'
   }
 
+  getCheckSplit(){
+    this.apiService.getCheckSplit(this.project_id).subscribe(
+      logs=>this.checksplitSuccessHandler(logs)
+    )
+  }
 
+  isEnableModeling=true;
+  checksplitSuccessHandler(data){
+    if(data.status_code=="200"){
+      this.isEnableModeling=data.response;
+    }
+  }
   successHandler(logs) {
     this.loaderdiv = false;
   }
@@ -161,7 +170,7 @@ export class DataCleanupComponent implements OnInit {
     )
   }
 
- 
+
 
   holdoutlistsuccessHandler(data) {
     if (data.status_code == "200") {
@@ -237,14 +246,14 @@ export class DataCleanupComponent implements OnInit {
   }
 
   setInput(operationid, event) {
-    var value=event.target.value;
+    var value = event.target.value;
     this.selectedColumn.forEach(element => {
       var input = $("#setInput_" + element + "_" + operationid).val();
       if (input != undefined) {
-      $("#setInput_" + element + "_" + operationid).val(value).removeClass("error")
+        $("#setInput_" + element + "_" + operationid).val(value).removeClass("error")
 
-      if($("#"+event.target.id).hasClass('errorstatus'))
-        $("#setInput_" + element + "_" + operationid).addClass("error");
+        if ($("#" + event.target.id).hasClass('errorstatus'))
+          $("#setInput_" + element + "_" + operationid).addClass("error");
       }
     });
   }
@@ -310,25 +319,22 @@ export class DataCleanupComponent implements OnInit {
   }
 
 
-  errorothertag=false;
-  tabchange(event,tabid) {
-   console.log($(".errorstatus").length);
+  errorothertag = false;
+  tabchange(event, tabid) {
+    console.log($(".errorstatus").length);
     $(".checkbox:checked").prop("checked", false);
     this.selectedColumn = [];
     this.getColumnviseOperation();
   }
 
- 
-
-reset()
-{
-  $(".checkbox:checked").prop("checked", false);
-  $(".customInput").prop('disabled', true).val('').removeClass('errorstatus');
-  $(".radiobutton:checked").prop('checked', false);
-  this.selectedColumn = [];
-  this.getColumnList();
-  this.getColumnviseOperation();
-}
+  reset() {
+    $(".checkbox:checked").prop("checked", false);
+    $(".customInput").prop('disabled', true).val('').removeClass('errorstatus');
+    $(".radiobutton:checked").prop('checked', false);
+    this.selectedColumn = [];
+    this.getColumnList();
+    this.getColumnviseOperation();
+  }
 
   getScalingOperations() {
     this.apiService.getScalingOperations().subscribe(
@@ -359,56 +365,56 @@ reset()
     this.errorflag = false;
     this.fianlarray = [];
     let arrayhandlers = [];
-    if($(".errorstatus").length>0){
+    if ($(".errorstatus").length > 0) {
       this.toaster.error("Please enter valid input", 'Error')
-    }else{
-    if ($(".handlingitem").length > 0) {
-     if($(".error").length==0){
-     
-   
-      $(".handlingitem").each(function () {
-        var id = $(this).prop('id').split('_');
-        var columnid = id[1];
-        var operationid = id[2];
+    } else {
+      if ($(".handlingitem").length > 0) {
+        if ($(".error").length == 0) {
 
-        var value = $("#setInput_" + columnid + "_" + operationid).val();
-        arrayhandlers.push({ column_id: columnid, selected_handling: operationid, values: value });
-      })
 
-      var handlers = this.groupBy(arrayhandlers, 'column_id');
-      for (var item in handlers) {
-        let selectedhandling = [];
-        let values = [];
-        for (var childitem of handlers[item]) {
-          selectedhandling.push(parseInt(childitem.selected_handling));
-          if (childitem.values == "")
-            this.errorflag = true;
+          $(".handlingitem").each(function () {
+            var id = $(this).prop('id').split('_');
+            var columnid = id[1];
+            var operationid = id[2];
 
-          if (childitem.values == undefined) {
-            childitem.values = '';
+            var value = $("#setInput_" + columnid + "_" + operationid).val();
+            arrayhandlers.push({ column_id: columnid, selected_handling: operationid, values: value });
+          })
+
+          var handlers = this.groupBy(arrayhandlers, 'column_id');
+          for (var item in handlers) {
+            let selectedhandling = [];
+            let values = [];
+            for (var childitem of handlers[item]) {
+              selectedhandling.push(parseInt(childitem.selected_handling));
+              if (childitem.values == "")
+                this.errorflag = true;
+
+              if (childitem.values == undefined) {
+                childitem.values = '';
+              }
+              values.push(childitem.values);
+            }
+            this.fianlarray.push({ "column_id": [parseInt(item)], "selected_handling": selectedhandling, "values": values })
           }
-          values.push(childitem.values);
+          console.log(this.fianlarray);
+          if (this.errorflag == true) {
+            this.toaster.error("Please enter required input", 'Error')
+          }
+          else {
+            this.apiService.saveOperations(this.schema_id, this.dataset_id, this.project_id, this.fianlarray).subscribe(
+              logs => this.saveSuccessHandlers(logs),
+              error => this.errorHandler(error)
+            )
+          }
         }
-        this.fianlarray.push({ "column_id": [parseInt(item)], "selected_handling": selectedhandling, "values": values })
-      }
-      console.log(this.fianlarray);
-      if (this.errorflag == true) {
-        this.toaster.error("Please enter required input", 'Error')
-      }
-      else {
-        this.apiService.saveOperations(this.schema_id, this.dataset_id, this.project_id, this.fianlarray).subscribe(
-          logs => this.saveSuccessHandlers(logs),
-          error => this.errorHandler(error)
-        )
-      }
-    }
-      else
-      this.toaster.error("Please enter valid input", 'Error')
+        else
+          this.toaster.error("Please enter valid input", 'Error')
 
+      }
+      else
+        this.toaster.error("Please select any handlers", 'Error')
     }
-    else
-      this.toaster.error("Please select any handlers", 'Error')
-  }
   }
 
   saveSuccessHandlers(data) {

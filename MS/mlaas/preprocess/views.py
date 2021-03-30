@@ -269,7 +269,11 @@ class OperationListClass(APIView):
 
                         column_ids = data['column_ids']
                         column_ids = column_ids.split(",") #split columnids by comma sepration
-                        column_ids = [int(i) for i in column_ids] #convert all ids to int
+                        try:
+                                column_ids = [int(i) for i in column_ids] #convert all ids to int
+                        except:
+                                #? This will be the case when column ids is None
+                                return Response({"status_code":"200","error_msg":"Successfull retrival","response":[]})
                         operation = preprocessObj.get_possible_operations(dataset_id,schema_id,column_ids) #call get_possible_operation class
                         if isinstance(operation,list):  
                                         logging.info("data preprocess : OperationListClass : POST Method : execution stop")
@@ -449,14 +453,30 @@ class TrainValidHoldout(APIView):
 
 class Check_Split(APIView):
 
-        def post(self, request, format=None):
+        def get(self, request, format=None):
                 try:
                         logging.info(" modeling : Check_Split : GET Method : execution start")
                         project_id = request.query_params.get('project_id')
                         flag = sd.check_split_exist(project_id)
-                        return Response({"status_code":"500","error_msg":"Successfull retrival","response":flag})    
+                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":flag})    
 
                 except Exception as e:
                         logging.error("modeling : Check_Split : GET Method  " + str(e))
                         logging.error(" modeling : Check_Split : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})    
+
+class CheckCleanupDagStatus(APIView):
+
+        def get(self, request, format=None):
+                try:
+                        logging.info(" data preprocess : CheckCleanupDagStatus : GET Method : execution start")
+                        project_id = request.query_params.get('project_id')
+                        flag = preprocessObj.get_dag_status(project_id)
+                        
+                        logging.info(" data preprocess : CheckCleanupDagStatus : GET Method : execution stop")
+                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":flag})    
+
+                except Exception as e:
+                        logging.error("data preprocess : CheckCleanupDagStatus : GET Method  " + str(e))
+                        logging.error(" data preprocess : CheckCleanupDagStatus : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":"Failed","response":str(e)})    
