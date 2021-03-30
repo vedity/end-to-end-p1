@@ -26,7 +26,6 @@ export class DataCleanupComponent implements OnInit {
     split_method: 'cross_validation',
     scaling_op: '0'
   };
-
   saveAs: any = {
     isPrivate: false,
     dataset_name: "",
