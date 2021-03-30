@@ -25,7 +25,7 @@ Automation Testing:
   only:
     # - development
     # - uat
-    # - master
+    - master
 
 Creating Testing Docker Images:
   image: docker:latest
