@@ -27,7 +27,12 @@ export class DataCleanupComponent implements OnInit {
     split_method: 'cross_validation',
     scaling_op: '0'
   };
+  saveAs: any = {
+    isPrivate: false,
+    dataset_name: "",
+    description: ""
 
+  }
   constructor(public apiService: DataCleanupApiService, public toaster: ToastrService, private modalService: NgbModal, public router: Router) { }
   @Input() public dataset_id: any;
   @Input() public title: any;
@@ -361,7 +366,7 @@ export class DataCleanupComponent implements OnInit {
 
   fianlarray = [];
   errorflag: boolean;
-  saveHanlers() {
+  saveHanlers(isSave,smallDataModal) {
     this.errorflag = false;
     this.fianlarray = [];
     let arrayhandlers = [];
@@ -402,10 +407,15 @@ export class DataCleanupComponent implements OnInit {
             this.toaster.error("Please enter required input", 'Error')
           }
           else {
-            this.apiService.saveOperations(this.schema_id, this.dataset_id, this.project_id, this.fianlarray).subscribe(
-              logs => this.saveSuccessHandlers(logs),
-              error => this.errorHandler(error)
-            )
+            if(isSave=='False'){
+              this.apiService.saveOperations(this.schema_id, this.dataset_id, this.project_id,isSave, this.fianlarray).subscribe(
+                logs => this.saveSuccessHandlers(logs),
+                error => this.errorHandler(error)
+              )
+            }
+            else{
+              this.modalService.open(smallDataModal, { size: 'sm', windowClass: 'modal-holder', centered: true });
+            }
           }
         }
         else
@@ -470,5 +480,53 @@ export class DataCleanupComponent implements OnInit {
     else {
       this.errorHandler(data);
     }
+  }
+
+  checkuniquedatasetname(event) {
+    var val = event.target.value;
+    if (val != "") {
+      this.apiService.checkUniqueDatasetName(val).subscribe(
+        logs => this.successUniquedatasetynamevalidation(logs, event.target),
+        error => this.errorHandler(error)
+      );
+    }
+    else {
+      this.datasetnameuniqueerror = false;
+    }
+  }
+
+  datasetnameuniqueerror: any = false;
+  successUniquedatasetynamevalidation(data, target) {
+    if (data.response == 'false') {
+      this.datasetnameuniqueerror = true;
+      target.className = target.className.replace("ng-valid", " ");
+      target.className = target.className + " ng-invalid";
+    }
+    else {
+      this.datasetnameuniqueerror = false;
+      target.className = target.className.replace("ng-invalid", " ");
+      target.className = target.className + " ng-valid";
+    }
+  }
+
+  saveAsDataset(flag){
+    this.apiService.saveasOperations(this.saveAs.dataset_name,this.saveAs.visibility,this.saveAs.dataset_desc,flag,this.fianlarray)
+    .subscribe(
+      logs=>this.saveAsSuccessHandlers(logs),
+    error=>this.errorHandler(error)
+    )
+  }
+  saveAsSuccessHandlers(data) {
+    if (data.status_code == "200") {
+      this.toaster.success(data.error_msg, 'Success')
+      this.modalService.dismissAll();
+    }
+    else {
+      this.errorHandler(data);
+    }
+  }
+
+  smallModal(smallDataModal: any) {
+    this.modalService.open(smallDataModal, { size: 'sm', windowClass: 'modal-holder', centered: true });
   }
 }
