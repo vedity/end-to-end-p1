@@ -12,13 +12,6 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
   styleUrls: ['./modeling-type.component.scss']
 })
 export class ModelingTypeComponent implements OnInit {
-  // mySwitch: boolean = false;
-  // public data:manualmodeling;
-  timePeriods = [
-    'Experiment 1', 'Experiment 2', 'Experiment 3', 'Experiment 4'
-  ];
-
-
   isDisplayRunning = true;
   model_type = "Regression";
   currentuser: any;
@@ -57,8 +50,6 @@ export class ModelingTypeComponent implements OnInit {
   }
 
   ngOnInit(): void {
-   // this.checkrunningExperiment()
-    let projectdatamodel;
     this.dtOptions = {
       paging: false,
       ordering: false,
@@ -67,96 +58,85 @@ export class ModelingTypeComponent implements OnInit {
       searching: false,
       scrollY: "calc(100vh - 545px)",
     }
+
     this.params = history.state;
-
-    if (this.params.dataset_id != undefined) {
-      localStorage.setItem("modeling", JSON.stringify(this.params));
-    }
-    else {
-      if (this.params.selectproject == false) {
-        $(".openmodal").trigger('click');
+    if (this.params.isFromMenu == true) {
+      this.getproject();
+      $(".openmodal").trigger('click');
+    }else{
+      if (this.params.dataset_id != undefined) {
+        localStorage.setItem("modeling", JSON.stringify(this.params));
       }
-      //this.modalService.open(projectdatamodel, { size: 'lg', windowClass: 'modal-holder', centered: true });
-      this.params = localStorage.getItem("params");
-      this.params = JSON.parse(this.params);
+      else {
+          this.params = localStorage.getItem("params");
+          this.params = JSON.parse(this.params);
+        }
+        this.currentuser = localStorage.getItem("currentUser")
+        this.params.user_id = JSON.parse(this.currentuser).id;
+        this.getDatasetInfo();
+        this.getRunningExperimentList();
+        this.getAllExperimentList();
     }
-
-    this.lineColumAreaChart = {
-      chart: {
-        height: 200,
-        type: 'line',
-        stacked: false,
-        toolbar: {
-          show: false
-        }
-      },
-      stroke: {
-        width: [2, 2, 4],
-      },
-      colors: ['#f46a6a', '#34c38f'],
-      series: [{
-        name: 'Experiment 1',
-        data: [23, 11, 50, 70, 13, 56, 37, 78, 44, 22, 30]
-      }, {
-        name: 'Experiment 2',
-        data: [23, 10, 22, 30, 13, 20, 31, 21, 40, 20, 32]
-      }],
-      fill: {
-        opacity: [0.85, 1],
-        gradient: {
-          inverseColors: false,
-          shade: 'light',
-          type: 'vertical',
-          opacityFrom: 0.85,
-          opacityTo: 0.55,
-          stops: [0, 100, 100, 100]
-        }
-      },
-      // tslint:disable-next-line: max-line-length
-      labels: ['01/01/2003', '02/01/2003', '03/01/2003', '04/01/2003', '05/01/2003', '06/01/2003', '07/01/2003', '08/01/2003', '09/01/2003', '10/01/2003', '11/01/2003'],
-      markers: {
-        size: [0, 2]
-      },
-      legend: {
-        offsetY: 5,
-      },
-      xaxis: {
-        type: 'datetime',
-      },
-      yaxis: {
-        title: {
-          text: 'Points',
-        },
-      },
-      tooltip: {
-        shared: true,
-        intersect: false,
-        y: {
-          formatter(y) {
-            if (typeof y !== 'undefined') {
-              return y.toFixed(0) + ' points';
-            }
-            return y;
-          }
-        }
-      },
-      grid: {
-        borderColor: '#f1f1f1'
-      }
-    };
-    this.currentuser = localStorage.getItem("currentUser")
-    this.params.user_id = JSON.parse(this.currentuser).id;
-    console.log(this.currentuser);
-    this.getDatasetInfo();
-    this.getRunningExperimentList();
-    this.getAllExperimentList();
-
   }
 
-  checkrunningExperiment(){
+  projectList: any;
+  getproject() {
+    this.apiservice.getproject().subscribe(
+      logs => this.successProjectListHandler(logs),
+      error => this.errorHandler(error)
+    );
+  }
+
+  successProjectListHandler(data) {
+    if (data.status_code == "200") {
+      this.projectList = data.response;
+    }
+    else {
+      this.projectList = []
+    }
+  }
+
+  projectdata: any;
+  setproject(value) {
+    console.log(value);
+    if (value != "") {
+      var projects = this.projectList.filter(function (elem) {
+        if (elem.project_id == value)
+          return elem
+      })
+      this.projectdata = projects[0];
+    }
+    else {
+      this.projectdata = undefined
+    }
+    console.log(this.projectdata);
+  }
+
+  setModeling() {
+    if (this.projectdata != undefined) {
+      this.params = {
+        dataset_id: this.projectdata.dataset_id,
+        dataset_name: this.projectdata.dataset_name,
+        project_id: this.projectdata.project_id, navigate_to: "/project",
+        schema_id: this.projectdata.schema_id
+      }
+      localStorage.setItem("modeling", JSON.stringify(this.params));
+      this.currentuser = localStorage.getItem("currentUser")
+      this.params.user_id = JSON.parse(this.currentuser).id;
+      this.getDatasetInfo();
+      this.getRunningExperimentList();
+      this.getAllExperimentList();
+      this.modalService.dismissAll();
+    }
+    else {
+      this.toaster.error("Please select any project", "Error");
+    }
+  }
+
+  checkrunningExperiment() {
     this.apiservice.checkrunningExperiment(this.params.project_id).subscribe(
-      logs=>this.checkrunningexpuccessHandler(logs),
-    //  error=>this.errorHandler(error)
+      logs => this.checkrunningexpuccessHandler(logs),
+      //  error=>this.errorHandler(error)
     )
   }
 
@@ -177,7 +157,7 @@ export class ModelingTypeComponent implements OnInit {
 
 
   drop(event: CdkDragDrop<string[]>) {
-    moveItemInArray(this.timePeriods, event.previousIndex, event.currentIndex);
+    moveItemInArray(this.compareIds, event.previousIndex, event.currentIndex);
   }
 
   compareIds = [];
@@ -458,7 +438,69 @@ export class ModelingTypeComponent implements OnInit {
 
   compareExperiment(compareModal: any) {
     console.log(this.compareIds);
-
+    this.lineColumAreaChart = {
+      chart: {
+        height: 200,
+        type: 'line',
+        stacked: false,
+        toolbar: {
+          show: false
+        }
+      },
+      stroke: {
+        width: [2, 2, 4],
+      },
+      colors: ['#f46a6a', '#34c38f'],
+      series: [{
+        name: 'Experiment 1',
+        data: [23, 11, 50, 70, 13, 56, 37, 78, 44, 22, 30]
+      }, {
+        name: 'Experiment 2',
+        data: [23, 10, 22, 30, 13, 20, 31, 21, 40, 20, 32]
+      }],
+      fill: {
+        opacity: [0.85, 1],
+        gradient: {
+          inverseColors: false,
+          shade: 'light',
+          type: 'vertical',
+          opacityFrom: 0.85,
+          opacityTo: 0.55,
+          stops: [0, 100, 100, 100]
+        }
+      },
+      // tslint:disable-next-line: max-line-length
+      labels: ['01/01/2003', '02/01/2003', '03/01/2003', '04/01/2003', '05/01/2003', '06/01/2003', '07/01/2003', '08/01/2003', '09/01/2003', '10/01/2003', '11/01/2003'],
+      markers: {
+        size: [0, 2]
+      },
+      legend: {
+        offsetY: 5,
+      },
+      xaxis: {
+        type: 'datetime',
+      },
+      yaxis: {
+        title: {
+          text: 'Points',
+        },
+      },
+      tooltip: {
+        shared: true,
+        intersect: false,
+        y: {
+          formatter(y) {
+            if (typeof y !== 'undefined') {
+              return y.toFixed(0) + ' points';
+            }
+            return y;
+          }
+        }
+      },
+      grid: {
+        borderColor: '#f1f1f1'
+      }
+    };
     this.apiservice.compareExperiment("[" + this.compareIds + "]").subscribe(
       logs => this.manageCompareExperiment(logs, compareModal),
       error => this.errorHandler(error)
@@ -467,14 +509,11 @@ export class ModelingTypeComponent implements OnInit {
 
   };
 
-  comparedata:any;
+  comparedata: any;
   manageCompareExperiment(data, modal) {
     if (data.status_code == "200") {
-      this.comparedata=data.response;
-      console.log(this.comparedata);
-      
+      this.comparedata = data.response;
       this.modalService.open(modal, { size: 'xl', windowClass: 'modal-holder', centered: true });
-
     }
     else {
 

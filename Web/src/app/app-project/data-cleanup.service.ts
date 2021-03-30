@@ -35,10 +35,33 @@ export class DataCleanupApiService
     return this.httpClient.get(this.baseUrl + "preprocess/cleanup/holdout/", { headers: this.headers });
   }
 
-  saveOperations(schema_id,dataset_id,project_id,data){
-    var params = new HttpParams().append("schema_id", schema_id).append("dataset_id", dataset_id).append("project_id", project_id)
+  getCheckSplit(project_id){
+    var params = new HttpParams().append("project_id", project_id)
+    return this.httpClient.get(this.baseUrl + "modeling/checksplit/", { headers: this.headers,params });
+  }
+
+
+  saveOperations(schema_id,dataset_id,project_id,flag,data){
+    var params = new HttpParams().append("schema_id", schema_id).append("dataset_id", dataset_id)
+    .append("project_id", project_id)
+    .append("flag", flag)
     return this.httpClient.post(this.baseUrl + "preprocess/cleanup/save/", data,{ headers: this.headers, params });
   }
+
+  saveasOperations(dataset_name,visibility,dataset_desc,flag,data){
+    var params = new HttpParams().append("dataset_name", dataset_name)
+    .append("visibility", visibility)
+    .append("dataset_desc", dataset_desc)
+    .append("flag", flag)
+    return this.httpClient.post(this.baseUrl + "preprocess/cleanup/save/", data,{ headers: this.headers, params });
+  }
+
+  checkUniqueDatasetName(obj): Observable<any> {
+    this.user = JSON.parse(localStorage.getItem("currentUser"));
+    var params = new HttpParams().append("user_name", this.user.username).append("dataset_name", obj)
+    return this.httpClient.get(this.baseUrl + "ingest/dataset/exist/", { headers: this.headers, params });
+  }
+
 
   savescalingOpertion(data){
 

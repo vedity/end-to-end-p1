@@ -79,16 +79,16 @@
                                     <span style="display:none;">{{data.dataset_status}}</span> {{data.dataset_name}}
                                 </td>
                                 <td class="status-icon" class="text-center">
-                                    <span style="display:none;" *ngIf="data.model_status==0">Success</span>
                                     <span style="display:none;" *ngIf="data.model_status==-1">Pending</span>
-                                    <span style="display:none;" *ngIf="data.model_status==1">Failed</span>
-                                    <span style="display:none;" *ngIf="data.model_status==2">InProgress</span>
+                                    <span style="display:none;" *ngIf="data.model_status==0">InProgress</span>
+                                    <span style="display:none;" *ngIf="data.model_status==1">Success</span>
+                                    <span style="display:none;" *ngIf="data.model_status==2">Failed</span>
 
                                     <a [routerLink]="['/modeling']" class="font-size-20" [state]="{dataset_id: data.dataset_id ,project_id:data.project_id}">
-                                        <i *ngIf="data.model_status==0" style="color: #3e6aec;" title="Success" class="dripicons-browser-upload"></i>
-                                        <i *ngIf="data.model_status==1" style="color: #f14646;" title="Failed" class="dripicons-browser-upload"></i>
                                         <i *ngIf="data.model_status==-1" style="color: #a6b0cf;" title="Pending" class="dripicons-browser-upload"></i>
-                                        <i *ngIf="data.model_status==2" style="color: #34c38f;" title="InProgress" class="dripicons-browser-upload"></i>
+                                        <i *ngIf="data.model_status==0" style="color: #34c38f;" title="InProgress" class="dripicons-browser-upload"></i>
+                                        <i *ngIf="data.model_status==1" style="color: #3e6aec;" title="Success" class="dripicons-browser-upload"></i>
+                                        <i *ngIf="data.model_status==2" style="color: #f14646;" title="Failed" class="dripicons-browser-upload"></i>
                                     </a>
                                 </td>
                                 <td class="text-center">
@@ -101,11 +101,11 @@
                                 </td>
                                 <td>{{data.created_on | date}}</td>
                                 <td class="text-center icon-box">
-                                    <a href="javascript:void(0);" title="Data Detail" id="detail_{{data.project_id}}" [routerLink]="['/schema']" [state]="{dataset_id: data.dataset_id ,project_id:data.project_id,dataset_name:data.dataset_name,navigate_to:'/project',schema_id:data.schema_id}">
+                                    <a href="javascript:void(0);" title="Data Detail" id="detail_{{data.project_id}}" [routerLink]="['/datadetail']" [state]="{dataset_id: data.dataset_id ,project_id:data.project_id,dataset_name:data.dataset_name,navigate_to:'/project',schema_id:data.schema_id}">
                                         <i id="detailicon" class=" bx bx-file"></i></a>
                                     <a href="javascript:void(0);" [routerLink]="['/schema']" id="schema_{{data.project_id}}" title="Schema Mapping" [state]="{dataset_id: data.dataset_id ,project_id:data.project_id,dataset_name:data.dataset_name,navigate_to:'/project',schema_id:data.schema_id}">
                                         <i id="schemaicon" class="bx bx-message-square-add"></i></a>
-                                    <a href="javascript:void(0);" [routerLink]="['/schema']" id="schema_{{data.project_id}}" title="Data Exploration" [state]="{dataset_id: data.dataset_id ,project_id:data.project_id,dataset_name:data.dataset_name,navigate_to:'/project',navigate:'explore',schema_id:data.schema_id}">
+                                    <a href="javascript:void(0);" [routerLink]="['/exploration']" id="schema_{{data.project_id}}" title="Data Exploration" [state]="{dataset_id: data.dataset_id ,project_id:data.project_id,dataset_name:data.dataset_name,navigate_to:'/project',navigate:'explore',schema_id:data.schema_id}">
                                         <i id="exploreicon" class="bx bx-screenshot"></i></a>
                                     <a href="javascript:void(0);" class="sa-warning" id="delete_{{data.project_id}}" title="Delete Project" (click)="confirm(data.project_id)"> <i id="deleteicon" class=" bx bx-trash"></i></a>
 
