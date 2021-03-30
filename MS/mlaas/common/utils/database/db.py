@@ -630,7 +630,7 @@ class DBClass:
         Return : 
                 [Dataframe] : [return the dataframe of project table]
         '''
-        sql_command = "SELECT original_dataset_id,dataset_id from mlaas.project_tbl where project_id='"+str(project_id)+"'"
+        sql_command = "SELECT original_dataset_id,dataset_id,project_name from mlaas.project_tbl where project_id='"+str(project_id)+"'"
        
         dataset_df=self.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         return dataset_df

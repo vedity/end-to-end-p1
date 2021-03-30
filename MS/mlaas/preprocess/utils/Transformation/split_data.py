@@ -48,3 +48,11 @@ class Split_Data():
             flag = True
     
         return flag
+
+    def get_split_activity_desc(self,project_name,activity_id):
+        #project_name = '"'+project_name+'"'
+        sql_command = f"select replace (amt.activity_description, '*', '{project_name}') as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
+        desc_df = DBObject.select_records(connection,sql_command)
+        activity_description = desc_df['description'][0]
+
+        return activity_description
