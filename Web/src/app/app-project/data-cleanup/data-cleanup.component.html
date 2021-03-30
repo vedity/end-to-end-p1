@@ -72,12 +72,12 @@
                                     <div class="button-items text-center" *ngIf="i+1==operationList.length">
                                         <button type="button" class="btn btn-secondary" (click)="reset()">Reset</button>
                                         <div class="btn-group me-1 dropdown" ngbDropdown>
-                                            <button type="button" class="btn btn-success" (click)="saveHanlers();">Save</button>
+                                            <button type="button" class="btn btn-success" (click)="saveHanlers('False',smallDataModal);">Save</button>
                                             <button type="button" class="btn btn-success dropdown-toggle dropdown-toggle-split" ngbDropdownToggle>
                                                               <i class="mdi mdi-chevron-down"></i>
                                                             </button>
                                             <div class="dropdown-menu" ngbDropdownMenu>
-                                                <a class="dropdown-item" href="javascript: void(0);">Save As</a>
+                                                <a class="dropdown-item" (click)="saveHanlers('True',smallDataModal)" href="javascript: void(0);">Save As</a>
                                             </div>
                                         </div>
                                     </div>
@@ -218,3 +218,41 @@
         </div>
     </div>
 </div>
+
+
+<ng-template #smallDataModal let-modal>
+    <div class="modal-header">
+        <h5 class="modal-title mt-0">Save the Dataset</h5>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-hidden="true">×</button>
+    </div>
+    <div class="modal-body">
+        <form #f="ngForm">
+            <div class="form-group">
+                <label for="example-text-input" class="col-form-label">Dataset Name</label>
+                <input class="form-control" maxlength="150" (change)="checkuniquedatasetname($event)" type="text" required [(ngModel)]="saveAs.dataset_name" name="datasetname" #datasetname="ngModel">
+                <div class="invalid-feedback" *ngIf="datasetname.errors?.required && (datasetname.dirty || datasetname.touched)">
+                    <span *ngIf="datasetname.errors?.required && (datasetname.dirty || datasetname.touched)" class="text-red">please enter dataset name.</span>
+                </div>
+                <div class="invalid-feedback" *ngIf="datasetnameuniqueerror">
+                    <span class="text-red">Dataset name already exist</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="example-text-input" class="col-form-label">Description</label>
+                <textarea class="form-control" maxlength="500" [(ngModel)]="saveAs.description" name="datasetdescription" #datasetdescription="ngModel" required></textarea>
+                <div class="invalid-feedback" *ngIf="datasetdescription.errors?.required && (datasetdescription.dirty || datasetdescription.touched)">
+                    <span *ngIf="datasetdescription.errors?.required && (datasetdescription.dirty || datasetdescription.touched)" class="text-red">Please enter description</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="custom-control custom-checkbox mb-3">
+                    <input type="checkbox" class="custom-control-input" (change)="saveAs.isprivate=$event.target.checked" checked name="isprivate" id="customCheck1">
+                    <label class="custom-control-label" for="customCheck1">Keep Dataset private</label>
+                </div>
+            </div>
+            <div class="button-items text-center">
+                <button type="button" class="btn btn-success" id="btnSaveas" [disabled]="!f.form.valid  || datasetnameuniqueerror" (click)="saveAsDataset('True');f.reset()">Submit</button>
+            </div>
+        </form>
+    </div>
+</ng-template>
