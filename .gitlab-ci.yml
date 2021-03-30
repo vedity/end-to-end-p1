@@ -23,7 +23,7 @@ Automation Testing:
     - docker exec ms_container sh -c "cd testing && python -m unittest ingest_test"
     - docker exec ms_container sh -c "cd testing && python -m unittest preprocess_test"
   only:
-    - development
+    # - development
     # - uat
     # - master
 
