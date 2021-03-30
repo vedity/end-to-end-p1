@@ -415,8 +415,6 @@ class ScalingSplitClass(APIView):
                         projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
                         project_name = projectnm_df['project_name'][0]
                         activity_description = sd.get_split_activity_desc(project_name,activity_id)
-                
-                        logging.info('------------->'+str(activity_description))
                         end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
                         activity_status,index = AT_OBJ.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
                         if isinstance(status,int):     
