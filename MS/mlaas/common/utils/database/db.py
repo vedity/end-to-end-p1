@@ -788,7 +788,7 @@ class DBClass:
         try:
             logging.info("database : DBClass : get_target_col : Execution Start")
             
-            sql_command = f"select st.column_name from mlaas.schema_tbl st where st.schema_id = '{schema_id}' and st.column_attribute = 'Target'"
+            sql_command = f"select case when changed_column_name = '' then column_name else changed_column_name end column_name from mlaas.schema_tbl st where st.schema_id = '{schema_id}' and st.column_attribute = 'Target'"
             target_df = self.select_records(connection,sql_command)
             
             target_lst = target_df['column_name']
