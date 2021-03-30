@@ -35,6 +35,7 @@ import numpy as np
 import pandas as pd
 import uuid
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
 import requests
 import uuid
 import json
@@ -52,6 +53,7 @@ logger = logging.getLogger('preprocessing')
 #* Object Definition
 dc = dataset_creation.DatasetClass()
 sp = split_data.Split_Data()
+le = LabelEncoder()
 class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass, trs.TransformationClass):
     def __init__(self,database,user,password,host,port):
         """This constructor is used to initialize database credentials.
@@ -460,7 +462,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
 
                     missing_values = self.detect_missing_values(DBObject, connection, table_name, col)
                     noise_status = self.dtct_noise(DBObject, connection, col, table_name= table_name)
-                    logging.info("BBBBBBBBBBBBBBB: "+ str(noise_status))
                     if noise_status == 1:
                         noise_status = True
                     else: noise_status = False
@@ -953,6 +954,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             feature_cols = list(data_df.columns) #get list of the columns
             tg_cols = DBObject.get_target_col(connection, schema_id) #get list of the target columns
             for col in tg_cols:
+                if data_df[col].dtype is object:
+                    data_df[col] = le.fit_transform(data_df[col]) 
                 feature_cols.remove(col) #remove target columns from list
             target_cols = [data_df.columns[0]]
             target_cols += tg_cols #add index column from target columns list
