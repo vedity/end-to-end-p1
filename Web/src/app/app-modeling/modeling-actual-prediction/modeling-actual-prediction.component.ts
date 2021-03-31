@@ -22,6 +22,7 @@ import {
 export class ModelingActualPredictionComponent implements OnInit {
   @ViewChild("chart") chart: ChartComponent;
   animation = "progress-dark";
+  
   theme = {
     'border-radius': '5px',
     'height': '40px',
@@ -35,6 +36,8 @@ export class ModelingActualPredictionComponent implements OnInit {
   public simpleline: any;
   classname = "expand-block";
   @Input() public experiment_id: any;
+  @Input() public model_type: any;
+  public columnlabelChartexpand:any;
   responsedata:any;
   ngOnInit(): void {
     this.getActualVsPreidiction();
@@ -42,7 +45,7 @@ export class ModelingActualPredictionComponent implements OnInit {
   }
 
   getActualVsPreidiction() {
-    this.apiservice.getActualVsPreidiction(this.experiment_id).subscribe(
+    this.apiservice.getActualVsPreidiction(this.experiment_id,this.model_type).subscribe(
       logs => this.successHandler(logs),
       error => this.errorHandler(error));
   }
@@ -62,7 +65,7 @@ export class ModelingActualPredictionComponent implements OnInit {
     if (data.status_code == "200") {
       this.responsedata = data.response;
       // console.log(this.responsedata);
-
+if(this.model_type=="Regression"){
       this.chartOptions1 = {
         series: [
           {
@@ -101,7 +104,75 @@ export class ModelingActualPredictionComponent implements OnInit {
           }
         }
       };
+    }
+    else{
+      this.columnlabelChartexpand = {
+        chart: {
+          height: 450,
+          width: '100%',
+          type: 'bar',
   
+          toolbar: {
+            show: false
+          },
+          selection: {
+            enabled: true
+          }
+        },
+        // plotOptions: {
+        //   bar: {
+        //     distributed: true
+        //   }
+        // },
+        plotOptions: {
+          bar: {
+            horizontal: false,
+            columnWidth: "25%",
+           // endingShape: "rounded"
+          }
+        },
+        dataLabels: {
+          enabled: false
+        },
+        //colors: ['#00e396d9','#008ffbd9'],
+        series: [
+          {
+            name:'actual',
+            data: this.responsedata.actual,
+            //color:'#00e396d9'
+          },
+          {
+            name:'prediction',
+            data: this.responsedata.prediction,
+            //color:'#008ffbd9'
+          }
+        ],
+        xaxis: {
+          categories: this.responsedata.keys,
+          position: 'bottom',
+          title: {
+            text: 'Histogarm'
+          }
+        },
+        yaxis: {
+          categories: this.responsedata.keys,
+          position: 'left',
+          labels: {
+            show: true,
+            align: 'right',
+            minWidth: 0,
+            maxWidth: 160,
+          },
+          offsetX: 0,
+          offsetY: 0,
+  
+        },
+        legend: {
+          show: true
+        }
+  
+      };
+    }
       // this.toaster.success(data.error_msg, 'Success');
     }
     else {
