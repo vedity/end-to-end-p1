@@ -104,7 +104,10 @@ export class ModelingTypeComponent implements OnInit {
         if (elem.project_id == value)
           return elem
       })
+     this.getCheckSplit(projects[0].project_id);
+     
       this.projectdata = projects[0];
+
     }
     else {
       this.projectdata = undefined
@@ -581,4 +584,21 @@ export class ModelingTypeComponent implements OnInit {
       $("#createExperiment").trigger('click');
     }
   }
+
+  getCheckSplit(project_id) {
+  return  this.apiservice.getCheckSplit(project_id).subscribe(
+      logs => this.checksplitSuccessHandler(logs)
+    );
+  }
+
+  isEnableModeling = false;
+  checksplitSuccessHandler(data) {
+    if (data.status_code == "200") {
+      this.isEnableModeling= data.response;
+    }
+    else{
+      this.isEnableModeling=false;
+    } 
+  }
+
 }
