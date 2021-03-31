@@ -151,7 +151,7 @@ if(this.model_type=="Regression"){
           categories: this.responsedata.keys,
           position: 'bottom',
           title: {
-            text: 'Histogarm'
+            text: 'Categories'
           }
         },
         yaxis: {
