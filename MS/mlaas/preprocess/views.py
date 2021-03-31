@@ -408,6 +408,15 @@ class ScalingSplitClass(APIView):
                         test_ratio = request.query_params.get('test_ratio') #get test ratio
                         random_state = request.query_params.get('random_state') #get random state
                         split_parameters = {'split_method': split_method ,'cv': cv,'valid_ratio': valid_ratio, 'test_ratio': test_ratio,'random_state': random_state} #split parameters
+                        
+                        activity_id = 49 #Scale and Split Activity Start
+                        activity_df = AT_OBJ.get_activity(activity_id,"US")
+                        projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
+                        project_name = projectnm_df['project_name'][0]
+                        activity_description = sd.get_split_activity_desc(project_name,activity_id)
+                        end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                        activity_status,index = AT_OBJ.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
+                        
                         status = preprocessObj.handover(dataset_id, schema_id, project_id, user_name,split_parameters, scaling_operation)
                         logging.info("data preprocess : ScalingSplitClass : POST Method : execution stop")
                         activity_id = 49

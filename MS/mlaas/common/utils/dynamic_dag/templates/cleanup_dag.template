@@ -105,13 +105,15 @@ op_dict = {
     32 : PC_OBJ.multiply_column
 }
 
-def dag_resetter(DBObject,connection,dag_id,**kwargs):
+def dag_resetter(DBObject,connection,dataset_id,project_id,dag_id,**kwargs):
     '''
         To reset the dag status
     '''
     sql_command = f"update mlaas.cleanup_dag_status set status = (case when status = '1' then '0' else '1' end) where dag_id = '{dag_id}'"
     update_status = DBObject.update_records(connection,sql_command)
-
+    activity_id = 52
+    status = PC_OBJ.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id)
+    
     return update_status
 
 #? Making Dynamic Tasks
@@ -127,7 +129,7 @@ t4= PythonOperator(
             dag=dag,
             provide_context=True,
             python_callable=dag_resetter,
-            op_args=[DBObject,connection,main_dag_id])
+            op_args=[DBObject,connection,dataset_id,project_id,main_dag_id])
 
 if save_as == 'True':
     t3 = PythonOperator(
