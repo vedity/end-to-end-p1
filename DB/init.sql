@@ -186,10 +186,10 @@ CREATE TABLE mlaas.schema_tbl (
 );
 
 --Insert menu_tbl
-Insert into  mlaas.menu_tbl values (2,'DI','Data Ingestion',null,null,'bx-home-circle');
+Insert into  mlaas.menu_tbl values (2,'DI','Data Ingestion',null,null,' mdi-database-import');
 Insert into  mlaas.menu_tbl values (3,'DI','Datasets','2','/dataset',null);
 Insert into  mlaas.menu_tbl values (4,'DI','Projects','2','/project',null);
-Insert into  mlaas.menu_tbl values (5,'DP','Data Pre-Proecessing',null,null,'bx-home-circle');
+Insert into  mlaas.menu_tbl values (5,'DP','Data Pre-Proecessing',null,null,'mdi-database-sync');
 Insert into  mlaas.menu_tbl values (6,'DP','Schema Mapping','5','/schema',null);
 Insert into  mlaas.menu_tbl values (7,'DP','Data Cleanup','5','/cleanup',null);
 
@@ -335,8 +335,10 @@ Insert into mlaas.activity_master_tbl values (109,45,'Started Modeling','Modelli
 Insert into mlaas.activity_master_tbl values (110,46,'Stopped Modeling','Modelling has been stopped for experiment','US','Operation',0,-1,0,0);
 Insert into mlaas.activity_master_tbl values (111,47,'Completed Modeling','Modeling of experiment * has been completed successfully','US','Operation',0,-1,0,0);
 Insert into mlaas.activity_master_tbl values (112,48,'Completed Modeling','Modeling of experiment * has been completed with an error','US','Operation',0,-1,0,0);
-Insert into mlaas.activity_master_tbl values (113,49,'Completed Scale And Split','Scaling and Spliting of * has been completed','US','Operation',0,-1,0,0);
-
+Insert into mlaas.activity_master_tbl values (113,49,'Started Scale And Split','Scaling and Spliting of * has been started','US','Operation',0,-1,0,0);
+Insert into mlaas.activity_master_tbl values (114,50,'Completed Scale And Split','Scaling and Spliting of * has been completed','US','Operation',0,-1,0,0);
+Insert into mlaas.activity_master_tbl values (115,51,'Cleanup Started','Cleanup started for dataset * of project &','US','Operation',0,-1,0,0);
+Insert into mlaas.activity_master_tbl values (116,52,'Cleanup Ended','Cleanup ended for dataset * of project &','US','Operation',0,-1,0,0);
 
 
 
