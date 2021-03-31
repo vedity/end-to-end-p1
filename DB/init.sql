@@ -337,7 +337,8 @@ Insert into mlaas.activity_master_tbl values (111,47,'Completed Modeling','Model
 Insert into mlaas.activity_master_tbl values (112,48,'Completed Modeling','Modeling of experiment * has been completed with an error','US','Operation',0,-1,0,0);
 Insert into mlaas.activity_master_tbl values (113,49,'Started Scale And Split','Scaling and Spliting of * has been started','US','Operation',0,-1,0,0);
 Insert into mlaas.activity_master_tbl values (114,50,'Completed Scale And Split','Scaling and Spliting of * has been completed','US','Operation',0,-1,0,0);
-
+Insert into mlaas.activity_master_tbl values (115,51,'Cleanup Started','Cleanup started for dataset * of project &','US','Operation',0,-1,0,0);
+Insert into mlaas.activity_master_tbl values (116,52,'Cleanup Ended','Cleanup ended for dataset * of project &','US','Operation',0,-1,0,0);
 
 
 

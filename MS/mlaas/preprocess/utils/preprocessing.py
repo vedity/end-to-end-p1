@@ -40,6 +40,7 @@ import requests
 import uuid
 import json
 import time
+import datetime
 
 
 user_name = 'admin'
@@ -1186,11 +1187,14 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             # json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
             # result = requests.post("http://airflow:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
-            
+
             status = self.dag_updater(master_dict, file_name, namespace)
             if not isinstance(status,int):
                 logging.error(f"Dag Updation Failed : Error : {str(status)}")
                 raise DagUpdateFailed(500)
+
+            activity_id = 51
+            activity_status = self.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id)
 
             json_data = {}
             result = requests.post(f"http://airflow:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False)#owner
@@ -1361,3 +1365,34 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.error("data preprocessing : PreprocessingClass : get_dag_status : " +traceback.format_exc())
             return exc.msg
         
+
+    def get_cleanup_startend_desc(self,DBObject,connection,dataset_id,project_id,activity_id):
+        """This function will replace * into project name and get activity description of scale and split.
+
+        Args:
+        project_name[String]: get project name
+        activity_id[Integer]: get activity id
+
+        Returns:
+            [String]: activity_description
+        """
+        #project_name = '"'+project_name+'"'
+        activity_df = self.AT.get_activity(activity_id,"US")
+        datasetnm_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
+        projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
+        dataset_name = datasetnm_df['dataset_name'][0]
+        user_name = datasetnm_df['user_name'][0]
+        project_name = projectnm_df['project_name'][0]
+
+        sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
+        desc_df = DBObject.select_records(connection,sql_command)
+        activity_description = desc_df['description'][0]
+        activity_description = activity_description.replace('*',dataset_name)
+        activity_description = activity_description.replace('&',project_name)
+        logging.info("------->"+str(activity_description))
+
+    
+        end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+        activity_status,index = self.AT.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
+
+        return activity_status
