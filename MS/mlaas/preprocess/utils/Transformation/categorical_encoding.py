@@ -126,33 +126,41 @@ class EncodeClass:
         if flag == False:
             for val in range(len(df)):
                 value = df.loc[val, {column_list[1]}]
+
+                #? Getting new Col name
+                new_col_name = column_list[1] +"_"+ value[0]
+                
                 value1 = "'"+str(value[0])+"'"
-                val_list.append(value[0])
+                val_list.append(str(new_col_name))
                 dtype.append('numeric')
                 missing_lst.append('False')
                 noise_lst.append('False') 
-                dist_val += f'"{value[0]}"=col{val},'
-                alter_val += f'add COLUMN "{value[0]}" int,'
+                dist_val += f'"{new_col_name}"=col{val},'
+                alter_val += f'add COLUMN "{new_col_name}" int,'
                 select_val += f',case when "{column_list[1]}"={value1} then 1 else 0 END AS col{val}'
         else:
             most_occure = self.frequent_value(DBObject,connection,table_name,column_list)
             logging.info(" checking "+str(most_occure))
             for val in range(len(most_occure)):
                 value = most_occure.loc[val, {column_list[1]}]
+                
+                #? Getting new Col name
+                new_col_name = column_list[1] +"_"+ value[0]
+                
                 value1 = "'"+str(value[0])+"'"
-                val_list.append(value[0])
+                val_list.append(str(new_col_name))
                 dtype.append('numeric')
                 missing_lst.append('False')
                 noise_lst.append('False') 
-                dist_val += f'"{value[0]}"=col{val},'
-                alter_val += f'add COLUMN "{value[0]}" int,'
+                dist_val += f'"{new_col_name}"=col{val},'
+                alter_val += f'add COLUMN "{new_col_name}" int,'
                 select_val += f',case when "{column_list[1]}"={value1} then 1 else 0 END AS col{val}'
             
             freq_lst = str(val_list)[1:-1]
-            dist_val += f'"other"=col,'
-            alter_val += f'add COLUMN "other" int,'
+            dist_val += f'"{column_list[1]}_other"=col,'
+            alter_val += f'add COLUMN "{column_list[1]}_other" int,'
             select_val += f', case when "{column_list[1]}" not in ({freq_lst}) then 1 else 0 END AS col'
-            val_list.append("other")
+            val_list.append(f"{column_list[1]}_other")
             dtype.append('numeric')
             missing_lst.append('False')
             noise_lst.append('False') 
@@ -192,6 +200,8 @@ class EncodeClass:
             Int: [0 : if columns updated, 1 : if column not updated]
         """
         sql_command_update=f'update {table_name} m SET {dist_val} from (SELECT {column_list[0]} {select_val} FROM {table_name} )s where m."{column_list[0]}" = s.{column_list[0]}'  
+        
+        logging.info("------->UP "+sql_command_update)
         status = DBObject.update_records(connection,sql_command_update)
         return status
 
@@ -223,5 +233,6 @@ class EncodeClass:
                 List of all 10 most occuring values.
         """
         sql_command = f'SELECT  "{column_list[1]}",count(*) from {table_name} GROUP BY "{column_list[1]}" order by count(*)  desc limit  10;'
+        logging.info("------->FRQ "+sql_command)
         freq_val = DBObject.select_records(connection,sql_command)
         return freq_val
