@@ -449,8 +449,9 @@ class DBClass:
         else:
             columns=columns     
         empty_string=""
+        global_value=global_value.lower()
         for i in range(len(columns)):
-            empty_string+="cast(\""+str(columns[i])+"\" as varchar) like '%"+str(global_value)+"%' or "   # create the string with Like operator  
+            empty_string+="lower(cast(\""+str(columns[i])+"\" as varchar)) like '%"+str(global_value)+"%' or "   # create the string with Like operator  
         global_search_clause="("+empty_string[:len(empty_string)-3]+")" # remove the "or" string appended at last 
         return global_search_clause
     
@@ -466,7 +467,8 @@ class DBClass:
         for x in dict:
             if dict[x]!="":
                 dict[x]=dict[x].replace("'","''")
-                empty_string+="cast(\""+x+"\" as varchar) like '%"+dict[x]+"%' or "
+                dict[x]=dict[x].lower()
+                empty_string+="lower(cast(\""+x+"\" as varchar)) like '%"+dict[x]+"%' or "
         customefilter="("+empty_string[:len(empty_string)-3]+")" # remove the "or" string appended at last 
         return customefilter
     
@@ -548,7 +550,7 @@ class DBClass:
                 sql_data =  f'SELECT {str(select_clause)} From {table_name} where "{columns_list[0]}" >= {start_index} {order_clause} limit {length}' # sql Query without any filter and clause 
                 sql_filtercount = f'SELECT count(*) From {table_name}' #sql Query with customefilter_clause
 
-            
+            logger.info("sql_data===="+str(sql_data))
             return sql_data,sql_filtercount
         except Exception as exc:
             return str(exc) 
