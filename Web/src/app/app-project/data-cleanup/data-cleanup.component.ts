@@ -54,8 +54,8 @@ export class DataCleanupComponent implements OnInit {
     'animation-duration': '20s'
   };
 
-  setCleanUpInterval:any;
-  setModelingInterval:any;
+  setCleanUpInterval: any;
+  setModelingInterval: any;
 
   //visibleSelection = 20;
   visibleBarOptions: Options = {
@@ -107,6 +107,12 @@ export class DataCleanupComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (this.setCleanUpInterval) {
+      clearInterval(this.setCleanUpInterval);
+    }
+    if (this.setModelingInterval) {
+      clearInterval(this.setModelingInterval);
+    }
     this.getCheckSplit();
     this.getCldagStatus();
     this.dtOptions = {
@@ -128,30 +134,32 @@ export class DataCleanupComponent implements OnInit {
     // this.scaldata.scaling_op='0'
   }
 
-  getCheckSplit(){
+  getCheckSplit() {
+    
     this.apiService.getCheckSplit(this.project_id).subscribe(
-      logs=>this.checksplitSuccessHandler(logs)
+      logs => this.checksplitSuccessHandler(logs)
     )
   }
 
-  getCldagStatus(){
+  getCldagStatus() {
+    
     this.apiService.getCldagStatus(this.project_id).subscribe(
-      logs=>this.CldagSuccessHandler(logs)
+      logs => this.CldagSuccessHandler(logs)
     )
   }
 
-  isEnableCleanup=true;
-  CldagSuccessHandler(data){
-    if(data.status_code=="200"){
-      this.isEnableCleanup=data.response;
-      if(this.isEnableCleanup){
-        if(!this.setCleanUpInterval){
-          this.setCleanUpInterval= setInterval(() => {
-           this.getCldagStatus();
+  isEnableCleanup = true;
+  CldagSuccessHandler(data) {
+    if (data.status_code == "200") {
+      this.isEnableCleanup = data.response;
+      if (this.isEnableCleanup) {
+        if (!this.setCleanUpInterval) {
+          this.setCleanUpInterval = setInterval(() => {
+            this.getCldagStatus();
           }, 10000);
         }
       }
-      else{
+      else {
         if (this.setCleanUpInterval) {
           clearInterval(this.setCleanUpInterval);
         }
@@ -159,18 +167,18 @@ export class DataCleanupComponent implements OnInit {
     }
   }
 
-  isEnableModeling=true;
-  checksplitSuccessHandler(data){
-    if(data.status_code=="200"){
-      this.isEnableModeling=data.response;
-      if(!this.isEnableModeling){
-        if(!this.setModelingInterval){
-          this.setModelingInterval= setInterval(() => {
-           this.getCheckSplit();
+  isEnableModeling = true;
+  checksplitSuccessHandler(data) {
+    if (data.status_code == "200") {
+      this.isEnableModeling = data.response;
+      if (!this.isEnableModeling) {
+        if (!this.setModelingInterval) {
+          this.setModelingInterval = setInterval(() => {
+            this.getCheckSplit();
           }, 10000);
         }
       }
-      else{
+      else {
         if (this.setModelingInterval) {
           clearInterval(this.setModelingInterval);
         }
@@ -375,6 +383,21 @@ export class DataCleanupComponent implements OnInit {
     this.selectedColumn = [];
     this.getColumnList();
     this.getColumnviseOperation();
+    if (this.isEnableCleanup) {
+      if (!this.setCleanUpInterval) {
+        this.setCleanUpInterval = setInterval(() => {
+          this.getCldagStatus();
+        }, 10000);
+      }
+    }
+
+    if (!this.isEnableModeling) {
+      if (!this.setModelingInterval) {
+        this.setModelingInterval = setInterval(() => {
+          this.getCheckSplit();
+        }, 10000);
+      }
+    }
   }
 
   getScalingOperations() {
@@ -402,7 +425,7 @@ export class DataCleanupComponent implements OnInit {
 
   fianlarray = [];
   errorflag: boolean;
-  saveHanlers(isSave,smallDataModal) {
+  saveHanlers(isSave, smallDataModal) {
     this.errorflag = false;
     this.fianlarray = [];
     let arrayhandlers = [];
@@ -443,13 +466,14 @@ export class DataCleanupComponent implements OnInit {
             this.toaster.error("Please enter required input", 'Error')
           }
           else {
-            if(isSave=='False'){
-              this.apiService.saveOperations(this.schema_id, this.dataset_id, this.project_id,isSave, this.fianlarray).subscribe(
+            if (isSave == 'False') {
+             
+              this.apiService.saveOperations(this.schema_id, this.dataset_id, this.project_id, isSave, this.fianlarray).subscribe(
                 logs => this.saveSuccessHandlers(logs),
                 error => this.errorHandler(error)
               )
             }
-            else{
+            else {
               this.modalService.open(smallDataModal, { size: 'sm', windowClass: 'modal-holder', centered: true });
             }
           }
@@ -465,9 +489,14 @@ export class DataCleanupComponent implements OnInit {
 
   saveSuccessHandlers(data) {
     if (data.status_code == "200") {
+      $(".checkbox:checked").prop("checked", false);
+      $(".customInput").prop('disabled', true).val('').removeClass('errorstatus');
+      $(".radiobutton:checked").prop('checked', false);
+      this.selectedColumn = [];
+      this.getColumnList();
+      this.getColumnviseOperation();
       this.toaster.success(data.error_msg, 'Success')
       this.getCldagStatus();
-      this.getCheckSplit();
     }
     else {
       this.errorHandler(data);
@@ -515,6 +544,8 @@ export class DataCleanupComponent implements OnInit {
   savescalSuccessHandlers(data) {
     if (data.status_code == "200") {
       this.toaster.success(data.error_msg, 'Success')
+      this.getCheckSplit();
+
     }
     else {
       this.errorHandler(data);
@@ -548,15 +579,21 @@ export class DataCleanupComponent implements OnInit {
     }
   }
 
-  saveAsDataset(flag){
-    this.apiService.saveasOperations(this.schema_id, this.dataset_id, this.project_id,this.saveAs.dataset_name,this.saveAs.visibility,this.saveAs.dataset_desc,flag,this.fianlarray)
-    .subscribe(
-      logs=>this.saveAsSuccessHandlers(logs),
-    error=>this.errorHandler(error)
-    )
+  saveAsDataset(flag) {
+    this.apiService.saveasOperations(this.schema_id, this.dataset_id, this.project_id, this.saveAs.dataset_name, this.saveAs.visibility, this.saveAs.dataset_desc, flag, this.fianlarray)
+      .subscribe(
+        logs => this.saveAsSuccessHandlers(logs),
+        error => this.errorHandler(error)
+      )
   }
   saveAsSuccessHandlers(data) {
     if (data.status_code == "200") {
+      $(".checkbox:checked").prop("checked", false);
+      $(".customInput").prop('disabled', true).val('').removeClass('errorstatus');
+      $(".radiobutton:checked").prop('checked', false);
+      this.selectedColumn = [];
+      this.getColumnList();
+      this.getColumnviseOperation();
       this.toaster.success(data.error_msg, 'Success')
       this.modalService.dismissAll();
     }
