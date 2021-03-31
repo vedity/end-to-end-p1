@@ -196,7 +196,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
-                status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value[i])
+                status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value)
 
                 #Update the activity status for the operation performed
                 at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
@@ -223,7 +223,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
-                status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value[i])
+                status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value)
 
                 #Update the activity status for the operation performed
                 at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
@@ -249,7 +249,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
-                status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value[i])
+                status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value)
 
                 #Update the activity status for the operation performed
                 at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
@@ -276,7 +276,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
-                status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value[i])
+                status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value)
 
                 #Update the activity status for the operation performed
                 at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
