@@ -586,6 +586,7 @@ export class DataCleanupComponent implements OnInit {
         error => this.errorHandler(error)
       )
   }
+  
   saveAsSuccessHandlers(data) {
     if (data.status_code == "200") {
       $(".checkbox:checked").prop("checked", false);
