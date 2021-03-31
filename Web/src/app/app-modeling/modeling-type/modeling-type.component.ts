@@ -595,6 +595,8 @@ export class ModelingTypeComponent implements OnInit {
   checksplitSuccessHandler(data) {
     if (data.status_code == "200") {
       this.isEnableModeling= data.response;
+      if(!this.isEnableModeling)
+      this.toaster.error('CleanUp is remaining for this project, Please select other project','Error');
     }
     else{
       this.isEnableModeling=false;
