@@ -40,21 +40,28 @@ class RegressionClass:
         
         """This function is used to run regression type model.
         """
-        logging.info("modeling : RegressionClass : regression_model : execution start")
-  
-        if model_param_dict['target_type'] == 'Single_Target':
-            
-            json_data = {'conf':'{"model_param_dict":"'+str(model_param_dict)+'"}'}
-            
-            logging.info("modeling : RegressionClass : all_regression_model : execution"+str(json_data))
-            
-            result = requests.post("http://airflow:8080/api/experimental/dags/auto_regression_pipeline/dag_runs",data=json.dumps(json_data),verify=False)#owner
-    
-        else:
-            print("yet not tested")
-            
-        logging.info("modeling : RegressionClass : regression_model : execution end")
         
+        try:
+        
+            logging.info("modeling : RegressionClass : regression_model : execution start")
+    
+            if model_param_dict['target_type'] == 'Single_Target':
+                
+                json_data = {'conf':'{"model_param_dict":"'+str(model_param_dict)+'"}'}
+                
+                logging.info("modeling : RegressionClass : all_regression_model : execution"+str(json_data))
+                
+                result = requests.post("http://airflow:8080/api/experimental/dags/auto_regression_pipeline/dag_runs",data=json.dumps(json_data),verify=False)#owner
+        
+            else:
+                print("yet not tested")
+                
+            logging.info("modeling : RegressionClass : regression_model : execution end")
+            
+        return result
+        
+        except Exception as e:
+            return e
     
     
 

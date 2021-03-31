@@ -143,8 +143,12 @@ class StartModelClass(APIView):
                                 activity_id = 42
                                 timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
 
-                                ModelObject.algorithm_identifier(model_param_dict)
-                                
+                                result = ModelObject.algorithm_identifier(model_param_dict)
+                                if result.status_code != 200:
+                                        # status_code,error_msg=json_obj.get_Status_code(learning_curve_json) # extract the status_code and error_msg from project_df
+                                        logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code :"+ result)
+                                        return Response({"status_code":result.status_code,"error_msg":str(result.content, 'UTF-8'),"response":"false"})
+
                                 logging.info("modeling : ModelClass : GET Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully updated","response":"pipeline started"})
                         else:
@@ -329,7 +333,8 @@ class ActualVsPredictionClass(APIView):
                        
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
                         experiment_id = request.query_params.get('experiment_id') #get experiment_id
-                        actual_vs_prediction_json =ModelStatObject.actual_vs_prediction(experiment_id)#will call actual_vs_prediction method
+                        model_type = request.query_params.get('model_type') #get model_type
+                        actual_vs_prediction_json =ModelStatObject.actual_vs_prediction(experiment_id, model_type)#will call actual_vs_prediction method
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
                         if isinstance(actual_vs_prediction_json,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(actual_vs_prediction_json) # extract the status_code and error_msg from project_df

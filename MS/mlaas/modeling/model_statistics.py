@@ -71,7 +71,7 @@ class ModelStatisticsClass:
         
 
 
-    def actual_vs_prediction(self, experiment_id):
+    def actual_vs_prediction(self, experiment_id, model_type):
         """This function is used to get actuval_vs_prediction of particular experiment.
 
         Args:
@@ -98,9 +98,18 @@ class ModelStatisticsClass:
 
             with open(actual_vs_prediction_uri, "r") as rf: # Read the actual vs prediction data from mlaas.runs
                 actual_vs_prediction_json = json.load(rf)
-                
-            actual_vs_prediction_df = DataFrame(actual_vs_prediction_json).round(decimals = 3) #Round to the nearest 3 decimals.
-            actual_vs_prediction_json = actual_vs_prediction_df.to_dict(orient='list')
+            
+            if model_type == 'Regression':
+                actual_vs_prediction_df = DataFrame(actual_vs_prediction_json).round(decimals = 3) #Round to the nearest 3 decimals.
+                actual_vs_prediction_json = actual_vs_prediction_df.to_dict(orient='list')
+            elif model_type == 'Classification':
+                actual_vs_prediction_df = DataFrame(actual_vs_prediction_json) #Round to the nearest 3 decimals.
+                actual_vs_prediction_df.drop(columns=['index'], inplace=True)
+                actual_dict = actual_vs_prediction_df.groupby(actual_vs_prediction_df.columns.values[0]).count().to_dict()
+                prediction_dict = actual_vs_prediction_df.groupby(actual_vs_prediction_df.columns.values[1]).count().to_dict()
+                actual_vs_prediction_json = {}
+                actual_vs_prediction_json.update(actual_dict)
+                actual_vs_prediction_json.update(prediction_dict)
 
             logging.info("modeling : ModelStatisticsClass : actual_vs_prediction : execution end")
             return actual_vs_prediction_json
