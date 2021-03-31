@@ -196,12 +196,12 @@ class LogisticClassifierClass:
         recall = recall_score(actual_lst, prediction_lst, pos_label='positive',average='micro')
         precision = precision_score(actual_lst, prediction_lst, pos_label='positive',average='micro')
         # print('ACTUAL LSTTT:-         ', actual_lst.shape)
-        classes = np.unique(actual_lst).astype(object)
-        CM = confusion_matrix(actual_lst,prediction_lst,labels=classes)
-        CM_df = pd.DataFrame(CM, columns=classes+'_true', index=classes+'_predicted')
-        CM_dict = CM_df.to_dict()
+        # classes = np.unique(actual_lst).astype(object)
+        # CM = confusion_matrix(actual_lst,prediction_lst,labels=classes)
+        # CM_df = pd.DataFrame(CM, columns=classes+'_true', index=classes+'_predicted')
+        # CM_dict = CM_df.to_dict()
         
-        return CM_dict,round(accuracy,2),round(recall,2),round(precision,2)
+        return round(accuracy,2),round(recall,2),round(precision,2)
         
     def model_summary(self,X_train, X_test,y_train):
         
@@ -286,7 +286,7 @@ class LogisticClassifierClass:
         # save prediction
         final_result_dict = self.save_prediction(self.y_test,prediction_lst)
         # all evaluation matrix
-        confusion_matrix,accuracy,recall,precision = self.get_evaluation_matrix(actual_lst,prediction_lst)  
+        accuracy,recall,precision = self.get_evaluation_matrix(actual_lst,prediction_lst)  
         # get cv score
         if self.dataset_split_dict['split_method'] == 'cross_validation':
             cv_score = self.cv_score(self.X_train,self.y_train) # default k-fold with 5 (r2-score)
@@ -328,5 +328,5 @@ class LogisticClassifierClass:
         mlflow.log_dict(features_impact_dict,"features_importance.json")
         mlflow.log_dict(model_summary,"model_summary.json")
         mlflow.log_dict(final_result_dict,"predictions.json")
-        mlflow.log_dict(confusion_matrix, "confusion_matrix.json")
+        # mlflow.log_dict(confusion_matrix, "confusion_matrix.json")
         print("DONEEE-     \n\n\n OKKK------------------------------")

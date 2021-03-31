@@ -954,7 +954,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             feature_cols = list(data_df.columns) #get list of the columns
             tg_cols = DBObject.get_target_col(connection, schema_id) #get list of the target columns
             for col in tg_cols:
-                if data_df[col].dtype is object:
+                if data_df[col].dtype == 'O':
                     data_df[col] = le.fit_transform(data_df[col]) 
                 feature_cols.remove(col) #remove target columns from list
             target_cols = [data_df.columns[0]]
