@@ -40,13 +40,13 @@
             <app-modeling-actual-prediction [experiment_id]="experiment_id"></app-modeling-actual-prediction>
         </ng-template>
     </li>
-    <li [ngbNavItem]="6" *ngIf="model_type=='Classification'">
+    <!-- <li [ngbNavItem]="6" *ngIf="model_type=='Classification'">
         <a ngbNavLink>
             <span class="font-size-12">Confusion Metrics</span>
         </a>
         <ng-template ngbNavContent>
             <app-modeling-confusion-matrics [experiment_id]="experiment_id"></app-modeling-confusion-matrics>
         </ng-template>
-    </li>
+    </li> -->
 </ul>
 <div [ngbNavOutlet]="justifiednavnew"></div>
