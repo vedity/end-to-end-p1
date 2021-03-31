@@ -127,4 +127,9 @@ export class ModelingTypeApiService {
     var params = new HttpParams().set("user_name", this.user.username);
     return this.httpClient.get(this.baseUrl + "ingest/project/create/", { headers: this.headers, params });
   }
+
+  getCheckSplit(project_id){
+    var params = new HttpParams().append("project_id", project_id)
+    return this.httpClient.get(this.baseUrl + "modeling/checksplit/", { headers: this.headers,params });
+  }
 }
