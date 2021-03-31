@@ -605,7 +605,7 @@ class CompareExperimentsClass(APIView):
                         
                         experiment_ids = tuple(json.loads(request.query_params.get('experiment_ids')))
  
-                        experiment_data = ModelStatObject.compare_experiments(experiment_ids)
+                        experiment_data = ModelStatObject.compare_experiments_grid(experiment_ids)
                         
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
                         return Response({"status_code":"200","error_msg":"Successfully updated","response":experiment_data})
@@ -683,4 +683,34 @@ class CheckRunningExperimentsClass(APIView):
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+
+
+
+#class to show experiments list for comparision
+#It will take url string as mlaas/modeling/compareexperiments/.                                 
+class CompareExperimentsGraphClass(APIView):
+ 
+        def get(self, request, format=None):
+                """
+                This function is used to get all Experiment to compare
         
+                Args  : 
+                        experiment_ids[(Integer)]   :[Id of Experiment]
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival & insertions failed or successfull),
+                        Response(return false if failed otherwise json data)
+                """
+                try:
+                        logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
+                        
+                        experiment_ids = tuple(json.loads(request.query_params.get('experiment_ids')))
+ 
+                        experiment_data = ModelStatObject.compare_experiments_graph(experiment_ids)
+                        
+                        logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
+                        return Response({"status_code":"200","error_msg":"Successfully updated","response":experiment_data})
+                except Exception as e:
+                        logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
+                        logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
