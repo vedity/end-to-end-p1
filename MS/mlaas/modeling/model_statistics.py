@@ -71,7 +71,7 @@ class ModelStatisticsClass:
         
 
 
-    def actual_vs_prediction(self, experiment_id, model_type):
+    def actual_vs_prediction(self, experiment_id,model_type):
         """This function is used to get actuval_vs_prediction of particular experiment.
 
         Args:
@@ -98,18 +98,38 @@ class ModelStatisticsClass:
 
             with open(actual_vs_prediction_uri, "r") as rf: # Read the actual vs prediction data from mlaas.runs
                 actual_vs_prediction_json = json.load(rf)
+                
+            # actual_vs_prediction_df = DataFrame(actual_vs_prediction_json).round(decimals = 3) #Round to the nearest 3 decimals.
+            # actual_vs_prediction_json = actual_vs_prediction_df.to_dict(orient='list')
             
             if model_type == 'Regression':
                 actual_vs_prediction_df = DataFrame(actual_vs_prediction_json).round(decimals = 3) #Round to the nearest 3 decimals.
                 actual_vs_prediction_json = actual_vs_prediction_df.to_dict(orient='list')
             elif model_type == 'Classification':
-                actual_vs_prediction_df = DataFrame(actual_vs_prediction_json) #Round to the nearest 3 decimals.
-                actual_vs_prediction_df.drop(columns=['index'], inplace=True)
+                actual_vs_prediction_df = DataFrame(actual_vs_prediction_json) 
+                actual_vs_prediction_df = actual_vs_prediction_df.drop(['index'],axis=1)
+                
                 actual_dict = actual_vs_prediction_df.groupby(actual_vs_prediction_df.columns.values[0]).count().to_dict()
+
                 prediction_dict = actual_vs_prediction_df.groupby(actual_vs_prediction_df.columns.values[1]).count().to_dict()
-                actual_vs_prediction_json = {}
-                actual_vs_prediction_json.update(actual_dict)
-                actual_vs_prediction_json.update(prediction_dict)
+                
+                act_dict = {}
+                prd_dict = {}
+                for i,j in zip(actual_dict.items(),prediction_dict.items()):
+                    act_dict.update(i[1])
+                    prd_dict.update(j[1])
+                    
+                # prediction_dict = prediction_dict.values()
+                
+                key = list(act_dict.keys())
+                actual_lst = list(act_dict.values())
+                prediction_lst = list(prd_dict.values())
+                
+                actual_vs_prediction_json = {"keys":key,"actual":actual_lst,"prediction":prediction_lst}
+                
+ 
+            logging.info("modeling : ModelStatisticsClass : actual_vs_prediction : execution end")
+            return actual_vs_prediction_json
 
             logging.info("modeling : ModelStatisticsClass : actual_vs_prediction : execution end")
             return actual_vs_prediction_json

@@ -334,7 +334,7 @@ class ActualVsPredictionClass(APIView):
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
                         experiment_id = request.query_params.get('experiment_id') #get experiment_id
                         model_type = request.query_params.get('model_type') #get model_type
-                        actual_vs_prediction_json =ModelStatObject.actual_vs_prediction(experiment_id, model_type)#will call actual_vs_prediction method
+                        actual_vs_prediction_json =ModelStatObject.actual_vs_prediction(experiment_id,model_type)#will call actual_vs_prediction method
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
                         if isinstance(actual_vs_prediction_json,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(actual_vs_prediction_json) # extract the status_code and error_msg from project_df
