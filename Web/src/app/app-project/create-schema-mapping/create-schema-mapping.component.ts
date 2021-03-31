@@ -90,7 +90,6 @@ export class CreateSchemaMappingComponent implements OnInit {
     this.displaydiv = true;
     this.getColumnAttributeList();
     // console.log(this.project_id, this.dataset_id);
-
     this.getSchema(this.project_id, this.dataset_id, this.schema_id);
   }
 

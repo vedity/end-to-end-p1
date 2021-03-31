@@ -234,7 +234,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 if not flag:
-                    value = "'"+value[i]+"'"
+                    value = "'"+value+"'"
             
                 status = self.perform_missing_value_imputation(DBObject,connection, table_name,col_name,value)
 
@@ -609,7 +609,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
-                status = super().delete_above(DBObject,connection,table_name,col_name,val[i])
+                status = super().delete_above(DBObject,connection,table_name,col_name,val)
                 logging.info(str(status))
 
                 #Update the activity status for the operation performed
@@ -638,7 +638,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
-                status = super().delete_below(DBObject,connection,table_name,col_name,val[i])
+                status = super().delete_below(DBObject,connection,table_name,col_name,val)
                 logging.info(str(status))
 
                 #Update the activity status for the operation performed
@@ -1042,8 +1042,6 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         #? Getting Activity Description
         desc = self.get_act_desc(DBObject, connection, operation_id, col_name, code = 2)
         
-        logging.info("--------->" + str(desc))
-
         #? Changing the activity description in the activity detail table 
         status = self.AT.update_activity(activity_id,desc)
         
