@@ -51,7 +51,7 @@ class ProbabilisticClass:
             logging.info("modeling : ClassificationClass : classification_model : execution end")
             logging.info("modeling : ClassificationClass : classification_model : "+str(result))
         
-        return result
+            return result
 
         except Exception as e:
             return e

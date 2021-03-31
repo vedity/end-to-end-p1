@@ -58,7 +58,7 @@ class RegressionClass:
                 
             logging.info("modeling : RegressionClass : regression_model : execution end")
             
-        return result
+            return result
         
         except Exception as e:
             return e

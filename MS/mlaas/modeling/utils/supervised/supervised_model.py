@@ -65,7 +65,7 @@ class SupervisedClass(RC,PC):
             logging.info("modeling : SupervisedClass : supervised_algorithm : execution end")
             logging.info("modeling : SupervisedClass : supervised_algorithm :  "+str(result))
 
-        return result
+            return result
         
         except Exception as e:
             return e
@@ -103,7 +103,7 @@ class SupervisedClass(RC,PC):
             logging.info("dag run result: "+str(result))
             logging.info("modeling : SupervisedClass : run_supervised_model : execution end")
             
-        return result
+            return result
 
         except Exception as e:
             return e
@@ -119,7 +119,7 @@ class SupervisedClass(RC,PC):
             dag_id_df = DBObject.select_records(connection,sql_command)
             dag_id = dag_id_df['model_dag_id'][0]
         
-        return dag_id
+            return dag_id
 
         except Exception as e:
             return e
