@@ -67,7 +67,6 @@ class LogisticClassifierClass:
         y_train = y_train[:,-1].reshape(-1 ,1)
 
         # Note, solvers available: {‘newton-cg’, ‘lbfgs’, ‘liblinear’, ‘sag’, ‘saga’}, default=’lbfgs’
-
         # define the model 
         model = LogisticRegression(solver='sag')
         # fit the model
@@ -175,9 +174,10 @@ class LogisticClassifierClass:
         test_results_df = pd.DataFrame(prediction_lst, columns = target_features_suf_res) 
         
         final_result_df = pd.concat([y_df,test_results_df],axis=1)
-        print("final results ==",final_result_df)
+        
         final_result_dict = final_result_df.to_dict(orient='list') 
-        print("final results dict ==",final_result_dict)
+        
+        
         return final_result_dict
         
     
@@ -195,13 +195,14 @@ class LogisticClassifierClass:
         ## Precision e Recall
         recall = recall_score(actual_lst, prediction_lst, pos_label='positive',average='micro')
         precision = precision_score(actual_lst, prediction_lst, pos_label='positive',average='micro')
-        # print('ACTUAL LSTTT:-         ', actual_lst.shape)
-        classes = np.unique(actual_lst).astype(object)
-        CM = confusion_matrix(actual_lst,prediction_lst,labels=classes)
-        CM_df = pd.DataFrame(CM, columns=classes+'_true', index=classes+'_predicted')
-        CM_dict = CM_df.to_dict()
         
-        return CM_dict,round(accuracy,2),round(recall,2),round(precision,2)
+        # print('ACTUAL LSTTT:-         ', actual_lst.shape)
+        # classes = np.unique(actual_lst).astype(object)
+        # CM = confusion_matrix(actual_lst,prediction_lst,labels=classes)
+        # CM_df = pd.DataFrame(CM, columns=classes+'_true', index=classes+'_predicted')
+        # CM_dict = CM_df.to_dict()
+        
+        return round(accuracy,2),round(recall,2),round(precision,2)
         
     def model_summary(self,X_train, X_test,y_train):
         
@@ -280,13 +281,19 @@ class LogisticClassifierClass:
         # train the model
         model = self.train_model(self.X_train,self.y_train)
         # get features importance
+        print("train model")
         features_impact_dict = self.features_importance(model,self.X_train) 
+        print("features importanace",features_impact_dict)
         # get actual and predicted values 
         actual_lst,prediction_lst = self.get_actual_prediction(model)
+        print("actual ",actual_lst)
+        print("prediction_lst ",prediction_lst)
         # save prediction
         final_result_dict = self.save_prediction(self.y_test,prediction_lst)
+        print("final_result_dict ",final_result_dict)
         # all evaluation matrix
-        confusion_matrix,accuracy,recall,precision = self.get_evaluation_matrix(actual_lst,prediction_lst)  
+        accuracy,recall,precision = self.get_evaluation_matrix(actual_lst,prediction_lst)  
+        print("final_result_dict ",final_result_dict)
         # get cv score
         if self.dataset_split_dict['split_method'] == 'cross_validation':
             cv_score = self.cv_score(self.X_train,self.y_train) # default k-fold with 5 (r2-score)
@@ -328,5 +335,5 @@ class LogisticClassifierClass:
         mlflow.log_dict(features_impact_dict,"features_importance.json")
         mlflow.log_dict(model_summary,"model_summary.json")
         mlflow.log_dict(final_result_dict,"predictions.json")
-        mlflow.log_dict(confusion_matrix, "confusion_matrix.json")
+        # mlflow.log_dict(confusion_matrix, "confusion_matrix.json")
         print("DONEEE-     \n\n\n OKKK------------------------------")

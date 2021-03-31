@@ -82,7 +82,7 @@ class ProjectClass:
         logging.info("data ingestion : ProjectClass : make_project_schema : execution end")
         return table_name,schema,cols
 
-    def  make_project_records(self,project_name,project_desc,user_name,original_dataset_id,dataset_id):
+    def make_project_records(self,project_name,project_desc,user_name,original_dataset_id,dataset_id):
         """This function is used to make records for inserting data into project table.
            E.g. column_name_1,column_name_2 .......,column_name_n.
 
