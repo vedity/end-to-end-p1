@@ -536,7 +536,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             check_sequence = DBObject.is_exist_sequence(connection,seq_name="dataset_sequence")
             if check_sequence =="True":
                 seq = DBObject.get_sequence(connection)
-
+            
             #Append the Sequence in the file name
             file_name = file.name.split(".")[0]+"_"+ str(seq['nextval'][0]) + '.csv'
 
