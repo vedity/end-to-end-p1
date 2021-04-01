@@ -1,6 +1,7 @@
 
 import json
 import pandas as pd
+import numpy as np
 import ast
 
 from pandas import DataFrame
@@ -83,7 +84,7 @@ class ModelStatisticsClass:
         """
         try:
             logging.info("modeling : ModelStatisticsClass : actual_vs_prediction : execution start")
-
+            # TODO : make common method for artifact uri
             sql_command = 'select artifact_uri from mlflow.runs where experiment_id='+str(experiment_id)
             # Get the actual_vs_predction's data path from mlaas.runs with the associated experiment id
             artifact_uri = self.DBObject.select_records(self.connection, sql_command)
@@ -105,13 +106,38 @@ class ModelStatisticsClass:
             if model_type == 'Regression':
                 actual_vs_prediction_df = DataFrame(actual_vs_prediction_json).round(decimals = 3) #Round to the nearest 3 decimals.
                 actual_vs_prediction_json = actual_vs_prediction_df.to_dict(orient='list')
-            elif model_type == 'Classification':
-                actual_vs_prediction_df = DataFrame(actual_vs_prediction_json) 
-                actual_vs_prediction_df = actual_vs_prediction_df.drop(['index'],axis=1)
                 
-                actual_dict = actual_vs_prediction_df.groupby(actual_vs_prediction_df.columns.values[0]).count().to_dict()
+            elif model_type == 'Classification':
+                
+                unscaled_df = self.get_unscaled_data(experiment_id)
 
-                prediction_dict = actual_vs_prediction_df.groupby(actual_vs_prediction_df.columns.values[1]).count().to_dict()
+                actual_vs_prediction_df = DataFrame(actual_vs_prediction_json) 
+                #TODO make dynamic
+                actual_vs_prediction_df.rename(columns = {'index':'seq_id'}, inplace = True)
+                
+                final_df=pd.merge(unscaled_df, actual_vs_prediction_df, on='seq_id', how='inner')
+                
+                logging.info("final df =="+str(final_df))
+                
+                actual_vs_prediction_df = actual_vs_prediction_df.drop(['seq_id'],axis=1)
+                
+                
+                cols=actual_vs_prediction_df.columns.values.tolist()
+                actual_col=''
+                predict_col=''
+                for i in cols:
+                    if i.endswith('_prediction') :
+                        predict_col=i
+                    else:
+                        actual_col = i
+                
+                
+                classes_df = final_df[[actual_col,actual_col+'_str']]
+                logging.info("classes_df df =="+str(classes_df))
+                
+                actual_dict = classes_df.groupby(actual_col+'_str').count().to_dict()
+
+                prediction_dict = actual_vs_prediction_df.groupby(predict_col).count().to_dict()
                 
                 act_dict = {}
                 prd_dict = {}
@@ -136,6 +162,37 @@ class ModelStatisticsClass:
             logging.error("modeling : ModelStatisticsClass : actual_vs_prediction : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : actual_vs_prediction : " +traceback.format_exc())
             return exc.msg
+        
+    def get_unscaled_data(self,experiment_id):
+        
+      
+        sql_command = "select scaled_split_parameters,target_features from mlaas.project_tbl"\
+                    " Where project_id in ( select project_id from mlaas.model_experiment_tbl where experiment_id="+str(experiment_id) +")"
+        
+        unscaled_info_df = self.DBObject.select_records(self.connection, sql_command)
+        if unscaled_info_df is None or len(unscaled_info_df) == 0 :
+            raise DataNotFound(500)
+        
+        scaled_split_parameters= ast.literal_eval(unscaled_info_df['scaled_split_parameters'][0])
+        
+        target_features = ast.literal_eval(unscaled_info_df['target_features'][0])
+        
+        unscaled_path = scaled_split_parameters['actual_Y_filename']
+        #TODO need to add exception
+        unscaled_arr= np.load('./'+unscaled_path,allow_pickle=True)
+        
+        unscaled_df=pd.DataFrame(unscaled_arr,columns=target_features)
+     
+        unscaled_df.rename(columns = {target_features[0]:'seq_id',target_features[1]:target_features[1]+'_str'}, inplace = True)
+        
+        
+        logging.info("arr =="+str(unscaled_df))
+        logging.info("arr =="+str(target_features))
+        
+      
+        return unscaled_df
+              
+        # return unscaled_arr
 
     def features_importance(self, experiment_id):
         """This function is used to get features_importance of particular experiment.

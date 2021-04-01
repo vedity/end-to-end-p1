@@ -1389,7 +1389,9 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         project_name = projectnm_df['project_name'][0]
 
         sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
+        logging.info("------->"+str(sql_command))
         desc_df = DBObject.select_records(connection,sql_command)
+        logging.info("------->"+str(desc_df))
         activity_description = desc_df['description'][0]
         activity_description = activity_description.replace('*',dataset_name)
         activity_description = activity_description.replace('&',project_name)
