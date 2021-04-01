@@ -131,8 +131,6 @@ class ModelStatisticsClass:
             logging.info("modeling : ModelStatisticsClass : actual_vs_prediction : execution end")
             return actual_vs_prediction_json
 
-            logging.info("modeling : ModelStatisticsClass : actual_vs_prediction : execution end")
-            return actual_vs_prediction_json
 
         except (DatabaseConnectionFailed,DataNotFound) as exc:
             logging.error("modeling : ModelStatisticsClass : actual_vs_prediction : Exception " + str(exc))
@@ -285,7 +283,8 @@ class ModelStatisticsClass:
                 raise DataNotFound(500)
 
             perform_pivot_df = perform_metrics_df.pivot(columns='key', values='value', index='experiment_id').round(2)
-            sql_command = 'select met.experiment_id, met.exp_created_on, mmt.model_name from mlaas.model_experiment_tbl met, mlaas.model_master_tbl mmt where mmt.model_id=met.model_id and met.experiment_id='+str(experiment_id)
+            perform_pivot_df.columns = [name.upper().replace('_', ' ') for name in perform_pivot_df.columns.values]
+            sql_command = 'select met.experiment_id, met.exp_created_on as "Created On", mmt.model_name as "Model Name" from mlaas.model_experiment_tbl met, mlaas.model_master_tbl mmt where mmt.model_id=met.model_id and met.experiment_id='+str(experiment_id)
             experiment_df = self.DBObject.select_records(self.connection, sql_command)
             if experiment_df is None:
                 raise DatabaseConnectionFailed(500)
@@ -479,7 +478,7 @@ class ModelStatisticsClass:
             return exc.msg
 
         
-    def compare_experiments(self, experiment_ids):
+    def compare_experiments_grid(self, experiment_ids):
         """This function is called when user wants to compare multiple experiments.
 
         Args:
@@ -532,10 +531,10 @@ class ModelStatisticsClass:
 
             final_df = model_names_df.merge(metrics_params_df, left_index=True, right_index=True)
             
-            sql_command = "select exp_name from mlaas.model_dags_tbl mdt, mlaas.model_experiment_tbl met where mdt.run_id=met.dag_run_id"\
-                          " and met.experiment_id in "+str(exp_ids)
+            sql_command = "select name from mlflow.experiments where experiment_id in "+str(experiment_ids)
+                        #   " and met.experiment_id in "+str(exp_ids)
 
-            exp_names = tuple(self.DBObject.select_records(self.connection, sql_command)['exp_name'])
+            exp_names = tuple(self.DBObject.select_records(self.connection, sql_command)['name'])
 
             final_df['experiment_name'] = exp_names
             columns = final_df.columns.values
@@ -548,3 +547,48 @@ class ModelStatisticsClass:
         return exc.msg
 
 
+    def compare_experiments_graph(self, experiment_ids):
+        
+        sql_command = "SELECT model_type from mlaas.model_experiment_tbl met, mlaas.model_master_tbl mmt where met.model_id = mmt.model_id and met.experiment_id in"+str(experiment_ids)
+        model_types_df = self.DBObject.select_records(self.connection, sql_command)
+        if model_types_df is None:
+            raise DatabaseConnectionFailed(500)
+
+        if len(model_types_df) == 0 :
+            raise DataNotFound(500)
+
+        model_types = tuple(model_types_df['model_type'])
+        actual_vs_prediction_json = self.actual_vs_prediction(experiment_ids[0], model_types[0])
+
+        if model_types[0] == 'Regression':
+            actual_vs_prediction_df = pd.DataFrame(actual_vs_prediction_json)
+            index = actual_vs_prediction_df['index'].tolist()
+            predicted_column = actual_vs_prediction_df.filter(regex=('.*_prediction.*')).columns.values[0]
+            actual_column = predicted_column.replace('_prediction', '')
+            actual = actual_vs_prediction_df[actual_column].tolist()
+            predicted_list = []
+            predicted_list.append(actual_vs_prediction_df[predicted_column].tolist())
+
+            for i in range(len(experiment_ids) - 1):
+                predicted_list.append(self.actual_vs_prediction(experiment_ids[i], model_types[i])[predicted_column])
+
+            comparision_dict = {'index': index, 'actual': actual, 'predicted': predicted_list}
+            
+            return comparision_dict
+
+        elif model_types[0] == 'Classification':
+            # actual_vs_prediction_json = {"keys":key,"actual":actual_lst,"prediction":prediction_lst}
+            keys = actual_vs_prediction_json['keys']
+            actual = actual_vs_prediction_json['actual']
+            
+            predicted_list = []
+            predicted_list.append(actual_vs_prediction_json['prediction'])
+
+            for i in range(len(experiment_ids) - 1):
+                predicted_list.append(self.actual_vs_prediction(experiment_ids[i], model_types[i])['prediction'])
+
+            comparision_dict = {'key': keys, 'actual': actual, 'predicted': predicted_list}
+
+            return comparision_dict
+
+        
