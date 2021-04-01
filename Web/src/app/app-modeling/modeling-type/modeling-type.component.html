@@ -22,11 +22,11 @@
                     <div class="right-box">
                         <div class="radio-group">
                             <div class="custom-control custom-radio mr-3">
-                                <input type="radio" id="customRadio1" name="customRadio" (click)="model_type='Regression'" checked class="custom-control-input">
+                                <input type="radio" id="customRadio1" name="customRadio" (click)="model_type='Regression'" [checked]="model_type=='Regression'" class="custom-control-input">
                                 <label class="custom-control-label" for="customRadio1">Regression</label>
                             </div>
                             <div class="custom-control custom-radio ">
-                                <input type="radio" id="customRadio2" name="customRadio" (click)="model_type='Classification'" class="custom-control-input">
+                                <input type="radio" id="customRadio2" name="customRadio" (click)="model_type='Classification'" [checked]="model_type=='Classification'" class="custom-control-input">
                                 <label class="custom-control-label" for="customRadio2">Classification</label>
                             </div>
                         </div>
@@ -359,7 +359,7 @@
                 </div>
             </div>
             <div class="button-items text-center">
-                <button class="btn btn-success" [disabled]="!f.form.valid || !checkuniuqename" (click)="startModel()" (click)="modal.dismiss('Cross click')">Start</button>
+                <button class="btn btn-success" [disabled]="!f.form.valid || !checkuniuqename" (click)="startModel()">Start</button>
             </div>
         </form>
     </div>
@@ -461,18 +461,18 @@
                 <ng-template ngbNavContent>
                     <div class="row">
                         <div class="col-md-12">
-                            <h4>Loss</h4>
+                            <h4>Actual vs Prediction</h4>
 
                             <apx-chart class="apex-charts" dir="ltr" [series]="lineColumAreaChart.series" [chart]="lineColumAreaChart.chart" [tooltip]="lineColumAreaChart.tooltip" [yaxis]="lineColumAreaChart.yaxis" [legend]="lineColumAreaChart.legend" [plotOptions]="lineColumAreaChart.plotOptions"
                                 [grid]="lineColumAreaChart.grid" [stroke]="lineColumAreaChart.stroke" [xaxis]="lineColumAreaChart.xaxis" [colors]="lineColumAreaChart.colors" [fill]="lineColumAreaChart.fill" [labels]="lineColumAreaChart.labels" [markers]="lineColumAreaChart.markers">
                             </apx-chart>
                         </div>
-                        <div class="col-md-12">
+                        <!-- <div class="col-md-12">
                             <h4>Accuracy</h4>
                             <apx-chart class="apex-charts" dir="ltr" [series]="lineColumAreaChart.series" [chart]="lineColumAreaChart.chart" [tooltip]="lineColumAreaChart.tooltip" [yaxis]="lineColumAreaChart.yaxis" [legend]="lineColumAreaChart.legend" [plotOptions]="lineColumAreaChart.plotOptions"
                                 [grid]="lineColumAreaChart.grid" [stroke]="lineColumAreaChart.stroke" [xaxis]="lineColumAreaChart.xaxis" [colors]="lineColumAreaChart.colors" [fill]="lineColumAreaChart.fill" [labels]="lineColumAreaChart.labels" [markers]="lineColumAreaChart.markers">
                             </apx-chart>
-                        </div>
+                        </div> -->
                     </div>
                 </ng-template>
             </li>

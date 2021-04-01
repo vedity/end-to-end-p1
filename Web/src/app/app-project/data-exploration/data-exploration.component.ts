@@ -331,19 +331,19 @@ export class DataExplorationComponent implements OnInit {
     let colorarray: any = [];
     if (obj["Left Outlier Values"][1].length > 0) {
       obj["Left Outlier Values"][0].forEach((element, index) => {
-        category.push(element);
+        category.push(element.toString());
         plotarray.push(obj["Left Outlier Values"][1][index]);
         colorarray.push('#f74242')
       });
     }
     obj["Plot Values"][0].forEach((element, index) => {
-      category.push(element);
+      category.push(element.toString());
       plotarray.push(obj["Plot Values"][1][index]);
       colorarray.push('#34c38f')
     });
     if (obj["Right Outlier Values"][1].length > 0) {
       obj["Right Outlier Values"][0].forEach((element, index) => {
-        category.push(element);
+        category.push(element.toString());
         plotarray.push(obj["Right Outlier Values"][1][index]);
         colorarray.push('#f74242')
       });
