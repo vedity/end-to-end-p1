@@ -86,7 +86,7 @@ class ModelClass(SC, SplitData):
         # Check Whether Model Type Is Regression Or Classification.
         if model_param_dict['model_type'] in ('Regression','Classification'):
             # Call The Super Class (SupervisedClass) Method's. 
-            super(ModelClass,self).run_supervised_model(model_param_dict,self.db_param_dict,model_id,model_name,model_param)
+            result = super(ModelClass,self).run_supervised_model(model_param_dict,self.db_param_dict,model_id,model_name,model_param)
         else:
             print("Unsupervised ML, to be implemented.")
         

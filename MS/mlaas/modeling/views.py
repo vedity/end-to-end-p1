@@ -166,8 +166,13 @@ class StartModelClass(APIView):
                                 
                                 model_param = request_body["hyperparameters"]
                                 
-                                ModelObject.run_model(model_param_dict,model_id,model_name,model_param)
+                                result = ModelObject.run_model(model_param_dict,model_id,model_name,model_param)
 
+                                if result.status_code != 200:
+                                        # status_code,error_msg=json_obj.get_Status_code(learning_curve_json) # extract the status_code and error_msg from project_df
+                                        logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code :"+ result)
+                                        return Response({"status_code":result.status_code,"error_msg":str(result.content, 'UTF-8'),"response":"false"})
+                                
                                 logging.info("modeling : ModelClass : GET Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully updated","response":"True"})
                                 
@@ -587,7 +592,7 @@ class ShowHyperParametersClass(APIView):
 
 #class to show experiments list for comparision
 #It will take url string as mlaas/modeling/compareexperiments/.                                 
-class CompareExperimentsClass(APIView):
+class CompareExperimentsGridClass(APIView):
  
         def get(self, request, format=None):
                 """
