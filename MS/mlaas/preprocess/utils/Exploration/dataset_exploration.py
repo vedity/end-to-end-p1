@@ -106,8 +106,14 @@ class ExploreClass:
             stats_df.rename(columns = {'std':'Std'}, inplace = True)    
             stats_df.rename(columns = {'min':'Min Value'}, inplace = True)    
             stats_df.rename(columns = {'max':'Max Value'}, inplace = True)    
-            stats_df.rename(columns = {'top':'Most Frequent'}, inplace = True) 
-            stats_df.rename(columns = {'freq':'Most Frequency'}, inplace = True)    
+            
+            try:
+                #? Removing unnecessary columns
+                stats_df.drop('top',axis=1, inplace=True)
+                stats_df.drop('freq',axis=1, inplace=True)
+            except:
+                #? If the column wasn't already there then
+                pass
 
             #? Changing Column Datatypes
             stats_df['Mean'] = stats_df['Mean'].astype(float)

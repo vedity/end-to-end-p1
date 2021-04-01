@@ -96,9 +96,10 @@ export class ModelingTypeApiService {
     return this.httpClient.get(this.baseUrl + "modeling/modelsummary/", { headers: this.headers, params });
   }
 
-  getActualVsPreidiction(experiment_id): Observable<any> {
+  getActualVsPreidiction(experiment_id,model_type): Observable<any> {
     //experiment_id=2;
-    var params = new HttpParams().append("experiment_id", experiment_id);
+    var params = new HttpParams().append("experiment_id", experiment_id)
+    .append("model_type", model_type);
     return this.httpClient.get(this.baseUrl + "modeling/actualvsprediction/", { headers: this.headers, params });
   }
 

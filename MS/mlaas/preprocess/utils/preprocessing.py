@@ -40,6 +40,7 @@ import requests
 import uuid
 import json
 import time
+import datetime
 
 
 user_name = 'admin'
@@ -953,12 +954,15 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     
             feature_cols = list(data_df.columns) #get list of the columns
             tg_cols = DBObject.get_target_col(connection, schema_id) #get list of the target columns
+            target_cols = [data_df.columns[0]]
+            target_cols += tg_cols
+            target_actual_features_df=data_df[target_cols]
             for col in tg_cols:
                 if data_df[col].dtype == 'O':
                     data_df[col] = le.fit_transform(data_df[col]) 
                 feature_cols.remove(col) #remove target columns from list
-            target_cols = [data_df.columns[0]]
-            target_cols += tg_cols #add index column from target columns list
+            # target_cols = [data_df.columns[0]]
+            # target_cols += tg_cols #add index column from target columns list
             
             input_features_df = data_df[feature_cols] #input_features_df
             target_features_df=data_df[target_cols] #target_features_df
@@ -973,7 +977,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             target_cols = str(target_cols) #target feature_cols
             feature_cols = feature_cols.replace("'",'"')
             target_cols = target_cols.replace("'",'"')
-
 
             #splitting parameters
             split_method =split_parameters['split_method'] #get split_method
@@ -1011,13 +1014,15 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 np.save(valid_X_filename,X_valid.to_numpy()) #save X_valid
                 np.save(valid_Y_filename,Y_valid.to_numpy()) #save Y_valid   
             Y_train_count=Y_train.shape[0] #train count
-            Y_test_count =Y_test.shape[0]  #test count      
+            Y_test_count =Y_test.shape[0]  #test count
+            actual_Y_filename =  scale_dir+"/Unscaled_actual_Y_data_" + unique_id  #genrate test_Y file path           
             np.save(train_X_filename,X_train.to_numpy()) #save X_train
             np.save(train_Y_filename,Y_train.to_numpy()) #save Y_train
             np.save(test_X_filename,X_test.to_numpy()) #save X_test
             np.save(test_Y_filename,Y_test.to_numpy()) #save Y_test
+            np.save(actual_Y_filename,target_actual_features_df.to_numpy()) #save Y_actual
         
-            scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_ratio)+', "test_ratio":'+ str(test_ratio)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'"}' #genrate scaled split parameters
+            scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_ratio)+', "test_ratio":'+ str(test_ratio)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'","actual_Y_filename":"'+actual_Y_filename+".npy"+'"}' #genrate scaled split parameters
             logger.info("scaled_split_parameters=="+scaled_split_parameters)
             sql_command = f"update mlaas.project_tbl set target_features= '{target_cols}' ,input_features='{feature_cols}',scaled_split_parameters = '{scaled_split_parameters}',problem_type = '{problem_type_dict}' where dataset_id = '{dataset_id}' and project_id = '{project_id}' and user_name= '{user_name}'"
             status = DBObject.update_records(connection, sql_command)
@@ -1186,11 +1191,14 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             # json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
             # result = requests.post("http://airflow:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
-            
+
             status = self.dag_updater(master_dict, file_name, namespace)
             if not isinstance(status,int):
                 logging.error(f"Dag Updation Failed : Error : {str(status)}")
                 raise DagUpdateFailed(500)
+
+            activity_id = 51
+            activity_status = self.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id)
 
             json_data = {}
             result = requests.post(f"http://airflow:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False)#owner
@@ -1361,3 +1369,34 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.error("data preprocessing : PreprocessingClass : get_dag_status : " +traceback.format_exc())
             return exc.msg
         
+
+    def get_cleanup_startend_desc(self,DBObject,connection,dataset_id,project_id,activity_id):
+        """This function will replace * into project name and get activity description of scale and split.
+
+        Args:
+        project_name[String]: get project name
+        activity_id[Integer]: get activity id
+
+        Returns:
+            [String]: activity_description
+        """
+        #project_name = '"'+project_name+'"'
+        activity_df = self.AT.get_activity(activity_id,"US")
+        datasetnm_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
+        projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
+        dataset_name = datasetnm_df['dataset_name'][0]
+        user_name = datasetnm_df['user_name'][0]
+        project_name = projectnm_df['project_name'][0]
+
+        sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
+        desc_df = DBObject.select_records(connection,sql_command)
+        activity_description = desc_df['description'][0]
+        activity_description = activity_description.replace('*',dataset_name)
+        activity_description = activity_description.replace('&',project_name)
+        logging.info("------->"+str(activity_description))
+
+    
+        end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+        activity_status,index = self.AT.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
+
+        return activity_status
