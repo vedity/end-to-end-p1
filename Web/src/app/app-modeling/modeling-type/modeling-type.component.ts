@@ -68,7 +68,7 @@ export class ModelingTypeComponent implements OnInit {
         localStorage.setItem("modeling", JSON.stringify(this.params));
       }
       else {
-          this.params = localStorage.getItem("params");
+          this.params = localStorage.getItem("modeling");
           this.params = JSON.parse(this.params);
         }
         this.currentuser = localStorage.getItem("currentUser")

@@ -222,7 +222,9 @@
                                                 <tr *ngFor="let item of allExpList;let i=index" id="tr_{{item.experiment_id}}">
                                                     <td>
                                                         <div class="custom-control custom-checkbox mb-3">
-                                                            <input type="checkbox" class="custom-control-input" name="isprivate" id="customCheck_{{i}}">
+                                                            <!-- <input type="checkbox" class="custom-control-input" name="isprivate" id="customCheck_{{i}}"> -->
+                                                            <input type="checkbox" class="custom-control-input" [disabled]="item.status!='success'" (change)="setCopmareIds($event.target.checked,item.experiment_id)" id="customCheck_{{i}}">
+
                                                             <label class="custom-control-label" for="customCheck_{{i}}"></label>
                                                         </div>
                                                     </td>
@@ -276,7 +278,8 @@
                                                 <tr *ngFor="let item of runningExpList;let i=index" id="tr_{{item.experiment_id}}">
                                                     <td>
                                                         <div class="custom-control custom-checkbox mb-3">
-                                                            <input type="checkbox" class="custom-control-input" name="isprivate" id="customCheck_{{i}}">
+                                                            <!-- <input type="checkbox" class="custom-control-input" name="isprivate" id="customCheck_{{i}}"> -->
+                                                            <input type="checkbox" class="custom-control-input" [disabled]="item.status!='success'" (change)="setCopmareIds($event.target.checked,item.experiment_id)" id="customCheck_{{i}}">
                                                             <label class="custom-control-label" for="customCheck_{{i}}"></label>
                                                         </div>
                                                     </td>
