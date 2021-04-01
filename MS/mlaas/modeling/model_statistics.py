@@ -558,6 +558,17 @@ class ModelStatisticsClass:
             raise DataNotFound(500)
 
         model_types = tuple(model_types_df['model_type'])
+        sql_command = "select name from mlflow.experiments where experiment_id in "+str(experiment_ids)
+        experiment_names_df = self.DBObject.select_records(self.connection, sql_command)
+        
+        if experiment_names_df is None:
+            raise DatabaseConnectionFailed(500)
+
+        if len(experiment_names_df) == 0 :
+            raise DataNotFound(500)
+        
+        experiment_names = list(experiment_names_df['name'])
+
         actual_vs_prediction_json = self.actual_vs_prediction(experiment_ids[0], model_types[0])
 
         if model_types[0] == 'Regression':
@@ -567,10 +578,10 @@ class ModelStatisticsClass:
             actual_column = predicted_column.replace('_prediction', '')
             actual = actual_vs_prediction_df[actual_column].tolist()
             predicted_list = []
-            predicted_list.append(actual_vs_prediction_df[predicted_column].tolist())
+            predicted_list.append({'exp_name': experiment_names[0],'values': actual_vs_prediction_df[predicted_column].tolist()})
 
             for i in range(len(experiment_ids) - 1):
-                predicted_list.append(self.actual_vs_prediction(experiment_ids[i], model_types[i])[predicted_column])
+                predicted_list.append({'exp_name': experiment_names[i+1],'values': self.actual_vs_prediction(experiment_ids[i+1], model_types[i+1])[predicted_column]})
 
             comparision_dict = {'index': index, 'actual': actual, 'predicted': predicted_list}
             
@@ -582,10 +593,10 @@ class ModelStatisticsClass:
             actual = actual_vs_prediction_json['actual']
             
             predicted_list = []
-            predicted_list.append(actual_vs_prediction_json['prediction'])
+            predicted_list.append({'exp_name': experiment_names[0],'values': actual_vs_prediction_json['prediction']})
 
             for i in range(len(experiment_ids) - 1):
-                predicted_list.append(self.actual_vs_prediction(experiment_ids[i], model_types[i])['prediction'])
+                predicted_list.append({'exp_name': experiment_names[i+1],'values': self.actual_vs_prediction(experiment_ids[i+1], model_types[i+1])['prediction']})
 
             comparision_dict = {'key': keys, 'actual': actual, 'predicted': predicted_list}
 
