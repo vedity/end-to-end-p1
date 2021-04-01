@@ -322,7 +322,7 @@ class EncodeClass:
                                                     from mlaas.project_tbl pt2 
                                                     where pt2.project_id = '{project_id}'
                                                     ) 
-                            and st.column_attribute = 'Target'
+                            and st.column_attribute in ('Target','Ignore')
                         )
                         """
             
