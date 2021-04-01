@@ -143,8 +143,12 @@ class StartModelClass(APIView):
                                 activity_id = 42
                                 timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
 
-                                ModelObject.algorithm_identifier(model_param_dict)
-                                
+                                result = ModelObject.algorithm_identifier(model_param_dict)
+                                if result.status_code != 200:
+                                        # status_code,error_msg=json_obj.get_Status_code(learning_curve_json) # extract the status_code and error_msg from project_df
+                                        logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code :"+ result)
+                                        return Response({"status_code":result.status_code,"error_msg":str(result.content, 'UTF-8'),"response":"false"})
+
                                 logging.info("modeling : ModelClass : GET Method : execution stop : status_code :200")
                                 return Response({"status_code":"200","error_msg":"Successfully updated","response":"pipeline started"})
                         else:
@@ -601,7 +605,7 @@ class CompareExperimentsClass(APIView):
                         
                         experiment_ids = tuple(json.loads(request.query_params.get('experiment_ids')))
  
-                        experiment_data = ModelStatObject.compare_experiments(experiment_ids)
+                        experiment_data = ModelStatObject.compare_experiments_grid(experiment_ids)
                         
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
                         return Response({"status_code":"200","error_msg":"Successfully updated","response":experiment_data})
@@ -679,4 +683,34 @@ class CheckRunningExperimentsClass(APIView):
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+
+
+
+#class to show experiments list for comparision
+#It will take url string as mlaas/modeling/compareexperiments/.                                 
+class CompareExperimentsGraphClass(APIView):
+ 
+        def get(self, request, format=None):
+                """
+                This function is used to get all Experiment to compare
         
+                Args  : 
+                        experiment_ids[(Integer)]   :[Id of Experiment]
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival & insertions failed or successfull),
+                        Response(return false if failed otherwise json data)
+                """
+                try:
+                        logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
+                        
+                        experiment_ids = tuple(json.loads(request.query_params.get('experiment_ids')))
+ 
+                        experiment_data = ModelStatObject.compare_experiments_graph(experiment_ids)
+                        
+                        logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
+                        return Response({"status_code":"200","error_msg":"Successfully updated","response":experiment_data})
+                except Exception as e:
+                        logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
+                        logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})

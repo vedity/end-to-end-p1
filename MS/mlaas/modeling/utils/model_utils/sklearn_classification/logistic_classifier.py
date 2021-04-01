@@ -93,7 +93,7 @@ class LogisticClassifierClass:
                        return_times=True)
         
         train_sizes_2, train_loss, test_loss, fit_times_2, _ = \
-        learning_curve(estimator = model, X=X_train, y=y_train, cv=None, scoring='neg_mean_squared_error',n_jobs=None,
+        learning_curve(estimator = model, X=X_train, y=y_train, cv=None, scoring='neg_log_loss',n_jobs=None,
                        train_sizes=train_sizes,
                        return_times=True)
         

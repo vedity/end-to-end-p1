@@ -15,11 +15,8 @@ class EncodeClass:
 
     
     # def label_encoding(self, series):
-
     #     labelencoder = LabelEncoder()
-
-    #     series = labelencoder.fit_transform(series)
-        
+    #     series = labelencoder.fit_transform(series)  
     #     return series
 
     def label_encoding(self,DBObject,connection,column_list, table_name):
@@ -34,28 +31,26 @@ class EncodeClass:
             Int: [0 : if columns updated, 1 : if column not updated]
         """
         try:
+            logging.info("Preprocess : EncodeClass : label_encoding : execution start")
             sql_command = f'update {table_name} m SET "{column_list[1]}" = WANT_THIS from (SELECT  "{column_list[0]}", dense_rank() OVER ( ORDER BY "{column_list[1]}") AS WANT_THIS FROM {table_name}) s where m."{column_list[0]}" = s."{column_list[0]}";'
             status = DBObject.update_records(connection,sql_command)
+            logging.info("Preprocess : EncodeClass : label_encoding : execution end")
             return status
 
         except Exception as exc:
+            logging.info("Preprocess : EncodeClass : label_encoding : exception raise "+str(exc))
             return exc
         
     # def one_hot_encoding(self, series):
-        
     #     df = pd.DataFrame(series)
     #     col_name = series.name
-    
     #     enc = OneHotEncoder(handle_unknown='ignore')
-
     #     ohe_df = enc.fit_transform(df).toarray()
     #     enc_df = pd.DataFrame(ohe_df, columns = [f"{col_name}_{i}" for i in range(ohe_df.shape[1])])
-
     #     return enc_df
 
     def one_hot_encoding(self,DBObject,connection,column_list, table_name, schema_id): 
         """This function do one-hot-encoding finds the distinct value and append columns with binary values
-
         Returns:
             Succesfull:
                 Int: [0 : if columns updated, 1 : if column not updated]
@@ -85,6 +80,7 @@ class EncodeClass:
             return status
 
         except (EcondingFailed) as exc:
+            logging.info("data preprocessing : EncodeClass : one_hot_encoding : exception "+str(exc.msg))
             return exc.msg
 
     def select_distinct(self,DBObject,connection,column_list,table_name):
@@ -98,9 +94,16 @@ class EncodeClass:
         Returns:
             dataframe: List of all distinct value in column.
         """
-        sql_command = f'select distinct "{column_list[1]}" from {table_name} dcat where "{column_list[1]}" is not null'
-        df = DBObject.select_records(connection,sql_command)
-        return df
+        try:
+            logging.info("Preprocess : EncodeClass : select_distinct : execution start")
+            sql_command = f'select distinct "{column_list[1]}" from {table_name} dcat where "{column_list[1]}" is not null'
+            df = DBObject.select_records(connection,sql_command)
+            logging.info("Preprocess : EncodeClass : select_distinct : execution stop")
+            return df
+        
+        except (EcondingFailed) as exc:
+            logging.info("data preprocessing : EncodeClass : one_hot_encoding : exception "+str(exc.msg))
+            return exc.msg
 
     def query_string(self, df,DBObject,connection,table_name,column_list,flag):
         """This function will generate dynamic query string for sql
@@ -116,50 +119,77 @@ class EncodeClass:
         Returns:
             string: returns all query string
         """
-        dist_val = ""
-        select_val = ""
-        alter_val = ""
-        val_list = []
-        dtype = []
-        missing_lst = []
-        noise_lst = []
-        if flag == False:
-            for val in range(len(df)):
-                value = df.loc[val, {column_list[1]}]
-                value1 = "'"+str(value[0])+"'"
-                val_list.append(value[0])
+        try:
+            logging.info("Preprocess : EncodeClass : query_string : execution start")
+            #? Initialization of list and string
+            dist_val = ""
+            select_val = ""
+            alter_val = ""
+            val_list = []
+            dtype = []
+            missing_lst = []
+            noise_lst = []
+            freq_lst = []
+
+            #? [If] distinct value < 10 [else] value < 10
+            if flag == False:
+
+                for val in range(len(df)):
+                    value = df.loc[val, {column_list[1]}]
+
+                    #? Getting new Col name i.e(colnm_distintvalue)
+                    new_col_name = str(column_list[1]) +"_"+ str(value[0])
+                    
+                    value1 = "'"+str(value[0])+"'"
+                    val_list.append(str(new_col_name)) 
+                    dtype.append('numeric')
+                    missing_lst.append('False')
+                    noise_lst.append('False') 
+
+                    #? Dynamic query string for distinct_value,alter_col,select_col
+                    dist_val += f'"{new_col_name}"=col{val},'
+                    alter_val += f'add COLUMN "{new_col_name}" int,'
+                    select_val += f',case when "{column_list[1]}"={value1} then 1 else 0 END AS col{val}'
+            else:
+                most_occure = self.frequent_value(DBObject,connection,table_name,column_list) #? Most 10 freq distinct value
+                
+                for val in range(len(most_occure)):
+                    value = most_occure.loc[val, {column_list[1]}]
+                    
+                    #? Getting new Col name
+                    new_col_name = str(column_list[1]) +"_"+ str(value[0])
+                    
+                    value1 = "'"+str(value[0])+"'"
+                    freq_lst.append(value[0])
+                    val_list.append(str(new_col_name))
+                    dtype.append('numeric')
+                    missing_lst.append('False')
+                    noise_lst.append('False') 
+
+                    #? Dynamic query string for distinct_value,alter_col,select_col
+                    dist_val += f'"{new_col_name}"=col{val},'
+                    alter_val += f'add COLUMN "{new_col_name}" int,'
+                    select_val += f',case when "{column_list[1]}"={value1} then 1 else 0 END AS col{val}'
+                
+                #? To add column OTHER if more then 10 distinct value
+                freq_lst = str(freq_lst)[1:-1]
+                dist_val += f'"{column_list[1]}_other"=col,'
+                alter_val += f'add COLUMN "{column_list[1]}_other" int,'
+                select_val += f', case when "{column_list[1]}" not in ({freq_lst}) then 1 else 0 END AS col'
+                val_list.append(f"{column_list[1]}_other")
                 dtype.append('numeric')
                 missing_lst.append('False')
                 noise_lst.append('False') 
-                dist_val += f'"{value[0]}"=col{val},'
-                alter_val += f'add COLUMN "{value[0]}" int,'
-                select_val += f',case when "{column_list[1]}"={value1} then 1 else 0 END AS col{val}'
-        else:
-            most_occure = self.frequent_value(DBObject,connection,table_name,column_list)
-            logging.info(" checking "+str(most_occure))
-            for val in range(len(most_occure)):
-                value = most_occure.loc[val, {column_list[1]}]
-                value1 = "'"+str(value[0])+"'"
-                val_list.append(value[0])
-                dtype.append('numeric')
-                missing_lst.append('False')
-                noise_lst.append('False') 
-                dist_val += f'"{value[0]}"=col{val},'
-                alter_val += f'add COLUMN "{value[0]}" int,'
-                select_val += f',case when "{column_list[1]}"={value1} then 1 else 0 END AS col{val}'
+
+            dist_val = dist_val[:len(dist_val)-1]  #? Remove , in dynamic query string
+            alter_val = alter_val[:len(alter_val)-1]  #? Remove , in dynamic query string
             
-            freq_lst = str(val_list)[1:-1]
-            dist_val += f'"other"=col,'
-            alter_val += f'add COLUMN "other" int,'
-            select_val += f', case when "{column_list[1]}" not in ({freq_lst}) then 1 else 0 END AS col'
-            val_list.append("other")
-            dtype.append('numeric')
-            missing_lst.append('False')
-            noise_lst.append('False') 
-        dist_val = dist_val[:len(dist_val)-1]
-        alter_val = alter_val[:len(alter_val)-1]
-        
-        return dist_val,alter_val,select_val,val_list,dtype,missing_lst,noise_lst
+            logging.info("Preprocess : EncodeClass : query_string : execution stop")
+            return dist_val,alter_val,select_val,val_list,dtype,missing_lst,noise_lst           
+
+        except (EcondingFailed) as exc:
+            logging.info("data preprocessing : EncodeClass : query_string : exception "+str(exc.msg))
+            return exc.msg
 
     def add_column(self,DBObject,connection,table_name,alter_val):
         """This function will add column with all distinct value 
@@ -173,9 +203,16 @@ class EncodeClass:
         Returns:
             Int: [0 : if columns updated, 1 : if column not updated]
         """
-        sql_command = f'Alter table {table_name} {alter_val}'
-        status = DBObject.update_records(connection,sql_command)
-        return status
+        try:
+            logging.info("Preprocess : EncodeClass : add_column : execution start")
+            sql_command = f'Alter table {table_name} {alter_val}'
+            status = DBObject.update_records(connection,sql_command)
+            logging.info("Preprocess : EncodeClass : add_column : execution stop")
+            return status
+        
+        except (EcondingFailed) as exc:
+            logging.info("data preprocessing : EncodeClass : add_column : exception "+str(exc.msg))
+            return exc.msg
 
     def update_column(self,DBObject,connection,table_name,dist_val,column_list,select_val):
         """This function will update the column with 0 1 value
@@ -191,9 +228,16 @@ class EncodeClass:
         Returns:
             Int: [0 : if columns updated, 1 : if column not updated]
         """
-        sql_command_update=f'update {table_name} m SET {dist_val} from (SELECT {column_list[0]} {select_val} FROM {table_name} )s where m."{column_list[0]}" = s.{column_list[0]}'  
-        status = DBObject.update_records(connection,sql_command_update)
-        return status
+        try:
+            logging.info("Preprocess : EncodeClass : update_column : execution start")
+            sql_command_update=f'update {table_name} m SET {dist_val} from (SELECT {column_list[0]} {select_val} FROM {table_name} )s where m."{column_list[0]}" = s.{column_list[0]}'  
+            status = DBObject.update_records(connection,sql_command_update)
+            logging.info("Preprocess : EncodeClass : update_column : execution stop")
+            return status
+
+        except (EcondingFailed) as exc:
+            logging.info("data preprocessing : EncodeClass : update_column : exception "+str(exc.msg))
+            return exc.msg
 
    
     def drop_column(self,DBObject,connection,table_name,column_list):
@@ -207,10 +251,16 @@ class EncodeClass:
             Returns:
             Int: [0 : if columns updated, 1 : if column not updated]
         """
-        drop_column = f'ALTER TABLE {table_name} DROP COLUMN "{column_list[1]}";'
-        status = DBObject.update_records(connection,drop_column)    
-        return status
+        try:
+            logging.info("Preprocess : EncodeClass : drop_column : execution start")
+            drop_column = f'ALTER TABLE {table_name} DROP COLUMN "{column_list[1]}";'
+            status = DBObject.update_records(connection,drop_column)   
+            logging.info("Preprocess : EncodeClass : drop_column : execution stop") 
+            return status
 
+        except (EcondingFailed) as exc:
+            logging.info("data preprocessing : EncodeClass : drop_column : exception "+str(exc.msg))
+            return exc.msg
     
 
     def frequent_value(self,DBObject,connection,table_name,column_list):
@@ -222,6 +272,13 @@ class EncodeClass:
             Returns:
                 List of all 10 most occuring values.
         """
-        sql_command = f'SELECT  "{column_list[1]}",count(*) from {table_name} GROUP BY "{column_list[1]}" order by count(*)  desc limit  10;'
-        freq_val = DBObject.select_records(connection,sql_command)
-        return freq_val
+        try:
+            logging.info("Preprocess : EncodeClass : frequent_value : execution start")
+            sql_command = f'SELECT  "{column_list[1]}",count(*) from {table_name} GROUP BY "{column_list[1]}" order by count(*)  desc limit  10;'
+            freq_val = DBObject.select_records(connection,sql_command)
+            logging.info("Preprocess : EncodeClass : frequent_value : execution stop")
+            return freq_val
+        
+        except (EcondingFailed) as exc:
+            logging.info("data preprocessing : EncodeClass : frequent_value : exception "+str(exc.msg))
+            return exc.msg

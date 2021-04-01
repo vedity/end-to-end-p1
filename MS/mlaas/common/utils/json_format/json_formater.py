@@ -139,7 +139,7 @@ class JsonFormatClass:
             final_json_data.insert(7,{"id": 7,
                 "label": 'Modeling',
                 "link":"/modeling/type",
-                "icon": 'bx-home-circle',
+                "icon": 'mdi-database-export',
                 "subItems": []
             })
             
