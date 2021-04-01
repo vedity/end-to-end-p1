@@ -409,7 +409,7 @@ class ScalingSplitClass(APIView):
                         random_state = request.query_params.get('random_state') #get random state
                         split_parameters = {'split_method': split_method ,'cv': cv,'valid_ratio': valid_ratio, 'test_ratio': test_ratio,'random_state': random_state} #split parameters
                         
-                        activity_id = 49 #Scale and Split Activity Start
+                        activity_id = 49 
                         activity_df = AT_OBJ.get_activity(activity_id,"US")
                         projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
                         project_name = projectnm_df['project_name'][0]
