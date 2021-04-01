@@ -56,16 +56,20 @@ class ModelClass(SC, SplitData):
             else call the unsupervised algorithm. 
         """
         # It will check wheather it is supervised algorithm or not.
-        if model_param_dict['model_type'] in ('Regression','Classification'):
-             # call  supervised algorithm method
-            super(ModelClass,self).supervised_algorithm(model_param_dict,self.db_param_dict)
-            
-        else:
-            # call  unsupervised algorithm method
-            super(ModelClass,self).unsupervised_algorithm(model_param_dict,self.db_param_dict)
-            
-        logging.info("modeling : ModelClass : algorithm_identifier : execution end")
-        
+        try:
+            if model_param_dict['model_type'] in ('Regression','Classification'):
+                # call  supervised algorithm method
+                result = super(ModelClass,self).supervised_algorithm(model_param_dict,self.db_param_dict)
+                
+            else:
+                # call  unsupervised algorithm method
+                result = super(ModelClass,self).unsupervised_algorithm(model_param_dict,self.db_param_dict)
+                
+            logging.info("modeling : ModelClass : algorithm_identifier : execution end")
+
+            return result
+        except Exception as e:
+            return e
 
         
     def run_model(self,model_param_dict,model_id,model_name,model_param):

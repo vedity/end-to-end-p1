@@ -1,0 +1,8 @@
+{
+  "split_method" : "cross_validation",
+  "train_size" : 0.8,
+  "test_size" : 0.2,
+  "random_state" : 0,
+  "cv" : 5,
+  "valid_size" : None
+}
