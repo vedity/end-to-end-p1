@@ -419,7 +419,7 @@ class ScalingSplitClass(APIView):
                         
                         status = preprocessObj.handover(dataset_id, schema_id, project_id, user_name,split_parameters, scaling_operation)
                         logging.info("data preprocess : ScalingSplitClass : POST Method : execution stop")
-                        activity_id = 49
+                        activity_id = 50
                         activity_df = AT_OBJ.get_activity(activity_id,"US")
                         projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
                         project_name = projectnm_df['project_name'][0]
