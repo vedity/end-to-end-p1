@@ -283,7 +283,8 @@ class ModelStatisticsClass:
                 raise DataNotFound(500)
 
             perform_pivot_df = perform_metrics_df.pivot(columns='key', values='value', index='experiment_id').round(2)
-            sql_command = 'select met.experiment_id, met.exp_created_on, mmt.model_name from mlaas.model_experiment_tbl met, mlaas.model_master_tbl mmt where mmt.model_id=met.model_id and met.experiment_id='+str(experiment_id)
+            perform_pivot_df.columns = [name.upper().replace('_', ' ') for name in perform_pivot_df.columns.values]
+            sql_command = 'select met.experiment_id, met.exp_created_on as "Created On", mmt.model_name as "Model Name" from mlaas.model_experiment_tbl met, mlaas.model_master_tbl mmt where mmt.model_id=met.model_id and met.experiment_id='+str(experiment_id)
             experiment_df = self.DBObject.select_records(self.connection, sql_command)
             if experiment_df is None:
                 raise DatabaseConnectionFailed(500)
