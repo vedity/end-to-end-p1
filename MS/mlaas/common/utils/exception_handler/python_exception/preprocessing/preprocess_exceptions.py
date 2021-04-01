@@ -151,3 +151,33 @@ class EcondingFailed(Exception):
      
     def __str__(self):
         return (self.msg)
+
+class TargetAttributeException(Exception):
+    """ Target Attribute Exception """
+    def __init__(self,status_code):
+        self.msg = "Only single target column is allowed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)
+
+class TargetAttributeExistException(Exception):
+    """ Target Attribute Exception """
+    def __init__(self,status_code):
+        self.msg = "Target column already selected !"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)
+
+class SelectAttributeRequired(Exception):
+    """ Target Attribute Exception """
+    def __init__(self,status_code):
+        self.msg = "Select attribute are required!"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)

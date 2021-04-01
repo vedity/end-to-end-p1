@@ -4,13 +4,18 @@ import logging
 from sklearn.model_selection import train_test_split
 from common.utils.logger_handler import custom_logger as cl
 from common.utils.database import db
+from .categorical_encoding import EncodeClass as ec
 from database import *
+
+
 user_name = 'admin'
 log_enable = True
 LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
 logger = logging.getLogger('project_creation')
 DBObject = db.DBClass()
+ENC_OBJECT = ec()
+
 connection,connection_string = DBObject.database_connection(database,user,password,host,port)
 class Split_Data():
     
@@ -47,14 +52,21 @@ class Split_Data():
             [flag] : flase if scale,split is not done else true.
         """
 
+        flag, desc = ENC_OBJECT.get_unencoded_colnames(DBObject,connection,projectid)
+        if not flag:
+            #? Encoding of some columns are still remaining
+            return flag, desc
+
         sql_command = f'select "scaled_split_parameters" from mlaas.project_tbl pt where project_id  ='+projectid
         df = DBObject.select_records(connection,sql_command)
         if (df.iloc[0]['scaled_split_parameters']) == None:
             flag = False
+            desc = "Please complete Scale & Split operation first!"
         else:
             flag = True
+            desc = "You can now proceed to the modelling."
     
-        return flag
+        return flag,desc
 
     def get_split_activity_desc(self,project_name,activity_id):
         """This function will replace * into project name and get activity description of scale and split.

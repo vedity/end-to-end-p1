@@ -409,7 +409,7 @@ class ScalingSplitClass(APIView):
                         random_state = request.query_params.get('random_state') #get random state
                         split_parameters = {'split_method': split_method ,'cv': cv,'valid_ratio': valid_ratio, 'test_ratio': test_ratio,'random_state': random_state} #split parameters
                         
-                        activity_id = 49 #Scale and Split Activity Start
+                        activity_id = 49 
                         activity_df = AT_OBJ.get_activity(activity_id,"US")
                         projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
                         project_name = projectnm_df['project_name'][0]
@@ -468,8 +468,13 @@ class Check_Split(APIView):
                 try:
                         logging.info(" modeling : Check_Split : GET Method : execution start")
                         project_id = request.query_params.get('project_id')
-                        flag = sd.check_split_exist(project_id)
-                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":flag})    
+                        flag,desc = sd.check_split_exist(project_id)
+                        if flag:
+                                #? All the cleanup operation are done before modelling.
+                                return Response({"status_code":"200","error_msg":"Successfull retrival","response":flag})  
+                        else:
+                                #! Some operations are still remaining before we can proceed to the modelling.
+                                return Response({"status_code":"200","error_msg":desc,"response":flag})
 
                 except Exception as e:
                         logging.error("modeling : Check_Split : GET Method  " + str(e))
