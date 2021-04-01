@@ -1372,11 +1372,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
 
     def get_cleanup_startend_desc(self,DBObject,connection,dataset_id,project_id,activity_id):
         """This function will replace * into project name and get activity description of scale and split.
-
+ 
         Args:
         project_name[String]: get project name
         activity_id[Integer]: get activity id
-
+ 
         Returns:
             [String]: activity_description
         """
@@ -1387,14 +1387,14 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         dataset_name = datasetnm_df['dataset_name'][0]
         user_name = datasetnm_df['user_name'][0]
         project_name = projectnm_df['project_name'][0]
-
+ 
         sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
         desc_df = DBObject.select_records(connection,sql_command)
         activity_description = desc_df['description'][0]
         activity_description = activity_description.replace('*',dataset_name)
         activity_description = activity_description.replace('&',project_name)
         logging.info("------->"+str(activity_description))
-
+ 
     
         end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
         activity_status,index = self.AT.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)

@@ -576,6 +576,15 @@ class SchemaClass:
             return str(exc),None
     
     def get_target_attribute_index(self,DBObject,connection,schema_id):
+        """
+        function used to get the Index value for column whose attribute type is "Target"
+
+        Args:
+            schema_id[(Integer)] : [Id of the schema table]
+
+        Return:
+            [Integer] : [return the index value of column if found else return 0 ]
+        """
         try:
             #get the table name and columns,and schema of the table
             schema_table_name,_,_ = self.get_schema()
