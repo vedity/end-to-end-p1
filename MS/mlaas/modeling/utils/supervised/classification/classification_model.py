@@ -34,26 +34,24 @@ class ProbabilisticClass:
     
     def classification_model(self,model_param_dict,db_param_dict):
         
-        logging.info("modeling : RegressionClass : classification_model : execution start")
-        
-        if model_param_dict['target_type'] == 'Single_Target':
+        try:
+            logging.info("modeling : RegressionClass : classification_model : execution start")
             
-            json_data = {'conf':'{"model_param_dict":"'+str(model_param_dict)+'"}'}
-            
-            logging.info("modeling : RegressionClass : classification_model : execution"+str(json_data))
-            
-            result = requests.post("http://airflow:8080/api/experimental/dags/auto_classification_pipeline/dag_runs",data=json.dumps(json_data),verify=False)#owner
-            
-        else:
-            print("yet not tested")
-            
-        logging.info("modeling : ClassificationClass : classification_model : execution end")
+            if model_param_dict['target_type'] == 'Single_Target':
+                
+                json_data = {'conf':'{"model_param_dict":"'+str(model_param_dict)+'"}'}
+                
+                logging.info("modeling : RegressionClass : classification_model : execution"+str(json_data))
+                
+                result = requests.post("http://airflow:8080/api/experimental/dags/auto_classification_pipeline/dag_runs",data=json.dumps(json_data),verify=False)#owner
+                
+            else:
+                print("yet not tested")
+                
+            logging.info("modeling : ClassificationClass : classification_model : execution end")
+            logging.info("modeling : ClassificationClass : classification_model : "+str(result))
         
-        
-    
-        
-        
-        
-        
-        
-        
+            return result
+
+        except Exception as e:
+            return e

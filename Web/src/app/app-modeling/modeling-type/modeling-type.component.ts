@@ -275,7 +275,7 @@ export class ModelingTypeComponent implements OnInit {
 
 
   startModel() {
-    this.processclass = "start";
+   
     this.experiment_name = this.params.experiment_name;
     this.experiment_desc = this.params.experiment_desc;
     console.log(this.currentuser);
@@ -352,6 +352,7 @@ export class ModelingTypeComponent implements OnInit {
 
   startsuccessHandler(data) {
     if (data.status_code == "200") {
+      this.processclass = "start";
       this.toaster.success(data.error_msg, 'Success');
       this.processInterval = setInterval(() => {
         this.getRunningExperimentList();
