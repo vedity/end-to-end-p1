@@ -1193,7 +1193,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 logging.error(f"Dag Updation Failed : Error : {str(status)}")
                 raise DagUpdateFailed(500)
 
-            activity_id = 51
+            activity_id = 50
             activity_status = self.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id)
 
             json_data = {}
