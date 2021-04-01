@@ -954,12 +954,15 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     
             feature_cols = list(data_df.columns) #get list of the columns
             tg_cols = DBObject.get_target_col(connection, schema_id) #get list of the target columns
+            target_cols = [data_df.columns[0]]
+            target_cols += tg_cols
+            target_actual_features_df=data_df[target_cols]
             for col in tg_cols:
                 if data_df[col].dtype == 'O':
                     data_df[col] = le.fit_transform(data_df[col]) 
                 feature_cols.remove(col) #remove target columns from list
-            target_cols = [data_df.columns[0]]
-            target_cols += tg_cols #add index column from target columns list
+            # target_cols = [data_df.columns[0]]
+            # target_cols += tg_cols #add index column from target columns list
             
             input_features_df = data_df[feature_cols] #input_features_df
             target_features_df=data_df[target_cols] #target_features_df
@@ -974,7 +977,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             target_cols = str(target_cols) #target feature_cols
             feature_cols = feature_cols.replace("'",'"')
             target_cols = target_cols.replace("'",'"')
-
 
             #splitting parameters
             split_method =split_parameters['split_method'] #get split_method
@@ -1012,13 +1014,15 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 np.save(valid_X_filename,X_valid.to_numpy()) #save X_valid
                 np.save(valid_Y_filename,Y_valid.to_numpy()) #save Y_valid   
             Y_train_count=Y_train.shape[0] #train count
-            Y_test_count =Y_test.shape[0]  #test count      
+            Y_test_count =Y_test.shape[0]  #test count
+            actual_Y_filename =  scale_dir+"/Unscaled_actual_Y_data_" + unique_id  #genrate test_Y file path           
             np.save(train_X_filename,X_train.to_numpy()) #save X_train
             np.save(train_Y_filename,Y_train.to_numpy()) #save Y_train
             np.save(test_X_filename,X_test.to_numpy()) #save X_test
             np.save(test_Y_filename,Y_test.to_numpy()) #save Y_test
+            np.save(actual_Y_filename,target_actual_features_df.to_numpy()) #save Y_actual
         
-            scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_ratio)+', "test_ratio":'+ str(test_ratio)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'"}' #genrate scaled split parameters
+            scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_ratio)+', "test_ratio":'+ str(test_ratio)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'","actual_Y_filename":"'+actual_Y_filename+".npy"+'"}' #genrate scaled split parameters
             logger.info("scaled_split_parameters=="+scaled_split_parameters)
             sql_command = f"update mlaas.project_tbl set target_features= '{target_cols}' ,input_features='{feature_cols}',scaled_split_parameters = '{scaled_split_parameters}',problem_type = '{problem_type_dict}' where dataset_id = '{dataset_id}' and project_id = '{project_id}' and user_name= '{user_name}'"
             status = DBObject.update_records(connection, sql_command)
