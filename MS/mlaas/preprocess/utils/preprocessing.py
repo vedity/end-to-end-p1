@@ -1398,5 +1398,5 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
     
         end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
         activity_status,index = self.AT.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
- 
+
         return activity_status

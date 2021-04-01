@@ -282,3 +282,81 @@ class EncodeClass:
         except (EcondingFailed) as exc:
             logging.info("data preprocessing : EncodeClass : frequent_value : exception "+str(exc.msg))
             return exc.msg
+
+    def get_unencoded_colnames(self,DBObject,connection,project_id):
+        '''
+            Used to get the names of all the columns that are yet to be encoded.
+
+            Args:
+            ----
+            DBObject (`object`): DB Class Object.
+            connection (`object`): Postgres connection object.
+            project_id (`int`): Id of the project
+
+            Returns:
+            -------
+            flag (`boolean`): Is any encoding remaining or not
+            description (`String`): The message that will be shown in the front end.
+        '''
+        try:
+            logging.info("data preprocessing : EncodeClass : get_unencoded_colnames : execution start")
+
+            sql_command = f"select dt.dataset_table_name from mlaas.project_tbl pt, mlaas.dataset_tbl dt where pt.project_id = '{project_id}' and dt.dataset_id = pt.dataset_id"
+            table_name_df = DBObject.select_records(connection,sql_command)
+            
+            if not isinstance(table_name_df,pd.DataFrame):
+                raise TypeError
+
+            table_name = table_name_df['dataset_table_name'][0]
+
+            sql_command = f"SELECT column_name FROM INFORMATION_SCHEMA.columns where table_name= '{table_name}' and data_type='text'"
+            unencoded_cols_df = DBObject.select_records(connection,sql_command)
+            
+            if not isinstance(unencoded_cols_df,pd.DataFrame):
+                raise TypeError
+            
+            #? Sub Function for getting column names
+            def get_unencoded_desc(df,col_name):
+                '''
+                    This is a sub-function thats specifically used to get the message for 
+                    unencoded columns list. This message will be shown on the frontend.
+
+                    Args:
+                    ----
+                    df (`pd.DataFrame`): Dataframe containing unencoded column_names in a single column.
+                    col_name (`String`): Name of the column that contains the unencoded column names.
+
+                    Returns:
+                    -------
+                    string (`String`): Description for unencoded column warning.
+                '''
+                logging.info("data preprocessing : EncodeClass : get_unencoded_desc : execution start")
+
+                if len(df) == 0:
+                    string = "No column remaining for Categorical Encoding."
+                else:    
+                    string = "Categorical Encoding Remaining in Columns "
+
+                    #? Adding column names
+                    for i,data in df.iterrows():
+                        string += f"'{data[col_name]}', "
+                    else:
+                        string = string[:-2]+"."
+
+                logging.info("data preprocessing : EncodeClass : get_unencoded_desc : execution stop")
+
+                return string
+
+            logging.info("data preprocessing : EncodeClass : get_unencoded_colnames : execution stop")
+
+            if len(unencoded_cols_df) == 0:
+                #? No unencoded columns remaining in the dataset
+                return True, get_unencoded_desc(unencoded_cols_df,'column_name')
+            else:
+                #? Some unencoded columns are still remaining in the dataset.
+                return False, get_unencoded_desc(unencoded_cols_df,'column_name')
+
+        except Exception as e:
+            logging.error(f"data preprocessing : EncodeClass : get_unencoded_colnames : function failed : {str(e)}")
+            return False, str(e)
+        

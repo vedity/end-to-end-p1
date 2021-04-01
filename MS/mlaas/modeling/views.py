@@ -719,3 +719,39 @@ class CompareExperimentsGraphClass(APIView):
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+
+class ModelTypeClass(APIView):
+ 
+        def get(self, request, format=None):
+                """
+                This function is used to get regression or classification type'
+        
+                Args  : 
+                        project_id[(Integer)]   :[Id of Project]
+                        dataset_ids[(Integer)]   :[Id of Dataset]
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival & insertions failed or successfull),
+                        Response(return false if failed otherwise json data)
+                """
+                try:
+                        logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
+                        
+                        project_id = request.query_params.get('project_id')
+
+                        dataset_id = request.query_params.get('dataset_id')
+ 
+
+                        model_type = AlgorithmDetectorObj.get_model_type(project_id,dataset_id)
+                        if isinstance(model_type,str): #check the instance of dataset_df
+                                status_code,error_msg=json_obj.get_Status_code(model_type) # extract the status_code and error_msg from project_df
+                                logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code :"+ status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        else:
+                                logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code : 200")
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":model_type})
+                        
+                except Exception as e:
+                        logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
+                        logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})

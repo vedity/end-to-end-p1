@@ -250,7 +250,10 @@ class LinearRegressionClass:
             [float]: [it will return cv score.]
         """
 
-        X_train = X_train[:,1:] 
+        if X_train.shape[1] == 2:
+            X_train = X_train[:,1:].reshape(-1, 1)
+        else:
+            X_train = X_train[:,1:]
         y_train = y_train[:,-1].reshape(len(y_train[:,-1]),1)
         
         shuffle = KFold(n_splits=self.dataset_split_dict['cv'],
