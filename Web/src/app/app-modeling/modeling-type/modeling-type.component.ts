@@ -76,6 +76,9 @@ export class ModelingTypeComponent implements OnInit {
       this.getDatasetInfo();
       this.getRunningExperimentList();
       this.getAllExperimentList();
+      if(this.runningExpList.length==0){
+        $("#switcher-list")[0].click();
+      }
     }
   }
 
@@ -266,6 +269,7 @@ export class ModelingTypeComponent implements OnInit {
     if (data.status_code == "200") {
       this.runningExpList = data.response;
       this.contentloaded = true;
+      
     }
     // else {
     //   this.errorHandler(data);
@@ -373,6 +377,9 @@ export class ModelingTypeComponent implements OnInit {
       this.processclass = "start";
       this.modalService.dismissAll();
       this.toaster.success(data.error_msg, 'Success');
+      if(!this.isDisplayRunning){
+          $("#switcher-list")[0].click();
+      }
       this.processInterval = setInterval(() => {
         this.getRunningExperimentList();
         this.getAllExperimentList();
