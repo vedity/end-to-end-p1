@@ -474,7 +474,7 @@ class Check_Split(APIView):
                                 return Response({"status_code":"200","error_msg":"Successfull retrival","response":flag})  
                         else:
                                 #! Some operations are still remaining before we can proceed to the modelling.
-                                return Response({"status_code":"200","error_msg":desc,"response":flag})
+                                return Response({"status_code":"500","error_msg":desc,"response":flag})
 
                 except Exception as e:
                         logging.error("modeling : Check_Split : GET Method  " + str(e))
