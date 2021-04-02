@@ -188,7 +188,10 @@ class DBClass:
                 logging.info(str(query) + " <> tuples")
                 extras.execute_values(cursor, query, tuples) # Excute insert query.
                 index = 0
-
+            elif Flag == 1:
+                query = "INSERT INTO %s(%s) VALUES %%s RETURNING dataset_id" % (table_name, cols) # Make query
+                extras.execute_values(cursor, query, tuples) # Excute insert query.
+                index = [row[0] for row in cursor.fetchall()][0]
             else :
                 query = "INSERT INTO %s(%s) VALUES %%s RETURNING index" % (table_name, cols) # Make query
                 extras.execute_values(cursor, query, tuples) # Excute insert query.
@@ -620,8 +623,8 @@ class DBClass:
         Return : 
                 [Dataframe] : [return the dataframe of dataset table ]
         '''
-        sql_command = "SELECT dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows,dataset_desc from mlaas.dataset_tbl Where dataset_id =" + str(dataset_id)
-        
+        # sql_command = "SELECT dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows,dataset_desc from mlaas.dataset_tbl Where dataset_id =" + str(dataset_id)
+        sql_command = "SELECT dataset_name,file_size,file_name,dataset_table_name,user_name,dataset_visibility,no_of_rows,dataset_desc from mlaas.dataset_tbl Where dataset_id =" + str(dataset_id)
         dataset_df=self.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         return dataset_df 
     
