@@ -18,10 +18,11 @@ class FeaturnScalingClass:
     def standard_scaling(self,dataframe):
         
         scaler = StandardScaler()
-        
+        logger.inf+str(dataframe._get_numeric_data().columns))
         scaled_data = scaler.fit_transform(dataframe._get_numeric_data())
         scaled_df = pd.DataFrame(scaled_data,columns = dataframe._get_numeric_data().columns)
-            
+        logger.info("dataframe==="+str(dataframe._get_numeric_data().columns))
+        logger.info("scaled_df===="+str(scaled_df))  
         for col in scaled_df.columns:
             dataframe[col] = scaled_df[col]
             
