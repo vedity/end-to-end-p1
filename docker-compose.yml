@@ -7,7 +7,15 @@ services:
         container_name: postgres_container
         volumes:
             - postgres_data:/var/lib/postgresql/data/
+            # - postgresql.conf:/var/lib/postgresql/data/postgresql.conf
+
+        # command: "-c 'config_file=/etc/postgres/postgresql.conf'"
+        # command:
+        #     - "postgres"
+        #     - "-c"
+        #     - "shared_buffers=1793GB"
         
+       
         ports:
             - "5432:5432"
         environment:
@@ -77,3 +85,4 @@ services:
 
 volumes:
     postgres_data:
+    # postgresql.conf:

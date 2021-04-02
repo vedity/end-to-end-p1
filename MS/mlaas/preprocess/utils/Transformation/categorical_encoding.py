@@ -34,6 +34,10 @@ class EncodeClass:
             logging.info("Preprocess : EncodeClass : label_encoding : execution start")
             sql_command = f'update {table_name} m SET "{column_list[1]}" = WANT_THIS from (SELECT  "{column_list[0]}", dense_rank() OVER ( ORDER BY "{column_list[1]}") AS WANT_THIS FROM {table_name}) s where m."{column_list[0]}" = s."{column_list[0]}";'
             status = DBObject.update_records(connection,sql_command)
+
+            update_dtype_sql_command = f'ALTER TABLE {table_name} ALTER COLUMN "{column_list[1]}" type "int8" USING "{column_list[1]}"::bigint;'
+            status = DBObject.update_records(connection,update_dtype_sql_command)
+
             logging.info("Preprocess : EncodeClass : label_encoding : execution end")
             return status
 
@@ -358,7 +362,7 @@ class EncodeClass:
                         string += f"'{data[col_name]}', "
                     else:
                         string = string[:-2]+"."
-
+                
                 logging.info("data preprocessing : EncodeClass : get_unencoded_desc : execution stop")
 
                 return string
