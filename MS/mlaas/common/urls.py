@@ -12,4 +12,7 @@ urlpatterns = [
     #url for activity timeline
     path('mlaas/common/activity/',ActivityTimelineClass.as_view()),
 
+    #url to read logfile 
+    path('mlaas/common/logfile/',LogFileClass.as_view()),
+
 ]

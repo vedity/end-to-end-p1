@@ -228,3 +228,30 @@ class ActivityTimelineClass(APIView):
                         logging.error("Common  : ActivityTimelineClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
 
+class LogFileClass(APIView):
+        def get(self,request,format=None):
+                """
+                This class is used read the text of the admin_debug log file.
+                It will take url string as mlaas/common/logfile/.
+
+                Args  : 
+                        user_name[(String)]   :[User Name]
+                        
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival failed or successfull),
+                        Response(return false if failed otherwise json data)
+                """
+             
+                try:
+                        with open('./logs/admin_debug.log','r') as file:
+                                log_string = file.read()
+
+
+                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":str(log_string)})  
+                except Exception as e:
+                        logging.error("Common  : LogFileClass : GET Method : Exception :" + str(e))
+                        logging.error("Common  : LogFileClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+
+
