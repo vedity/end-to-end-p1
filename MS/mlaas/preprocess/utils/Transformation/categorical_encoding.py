@@ -301,15 +301,31 @@ class EncodeClass:
         try:
             logging.info("data preprocessing : EncodeClass : get_unencoded_colnames : execution start")
 
-            sql_command = f"select dt.dataset_table_name from mlaas.project_tbl pt, mlaas.dataset_tbl dt where pt.project_id = '{project_id}' and dt.dataset_id = pt.dataset_id"
-            table_name_df = DBObject.select_records(connection,sql_command)
+            sql_command = f"""SELECT column_name 
+                        FROM INFORMATION_SCHEMA.columns 
+                        where table_name = (select dt.dataset_table_name 
+                                                from mlaas.project_tbl pt, mlaas.dataset_tbl dt 
+                                                where pt.project_id = '{project_id}' 
+                                                and dt.dataset_id = pt.dataset_id
+                                                ) 
+                        and data_type='text'
+                        and column_name not in (
+                            select 
+                                case
+                                    when st.changed_column_name = null
+                                        then st.column_name 
+                                    else
+                                        st.changed_column_name 
+                                end
+                            from mlaas.schema_tbl st 
+                            where st.schema_id = (select pt2.schema_id 
+                                                    from mlaas.project_tbl pt2 
+                                                    where pt2.project_id = '{project_id}'
+                                                    ) 
+                            and st.column_attribute in ('Target','Ignore')
+                        )
+                        """
             
-            if not isinstance(table_name_df,pd.DataFrame):
-                raise TypeError
-
-            table_name = table_name_df['dataset_table_name'][0]
-
-            sql_command = f"SELECT column_name FROM INFORMATION_SCHEMA.columns where table_name= '{table_name}' and data_type='text'"
             unencoded_cols_df = DBObject.select_records(connection,sql_command)
             
             if not isinstance(unencoded_cols_df,pd.DataFrame):

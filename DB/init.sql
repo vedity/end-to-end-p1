@@ -206,6 +206,11 @@ Insert into mlaas.user_auth_tbl values(9,'bhavin','bhavin');
 Insert into mlaas.user_auth_tbl values(10,'raj','raj');
 Insert into mlaas.user_auth_tbl values(11,'nisha','nisha');
 Insert into mlaas.user_auth_tbl values(12,'mann','mann');
+Insert into mlaas.user_auth_tbl values(13,'bhavsik','bhavsik');
+Insert into mlaas.user_auth_tbl values(14,'prayagraj','prayagraj');
+Insert into mlaas.user_auth_tbl values(15,'brijraj','brijraj');
+Insert into mlaas.user_auth_tbl values(16,'karishma','karishma');
+Insert into mlaas.user_auth_tbl values(17,'denisha','denisha');
 
 
 --Insert parent_activity_tbl
