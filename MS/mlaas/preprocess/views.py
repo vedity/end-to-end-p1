@@ -116,7 +116,7 @@ class SchemaSaveClass(APIView):
                         schema_id = request.query_params.get('schema_id') #get the schema id
                         dataset_id = request.query_params.get('dataset_id') #get the dataset id
                         project_id = request.query_params.get('project_id') #get the project id
-                        usernm_df = DBObject.get_project_detail()
+                        usernm_df = DBObject.get_project_detail(DBObject,connection,project_id)
                         user_name = usernm_df['user_name'][0]
                         schema_status=preprocessObj.save_schema_data(schema_data,project_id,dataset_id,schema_id,user_name)
                         logging.info(str(schema_status)+" stauts type "+str(type(schema_status)))
