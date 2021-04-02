@@ -13,7 +13,7 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 })
 export class ModelingTypeComponent implements OnInit {
   isDisplayRunning = true;
-  model_type = "Regression";
+  model_type = "";
   currentuser: any;
   splitmethodselection = "crossvalidation";
   hyperparams = 'sklearn';
@@ -63,19 +63,37 @@ export class ModelingTypeComponent implements OnInit {
     if (this.params.isFromMenu == true) {
       this.getproject();
       $(".openmodal").trigger('click');
-    }else{
+    } else {
       if (this.params.dataset_id != undefined) {
         localStorage.setItem("modeling", JSON.stringify(this.params));
       }
       else {
-          this.params = localStorage.getItem("modeling");
-          this.params = JSON.parse(this.params);
-        }
-        this.currentuser = localStorage.getItem("currentUser")
-        this.params.user_id = JSON.parse(this.currentuser).id;
-        this.getDatasetInfo();
-        this.getRunningExperimentList();
-        this.getAllExperimentList();
+        this.params = localStorage.getItem("modeling");
+        this.params = JSON.parse(this.params);
+      }
+      this.checkmodelType(this.params.dataset_id,this.params.project_id)
+      this.currentuser = localStorage.getItem("currentUser")
+      this.params.user_id = JSON.parse(this.currentuser).id;
+      this.getDatasetInfo();
+      this.getRunningExperimentList();
+      this.getAllExperimentList();
+    }
+  }
+
+  checkmodelType(dataset_id,project_id){
+    this.apiservice.checkmodelType(dataset_id,project_id).subscribe(
+      logs=>this.modelTypeSuccessHandlers(logs),
+      error=>this.errorHandler(error)
+    )
+  }
+
+  modelTypeSuccessHandlers(data){
+    if(data.status_code=="200"){
+      this.model_type=data.response.model_type;
+      console.log(this.model_type);
+    }
+    else{
+      this.errorHandler(data);
     }
   }
 
@@ -104,10 +122,8 @@ export class ModelingTypeComponent implements OnInit {
         if (elem.project_id == value)
           return elem
       })
-     this.getCheckSplit(projects[0].project_id);
-     
+      this.getCheckSplit(projects[0].project_id);
       this.projectdata = projects[0];
-
     }
     else {
       this.projectdata = undefined
@@ -126,10 +142,14 @@ export class ModelingTypeComponent implements OnInit {
       localStorage.setItem("modeling", JSON.stringify(this.params));
       this.currentuser = localStorage.getItem("currentUser")
       this.params.user_id = JSON.parse(this.currentuser).id;
+      this.checkmodelType(this.projectdata.dataset_id,this.projectdata.project_id)
+
       this.getDatasetInfo();
       this.getRunningExperimentList();
       this.getAllExperimentList();
+      setTimeout(() => {
       this.modalService.dismissAll();
+      }, 0);
     }
     else {
       this.toaster.error("Please select any project", "Error");
@@ -275,7 +295,7 @@ export class ModelingTypeComponent implements OnInit {
 
 
   startModel() {
-    this.processclass = "start";
+
     this.experiment_name = this.params.experiment_name;
     this.experiment_desc = this.params.experiment_desc;
     console.log(this.currentuser);
@@ -352,6 +372,8 @@ export class ModelingTypeComponent implements OnInit {
 
   startsuccessHandler(data) {
     if (data.status_code == "200") {
+      this.processclass = "start";
+      this.modalService.dismissAll();
       this.toaster.success(data.error_msg, 'Success');
       this.processInterval = setInterval(() => {
         this.getRunningExperimentList();
@@ -441,86 +463,104 @@ export class ModelingTypeComponent implements OnInit {
 
   compareExperiment(compareModal: any) {
     console.log(this.compareIds);
-    this.lineColumAreaChart = {
-      chart: {
-        height: 200,
-        type: 'line',
-        stacked: false,
-        toolbar: {
-          show: false
-        }
-      },
-      stroke: {
-        width: [2, 2, 4],
-      },
-      colors: ['#f46a6a', '#34c38f'],
-      series: [{
-        name: 'Experiment 1',
-        data: [23, 11, 50, 70, 13, 56, 37, 78, 44, 22, 30]
-      }, {
-        name: 'Experiment 2',
-        data: [23, 10, 22, 30, 13, 20, 31, 21, 40, 20, 32]
-      }],
-      fill: {
-        opacity: [0.85, 1],
-        gradient: {
-          inverseColors: false,
-          shade: 'light',
-          type: 'vertical',
-          opacityFrom: 0.85,
-          opacityTo: 0.55,
-          stops: [0, 100, 100, 100]
-        }
-      },
-      // tslint:disable-next-line: max-line-length
-      labels: ['01/01/2003', '02/01/2003', '03/01/2003', '04/01/2003', '05/01/2003', '06/01/2003', '07/01/2003', '08/01/2003', '09/01/2003', '10/01/2003', '11/01/2003'],
-      markers: {
-        size: [0, 2]
-      },
-      legend: {
-        offsetY: 5,
-      },
-      xaxis: {
-        type: 'datetime',
-      },
-      yaxis: {
-        title: {
-          text: 'Points',
-        },
-      },
-      tooltip: {
-        shared: true,
-        intersect: false,
-        y: {
-          formatter(y) {
-            if (typeof y !== 'undefined') {
-              return y.toFixed(0) + ' points';
-            }
-            return y;
-          }
-        }
-      },
-      grid: {
-        borderColor: '#f1f1f1'
-      }
-    };
-    this.apiservice.compareExperiment("[" + this.compareIds + "]").subscribe(
-      logs => this.manageCompareExperiment(logs, compareModal),
+   
+    this.apiservice.compareExperimentgraph("[" + this.compareIds + "]").subscribe(
+      logs => this.manageGraphCompareExperiment(logs, compareModal),
       error => this.errorHandler(error)
     )
-    // this.modalService.open(compareModal, { size: 'xl',windowClass:'modal-holder', centered: true });
-
   };
 
   comparedata: any;
-  manageCompareExperiment(data, modal) {
+  manageGridCompareExperiment(data) {
     if (data.status_code == "200") {
       this.comparedata = data.response;
-      this.modalService.open(modal, { size: 'xl', windowClass: 'modal-holder', centered: true });
+      //   this.modalService.open(modal, { size: 'xl', windowClass: 'modal-holder', centered: true });
     }
     else {
-
+      this.errorHandler(data);
     }
+  }
+
+  comparegraphdata: any;
+  manageGraphCompareExperiment(data, modal) {
+    if (data.status_code == "200") {
+      this.comparegraphdata = data.response;
+      let series=[];
+      let makrkerssize=[]
+      series.push({name:"ACTUAL",data:this.comparegraphdata.actual});
+      makrkerssize.push(2);
+      this.comparegraphdata.predicted.forEach(element => {
+        series.push({name:element.exp_name,data:element.values});
+      makrkerssize.push(0);
+
+      });
+      this.modalService.open(modal, { size: 'xl', windowClass: 'modal-holder', centered: true });
+      this.lineColumAreaChart = {
+        chart: {
+          height: 450,
+          type: 'line',
+          stacked: false,
+          toolbar: {
+            show: false
+          }
+        },
+        stroke: {
+          width: [2, 2, 4],
+        },
+        //colors: ['#f46a6a', '#34c38f'],
+        series: series,
+        fill: {
+         // opacity: [0.85, 1],
+          gradient: {
+            inverseColors: false,
+            shade: 'light',
+            type: 'vertical',
+            opacityFrom: 0.85,
+            opacityTo: 0.55,
+            stops: [0, 100, 100, 100]
+          }
+        },
+        // tslint:disable-next-line: max-line-length
+        labels:this.comparegraphdata.index,
+        // ['01/01/2003', '02/01/2003', '03/01/2003', '04/01/2003', '05/01/2003', '06/01/2003', '07/01/2003', '08/01/2003', '09/01/2003', '10/01/2003', '11/01/2003'],
+        markers: {
+          size: makrkerssize
+        },
+        legend: {
+          offsetY: 5,
+        },
+        xaxis: {
+          //type: 'datetime',
+        },
+        yaxis: {
+          // title: {
+          //   text: 'Points',
+          // },
+        },
+        tooltip: {
+          shared: true,
+          intersect: false,
+          y: {
+            formatter(y) {
+              if (typeof y !== 'undefined') {
+                return y.toFixed(0);
+              }
+              return y;
+            }
+          }
+        },
+        grid: {
+          borderColor: '#f1f1f1'
+        }
+      };
+    }
+    else {
+      this.errorHandler(data);
+    }
+    this.apiservice.compareExperimentgrid("[" + this.compareIds + "]").subscribe(
+      logs => this.manageGridCompareExperiment(logs),
+      error => this.errorHandler(error)
+    )
   }
 
   ProjectData(projectModal: any) {
@@ -586,7 +626,7 @@ export class ModelingTypeComponent implements OnInit {
   }
 
   getCheckSplit(project_id) {
-  return  this.apiservice.getCheckSplit(project_id).subscribe(
+    return this.apiservice.getCheckSplit(project_id).subscribe(
       logs => this.checksplitSuccessHandler(logs)
     );
   }
@@ -594,13 +634,13 @@ export class ModelingTypeComponent implements OnInit {
   isEnableModeling = false;
   checksplitSuccessHandler(data) {
     if (data.status_code == "200") {
-      this.isEnableModeling= data.response;
-      if(!this.isEnableModeling)
-      this.toaster.error('CleanUp is remaining for this project, Please select other project','Error');
+      this.isEnableModeling = data.response;
+      if (!this.isEnableModeling)
+        this.toaster.error('CleanUp is remaining for this project, Please select other project', 'Error');
     }
-    else{
-      this.isEnableModeling=false;
-    } 
+    else {
+      this.isEnableModeling = false;
+    }
   }
 
 }

@@ -113,9 +113,21 @@ export class ModelingTypeApiService {
     return this.httpClient.get(this.baseUrl + "modeling/hyperparameters/", { headers: this.headers, params });
   }
 
-  compareExperiment(exp_ids): Observable<any> {
+  compareExperimentgrid(exp_ids): Observable<any> {
     var params = new HttpParams().append("experiment_ids", exp_ids);
-    return this.httpClient.get(this.baseUrl + "modeling/compareexperiments/", { headers: this.headers, params });
+    return this.httpClient.get(this.baseUrl + "modeling/compareexperimentsgrid/", { headers: this.headers, params });
+  }
+
+  compareExperimentgraph(exp_ids): Observable<any> {
+    var params = new HttpParams().append("experiment_ids", exp_ids);
+    return this.httpClient.get(this.baseUrl + "modeling/compareexperimentsgraph/", { headers: this.headers, params });
+  }
+  
+  checkmodelType(dataset_id,project_id){
+    var params = new HttpParams()
+    .append("dataset_id", dataset_id)
+    .append("project_id", project_id);
+    return this.httpClient.get(this.baseUrl + "modeling/modeltype/", { headers: this.headers, params });
   }
 
   checkrunningExperiment(project_id): Observable<any> {

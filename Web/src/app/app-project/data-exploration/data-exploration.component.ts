@@ -141,13 +141,15 @@ export class DataExplorationComponent implements OnInit {
         toolbar: {
           show: false
         },
-        selection: {
-          enabled: true
-        }
+        // selection: {
+        //   enabled: true
+        // }
       },
       plotOptions: {
         bar: {
-          distributed: true
+          distributed: true,
+          horizontal: false,
+          columnWidth: "25%",
         }
       },
 
@@ -168,20 +170,20 @@ export class DataExplorationComponent implements OnInit {
           }
         }
       },
-      xaxis: {
-        axisBorder: {
-          show: false
-        },
-        axisTicks: {
-          show: false,
-        },
-        labels: {
-          show: false,
-          formatter: (val) => {
-            return val;
-          }
-        }
-      },
+      // xaxis: {
+      //   axisBorder: {
+      //     show: false
+      //   },
+      //   axisTicks: {
+      //     show: false,
+      //   },
+      //   labels: {
+      //     show: false,
+      //     formatter: (val) => {
+      //       return val;
+      //     }
+      //   }
+      // },
       legend: {
         show: false
       }
@@ -297,6 +299,8 @@ export class DataExplorationComponent implements OnInit {
       this.categoricalexploredata = data["false"];
       this.loaderdiv = false;
       this.finaldata = logs.response;
+      console.log( this.categoricalexploredata);
+      
     }
     else {
       this.errorHandler(logs)
@@ -331,19 +335,19 @@ export class DataExplorationComponent implements OnInit {
     let colorarray: any = [];
     if (obj["Left Outlier Values"][1].length > 0) {
       obj["Left Outlier Values"][0].forEach((element, index) => {
-        category.push(element);
+        category.push(element.toString());
         plotarray.push(obj["Left Outlier Values"][1][index]);
         colorarray.push('#f74242')
       });
     }
     obj["Plot Values"][0].forEach((element, index) => {
-      category.push(element);
+      category.push(element.toString());
       plotarray.push(obj["Plot Values"][1][index]);
       colorarray.push('#34c38f')
     });
     if (obj["Right Outlier Values"][1].length > 0) {
       obj["Right Outlier Values"][0].forEach((element, index) => {
-        category.push(element);
+        category.push(element.toString());
         plotarray.push(obj["Right Outlier Values"][1][index]);
         colorarray.push('#f74242')
       });

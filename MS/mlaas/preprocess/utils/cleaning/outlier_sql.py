@@ -58,7 +58,7 @@ class OutliersTreatmentClass:
             if discard_missing == True:
 
                 # Delete the records from the table based on the upper limit and lower limit 
-                sql_command = f'delete from {table_name} where "{col_name}" < {str(lower_limit)} and "{col_name}" > {str(upper_limit)}'
+                sql_command = f'delete from {table_name} where "{col_name}" < {str(lower_limit)} or "{col_name}" > {str(upper_limit)}'
                 logging.info("Sql_command : Delete record using  : extreme_value_analysis : "+str(sql_command))
 
             else:
@@ -101,10 +101,10 @@ class OutliersTreatmentClass:
             if discard_missing == True:
 
                 #Delete the records if the compute value of the column based on formula is not between -3 and 3
-                sql_command = f'delete from {table_name} where "{col_name}"-'+str(avg_value)+'/'+str(stddev_value)+ ' not between -3 and 3'
+                sql_command = f'delete from {table_name} where ("{col_name}"-'+str(avg_value)+')/'+str(stddev_value)+ ' not between -3 and 3'
                 logging.info("Sql_command : Delete query: z_score_analysis : "+str(sql_command))
             else:
-                sql_command = f'Update {table_name} set "{col_name}"={impute_value} where "{col_name}"-'+str(avg_value)+'/'+str(stddev_value)+ ' not between -3 and 3' # Get update query
+                sql_command = f'Update {table_name} set "{col_name}"={impute_value} where ("{col_name}"-'+str(avg_value)+')/'+str(stddev_value)+ ' not between -3 and 3' # Get update query
                 logging.info("Sql_command : update query : z_score_analysis : "+str(sql_command))
 
             status = DBObject.update_records(connection,sql_command)

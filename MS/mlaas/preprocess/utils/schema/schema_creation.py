@@ -183,7 +183,7 @@ class SchemaClass:
             
             index_list = [] #get the index id
  
-
+            target_count = 0
             for count in range(len(schema_data)):
 
 
@@ -205,6 +205,16 @@ class SchemaClass:
                 index_list.append(schema_data[count]["index"]) #append  index 
 
                 column_name_list.append(schema_data[count]["column_name"]) #append column_name
+                
+                #Check if  Target attribute incoming
+                if schema_data[count]["column_attribute"] == 'Target':
+
+                    #Increment variable by 1 if Target attribute is present
+                    target_count+=1
+
+                    #Check if "target_count" variable having value greater then 1 then raise exception
+                    if target_count > 1:
+                        raise TargetAttributeException(500)
 
                 column_attribute_list.append(schema_data[count]["column_attribute"]) #append attribute type
 
@@ -214,12 +224,26 @@ class SchemaClass:
 
             for value in change_column_name:
                 if value != '':
+                    #check the changed column name having same name
+                    #?if name count in canged column list is greater then one means its duplicate then raise exception 
                     if str(change_column_name).strip().count(str(value).strip()) > 1 :
                         raise ChangeColumnNameSame(500)
-            
+
+
+
+            index_value = self.get_target_attribute_index(DBObject,connection,schema_id)
+            logging.info(str(index_value) + " index ")
+            #if index value is not Zero 
+            #? Then in schema table having a column with target Attribute 
+            if index_value !=0 and column_attribute_list.count('Target')>=1:
+                #if the index value is not present in index_list raise
+                if index_value not in index_list:
+                    raise TargetAttributeExistException(500)
+
+
             column_count_value,ignore_count_value = self.get_count_value(DBObject,connection,schema_id)
 
-            if (column_count_value-ignore_count_value)== column_attribute_list.count('Ignore') and column_attribute_list.count('Select')==0 and column_attribute_list.count('Target')==0 :
+            if (column_count_value-ignore_count_value)== column_attribute_list.count('Ignore') and column_attribute_list.count('Select')>=1 and column_attribute_list.count('Target')==0 :
                 raise IgnoreColumns(500)
 
 
@@ -249,7 +273,7 @@ class SchemaClass:
             logging.info("data preprocess : SchemaClass : save_schema : execution stop")
             return schema_status
 
-        except (SchemaUpdateFailed,TableCreationFailed,SameColumnNameFound,InvalidColumnNames,ChangeColumnNameSame,IgnoreColumns) as exc:
+        except (SchemaUpdateFailed,TableCreationFailed,SameColumnNameFound,InvalidColumnNames,ChangeColumnNameSame,IgnoreColumns,TargetAttributeException,TargetAttributeExistException) as exc:
             logging.error("data preprocess : ingestclass : save_schema : Exception " + str(exc.msg))
             logging.error("data preprocess : ingestclass : save_schema : " +traceback.format_exc())
             return exc.msg
@@ -539,8 +563,8 @@ class SchemaClass:
             schema_table_name,_,_ = self.get_schema()
 
             #get the total column count and Ignore count for the perticular schema id
-            sql_command = "select count(schema_id) as column_count,(select count(column_attribute) from "+str(schema_table_name)+" where schema_id ='"+str(schema_id)+"' and column_attribute ='Ignore') as ignore_count from "+str(schema_table_name)+" where schema_id ='"+str(schema_id)+"'"
-            
+            sql_command = f'''select count(schema_id) as column_count,(select count(column_attribute) from {schema_table_name} where schema_id ={schema_id} and column_attribute ='Ignore') as ignore_count from {schema_table_name} where schema_id ={str(schema_id)}'''
+            logging.info(str(sql_command) + "  select command")
             #Execute the sql command
             dataframe = DBObject.select_records(connection,sql_command)
 
@@ -548,6 +572,35 @@ class SchemaClass:
             column_count_value,ignore_count_value = int(dataframe['column_count'][0])-1,int(dataframe['ignore_count'][0])
 
             return column_count_value,ignore_count_value
+        except Exception as exc:
+            return str(exc),None
+    
+    def get_target_attribute_index(self,DBObject,connection,schema_id):
+        """
+        function used to get the Index value for column whose attribute type is "Target"
+
+        Args:
+            schema_id[(Integer)] : [Id of the schema table]
+
+        Return:
+            [Integer] : [return the index value of column if found else return 0 ]
+        """
+        try:
+            #get the table name and columns,and schema of the table
+            schema_table_name,_,_ = self.get_schema()
+
+            #get the total column count and Ignore count for the perticular schema id
+            sql_command = f'''select index from {schema_table_name} where  schema_id ={schema_id} and column_attribute='Target' '''
+            
+            #Execute the sql command
+            dataframe = DBObject.select_records(connection,sql_command)
+            if len(dataframe['index'])==0:
+                index_value = 0
+            else:
+                #get the total  index  value where column having target attribute
+                index_value = int(dataframe['index'][0])
+
+            return index_value
         except Exception as exc:
             return str(exc)
     

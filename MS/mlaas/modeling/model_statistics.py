@@ -1,6 +1,7 @@
 
 import json
 import pandas as pd
+import numpy as np
 import ast
 
 from pandas import DataFrame
@@ -83,7 +84,7 @@ class ModelStatisticsClass:
         """
         try:
             logging.info("modeling : ModelStatisticsClass : actual_vs_prediction : execution start")
-
+            # TODO : make common method for artifact uri
             sql_command = 'select artifact_uri from mlflow.runs where experiment_id='+str(experiment_id)
             # Get the actual_vs_predction's data path from mlaas.runs with the associated experiment id
             artifact_uri = self.DBObject.select_records(self.connection, sql_command)
@@ -105,13 +106,38 @@ class ModelStatisticsClass:
             if model_type == 'Regression':
                 actual_vs_prediction_df = DataFrame(actual_vs_prediction_json).round(decimals = 3) #Round to the nearest 3 decimals.
                 actual_vs_prediction_json = actual_vs_prediction_df.to_dict(orient='list')
-            elif model_type == 'Classification':
-                actual_vs_prediction_df = DataFrame(actual_vs_prediction_json) 
-                actual_vs_prediction_df = actual_vs_prediction_df.drop(['index'],axis=1)
                 
-                actual_dict = actual_vs_prediction_df.groupby(actual_vs_prediction_df.columns.values[0]).count().to_dict()
+            elif model_type == 'Classification':
+                
+                unscaled_df,target_features = self.get_unscaled_data(experiment_id)
 
-                prediction_dict = actual_vs_prediction_df.groupby(actual_vs_prediction_df.columns.values[1]).count().to_dict()
+                actual_vs_prediction_df = DataFrame(actual_vs_prediction_json) 
+               
+                actual_vs_prediction_df.rename(columns = {target_features[0]:'seq_id'}, inplace = True)
+                
+                final_df=pd.merge(unscaled_df, actual_vs_prediction_df, on='seq_id', how='inner')
+                
+                logging.info("final df =="+str(final_df))
+                
+                actual_vs_prediction_df = actual_vs_prediction_df.drop(['seq_id'],axis=1)
+                
+                
+                cols=actual_vs_prediction_df.columns.values.tolist()
+                actual_col=''
+                predict_col=''
+                for i in cols:
+                    if i.endswith('_prediction') :
+                        predict_col=i
+                    else:
+                        actual_col = i
+                
+                
+                classes_df = final_df[[actual_col,actual_col+'_str']]
+                logging.info("classes_df df =="+str(classes_df))
+                
+                actual_dict = classes_df.groupby(actual_col+'_str').count().to_dict()
+
+                prediction_dict = actual_vs_prediction_df.groupby(predict_col).count().to_dict()
                 
                 act_dict = {}
                 prd_dict = {}
@@ -136,6 +162,37 @@ class ModelStatisticsClass:
             logging.error("modeling : ModelStatisticsClass : actual_vs_prediction : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : actual_vs_prediction : " +traceback.format_exc())
             return exc.msg
+        
+    def get_unscaled_data(self,experiment_id):
+        
+      
+        sql_command = "select scaled_split_parameters,target_features from mlaas.project_tbl"\
+                    " Where project_id in ( select project_id from mlaas.model_experiment_tbl where experiment_id="+str(experiment_id) +")"
+        
+        unscaled_info_df = self.DBObject.select_records(self.connection, sql_command)
+        if unscaled_info_df is None or len(unscaled_info_df) == 0 :
+            raise DataNotFound(500)
+        
+        scaled_split_parameters= ast.literal_eval(unscaled_info_df['scaled_split_parameters'][0])
+        
+        target_features = ast.literal_eval(unscaled_info_df['target_features'][0])
+        
+        unscaled_path = scaled_split_parameters['actual_Y_filename']
+        #TODO need to add exception
+        unscaled_arr= np.load('./'+unscaled_path,allow_pickle=True)
+        
+        unscaled_df=pd.DataFrame(unscaled_arr,columns=target_features)
+     
+        unscaled_df.rename(columns = {target_features[0]:'seq_id',target_features[1]:target_features[1]+'_str'}, inplace = True)
+        
+        
+        logging.info("arr =="+str(unscaled_df))
+        logging.info("arr =="+str(target_features))
+        
+      
+        return unscaled_df,target_features
+              
+        # return unscaled_arr
 
     def features_importance(self, experiment_id):
         """This function is used to get features_importance of particular experiment.
@@ -188,6 +245,7 @@ class ModelStatisticsClass:
             [data_frame]: [it will return the dataframe for model_summary.]
             
         """
+        logging.info("modeling : ModelStatisticsClass : model_summary : Exception Start" )
         try:
  
             sql_command = 'select artifact_uri from mlflow.runs where experiment_id='+str(experiment_id)
@@ -218,7 +276,7 @@ class ModelStatisticsClass:
             model_desc = model_desc.iloc[0, 0]
  
             model_summary.update({'Model_Description': model_desc})
- 
+            logging.info("modeling : ModelStatisticsClass : model_summary : Exception Start"+str(model_summary))
             return model_summary
  
         except (DatabaseConnectionFailed,DataNotFound) as exc:
@@ -558,6 +616,17 @@ class ModelStatisticsClass:
             raise DataNotFound(500)
 
         model_types = tuple(model_types_df['model_type'])
+        sql_command = "select name from mlflow.experiments where experiment_id in "+str(experiment_ids)
+        experiment_names_df = self.DBObject.select_records(self.connection, sql_command)
+        
+        if experiment_names_df is None:
+            raise DatabaseConnectionFailed(500)
+
+        if len(experiment_names_df) == 0 :
+            raise DataNotFound(500)
+        
+        experiment_names = list(experiment_names_df['name'])
+
         actual_vs_prediction_json = self.actual_vs_prediction(experiment_ids[0], model_types[0])
 
         if model_types[0] == 'Regression':
@@ -567,10 +636,10 @@ class ModelStatisticsClass:
             actual_column = predicted_column.replace('_prediction', '')
             actual = actual_vs_prediction_df[actual_column].tolist()
             predicted_list = []
-            predicted_list.append(actual_vs_prediction_df[predicted_column].tolist())
+            predicted_list.append({'exp_name': experiment_names[0],'values': actual_vs_prediction_df[predicted_column].tolist()})
 
             for i in range(len(experiment_ids) - 1):
-                predicted_list.append(self.actual_vs_prediction(experiment_ids[i], model_types[i])[predicted_column])
+                predicted_list.append({'exp_name': experiment_names[i+1],'values': self.actual_vs_prediction(experiment_ids[i+1], model_types[i+1])[predicted_column]})
 
             comparision_dict = {'index': index, 'actual': actual, 'predicted': predicted_list}
             
@@ -582,10 +651,10 @@ class ModelStatisticsClass:
             actual = actual_vs_prediction_json['actual']
             
             predicted_list = []
-            predicted_list.append(actual_vs_prediction_json['prediction'])
+            predicted_list.append({'exp_name': experiment_names[0],'values': actual_vs_prediction_json['prediction']})
 
             for i in range(len(experiment_ids) - 1):
-                predicted_list.append(self.actual_vs_prediction(experiment_ids[i], model_types[i])['prediction'])
+                predicted_list.append({'exp_name': experiment_names[i+1],'values': self.actual_vs_prediction(experiment_ids[i+1], model_types[i+1])['prediction']})
 
             comparision_dict = {'key': keys, 'actual': actual, 'predicted': predicted_list}
 

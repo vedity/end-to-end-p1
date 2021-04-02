@@ -52,13 +52,17 @@ class SupervisedClass(RC,PC):
             
             model_type_dict = AlgorithmDetectorObject.get_model_type(project_id,dataset_id)
             
+            logging.info("modeling : SupervisedClass : supervised_algorithm : execution start"+str(model_type_dict))
+            
             model_param_dict['algorithm_type'] = model_type_dict['algorithm_type']
             model_param_dict['target_type'] = model_type_dict['target_type']
             
+            logging.info("modeling : SupervisedClass : supervised_algorithm : execution start"+str(model_param_dict))
             if model_param_dict['model_type'] == "Regression" :
                 # Call Regression Class's method
                 result = super(SupervisedClass,self).regression_model(model_param_dict,db_param_dict)                                  
             else:
+                logging.info("modeling : SupervisedClass : supervised_algorithm : execution start"+str(model_param_dict))
                 # Call Probabilistic Class's method
                 result = super(SupervisedClass,self).classification_model(model_param_dict,db_param_dict)
                 
@@ -140,7 +144,7 @@ class SupervisedClass(RC,PC):
             status (`integer | Exception`): `0` if updation was successful else error.
         '''
         try:
-            logging.info("data preprocessing : PreprocessingClass : dag_updater : execution start")
+            logging.info("Modeling : SupervisedClass : dag_updater : execution start")
             
             #? Reading the file
             with open(f"dynamic_dags/{namespace}/{file}","r") as ro:
@@ -183,7 +187,7 @@ class SupervisedClass(RC,PC):
             with open(f"dynamic_dags/{namespace}/{file}", 'w') as wo:
                 wo.write(new_str)
 
-            logging.info("data preprocessing : PreprocessingClass : dag_updater : execution stop")
+            logging.info("Modeling : SupervisedClass : dag_updater : execution End")
             
             return 0
 
