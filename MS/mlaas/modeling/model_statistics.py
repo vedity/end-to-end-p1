@@ -109,11 +109,11 @@ class ModelStatisticsClass:
                 
             elif model_type == 'Classification':
                 
-                unscaled_df = self.get_unscaled_data(experiment_id)
+                unscaled_df,target_features = self.get_unscaled_data(experiment_id)
 
                 actual_vs_prediction_df = DataFrame(actual_vs_prediction_json) 
-                #TODO make dynamic
-                actual_vs_prediction_df.rename(columns = {'index':'seq_id'}, inplace = True)
+               
+                actual_vs_prediction_df.rename(columns = {target_features[0]:'seq_id'}, inplace = True)
                 
                 final_df=pd.merge(unscaled_df, actual_vs_prediction_df, on='seq_id', how='inner')
                 
@@ -190,7 +190,7 @@ class ModelStatisticsClass:
         logging.info("arr =="+str(target_features))
         
       
-        return unscaled_df
+        return unscaled_df,target_features
               
         # return unscaled_arr
 
