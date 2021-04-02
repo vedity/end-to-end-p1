@@ -52,6 +52,8 @@ class SchemaClass:
         this function used to get the column name and datatype of the given dataset id.
 
         Args :
+                DBObject ([object]): [object of database class.],
+                connection ([object]): [connection object of database class.]
                 dataset_id[(Integer)] : [Id of the dataset table]
         Return : 
                 
@@ -103,6 +105,8 @@ class SchemaClass:
         this function used to get proper attribute type for the column in csv file.
 
         Args : 
+            DBObject ([object]): [object of database class.],
+            connection ([object]): [connection object of database class.]
             [(table_name)] : [ Name of te table]
             [(column_name_list)] : [List of the column name]
             [(no_of_rows)] : [No of rows in csv data]
@@ -168,6 +172,8 @@ class SchemaClass:
         function used to update the changed columns values in schema table  
 
         Args :
+                DBObject ([object]): [object of database class.],
+                connection ([object]): [connection object of database class.]
                 schema_data[(List)]   : [list of dictonery with details of schema]
                 schema_id[(Integer)] : [Id of the schema table]
         Return:
@@ -286,6 +292,8 @@ class SchemaClass:
         3)For the column name updated
 
         Args:
+                DBObject ([object]): [object of database class.],
+                connection ([object]): [connection object of database class.]
                 project_id[(Integer)]:[Id of the project]
                 dataset_id[(Integer)]:[Id of the dataset]
                 user_name[(String)]:[Name of the user]
@@ -407,6 +415,8 @@ class SchemaClass:
         """
         this function used to insert the records into a table if not exist otherwise it will update the existing schema data record from the table.
         Args:
+                DBObject ([object]): [object of database class.],
+                connection ([object]): [connection object of database class.]
                 schema_id [(Integer)]  : [Id of the schema table]
                 column_name_list[(List)]  : [Existing table column name value]
                 change_column_name[(List)] : [change column values]
@@ -481,6 +491,8 @@ class SchemaClass:
         this function used to  check the  Data for the given schema Id in schema table where data is already exist or not.
 
         Args : 
+                DBObject ([object]): [object of database class.],
+                connection ([object]): [connection object of database class.]
                 schema_id[(Integer)] : [Id of the schema table]
         Return :
                 [Boolean] : [return True if record exists else False]
@@ -515,6 +527,8 @@ class SchemaClass:
         """
         function used to get the schema table details based on the schema id.
         Args : 
+                DBObject ([object]): [object of database class.],
+                connection ([object]): [connection object of database class.]
                 schema_id[(Integer)] : [Id of the schema table]
         Return :
                 [List] : [schema details in form of list of dictonery]
@@ -553,6 +567,8 @@ class SchemaClass:
         function used to get the count values from the schema table of column name and "Ignore" attribute type
 
         Args:
+            DBObject ([object]): [object of database class.],
+            connection ([object]): [connection object of database class.]
             schema_id[(Integer)] : [Id of the schema table]
 
         Return:
@@ -608,6 +624,8 @@ class SchemaClass:
         """
         Function used to delete the record from  the schema table
         Args : 
+                DBObject ([object]): [object of database class.],
+                connection ([object]): [connection object of database class.]
                 schema_id[(integer)] : [Id of the schema table]
                 col_name[(String)] : [Name of the column]
         Return:
