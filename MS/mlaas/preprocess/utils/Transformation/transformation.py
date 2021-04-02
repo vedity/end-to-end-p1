@@ -99,7 +99,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
     #     logging.info("data preprocessing : TransformationClass : label_encoding : execution stop")
     #     return dataframe
     
-    def label_encoding(self, DBObject,connection,project_id,column_list, table_name, col, **kwargs):
+    def label_encoding(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
             Operation id: 27
         '''
@@ -127,7 +127,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         logging.info("data preprocessing : TransformationClass : label_encoding : execution stop")
         return status
 
-    def one_hot_encoding(self, DBObject,connection,project_id,column_list, table_name, col, schema_id, **kwargs):
+    def one_hot_encoding(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, schema_id, **kwargs):
         '''
             Operation id: 28
         '''
@@ -179,7 +179,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
     
     #* MATH OPERATIONS
     
-    def add_to_column(self, DBObject,connection,project_id,column_list, table_name, col, value, **kwargs):
+    def add_to_column(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, value, **kwargs):
         '''
             Operation id: 29
         '''
@@ -207,7 +207,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         logging.info("data preprocessing : TransformationClass : add_to_column : execution stop")
         return status
     
-    def subtract_from_column(self, DBObject,connection,project_id,column_list, table_name, col, value, **kwargs):
+    def subtract_from_column(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, value, **kwargs):
         '''
             Operation id: 30
         '''
@@ -233,7 +233,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         logging.info("data preprocessing : TransformationClass : subtract_from_column : execution stop")
         return status
     
-    def multiply_column(self, DBObject,connection,project_id,column_list, table_name, col, value, **kwargs):
+    def multiply_column(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, value, **kwargs):
         '''
             Operation id: 31
         '''
@@ -260,7 +260,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         logging.info("data preprocessing : TransformationClass : multiply_column : execution stop")
         return status
     
-    def divide_column(self, DBObject,connection,project_id,column_list, table_name, col, value, **kwargs):
+    def divide_column(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, value, **kwargs):
         '''
             Operation id: 32
         '''
