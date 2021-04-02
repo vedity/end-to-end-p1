@@ -105,10 +105,12 @@ class ModelStatisticsClass:
             
             if model_type == 'Regression':
                 actual_vs_prediction_df = DataFrame(actual_vs_prediction_json).round(decimals = 3) #Round to the nearest 3 decimals.
+                _,target_features = self.get_unscaled_data(experiment_id)
+                actual_vs_prediction_df.rename(columns = {target_features[0]:'index',target_features[1]:'price',target_features[1]+'_prediction':'price_prediction'}, inplace = True)
                 actual_vs_prediction_json = actual_vs_prediction_df.to_dict(orient='list')
                 
             elif model_type == 'Classification':
-                
+            
                 unscaled_df,target_features = self.get_unscaled_data(experiment_id)
 
                 actual_vs_prediction_df = DataFrame(actual_vs_prediction_json) 
