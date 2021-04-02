@@ -96,7 +96,7 @@
                                         <div class="card-body">
                                             <h4 class="card-title mb-4">
                                                 <div class="custom-control custom-checkbox">
-                                                    <input type="checkbox" class="custom-control-input" [disabled]="item.status!='success'" (change)="setCopmareIds($event.target.checked,item.experiment_id)" id="customCheck_{{i}}">
+                                                    <input type="checkbox" class="custom-control-input" [disabled]="item.status!='success'" (change)="setCopmareIds($event.target.checked,item.experiment_id,item.experiment_name)" id="customCheck_{{i}}">
                                                     <label class="custom-control-label" for="customCheck_{{i}}">{{item.experiment_name}}</label>
                                                 </div> <span class="date-time">{{item.exp_created_on | date: 'MMM dd,
                                                     yyyy, hh:mm a'}}</span>
@@ -147,7 +147,7 @@
                                         <div class="card-body">
                                             <h4 class="card-title mb-4">
                                                 <div class="custom-control custom-checkbox">
-                                                    <input type="checkbox" class="custom-control-input" (change)="setCopmareIds($event.target.checked,item.experiment_id)" id="customCheck_{{i}}">
+                                                    <input type="checkbox" class="custom-control-input" (change)="setCopmareIds($event.target.checked,item.experiment_id,item.experiment_name)" id="customCheck_{{i}}">
                                                     <label class="custom-control-label" for="customCheck_{{i}}">{{item.experiment_name}}</label>
                                                 </div> <span class="date-time">{{item.exp_created_on |
                                                     date:'short'}}</span>
@@ -223,7 +223,7 @@
                                                     <td>
                                                         <div class="custom-control custom-checkbox mb-3">
                                                             <!-- <input type="checkbox" class="custom-control-input" name="isprivate" id="customCheck_{{i}}"> -->
-                                                            <input type="checkbox" class="custom-control-input" [disabled]="item.status!='success'" (change)="setCopmareIds($event.target.checked,item.experiment_id)" id="customCheck_{{i}}">
+                                                            <input type="checkbox" class="custom-control-input" [disabled]="item.status!='success'" (change)="setCopmareIds($event.target.checked,item.experiment_id,item.experiment_name)" id="customCheck_{{i}}">
 
                                                             <label class="custom-control-label" for="customCheck_{{i}}"></label>
                                                         </div>
@@ -279,7 +279,7 @@
                                                     <td>
                                                         <div class="custom-control custom-checkbox mb-3">
                                                             <!-- <input type="checkbox" class="custom-control-input" name="isprivate" id="customCheck_{{i}}"> -->
-                                                            <input type="checkbox" class="custom-control-input" [disabled]="item.status!='success'" (change)="setCopmareIds($event.target.checked,item.experiment_id)" id="customCheck_{{i}}">
+                                                            <input type="checkbox" class="custom-control-input" [disabled]="item.status!='success'" (change)="setCopmareIds($event.target.checked,item.experiment_id,item.experiment_name)" id="customCheck_{{i}}">
                                                             <label class="custom-control-label" for="customCheck_{{i}}"></label>
                                                         </div>
                                                     </td>
@@ -410,38 +410,6 @@
 
             </div>
         </form>
-        <!-- <form #f="ngForm">
-            <div class="row content-2" [hidden]="contentid!=2">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="example-text-input" class="col-form-label">Experiment Name<span
-                            class="required-label">&nbsp;*</span></label>
-                        <input class="form-control" required type="text" [(ngModel)]="params.experiment_name" (change)="checkexperimentname($event)" name="experiment_name" #experiment_name="ngModel" maxlength="200">
-                        <div class="invalid-feedback" *ngIf="experiment_name.errors?.required && (experiment_name.dirty || experiment_name.touched)">
-                            <span *ngIf="experiment_name.errors?.required && (experiment_name.dirty || experiment_name.touched)" class="text-red">Please enter experiment name</span>
-                        </div>
-                        <div class="invalid-feedback" *ngIf="!checkuniuqename && !experiment_name.errors">
-                            <span class="text-red">Experiment name already exist</span>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="example-text-input" class="col-form-label">Experiment Description<span
-                            class="required-label">&nbsp;*</span></label>
-                        <textarea class="form-control" maxlength="500" [(ngModel)]="params.experiment_desc" name="experiment_desc" #experiment_desc="ngModel" required></textarea>
-                        <div class="invalid-feedback" *ngIf="experiment_desc.errors?.required && (experiment_desc.dirty || experiment_desc.touched)">
-                            <span *ngIf="experiment_desc.errors?.required && (experiment_desc.dirty || experiment_desc.touched)" class="text-red">Please enter description</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-12">
-                    <div class="text-center mb-4">
-                        <button class="btn btn-success mr-3" type="submit" (click)="showContent(1)">Previous</button>
-                        <button class="btn btn-success" [disabled]="!f.form.valid || !checkuniuqename" (click)="startModel('Manual')">Start</button>
-                    </div>
-                </div>
-            </div>
-        </form> -->
     </div>
 </ng-template>
 
@@ -453,65 +421,9 @@
         </button>
     </div>
     <div class="modal-body compare-model">
-        <ul ngbNav #justifiednavcompare="ngbNav" [activeId]="1" class="nav-pills nav-justified nav">
-            <li [ngbNavItem]="1">
-                <a ngbNavLink>
-                    <span class="font-size-18"><i class="bx bx-line-chart"></i></span>
-                </a>
-                <ng-template ngbNavContent>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h4>Actual vs Prediction</h4>
+        <app-modeling-comparison-detail [compareIds]="compareIds" [compareExps]="compareExps" [model_type]="model_type">
+        </app-modeling-comparison-detail>
 
-                            <apx-chart class="apex-charts" dir="ltr" [series]="lineColumAreaChart.series" [chart]="lineColumAreaChart.chart" [tooltip]="lineColumAreaChart.tooltip" [yaxis]="lineColumAreaChart.yaxis" [legend]="lineColumAreaChart.legend" [plotOptions]="lineColumAreaChart.plotOptions"
-                                [grid]="lineColumAreaChart.grid" [stroke]="lineColumAreaChart.stroke" [xaxis]="lineColumAreaChart.xaxis" [colors]="lineColumAreaChart.colors" [fill]="lineColumAreaChart.fill" [labels]="lineColumAreaChart.labels" [markers]="lineColumAreaChart.markers">
-                            </apx-chart>
-                        </div>
-                        <!-- <div class="col-md-12">
-                            <h4>Accuracy</h4>
-                            <apx-chart class="apex-charts" dir="ltr" [series]="lineColumAreaChart.series" [chart]="lineColumAreaChart.chart" [tooltip]="lineColumAreaChart.tooltip" [yaxis]="lineColumAreaChart.yaxis" [legend]="lineColumAreaChart.legend" [plotOptions]="lineColumAreaChart.plotOptions"
-                                [grid]="lineColumAreaChart.grid" [stroke]="lineColumAreaChart.stroke" [xaxis]="lineColumAreaChart.xaxis" [colors]="lineColumAreaChart.colors" [fill]="lineColumAreaChart.fill" [labels]="lineColumAreaChart.labels" [markers]="lineColumAreaChart.markers">
-                            </apx-chart>
-                        </div> -->
-                    </div>
-                </ng-template>
-            </li>
-            <li [ngbNavItem]="2">
-                <a ngbNavLink>
-                    <span class="font-size-18"><i class="bx bx-spreadsheet"></i></span>
-                </a>
-                <ng-template ngbNavContent>
-                    <perfect-scrollbar style="height:470px;" scrollable="yaxis">
-                        <div class="detail-compare" *ngIf="comparedata">
-                            <div class="box title-box">
-                                <ul>
-                                    <li>Experiment Fields</li>
-                                    <li *ngFor="let item of comparedata.column_names" [hidden]="item=='experiment_name'">{{item}}</li>
-
-                                </ul>
-                            </div>
-                            <div cdkDropList cdkDropListOrientation="horizontal" class="example-list" (cdkDropListDropped)="drop($event)">
-                                <div class="box box-one example-box" *ngFor="let item of comparedata.responsedata" cdkDrag>
-                                    <ul>
-                                        <li class="name">{{item.experiment_name}} <a href="javascript:void(0)" title="Remove"><i
-                                                class="mdi mdi-close"></i></a></li>
-                                        <li *ngFor="let i of comparedata.column_names" [hidden]="i=='experiment_name'">{{item[i]}}</li>
-
-                                    </ul>
-                                </div>
-                            </div>
-
-                        </div>
-                    </perfect-scrollbar>
-                </ng-template>
-            </li>
-        </ul>
-        <div class="experiment-list" *ngIf="comparedata">
-            <div class="expe-name" *ngFor="let item of comparedata.responsedata">
-                <p>{{item.experiment_name}} <a href="javascript:void(0)" title="Remove" *ngIf="compareIds.length>2"><i class="mdi mdi-close"></i></a></p>
-            </div>
-        </div>
-        <div [ngbNavOutlet]="justifiednavcompare"></div>
     </div>
 </ng-template>
 
