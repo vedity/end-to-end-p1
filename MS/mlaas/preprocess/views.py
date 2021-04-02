@@ -468,8 +468,13 @@ class Check_Split(APIView):
                 try:
                         logging.info(" modeling : Check_Split : GET Method : execution start")
                         project_id = request.query_params.get('project_id')
-                        flag = sd.check_split_exist(project_id)
-                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":flag})    
+                        flag,desc = sd.check_split_exist(project_id)
+                        if flag:
+                                #? All the cleanup operation are done before modelling.
+                                return Response({"status_code":"200","error_msg":"Successfull retrival","response":flag})  
+                        else:
+                                #! Some operations are still remaining before we can proceed to the modelling.
+                                return Response({"status_code":"200","error_msg":desc,"response":flag})
 
                 except Exception as e:
                         logging.error("modeling : Check_Split : GET Method  " + str(e))

@@ -65,7 +65,7 @@ class ModelClass(SC, SplitData):
                 # call  unsupervised algorithm method
                 result = super(ModelClass,self).unsupervised_algorithm(model_param_dict,self.db_param_dict)
                 
-            logging.info("modeling : ModelClass : algorithm_identifier : execution end")
+            logging.info("modeling : ModelClass : algorithm_identifier : execution end"+str(result))
 
             return result
         except Exception as e:
@@ -89,6 +89,8 @@ class ModelClass(SC, SplitData):
             result = super(ModelClass,self).run_supervised_model(model_param_dict,self.db_param_dict,model_id,model_name,model_param)
         else:
             print("Unsupervised ML, to be implemented.")
+            
+        return result
         
         
  
