@@ -5,6 +5,8 @@ import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
 import { PERFECT_SCROLLBAR_CONFIG } from 'ngx-perfect-scrollbar';
 import { PerfectScrollbarConfigInterface } from 'ngx-perfect-scrollbar';
 import { NgbNavModule, NgbDropdownModule, NgbModalModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import {DragDropModule} from '@angular/cdk/drag-drop';
+
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { NgxChartistModule } from 'ngx-chartist';
 import { ChartsModule } from 'ng2-charts';
@@ -30,8 +32,12 @@ import { ModelingFeatureImportanceComponent } from './modeling-feature-importanc
 import { ModelingPerformanceMatricsComponent } from './modeling-performance-matrics/modeling-performance-matrics.component';
 import { ModelingModalSummaryComponent } from './modeling-modal-summary/modeling-modal-summary.component';
 import { ModelingActualPredictionComponent } from './modeling-actual-prediction/modeling-actual-prediction.component';
-import {DragDropModule} from '@angular/cdk/drag-drop';
 import { ModelingConfusionMatricsComponent } from './modeling-confusion-matrics/modeling-confusion-matrics.component';
+import { ModelingComparisonGraphComponent } from './modeling-comparison-graph/modeling-comparison-graph.component';
+import { ModelingComparisonGridComponent } from './modeling-comparison-grid/modeling-comparison-grid.component';
+import { ModelingComparisonDetailComponent } from './modeling-comparison-detail/modeling-comparison-detail.component';
+
+
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   suppressScrollX: true,
   wheelSpeed: 0.3
@@ -45,7 +51,10 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     ModelingPerformanceMatricsComponent,
     ModelingModalSummaryComponent,
     ModelingActualPredictionComponent,
-    ModelingConfusionMatricsComponent
+    ModelingConfusionMatricsComponent,
+    ModelingComparisonDetailComponent,
+    ModelingComparisonGraphComponent,
+    ModelingComparisonGridComponent
   ],
   imports: [
     CommonModule,
