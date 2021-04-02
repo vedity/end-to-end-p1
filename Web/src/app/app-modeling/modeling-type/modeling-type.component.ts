@@ -5,7 +5,6 @@ import { DataTableDirective } from 'angular-datatables';
 import { ToastrService } from 'ngx-toastr';
 //  import { manualmodeling } from './modeling.model';
 import { ModelingTypeApiService } from '../modeling-type.service';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 @Component({
   selector: 'app-modeling-type',
   templateUrl: './modeling-type.component.html',
@@ -77,6 +76,9 @@ export class ModelingTypeComponent implements OnInit {
       this.getDatasetInfo();
       this.getRunningExperimentList();
       this.getAllExperimentList();
+      if(this.runningExpList.length==0){
+        $("#switcher-list")[0].click();
+      }
     }
   }
 
@@ -178,22 +180,21 @@ export class ModelingTypeComponent implements OnInit {
     // }
   }
 
-
-  drop(event: CdkDragDrop<string[]>) {
-    moveItemInArray(this.compareIds, event.previousIndex, event.currentIndex);
-  }
-
   compareIds = [];
-  setCopmareIds(val, id) {
+  compareExps = [];
+  setCopmareIds(val, id,name) {
     // console.log(val, id);
     if (val == true) {
       this.compareIds.push(id);
+      this.compareExps.push({id:id,name:name});
     }
     else {
       // console.log(this.compareIds.indexOf(id));
       var index = this.compareIds.indexOf(id);
       if (index != -1) {
         this.compareIds.splice(index, 1);
+      this.compareExps.splice(index,1);
+
       }
     }
     // console.log(this.compareIds);
@@ -268,6 +269,7 @@ export class ModelingTypeComponent implements OnInit {
     if (data.status_code == "200") {
       this.runningExpList = data.response;
       this.contentloaded = true;
+      
     }
     // else {
     //   this.errorHandler(data);
@@ -375,6 +377,9 @@ export class ModelingTypeComponent implements OnInit {
       this.processclass = "start";
       this.modalService.dismissAll();
       this.toaster.success(data.error_msg, 'Success');
+      if(!this.isDisplayRunning){
+          $("#switcher-list")[0].click();
+      }
       this.processInterval = setInterval(() => {
         this.getRunningExperimentList();
         this.getAllExperimentList();
@@ -451,10 +456,8 @@ export class ModelingTypeComponent implements OnInit {
   contentid = 0;
   LargeModal(largeModal: any, val) {
     this.model_mode = 'Auto';
-
     if (val) {
       this.model_mode = 'Manual';
-
       this.contentid = 1;
       this.getAlgorithmList();
       this.modalService.open(largeModal, { size: 'lg', windowClass: 'modal-holder', centered: true });
@@ -463,105 +466,10 @@ export class ModelingTypeComponent implements OnInit {
 
   compareExperiment(compareModal: any) {
     console.log(this.compareIds);
+    this.modalService.open(compareModal, { size: 'xl', windowClass: 'modal-holder', centered: true });
    
-    this.apiservice.compareExperimentgraph("[" + this.compareIds + "]").subscribe(
-      logs => this.manageGraphCompareExperiment(logs, compareModal),
-      error => this.errorHandler(error)
-    )
+    
   };
-
-  comparedata: any;
-  manageGridCompareExperiment(data) {
-    if (data.status_code == "200") {
-      this.comparedata = data.response;
-      //   this.modalService.open(modal, { size: 'xl', windowClass: 'modal-holder', centered: true });
-    }
-    else {
-      this.errorHandler(data);
-    }
-  }
-
-  comparegraphdata: any;
-  manageGraphCompareExperiment(data, modal) {
-    if (data.status_code == "200") {
-      this.comparegraphdata = data.response;
-      let series=[];
-      let makrkerssize=[]
-      series.push({name:"ACTUAL",data:this.comparegraphdata.actual});
-      makrkerssize.push(2);
-      this.comparegraphdata.predicted.forEach(element => {
-        series.push({name:element.exp_name,data:element.values});
-      makrkerssize.push(0);
-
-      });
-      this.modalService.open(modal, { size: 'xl', windowClass: 'modal-holder', centered: true });
-      this.lineColumAreaChart = {
-        chart: {
-          height: 450,
-          type: 'line',
-          stacked: false,
-          toolbar: {
-            show: false
-          }
-        },
-        stroke: {
-          width: [2, 2, 4],
-        },
-        //colors: ['#f46a6a', '#34c38f'],
-        series: series,
-        fill: {
-         // opacity: [0.85, 1],
-          gradient: {
-            inverseColors: false,
-            shade: 'light',
-            type: 'vertical',
-            opacityFrom: 0.85,
-            opacityTo: 0.55,
-            stops: [0, 100, 100, 100]
-          }
-        },
-        // tslint:disable-next-line: max-line-length
-        labels:this.comparegraphdata.index,
-        // ['01/01/2003', '02/01/2003', '03/01/2003', '04/01/2003', '05/01/2003', '06/01/2003', '07/01/2003', '08/01/2003', '09/01/2003', '10/01/2003', '11/01/2003'],
-        markers: {
-          size: makrkerssize
-        },
-        legend: {
-          offsetY: 5,
-        },
-        xaxis: {
-          //type: 'datetime',
-        },
-        yaxis: {
-          // title: {
-          //   text: 'Points',
-          // },
-        },
-        tooltip: {
-          shared: true,
-          intersect: false,
-          y: {
-            formatter(y) {
-              if (typeof y !== 'undefined') {
-                return y.toFixed(0);
-              }
-              return y;
-            }
-          }
-        },
-        grid: {
-          borderColor: '#f1f1f1'
-        }
-      };
-    }
-    else {
-      this.errorHandler(data);
-    }
-    this.apiservice.compareExperimentgrid("[" + this.compareIds + "]").subscribe(
-      logs => this.manageGridCompareExperiment(logs),
-      error => this.errorHandler(error)
-    )
-  }
 
   ProjectData(projectModal: any) {
     this.modalService.open(projectModal, { size: 'lg', windowClass: 'modal-holder', centered: true });
@@ -570,7 +478,6 @@ export class ModelingTypeComponent implements OnInit {
   showContent(id) {
     this.contentid = id;
   };
-
 
   responsearray = {};
   nextValidate() {
@@ -636,10 +543,12 @@ export class ModelingTypeComponent implements OnInit {
     if (data.status_code == "200") {
       this.isEnableModeling = data.response;
       if (!this.isEnableModeling)
-        this.toaster.error('CleanUp is remaining for this project, Please select other project', 'Error');
+        this.toaster.error(data.error_msg, 'Error');
     }
     else {
       this.isEnableModeling = false;
+      this.toaster.error(data.error_msg, 'Error');
+
     }
   }
 

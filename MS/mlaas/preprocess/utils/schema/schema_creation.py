@@ -223,10 +223,11 @@ class SchemaClass:
             logging.info(str(column_attribute_list)+" column_attribute_list")
 
             for value in change_column_name:
+                
                 if value != '':
                     #check the changed column name having same name
                     #?if name count in canged column list is greater then one means its duplicate then raise exception 
-                    if str(change_column_name).strip().count(str(value).strip()) > 1 :
+                    if change_column_name.count(str(value).strip()) > 1 :
                         raise ChangeColumnNameSame(500)
 
 

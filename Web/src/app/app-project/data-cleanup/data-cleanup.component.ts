@@ -113,7 +113,7 @@ export class DataCleanupComponent implements OnInit {
     if (this.setModelingInterval) {
       clearInterval(this.setModelingInterval);
     }
-    this.getCheckSplit();
+   // this.getCheckSplit();
     this.getCldagStatus();
     this.dtOptions = {
       paging: false,
@@ -137,7 +137,8 @@ export class DataCleanupComponent implements OnInit {
   getCheckSplit() {
     
     this.apiService.getCheckSplit(this.project_id).subscribe(
-      logs => this.checksplitSuccessHandler(logs)
+      logs => this.checksplitSuccessHandler(logs),
+      error=>this.errorHandler(error)
     )
   }
 
@@ -171,18 +172,27 @@ export class DataCleanupComponent implements OnInit {
   checksplitSuccessHandler(data) {
     if (data.status_code == "200") {
       this.isEnableModeling = data.response;
-      if (!this.isEnableModeling) {
-        if (!this.setModelingInterval) {
-          this.setModelingInterval = setInterval(() => {
-            this.getCheckSplit();
-          }, 10000);
-        }
+      if(this.isEnableModeling){
+        $("#modeling-btn")[0].click();
       }
-      else {
-        if (this.setModelingInterval) {
-          clearInterval(this.setModelingInterval);
-        }
+      else{
+        this.errorHandler(data);
       }
+      // if (!this.isEnableModeling) {
+      //   if (!this.setModelingInterval) {
+      //     this.setModelingInterval = setInterval(() => {
+      //       this.getCheckSplit();
+      //     }, 10000);
+      //   }
+      // }
+      // else {
+      //   if (this.setModelingInterval) {
+      //     clearInterval(this.setModelingInterval);
+      //   }
+      // }
+    }
+    else{
+      this.errorHandler(data);
     }
   }
 
@@ -391,13 +401,13 @@ export class DataCleanupComponent implements OnInit {
       }
     }
 
-    if (!this.isEnableModeling) {
-      if (!this.setModelingInterval) {
-        this.setModelingInterval = setInterval(() => {
-          this.getCheckSplit();
-        }, 10000);
-      }
-    }
+    // if (!this.isEnableModeling) {
+    //   if (!this.setModelingInterval) {
+    //     this.setModelingInterval = setInterval(() => {
+    //       this.getCheckSplit();
+    //     }, 10000);
+    //   }
+    // }
   }
 
   getScalingOperations() {
@@ -544,7 +554,7 @@ export class DataCleanupComponent implements OnInit {
   savescalSuccessHandlers(data) {
     if (data.status_code == "200") {
       this.toaster.success(data.error_msg, 'Success')
-      this.getCheckSplit();
+     // this.getCheckSplit();
 
     }
     else {

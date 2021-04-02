@@ -8,6 +8,9 @@ import { CookieService } from 'ngx-cookie-service';
 import { LanguageService } from '../../core/services/language.service';
 import { LoaderService } from '../../core/services/loader.service';
 import { TranslateService } from '@ngx-translate/core';
+import { LayoutApiService } from '../layouts-api.service';
+import { ToastrService } from 'ngx-toastr';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-topbar',
@@ -32,7 +35,11 @@ export class TopbarComponent implements OnInit {
               public languageService: LanguageService,
               public translate: TranslateService,
               // tslint:disable-next-line: variable-name
-              public _cookiesService: CookieService) {
+              public _cookiesService: CookieService,
+              public apiService: LayoutApiService,
+              public toaster:ToastrService,
+              private sanitizer: DomSanitizer
+              ) {
   }
 
   listLang = [
@@ -135,6 +142,38 @@ this.username=user.username;
         /* IE/Edge */
         this.document.msExitFullscreen();
       }
+    }
+  }
+
+  downloadLogs(){
+
+this.apiService.downloadLogFile().subscribe(logs=>this.successHandler(logs),error=>this.errorHandler(error))
+  }
+  fileUrl:any='';
+  filename:any;
+  successHandler(response){
+    if(response.status_code=="200"){
+    const data = response.response;
+    var date=new Date();
+    this.filename='logs_'+date.getTime()+'.txt';
+      const blob = new Blob([data], { type: 'application/octet-stream' });
+      this.fileUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
+        window.URL.createObjectURL(blob)
+      );
+      setTimeout(() => {
+      $("#download-btn")[0].click();
+      }, 10);
+    }
+    else{
+      this.errorHandler(response);
+    }
+  }
+
+  errorHandler(error) {
+    if (error.error_msg)
+      this.toaster.error(error.error_msg, 'Error');
+    else {
+      this.toaster.error('Something went wrong', 'Error');
     }
   }
 }

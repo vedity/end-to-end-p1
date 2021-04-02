@@ -490,7 +490,15 @@ class ModelStatisticsClass:
             if status == 'running':
                 st=0
             elif status == 'success':
-                st=1
+                sql_command = "select status from mlaas.model_experiment_tbl where dag_run_id='"+run_id+"' and status='failed'" 
+                exp_state_df = self.DBObject.select_records(self.connection, sql_command)
+                if exp_state_df is None:
+                    raise DatabaseConnectionFailed(500)
+                
+                if len(exp_state_df) == 0:
+                    st=1
+                else:
+                    st=2         
             else:
                 st=2
             

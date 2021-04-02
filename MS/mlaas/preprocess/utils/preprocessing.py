@@ -187,7 +187,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.error("data preprocessing : PreprocessingClass : get_schema_details : " +traceback.format_exc())
             return exc.msg
         
-    def get_col_names(self, schema_id, json = False):
+    def get_col_names(self, schema_id, json = False,original = False):
         '''
             It is used to get the column names.
             
@@ -205,14 +205,19 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             DBObject,connection,connection_string = self.get_db_connection()
             if connection == None :
                 raise DatabaseConnectionFailed(500)  
-                
-            sql_command = f"select case when changed_column_name = '' then column_name else changed_column_name end column_list,case when 'True' in( missing_flag, noise_flag) then 'True' else 'False' end flag from mlaas.schema_tbl where schema_id ='{str(schema_id)}' and column_attribute !='Ignore' order by index"
+            if not original:
+                sql_command = f"select case when changed_column_name = '' then column_name else changed_column_name end column_list,case when 'True' in( missing_flag, noise_flag) then 'True' else 'False' end flag from mlaas.schema_tbl where schema_id ='{str(schema_id)}' and column_attribute !='Ignore' order by index"
+            else:
+                sql_command = f"select column_name as column_list,case when 'True' in( missing_flag, noise_flag) then 'True' else 'False' end flag from mlaas.schema_tbl where schema_id ='{str(schema_id)}' and column_attribute !='Ignore' order by index"
+                logging.info(str(sql_command) + " command ")
             col_df = DBObject.select_records(connection,sql_command) 
             
             if col_df is None:
                 raise EntryNotFound(500)
             
             column_name,flag_value = list(col_df['column_list']),list(col_df['flag'])
+            
+            
             
             #? Returning column names if user doesn't want json
             if not json:
@@ -437,15 +442,20 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             table_name = DBObject.get_active_table_name(connection, dataset_id)
             
             num_cols = data_df._get_numeric_data().columns.tolist()
+            
             predicted_datatypes = self.get_attrbt_datatype(data_df,data_df.columns,len(data_df))
+            
+            old_col_list = self.get_col_names(schema_id,json = False,original = True)
             
             #? Logical function starts
             try:
                 #? Logical function starts
                 all_col_operations = []
-
+                
                 for id in column_ids:
+                    prev_col_name = old_col_list[id]
                     col = data_df.columns[id]
+                    
                     series = data_df[col]
                     operations = []
 
@@ -461,8 +471,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     else:
                         col_type = 3
 
-                    missing_values = self.detect_missing_values(DBObject, connection, table_name, col)
-                    noise_status = self.dtct_noise(DBObject, connection, col, table_name= table_name)
+                    missing_values = self.detect_missing_values(DBObject, connection, table_name, prev_col_name)
+                    noise_status = self.dtct_noise(DBObject, connection, prev_col_name, table_name= table_name)
                     if noise_status == 1:
                         noise_status = True
                     else: noise_status = False
