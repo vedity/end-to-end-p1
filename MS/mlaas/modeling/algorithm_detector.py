@@ -83,7 +83,8 @@ class AlgorithmDetector:
                 raise DataNotFound(500)
     
             data_dict = ast.literal_eval(model_type_literal.iloc[0, 0])
-            model_type_dict = {"model_type":data_dict["model_type"]}
+            model_type_dict = data_dict
+            # model_type_dict = {"model_type":data_dict["model_type"]}
 
         except (DatabaseConnectionFailed,DataNotFound) as exc:
             logging.error("modeling : ModelStatisticsClass : performance_metrics : Exception " + str(exc))

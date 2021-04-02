@@ -245,6 +245,7 @@ class ModelStatisticsClass:
             [data_frame]: [it will return the dataframe for model_summary.]
             
         """
+        logging.info("modeling : ModelStatisticsClass : model_summary : Exception Start" )
         try:
  
             sql_command = 'select artifact_uri from mlflow.runs where experiment_id='+str(experiment_id)
@@ -275,7 +276,7 @@ class ModelStatisticsClass:
             model_desc = model_desc.iloc[0, 0]
  
             model_summary.update({'Model_Description': model_desc})
- 
+            logging.info("modeling : ModelStatisticsClass : model_summary : Exception Start"+str(model_summary))
             return model_summary
  
         except (DatabaseConnectionFailed,DataNotFound) as exc:
