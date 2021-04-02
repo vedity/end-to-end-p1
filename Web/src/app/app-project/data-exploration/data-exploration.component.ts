@@ -141,13 +141,15 @@ export class DataExplorationComponent implements OnInit {
         toolbar: {
           show: false
         },
-        selection: {
-          enabled: true
-        }
+        // selection: {
+        //   enabled: true
+        // }
       },
       plotOptions: {
         bar: {
-          distributed: true
+          distributed: true,
+          horizontal: false,
+          columnWidth: "25%",
         }
       },
 
@@ -168,20 +170,20 @@ export class DataExplorationComponent implements OnInit {
           }
         }
       },
-      xaxis: {
-        axisBorder: {
-          show: false
-        },
-        axisTicks: {
-          show: false,
-        },
-        labels: {
-          show: false,
-          formatter: (val) => {
-            return val;
-          }
-        }
-      },
+      // xaxis: {
+      //   axisBorder: {
+      //     show: false
+      //   },
+      //   axisTicks: {
+      //     show: false,
+      //   },
+      //   labels: {
+      //     show: false,
+      //     formatter: (val) => {
+      //       return val;
+      //     }
+      //   }
+      // },
       legend: {
         show: false
       }
@@ -297,6 +299,8 @@ export class DataExplorationComponent implements OnInit {
       this.categoricalexploredata = data["false"];
       this.loaderdiv = false;
       this.finaldata = logs.response;
+      console.log( this.categoricalexploredata);
+      
     }
     else {
       this.errorHandler(logs)

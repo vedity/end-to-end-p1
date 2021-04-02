@@ -66,7 +66,7 @@
             <div class="col-md-12">
                 <div class="form-group">
                     <label>Select Project</label>
-                    <select class="form-control" (change)="setproject($event.target.value)">
+                    <select class="form-control" id="drpprojectlist" (change)="setproject($event.target.value)">
                         <option value="">select</option>
 
                         <option value="{{item.project_id}}" *ngFor="let item of projectList">{{item.project_name}}</option>
@@ -76,7 +76,7 @@
 
             <div class="col-md-12">
                 <div class="text-center mb-4">
-                    <button class="btn btn-success" type="submit" (click)="setParams()">Next</button>
+                    <button class="btn btn-success" id="next_btn" type="submit" (click)="setParams()">Next</button>
                 </div>
             </div>
         </div>
