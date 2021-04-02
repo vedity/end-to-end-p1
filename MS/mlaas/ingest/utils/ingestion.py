@@ -229,7 +229,6 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             
             project_df = project_df.to_json(orient='records')
             project_df = json.loads(project_df)
-            
         except (DatabaseConnectionFailed) as exc:
             logging.error("data ingestion : ingestclass : show_data_details : Exception " + str(exc.msg))
             logging.error("data ingestion : ingestclass : show_data_details : " +traceback.format_exc())
