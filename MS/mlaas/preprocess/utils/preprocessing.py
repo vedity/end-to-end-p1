@@ -154,7 +154,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         logging.info("data preprocessing : PreprocessingClass : get_exploration_data : execution end")
         return stats_df
     
-    def save_schema_data(self,schema_data,project_id,dataset_id,schema_id):
+    def save_schema_data(self,schema_data,project_id,dataset_id,schema_id,user_name):
         try:
             logging.info("data preprocessing : PreprocessingClass : save_schema_data : execution start")
 
@@ -162,7 +162,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if connection == None :
                 raise DatabaseConnectionFailed(500)
 
-            status = super(PreprocessingClass,self).save_schema(DBObject,connection,schema_data,project_id,dataset_id,schema_id)
+            status = super(PreprocessingClass,self).save_schema(DBObject,connection,schema_data,project_id,dataset_id,schema_id,user_name)
 
             logging.info("data preprocessing : PreprocessingClass : save_schema_data : execution start")
             return status
@@ -1395,7 +1395,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         datasetnm_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
         projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
         dataset_name = datasetnm_df['dataset_name'][0]
-        user_name = datasetnm_df['user_name'][0]
+        user_name = projectnm_df['user_name'][0]
         project_name = projectnm_df['project_name'][0]
  
         sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
