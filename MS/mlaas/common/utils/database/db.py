@@ -185,7 +185,7 @@ class DBClass:
                 logging.info(str(table_name) + " <> table_name")
                 logging.info(str(cols) + " <> columns")
                 logging.info(str(query) + " <> Query")
-                logging.info(str(tuples) + " <> tuples")
+                logging.info(str(query) + " <> tuples")
                 extras.execute_values(cursor, query, tuples) # Excute insert query.
                 index = 0
 
