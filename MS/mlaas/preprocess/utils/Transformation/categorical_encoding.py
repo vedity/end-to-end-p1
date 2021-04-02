@@ -362,7 +362,7 @@ class EncodeClass:
                         string += f"'{data[col_name]}', "
                     else:
                         string = string[:-2]+"."
-
+                
                 logging.info("data preprocessing : EncodeClass : get_unencoded_desc : execution stop")
 
                 return string

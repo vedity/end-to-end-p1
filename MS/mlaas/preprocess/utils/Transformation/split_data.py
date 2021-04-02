@@ -53,11 +53,12 @@ class Split_Data():
         """
 
         flag, desc = ENC_OBJECT.get_unencoded_colnames(DBObject,connection,projectid)
+
         if not flag:
             #? Encoding of some columns are still remaining
             return flag, desc
 
-        sql_command = f'select "scaled_split_parameters" from mlaas.project_tbl pt where project_id  ='+projectid
+        sql_command = f'select "scaled_split_parameters" from mlaas.project_tbl pt where project_id  ='+str(projectid)
         df = DBObject.select_records(connection,sql_command)
         if (df.iloc[0]['scaled_split_parameters']) == None:
             flag = False
@@ -65,7 +66,7 @@ class Split_Data():
         else:
             flag = True
             desc = "You can now proceed to the modelling."
-    
+
         return flag,desc
 
     def get_split_activity_desc(self,project_name,activity_id):
