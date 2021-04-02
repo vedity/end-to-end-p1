@@ -952,25 +952,31 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             #? Getting Dataframe
             data_df = self.get_data_df(dataset_id,schema_id) #get dataframe
+            
             if isinstance(data_df, str):
                 raise GetDataDfFailed(500)
             
-            if scaling_type == 0:
-                data_df[:,1:] = self.standard_scaling(data_df[:,1:]) #standard_scaling
-            elif scaling_type == 1:
-                data_df[:,1:] = self.min_max_scaling(data_df[:,1:]) #min_max_scaling
-            elif scaling_type == 2:
-                data_df[:,1:] = self.robust_scaling(data_df[:,1:]) #robust_scaling
-                    
-            feature_cols = list(data_df.columns) #get list of the columns
             tg_cols = DBObject.get_target_col(connection, schema_id) #get list of the target columns
             target_cols = [data_df.columns[0]]
-            target_cols += tg_cols
+            target_cols += tg_cols           
             target_actual_features_df=data_df[target_cols]
-            for col in tg_cols:
+        
+            
+            if scaling_type == 0:
+                data_df.iloc[:,1:] = self.standard_scaling(data_df.iloc[:,1:]) #standard_scaling
+            elif scaling_type == 1:
+                data_df.iloc[:,1:] = self.min_max_scaling(data_df.iloc[:,1:]) #min_max_scaling
+            elif scaling_type == 2:
+                data_df.iloc[:,1:] = self.robust_scaling(data_df.iloc[:,1:]) #robust_scaling
+             
+            feature_cols = list(data_df.columns) #get list of the column
+            for col in feature_cols[1:]:
                 if data_df[col].dtype == 'O':
-                    data_df[col] = le.fit_transform(data_df[col]) 
+                    data_df[col] = le.fit_transform(data_df[col])  
+            for col in tg_cols:
                 feature_cols.remove(col) #remove target columns from list
+
+            
             # target_cols = [data_df.columns[0]]
             # target_cols += tg_cols #add index column from target columns list
             
