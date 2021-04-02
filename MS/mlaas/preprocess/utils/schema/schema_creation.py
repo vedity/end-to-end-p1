@@ -163,7 +163,7 @@ class SchemaClass:
             return exc.msg
 
 
-    def save_schema(self,DBObject,connection,schema_data,project_id,dataset_id,schema_id):
+    def save_schema(self,DBObject,connection,schema_data,project_id,dataset_id,schema_id,user_name):
         """
         function used to update the changed columns values in schema table  
 
@@ -263,7 +263,7 @@ class SchemaClass:
                 dataset_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
 
                 #get the 0 index  key as 'user_name' from the dataframe
-                user_name,dataset_name = str(dataset_df['user_name'][0]),str(dataset_df['dataset_name'][0])
+                user_name,dataset_name = str(user_name),str(dataset_df['dataset_name'][0])
                 
 
                 #get te timeline status if successfully inserted return 0 else return 1
