@@ -31,6 +31,7 @@ from common.utils.database import db
 # Preprocess file imports
 from preprocess.utils import preprocessing
 from preprocess.utils.schema.schema_creation import *
+from preprocess.utils.Transformation.split_data import Split_Data
 
 #Manual modeling file imports
 from modeling.utils.modeling_dag_utils.dag_common_utils import get_modeling_dag_name
@@ -38,7 +39,7 @@ from modeling.utils.modeling_dag_utils.dag_common_utils import get_modeling_dag_
 # Object Initialization
 preprocessObj =  preprocessing.PreprocessingClass(database,user,password,host,port) #initialize Preprocess class object
 schema_obj=SchemaClass() #initialize Schema object from schema class
-
+PREPROCESS_OBJ = Split_Data()
 user_name = 'admin'
 log_enable = True
 LogObject = cl.LogClass(user_name,log_enable)
@@ -269,10 +270,23 @@ class ProjectClass:
                 project_df=DBObject.select_records(connection,sql_command) # Get project details in the form of dataframe.
                 if len(project_df) == 0 or project_df is None:
                     raise ProjectDataNotFound(500)
+                
+                #? To check scale and split in all project 
+                split_flags = []
+                try:
+                    for i in project_df['project_id']:
+                        flag,desc = PREPROCESS_OBJ.check_split_exist(i)
+                        split_flags.append(flag)
+                    
+                except Exception as e:
+                    return e
 
+                project_df['split_status'] = split_flags
+            
             except (ProjectDataNotFound) as exc:
                 return exc.msg
             logging.info("data ingestion : ProjectClass : show_project_details : execution end")
+    
             return project_df
 
         except Exception as exc:
