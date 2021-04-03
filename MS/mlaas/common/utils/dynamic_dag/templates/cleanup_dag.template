@@ -69,6 +69,7 @@ else:
 
 #get the Column list
 column_list = PC_OBJ.get_col_names(schema_id)
+old_column_list = PC_OBJ.get_col_names(schema_id,json = False,original = True)
 
 op_dict = {
     1 : PC_OBJ.discard_missing_values,
@@ -164,38 +165,38 @@ for index in operation.keys():
         
         #? Which parameters should be given to which function
         param_dict = {
-            1 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            2 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            3 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value[j]],
-            4 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value[j]],
-            5 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            6 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            7 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            8 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            9 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value[j], True],
-            10 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            11 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            12 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value[j]],
-            13 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            14 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            15 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            16 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            17 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            18 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            19 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value[j]],
-            20 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            21 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            22 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            23 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            24 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            25 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            26 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            27 : [DBObject,connection,project_id,column_list, dataset_table_name, [col]],
-            28 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], schema_id],
-            29 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value[j]],
-            30 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value[j]],
-            31 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value[j]],
-            32 : [DBObject,connection,project_id,column_list, dataset_table_name, [col], value[j]]
+            1 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            2 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            3 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
+            4 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
+            5 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            6 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            7 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            8 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            9 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j], True],
+            10 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            11 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            12 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
+            13 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            14 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            15 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            16 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            17 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            18 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            19 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
+            20 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            21 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            22 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            23 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            24 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            25 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            26 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            27 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            28 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], schema_id],
+            29 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
+            30 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
+            31 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
+            32 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]]
         }
         
         dynamicTask = PythonOperator(
