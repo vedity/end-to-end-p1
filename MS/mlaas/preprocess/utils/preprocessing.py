@@ -154,7 +154,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         logging.info("data preprocessing : PreprocessingClass : get_exploration_data : execution end")
         return stats_df
     
-    def save_schema_data(self,schema_data,project_id,dataset_id,schema_id):
+    def save_schema_data(self,schema_data,project_id,dataset_id,schema_id,user_name):
         try:
             logging.info("data preprocessing : PreprocessingClass : save_schema_data : execution start")
 
@@ -162,7 +162,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if connection == None :
                 raise DatabaseConnectionFailed(500)
 
-            status = super(PreprocessingClass,self).save_schema(DBObject,connection,schema_data,project_id,dataset_id,schema_id)
+            status = super(PreprocessingClass,self).save_schema(DBObject,connection,schema_data,project_id,dataset_id,schema_id,user_name)
 
             logging.info("data preprocessing : PreprocessingClass : save_schema_data : execution start")
             return status
@@ -187,7 +187,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.error("data preprocessing : PreprocessingClass : get_schema_details : " +traceback.format_exc())
             return exc.msg
         
-    def get_col_names(self, schema_id, json = False):
+    def get_col_names(self, schema_id, json = False,original = False):
         '''
             It is used to get the column names.
             
@@ -205,14 +205,19 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             DBObject,connection,connection_string = self.get_db_connection()
             if connection == None :
                 raise DatabaseConnectionFailed(500)  
-                
-            sql_command = f"select case when changed_column_name = '' then column_name else changed_column_name end column_list,case when 'True' in( missing_flag, noise_flag) then 'True' else 'False' end flag from mlaas.schema_tbl where schema_id ='{str(schema_id)}' and column_attribute !='Ignore' order by index"
+            if not original:
+                sql_command = f"select case when changed_column_name = '' then column_name else changed_column_name end column_list,case when 'True' in( missing_flag, noise_flag) then 'True' else 'False' end flag from mlaas.schema_tbl where schema_id ='{str(schema_id)}' and column_attribute !='Ignore' order by index"
+            else:
+                sql_command = f"select column_name as column_list,case when 'True' in( missing_flag, noise_flag) then 'True' else 'False' end flag from mlaas.schema_tbl where schema_id ='{str(schema_id)}' and column_attribute !='Ignore' order by index"
+                logging.info(str(sql_command) + " command ")
             col_df = DBObject.select_records(connection,sql_command) 
             
             if col_df is None:
                 raise EntryNotFound(500)
             
             column_name,flag_value = list(col_df['column_list']),list(col_df['flag'])
+            
+            
             
             #? Returning column names if user doesn't want json
             if not json:
@@ -437,15 +442,20 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             table_name = DBObject.get_active_table_name(connection, dataset_id)
             
             num_cols = data_df._get_numeric_data().columns.tolist()
+            
             predicted_datatypes = self.get_attrbt_datatype(data_df,data_df.columns,len(data_df))
+            
+            old_col_list = self.get_col_names(schema_id,json = False,original = True)
             
             #? Logical function starts
             try:
                 #? Logical function starts
                 all_col_operations = []
-
+                
                 for id in column_ids:
+                    prev_col_name = old_col_list[id]
                     col = data_df.columns[id]
+                    
                     series = data_df[col]
                     operations = []
 
@@ -461,8 +471,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     else:
                         col_type = 3
 
-                    missing_values = self.detect_missing_values(DBObject, connection, table_name, col)
-                    noise_status = self.dtct_noise(DBObject, connection, col, table_name= table_name)
+                    missing_values = self.detect_missing_values(DBObject, connection, table_name, prev_col_name)
+                    noise_status = self.dtct_noise(DBObject, connection, prev_col_name, table_name= table_name)
                     if noise_status == 1:
                         noise_status = True
                     else: noise_status = False
@@ -942,25 +952,31 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             #? Getting Dataframe
             data_df = self.get_data_df(dataset_id,schema_id) #get dataframe
+            
             if isinstance(data_df, str):
                 raise GetDataDfFailed(500)
             
-            if scaling_type == 0:
-                data_df[:,1:] = self.standard_scaling(data_df[:,1:]) #standard_scaling
-            elif scaling_type == 1:
-                data_df[:,1:] = self.min_max_scaling(data_df[:,1:]) #min_max_scaling
-            elif scaling_type == 2:
-                data_df[:,1:] = self.robust_scaling(data_df[:,1:]) #robust_scaling
-                    
-            feature_cols = list(data_df.columns) #get list of the columns
             tg_cols = DBObject.get_target_col(connection, schema_id) #get list of the target columns
             target_cols = [data_df.columns[0]]
-            target_cols += tg_cols
+            target_cols += tg_cols           
             target_actual_features_df=data_df[target_cols]
-            for col in tg_cols:
+        
+            
+            if scaling_type == 0:
+                data_df.iloc[:,1:] = self.standard_scaling(data_df.iloc[:,1:]) #standard_scaling
+            elif scaling_type == 1:
+                data_df.iloc[:,1:] = self.min_max_scaling(data_df.iloc[:,1:]) #min_max_scaling
+            elif scaling_type == 2:
+                data_df.iloc[:,1:] = self.robust_scaling(data_df.iloc[:,1:]) #robust_scaling
+             
+            feature_cols = list(data_df.columns) #get list of the column
+            for col in feature_cols[1:]:
                 if data_df[col].dtype == 'O':
-                    data_df[col] = le.fit_transform(data_df[col]) 
+                    data_df[col] = le.fit_transform(data_df[col])  
+            for col in tg_cols:
                 feature_cols.remove(col) #remove target columns from list
+
+            
             # target_cols = [data_df.columns[0]]
             # target_cols += tg_cols #add index column from target columns list
             
@@ -1385,7 +1401,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         datasetnm_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
         projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
         dataset_name = datasetnm_df['dataset_name'][0]
-        user_name = datasetnm_df['user_name'][0]
+        user_name = projectnm_df['user_name'][0]
         project_name = projectnm_df['project_name'][0]
  
         sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"

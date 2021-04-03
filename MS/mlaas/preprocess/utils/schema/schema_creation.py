@@ -62,17 +62,18 @@ class SchemaClass:
             logging.info("data preprocess : SchemaClass :get_dataset_schema : execution start")
             
             #get the dataset table details based on the dataset id
-            dataset_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
+            
+            data_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
 
             #check the dataset_df is empty or not if yes raise exception
-            if dataset_df is None or len(dataset_df) == 0:
+            if data_df is None or len(data_df) == 0:
                         raise DatasetDataNotFound(500)
+            dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows = str(data_df['dataset_name'][0]),str(data_df['dataset_table_name'][0]),str(data_df['user_name'][0]),str(data_df['dataset_visibility'][0]),str(data_df['no_of_rows'][0])
+            # dataset_records = dataset_df.to_records(index=False) # convert dataframe to a NumPy record  
 
-            dataset_records = dataset_df.to_records(index=False) # convert dataframe to a NumPy record  
+            # dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows,_ = dataset_records[0] # first record of dataset
 
-            dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows,_ = dataset_records[0] # first record of dataset
-
-            dataset_name,dataset_table_name,user_name,dataset_visibility = str(dataset_name),str(dataset_table_name),str(user_name),str(dataset_visibility)
+            # dataset_name,dataset_table_name,user_name,dataset_visibility = str(dataset_name),str(dataset_table_name),str(user_name),str(dataset_visibility)
 
             #check the dataset visibility if private append the user name with  dataset table name 
             #dataset visibility if public assign table name as  dataset table name we get
@@ -163,7 +164,7 @@ class SchemaClass:
             return exc.msg
 
 
-    def save_schema(self,DBObject,connection,schema_data,project_id,dataset_id,schema_id):
+    def save_schema(self,DBObject,connection,schema_data,project_id,dataset_id,schema_id,user_name):
         """
         function used to update the changed columns values in schema table  
 
@@ -200,7 +201,7 @@ class SchemaClass:
 
                     change_column_name.append(schema_data[count]["column_name"]) #append change column name
                 else:
-                    change_column_name.append(schema_data[count]["change_column_name"])
+                    change_column_name.append(str(schema_data[count]["change_column_name"]).strip())
 
                 index_list.append(schema_data[count]["index"]) #append  index 
 
@@ -223,10 +224,11 @@ class SchemaClass:
             logging.info(str(column_attribute_list)+" column_attribute_list")
 
             for value in change_column_name:
+                
                 if value != '':
                     #check the changed column name having same name
                     #?if name count in canged column list is greater then one means its duplicate then raise exception 
-                    if str(change_column_name).strip().count(str(value).strip()) > 1 :
+                    if change_column_name.count(str(value).strip()) > 1 :
                         raise ChangeColumnNameSame(500)
 
 
@@ -263,7 +265,7 @@ class SchemaClass:
                 dataset_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
 
                 #get the 0 index  key as 'user_name' from the dataframe
-                user_name,dataset_name = str(dataset_df['user_name'][0]),str(dataset_df['dataset_name'][0])
+                user_name,dataset_name = str(user_name),str(dataset_df['dataset_name'][0])
                 
 
                 #get te timeline status if successfully inserted return 0 else return 1

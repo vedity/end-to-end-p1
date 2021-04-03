@@ -71,13 +71,13 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         
         return super().robust_scaling(dataframe)
     
-    def custom_scaling(self, dataframe, max, min):
+    # def custom_scaling(self, dataframe, max, min):
         
-        logging.info("data preprocessing : TransformationClass : duplicate_data_removal : execution start")
+    #     logging.info("data preprocessing : TransformationClass : duplicate_data_removal : execution start")
         
-        logging.info("data preprocessing : TransformationClass : duplicate_data_removal : execution stop")
+    #     logging.info("data preprocessing : TransformationClass : duplicate_data_removal : execution stop")
         
-        return super().custom_scaling(dataframe, max, min)
+    #     return super().custom_scaling(dataframe, max, min)
     
     #* Categorical Encoding
     
