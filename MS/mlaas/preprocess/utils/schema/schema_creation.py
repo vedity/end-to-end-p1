@@ -201,7 +201,7 @@ class SchemaClass:
 
                     change_column_name.append(schema_data[count]["column_name"]) #append change column name
                 else:
-                    change_column_name.append(schema_data[count]["change_column_name"])
+                    change_column_name.append(str(schema_data[count]["change_column_name"]).strip())
 
                 index_list.append(schema_data[count]["index"]) #append  index 
 
