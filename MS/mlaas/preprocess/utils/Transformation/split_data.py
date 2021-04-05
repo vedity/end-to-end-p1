@@ -52,11 +52,11 @@ class Split_Data():
             [flag] : flase if scale,split is not done else true.
         """
 
-        flag, desc = ENC_OBJECT.get_unencoded_colnames(DBObject,connection,projectid)
+        # flag, desc = ENC_OBJECT.get_unencoded_colnames(DBObject,connection,projectid)
 
-        if not flag:
-            #? Encoding of some columns are still remaining
-            return flag, desc
+        # if not flag:
+        #     #? Encoding of some columns are still remaining
+        #     return flag, desc
 
         sql_command = f'select "scaled_split_parameters" from mlaas.project_tbl pt where project_id  ='+str(projectid)
         df = DBObject.select_records(connection,sql_command)
