@@ -136,7 +136,7 @@ export class DataCleanupComponent implements OnInit {
 
   getCheckSplit() {
     
-    this.apiService.getCheckSplit(this.project_id).subscribe(
+    this.apiService.getCheckSplit(this.project_id,this.schema_id).subscribe(
       logs => this.checksplitSuccessHandler(logs),
       error=>this.errorHandler(error)
     )
