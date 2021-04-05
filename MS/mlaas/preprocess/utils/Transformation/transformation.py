@@ -71,13 +71,13 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         
         return super().robust_scaling(dataframe)
     
-    def custom_scaling(self, dataframe, max, min):
+    # def custom_scaling(self, dataframe, max, min):
         
-        logging.info("data preprocessing : TransformationClass : duplicate_data_removal : execution start")
+    #     logging.info("data preprocessing : TransformationClass : duplicate_data_removal : execution start")
         
-        logging.info("data preprocessing : TransformationClass : duplicate_data_removal : execution stop")
+    #     logging.info("data preprocessing : TransformationClass : duplicate_data_removal : execution stop")
         
-        return super().custom_scaling(dataframe, max, min)
+    #     return super().custom_scaling(dataframe, max, min)
     
     #* Categorical Encoding
     
@@ -99,7 +99,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
     #     logging.info("data preprocessing : TransformationClass : label_encoding : execution stop")
     #     return dataframe
     
-    def label_encoding(self, DBObject,connection,project_id,column_list, table_name, col, **kwargs):
+    def label_encoding(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
             Operation id: 27
         '''
@@ -110,13 +110,14 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
 
         index = column_list[0]
         cols = [column_list[i] for i in col]
+        old_cols = [old_column_list[i] for i in col]
         
-        for col_name in cols:
+        for i,col_name in enumerate(cols):
             try:
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
-                status = super().label_encoding(DBObject, connection, [index,col_name], table_name)
+                status = super().label_encoding(DBObject, connection, [index,old_cols[i]], table_name)
 
                 #Update the activity status for the operation performed
                 at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
@@ -127,7 +128,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         logging.info("data preprocessing : TransformationClass : label_encoding : execution stop")
         return status
 
-    def one_hot_encoding(self, DBObject,connection,project_id,column_list, table_name, col, schema_id, **kwargs):
+    def one_hot_encoding(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, schema_id, **kwargs):
         '''
             Operation id: 28
         '''
@@ -136,17 +137,18 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         index = column_list[0]
 
         cols = [column_list[i] for i in col]
-
+        old_cols = [old_column_list[i] for i in col]
+        
         #Operation Id to get activity details
         operation_id = 28
 
-        for col_name in cols:
+        for i,col_name in enumerate(cols):
             try:
 
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
-                status = super().one_hot_encoding(DBObject, connection, [index,col_name], table_name, schema_id)
+                status = super().one_hot_encoding(DBObject, connection, [index,old_cols[i]], table_name, schema_id)
 
                 #Update the activity status for the operation performed
                 at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
@@ -179,7 +181,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
     
     #* MATH OPERATIONS
     
-    def add_to_column(self, DBObject,connection,project_id,column_list, table_name, col, value, **kwargs):
+    def add_to_column(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, value, **kwargs):
         '''
             Operation id: 29
         '''
@@ -191,12 +193,14 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         operation = '+'
         
         cols = [column_list[i] for i in col]
+        old_cols = [old_column_list[i] for i in col]
+        
         for i,col_name in enumerate(cols):
             try:
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
-                status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value)
+                status = self.perform_math_operation(DBObject, connection, table_name, old_cols[i], operation, value)
 
                 #Update the activity status for the operation performed
                 at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
@@ -207,7 +211,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         logging.info("data preprocessing : TransformationClass : add_to_column : execution stop")
         return status
     
-    def subtract_from_column(self, DBObject,connection,project_id,column_list, table_name, col, value, **kwargs):
+    def subtract_from_column(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, value, **kwargs):
         '''
             Operation id: 30
         '''
@@ -218,12 +222,14 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         operation = '-'
         
         cols = [column_list[i] for i in col]
+        old_cols = [old_column_list[i] for i in col]
+        
         for i,col_name in enumerate(cols):
             try:
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
-                status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value)
+                status = self.perform_math_operation(DBObject, connection, table_name, old_cols[i], operation, value)
 
                 #Update the activity status for the operation performed
                 at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
@@ -233,7 +239,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         logging.info("data preprocessing : TransformationClass : subtract_from_column : execution stop")
         return status
     
-    def multiply_column(self, DBObject,connection,project_id,column_list, table_name, col, value, **kwargs):
+    def multiply_column(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, value, **kwargs):
         '''
             Operation id: 31
         '''
@@ -244,12 +250,14 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         operation_id = 32
 
         cols = [column_list[i] for i in col]
+        old_cols = [old_column_list[i] for i in col]
+        
         for i,col_name in enumerate(cols):
             try:
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
-                status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value)
+                status = self.perform_math_operation(DBObject, connection, table_name, old_cols[i], operation, value)
 
                 #Update the activity status for the operation performed
                 at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
@@ -260,7 +268,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         logging.info("data preprocessing : TransformationClass : multiply_column : execution stop")
         return status
     
-    def divide_column(self, DBObject,connection,project_id,column_list, table_name, col, value, **kwargs):
+    def divide_column(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, value, **kwargs):
         '''
             Operation id: 32
         '''
@@ -271,12 +279,14 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         operation_id = 31
 
         cols = [column_list[i] for i in col]
+        old_cols = [old_column_list[i] for i in col]
+        
         for i,col_name in enumerate(cols):
             try:
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
-                status = self.perform_math_operation(DBObject, connection, table_name, col_name, operation, value)
+                status = self.perform_math_operation(DBObject, connection, table_name, old_cols[i], operation, value)
 
                 #Update the activity status for the operation performed
                 at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
