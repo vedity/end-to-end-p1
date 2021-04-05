@@ -265,7 +265,7 @@ class SchemaClass:
                 dataset_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
 
                 #get the 0 index  key as 'user_name' from the dataframe
-                user_name,dataset_name = str(user_name),str(dataset_df['dataset_name'][0])
+                dataset_name = str(dataset_df['dataset_name'][0])
                 
 
                 #get te timeline status if successfully inserted return 0 else return 1

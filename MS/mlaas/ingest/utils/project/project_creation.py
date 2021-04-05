@@ -159,17 +159,7 @@ class ProjectClass:
 
             page_name = 'schema mapping'
 
-            #Check th visibility
-            #? If visibility is None then Assign dataset visibility to private
-            logging.info(str(user_visibility) + " checking")
-            # if user_visibility == None:
-            #     user_visibility = 'private'
-               
-            # else:
-            #     user_visibility = dataset_visibility
-                
             
-            # Make record for dataset table.
             row=dataset_name,file_name,file_size,new_table_name,user_visibility,user_name,dataset_desc,page_name 
             row_tuples = [tuple(row)]
 
