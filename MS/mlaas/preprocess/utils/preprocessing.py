@@ -154,7 +154,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         logging.info("data preprocessing : PreprocessingClass : get_exploration_data : execution end")
         return stats_df
     
-    def save_schema_data(self,schema_data,project_id,dataset_id,schema_id):
+    def save_schema_data(self,schema_data,project_id,dataset_id,schema_id,user_name):
         try:
             logging.info("data preprocessing : PreprocessingClass : save_schema_data : execution start")
 
@@ -162,7 +162,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if connection == None :
                 raise DatabaseConnectionFailed(500)
 
-            status = super(PreprocessingClass,self).save_schema(DBObject,connection,schema_data,project_id,dataset_id,schema_id)
+            status = super(PreprocessingClass,self).save_schema(DBObject,connection,schema_data,project_id,dataset_id,schema_id,user_name)
 
             logging.info("data preprocessing : PreprocessingClass : save_schema_data : execution start")
             return status
@@ -952,25 +952,31 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             #? Getting Dataframe
             data_df = self.get_data_df(dataset_id,schema_id) #get dataframe
+            
             if isinstance(data_df, str):
                 raise GetDataDfFailed(500)
             
-            if scaling_type == 0:
-                data_df[:,1:] = self.standard_scaling(data_df[:,1:]) #standard_scaling
-            elif scaling_type == 1:
-                data_df[:,1:] = self.min_max_scaling(data_df[:,1:]) #min_max_scaling
-            elif scaling_type == 2:
-                data_df[:,1:] = self.robust_scaling(data_df[:,1:]) #robust_scaling
-                    
-            feature_cols = list(data_df.columns) #get list of the columns
             tg_cols = DBObject.get_target_col(connection, schema_id) #get list of the target columns
             target_cols = [data_df.columns[0]]
-            target_cols += tg_cols
+            target_cols += tg_cols           
             target_actual_features_df=data_df[target_cols]
-            for col in tg_cols:
+        
+            
+            if scaling_type == 0:
+                data_df.iloc[:,1:] = self.standard_scaling(data_df.iloc[:,1:]) #standard_scaling
+            elif scaling_type == 1:
+                data_df.iloc[:,1:] = self.min_max_scaling(data_df.iloc[:,1:]) #min_max_scaling
+            elif scaling_type == 2:
+                data_df.iloc[:,1:] = self.robust_scaling(data_df.iloc[:,1:]) #robust_scaling
+             
+            feature_cols = list(data_df.columns) #get list of the column
+            for col in feature_cols[1:]:
                 if data_df[col].dtype == 'O':
-                    data_df[col] = le.fit_transform(data_df[col]) 
+                    data_df[col] = le.fit_transform(data_df[col])  
+            for col in tg_cols:
                 feature_cols.remove(col) #remove target columns from list
+
+            
             # target_cols = [data_df.columns[0]]
             # target_cols += tg_cols #add index column from target columns list
             
@@ -1395,7 +1401,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         datasetnm_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
         projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
         dataset_name = datasetnm_df['dataset_name'][0]
-        user_name = datasetnm_df['user_name'][0]
+        user_name = projectnm_df['user_name'][0]
         project_name = projectnm_df['project_name'][0]
  
         sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
