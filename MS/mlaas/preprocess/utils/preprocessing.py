@@ -1153,7 +1153,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             return exc.msg
             
     
-    def dag_executor(self,project_id, dataset_id, schema_id, request, flag ,selected_visibility,dataset_name ,dataset_desc):
+    def dag_executor(self,project_id, dataset_id, schema_id, request, flag ,selected_visibility,dataset_name ,dataset_desc,user_name):
         '''
             This Function is used to trigger the dag at the save time.
 
@@ -1202,7 +1202,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             "save_as": flag,
             "visibility": selected_visibility,
             "dataset_name": dataset_name,
-            "dataset_desc": dataset_desc
+            "dataset_desc": dataset_desc,
+            "user_name": user_name
             }
             
             # json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
@@ -1214,7 +1215,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 raise DagUpdateFailed(500)
 
             activity_id = 51
-            activity_status = self.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id)
+            activity_status = self.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id,user_name)
 
             json_data = {}
             result = requests.post(f"http://airflow:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False)#owner
@@ -1386,7 +1387,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             return exc.msg
         
 
-    def get_cleanup_startend_desc(self,DBObject,connection,dataset_id,project_id,activity_id):
+    def get_cleanup_startend_desc(self,DBObject,connection,dataset_id,project_id,activity_id,user_name):
         """This function will replace * into project name and get activity description of scale and split.
  
         Args:
@@ -1396,23 +1397,17 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         Returns:
             [String]: activity_description
         """
-        #project_name = '"'+project_name+'"'
         activity_df = self.AT.get_activity(activity_id,"US")
         datasetnm_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
         projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
         dataset_name = datasetnm_df['dataset_name'][0]
-        user_name = projectnm_df['user_name'][0]
         project_name = projectnm_df['project_name'][0]
- 
+
         sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
-        logging.info("------->"+str(sql_command))
         desc_df = DBObject.select_records(connection,sql_command)
-        logging.info("------->"+str(desc_df))
         activity_description = desc_df['description'][0]
         activity_description = activity_description.replace('*',dataset_name)
         activity_description = activity_description.replace('&',project_name)
-        logging.info("------->"+str(activity_description))
- 
     
         end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
         activity_status,index = self.AT.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
