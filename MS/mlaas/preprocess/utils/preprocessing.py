@@ -1397,23 +1397,17 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         Returns:
             [String]: activity_description
         """
-        #project_name = '"'+project_name+'"'
         activity_df = self.AT.get_activity(activity_id,"US")
         datasetnm_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
         projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
         dataset_name = datasetnm_df['dataset_name'][0]
-        #user_name = projectnm_df['user_name'][0]
         project_name = projectnm_df['project_name'][0]
- 
+
         sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
-        logging.info("------->"+str(sql_command))
         desc_df = DBObject.select_records(connection,sql_command)
-        logging.info("------->"+str(desc_df))
         activity_description = desc_df['description'][0]
         activity_description = activity_description.replace('*',dataset_name)
         activity_description = activity_description.replace('&',project_name)
-        logging.info("------->"+str(activity_description))
- 
     
         end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
         activity_status,index = self.AT.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
