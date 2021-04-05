@@ -226,7 +226,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise DatabaseConnectionFailed(500)
             
             project_df = super(IngestClass,self).show_project_details(DBObject,connection,user_name) # Get dataframe of project created.
-            
+            logging.info("---->"+str(project_df))
             project_df = project_df.to_json(orient='records')
             project_df = json.loads(project_df)
         except (DatabaseConnectionFailed) as exc:
