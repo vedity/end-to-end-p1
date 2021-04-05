@@ -124,7 +124,7 @@ export class ModelingTypeComponent implements OnInit {
         if (elem.project_id == value)
           return elem
       })
-      this.getCheckSplit(projects[0].project_id);
+      this.getCheckSplit(projects[0].project_id,projects[0].schema_id);
       this.projectdata = projects[0];
     }
     else {
@@ -158,27 +158,27 @@ export class ModelingTypeComponent implements OnInit {
     }
   }
 
-  checkrunningExperiment() {
-    this.apiservice.checkrunningExperiment(this.params.project_id).subscribe(
-      logs => this.checkrunningexpuccessHandler(logs),
-      //  error=>this.errorHandler(error)
-    )
-  }
+  // checkrunningExperiment() {
+  //   this.apiservice.checkrunningExperiment(this.params.project_id).subscribe(
+  //     logs => this.checkrunningexpuccessHandler(logs),
+  //     //  error=>this.errorHandler(error)
+  //   )
+  // }
 
-  checkrunningexpuccessHandler(data) {
-    if (data.status_code == "200") {
-      if (data.response.exp_name != "") {
-        this.processInterval = setInterval(() => {
-          this.getRunningExperimentList();
-          this.getAllExperimentList();
-          this.checkstatus();
-        }, 4000);
-      }
-    }
-    // else {
-    //   this.errorHandler(data);
-    // }
-  }
+  // checkrunningexpuccessHandler(data) {
+  //   if (data.status_code == "200") {
+  //     if (data.response.exp_name != "") {
+  //       this.processInterval = setInterval(() => {
+  //         this.getRunningExperimentList();
+  //         this.getAllExperimentList();
+  //         this.checkstatus();
+  //       }, 4000);
+  //     }
+  //   }
+  //   // else {
+  //   //   this.errorHandler(data);
+  //   // }
+  // }
 
   compareIds = [];
   compareExps = [];
@@ -532,8 +532,8 @@ export class ModelingTypeComponent implements OnInit {
     }
   }
 
-  getCheckSplit(project_id) {
-    return this.apiservice.getCheckSplit(project_id).subscribe(
+  getCheckSplit(project_id,schema_id) {
+    return this.apiservice.getCheckSplit(project_id,schema_id).subscribe(
       logs => this.checksplitSuccessHandler(logs)
     );
   }

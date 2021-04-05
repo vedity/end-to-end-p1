@@ -95,7 +95,7 @@ class ActivityTimelineClass:
                 row_tuples = [tuple(rows)]
                 
                 #insert the record and return 1 if inserted else return 1
-                status,index = DBObject.insert_records(connection,table_name,row_tuples,cols,Flag=1) 
+                status,index = DBObject.insert_records(connection,table_name,row_tuples,cols,column_name='index') 
 
                 if status == 1:
                     raise ActivityInsertionFailed(500)

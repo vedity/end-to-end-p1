@@ -47,7 +47,6 @@ class DBClass:
         """
 
         read_df=pd.read_csv(file_path) #  Read csv file and load data into dataframe.
-        logging.info(str(read_df) + " read dataframe")
 
         column_name_list = read_df.columns.values.tolist()
     
@@ -159,7 +158,7 @@ class DBClass:
         
     
     
-    def insert_records(self,connection,table_name,row_tuples,cols,Flag=0):
+    def insert_records(self,connection,table_name,row_tuples,cols,column_name=None):
         """This function is used to insert data into database table.
 
         Args:
@@ -180,7 +179,7 @@ class DBClass:
 
         cursor = connection.cursor() # Open cursor for database.
         try:
-            if Flag == 0 :
+            if column_name == None :
                 query = "INSERT INTO %s(%s) VALUES %%s " % (table_name, cols) # Make query
                 logging.info(str(table_name) + " <> table_name")
                 logging.info(str(cols) + " <> columns")
@@ -188,12 +187,8 @@ class DBClass:
                 logging.info(str(query) + " <> tuples")
                 extras.execute_values(cursor, query, tuples) # Excute insert query.
                 index = 0
-            elif Flag == 1:
-                query = "INSERT INTO %s(%s) VALUES %%s RETURNING dataset_id" % (table_name, cols) # Make query
-                extras.execute_values(cursor, query, tuples) # Excute insert query.
-                index = [row[0] for row in cursor.fetchall()][0]
             else :
-                query = "INSERT INTO %s(%s) VALUES %%s RETURNING index" % (table_name, cols) # Make query
+                query = f"INSERT INTO %s(%s) VALUES %%s RETURNING {column_name} " % (table_name, cols) # Make query
                 extras.execute_values(cursor, query, tuples) # Excute insert query.
                 index = [row[0] for row in cursor.fetchall()][0]
             
