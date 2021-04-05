@@ -109,7 +109,7 @@ class ProjectClass:
         return row_tuples
         
 
-    def make_project(self,DBObject,connection,connection_string,project_name,project_desc,page_name,dataset_desc,dataset_name,dataset_visibility,file_name ,original_dataset_id,user_name):
+    def make_project(self,DBObject,connection,connection_string,project_name,project_desc,page_name,dataset_desc,dataset_name,user_visibility,file_name ,original_dataset_id,user_name):
         """This function is used to make project and it will create main project table and also
            load project details into database main project table.
            E.g. project name : sales forecast, travel time prediction etc.
@@ -121,7 +121,7 @@ class ProjectClass:
             project_name ([string]): [name of the project.],
             project_desc ([string]): [descriptions of the project.],
             dataset_name ([string]): [name of the dataset.],
-            dataset_visibility ([string]): [visibility of the dataset.],
+            user_visibility ([string]): [visibility of the dataset.],
             file_name ([string]): [name of the file.],
             original_dataset_id ([integer]): [dataset id of the selected dataset.],
             user_name ([string]): [name of the user.]
@@ -135,44 +135,64 @@ class ProjectClass:
 
             # Get table name,schema and columns from dataset class.
             table_name,schema,cols = self.make_project_schema() 
+            dataset_table_name,dataset_schema,datset_cols = DatasetObject.make_dataset_schema()
+
             if self.project_exists(DBObject,connection,table_name,project_name,user_name) : 
                 raise ProjectAlreadyExist(500)
             
             
 
             if original_dataset_id == None:
-                status,original_dataset_id,raw_dataset_id  = DatasetObject.make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name)   
+                status,original_dataset_id  = DatasetObject.make_dataset(DBObject,connection,connection_string,dataset_name,file_name,user_visibility,user_name,dataset_desc,page_name)   
                 
                 if status != 0:
                     return status,None,None
-                else:
-                    dataset_id = raw_dataset_id
+
+            #Get the dataset details based on the original dataset id   
+            data_df = DBObject.get_dataset_detail(DBObject,connection,original_dataset_id)
+            
+            #Extract the data from the dataframe variable " data_df "
+            dataset_name,file_name,file_size,old_table_name,dataset_desc,dataset_visibility = str(data_df['dataset_name'][0]),str(data_df['file_name'][0]),str(data_df['file_size'][0]),str(data_df['dataset_table_name'][0]),str(data_df['dataset_desc'][0]),str(data_df['dataset_visibility'][0])
                 
+            # Get the updated table name for the variable dataset
+            new_table_name = DBObject.get_table_name(connection,old_table_name)
+
+            page_name = 'schema mapping'
+
+            #Check th visibility
+            #? If visibility is None then Assign dataset visibility to private
+            logging.info(str(user_visibility) + " checking")
+            # if user_visibility == None:
+            #     user_visibility = 'private'
+               
+            # else:
+            #     user_visibility = dataset_visibility
+                
+            
+            # Make record for dataset table.
+            row=dataset_name,file_name,file_size,new_table_name,user_visibility,user_name,dataset_desc,page_name 
+            row_tuples = [tuple(row)]
+
+            #Insert the dataset record into table
+            dataset_insert_status,dataset_id = DBObject.insert_records(connection,dataset_table_name,row_tuples,datset_cols,column_name='dataset_id')
+                
+            if dataset_insert_status == 0:
+    
+                #Create the variable table based on the  Raw dataset table.
+                create_status = DatasetObject.create_variable_dataset(DBObject,connection,dataset_id,user_name,old_table_name,new_table_name,user_visibility,dataset_visibility)
+                    
+                if create_status != 0:
+                    return create_status,None,None
+
             else:
+                raise ProjectCreationFailed(500)
+                    
+
                 
-                #dataset_id,_ = DBObject.get_raw_dataset_detail(connection,original_dataset_id)
-                data_df = DBObject.get_dataset_detail(DBObject,connection,original_dataset_id)
-                dataset_name,file_name,file_size,old_table_name,no_of_rows,dataset_desc,dataset_visibility,old_user_name = str(data_df['dataset_name'][0]),str(data_df['file_name'][0]),str(data_df['file_size'][0]),str(data_df['dataset_table_name'][0]),str(data_df['no_of_rows'][0]),str(data_df['dataset_desc'][0]),str(data_df['dataset_visibility'][0]),str(data_df['user_name'][0])
-                #row=dataset_name,file_name,file_size,dataset_table_name,dataset_visibility,user_name,dataset_desc,page_name # Make record for dataset table.
-                create_status,new_table_name = self.insert_raw_dataset_change(DBObject,connection,old_user_name,user_name,old_table_name,dataset_visibility)
-                if create_status == 0:
-                    page_name = 'schema mapping'
-                    row=dataset_name,file_name,file_size,new_table_name,'private',user_name,dataset_desc,page_name # Make record for dataset table.
-                    row_tuples = [tuple(row)]
-                    logging.info("row_tuples======   "+str(row_tuples))
-                    dataset_table_name,dataset_schema,datset_cols = DatasetObject.make_dataset_schema()
-                    dataset_insert_status,dataset_id = DBObject.insert_records(connection,dataset_table_name,row_tuples,datset_cols,Flag=1)
-                    logging.info("row_tuples======   "+str(dataset_id))
-                    if dataset_insert_status!=0:
-                        raise ProjectCreationFailed(500)         
-                else:
-                    raise ProjectCreationFailed(500)
-            # if dataset_insert_status==0:
-                # Get row for project table.
+            
+            # Get row for project table.
             row_tuples = self.make_project_records(project_name,project_desc,user_name,original_dataset_id,dataset_id) 
-            logger.info("row_tuples=="+str(row_tuples))
-            logger.info("table_name=="+str(table_name))
-            logger.info("cols=="+str(cols))
+            
                 
                 # Get status about inserting records into project table. if successful then 0 else 1. 
             insert_status,_ = DBObject.insert_records(connection,table_name,row_tuples,cols) 
@@ -404,43 +424,6 @@ class ProjectClass:
         except:
             return False
 
-    def insert_raw_dataset_change(self,DBObject,connection,old_user_name,user_name,old_table_name,dataset_visibility):
-        '''
-        Function used to create the new table based on existing table and update the "number of rows" and "table name" of the perticular dataset id
-        
-        Args:
-                dataset_id[(Integer)] : [Id of the dataset record]
-                user_name[(String)] : [Name of the user]
-                table_name[(String)] : [Name of the table]
-                dataset_visibility[(String)] : [Existing dataset_visibility]
-                selected_visibility[(String)] : [User Entered visibility]
-        Return:
-                [Integer] : [Return 0 if successfully inserted else 1]
-        '''
-        try:
-            logging.info("data ingestion : DatasetClass : insert_raw_dataset : execution start")
-            
-            # Get the updated table name for the raw dataset
-            new_table_name = DBObject.get_table_name(connection,old_table_name)
-            logging.info("new_table_name======   "+new_table_name)
-            
-            original_table_name = 'public."'+str(old_table_name)+'"'
-                
-                    
-
-            # Create the new table based on the existing table
-            sql_command = f'CREATE TABLE {str(user_name)}."{str(new_table_name)}" AS SELECT * FROM {str(original_table_name)}'
-            logging.info("sql_command======   "+sql_command)
-            # Execute the sql query
-            create_status = DBObject.update_records(connection,sql_command)
-
-            
-                
-             
-                
-            logging.info("data ingestion : DatasetClass : insert_raw_dataset : execution stop")
-            return create_status,new_table_name
-        except Exception as exc:
-            return exc,None
+    
     
  
