@@ -470,6 +470,7 @@ class Check_Split(APIView):
                 try:
                         logging.info(" modeling : Check_Split : GET Method : execution start")
                         project_id = request.query_params.get('project_id')
+                        schema_id = request.query_params.get('schema_id')
                         flag,desc = sd.check_split_exist(project_id)
                         if flag:
                                 #? All the cleanup operation are done before modelling.
