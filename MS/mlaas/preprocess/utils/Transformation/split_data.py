@@ -58,11 +58,35 @@ class Split_Data():
         #     #? Encoding of some columns are still remaining
         #     return flag, desc
 
-        sql_command = f'select "scaled_split_parameters" from mlaas.project_tbl pt where project_id  ='+str(projectid)
+        missing_sql_command = f"select column_name from mlaas.schema_tbl  where schema_id = '26' and missing_flag = 'True'"
+        missing_val_df = DBObject.select_records(connection, missing_sql_command)
+        
+        if not isinstance(missing_val_df,pd.DataFrame):
+            return False,'function failed'
+
+        desc = self.get_missing_col_desc(missing_val_df,'column_name')
+        logging.info("----->"+str(missing_val_df['column_name']))
+        if missing_val_df.empty:
+            return True, desc
+        else:
+
+            return False, desc
+
+
+        target_sql_command = f"select count(*) from mlaas.schema_tbl where schema_id = '26' and column_attribute = 'Target'"
+        target_df = DBObject.select_records(connection,target_sql_command)
+
+        sql_command = f'select "scaled_split_parameters","target_features" from mlaas.project_tbl pt where project_id  ='+str(projectid)
         df = DBObject.select_records(connection,sql_command)
-        if (df.iloc[0]['scaled_split_parameters']) == None:
+
+        logging.info("---->"+str(target_df['count'][0]))
+        if (target_df['count'][0]) <=0:
             flag = False
-            desc = "Please complete Scale & Split operation first!"
+            desc = "Select target column in schema mapping!"
+
+        # elif (df.iloc[0]['scaled_split_parameters']) == None:
+        #     flag = False
+        #     desc = "Please complete Scale & Split operation first!"
         else:
             flag = True
             desc = "You can now proceed to the modelling."
@@ -85,3 +109,34 @@ class Split_Data():
         activity_description = desc_df['description'][0]
 
         return activity_description
+
+    def get_missing_col_desc(self,df,col_name):
+        '''
+            This is a sub-function thats specifically used to get the message for 
+            unencoded columns list. This message will be shown on the frontend.
+
+            Args:
+            ----
+            df (`pd.DataFrame`): Dataframe containing unencoded column_names in a single column.
+            col_name (`String`): Name of the column that contains the unencoded column names.
+
+            Returns:
+            -------
+            string (`String`): Description for unencoded column warning.
+        '''
+        logging.info("data preprocessing : EncodeClass : get_unencoded_desc : execution start")
+
+        if df.empty:
+            string = "No column remaining for Missing Value Handling."
+        else:    
+            string = "Missing Value Handling Remaining in Columns "
+
+            #? Adding column names
+            for i,data in df.iterrows():
+                string += f"'{data[col_name]}', "
+            else:
+                string = string[:-2]+"."
+        
+        logging.info("data preprocessing : EncodeClass : get_unencoded_desc : execution stop")
+
+        return string
