@@ -29,3 +29,12 @@
 .ps__rail-x {
     display: none !important;
 }
+
+.custom-control-label::before {border:1px solid #34c38f !important;}
+.custom-control-input[disabled] .custom-control-label::before, .custom-control-input:disabled ~ .custom-control-label::before {background-color: #222736 !important; border:1px solid #5a6074 !important;}
+.custom-control-input:checked ~ .custom-control-label::before {
+    color: #fff;
+    border-color: #34c38f !important;
+    background-color: #34c38f !important;
+}
+.custom-control-input[disabled]:hover .custom-control-label::before,.custom-control-input:hover:disabled ~ .custom-control-label::before {cursor: no-drop !important;}
