@@ -8,10 +8,10 @@
     display: none;
 }
 
-.custom-control-input[disabled]~.custom-control-label::before,
-.custom-control-input:disabled~.custom-control-label::before {
-    background-color: #5a6074 !important;
-}
+// .custom-control-input[disabled]~.custom-control-label::before,
+// .custom-control-input:disabled~.custom-control-label::before {
+//     background-color: #5a6074 !important;
+// }
 
 .module-main {
     position: relative;
@@ -396,7 +396,7 @@ table {
     display: inline-block;
     vertical-align: middle;
     height: 24px;
-    width: 100px;
+    width: 50px;
     margin-left: 15px;
 }
 

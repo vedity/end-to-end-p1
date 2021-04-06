@@ -54,8 +54,12 @@ class DBClass:
         for name in column_name_list:
             if read_df.dtypes.to_dict()[name] == 'object':
                 column_list.append(name)
+        
         read_df=pd.read_csv(file_path,parse_dates=column_list) #  Read csv file and load data into dataframe.
-        return read_df
+        
+        dataframe = read_df.replace(r'\s+', np.nan, regex=True)
+        
+        return dataframe
     
     def database_connection(self,database,user,password,host,port):
         """This function is used to make connection with database.
