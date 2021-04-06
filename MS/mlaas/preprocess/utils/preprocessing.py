@@ -1023,6 +1023,9 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             valid_Y_filename = "None"
             Y_valid_count= None
             X_train, X_valid, X_test, Y_train, Y_valid, Y_test=sp.get_split_data(input_features_df,target_features_df, int(random_state),float(test_ratio), valid_ratio, str(split_method))
+            if isinstance(X_train,str):
+                return X_train
+
             if split_method != 'cross_validation':
                 Y_valid_count= Y_valid.shape[0]
                 valid_X_filename = scale_dir+"/scaled_valid_X_data_" + unique_id #genrate valid_X file path     
@@ -1044,9 +1047,12 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             status = DBObject.update_records(connection, sql_command)
             if status==1:
                 raise ProjectUpdateFailed(500)
+
+            sql_command = f'''update mlaas.project_tbl set scale_split_flag ='0' where project_id = {project_id}'''
+            update_status = DBObject.update_records(connection,sql_command) 
             return status
             
-        except (DatabaseConnectionFailed,GetDataDfFailed,ProjectUpdateFailed) as exc:
+        except (DatabaseConnectionFailed,GetDataDfFailed,ProjectUpdateFailed,SplitFailed) as exc:
             logging.error("data preprocessing : PreprocessingClass : handover : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : handover : " +traceback.format_exc())
             return exc.msg

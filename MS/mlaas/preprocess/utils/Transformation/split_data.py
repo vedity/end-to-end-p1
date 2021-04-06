@@ -29,19 +29,22 @@ class Split_Data():
             Returns:
                 X_train, X_test, Y_train, Y_test or also returns X_valid, Y_valid: Splitted data for train and test.
             """
-            if split_method == 'cross_validation':
-                X_train, X_test, Y_train, Y_test = train_test_split(input_df, target_df, test_size=test_size,
+            try:
+                if split_method == 'cross_validation':
+                    X_train, X_test, Y_train, Y_test = train_test_split(input_df, target_df, test_size=test_size,
+                                                                        random_state=random_state)
+
+                    return X_train, None, X_test, Y_train, None, Y_test
+                else:
+                    X_train_valid, X_test, Y_train_valid, Y_test = train_test_split(input_df, target_df, test_size=test_size,
+                                                                                random_state=random_state)
+
+                    X_train, X_valid, Y_train, Y_valid = train_test_split(X_train_valid, Y_train_valid, test_size=valid_size,
                                                                     random_state=random_state)
 
-                return X_train, None, X_test, Y_train, None, Y_test
-            else:
-                X_train_valid, X_test, Y_train_valid, Y_test = train_test_split(input_df, target_df, test_size=test_size,
-                                                                            random_state=random_state)
-
-                X_train, X_valid, Y_train, Y_valid = train_test_split(X_train_valid, Y_train_valid, test_size=valid_size,
-                                                                random_state=random_state)
-
-                return X_train, X_valid, X_test, Y_train, Y_valid, Y_test
+                    return X_train, X_valid, X_test, Y_train, Y_valid, Y_test
+            except Exception as e:
+                return str(e),None,None,None,None,None
 
     def check_split_exist(self,projectid):
         """This function will return status if scale and split is performed for particular project
@@ -57,42 +60,6 @@ class Split_Data():
         # if not flag:
         #     #? Encoding of some columns are still remaining
         #     return flag, desc
-        
-        try:
-            #? Getting columns names that have missing values
-            missing_sql_command = f"select st.column_name from mlaas.schema_tbl st  where st.schema_id in (select schema_id from mlaas.project_tbl where project_id = '{projectid}') and st.missing_flag = 'True'"
-            missing_val_df = DBObject.select_records(connection, missing_sql_command)
-            
-            #? Checking wether the function failed
-            if not isinstance(missing_val_df,pd.DataFrame):
-                return False,'function failed'
-
-            #? Getting Description
-            desc = self.get_missing_col_desc(missing_val_df,'column_name')
-            if not missing_val_df.empty:
-                return False, desc
-
-            #? Checking if scaling & spliting is done or not
-            sql_command = f'select "scaled_split_parameters" from mlaas.project_tbl pt where project_id  ='+str(projectid)
-            df = DBObject.select_records(connection,sql_command)
-
-            #? Checking if target column is selected or not
-            target_sql_command = f"select count(*) from mlaas.schema_tbl where schema_id in (select schema_id from mlaas.project_tbl where project_id = '{projectid}') and column_attribute = 'Target'"
-            target_df = DBObject.select_records(connection,target_sql_command)
-
-            #! No target column is selected
-            if (int(target_df['count'][0])) == 0:
-                flag = False
-                desc = "Select target column in schema mapping!"                
-
-            #! No scaling has bee done
-            elif (df.iloc[0]['scaled_split_parameters']) == None:
-                flag = False
-                desc = "Please complete Scale & Split operation first!"
-            else:
-                #? Scaling complete
-                flag = True
-                desc = "You can now proceed to the modelling."
 
         
         try:
@@ -101,11 +68,10 @@ class Split_Data():
                 return flag,desc
             sql_command = f'select "scaled_split_parameters" from mlaas.project_tbl pt where project_id  ='+str(projectid)
             df = DBObject.select_records(connection,sql_command)
-
             if (df.iloc[0]['scaled_split_parameters']) == None:
                 flag = False
                 desc = "Please complete Scale & Split operation first!"
-
+        
             return flag,desc
 
         except Exception as e:
@@ -166,27 +132,33 @@ class Split_Data():
 
     def check_split_validation(self,projectid):
         try:
+            logging.info("data preprocessing : Check Split : check_split_validation : execution start")
             target_sql_command = f"select count(*) from mlaas.schema_tbl where schema_id in (select schema_id from mlaas.project_tbl where project_id = '{projectid}') and column_attribute = 'Target'"
             target_df = DBObject.select_records(connection,target_sql_command)
-
             if (int(target_df['count'][0])) == 0:
                 flag = False
                 desc = "Select target column in schema mapping!"
+                logging.info("data preprocessing : Check Split : check_split_validation : execution stop")
                 return flag,desc
             # else:
             #     flag = True
             #     desc = "You can now proceed to the modelling."
 
-            missing_sql_command = f"select case when changed_column_name = '' then column_name else changed_column_name end column_name from mlaas.schema_tbl   where schema_id in (select schema_id from mlaas.project_tbl where project_id = '{projectid}') and missing_flag = 'True'"
+            missing_sql_command = f"select case when changed_column_name = '' then column_name else changed_column_name end column_name from mlaas.schema_tbl   where schema_id in (select schema_id from mlaas.project_tbl where project_id = '{projectid}') and missing_flag = 'True' and column_attribute != 'Ignore'"
             missing_val_df = DBObject.select_records(connection, missing_sql_command)
             
             if not isinstance(missing_val_df,pd.DataFrame):
+                logging.info("data preprocessing : Check Split : check_split_validation : execution stop")
                 return False,'function failed'
 
             desc = self.get_missing_col_desc(missing_val_df,'column_name')
             if not missing_val_df.empty:
+                logging.info("data preprocessing : Check Split : check_split_validation : execution stop")
                 return False, desc
-
+            else:
+                desc = "Continue for Scal and Split."
+                return True, desc
+        
         except Exception as e:
             logging.error("data preprocessing : Check Split : check_split_validation : exception"+str(e))
-            return str(e)
+            return False,str(e)
