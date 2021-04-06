@@ -116,8 +116,8 @@ class SchemaSaveClass(APIView):
                         schema_id = request.query_params.get('schema_id') #get the schema id
                         dataset_id = request.query_params.get('dataset_id') #get the dataset id
                         project_id = request.query_params.get('project_id') #get the project id
-                        usernm_df = DBObject.get_project_detail(DBObject,connection,project_id)
-                        user_name = usernm_df['user_name'][0]
+                        user_name = request.query_params.get('user_name') #get user name
+                        
                         schema_status=preprocessObj.save_schema_data(schema_data,project_id,dataset_id,schema_id,user_name)
                         logging.info(str(schema_status)+" stauts type "+str(type(schema_status)))
                         if isinstance(schema_status,str): #check the instance of dataset_df
@@ -364,21 +364,22 @@ class CleanupSave(APIView):
                 '''
                 try:
                         logging.info("data preprocess : CleanupSave : POST Method : execution start")
-                        project_id = request.query_params.get('project_id') #get schema id
+                        project_id = request.query_params.get('project_id') #get project id
                         schema_id = request.query_params.get('schema_id') #get schema id
                         dataset_id = request.query_params.get('dataset_id') #get dataset id
-                        method_flag = request.query_params.get('flag') #get dataset id
+                        method_flag = request.query_params.get('flag') #get flag
+                        user_name = request.query_params.get('user_name') #get user_name
                         logging.info(str(method_flag) +" checking")
                         if method_flag == 'True':
                                 visibility = request.query_params.get('visibility') #get schema id
-                                dataset_name = request.query_params.get('dataset_name') #get dataset id
-                                dataset_desc = request.query_params.get('dataset_desc') #get dataset id
+                                dataset_name = request.query_params.get('dataset_name') #get dataset name
+                                dataset_desc = request.query_params.get('dataset_desc') #get dataset desc
                         else:
                                 visibility = dataset_name = dataset_desc = None
                         data = json.dumps(request.data) #get handling json
                         data = json.loads(data) 
                         # operation = preprocessObj.master_executor(project_id, dataset_id,schema_id,data,method_flag,visibility ,dataset_name ,dataset_desc )
-                        operation = preprocessObj.dag_executor(project_id, dataset_id,schema_id,data,method_flag,visibility ,dataset_name ,dataset_desc )
+                        operation = preprocessObj.dag_executor(project_id, dataset_id,schema_id,data,method_flag,visibility ,dataset_name ,dataset_desc,user_name)
                         logging.info("data preprocess : CleanupSave : POST Method : execution stop")
                         if isinstance(operation,int): 
                                 
@@ -401,7 +402,7 @@ class ScalingSplitClass(APIView):
                         schema_id = request.query_params.get('schema_id') #get schema id
                         dataset_id = request.query_params.get('dataset_id') #get dataset id
                         project_id = request.query_params.get('project_id') #get dataset id
-                        user_name = request.query_params.get('user_name') #get dataset id
+                        user_name = request.query_params.get('user_name') #get user_name
                         scaling_operation = request.query_params.get('scaling_op') #get scaling op
                         split_method = request.query_params.get('split_method') #get scaling method
                         cv = request.query_params.get('cv')  #get scaling method
@@ -469,6 +470,7 @@ class Check_Split(APIView):
                 try:
                         logging.info(" modeling : Check_Split : GET Method : execution start")
                         project_id = request.query_params.get('project_id')
+                        schema_id = request.query_params.get('schema_id')
                         flag,desc = sd.check_split_exist(project_id)
                         if flag:
                                 #? All the cleanup operation are done before modelling.

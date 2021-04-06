@@ -57,17 +57,48 @@ class Split_Data():
         # if not flag:
         #     #? Encoding of some columns are still remaining
         #     return flag, desc
+        
+        try:
+            #? Getting columns names that have missing values
+            missing_sql_command = f"select st.column_name from mlaas.schema_tbl st  where st.schema_id in (select schema_id from mlaas.project_tbl where project_id = '{projectid}') and st.missing_flag = 'True'"
+            missing_val_df = DBObject.select_records(connection, missing_sql_command)
+            
+            #? Checking wether the function failed
+            if not isinstance(missing_val_df,pd.DataFrame):
+                return False,'function failed'
 
-        sql_command = f'select "scaled_split_parameters" from mlaas.project_tbl pt where project_id  ='+str(projectid)
-        df = DBObject.select_records(connection,sql_command)
-        if (df.iloc[0]['scaled_split_parameters']) == None:
-            flag = False
-            desc = "Please complete Scale & Split operation first!"
-        else:
-            flag = True
-            desc = "You can now proceed to the modelling."
+            #? Getting Description
+            desc = self.get_missing_col_desc(missing_val_df,'column_name')
+            if not missing_val_df.empty:
+                return False, desc
 
-        return flag,desc
+            #? Checking if scaling & spliting is done or not
+            sql_command = f'select "scaled_split_parameters" from mlaas.project_tbl pt where project_id  ='+str(projectid)
+            df = DBObject.select_records(connection,sql_command)
+
+            #? Checking if target column is selected or not
+            target_sql_command = f"select count(*) from mlaas.schema_tbl where schema_id in (select schema_id from mlaas.project_tbl where project_id = '{projectid}') and column_attribute = 'Target'"
+            target_df = DBObject.select_records(connection,target_sql_command)
+
+            #! No target column is selected
+            if (int(target_df['count'][0])) == 0:
+                flag = False
+                desc = "Select target column in schema mapping!"                
+
+            #! No scaling has bee done
+            elif (df.iloc[0]['scaled_split_parameters']) == None:
+                flag = False
+                desc = "Please complete Scale & Split operation first!"
+            else:
+                #? Scaling complete
+                flag = True
+                desc = "You can now proceed to the modelling."
+
+            return flag,desc
+
+        except Exception as e:
+            logging.info("data preprocessing : Check Split : check_split_exist : exception"+str(e))
+            return str(e)
 
     def get_split_activity_desc(self,project_name,activity_id):
         """This function will replace * into project name and get activity description of scale and split.
@@ -85,3 +116,38 @@ class Split_Data():
         activity_description = desc_df['description'][0]
 
         return activity_description
+
+    def get_missing_col_desc(self,df,col_name):
+        '''
+            This is a sub-function thats specifically used to get the message for 
+            unencoded columns list. This message will be shown on the frontend.
+
+            Args:
+            ----
+            df (`pd.DataFrame`): Dataframe containing unencoded column_names in a single column.
+            col_name (`String`): Name of the column that contains the unencoded column names.
+
+            Returns:
+            -------
+            string (`String`): Description for unencoded column warning.
+        '''
+        try:
+            logging.info("data preprocessing : Split_Data : get_missing_col_desc : execution start")
+
+            if df.empty:
+                string = "No column remaining for Missing Value Handling."
+            else:    
+                string = "Missing Value Handling Remaining in Columns "
+
+                #? Adding column names
+                for i,data in df.iterrows():
+                    string += f"'{data[col_name]}', "
+                else:
+                    string = string[:-2]+"."
+            
+            logging.info("data preprocessing : Split_Data : get_missing_col_desc : execution stop")
+
+            return string
+        except Exception as e:
+            logging.info("data preprocessing : Check Split : get_missing_col_desc : exception"+str(e))
+            return str(e)
