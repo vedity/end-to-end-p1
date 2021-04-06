@@ -118,7 +118,10 @@ class CreateProjectClass(APIView):
                                 exists_project_status = IngestionObj.does_project_exists(project_name,user_name) 
                                 if exists_project_status == False:
                                         file=request.FILES['inputfile'] #get inputfile Name
-                                        file_data = pd.read_csv(request.FILES['inputfile']) # read the csv file and store into dataframe variable
+                                        try:
+                                                file_data = pd.read_csv(request.FILES['inputfile']) # read the csv file and store into dataframe variable
+                                        except:
+                                                return Response({"status_code":500,"error_msg":"Invalid CSV Format, Please upload UTF-8 encoded CSV","response":"false"})
                                         file_check_status = IngestionObj.check_file(file,file_data) # call check_file function to verify csv file data
                                         if file_check_status !=True: #if file_check_status not equal to true then file must  be inappropriate
                                                 status_code,error_msg=json_obj.get_Status_code(file_check_status) # extract the status_code and error_msg from file_check_status
@@ -222,11 +225,11 @@ class CreateDatasetClass(APIView):
                                 file=request.FILES['inputfile'] #get inputfile Name
                                 
 
-                                #try:
-                                file_data = pd.read_csv(request.FILES['inputfile'])   # read the csv file and store into dataframe variable 
+                                try:
+                                        file_data = pd.read_csv(request.FILES['inputfile'])   # read the csv file and store into dataframe variable 
                                 
-                                # except:
-                                #         return Response({"status_code":500,"error_msg":"Invalid CSV Format","response":"false"})
+                                except:
+                                        return Response({"status_code":500,"error_msg":"Invalid CSV Format, Please upload UTF-8 encoded CSV","response":"false"})
                                                 
                                                                         
                                 file_check_status = IngestionObj.check_file(file,file_data)  # call check_file function to verify csv file data
