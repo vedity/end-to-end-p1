@@ -7,11 +7,14 @@ import { ManageProjectComponent } from './manage-project/manage-project.componen
 import { DetailviewProjectComponent } from './detailview-project/detailview-project.component';
 import { CreateProjectComponent } from './create-project/create-project.component';
 import { ManageSchemaMappingComponent } from './manage-schema-mapping/manage-schema-mapping.component';
+import { ManageDatasetComponent } from './manage-dataset/manage-dataset.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'project' },
   { path: 'manage', component: ListProjectComponent },
-  {path: 'dataset', component: ListDatabaseComponent},
+  // {path: 'dataset', component: ListDatabaseComponent},
+  {path: 'dataset', component: ManageDatasetComponent},
+  
   // {path: 'datadetail', component: ListDatadetailComponent},
   {path: 'project', component: ManageProjectComponent},
   {path: 'upload', component: DetailviewProjectComponent},
