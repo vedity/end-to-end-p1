@@ -68,7 +68,6 @@ class ProjectClass:
                 "dataset_status integer NOT NULL DEFAULT -1,"\
                 "model_status integer NOT NULL DEFAULT -1,"\
                 "deployment_status integer NOT NULL DEFAULT -1,"\
-                "scale_split_flag integer NOT NULL DEFAULT 1,"\
                 "user_name  text,"\
                 "original_dataset_id  bigint,"\
                 "dataset_id bigint,"\
