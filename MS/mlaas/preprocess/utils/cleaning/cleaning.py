@@ -253,7 +253,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : missing_category_imputation : execution stop")
         return status
     
-    
+   
     def frequent_category_imputation(self,DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
             Operation id: 11
@@ -279,10 +279,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 if len(dataframe['impute_value'])==0:
                     impute_value = "'-'"
                 else:
-                    impute_value = "'"+str(dataframe['impute_value'])+"'"
-
-                dataframe = DBObject.select_records(connection,sql_command)
-                impute_value = "'"+str(dataframe['impute_value'][0])+"'"
+                    impute_value = "'"+str(dataframe['impute_value'][0])+"'"
 
                 status = self.perform_missing_value_imputation(DBObject,connection, table_name,old_cols[i],impute_value)
 

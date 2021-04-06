@@ -628,7 +628,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             return OperationOrderingFailed(500).msg
         
         
-    # def master_executor(self, project_id,dataset_id, schema_id,request, flag ,selected_visibility,dataset_name ,dataset_desc):
+    # def master_executor(self,project_id, dataset_id,schema_id,request,method_flag,visibility ,dataset_name ,dataset_desc):
     #     '''
     #         It takes the request from the frontend and executes the cleanup operations.
             
@@ -645,7 +645,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
     #     '''
         
     #     try:
-    #         logging.info("data preprocessing : PreprocessingClass : master_executor : execution start" + str(type(flag))+ str(flag))
+    #         logging.info("data preprocessing : PreprocessingClass : master_executor : execution start" )
     #         DBObject,connection,connection_string = self.get_db_connection()
     #         if connection == None :
     #             raise DatabaseConnectionFailed(500)
@@ -685,9 +685,9 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
     #             value = val_dict[op]
                 
     #             #? Making Entry in the Activity Table
-    #             activity_ids = []
-    #             for temp_col_names in temp_cols:
-    #                 activity_ids.append(self.operation_start(DBObject, connection, op, user_name, project_id, dataset_id, temp_col_names))
+    #             # activity_ids = []
+    #             # for temp_col_names in temp_cols:
+    #             #     activity_ids.append(self.operation_start(DBObject, connection, op, user_name, project_id, dataset_id, temp_col_names))
                 
     #             col_names = [column_list[i] for i in col]
     #             try:
@@ -756,7 +756,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
     #                             sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
                         
     #                 elif op == 11:
-    #                     status = self.frequent_category_imputation(DBObject,connection,column_list, dataset_table_name, col)
+    #                     status = self.frequent_category_imputation(DBObject,connection,project_id,column_list,column_list, dataset_table_name, col)
     #                     if status == 0:
     #                         for col_name in col_names:
     #                             sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
@@ -885,14 +885,15 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
     #                     status = self.update_schema_flag_status(DBObject,connection,schema_id,dataset_id,column_list)
                         
     #                     if status ==0:  
+    #                         pass
     #                         #? Updating the Activity table
-    #                         for i,temp_col_names in enumerate(temp_cols):
-    #                             activity_status = self.operation_end(DBObject, connection, activity_ids[i], op, temp_col_names)
+    #                         # for i,temp_col_names in enumerate(temp_cols):
+    #                         #     activity_status = self.operation_end(DBObject, connection, activity_ids[i], op, temp_col_names)
 
-    #                         if flag == 'True':
-    #                             logging.info(" call <>")
-    #                             save_as_status = self.SaveAs(DBObject,connection,project_id,table_name,user_name,dataset_visibility,dataset_name,selected_visibility,dataset_desc)
-    #                             return save_as_status
+    #                         # if flag == 'True':
+    #                         #     logging.info(" call <>")
+    #                         #     save_as_status = self.SaveAs(DBObject,connection,project_id,table_name,user_name,dataset_visibility,dataset_name,selected_visibility,dataset_desc)
+    #                         #     return save_as_status
     #                     else:
                             
     #                         return status
@@ -902,11 +903,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
     #         logging.info("data preprocessing : PreprocessingClass : master_executor : execution stop")
     #         return status
 
-    #     except (DatabaseConnectionFailed,GetDataDfFailed,SavingFailed) as exc:
-    #         logging.error(str(exc) +" Error")
-    #         logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
-    #         logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
-    #         return exc.msg
+        except (DatabaseConnectionFailed,GetDataDfFailed,SavingFailed) as exc:
+            logging.error(str(exc) +" Error")
+            logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
+            logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
+            return exc.msg
             
     def handover(self, dataset_id, schema_id, project_id, user_name,split_parameters,scaling_type = 0):
         """[This function is used to scaled data and store numpy file into the scaled dataset folder.]

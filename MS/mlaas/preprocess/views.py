@@ -378,7 +378,7 @@ class CleanupSave(APIView):
                                 visibility = dataset_name = dataset_desc = None
                         data = json.dumps(request.data) #get handling json
                         data = json.loads(data) 
-                        # operation = preprocessObj.master_executor(project_id, dataset_id,schema_id,data,method_flag,visibility ,dataset_name ,dataset_desc )
+                        #operation = preprocessObj.master_executor(project_id, dataset_id,schema_id,data,method_flag,visibility ,dataset_name ,dataset_desc )
                         operation = preprocessObj.dag_executor(project_id, dataset_id,schema_id,data,method_flag,visibility ,dataset_name ,dataset_desc,user_name)
                         logging.info("data preprocess : CleanupSave : POST Method : execution stop")
                         if isinstance(operation,int): 
@@ -464,7 +464,7 @@ class TrainValidHoldout(APIView):
         def get(self,request,format=None):
                 try :
                         logging.info("data preprocess : TrainValidHoldout : GET Method : execution start")
-                        holdout = [{"id" : 2,"value": "90-0-5"},{"id" : 3,"value": "85-5-10"},{"id" : 4,"value": "80-10-10"},{"id" : 5,"value": "75-10-15"},{"id" : 6,"value": "70-15-15"},{"id" : 7,"value": "65-15-20"},{"id" : 8,"value": "60-20-20"}]
+                        holdout = [{"id" : 2,"value": "90-5-5"},{"id" : 3,"value": "85-5-10"},{"id" : 4,"value": "80-10-10"},{"id" : 5,"value": "75-10-15"},{"id" : 6,"value": "70-15-15"},{"id" : 7,"value": "65-15-20"},{"id" : 8,"value": "60-20-20"}]
                         return Response({"status_code":"200","error_msg":"Successfull retrival","response":holdout})
                 except Exception as e:
                         logging.error("data preprocess : TrainValidHoldout : GET Method : Exception :" + str(e))

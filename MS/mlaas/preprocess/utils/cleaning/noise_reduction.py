@@ -282,6 +282,7 @@ class RemoveNoiseClass:
         
         noise_percentage = noise_df['noise_percentage'].tolist()[0]
         
+        
         if noise_percentage == 0:
             noise_status =  0
         elif noise_percentage <= 33:
