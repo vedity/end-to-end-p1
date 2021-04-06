@@ -250,7 +250,7 @@ class SchemaClass:
             
             if schema_status ==0:
                 
-                sql_command = f'''update mlaas.project_tbl set scale_split_flag ='1' where project_id = {project_id}'''
+                sql_command = f'''update mlaas.project_tbl set scaled_split_parameters = null where project_id = {project_id}'''
                 status = DBObject.update_records(connection,sql_command) 
                 
                 #get the different column list
