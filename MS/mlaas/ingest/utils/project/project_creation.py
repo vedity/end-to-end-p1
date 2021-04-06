@@ -68,6 +68,7 @@ class ProjectClass:
                 "dataset_status integer NOT NULL DEFAULT -1,"\
                 "model_status integer NOT NULL DEFAULT -1,"\
                 "deployment_status integer NOT NULL DEFAULT -1,"\
+                "scale_split_flag integer NOT NULL DEFAULT 1,"\
                 "user_name  text,"\
                 "original_dataset_id  bigint,"\
                 "dataset_id bigint,"\
@@ -177,8 +178,6 @@ class ProjectClass:
             else:
                 raise ProjectCreationFailed(500)
                     
-
-                
             
             # Get row for project table.
             row_tuples = self.make_project_records(project_name,project_desc,user_name,original_dataset_id,dataset_id) 
@@ -398,12 +397,12 @@ class ProjectClass:
             #? Checking if Same project_name exists for the same user
             project_name=str(project_name).replace("'","''")
             sql_command = f"SELECT PROJECT_ID FROM {table_name} WHERE PROJECT_NAME = '{project_name}' AND USER_NAME = '{user_name}'"
-            #logging.info(str(sql_command) + " check error")
+           
 
             data=DBObject.select_records(connection,sql_command)
             data=len(data)
 
-            #logging.info(str(data) + " check error")
+           
             logging.info("data ingestion : ProjectClass : project_exists : execution end")
             
             #! Same project_name exists for the same user, then return status True

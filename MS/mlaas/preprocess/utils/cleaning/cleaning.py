@@ -969,10 +969,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         try:
             
             col_string = ''
-            
             # operation_id = 7
-            
-        
             for x in column_list:
                 col_string += '"'+str(x)+'",'
     

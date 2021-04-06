@@ -146,6 +146,7 @@ CREATE TABLE mlaas.project_tbl (
 	dataset_status int4 NOT NULL DEFAULT '-1'::integer,
 	model_status int4 NOT NULL DEFAULT '-1'::integer,
 	deployment_status int4 NOT NULL DEFAULT '-1'::integer,
+	scale_split_flag int4 NOT NULL DEFAULT '1'::integer,
 	user_name text NULL,
 	original_dataset_id int8 NULL,
 	dataset_id int8 NULL,
