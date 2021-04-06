@@ -301,12 +301,12 @@ class ProjectClass:
                 split_flags = []
                 try:
                     for i in project_df['project_id']:
-                        flag,desc = PREPROCESS_OBJ.check_split_exist(i)
-                        split_flags.append(flag)
+                        flag,desc = PREPROCESS_OBJ.check_split_exist(str(i))
+                        split_flags.append(str(flag))
                     
                 except Exception as e:
-                    return e
-
+                    return str(e)
+                    
                 project_df['split_status'] = split_flags
             
             except (ProjectDataNotFound) as exc:
