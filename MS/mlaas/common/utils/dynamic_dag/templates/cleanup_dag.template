@@ -111,7 +111,7 @@ def dag_resetter(DBObject,connection,dataset_id,project_id,dag_id,new_user_name,
     '''
         To reset the dag status
     '''
-    sql_command = f"update mlaas.cleanup_dag_status set status = (case when status = '1' then '0' else '1' end) where dag_id = '{dag_id}'"
+    sql_command = f"update mlaas.cleanup_dag_status set status ='0' where dag_id = '{dag_id}'"
     update_status = DBObject.update_records(connection,sql_command)
     activity_id = 52
     status = PC_OBJ.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id,new_user_name)
