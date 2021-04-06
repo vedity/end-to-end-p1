@@ -57,6 +57,42 @@ class Split_Data():
         # if not flag:
         #     #? Encoding of some columns are still remaining
         #     return flag, desc
+        
+        try:
+            #? Getting columns names that have missing values
+            missing_sql_command = f"select st.column_name from mlaas.schema_tbl st  where st.schema_id in (select schema_id from mlaas.project_tbl where project_id = '{projectid}') and st.missing_flag = 'True'"
+            missing_val_df = DBObject.select_records(connection, missing_sql_command)
+            
+            #? Checking wether the function failed
+            if not isinstance(missing_val_df,pd.DataFrame):
+                return False,'function failed'
+
+            #? Getting Description
+            desc = self.get_missing_col_desc(missing_val_df,'column_name')
+            if not missing_val_df.empty:
+                return False, desc
+
+            #? Checking if scaling & spliting is done or not
+            sql_command = f'select "scaled_split_parameters" from mlaas.project_tbl pt where project_id  ='+str(projectid)
+            df = DBObject.select_records(connection,sql_command)
+
+            #? Checking if target column is selected or not
+            target_sql_command = f"select count(*) from mlaas.schema_tbl where schema_id in (select schema_id from mlaas.project_tbl where project_id = '{projectid}') and column_attribute = 'Target'"
+            target_df = DBObject.select_records(connection,target_sql_command)
+
+            #! No target column is selected
+            if (int(target_df['count'][0])) == 0:
+                flag = False
+                desc = "Select target column in schema mapping!"                
+
+            #! No scaling has bee done
+            elif (df.iloc[0]['scaled_split_parameters']) == None:
+                flag = False
+                desc = "Please complete Scale & Split operation first!"
+            else:
+                #? Scaling complete
+                flag = True
+                desc = "You can now proceed to the modelling."
 
         
         try:
@@ -150,9 +186,6 @@ class Split_Data():
             desc = self.get_missing_col_desc(missing_val_df,'column_name')
             if not missing_val_df.empty:
                 return False, desc
-
-            
-
 
         except Exception as e:
             logging.error("data preprocessing : Check Split : check_split_validation : exception"+str(e))
