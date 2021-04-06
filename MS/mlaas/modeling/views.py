@@ -111,7 +111,7 @@ class StartModelClass(APIView):
                         
                 """
                 try:
-                        logging.info("modeling : ExperimentClass : GET Method : execution start")
+                        logging.info("modeling : StartModelClass : POST Method : execution start")
                         # We will get it from the front-end
                         model_mode = request.query_params.get('model_mode')#get model_mode
                         model_name = request.query_params.get('model_name')#get model_mode
@@ -137,49 +137,58 @@ class StartModelClass(APIView):
                         model_param_dict = {'model_mode':model_mode,'model_type':model_type,
                                 'experiment_name':experiment_name,'experiment_desc':experiment_desc,
                                 'user_id':user_id,'project_id':project_id,'dataset_id':dataset_id}
+                        
+                        model_req_status = AlgorithmDetectorObj.check_model_requirements(project_id)
+                        logging.info("modeling : StartModelClass : POST Method : execution start"+str(model_req_status))
+                        if model_req_status == True:
 
-                        if model_mode == 'Auto':
-                                #will add 'Selected Auto modeling' activity in activity_detail_tbl 
-                                activity_id = 42
-                                timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
+                                if model_mode == 'Auto':
+                                        #will add 'Selected Auto modeling' activity in activity_detail_tbl 
+                                        activity_id = 42
+                                        timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
 
-                                result = ModelObject.algorithm_identifier(model_param_dict)
-                                if result.status_code != 200:
-                                        # status_code,error_msg=json_obj.get_Status_code(learning_curve_json) # extract the status_code and error_msg from project_df
-                                        logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code :"+ result)
-                                        return Response({"status_code":result.status_code,"error_msg":str(result.content, 'UTF-8'),"response":"false"})
+                                        result = ModelObject.algorithm_identifier(model_param_dict)
+                                        if result.status_code != 200:
+                                                # status_code,error_msg=json_obj.get_Status_code(learning_curve_json) # extract the status_code and error_msg from project_df
+                                                logging.info("modeling : StartModelClass : GET Method : execution : status_code :"+ result)
+                                                return Response({"status_code":result.status_code,"error_msg":str(result.content, 'UTF-8'),"response":"false"})
 
-                                logging.info("modeling : ModelClass : GET Method : execution stop : status_code :200")
-                                return Response({"status_code":"200","error_msg":"Successfully updated","response":"pipeline started"})
+                                        logging.info("modeling : StartModelClass : GET Method : execution stop : status_code :200")
+                                        return Response({"status_code":"200","error_msg":"Successfully updated","response":"pipeline started"})
+                                
+                                else:
+                                        #will add 'selected manual modeling' activity in activity_detail_tbl
+                                        model_id = int(request.query_params.get('model_id'))
+                                        model_name = request.query_params.get('model_name') #ASK
+                                        activity_id = 43
+                                        timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
+
+                                        activity_id = 44
+                                        timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name,model_name)
+
+                                        data = json.dumps(request.data)
+                                        request_body = json.loads(data) #get all the request body parameter
+                                        
+                                        model_param = request_body["hyperparameters"]
+                                        
+                                        result = ModelObject.run_model(model_param_dict,model_id,model_name,model_param)
+
+                                        if result.status_code != 200:
+                                                # status_code,error_msg=json_obj.get_Status_code(learning_curve_json) # extract the status_code and error_msg from project_df
+                                                logging.info("modeling : StartModelClass : GET Method : execution : status_code :"+ result)
+                                                return Response({"status_code":result.status_code,"error_msg":str(result.content, 'UTF-8'),"response":"false"})
+                                        
+                                        logging.info("modeling : StartModelClass : GET Method : execution stop : status_code :200")
+                                        return Response({"status_code":"200","error_msg":"Successfully updated","response":"True"})
+                                
                         else:
-                                #will add 'selected manual modeling' activity in activity_detail_tbl
-                                model_id = int(request.query_params.get('model_id'))
-                                model_name = request.query_params.get('model_name') #ASK
-                                activity_id = 43
-                                timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
-
-                                activity_id = 44
-                                timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name,model_name)
-
-                                data = json.dumps(request.data)
-                                request_body = json.loads(data) #get all the request body parameter
-                                
-                                model_param = request_body["hyperparameters"]
-                                
-                                result = ModelObject.run_model(model_param_dict,model_id,model_name,model_param)
-
-                                if result.status_code != 200:
-                                        # status_code,error_msg=json_obj.get_Status_code(learning_curve_json) # extract the status_code and error_msg from project_df
-                                        logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code :"+ result)
-                                        return Response({"status_code":result.status_code,"error_msg":str(result.content, 'UTF-8'),"response":"false"})
-                                
-                                logging.info("modeling : ModelClass : GET Method : execution stop : status_code :200")
-                                return Response({"status_code":"200","error_msg":"Successfully updated","response":"True"})
+                                logging.info("modeling : StartModelClass : GET Method : execution : error_msg :"+ model_req_status)
+                                return Response({"status_code":"500","error_msg":model_req_status,"response":"false"})
                                 
                                 
                 except Exception as e:
-                        logging.error("mdeling : ModelClass : GET Method : Exception :" + str(e))
-                        logging.error("modeling : ModelClass : GET Method : " +traceback.format_exc())
+                        logging.error("modeling : StartModelClass : GET Method : Exception :" + str(e))
+                        logging.error("modeling : StartModelClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
 
 #class to get learning curve
