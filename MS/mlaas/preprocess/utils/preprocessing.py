@@ -903,11 +903,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
     #         logging.info("data preprocessing : PreprocessingClass : master_executor : execution stop")
     #         return status
 
-        except (DatabaseConnectionFailed,GetDataDfFailed,SavingFailed) as exc:
-            logging.error(str(exc) +" Error")
-            logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
-            logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
-            return exc.msg
+        # except (DatabaseConnectionFailed,GetDataDfFailed,SavingFailed) as exc:
+        #     logging.error(str(exc) +" Error")
+        #     logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
+        #     logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
+        #     return exc.msg
             
     def handover(self, dataset_id, schema_id, project_id, user_name,split_parameters,scaling_type = 0):
         """[This function is used to scaled data and store numpy file into the scaled dataset folder.]
