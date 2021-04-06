@@ -1058,7 +1058,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         
         index = '"index"'
         sql_command = f"update mlaas.schema_tbl set missing_flag = '{flag}' where {index} in (select {index} from mlaas.schema_tbl st where st.schema_id = '{schema_id}' and (st.changed_column_name = '{column_name}' or st.column_name = '{column_name}'))"
-        logging.info("sql_command: "+sql_command)
+        logging.info("Sql_command : update_schema_tbl_missing_flag : "+str(sql_command))
         
         status = DBObject.update_records(connection,sql_command)
         logging.info("data preprocessing : PreprocessingClass : update_schema_tbl_missing_flag : execution stop")
@@ -1071,7 +1071,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         
         index = '"index"'
         sql_command = f"update mlaas.schema_tbl set noise_flag = '{flag}' where {index} in (select {index} from mlaas.schema_tbl st where st.schema_id = '{schema_id}' and (st.changed_column_name = '{column_name}' or st.column_name = '{column_name}'))"
-        logging.info("sql_command: "+sql_command)
+        logging.info("Sql_command : update_schema_tbl_noise_flag : "+str(sql_command))
         
         status = DBObject.update_records(connection,sql_command)
         logging.info("data preprocessing : PreprocessingClass : update_schema_tbl_noise_flag : execution stop")
@@ -1092,7 +1092,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                                 "noise_flag = '" +str(noise_flag) +"'"\
                                 " Where schema_id ='"+str(schema_id)+"' and column_name = '"+str(col_name)+"'"
 
-                logging.info("sql_command " + sql_command) 
+                logging.info("Sql_command : update_schema_flag_status : "+str(sql_command))
                 #execute sql query command
                 status = DBObject.update_records(connection,sql_command) 
 
@@ -1327,7 +1327,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.info("row tuples error"+str(row_tuples))
 
             # Insert the records into table and return status and dataset_id of the inserted values
-            insert_status,dataset_id = DBObject.insert_records(connection,tbl_name,row_tuples,cols,Flag =1)
+            insert_status,dataset_id = DBObject.insert_records(connection,tbl_name,row_tuples,cols,column_name = 'dataset_id')
                                 
             if insert_status == 0:
                                     

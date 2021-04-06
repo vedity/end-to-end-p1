@@ -270,10 +270,10 @@ class DatasetClass:
         dataset_name=str(dataset_name).replace("'","''")
         if page_name == False:
             sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_name ='" + dataset_name + "' and user_name = '"+ user_name + "' and page_name='schema mapping'"
-            logging.info(str(sql_command) + "command")
+           
         else:
             sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_name ='" + dataset_name + "' and user_name = '"+ user_name + "' "
-            logging.info(str(sql_command) + "command")
+            
 
         # Get dataframe of dataset id. 
         dataset_df = DBObject.select_records(connection,sql_command)

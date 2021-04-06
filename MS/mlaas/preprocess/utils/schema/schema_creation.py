@@ -68,13 +68,8 @@ class SchemaClass:
             #check the dataset_df is empty or not if yes raise exception
             if data_df is None or len(data_df) == 0:
                         raise DatasetDataNotFound(500)
-            dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows = str(data_df['dataset_name'][0]),str(data_df['dataset_table_name'][0]),str(data_df['user_name'][0]),str(data_df['dataset_visibility'][0]),str(data_df['no_of_rows'][0])
-            # dataset_records = dataset_df.to_records(index=False) # convert dataframe to a NumPy record  
-
-            # dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows,_ = dataset_records[0] # first record of dataset
-
-            # dataset_name,dataset_table_name,user_name,dataset_visibility = str(dataset_name),str(dataset_table_name),str(user_name),str(dataset_visibility)
-
+            dataset_table_name,user_name,dataset_visibility = str(data_df['dataset_table_name'][0]),str(data_df['user_name'][0]),str(data_df['dataset_visibility'][0])
+            
             #check the dataset visibility if private append the user name with  dataset table name 
             #dataset visibility if public assign table name as  dataset table name we get
 
@@ -219,9 +214,7 @@ class SchemaClass:
 
                 column_attribute_list.append(schema_data[count]["column_attribute"]) #append attribute type
 
-            logging.info(str(change_column_name)+" change_column_name")
-            logging.info(str(column_name_list)+" column_name_list")
-            logging.info(str(column_attribute_list)+" column_attribute_list")
+           
 
             for value in change_column_name:
                 
@@ -234,7 +227,7 @@ class SchemaClass:
 
 
             index_value = self.get_target_attribute_index(DBObject,connection,schema_id)
-            logging.info(str(index_value) + " index ")
+            
             #if index value is not Zero 
             #? Then in schema table having a column with target Attribute 
             if index_value !=0 and column_attribute_list.count('Target')>=1:
@@ -256,7 +249,10 @@ class SchemaClass:
             schema_status = self.update_dataset_schema(DBObject,connection,schema_id,column_name_list,column_datatype_list,change_column_name,column_attribute_list,index_list)
             
             if schema_status ==0:
-
+                
+                sql_command = f'''update mlaas.project_tbl set scale_split_flag ='1' where project_id = {project_id}'''
+                status = DBObject.update_records(connection,sql_command) 
+                
                 #get the different column list
                 column_lst,change_column_lst,target_column_lst,ignore_column_lst = self.get_column_list(column_name_list,change_column_name,column_attribute_list)
                 
@@ -425,60 +421,54 @@ class SchemaClass:
             #get the table name and columns,and schema of the table
             schema_table_name,cols,schema = self.get_schema()
 
-            #create the schema table if already created return 1,if not return 0
-            create_status = DBObject.create_table(connection,schema_table_name,schema)
-
-            if create_status in [1,0]:
-
-                #check if values in schema table,data is exist or not. If exist then update the values else insert new record
-                status = self.is_existing_schema(DBObject,connection,schema_id)
-                if status == True and flag == False :
-                    new_cols_lst = change_column_name
-                    cols_attribute_lst = column_attribute_list
-                   
-                    for index,new_col,col_attr in zip(index_list,new_cols_lst,cols_attribute_lst): 
-
-                        #sql command for updating change_column_name and column_attribute column  based on index column value
-                        sql_command = "update "+ schema_table_name + " SET changed_column_name = '" + str(new_col) + "',"\
-                                                                    "column_attribute = '" +str(col_attr) +"'"\
-                                    " Where index ='"+str(index)+"' "
-                        
-                        logging.info(str(sql_command) + " sql")
-                        #execute sql query command
-                        status = DBObject.update_records(connection,sql_command) 
-
-                        if status ==1:
-                            raise SchemaUpdateFailed(500)
-                else:
-                    prev_dtype_lst = column_datatype_list
-                    prev_cols_lst = column_name_list
-                    new_cols_lst = ''
-                    cols_attribute_lst = 'Select'
-                    for prev_col,new_dtype,missing_value,noise_value in zip(prev_cols_lst,prev_dtype_lst,missing_flag,noise_flag): 
-
-                        row = schema_id,prev_col,new_cols_lst,new_dtype,cols_attribute_lst,str(missing_value),str(noise_value)
-
-                        # Make record for project table
-                        row_tuples = [tuple(row)] 
-                        
-                        #insert the records into schema table
-                        status,_ = DBObject.insert_records(connection,schema_table_name,row_tuples,cols) 
-                        if status ==1:
-                            raise SchemaInsertionFailed(500)
-
-                
-            else :
-                raise TableCreationFailed(500)
             
+
+            #check if values in schema table,data is exist or not. If exist then update the values else insert new record
+            status = self.is_existing_data(DBObject,connection,schema_id)
+            if status == True and flag == False :
+                new_cols_lst = change_column_name
+                cols_attribute_lst = column_attribute_list
+                   
+                for index,new_col,col_attr in zip(index_list,new_cols_lst,cols_attribute_lst): 
+
+                    #sql command for updating change_column_name and column_attribute column  based on index column value
+                    sql_command = "update "+ schema_table_name + " SET changed_column_name = '" + str(new_col) + "',"\
+                                                                "column_attribute = '" +str(col_attr) +"'"\
+                                " Where index ='"+str(index)+"' "
+                        
+                    #logging.info("update_dataset_schema : sql command to update : " + str(sql_command))
+
+                    #execute sql query command
+                    status = DBObject.update_records(connection,sql_command) 
+
+                    if status ==1:
+                        raise SchemaUpdateFailed(500)
+            else:
+                prev_dtype_lst = column_datatype_list
+                prev_cols_lst = column_name_list
+                new_cols_lst = ''
+                cols_attribute_lst = 'Select'
+                for prev_col,new_dtype,missing_value,noise_value in zip(prev_cols_lst,prev_dtype_lst,missing_flag,noise_flag): 
+
+                    row = schema_id,prev_col,new_cols_lst,new_dtype,cols_attribute_lst,str(missing_value),str(noise_value)
+
+                    # Make record for project table
+                    row_tuples = [tuple(row)] 
+                        
+                    #insert the records into schema table
+                    status,_ = DBObject.insert_records(connection,schema_table_name,row_tuples,cols) 
+                    if status ==1:
+                        raise SchemaInsertionFailed(500)
+
             logging.info("data preprocess : SchemaClass : update_dataset_schema : execution stop ")
             return status
-        except(SchemaUpdateFailed,TableCreationFailed,SchemaInsertionFailed) as exc:
+        except(SchemaUpdateFailed,SchemaInsertionFailed) as exc:
             logging.error("data preprocess : SchemaClass : update_dataset_schema : Exception " + str(exc.msg))
             logging.error("data preprocess : SchemaClass : update_dataset_schema : " +traceback.format_exc())
             return exc.msg
 
     
-    def is_existing_schema(self,DBObject,connection,schema_id):
+    def is_existing_data(self,DBObject,connection,schema_id):
         """
         this function used to  check the  Data for the given schema Id in schema table where data is already exist or not.
 
@@ -495,7 +485,7 @@ class SchemaClass:
 
             #this sql command will get schema_id if found.
             sql_command = "select schema_id from "+ table_name +" where schema_id='"+str(schema_id)+"'"
-            logging.info(str(sql_command) + " check error" )
+            
             #execute the query string,if record exist return dataframe else None
             data=DBObject.select_records(connection,sql_command) 
 
@@ -566,7 +556,7 @@ class SchemaClass:
 
             #get the total column count and Ignore count for the perticular schema id
             sql_command = f'''select count(schema_id) as column_count,(select count(column_attribute) from {schema_table_name} where schema_id ={schema_id} and column_attribute ='Ignore') as ignore_count from {schema_table_name} where schema_id ={str(schema_id)}'''
-            logging.info(str(sql_command) + "  select command")
+            
             #Execute the sql command
             dataframe = DBObject.select_records(connection,sql_command)
 

@@ -131,7 +131,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise DatabaseConnectionFailed(500)
             dataset_status,original_dataset_id = super(IngestClass,self).make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name) # Get Status about dataset creation,if successfully then 0 else 1.
             
-            # Condition will check dataset successfully created or not. if successfully then 0 else 1.
+           
             
                          
         except (DatabaseConnectionFailed) as exc:
@@ -226,7 +226,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
                 raise DatabaseConnectionFailed(500)
             
             project_df = super(IngestClass,self).show_project_details(DBObject,connection,user_name) # Get dataframe of project created.
-            logging.info("---->"+str(project_df))
+            
             project_df = project_df.to_json(orient='records')
             project_df = json.loads(project_df)
         except (DatabaseConnectionFailed) as exc:
@@ -409,7 +409,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             table_name,schema,cols = super(IngestClass, self).make_dataset_schema()
         
             sql_command = f"SELECT DATASET_VISIBILITY FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND USER_NAME = '{user_name}'"
-            logging.info(str(sql_command) + " check error")
+          
             visibility_df = DBObject.select_records(connection,sql_command) 
             
             if visibility_df is None:
