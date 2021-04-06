@@ -1189,7 +1189,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             dag_id = dag_id_df['cleanup_dag_id'][0]
             
             #? Setting the dag as busy
-            sql_command = f"update mlaas.cleanup_dag_status set status = (case when status = '1' then '0' else '1' end) where dag_id = '{dag_id}'"
+            sql_command = f"update mlaas.cleanup_dag_status set status ='1' where dag_id = '{dag_id}'"
             update_status = DBObject.update_records(connection,sql_command)
 
             op_dict, val_dict = self.reorder_operations(request)
