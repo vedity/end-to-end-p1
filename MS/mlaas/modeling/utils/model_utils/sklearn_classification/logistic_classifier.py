@@ -293,21 +293,24 @@ class LogisticClassifierClass:
         print("final_result_dict ",final_result_dict)
         # all evaluation matrix
         accuracy,recall,precision = self.get_evaluation_matrix(actual_lst,prediction_lst)  
-        print("final_result_dict ",final_result_dict)
+        print(" accuracy recall precision ", accuracy,recall,precision)
         # get cv score
         if self.dataset_split_dict['split_method'] == 'cross_validation':
             cv_score = self.cv_score(self.X_train,self.y_train) # default k-fold with 5 (r2-score)
         else:
             cv_score = 0
+        print(" cv_score ", cv_score)
         # get holdout score
         holdout_score = self.holdout_score(model,self.X_test,self.y_test) # default 80:20 splits (r2-score)
         # get model summary
-
+        print(" holdout_score ", holdout_score)
         # MLPipelineClass.store_model_metrics(accuracy=accuracy, recall=recall, precision=precision, cv_score=cv_score,
         #                                     holdout_score=holdout_score)
         model_summary = self.model_summary(self.X_train, self.X_test,self.y_train) # high level model summary
+        print(" model_summary ", model_summary)
         # get model learning curve
         learning_curve_dict = self.get_learning_curve(model,self.X_train,self.y_train)
+        print(" learning_curve_dict ", learning_curve_dict)
         
         # log mlflow parameter TODO change it to a for loop in future.
         mlflow.log_param("split method", self.dataset_split_dict['split_method'])
