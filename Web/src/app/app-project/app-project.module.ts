@@ -22,6 +22,7 @@ import { ListProjectComponent } from './list-project/list-project.component';
 import { CreateProjectComponent } from './create-project/create-project.component';
 import { ManageProjectComponent } from './manage-project/manage-project.component';
 import { DetailviewProjectComponent } from './detailview-project/detailview-project.component';
+import { DetailviewDatasetComponent } from './detailview-dataset/detailview-dataset.component';
 import { DataTablesModule } from 'angular-datatables';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
 import { CreateSchemaMappingComponent } from './create-schema-mapping/create-schema-mapping.component';
@@ -36,6 +37,7 @@ import * as exporting from 'highcharts/modules/exporting.src';
 import * as theme from 'highcharts/themes/dark-unica.src';
 import { CreateDatasetComponent } from './create-dataset/create-dataset.component';
 import { Ng5SliderModule } from 'ng5-slider';
+import { ManageDatasetComponent } from './manage-dataset/manage-dataset.component';
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   suppressScrollX: true,
@@ -53,7 +55,9 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     DataVisualizationComponent,
     DataCleanupComponent,
     ManageSchemaMappingComponent,
-    CreateDatasetComponent
+    CreateDatasetComponent,
+    ManageDatasetComponent,
+    DetailviewDatasetComponent
   ],
   imports: [
     CommonModule,

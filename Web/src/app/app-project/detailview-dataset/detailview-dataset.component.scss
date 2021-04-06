@@ -1,18 +1,10 @@
-.upload-btn {
-    margin-top: 35px;
+.ng-dirty.ng-invalid,
+.ng-touched.ng-invalid {
+    border-color: #f46a6a !important;
 }
 
-.custom-checkbox {
-    margin-top: 43px;
-}
-
-table {
-    tr {
-        td:first-child {
-            max-width: 200px;
-            overflow: hidden;
-        }
-    }
+.invalid-feedback {
+    display: block !important;
 }
 
 .tab-menu {
