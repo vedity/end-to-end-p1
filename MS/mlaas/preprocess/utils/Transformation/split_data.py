@@ -60,32 +60,15 @@ class Split_Data():
 
         
         try:
-            missing_sql_command = f"select st.column_name from mlaas.schema_tbl st  where st.schema_id in (select schema_id from mlaas.project_tbl where project_id = '{projectid}') and st.missing_flag = 'True'"
-            missing_val_df = DBObject.select_records(connection, missing_sql_command)
-            
-            if not isinstance(missing_val_df,pd.DataFrame):
-                return False,'function failed'
-
-            desc = self.get_missing_col_desc(missing_val_df,'column_name')
-            if not missing_val_df.empty:
-                return False, desc
-
+            flag,desc = self.check_split_validation(projectid)
+            if flag == False:
+                return flag,desc
             sql_command = f'select "scaled_split_parameters" from mlaas.project_tbl pt where project_id  ='+str(projectid)
             df = DBObject.select_records(connection,sql_command)
 
-            target_sql_command = f"select count(*) from mlaas.schema_tbl where schema_id in (select schema_id from mlaas.project_tbl where project_id = '{projectid}') and column_attribute = 'Target'"
-            target_df = DBObject.select_records(connection,target_sql_command)
-
-            if (int(target_df['count'][0])) == 0:
-                flag = False
-                desc = "Select target column in schema mapping!"
-
-            elif (df.iloc[0]['scaled_split_parameters']) == None:
+            if (df.iloc[0]['scaled_split_parameters']) == None:
                 flag = False
                 desc = "Please complete Scale & Split operation first!"
-            else:
-                flag = True
-                desc = "You can now proceed to the modelling."
 
             return flag,desc
 
@@ -142,5 +125,35 @@ class Split_Data():
 
             return string
         except Exception as e:
-            logging.info("data preprocessing : Check Split : get_missing_col_desc : exception"+str(e))
+            logging.error("data preprocessing : Check Split : get_missing_col_desc : exception"+str(e))
+            return str(e)
+
+    def check_split_validation(self,projectid):
+        try:
+            target_sql_command = f"select count(*) from mlaas.schema_tbl where schema_id in (select schema_id from mlaas.project_tbl where project_id = '{projectid}') and column_attribute = 'Target'"
+            target_df = DBObject.select_records(connection,target_sql_command)
+
+            if (int(target_df['count'][0])) == 0:
+                flag = False
+                desc = "Select target column in schema mapping!"
+                return flag,desc
+            # else:
+            #     flag = True
+            #     desc = "You can now proceed to the modelling."
+
+            missing_sql_command = f"select case when changed_column_name = '' then column_name else changed_column_name end column_name from mlaas.schema_tbl   where schema_id in (select schema_id from mlaas.project_tbl where project_id = '{projectid}') and missing_flag = 'True'"
+            missing_val_df = DBObject.select_records(connection, missing_sql_command)
+            
+            if not isinstance(missing_val_df,pd.DataFrame):
+                return False,'function failed'
+
+            desc = self.get_missing_col_desc(missing_val_df,'column_name')
+            if not missing_val_df.empty:
+                return False, desc
+
+            
+
+
+        except Exception as e:
+            logging.error("data preprocessing : Check Split : check_split_validation : exception"+str(e))
             return str(e)

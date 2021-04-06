@@ -401,7 +401,7 @@ class ScalingSplitClass(APIView):
                         logging.info("data preprocess : HandoverClass : POST Method : execution start")
                         schema_id = request.query_params.get('schema_id') #get schema id
                         dataset_id = request.query_params.get('dataset_id') #get dataset id
-                        project_id = request.query_params.get('project_id') #get dataset id
+                        project_id = request.query_params.get('project_id') #get project id
                         user_name = request.query_params.get('user_name') #get user_name
                         scaling_operation = request.query_params.get('scaling_op') #get scaling op
                         split_method = request.query_params.get('split_method') #get scaling method
@@ -411,6 +411,14 @@ class ScalingSplitClass(APIView):
                         random_state = request.query_params.get('random_state') #get random state
                         split_parameters = {'split_method': split_method ,'cv': cv,'valid_ratio': valid_ratio, 'test_ratio': test_ratio,'random_state': random_state} #split parameters
                         
+                        flag,desc = sd.check_split_validation(project_id)
+                        if flag:
+                                #? All the cleanup operation are done before modelling.
+                                return Response({"status_code":"200","error_msg":"Successfull retrival","response":flag})  
+                        else:
+                                #! Some operations are still remaining before we can proceed to the modelling.
+                                return Response({"status_code":"500","error_msg":desc,"response":flag})
+
                         activity_id = 49 
                         activity_df = AT_OBJ.get_activity(activity_id,"US")
                         projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
