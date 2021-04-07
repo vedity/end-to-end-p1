@@ -12,7 +12,7 @@ export class ModelingComparisonGraphComponent implements OnInit {
 
   @Input() public compareIds: any;
   @Input() public model_type: any;
-  public lineColumAreaChart: any;
+  public columnlabelChartexpand: any;
   public linechart:any;
   animation = "progress-dark";
   
@@ -68,64 +68,58 @@ export class ModelingComparisonGraphComponent implements OnInit {
 
     });
 
-    this.lineColumAreaChart = {
+    this.columnlabelChartexpand = {
       chart: {
         height: 450,
-        type: 'line',
-        stacked: false,
+        width: '100%',
+        type: 'bar',
+
         toolbar: {
           show: false
+        },
+        selection: {
+          enabled: true
         }
       },
-      stroke: {
-        width: [2, 2, 4],
+      
+      plotOptions: {
+        bar: {
+          horizontal: false,
+          columnWidth: "25%",
+         // endingShape: "rounded"
+        }
       },
-      //colors: ['#f46a6a', '#34c38f'],
+      dataLabels: {
+        enabled: false
+      },
+      //colors: ['#00e396d9','#008ffbd9'],
       series: series,
-      fill: {
-        // opacity: [0.85, 1],
-        gradient: {
-          inverseColors: false,
-          shade: 'light',
-          type: 'vertical',
-          opacityFrom: 0.85,
-          opacityTo: 0.55,
-          stops: [0, 100, 100, 100]
-        }
-      },
-      // tslint:disable-next-line: max-line-length
-      labels: this.comparegraphdata.index,
-      // ['01/01/2003', '02/01/2003', '03/01/2003', '04/01/2003', '05/01/2003', '06/01/2003', '07/01/2003', '08/01/2003', '09/01/2003', '10/01/2003', '11/01/2003'],
-      markers: {
-        size: makrkerssize
-      },
-      legend: {
-        offsetY: 5,
-      },
       xaxis: {
-        //type: 'datetime',
+        categories: this.comparegraphdata.key,
+        position: 'bottom',
+        title: {
+          text: 'Categories'
+        }
       },
       yaxis: {
-        // title: {
-        //   text: 'Points',
-        // },
+        position: 'left',
+        labels: {
+          show: true,
+          align: 'right',
+          minWidth: 0,
+          maxWidth: 160,
+        },
+        offsetX: 0,
+        offsetY: 0,
+
       },
-      tooltip: {
-        shared: true,
-        intersect: false,
-        y: {
-          formatter(y) {
-            if (typeof y !== 'undefined') {
-              return y.toFixed(0);
-            }
-            return y;
-          }
-        }
-      },
-      grid: {
-        borderColor: '#f1f1f1'
+      legend: {
+        show: true
       }
+
     };
+
+  
     this.isChart=true;
   }
 
