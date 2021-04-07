@@ -35,10 +35,10 @@
                                     <span *ngIf="item.deployment_status==0" class="badge badge-pill badge-soft-success ml-1 font-size-15">Active</span>
                                 </div>
                                 <div class="text-right float-right font-size-18 icon-box">
-                                    <a href="javascript:void(0);" [routerLink]="['/datadetail']" [state]="{dataset_id: item.dataset_id ,project_id:item.project_id,dataset_name:item.dataset_name,project_name:data.project_name,navigate_to:'/project',schema_id:item.schema_id}"> <i class=" bx bx-file font-size-22"></i></a>
-                                    <a href="javascript:void(0);" [routerLink]="['/schema']" id="schema_{{item.project_id}}" title="Schema Mapping" [state]="{dataset_id: item.dataset_id ,project_id:item.project_id,dataset_name:item.dataset_name,project_name:data.project_name,navigate_to:'/project',schema_id:item.schema_id}">
+                                    <a href="javascript:void(0);" [routerLink]="['/datadetail']" [state]="{dataset_id: item.dataset_id ,project_id:item.project_id,dataset_name:item.dataset_name,project_name:item.project_name,navigate_to:'/project',schema_id:item.schema_id}"> <i class=" bx bx-file font-size-22"></i></a>
+                                    <a href="javascript:void(0);" [routerLink]="['/schema']" id="schema_{{item.project_id}}" title="Schema Mapping" [state]="{dataset_id: item.dataset_id ,project_id:item.project_id,dataset_name:item.dataset_name,project_name:item.project_name,navigate_to:'/project',schema_id:item.schema_id}">
                                         <i id="schemaicon" class="bx bx-message-square-add"></i></a>
-                                    <a href="javascript:void(0);" [routerLink]="['/exploration']" id="schema_{{item.project_id}}" title="Data Exploration" [state]="{dataset_id: item.dataset_id ,project_id:item.project_id,dataset_name:item.dataset_name,project_name:data.project_name,navigate_to:'/project',navigate:'explore',schema_id:item.schema_id}">
+                                    <a href="javascript:void(0);" [routerLink]="['/exploration']" id="schema_{{item.project_id}}" title="Data Exploration" [state]="{dataset_id: item.dataset_id ,project_id:item.project_id,dataset_name:item.dataset_name,project_name:item.project_name,navigate_to:'/project',navigate:'explore',schema_id:item.schema_id}">
                                         <i id="exploreicon" class="bx bx-screenshot"></i></a>
                                     <a href="javascript:void(0);" id="sa-warning" (click)="confirm(item.project_id)"> <i class=" bx bx-trash font-size-22"></i></a>
                                 </div>
