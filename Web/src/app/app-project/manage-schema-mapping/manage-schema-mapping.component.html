@@ -6,7 +6,6 @@
                     <span class="font-size-18"><i class="bx bx-spreadsheet"></i></span>
                 </a>
                 <ng-template ngbNavContent>
-                    <!-- <app-list-datadetail [title]="title" [dataset_id]="dataset_id" [schema_id]="schema_id" [navigate_to]="navigate_to" [displaytitle]="displaytitle"></app-list-datadetail> -->
                 </ng-template>
             </li>
             <li [ngbNavItem]="2">
@@ -14,8 +13,6 @@
                     <span class="font-size-18"><i class="bx bx-message-square-add"></i></span>
                 </a>
                 <ng-template ngbNavContent>
-                    <!-- <app-create-schema-mapping [dataset_id]="dataset_id" [project_id]="project_id" [schema_id]="schema_id" [title]="title">
-                    </app-create-schema-mapping> -->
                 </ng-template>
             </li>
             <li [ngbNavItem]="3">
@@ -23,35 +20,23 @@
                     <span class="font-size-18"><i class="bx bx-screenshot"></i></span>
                 </a>
                 <ng-template ngbNavContent>
-                    <!-- <app-data-exploration [dataset_id]="dataset_id" [schema_id]="schema_id" [project_id]="project_id" [title]="title">
-                    </app-data-exploration> -->
                 </ng-template>
             </li>
-            <!-- <li [ngbNavItem]="4">
-                <a ngbNavLink title="Visualization">
-                    <span class="font-size-18"><i class="bx bx-bar-chart"></i></span>
-                </a>
-                <ng-template ngbNavContent>
-                    <app-data-visualization [dataset_id]="dataset_id" [project_id]="project_id" [title]="title">
-                    </app-data-visualization>
-                </ng-template>
-            </li> -->
             <li [ngbNavItem]="5">
                 <a ngbNavLink title="Data Cleanup" (click)="navigatePage(5)">
                     <span class="font-size-18"><i class="bx bx-brush"></i></span>
                 </a>
                 <ng-template ngbNavContent>
-                    <!-- <app-data-cleanup [dataset_id]="dataset_id" [schema_id]="schema_id" [project_id]="project_id" [title]="title"></app-data-cleanup> -->
                 </ng-template>
             </li>
         </ul>
     </div>
     <div [ngbNavOutlet]="justifiednav"></div>
     <div>
-        <app-list-datadetail *ngIf="activeId==1" [title]="title" [dataset_id]="dataset_id" [schema_id]="schema_id" [navigate_to]="navigate_to" [displaytitle]="displaytitle"></app-list-datadetail>
-        <app-create-schema-mapping *ngIf="activeId==2" [dataset_id]="dataset_id" [project_id]="project_id" [schema_id]="schema_id" [title]="title"></app-create-schema-mapping>
-        <app-data-exploration *ngIf="activeId==3" [dataset_id]="dataset_id" [schema_id]="schema_id" [project_id]="project_id" [title]="title"></app-data-exploration>
-        <app-data-cleanup *ngIf="activeId==5" [dataset_id]="dataset_id" [schema_id]="schema_id" [project_id]="project_id" [title]="title"></app-data-cleanup>
+        <app-list-datadetail *ngIf="activeId==1" [title]="title" [dataset_id]="dataset_id" [schema_id]="schema_id" [project_name]="project_name" [navigate_to]="navigate_to" [displaytitle]="displaytitle"></app-list-datadetail>
+        <app-create-schema-mapping *ngIf="activeId==2" [dataset_id]="dataset_id" [project_id]="project_id" [schema_id]="schema_id" [project_name]="project_name" [title]="title"></app-create-schema-mapping>
+        <app-data-exploration *ngIf="activeId==3" [dataset_id]="dataset_id" [schema_id]="schema_id" [project_id]="project_id" [project_name]="project_name" [title]="title"></app-data-exploration>
+        <app-data-cleanup *ngIf="activeId==5" [dataset_id]="dataset_id" [schema_id]="schema_id" [project_id]="project_id" [project_name]="project_name" [title]="title"></app-data-cleanup>
     </div>
     <button class="btn btn-outline-success openmodal" hidden (click)="ProjectData(projectModal)">View
         Detail </button>

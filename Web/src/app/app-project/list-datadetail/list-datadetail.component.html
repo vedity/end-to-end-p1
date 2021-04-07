@@ -9,7 +9,9 @@
     <div class="col-md-12">
         <div class="card table-card">
             <div class="card-body">
-                <h4 class="card-title mb-4">{{title}}</h4>
+                <!-- <h4 class="card-title mb-4">{{title}}</h4> -->
+                <h4 class="card-title mb-4" *ngIf="!displaytitle"> {{project_name}} > {{title}} </h4>
+                <h4 class="card-title mb-4" *ngIf="displaytitle">{{title}}</h4>
                 <ngx-skeleton-loader [hidden]="contentloaded" count="7" [animation]="animation" [theme]="theme">
                 </ngx-skeleton-loader>
                 <div class="main-datatable datadetail-datatable">
