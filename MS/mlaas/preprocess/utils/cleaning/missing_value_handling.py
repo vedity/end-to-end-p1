@@ -99,13 +99,14 @@ class MissingValueClass:
             `boolean`: `True` if missing value exists else `False`.
         '''
         sql_command = f'select count(*) as missing_value from {table_name} where "{col_name}" is null;'
-        logging.info("--->missing"+str(sql_command))   
+        
         noise_df = DBObject.select_records(connection,sql_command)
-        logging.info("--->missing"+str(noise_df))   
+        
         if int(noise_df['missing_value'][0]) > 0:
-            logging.info("--->missing"+str(True))   
+            
             return True
         else:
+            
             return False
     
-          
+        

@@ -253,7 +253,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : missing_category_imputation : execution stop")
         return status
     
-    
+   
     def frequent_category_imputation(self,DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
             Operation id: 11
@@ -275,14 +275,14 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 sql_command = 'select "'+str(old_cols[i])+'" as impute_value,count(*) from '+str(table_name)+' where "'+old_cols[i]+'" is not null group by "'+old_cols[i]+'" order by count desc limit 1'
+                logging.info(" sql_command : frequent_category_imputation " + str(sql_command))
                 dataframe = DBObject.select_records(connection,sql_command)
                 if len(dataframe['impute_value'])==0:
-                    impute_value = "'-'"
+                    impute_value = 0
                 else:
-                    impute_value = "'"+str(dataframe['impute_value'])+"'"
-
-                # dataframe = DBObject.select_records(connection,sql_command)
-                # impute_value = "'"+str(dataframe['impute_value'][0])+"'"
+                    impute_value = "'"+str(dataframe['impute_value'][0])+"'"
+                
+                logging.info(str(impute_value) + " impute_value ")
 
                 status = self.perform_missing_value_imputation(DBObject,connection, table_name,old_cols[i],impute_value)
 

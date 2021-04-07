@@ -217,13 +217,16 @@ class DBClass:
         Returns:
             [dataframe]: [it will return dataframe of the selected data from the database table.]
         """
-        sql_command = str(sql_command).replace('%',"%%") # Get sql command.
+        sql_command = str(sql_command) # Get sql command.
         try :
-        
-            connection_string = "postgresql://" + user + ":" + password + "@" + host + ":" + port + "/" + database # Make database connection string.
-            engine = create_engine(connection_string) # Create database engine.
-            data = pd.read_sql_query(sql_command, engine) #method of sqlalchemy
-            engine.dispose()
+            
+           
+            data = pd.read_sql(sql_command, connection) # Read data from database table.
+            self.update_records(connection,'commit')
+            # connection_string = "postgresql://" + user + ":" + password + "@" + host + ":" + port + "/" + database # Make database connection string.
+            # engine = create_engine(connection_string) # Create database engine.
+            # data = pd.read_sql_query(sql_command, engine) #method of sqlalchemy
+            # engine.dispose()
             return data   
         except(Exception, psycopg2.DatabaseError) as error:
             logging.info(str(error) + "check")
