@@ -71,8 +71,6 @@ else:
 #get the Column list
 column_list = PC_OBJ.get_col_names(schema_id)
 old_column_list = PC_OBJ.get_col_names(schema_id,json = False,original = True)
-schema_column_list = DBObject.get_schema_column(connection,schema_id)
-
 
 op_dict = {
     1 : PC_OBJ.discard_missing_values,
@@ -127,7 +125,7 @@ t2= PythonOperator(
             dag=dag,
             provide_context=True,
             python_callable=PC_OBJ.update_schema_flag_status,
-            op_args=[DBObject,connection,schema_id,dataset_id,schema_column_list])
+            op_args=[DBObject,connection,schema_id,dataset_id,column_list])
 t4= PythonOperator(
             task_id='Enable_Cleanup_Page',
             dag=dag,
