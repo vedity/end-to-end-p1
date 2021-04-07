@@ -628,7 +628,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             return OperationOrderingFailed(500).msg
         
         
-    # def master_executor(self, project_id,dataset_id, schema_id,request, flag ,selected_visibility,dataset_name ,dataset_desc):
+    # def master_executor(self,project_id, dataset_id,schema_id,request,method_flag,visibility ,dataset_name ,dataset_desc):
     #     '''
     #         It takes the request from the frontend and executes the cleanup operations.
             
@@ -645,7 +645,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
     #     '''
         
     #     try:
-    #         logging.info("data preprocessing : PreprocessingClass : master_executor : execution start" + str(type(flag))+ str(flag))
+    #         logging.info("data preprocessing : PreprocessingClass : master_executor : execution start" )
     #         DBObject,connection,connection_string = self.get_db_connection()
     #         if connection == None :
     #             raise DatabaseConnectionFailed(500)
@@ -685,9 +685,9 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
     #             value = val_dict[op]
                 
     #             #? Making Entry in the Activity Table
-    #             activity_ids = []
-    #             for temp_col_names in temp_cols:
-    #                 activity_ids.append(self.operation_start(DBObject, connection, op, user_name, project_id, dataset_id, temp_col_names))
+    #             # activity_ids = []
+    #             # for temp_col_names in temp_cols:
+    #             #     activity_ids.append(self.operation_start(DBObject, connection, op, user_name, project_id, dataset_id, temp_col_names))
                 
     #             col_names = [column_list[i] for i in col]
     #             try:
@@ -756,7 +756,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
     #                             sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
                         
     #                 elif op == 11:
-    #                     status = self.frequent_category_imputation(DBObject,connection,column_list, dataset_table_name, col)
+    #                     status = self.frequent_category_imputation(DBObject,connection,project_id,column_list,column_list, dataset_table_name, col)
     #                     if status == 0:
     #                         for col_name in col_names:
     #                             sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
@@ -885,14 +885,15 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
     #                     status = self.update_schema_flag_status(DBObject,connection,schema_id,dataset_id,column_list)
                         
     #                     if status ==0:  
+    #                         pass
     #                         #? Updating the Activity table
-    #                         for i,temp_col_names in enumerate(temp_cols):
-    #                             activity_status = self.operation_end(DBObject, connection, activity_ids[i], op, temp_col_names)
+    #                         # for i,temp_col_names in enumerate(temp_cols):
+    #                         #     activity_status = self.operation_end(DBObject, connection, activity_ids[i], op, temp_col_names)
 
-    #                         if flag == 'True':
-    #                             logging.info(" call <>")
-    #                             save_as_status = self.SaveAs(DBObject,connection,project_id,table_name,user_name,dataset_visibility,dataset_name,selected_visibility,dataset_desc)
-    #                             return save_as_status
+    #                         # if flag == 'True':
+    #                         #     logging.info(" call <>")
+    #                         #     save_as_status = self.SaveAs(DBObject,connection,project_id,table_name,user_name,dataset_visibility,dataset_name,selected_visibility,dataset_desc)
+    #                         #     return save_as_status
     #                     else:
                             
     #                         return status
@@ -1023,6 +1024,9 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             valid_Y_filename = "None"
             Y_valid_count= None
             X_train, X_valid, X_test, Y_train, Y_valid, Y_test=sp.get_split_data(input_features_df,target_features_df, int(random_state),float(test_ratio), valid_ratio, str(split_method))
+            if isinstance(X_train,str):
+                return X_train
+
             if split_method != 'cross_validation':
                 Y_valid_count= Y_valid.shape[0]
                 valid_X_filename = scale_dir+"/scaled_valid_X_data_" + unique_id #genrate valid_X file path     
@@ -1044,9 +1048,12 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             status = DBObject.update_records(connection, sql_command)
             if status==1:
                 raise ProjectUpdateFailed(500)
+
+            sql_command = f'''update mlaas.project_tbl set scale_split_flag ='0' where project_id = {project_id}'''
+            update_status = DBObject.update_records(connection,sql_command) 
             return status
             
-        except (DatabaseConnectionFailed,GetDataDfFailed,ProjectUpdateFailed) as exc:
+        except (DatabaseConnectionFailed,GetDataDfFailed,ProjectUpdateFailed,SplitFailed) as exc:
             logging.error("data preprocessing : PreprocessingClass : handover : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : handover : " +traceback.format_exc())
             return exc.msg
@@ -1085,7 +1092,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             missing_flag,noise_flag = self.get_preprocess_cache(dataset_id)
 
             
-            for noise_flag,missing_flag,col_name in zip(missing_flag,noise_flag,column_list): 
+            for missing_flag,noise_flag,col_name in zip(missing_flag,noise_flag,column_list): 
 
                 #sql command for updating change_column_name and column_attribute column  based on index column value
                 sql_command = "update mlaas.schema_tbl SET missing_flag = '" + str(missing_flag) + "',"\
@@ -1183,7 +1190,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             dag_id = dag_id_df['cleanup_dag_id'][0]
             
             #? Setting the dag as busy
-            sql_command = f"update mlaas.cleanup_dag_status set status = (case when status = '1' then '0' else '1' end) where dag_id = '{dag_id}'"
+            sql_command = f"update mlaas.cleanup_dag_status set status ='1' where dag_id = '{dag_id}'"
             update_status = DBObject.update_records(connection,sql_command)
 
             op_dict, val_dict = self.reorder_operations(request)

@@ -68,7 +68,6 @@ class ProjectClass:
                 "dataset_status integer NOT NULL DEFAULT -1,"\
                 "model_status integer NOT NULL DEFAULT -1,"\
                 "deployment_status integer NOT NULL DEFAULT -1,"\
-                "scale_split_flag integer NOT NULL DEFAULT 1,"\
                 "user_name  text,"\
                 "original_dataset_id  bigint,"\
                 "dataset_id bigint,"\
@@ -302,12 +301,12 @@ class ProjectClass:
                 split_flags = []
                 try:
                     for i in project_df['project_id']:
-                        flag,desc = PREPROCESS_OBJ.check_split_exist(i)
-                        split_flags.append(flag)
+                        flag,desc = PREPROCESS_OBJ.check_split_exist(str(i))
+                        split_flags.append(str(flag))
                     
                 except Exception as e:
-                    return e
-
+                    return str(e)
+                    
                 project_df['split_status'] = split_flags
             
             except (ProjectDataNotFound) as exc:

@@ -378,7 +378,7 @@ class CleanupSave(APIView):
                                 visibility = dataset_name = dataset_desc = None
                         data = json.dumps(request.data) #get handling json
                         data = json.loads(data) 
-                        # operation = preprocessObj.master_executor(project_id, dataset_id,schema_id,data,method_flag,visibility ,dataset_name ,dataset_desc )
+                        #operation = preprocessObj.master_executor(project_id, dataset_id,schema_id,data,method_flag,visibility ,dataset_name ,dataset_desc )
                         operation = preprocessObj.dag_executor(project_id, dataset_id,schema_id,data,method_flag,visibility ,dataset_name ,dataset_desc,user_name)
                         logging.info("data preprocess : CleanupSave : POST Method : execution stop")
                         if isinstance(operation,int): 
@@ -401,7 +401,7 @@ class ScalingSplitClass(APIView):
                         logging.info("data preprocess : HandoverClass : POST Method : execution start")
                         schema_id = request.query_params.get('schema_id') #get schema id
                         dataset_id = request.query_params.get('dataset_id') #get dataset id
-                        project_id = request.query_params.get('project_id') #get dataset id
+                        project_id = request.query_params.get('project_id') #get project id
                         user_name = request.query_params.get('user_name') #get user_name
                         scaling_operation = request.query_params.get('scaling_op') #get scaling op
                         split_method = request.query_params.get('split_method') #get scaling method
@@ -411,6 +411,11 @@ class ScalingSplitClass(APIView):
                         random_state = request.query_params.get('random_state') #get random state
                         split_parameters = {'split_method': split_method ,'cv': cv,'valid_ratio': valid_ratio, 'test_ratio': test_ratio,'random_state': random_state} #split parameters
                         
+                        flag,desc = sd.check_split_validation(project_id)
+                        if not flag:
+                                #! Some operations are still remaining before we can proceed to the modelling.
+                                return Response({"status_code":"500","error_msg":desc,"response":flag})
+
                         activity_id = 49 
                         activity_df = AT_OBJ.get_activity(activity_id,"US")
                         projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
@@ -420,6 +425,9 @@ class ScalingSplitClass(APIView):
                         activity_status,index = AT_OBJ.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
                         
                         status = preprocessObj.handover(dataset_id, schema_id, project_id, user_name,split_parameters, scaling_operation)
+                        if isinstance(status,str):
+                                return Response({"status_code":"500","error_msg":status,"response":"false"})
+                                
                         logging.info("data preprocess : ScalingSplitClass : POST Method : execution stop")
                         activity_id = 50
                         activity_df = AT_OBJ.get_activity(activity_id,"US")
@@ -456,7 +464,7 @@ class TrainValidHoldout(APIView):
         def get(self,request,format=None):
                 try :
                         logging.info("data preprocess : TrainValidHoldout : GET Method : execution start")
-                        holdout = [{"id" : 1,"value": "95-0-5"},{"id" : 2,"value": "90-5-5"},{"id" : 3,"value": "85-5-10"},{"id" : 4,"value": "80-10-10"},{"id" : 5,"value": "75-10-15"},{"id" : 6,"value": "70-15-15"},{"id" : 7,"value": "65-15-20"},{"id" : 8,"value": "60-20-20"}]
+                        holdout = [{"id" : 2,"value": "90-5-5"},{"id" : 3,"value": "85-5-10"},{"id" : 4,"value": "80-10-10"},{"id" : 5,"value": "75-10-15"},{"id" : 6,"value": "70-15-15"},{"id" : 7,"value": "65-15-20"},{"id" : 8,"value": "60-20-20"}]
                         return Response({"status_code":"200","error_msg":"Successfull retrival","response":holdout})
                 except Exception as e:
                         logging.error("data preprocess : TrainValidHoldout : GET Method : Exception :" + str(e))

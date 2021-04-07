@@ -54,8 +54,12 @@ class DBClass:
         for name in column_name_list:
             if read_df.dtypes.to_dict()[name] == 'object':
                 column_list.append(name)
+        
         read_df=pd.read_csv(file_path,parse_dates=column_list) #  Read csv file and load data into dataframe.
-        return read_df
+        
+        dataframe = read_df.replace(r'\s+', np.nan, regex=True)
+        
+        return dataframe
     
     def database_connection(self,database,user,password,host,port):
         """This function is used to make connection with database.
@@ -213,13 +217,16 @@ class DBClass:
         Returns:
             [dataframe]: [it will return dataframe of the selected data from the database table.]
         """
-        sql_command = str(sql_command).replace('%',"%%") # Get sql command.
+        sql_command = str(sql_command) # Get sql command.
         try :
-        
-            connection_string = "postgresql://" + user + ":" + password + "@" + host + ":" + port + "/" + database # Make database connection string.
-            engine = create_engine(connection_string) # Create database engine.
-            data = pd.read_sql_query(sql_command, engine) #method of sqlalchemy
-            engine.dispose()
+            
+           
+            data = pd.read_sql(sql_command, connection) # Read data from database table.
+            self.update_records(connection,'commit')
+            # connection_string = "postgresql://" + user + ":" + password + "@" + host + ":" + port + "/" + database # Make database connection string.
+            # engine = create_engine(connection_string) # Create database engine.
+            # data = pd.read_sql_query(sql_command, engine) #method of sqlalchemy
+            # engine.dispose()
             return data   
         except(Exception, psycopg2.DatabaseError) as error:
             logging.info(str(error) + "check")
