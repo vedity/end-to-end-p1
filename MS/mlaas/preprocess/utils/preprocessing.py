@@ -893,10 +893,10 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
     #                         # for i,temp_col_names in enumerate(temp_cols):
     #                         #     activity_status = self.operation_end(DBObject, connection, activity_ids[i], op, temp_col_names)
 
-    #                         # if flag == 'True':
-    #                         #     logging.info(" call <>")
-    #                         #     save_as_status = self.SaveAs(DBObject,connection,project_id,table_name,user_name,dataset_visibility,dataset_name,selected_visibility,dataset_desc)
-    #                         #     return save_as_status
+    #                         if method_flag == 'True':
+    #                             logging.info(" call <>")
+    #                             save_as_status = self.SaveAs(DBObject,connection,project_id,table_name,user_name,dataset_visibility,dataset_name,selected_visibility,dataset_desc)
+    #                             return save_as_status
     #                     else:
                             
     #                         return status
@@ -1289,7 +1289,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             # Get table name,schema and columns from dataset class.
             tbl_name,schema,cols = dc.make_dataset_schema() 
             file_name = None
-            file_size = None
+            file_size = '-'
             page_name = 'Cleanup'
 
             # Make record for dataset table.
