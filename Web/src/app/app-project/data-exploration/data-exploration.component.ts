@@ -85,6 +85,7 @@ export class DataExplorationComponent implements OnInit {
   dtOptions: DataTables.Settings = {};
   @Input() public dataset_id: any;
   @Input() public title: any;
+  @Input() public project_name: any;
   @Input() public project_id: any;
   @Input() public schema_id: any;
   chart: Chart;
