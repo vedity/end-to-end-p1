@@ -948,44 +948,44 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             status (`Intiger`): Status of the upload.
         '''
         try:
-            logging.info("data preprocessing : PreprocessingClass : handover : execution start")
-            
             DBObject,connection,connection_string = self.get_db_connection() #get db connection
             if connection == None :
                 raise DatabaseConnectionFailed(500)  
             
             #? Getting Dataframe
             data_df = self.get_data_df(dataset_id,schema_id) #get dataframe
-            
             if isinstance(data_df, str):
                 raise GetDataDfFailed(500)
-            
             tg_cols = DBObject.get_target_col(connection, schema_id) #get list of the target columns
             target_cols = [data_df.columns[0]]
-            target_cols += tg_cols           
+            target_cols += tg_cols    
             target_actual_features_df=data_df[target_cols]
-        
-            
-            if scaling_type == 0:
-                data_df.iloc[:,1:] = self.standard_scaling(data_df.iloc[:,1:]) #standard_scaling
-            elif scaling_type == 1:
-                data_df.iloc[:,1:] = self.min_max_scaling(data_df.iloc[:,1:]) #min_max_scaling
-            elif scaling_type == 2:
-                data_df.iloc[:,1:] = self.robust_scaling(data_df.iloc[:,1:]) #robust_scaling
-             
+            encoded_target_df=target_actual_features_df
+            for col in target_cols[1:]:
+                if encoded_target_df[col].dtype == 'O':
+                    encoded_target_df[col] = le.fit_transform(encoded_target_df[col])  
+                    
+            encoded_target_df=encoded_target_df[target_cols] #target_features_df
             feature_cols = list(data_df.columns) #get list of the column
-            for col in feature_cols[1:]:
-                if data_df[col].dtype == 'O':
-                    data_df[col] = le.fit_transform(data_df[col])  
+            
             for col in tg_cols:
                 feature_cols.remove(col) #remove target columns from list
-
+                    
+            input_feature_df=data_df[feature_cols]
+            for col in feature_cols[1:]:
+                if input_feature_df[col].dtype == 'O':
+                    input_feature_df[col] = le.fit_transform(input_feature_df[col])  
+                
+            if int(scaling_type) == 0:
+                input_feature_df.iloc[:,1:] = super().standard_scaling(input_feature_df.iloc[:,1:]) #standard_scaling
+            elif int(scaling_type) == 1:
+                input_feature_df.iloc[:,1:] = super().min_max_scaling(input_feature_df.iloc[:,1:]) #min_max_scaling
+            elif int(scaling_type) == 2:
+                input_feature_df.iloc[:,1:] = super().robust_scaling(input_feature_df.iloc[:,1:]) #robust_scaling
             
-            # target_cols = [data_df.columns[0]]
-            # target_cols += tg_cols #add index column from target columns list
             
-            input_features_df = data_df[feature_cols] #input_features_df
-            target_features_df=data_df[target_cols] #target_features_df
+            input_features_df = input_feature_df #input_features_df
+            target_features_df=encoded_target_df #target_features_df           
             mt = ModelType()
             problem_type = mt.get_model_type(target_features_df) #call get_model_type
             model_type = problem_type[0] #model_type
@@ -1388,12 +1388,36 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if status == '1':
                 return True
             else:
-                return False
-        
+                return False      
         except (DatabaseConnectionFailed) as exc:
             logging.error("data preprocessing : PreprocessingClass : get_dag_status : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_dag_status : " +traceback.format_exc())
             return exc.msg
+    def get_modelling_status(self, project_id):
+        '''
+            Used to get the dag status
+        '''
+        try:
+            logging.info("data preprocessing : PreprocessingClass : get_dag_status : execution stop")
+            
+            DBObject,connection,connection_string = self.get_db_connection()
+            if connection == None :
+                raise DatabaseConnectionFailed(500)
+            
+            sql_command = "SELECT model_status from mlaas.project_tbl where project_id='"+str(project_id)+"'"
+            model_status_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+            status = model_status_df['model_status'][0]
+            logging.info("------+++"+str(status))
+            logging.info("data preprocessing : PreprocessingClass : get_dag_status : execution stop")
+            if status == 0:
+                return True
+            else:
+                return False
+        except (DatabaseConnectionFailed) as exc:
+            logging.error("data preprocessing : PreprocessingClass : get_dag_status : Exception " + str(exc.msg))
+            logging.error("data preprocessing : PreprocessingClass : get_dag_status : " +traceback.format_exc())
+            return exc.msg
+
         
 
     def get_cleanup_startend_desc(self,DBObject,connection,dataset_id,project_id,activity_id,user_name):
