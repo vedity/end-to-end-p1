@@ -76,13 +76,21 @@ export class VerticalComponent implements OnInit, AfterViewInit {
     }
   }
 
+  timelineInterval: any;
   toggleTimeline() {
     this.getactivivtyTimeline();
-
-    if (this.classname == "")
+    if (this.classname == "") {
       this.classname = "open";
-    else
+      this.timelineInterval = setInterval(() => {
+        this.getactivivtyTimeline();
+      }, 10000);
+    }
+    else {
       this.classname = "";
+      if (this.timelineInterval) {
+        clearInterval(this.timelineInterval);
+      }
+    }
   }
 
   isMobile() {

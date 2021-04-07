@@ -30,11 +30,71 @@
     display: none !important;
 }
 
-.custom-control-label::before {border:1px solid #34c38f !important;}
-.custom-control-input[disabled] .custom-control-label::before, .custom-control-input:disabled ~ .custom-control-label::before {background-color: #222736 !important; border:1px solid #5a6074 !important;}
-.custom-control-input:checked ~ .custom-control-label::before {
+.custom-control-label::before {
+    border: 1px solid #34c38f !important;
+}
+
+.custom-control-input[disabled] .custom-control-label::before,
+.custom-control-input:disabled~.custom-control-label::before {
+    background-color: #222736 !important;
+    border: 1px solid #5a6074 !important;
+}
+
+.custom-control-input:checked~.custom-control-label::before {
     color: #fff;
     border-color: #34c38f !important;
     background-color: #34c38f !important;
 }
-.custom-control-input[disabled]:hover .custom-control-label::before,.custom-control-input:hover:disabled ~ .custom-control-label::before {cursor: no-drop !important;}
+
+.custom-control-input[disabled]:hover .custom-control-label::before,
+.custom-control-input:hover:disabled~.custom-control-label::before {
+    cursor: no-drop !important;
+}
+
+.right-panel-timeline {
+    .card {
+        position: relative;
+    }
+    .accordion {
+        .card-header {
+            background-color: transparent !important;
+            border-radius: 0px !important;
+            p {
+                margin-bottom: 0px;
+                width: 100%;
+                border-bottom: 1px solid #323232;
+                color: #c3cbe4;
+                span {
+                    color: #fff;
+                    font-weight: 500;
+                }
+            }
+        }
+        :hover {
+            border-bottom: none;
+        }
+        .btn-link:focus,
+        .btn-link.focus {
+            text-decoration: none !important;
+        }
+        .btn-link:hover {
+            color: #c3cbe4 !important;
+            text-decoration: none !important;
+        }
+        .btn:focus,
+        .btn.focus {
+            outline: 0;
+            box-shadow: none;
+        }
+        .btn {
+            border: 0px solid transparent !important;
+        }
+        .btn-link:visited {
+            text-decoration: none !important;
+            border-bottom: none !important;
+        }
+        // .card{background-color:transparent;
+        //   .card-body{padding:20px 0px;}
+        // }
+    }
+}

@@ -4,7 +4,7 @@ import { RouterModule } from '@angular/router';
 
 import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
 
-import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDropdownModule,NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 import { ClickOutsideModule } from 'ng-click-outside';
 
 import { UIModule } from '../shared/ui/ui.module';
@@ -28,7 +28,7 @@ import { TranslateModule } from '@ngx-translate/core';
     RouterModule,
     NgbDropdownModule,
     ClickOutsideModule,
-    UIModule,
+    UIModule,NgbAccordionModule,
     PerfectScrollbarModule
   ],
   providers:[LanguageService]
