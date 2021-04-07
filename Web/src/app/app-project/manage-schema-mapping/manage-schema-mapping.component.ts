@@ -22,6 +22,7 @@ export class ManageSchemaMappingComponent implements OnInit {
   schema_id:any;
   params:any;
   currentuser:any;
+  project_name:any;
   activatedroutedata:any;
   async ngOnInit() {
     this.params = history.state;
@@ -39,6 +40,10 @@ export class ManageSchemaMappingComponent implements OnInit {
       
       if (this.params.dataset_name != undefined) {
         this.title = this.params.dataset_name;
+      }
+
+      if (this.params.project_name != undefined) {
+        this.project_name = this.params.project_name;
       }
 
       this.navigate_to = this.params.navigate_to;
@@ -79,12 +84,14 @@ export class ManageSchemaMappingComponent implements OnInit {
       this.params = {
         dataset_id: this.projectdata.dataset_id,
         dataset_name: this.projectdata.dataset_name,
+        project_name: this.projectdata.project_name,
         project_id: this.projectdata.project_id, navigate_to: "/project",
         schema_id: this.projectdata.schema_id
       }
       this.dataset_id = this.params.dataset_id;
       this.schema_id=this.params.schema_id;
       this.title=this.params.dataset_name;
+      this.project_name=this.params.project_name;
       this.navigate_to = this.params.navigate_to;
       this.project_id = this.params.project_id;
 
