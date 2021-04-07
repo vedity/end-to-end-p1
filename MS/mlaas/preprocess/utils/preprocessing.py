@@ -210,6 +210,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             else:
                 sql_command = f"select column_name as column_list,case when 'True' in( missing_flag, noise_flag) then 'True' else 'False' end flag from mlaas.schema_tbl where schema_id ='{str(schema_id)}' and column_attribute !='Ignore' order by index"
                 logging.info(str(sql_command) + " command ")
+
             col_df = DBObject.select_records(connection,sql_command) 
             
             if col_df is None:
@@ -669,6 +670,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
 
     #         #? Getting operations in the ordered format
     #         op_dict, val_dict = self.reorder_operations(request)
+
+    #         schema_column_list = DBObject.get_schema_column(connection,schema_id)
             
     #         operations = op_dict.keys()
     #         for op in operations:
@@ -882,7 +885,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
     #                 else:
 
     #                     #Update all the status flag's based on the schema id
-    #                     status = self.update_schema_flag_status(DBObject,connection,schema_id,dataset_id,column_list)
+    #                     status = self.update_schema_flag_status(DBObject,connection,schema_id,dataset_id,schema_column_list)
                         
     #                     if status ==0:  
     #                         pass
@@ -1049,8 +1052,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if status==1:
                 raise ProjectUpdateFailed(500)
 
-            sql_command = f'''update mlaas.project_tbl set scale_split_flag ='0' where project_id = {project_id}'''
-            update_status = DBObject.update_records(connection,sql_command) 
+            
             return status
             
         except (DatabaseConnectionFailed,GetDataDfFailed,ProjectUpdateFailed,SplitFailed) as exc:

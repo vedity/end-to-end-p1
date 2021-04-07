@@ -857,3 +857,19 @@ class DBClass:
         
         return status
     
+
+    def get_schema_column(self,connection,schema_id):
+        '''
+        Function used to get the column name list from the schema table based on the schema id.
+        Args :
+                schema_id[(Integer)] : [Id of the schema table]
+        Return :
+                column_list[(List)] : [Name of the column ]
+
+        '''
+        sql_command = f"select column_name from mlaas.schema_tbl where schema_id = '{str(schema_id)}'"
+
+        data_df = self.select_records(connection,sql_command)
+       
+        column_list = list(data_df['column_name'])
+        return column_list
