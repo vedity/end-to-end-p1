@@ -281,8 +281,8 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 else:
                     impute_value = "'"+str(dataframe['impute_value'])+"'"
 
-                dataframe = DBObject.select_records(connection,sql_command)
-                impute_value = "'"+str(dataframe['impute_value'][0])+"'"
+                # dataframe = DBObject.select_records(connection,sql_command)
+                # impute_value = "'"+str(dataframe['impute_value'][0])+"'"
 
                 status = self.perform_missing_value_imputation(DBObject,connection, table_name,old_cols[i],impute_value)
 
