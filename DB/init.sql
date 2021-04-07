@@ -185,6 +185,21 @@ CREATE TABLE mlaas.schema_tbl (
 	noise_flag text NULL
 );
 
+--Create activity_deatil table
+CREATE TABLE mlaas.activity_detail_tbl (
+    "index" bigserial NOT NULL,
+    activity_id int8 NULL,
+    user_name text NULL,
+    project_id int8 NULL,
+    dataset_id int8 NULL,
+    activity_description text NULL,
+    start_time timestamp NOT NULL DEFAULT now(),
+    end_time timestamp NULL,
+    column_id text NULL,
+    "parameter" text NULL
+);
+ 
+
 --Insert menu_tbl
 Insert into  mlaas.menu_tbl values (2,'DI','Data Ingestion',null,null,' mdi-database-import');
 Insert into  mlaas.menu_tbl values (3,'DI','Datasets','2','/dataset',null);
