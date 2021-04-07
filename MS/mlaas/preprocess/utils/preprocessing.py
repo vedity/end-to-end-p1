@@ -665,11 +665,14 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
     #         #get the Column list
     #         column_list = DBObject.get_column_names( connection, table_name)
     #         # column_list = self.get_col_names(schema_id)
-    #         logging.info(str(column_list) + " column_list")
+            
 
     #         #? Getting operations in the ordered format
     #         op_dict, val_dict = self.reorder_operations(request)
+
+    #         schema_column_list = DBObject.get_schema_column(connection,schema_id)
             
+           
     #         operations = op_dict.keys()
     #         for op in operations:
     #             status = 1
@@ -882,7 +885,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
     #                 else:
 
     #                     #Update all the status flag's based on the schema id
-    #                     status = self.update_schema_flag_status(DBObject,connection,schema_id,dataset_id,column_list)
+    #                     status = self.update_schema_flag_status(DBObject,connection,schema_id,dataset_id,schema_column_list)
                         
     #                     if status ==0:  
     #                         pass
