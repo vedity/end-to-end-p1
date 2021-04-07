@@ -11,6 +11,7 @@
 
 # Python library imports
 import os
+import sys
 import pandas as pd
 import logging
 import traceback
@@ -104,7 +105,7 @@ class DatasetClass:
         logging.info("data ingestion : DatasetClass : get_file_path : execution end")
         return file_path
     
-    def get_file_size(self,file_path):
+    def get_file_size(self,file_path,flag = None):
         """This function is used to get size of the file.
 
         Args:
@@ -115,7 +116,11 @@ class DatasetClass:
         """
             
         logging.info("data ingestion : DatasetClass : get_file_size : execution start")
-        file_size = os.path.getsize(file_path)
+        if flag == None:
+            file_size = os.path.getsize(file_path)
+        else:
+            file_size = file_path
+
         max_size = 512000
         if file_size < max_size:
             value = round(file_size/1000, 2)
@@ -675,9 +680,14 @@ class DatasetClass:
 
             else:
                 raise VariableDatasetCreationFailed(500)
+            
+            sql_command  = "select * from "+str(raw_table_name)
+            dataframe = DBObject.select_records(connection,sql_command)
+            dataframe_size = sys.getsizeof(dataframe)
+            file_size = self.get_file_size(self,dataframe_size,flag = True)
                 
             # update the "dataset table name"  and "no_of _rows" of the given dataset id
-            sql_command = "UPDATE mlaas.dataset_tbl SET dataset_table_name='"+str(new_table_name)+"',no_of_rows = '"+str(no_of_rows)+"' where dataset_id ='"+str(dataset_id)+"'"
+            sql_command = "UPDATE mlaas.dataset_tbl SET file_size = '"+str(file_size)+"', dataset_table_name='"+str(new_table_name)+"',no_of_rows = '"+str(no_of_rows)+"' where dataset_id ='"+str(dataset_id)+"'"
             
             # Execute the sql query
             update_status = DBObject.update_records(connection,sql_command)

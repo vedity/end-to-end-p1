@@ -378,6 +378,11 @@ class CleanupSave(APIView):
                                 visibility = dataset_name = dataset_desc = None
                         data = json.dumps(request.data) #get handling json
                         data = json.loads(data) 
+                        # operation_dict = {}
+                        for dic in data:
+                                if dic['selected_handling'] == [20]:
+                                        if len(str(dic['values'][0]).strip())== 0:
+                                                return Response({"status_code":"500","error_msg":"Space is not allowed","response":"false"})
                         #operation = preprocessObj.master_executor(project_id, dataset_id,schema_id,data,method_flag,visibility ,dataset_name ,dataset_desc )
                         operation = preprocessObj.dag_executor(project_id, dataset_id,schema_id,data,method_flag,visibility ,dataset_name ,dataset_desc,user_name)
                         logging.info("data preprocess : CleanupSave : POST Method : execution stop")
