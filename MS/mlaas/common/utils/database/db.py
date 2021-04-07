@@ -57,7 +57,7 @@ class DBClass:
         
         read_df=pd.read_csv(file_path,parse_dates=column_list) #  Read csv file and load data into dataframe.
         
-        dataframe = read_df.replace(r'\s+', np.nan, regex=True)
+        dataframe = read_df.replace(r'^\s*$', np.nan, regex=True)
         
         return dataframe
     
@@ -867,7 +867,7 @@ class DBClass:
                 column_list[(List)] : [Name of the column ]
 
         '''
-        sql_command = f"select column_name from mlaas.schema_tbl where schema_id = '{str(schema_id)}'"
+        sql_command = f"select column_name from mlaas.schema_tbl where schema_id = '{str(schema_id)}' order by index"
 
         data_df = self.select_records(connection,sql_command)
        
