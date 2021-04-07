@@ -903,11 +903,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
     #         logging.info("data preprocessing : PreprocessingClass : master_executor : execution stop")
     #         return status
 
-        except (DatabaseConnectionFailed,GetDataDfFailed,SavingFailed) as exc:
-            logging.error(str(exc) +" Error")
-            logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
-            logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
-            return exc.msg
+    #     except (DatabaseConnectionFailed,GetDataDfFailed,SavingFailed) as exc:
+    #         logging.error(str(exc) +" Error")
+    #         logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
+    #         logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
+    #         return exc.msg
             
     def handover(self, dataset_id, schema_id, project_id, user_name,split_parameters,scaling_type = 0):
         """[This function is used to scaled data and store numpy file into the scaled dataset folder.]
@@ -1092,7 +1092,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             missing_flag,noise_flag = self.get_preprocess_cache(dataset_id)
 
             
-            for noise_flag,missing_flag,col_name in zip(missing_flag,noise_flag,column_list): 
+            for missing_flag,noise_flag,col_name in zip(missing_flag,noise_flag,column_list): 
 
                 #sql command for updating change_column_name and column_attribute column  based on index column value
                 sql_command = "update mlaas.schema_tbl SET missing_flag = '" + str(missing_flag) + "',"\

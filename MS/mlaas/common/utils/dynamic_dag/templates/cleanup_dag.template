@@ -115,7 +115,7 @@ def dag_resetter(DBObject,connection,dataset_id,project_id,dag_id,new_user_name,
     update_status = DBObject.update_records(connection,sql_command)
     activity_id = 52
     status = PC_OBJ.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id,new_user_name)
-        
+    connection.close()
     return update_status
 
 #? Making Dynamic Tasks
