@@ -210,7 +210,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             else:
                 sql_command = f"select column_name as column_list,case when 'True' in( missing_flag, noise_flag) then 'True' else 'False' end flag from mlaas.schema_tbl where schema_id ='{str(schema_id)}' and column_attribute !='Ignore' order by index"
                 logging.info(str(sql_command) + " command ")
-
             col_df = DBObject.select_records(connection,sql_command) 
             
             if col_df is None:
@@ -670,8 +669,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
 
     #         #? Getting operations in the ordered format
     #         op_dict, val_dict = self.reorder_operations(request)
-
-    #         schema_column_list = DBObject.get_schema_column(connection,schema_id)
             
            
     #         operations = op_dict.keys()
@@ -886,7 +883,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
     #                 else:
 
     #                     #Update all the status flag's based on the schema id
-    #                     status = self.update_schema_flag_status(DBObject,connection,schema_id,dataset_id,schema_column_list)
+    #                     status = self.update_schema_flag_status(DBObject,connection,schema_id,dataset_id,column_list)
                         
     #                     if status ==0:  
     #                         pass
@@ -913,41 +910,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
     #         logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
     #         return exc.msg
             
-    def handover(self, dataset_id, schema_id, project_id, user_name,split_parameters,scaling_type = 0):
-        """[This function is used to scaled data and store numpy file into the scaled dataset folder.]
-
-        Args:
-            dataset_id ([type]): [to get the dataframe for scaling and split]
-            schema_id ([type]): [to get column name]
-            project_id ([type]): [to update the entry in project_tble]
-            user_name ([type]): [to update the entry in project_tble]
-            split_parameters ([type]): [for spliling]
-            scaling_type (int, optional): [get scaling type]. Defaults to 0.
-
-        Raises:
-            DatabaseConnectionFailed: [description]
-            GetDataDfFailed: [description]
-            ProjectUpdateFailed: [description]
-
-        Returns:
-            status (`Intiger`): Status of the upload.
-        """
-        '''
-            This function is used to scaled data and store numpy file into the scaled dataset folder.
-            
-            Args:
-            -----
-            data_df (`pandas.DataFrame`) = whole dataframe.
-            scaling_type (`Intiger`) (default = `0`): Type of the rescaling operation.
-                - 0 : Standard Scaling
-                - 1 : Min-max Scaling
-                - 2 : Robust Scaling
-                - 3 : Custom Scaling
-                
-            Returns:
-            -------
-            status (`Intiger`): Status of the upload.
-        '''
+    def handover(self, dataset_id, schema_id, project_id, user_name,split_parameters,scaling_type = 0):        
+        logging.info("data preprocessing : PreprocessingClass : handover : execution start")
         try:
             DBObject,connection,connection_string = self.get_db_connection() #get db connection
             if connection == None :
@@ -1052,8 +1016,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             status = DBObject.update_records(connection, sql_command)
             if status==1:
                 raise ProjectUpdateFailed(500)
-
-            
             return status
             
         except (DatabaseConnectionFailed,GetDataDfFailed,ProjectUpdateFailed,SplitFailed) as exc:
