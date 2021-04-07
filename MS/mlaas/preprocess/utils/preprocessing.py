@@ -1350,12 +1350,36 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if status == '1':
                 return True
             else:
-                return False
-        
+                return False      
         except (DatabaseConnectionFailed) as exc:
             logging.error("data preprocessing : PreprocessingClass : get_dag_status : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_dag_status : " +traceback.format_exc())
             return exc.msg
+    def get_modelling_status(self, project_id):
+        '''
+            Used to get the dag status
+        '''
+        try:
+            logging.info("data preprocessing : PreprocessingClass : get_dag_status : execution stop")
+            
+            DBObject,connection,connection_string = self.get_db_connection()
+            if connection == None :
+                raise DatabaseConnectionFailed(500)
+            
+            sql_command = "SELECT model_status from mlaas.project_tbl where project_id='"+str(project_id)+"'"
+            model_status_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+            status = model_status_df['model_status'][0]
+            logging.info("------+++"+str(status))
+            logging.info("data preprocessing : PreprocessingClass : get_dag_status : execution stop")
+            if status == 0:
+                return True
+            else:
+                return False
+        except (DatabaseConnectionFailed) as exc:
+            logging.error("data preprocessing : PreprocessingClass : get_dag_status : Exception " + str(exc.msg))
+            logging.error("data preprocessing : PreprocessingClass : get_dag_status : " +traceback.format_exc())
+            return exc.msg
+
         
 
     def get_cleanup_startend_desc(self,DBObject,connection,dataset_id,project_id,activity_id,user_name):
