@@ -19,7 +19,7 @@
             <div class="right-panel-timeline">
                 <h4>Timeline</h4>
                 <perfect-scrollbar style="height: calc(100vh - 185px);">
-                    <div class="box" *ngFor="let item of keys;let i=index">
+                    <!-- <div class="box" *ngFor="let item of keys;let i=index">
                         <p *ngIf="(currentDate | date:'yMMdd') == (item | date:'yMMdd')">Today <span class="badge badge-pill badge-soft-dark ml-1 ">{{transactions[item].length}} Activities</span></p>
                         <p *ngIf="(currentDate | date:'yMMdd') != (item | date:'yMMdd')">{{item | date}} <span class="badge badge-pill badge-soft-dark ml-1 ">{{transactions[item].length}} Activities</span></p>
                         <div class="card">
@@ -41,7 +41,61 @@
                                 </ul>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
+
+
+                    <ngb-accordion #acc="ngbAccordion" activeIds="static-0" [closeOthers]="true">
+                        <ngb-panel id="static-{{i}}" *ngFor="let item of keys;let i=index">
+                            <ng-template ngbPanelTitle class="text-black">
+                                <p>
+                                    <span *ngIf="(currentDate | date:'yMMdd') == (item | date:'yMMdd')">Today </span>
+                                    <span *ngIf="(currentDate | date:'yMMdd') != (item | date:'yMMdd')">{{item | date}} </span> ( {{transactions[item].length}} Activities )
+                                </p>
+                            </ng-template>
+                            <ng-template ngbPanelContent>
+                                <div class="box">
+                                    <div class="filter-timeline">
+                                        <!-- <div class="dropdown" ngbDropdown>
+
+                                            <button type="button" class="btn  dropdown-toggle dropdown-toggle-split" ngbDropdownToggle>
+                                      <i class="bx bx-dots-vertical-rounded"></i>
+                                  </button>
+                                            <div class="dropdown-menu " x-placement="bottom-left" ngbDropdownMenu>
+                                                <a class="dropdown-item" href="javascript: void(0);">Project Creation</a>
+                                                <a class="dropdown-item" href="javascript: void(0);">Dataset Creation</a>
+                                                <a class="dropdown-item" href="javascript: void(0);">Project Deletion</a>
+                                                <a class="dropdown-item" href="javascript: void(0);">Dataset Deletion</a>
+                                                <a class="dropdown-item" href="javascript: void(0);">Cleanup Activities</a>
+                                                <a class="dropdown-item" href="javascript: void(0);">Cleanup Activities</a>
+
+                                            </div>
+                                        </div> -->
+
+                                    </div>
+                                    <ul class="verti-timeline list-unstyled">
+                                        <li class="event-list" *ngFor="let activity of transactions[item]">
+                                            <div class="event-timeline-dot">
+                                                <i class="bx font-size-20 {{activity.operation | lowercase}}"></i>
+                                            </div>
+                                            <div class="media">
+                                                <div class="media-body">
+                                                    <div>
+                                                        <h5>{{activity.activity_name}} <span>{{activity.timestamp |date :'shortTime'}}</span></h5>
+                                                        <p [innerHtml]="activity.activity_description"></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                    <!-- <div class="text-center mt-4"><a href="" class="btn btn-primary btn-sm">View More <i
+                                            class="mdi mdi-arrow-right ml-1"></i></a></div> -->
+                                    <!-- </div>
+                              </div> -->
+                                </div>
+                            </ng-template>
+                        </ngb-panel>
+
+                    </ngb-accordion>
                 </perfect-scrollbar>
             </div>
 
