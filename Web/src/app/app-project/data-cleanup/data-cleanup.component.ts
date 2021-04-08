@@ -5,7 +5,7 @@ import { DataTableDirective } from 'angular-datatables';
 import { ToastrService } from 'ngx-toastr';
 import { DataCleanupApiService } from '../data-cleanup.service';
 import { Options } from 'ng5-slider';
-import { scaleandsplit ,saveAsModal} from './data-cleanup.model';
+import { scaleandsplit, saveAsModal } from './data-cleanup.model';
 import { NgForm } from '@angular/forms';
 import { isInteractionValid } from '@fullcalendar/core/validation';
 @Component({
@@ -73,7 +73,6 @@ export class DataCleanupComponent implements OnInit {
 
   checkvalidation(event, type) {
     var value = event.target.value;
-    console.log(type);
     var match = true;
     var regexfortypeinteger = /^[0-9]{1,50}$/;
     var regexfortypefloat = /^([0-9]*[.])?[0-9]+$/;
@@ -96,7 +95,6 @@ export class DataCleanupComponent implements OnInit {
         else
           match = false
       }
-      console.log(match);
       if (!match) {
         $("#" + event.target.id).addClass("errorstatus")
       }
@@ -110,7 +108,7 @@ export class DataCleanupComponent implements OnInit {
     if (this.setModelingInterval) {
       clearInterval(this.setModelingInterval);
     }
-   // this.getCheckSplit();
+    // this.getCheckSplit();
     this.getCldagStatus();
     this.dtOptions = {
       paging: false,
@@ -132,15 +130,15 @@ export class DataCleanupComponent implements OnInit {
   }
 
   getCheckSplit() {
-    
-    this.apiService.getCheckSplit(this.project_id,this.schema_id).subscribe(
+
+    this.apiService.getCheckSplit(this.project_id, this.schema_id).subscribe(
       logs => this.checksplitSuccessHandler(logs),
-      error=>this.errorHandler(error)
+      error => this.errorHandler(error)
     )
   }
 
   getCldagStatus() {
-    
+
     this.apiService.getCldagStatus(this.project_id).subscribe(
       logs => this.CldagSuccessHandler(logs)
     )
@@ -169,10 +167,10 @@ export class DataCleanupComponent implements OnInit {
   checksplitSuccessHandler(data) {
     if (data.status_code == "200") {
       this.isEnableModeling = data.response;
-      if(this.isEnableModeling){
+      if (this.isEnableModeling) {
         $("#modeling-btn")[0].click();
       }
-      else{
+      else {
         this.errorHandler(data);
       }
       // if (!this.isEnableModeling) {
@@ -188,7 +186,7 @@ export class DataCleanupComponent implements OnInit {
       //   }
       // }
     }
-    else{
+    else {
       this.errorHandler(data);
     }
   }
@@ -377,7 +375,6 @@ export class DataCleanupComponent implements OnInit {
 
   errorothertag = false;
   tabchange(event, tabid) {
-    console.log($(".errorstatus").length);
     $(".checkbox:checked").prop("checked", false);
     this.selectedColumn = [];
     this.getColumnviseOperation();
@@ -441,17 +438,13 @@ export class DataCleanupComponent implements OnInit {
     } else {
       if ($(".handlingitem").length > 0) {
         if ($(".error").length == 0) {
-
-
           $(".handlingitem").each(function () {
             var id = $(this).prop('id').split('_');
             var columnid = id[1];
             var operationid = id[2];
-
             var value = $("#setInput_" + columnid + "_" + operationid).val();
             arrayhandlers.push({ column_id: columnid, selected_handling: operationid, values: value });
           })
-
           var handlers = this.groupBy(arrayhandlers, 'column_id');
           for (var item in handlers) {
             let selectedhandling = [];
@@ -468,21 +461,20 @@ export class DataCleanupComponent implements OnInit {
             }
             this.fianlarray.push({ "column_id": [parseInt(item)], "selected_handling": selectedhandling, "values": values })
           }
-          console.log(this.fianlarray);
           if (this.errorflag == true) {
             this.toaster.error("Please enter required input", 'Error')
           }
           else {
             if (isSave == 'False') {
-             
+
               this.apiService.saveOperations(this.schema_id, this.dataset_id, this.project_id, isSave, this.fianlarray).subscribe(
                 logs => this.saveSuccessHandlers(logs),
                 error => this.errorHandler(error)
               )
             }
             else {
-              this.saveAs=new saveAsModal();
-              this.saveAs.isPrivate=true;
+              this.saveAs = new saveAsModal();
+              this.saveAs.isPrivate = true;
               this.modalService.open(smallDataModal, { size: 'sm', windowClass: 'modal-holder', centered: true });
             }
           }
@@ -491,8 +483,17 @@ export class DataCleanupComponent implements OnInit {
           this.toaster.error("Please enter valid input", 'Error')
 
       }
-      else
-        this.toaster.error("Please select any handlers", 'Error')
+      else {
+        if (isSave == 'False') {
+          this.toaster.error("Please select any handlers", 'Error')
+        }
+        else {
+          this.saveAs = new saveAsModal();
+          this.saveAs.isPrivate = true;
+          this.modalService.open(smallDataModal, { size: 'sm', windowClass: 'modal-holder', centered: true });
+        }
+      }
+
     }
   }
 
@@ -543,7 +544,6 @@ export class DataCleanupComponent implements OnInit {
         random_state: this.scaldata.train_random_state
       }
     }
-    console.log(this.response);
     this.apiService.savescalingOpertion(this.response).subscribe(
       logs => this.savescalSuccessHandlers(logs),
       error => this.errorHandler(error)
@@ -553,7 +553,7 @@ export class DataCleanupComponent implements OnInit {
   savescalSuccessHandlers(data) {
     if (data.status_code == "200") {
       this.toaster.success(data.error_msg, 'Success')
-     // this.getCheckSplit();
+      // this.getCheckSplit();
 
     }
     else {
@@ -589,13 +589,18 @@ export class DataCleanupComponent implements OnInit {
   }
 
   saveAsDataset(flag) {
-    this.apiService.saveasOperations(this.schema_id, this.dataset_id, this.project_id, this.saveAs.dataset_name, this.saveAs.isPrivate, this.saveAs.description, flag, this.fianlarray)
-     .subscribe(
-       logs => this.saveAsSuccessHandlers(logs),
-       error => this.errorHandler(error)
+    let visibility = "";
+    if (this.saveAs.isPrivate == true)
+      visibility = 'private';
+    else
+      visibility = 'public';
+    this.apiService.saveasOperations(this.schema_id, this.dataset_id, this.project_id, this.saveAs.dataset_name, visibility, this.saveAs.description, flag, this.fianlarray)
+      .subscribe(
+        logs => this.saveAsSuccessHandlers(logs),
+        error => this.errorHandler(error)
       )
   }
-  
+
   saveAsSuccessHandlers(data) {
     if (data.status_code == "200") {
       $(".checkbox:checked").prop("checked", false);
