@@ -685,6 +685,7 @@ class DatasetClass:
             dataframe = DBObject.select_records(connection,sql_command)
             dataframe_size = sys.getsizeof(dataframe)
             file_size = self.get_file_size(dataframe_size,flag = True)
+                
             # update the "dataset table name"  and "no_of _rows" of the given dataset id
             sql_command = "UPDATE mlaas.dataset_tbl SET file_size = '"+str(file_size)+"', dataset_table_name='"+str(new_table_name)+"',no_of_rows = '"+str(no_of_rows)+"' where dataset_id ='"+str(dataset_id)+"'"
             
