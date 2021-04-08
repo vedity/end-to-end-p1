@@ -28,6 +28,15 @@ export class ListDatabaseComponent implements OnInit {
   filter: boolean = true;
   loaderdiv = false;
   f: NgForm;
+  isloaderdiv:boolean=true;
+  animation = "progress-dark";
+  theme = {
+    'border-radius': '5px',
+    'height': '40px',
+    'background-color': ' rgb(34 39 54)',
+    'border': '1px solid #32394e',
+    'animation-duration': '20s'
+  };
   constructor(public apiService: ProjectApiService, public toaster: ToastrService,private modalService: NgbModal,public router:Router) { }
   transactions: any = [];
 
@@ -79,6 +88,9 @@ export class ListDatabaseComponent implements OnInit {
     else {
       this.rendered();
     }
+    setTimeout(() => {
+      this.isloaderdiv=false;
+    }, 0);
   }
 
   errorHandler(error) {
