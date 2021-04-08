@@ -109,14 +109,16 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 raise DatabaseConnectionFailed(500)  
             
             data_df = DBObject.get_dataset_df(connection, dataset_id, schema_id)
+            
             if isinstance(data_df, str):
                 raise EntryNotFound(500)
-            
+            connection.close()
             logging.info("data preprocessing : PreprocessingClass : get_data_df : execution stop")
             
             return data_df
             
         except (DatabaseConnectionFailed,EntryNotFound) as exc:
+            connection.close()
             logging.error("data preprocessing : PreprocessingClass : get_data_df : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_data_df : " +traceback.format_exc())
             return exc.msg
@@ -163,10 +165,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 raise DatabaseConnectionFailed(500)
 
             status = super(PreprocessingClass,self).save_schema(DBObject,connection,schema_data,project_id,dataset_id,schema_id,user_name)
-
+            connection.close()
             logging.info("data preprocessing : PreprocessingClass : save_schema_data : execution start")
             return status
         except (DatabaseConnectionFailed) as exc:
+            connection.close()
             logging.error("data preprocessing : PreprocessingClass : save_schema_data : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : save_schema_data : " +traceback.format_exc())
             return exc.msg
@@ -179,10 +182,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 raise DatabaseConnectionFailed(500)
 
             status = super(PreprocessingClass,self).get_schema_data(DBObject,connection,schema_id)
-            
+            connection.close()
             logging.info("data preprocessing : PreprocessingClass : get_schema_details : execution stop")
             return status
         except (DatabaseConnectionFailed) as exc:
+            connection.close()
             logging.error("data preprocessing : PreprocessingClass : get_schema_details : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_schema_details : " +traceback.format_exc())
             return exc.msg
@@ -228,10 +232,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             json_data = [{"column_id": count, "col_name": column_name[count],"is_missing":flag_value[count]} for count in range(1,len(column_name))]
             
             logging.info("data preprocessing : PreprocessingClass : get_col_names : execution stop")
-            
+            connection.close()
             return json_data
             
         except (DatabaseConnectionFailed,EntryNotFound) as exc:
+            connection.close()
             logging.error("data preprocessing : PreprocessingClass : get_col_names : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_col_names : " +traceback.format_exc())
             return exc.msg
@@ -307,15 +312,17 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     tab_dict['operation_classes'] = operation_classes
                     master_response.append(tab_dict)
                     k += 1
-    
+                connection.close()
                 logging.info("data preprocessing : PreprocessingClass : get_all_operations : execution stop")
                 return master_response
             
             except Exception as exc:
+                connection.close()
                 logging.info(f"data preprocessing : PreprocessingClass : get_all_operations : Function failed : {str(exc)}")
                 return exc
             
         except (DatabaseConnectionFailed,TableNotFound) as exc:
+            connection.close()
             logging.error("data preprocessing : PreprocessingClass : get_all_operations : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_all_operations : " +traceback.format_exc())
             return exc.msg
@@ -364,11 +371,12 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     noise = True
                 else: noise = False
                 noise_status.append(noise)
-            
+            connection.close()
             logging.info("data preprocessing : PreprocessingClass : get_preprocess_cache : execution stop")
             return missing_value_status,noise_status
             
         except (DatabaseConnectionFailed,EntryNotFound,GetDataDfFailed) as exc:
+            connection.close()
             logging.error("data preprocessing : PreprocessingClass : get_preprocess_cache : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_preprocess_cache : " +traceback.format_exc())
             return exc.msg
@@ -520,14 +528,16 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 final_op_list.sort()
                 
                 logging.info("data preprocessing : PreprocessingClass : get_possible_operations : execution End")
-                
+                connection.close()
                 return [i+self.op_diff for i in final_op_list]    
             
             except Exception as exc:
+                connection.close()
                 logging.info(f"data preprocessing : PreprocessingClass : get_possible_operations : Function failed : {str(exc)}")
                 return exc
                 
         except (DatabaseConnectionFailed,EntryNotFound,GetDataDfFailed) as exc:
+            connection.close()
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
             return exc.msg
@@ -1018,9 +1028,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             status = DBObject.update_records(connection, sql_command)
             if status==1:
                 raise ProjectUpdateFailed(500)
+            connection.close()
             return status
             
         except (DatabaseConnectionFailed,GetDataDfFailed,ProjectUpdateFailed,SplitFailed) as exc:
+            connection.close()
             logging.error("data preprocessing : PreprocessingClass : handover : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : handover : " +traceback.format_exc())
             return exc.msg
@@ -1118,10 +1130,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             result = requests.post("http://airflow:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
 
             logging.info("data preprocessing : PreprocessingClass : get_cleanup_dag_name : execution stop")
-            
+            connection.close()
             return dag_id
         
         except (DatabaseConnectionFailed) as exc:
+            connection.close()
             logging.error("data preprocessing : PreprocessingClass : get_cleanup_dag_name : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_cleanup_dag_name : " +traceback.format_exc())
             return exc.msg
@@ -1197,7 +1210,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.info("DAG RUN RESULT: "+str(result))
             
             logging.info("data preprocessing : PreprocessingClass : dag_executor : execution stop")
-                
+            connection.close()   
             return 0
         
         except (DatabaseConnectionFailed,DagUpdateFailed) as exc:
@@ -1206,7 +1219,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if update_status == 0:
                 sql_command = f"update mlaas.cleanup_dag_status set status = (case when status = '1' then '0' else '1' end) where dag_id = '{dag_id}'"
                 update_status = DBObject.update_records(connection,sql_command)
-
+            connection.close()
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
             return exc.msg
@@ -1349,12 +1362,13 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             status = status_df['status'][0]
             
             logging.info("data preprocessing : PreprocessingClass : get_dag_status : execution stop")
-
+            connection.close()
             if status == '1':
                 return True
             else:
                 return False      
         except (DatabaseConnectionFailed) as exc:
+            connection.close()
             logging.error("data preprocessing : PreprocessingClass : get_dag_status : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_dag_status : " +traceback.format_exc())
             return exc.msg
@@ -1374,11 +1388,13 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             status = model_status_df['model_status'][0]
             logging.info("------+++"+str(status))
             logging.info("data preprocessing : PreprocessingClass : get_dag_status : execution stop")
+            connection.close()
             if status == 0:
                 return True
             else:
                 return False
         except (DatabaseConnectionFailed) as exc:
+            connection.close()
             logging.error("data preprocessing : PreprocessingClass : get_dag_status : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_dag_status : " +traceback.format_exc())
             return exc.msg
