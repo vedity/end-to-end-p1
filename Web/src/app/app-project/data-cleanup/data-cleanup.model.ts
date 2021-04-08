@@ -9,3 +9,14 @@ export class scaleandsplit{
     valid_ratio ?:number;
 
 }
+
+export class saveAsModal{
+    isPrivate?: boolean;
+    dataset_name?: string;
+    description?: string;
+}
+export class saveAsModal{
+    isPrivate?: boolean;
+    dataset_name?: string;
+    description?: string;
+}
