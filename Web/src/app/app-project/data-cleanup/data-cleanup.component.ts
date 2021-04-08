@@ -606,6 +606,7 @@ export class DataCleanupComponent implements OnInit {
       this.getColumnviseOperation();
       this.toaster.success(data.error_msg, 'Success')
       this.modalService.dismissAll();
+      this.getCldagStatus();
     }
     else {
       this.errorHandler(data);
