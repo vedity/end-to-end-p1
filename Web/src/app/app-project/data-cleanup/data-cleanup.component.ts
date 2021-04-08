@@ -26,7 +26,7 @@ export class DataCleanupComponent implements OnInit {
     split_method: 'cross_validation',
     scaling_op: '0'
   };
-  saveAs: any = new saveAsModal();
+  saveAs = new saveAsModal();
   constructor(public apiService: DataCleanupApiService, public toaster: ToastrService, private modalService: NgbModal, public router: Router) { }
   @Input() public dataset_id: any;
   @Input() public title: any;
