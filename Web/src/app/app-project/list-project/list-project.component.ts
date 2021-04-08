@@ -19,6 +19,15 @@ export class ListProjectComponent implements OnInit {
     scrollY: "calc(100vh - 420px)",
     
   };
+  isloaderdiv:boolean=true;
+  animation = "progress-dark";
+  theme = {
+    'border-radius': '5px',
+    'height': '40px',
+    'background-color': ' rgb(34 39 54)',
+    'border': '1px solid #32394e',
+    'animation-duration': '20s'
+  };
   dtTrigger: Subject<any> = new Subject<any>();
   filter: boolean = true;
   constructor(public router: Router, public http: HttpClient, public apiService: ProjectApiService, public toaster: ToastrService) { }
@@ -77,6 +86,9 @@ export class ListProjectComponent implements OnInit {
       this.rendered();
       this.dtTrigger.next();
     }
+    setTimeout(() => {
+    this.isloaderdiv=false;
+    }, 0);
   }
 
   errorHandler(error) {
