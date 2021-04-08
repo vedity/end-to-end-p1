@@ -1202,7 +1202,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 raise DagUpdateFailed(500)
 
             activity_id = 51
-            activity_status = self.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id,user_name)
+            activity_status = self.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id,user_name,dataset_name)
 
             json_data = {}
             result = requests.post(f"http://airflow:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False)#owner
@@ -1401,7 +1401,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
 
         
 
-    def get_cleanup_startend_desc(self,DBObject,connection,dataset_id,project_id,activity_id,user_name):
+    def get_cleanup_startend_desc(self,DBObject,connection,dataset_id,project_id,activity_id,user_name,dataset_name):
         """This function will replace * into project name and get activity description of scale and split.
  
         Args:
@@ -1412,9 +1412,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             [String]: activity_description
         """
         activity_df = self.AT.get_activity(activity_id,"US")
-        datasetnm_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
+        if dataset_name == None:   
+            datasetnm_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
+            dataset_name = datasetnm_df['dataset_name'][0]
+        
         projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
-        dataset_name = datasetnm_df['dataset_name'][0]
         project_name = projectnm_df['project_name'][0]
 
         sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
