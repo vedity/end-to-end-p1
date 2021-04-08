@@ -15,6 +15,7 @@ import json
 from common.utils.logger_handler import custom_logger as cl
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception import *
+from common.utils.exception_handler.python_exception.modeling.modeling_exception import *
 
 user_name = 'admin'
 log_enable = True
@@ -151,3 +152,42 @@ class AlgorithmDetector:
             logging.error("modeling : ModelStatisticsClass : performance_metrics : " +traceback.format_exc())
             return exc.msg
         return json_data
+    
+    
+    def check_model_requirements(self,project_id):
+        
+        logging.info("modeling : AlgorithmDetector : check_model_requirements : Execution Start")
+        
+        try:
+            
+            sql_command = "select scaled_split_parameters from mlaas.project_tbl where project_id="+str(project_id)
+            check_data = self.DBObject.select_records(self.connection, sql_command)
+            
+            if check_data is None:
+                raise DatabaseConnectionFailed(500)
+            
+            if len(check_data) == 0:
+                raise ScaledDataNotFound(500)
+            
+            scaled_split_parameters = check_data['scaled_split_parameters'][0]
+            
+            if not scaled_split_parameters:
+                raise ScaledDataNotFound(500)
+                
+        
+        except (DatabaseConnectionFailed,ScaledDataNotFound) as exc:
+            
+            logging.error("modeling : AlgorithmDetector : check_model_requirements : Exception " + str(exc))
+            logging.error("modeling : AlgorithmDetector : check_model_requirements : " +traceback.format_exc())
+            
+            return exc.msg
+        
+        logging.info("modeling : AlgorithmDetector : check_model_requirements : Execution Start")
+         
+        return True
+        
+        
+        
+        
+
+        

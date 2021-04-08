@@ -57,7 +57,7 @@
                                 <span>{{item.tab_name}}</span>
                             </a>
                             <ng-template ngbNavContent>
-                                <perfect-scrollbar style="height: 450px;">
+                                <perfect-scrollbar style="height: 420px;">
                                     <fieldset [disabled]="isEnableCleanup">
                                         <div *ngFor="let operations of item.operation_classes;let k=index">
                                             <h4 class="mb-3">{{operations.title}}</h4>
@@ -220,7 +220,7 @@
     <div class="col-md-12">
         <div class="card table-card">
             <div class="card-body">
-                <h4 class="card-title mb-4">{{title}}</h4>
+                <h4 class="card-title mb-4">{{project_name}} > {{title}}</h4>
                 <div [ngbNavOutlet]="justifiednavdatacleanup"></div>
             </div>
         </div>
@@ -254,7 +254,7 @@
             </div>
             <div class="form-group">
                 <div class="custom-control custom-checkbox mb-3">
-                    <input type="checkbox" class="custom-control-input" (change)="saveAs.isprivate=$event.target.checked" checked name="isprivate" id="customCheck1">
+                    <input type="checkbox" class="custom-control-input" (change)="saveAs.isPrivate=$event.target.checked" checked name="isprivate" id="customCheck1">
                     <label class="custom-control-label" for="customCheck1">Keep Dataset private</label>
                 </div>
             </div>

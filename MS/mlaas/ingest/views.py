@@ -36,7 +36,7 @@ from common.utils.json_format.json_formater import *
 from common.utils.activity_timeline import *
 from common.utils.activity_timeline import activity_timeline
 from common.utils.logger_handler import custom_logger as cl
-
+from preprocess.utils.preprocessing import PreprocessingClass
 user_name = 'admin'
 log_enable = True
 LogObject = cl.LogClass(user_name,log_enable)
@@ -49,7 +49,7 @@ connection,connection_string=DBObject.database_connection(database,user,password
 IngestionObj=ingestion.IngestClass(database,user,password,host,port) #initialize the Ingest Class 
 timeline_Obj=activity_timeline.ActivityTimelineClass(database,user,password,host,port) #initialize the ActivityTimeline Class
 json_obj = JsonFormatClass() #initialize the JsonFormat Class 
-
+PC_OBJ = PreprocessingClass(database,user,password,host,port)
 
 # Class for Project to retrive & insert 
 #It will take url string as mlaas/ingest/create_project/.
@@ -118,7 +118,10 @@ class CreateProjectClass(APIView):
                                 exists_project_status = IngestionObj.does_project_exists(project_name,user_name) 
                                 if exists_project_status == False:
                                         file=request.FILES['inputfile'] #get inputfile Name
-                                        file_data = pd.read_csv(request.FILES['inputfile']) # read the csv file and store into dataframe variable
+                                        try:
+                                                file_data = pd.read_csv(request.FILES['inputfile']) # read the csv file and store into dataframe variable
+                                        except:
+                                                return Response({"status_code":500,"error_msg":"Invalid CSV Format, Please upload UTF-8 encoded CSV","response":"false"})
                                         file_check_status = IngestionObj.check_file(file,file_data) # call check_file function to verify csv file data
                                         if file_check_status !=True: #if file_check_status not equal to true then file must  be inappropriate
                                                 status_code,error_msg=json_obj.get_Status_code(file_check_status) # extract the status_code and error_msg from file_check_status
@@ -222,11 +225,11 @@ class CreateDatasetClass(APIView):
                                 file=request.FILES['inputfile'] #get inputfile Name
                                 
 
-                                #try:
-                                file_data = pd.read_csv(request.FILES['inputfile'])   # read the csv file and store into dataframe variable 
+                                try:
+                                        file_data = pd.read_csv(request.FILES['inputfile'])   # read the csv file and store into dataframe variable 
                                 
-                                # except:
-                                #         return Response({"status_code":500,"error_msg":"Invalid CSV Format","response":"false"})
+                                except:
+                                        return Response({"status_code":500,"error_msg":"Invalid CSV Format, Please upload UTF-8 encoded CSV","response":"false"})
                                                 
                                                                         
                                 file_check_status = IngestionObj.check_file(file,file_data)  # call check_file function to verify csv file data
@@ -376,6 +379,15 @@ class DeleteProjectDetailClass(APIView):
                         logging.info("data ingestion : DeleteProjectDetailClass : DELETE Method : execution start")
                         user_name=request.query_params.get('user_name') # get username
                         project_id=request.query_params.get('project_id')  #get tablename 
+                        
+                        cleanup_process = PC_OBJ.get_dag_status(project_id) # check cleanup is running
+                        if cleanup_process == True:
+                                return Response({"status_code":"500","error_msg":"Can't Delete,Cleanup Process is going on!","response":"false"}) 
+
+                        modelling_process = PC_OBJ.get_modelling_status(project_id) #check model runnig
+                        logging.info("---->"+str(modelling_process))
+                        if modelling_process == True:
+                                return Response({"status_code":"500","error_msg":"Can't Delete,Model Running!","response":"false"}) 
                         project_status,dataset_id,project_name= IngestionObj.delete_project_details(project_id,user_name)  #get the project_status if project Deletion failed or successfull
                         if project_status != 0:
                                 status_code,error_msg=json_obj.get_Status_code(project_status) # extract the status_code and error_msg from  project_status
@@ -394,7 +406,7 @@ class DeleteProjectDetailClass(APIView):
                                 else:
                                         logging.info("data ingestion : DeleteProjectDetailClass : DELETE Method : execution stop : status_code :200")
                                         return Response({"status_code":"200","error_msg":"Successfully deleted","response":"true"})
-                except Exceptinsert_user_activityion as e:
+                except Exception as e:
                         logging.error("data ingestion : DeleteProjectDetailClass : DELETE Method :  Exception : " + str(e))
                         logging.error("data ingestion : DeleteProjectDetailClass : DELETE Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"}) 

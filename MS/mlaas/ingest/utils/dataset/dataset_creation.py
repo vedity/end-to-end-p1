@@ -11,6 +11,7 @@
 
 # Python library imports
 import os
+import sys
 import pandas as pd
 import logging
 import traceback
@@ -104,7 +105,7 @@ class DatasetClass:
         logging.info("data ingestion : DatasetClass : get_file_path : execution end")
         return file_path
     
-    def get_file_size(self,file_path):
+    def get_file_size(self,file_path,flag = None):
         """This function is used to get size of the file.
 
         Args:
@@ -115,7 +116,11 @@ class DatasetClass:
         """
             
         logging.info("data ingestion : DatasetClass : get_file_size : execution start")
-        file_size = os.path.getsize(file_path)
+        if flag == None:
+            file_size = os.path.getsize(file_path)
+        else:
+            file_size = file_path
+
         max_size = 512000
         if file_size < max_size:
             value = round(file_size/1000, 2)
@@ -146,7 +151,7 @@ class DatasetClass:
         
  
 
-    def make_dataset(self,DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,flag=True,row_creation_flag=True):
+    def make_dataset(self,DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,flag=True):
         """This function is used to main dataset table and also load main dataset details into database table.
            E.g. dataset details : dataset_name,file_name,file_size,dataset_table_name,user_name.
 
@@ -166,7 +171,7 @@ class DatasetClass:
             logging.info("data ingestion : DatasetClass : make_dataset : execution start")
             
             table_name,schema,cols = self.make_dataset_schema() # Get table name,schema and columns from dataset class.
-            original_dataset_id = 0
+            
             if flag == True:
                 #? Checking if the same dataset is there for the same user in the dataset table? If yes, then it will not insert a new row in the table
                 dataset_exist = self.dataset_exists(DBObject,connection,table_name,dataset_visibility,dataset_name,user_name)
@@ -175,16 +180,10 @@ class DatasetClass:
             
             row_tuples = self.make_dataset_records(dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name) # Get record for dataset table.
             
-            if flag == True:
-                # Get status about inserting records into dataset table. if successful then 0 else 1.
-                insert_status,_ = DBObject.insert_records(connection,table_name,row_tuples,cols) 
-
-                if insert_status ==0:
-                        
-                    #?TODO No need to call get_dataset_id function already having defined the function to get dataset_id
-                    #Get the dataset_id
-                    original_dataset_id = self.get_dataset_id(DBObject,connection,row_tuples,user_name,flag)
-
+            # Get status about inserting records into dataset table. if successful then 0 else 1.
+            insert_status,original_dataset_id = DBObject.insert_records(connection,table_name,row_tuples,cols,column_name='dataset_id')
+            if insert_status == 0:
+                
                     load_data_status,no_of_rows = self.load_dataset(DBObject,connection,connection_string,file_name,dataset_visibility,user_name)
                         
                     if load_data_status ==0:
@@ -198,34 +197,16 @@ class DatasetClass:
                             raise DatasetColumnUpdateFailed(500)
                     else:
                         status =1
-                else:
-                    raise DatasetCreationFailed(500)
+            else:
+                raise DatasetCreationFailed(500)
                     
-            if row_creation_flag == True:
-                    
-                #Change the page name for the Raw dataset creation
-                row_list = list(row_tuples[0])
-                row_list[7] = 'schema mapping'
-                row_tuples = [tuple(row_list)]
-
-                # Get status about inserting records into dataset table. if successful then 0 else 1.
-                insert_status,_ = DBObject.insert_records(connection,table_name,row_tuples,cols)
-
-                if insert_status == 0:
-
-                    #Get the dataset_id
-                    raw_dataset_id = self.get_dataset_id(DBObject,connection,row_tuples,user_name,False)
-                    status = self.insert_raw_dataset(DBObject,connection,raw_dataset_id,user_name,file_name,dataset_visibility)
-                    if status!=0:
-                        raise RawDatasetInsertionFailed(500)
-                else:
-                    raise RawDatasetCreationFailed(500)
+            
 
             logging.info("data ingestion : DatasetClass : make_dataset : execution end")
-            return status,original_dataset_id,raw_dataset_id
+            return status,original_dataset_id
 
-        except (DatasetAlreadyExist,DatasetCreationFailed,RawDatasetCreationFailed,DatasetColumnUpdateFailed) as exc:
-            return exc.msg,None,None
+        except (DatasetAlreadyExist,DatasetCreationFailed,DatasetColumnUpdateFailed) as exc:
+            return exc.msg,None
 
     
     def load_dataset(self,DBObject,connection,connection_string,file_name,dataset_visibility,user_name):
@@ -294,10 +275,11 @@ class DatasetClass:
         dataset_name=str(dataset_name).replace("'","''")
         if page_name == False:
             sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_name ='" + dataset_name + "' and user_name = '"+ user_name + "' and page_name='schema mapping'"
-            logging.info(str(sql_command) + "command")
+           
         else:
             sql_command = "SELECT dataset_id from "+ table_name + " Where dataset_name ='" + dataset_name + "' and user_name = '"+ user_name + "' "
-            logging.info(str(sql_command) + "command")
+            
+
         # Get dataframe of dataset id. 
         dataset_df = DBObject.select_records(connection,sql_command)
 
@@ -697,21 +679,91 @@ class DatasetClass:
                 no_of_rows = str(dataframe['count'][0])
 
             else:
-                raise RawDatasetTableCreationFailed(500)
-                
+                raise VariableDatasetCreationFailed(500)
+            
+            sql_command  = "select * from "+str(raw_table_name)
+            dataframe = DBObject.select_records(connection,sql_command)
+            dataframe_size = sys.getsizeof(dataframe)
+            file_size = self.get_file_size(dataframe_size,flag = True)
             # update the "dataset table name"  and "no_of _rows" of the given dataset id
-            sql_command = "UPDATE mlaas.dataset_tbl SET dataset_table_name='"+str(new_table_name)+"',no_of_rows = '"+str(no_of_rows)+"' where dataset_id ='"+str(dataset_id)+"'"
+            sql_command = "UPDATE mlaas.dataset_tbl SET file_size = '"+str(file_size)+"', dataset_table_name='"+str(new_table_name)+"',no_of_rows = '"+str(no_of_rows)+"' where dataset_id ='"+str(dataset_id)+"'"
             
             # Execute the sql query
             update_status = DBObject.update_records(connection,sql_command)
 
             if create_status !=0:
-                raise DatasetColumnUpdateFailed
+                raise DatasetColumnUpdateFailed(500)
                 
             logging.info("data ingestion : DatasetClass : insert_raw_dataset : execution stop")
             return update_status
-        except (RawDatasetTableCreationFailed,DatasetColumnUpdateFailed) as exc:
+        except (VariableDatasetCreationFailed,DatasetColumnUpdateFailed) as exc:
             return exc.msg
+    
+    def create_variable_dataset(self,DBObject,connection,dataset_id,user_name,old_table_name,new_table_name,user_visibility,dataset_visibility):
+        '''
+        Function used to create the variable table based on existing raw dataset table and update the "number of rows"  of the perticular dataset id
+        
+        Args:
+                dataset_id[(Integer)] : [Id of the dataset record]
+                user_name[(String)] : [Name of the user]
+                old_table_name[(String)] : [Name of the Raw dataset table]
+                new_table_name[(String)] : [Name of the  variable dataset table]
+                dataset_visibility[(String)] : [Existing dataset_visibility]
+        
+        Return:
+                [Integer] : [Return 0 if successfully inserted else 1]
+        '''
+        try:
+            logging.info("data ingestion : DatasetClass : create_variable_dataset : execution start")
+            
+            # Create the schema for the perticular user
+            schema_status = DBObject.create_schema(connection,user_name)
+
+            if dataset_visibility == 'private':
+                dataset_visibility = str(user_name)
+            
+            if user_visibility =='private':
+                user_visibility = user_name
+            else:
+                user_visibility = 'public'
+            # Make a raw table name based on its visibility and table_name
+            original_table_name = f'{dataset_visibility}."{old_table_name}"'
+
+            # Make a Variable dataset table name based on its visibility and table_name
+            variable_table_name = f'{str(user_visibility)}."{str(new_table_name)}"'
+
+            # Create the new table based on the existing table
+            sql_command = f'CREATE TABLE {variable_table_name} AS SELECT * FROM {str(original_table_name)}'
+            
+            # Execute the sql query
+            create_status = DBObject.update_records(connection,sql_command)
+
+            if create_status == 0:
+                # Get count of rows for the given table name
+                sql_command = "SELECT count(*) from "+str(variable_table_name)
+
+                # Execute the sql query
+                dataframe = DBObject.select_records(connection,sql_command)
+
+                # Extract the number of rows from dataframe
+                no_of_rows = str(dataframe['count'][0])
+
+                 # update the "dataset table name"  and "no_of _rows" of the given dataset id
+                sql_command = "UPDATE mlaas.dataset_tbl SET no_of_rows = '"+str(no_of_rows)+"' where dataset_id ='"+str(dataset_id)+"'"
+            
+                # Execute the sql query
+                update_status = DBObject.update_records(connection,sql_command)
+
+                if update_status !=0:
+                    raise DatasetColumnUpdateFailed(500)
+            else:
+                raise VariableDatasetCreationFailed(500)
+
+            logging.info("data ingestion : DatasetClass : create_variable_dataset : execution stop")
+
+            return update_status
+        except {DatasetColumnUpdateFailed,VariableDatasetCreationFailed} as exc:
+            return exc.msg,None
 
 
 

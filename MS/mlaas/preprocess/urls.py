@@ -34,13 +34,18 @@ urlpatterns = [
     #url for save cleanup 
     path('mlaas/preprocess/cleanup/save/',CleanupSave.as_view()),
     
+    #url for scaling and split
     path('mlaas/preprocess/cleanup/scaling/',ScalingSplitClass.as_view()),
     
+    #url for scaling type
     path('mlaas/preprocess/cleanup/scaling/type/',Scalingtype.as_view()),
 
+    #url for train valid holdout
     path('mlaas/preprocess/cleanup/holdout/',TrainValidHoldout.as_view()),
 
+    #url for check scal and split 
     path('mlaas/modeling/checksplit/',Check_Split.as_view()),
     
+    #url for check cleanup dag status
     path('mlaas/preprocess/cldag_status/',CheckCleanupDagStatus.as_view()),
 ]

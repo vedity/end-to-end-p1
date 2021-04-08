@@ -247,7 +247,7 @@ class RemoveNoiseClass:
         '''
         column_name = '"' + column_name + '"'
         sql_command = f"update {table_name} set {column_name} = Null where {column_name} !~ '[0-9.]'"
-        logging.info(sql_command)
+        #logging.info("Sql_command : rmv_noise : "+str(sql_command))
         status = DBObject.update_records(connection,sql_command)
         return status
     
@@ -273,13 +273,15 @@ class RemoveNoiseClass:
         '''
         column_name = '"' + column_name + '"'
         if dataset_id is None:
-            sql_command = f"select cast((count(*)*100) as float)/(select count(*) from {table_name}) as noise_percentage from {table_name} where {column_name} !~ '[0-9.]';"
-            
+            sql_command = f"select cast((count(*)*100) as float)/(select count(*) from {table_name}) as noise_percentage from {table_name} where {column_name} !~ '[0-9.]';"  
+            #logging.info("Sql_command : dtct_noise : "+str(sql_command))
+        
         noise_df = DBObject.select_records(connection,sql_command)
         if not isinstance(noise_df, pd.DataFrame):
             return 0
         
         noise_percentage = noise_df['noise_percentage'].tolist()[0]
+        
         
         if noise_percentage == 0:
             noise_status =  0

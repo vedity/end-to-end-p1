@@ -116,8 +116,9 @@ class SchemaSaveClass(APIView):
                         schema_id = request.query_params.get('schema_id') #get the schema id
                         dataset_id = request.query_params.get('dataset_id') #get the dataset id
                         project_id = request.query_params.get('project_id') #get the project id
+                        user_name = request.query_params.get('user_name') #get user name
                         
-                        schema_status=preprocessObj.save_schema_data(schema_data,project_id,dataset_id,schema_id)
+                        schema_status=preprocessObj.save_schema_data(schema_data,project_id,dataset_id,schema_id,user_name)
                         logging.info(str(schema_status)+" stauts type "+str(type(schema_status)))
                         if isinstance(schema_status,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(schema_status) # extract the status_code and error_msg from schema_status
@@ -363,21 +364,29 @@ class CleanupSave(APIView):
                 '''
                 try:
                         logging.info("data preprocess : CleanupSave : POST Method : execution start")
-                        project_id = request.query_params.get('project_id') #get schema id
+                        project_id = request.query_params.get('project_id') #get project id
                         schema_id = request.query_params.get('schema_id') #get schema id
                         dataset_id = request.query_params.get('dataset_id') #get dataset id
-                        method_flag = request.query_params.get('flag') #get dataset id
+                        method_flag = request.query_params.get('flag') #get flag
+                        user_name = request.query_params.get('user_name') #get user_name
                         logging.info(str(method_flag) +" checking")
                         if method_flag == 'True':
                                 visibility = request.query_params.get('visibility') #get schema id
-                                dataset_name = request.query_params.get('dataset_name') #get dataset id
-                                dataset_desc = request.query_params.get('dataset_desc') #get dataset id
+                                if visibility == 'undefined':
+                                        visibility='public'
+                                dataset_name = request.query_params.get('dataset_name') #get dataset name
+                                dataset_desc = request.query_params.get('dataset_desc') #get dataset desc
                         else:
                                 visibility = dataset_name = dataset_desc = None
                         data = json.dumps(request.data) #get handling json
                         data = json.loads(data) 
-                        # operation = preprocessObj.master_executor(project_id, dataset_id,schema_id,data,method_flag,visibility ,dataset_name ,dataset_desc )
-                        operation = preprocessObj.dag_executor(project_id, dataset_id,schema_id,data,method_flag,visibility ,dataset_name ,dataset_desc )
+                        # operation_dict = {}
+                        for dic in data:
+                                if dic['selected_handling'] == [20]:
+                                        if len(str(dic['values'][0]).strip())== 0:
+                                                return Response({"status_code":"500","error_msg":"Space is not allowed","response":"false"})
+                        #operation = preprocessObj.master_executor(project_id, dataset_id,schema_id,data,method_flag,visibility ,dataset_name ,dataset_desc )
+                        operation = preprocessObj.dag_executor(project_id, dataset_id,schema_id,data,method_flag,visibility ,dataset_name ,dataset_desc,user_name)
                         logging.info("data preprocess : CleanupSave : POST Method : execution stop")
                         if isinstance(operation,int): 
                                 
@@ -399,8 +408,8 @@ class ScalingSplitClass(APIView):
                         logging.info("data preprocess : HandoverClass : POST Method : execution start")
                         schema_id = request.query_params.get('schema_id') #get schema id
                         dataset_id = request.query_params.get('dataset_id') #get dataset id
-                        project_id = request.query_params.get('project_id') #get dataset id
-                        user_name = request.query_params.get('user_name') #get dataset id
+                        project_id = request.query_params.get('project_id') #get project id
+                        user_name = request.query_params.get('user_name') #get user_name
                         scaling_operation = request.query_params.get('scaling_op') #get scaling op
                         split_method = request.query_params.get('split_method') #get scaling method
                         cv = request.query_params.get('cv')  #get scaling method
@@ -409,6 +418,11 @@ class ScalingSplitClass(APIView):
                         random_state = request.query_params.get('random_state') #get random state
                         split_parameters = {'split_method': split_method ,'cv': cv,'valid_ratio': valid_ratio, 'test_ratio': test_ratio,'random_state': random_state} #split parameters
                         
+                        flag,desc = sd.check_split_validation(project_id)
+                        if not flag:
+                                #! Some operations are still remaining before we can proceed to the modelling.
+                                return Response({"status_code":"500","error_msg":desc,"response":flag})
+
                         activity_id = 49 
                         activity_df = AT_OBJ.get_activity(activity_id,"US")
                         projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
@@ -418,6 +432,9 @@ class ScalingSplitClass(APIView):
                         activity_status,index = AT_OBJ.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
                         
                         status = preprocessObj.handover(dataset_id, schema_id, project_id, user_name,split_parameters, scaling_operation)
+                        if isinstance(status,str):
+                                return Response({"status_code":"500","error_msg":status,"response":"false"})
+                                
                         logging.info("data preprocess : ScalingSplitClass : POST Method : execution stop")
                         activity_id = 50
                         activity_df = AT_OBJ.get_activity(activity_id,"US")
@@ -454,7 +471,7 @@ class TrainValidHoldout(APIView):
         def get(self,request,format=None):
                 try :
                         logging.info("data preprocess : TrainValidHoldout : GET Method : execution start")
-                        holdout = [{"id" : 1,"value": "95-0-5"},{"id" : 2,"value": "90-5-5"},{"id" : 3,"value": "85-5-10"},{"id" : 4,"value": "80-10-10"},{"id" : 5,"value": "75-10-15"},{"id" : 6,"value": "70-15-15"},{"id" : 7,"value": "65-15-20"},{"id" : 8,"value": "60-20-20"}]
+                        holdout = [{"id" : 2,"value": "90-5-5"},{"id" : 3,"value": "85-5-10"},{"id" : 4,"value": "80-10-10"},{"id" : 5,"value": "75-10-15"},{"id" : 6,"value": "70-15-15"},{"id" : 7,"value": "65-15-20"},{"id" : 8,"value": "60-20-20"}]
                         return Response({"status_code":"200","error_msg":"Successfull retrival","response":holdout})
                 except Exception as e:
                         logging.error("data preprocess : TrainValidHoldout : GET Method : Exception :" + str(e))
@@ -468,6 +485,7 @@ class Check_Split(APIView):
                 try:
                         logging.info(" modeling : Check_Split : GET Method : execution start")
                         project_id = request.query_params.get('project_id')
+                        schema_id = request.query_params.get('schema_id')
                         flag,desc = sd.check_split_exist(project_id)
                         if flag:
                                 #? All the cleanup operation are done before modelling.

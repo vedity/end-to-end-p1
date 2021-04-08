@@ -17,6 +17,7 @@ export class CreateSchemaMappingComponent implements OnInit {
   @Input() public title: any;
   @Input() public project_id: any;
   @Input() public schema_id: any;
+  @Input() public project_name: any;
   loaderdiv = false;
   saveAs: any = {
     isPrivate: false,

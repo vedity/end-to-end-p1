@@ -39,6 +39,19 @@ class ActivityTimelineClass:
         self.password = password # Password 
         self.host = host # Host Name
         self.port = port # Port Number
+    
+    def get_db_connection(self):
+        """This function is used to initialize database connection.
+        
+        Returns:
+            [object,string]: [it will return database object as well as connection string.]
+        """
+        logging.info("Common : ActivityTimelineClass : get_db_connection : execution start")
+        DBObject = db.DBClass() # Get database object from database class
+        connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port) # Initialize connection with database and get connection string , connection object.
+        
+        logging.info("Common : ActivityTimelineClass : get_db_connection : execution end ")
+        return DBObject,connection,connection_string
         
     def get_schema(self):
         # table name
@@ -76,8 +89,7 @@ class ActivityTimelineClass:
         """
         try:
             logging.info("Common : ActivityTimelineClass : insert_user_activity : execution start")
-            DBObject = db.DBClass() # create object for database class
-            connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port)
+            DBObject,connection,connection_string = self.get_db_connection()
             
             if connection == None :
                 raise DatabaseConnectionFailed(500)
@@ -95,7 +107,7 @@ class ActivityTimelineClass:
                 row_tuples = [tuple(rows)]
                 
                 #insert the record and return 1 if inserted else return 1
-                status,index = DBObject.insert_records(connection,table_name,row_tuples,cols,Flag=1) 
+                status,index = DBObject.insert_records(connection,table_name,row_tuples,cols,column_name='index') 
 
                 if status == 1:
                     raise ActivityInsertionFailed(500)
@@ -121,8 +133,7 @@ class ActivityTimelineClass:
         """
         try:
             logging.info("Common : ActivityTimelineClass : get_user_activity : execution start")
-            DBObject = db.DBClass() # create object for database class
-            connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port)
+            DBObject,connection,connection_string = self.get_db_connection()
 
             table_name,_,_ = self.get_schema()
 
@@ -202,10 +213,7 @@ class ActivityTimelineClass:
         '''
         try:
             logging.info("Common : ActivityTimelineClass : get_activity : execution start")
-            DBObject = db.DBClass() 
-
-            #get the connection stablish to postgressql  
-            connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port)
+            DBObject,connection,connection_string = self.get_db_connection()
             
             if connection == None :
                 raise DatabaseConnectionFailed(500)
@@ -245,9 +253,7 @@ class ActivityTimelineClass:
         try:
             logging.info("Common : ActivityTimelineClass : update_activity : execution start")
 
-            DBObject = db.DBClass() 
-            #get the connection stablish to postgressql  
-            connection,connection_string = DBObject.database_connection(self.database,self.user,self.password,self.host,self.port)
+            DBObject,connection,connection_string = self.get_db_connection()
             
             if connection == None :
                 raise DatabaseConnectionFailed(500)

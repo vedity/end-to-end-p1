@@ -47,7 +47,6 @@ class DBClass:
         """
 
         read_df=pd.read_csv(file_path) #  Read csv file and load data into dataframe.
-        logging.info(str(read_df) + " read dataframe")
 
         column_name_list = read_df.columns.values.tolist()
     
@@ -55,8 +54,12 @@ class DBClass:
         for name in column_name_list:
             if read_df.dtypes.to_dict()[name] == 'object':
                 column_list.append(name)
+        
         read_df=pd.read_csv(file_path,parse_dates=column_list) #  Read csv file and load data into dataframe.
-        return read_df
+        
+        dataframe = read_df.replace(r'^\s*$', np.nan, regex=True)
+        
+        return dataframe
     
     def database_connection(self,database,user,password,host,port):
         """This function is used to make connection with database.
@@ -159,7 +162,7 @@ class DBClass:
         
     
     
-    def insert_records(self,connection,table_name,row_tuples,cols,Flag=0):
+    def insert_records(self,connection,table_name,row_tuples,cols,column_name=None):
         """This function is used to insert data into database table.
 
         Args:
@@ -180,7 +183,7 @@ class DBClass:
 
         cursor = connection.cursor() # Open cursor for database.
         try:
-            if Flag == 0 :
+            if column_name == None :
                 query = "INSERT INTO %s(%s) VALUES %%s " % (table_name, cols) # Make query
                 logging.info(str(table_name) + " <> table_name")
                 logging.info(str(cols) + " <> columns")
@@ -188,9 +191,8 @@ class DBClass:
                 logging.info(str(query) + " <> tuples")
                 extras.execute_values(cursor, query, tuples) # Excute insert query.
                 index = 0
-
             else :
-                query = "INSERT INTO %s(%s) VALUES %%s RETURNING index" % (table_name, cols) # Make query
+                query = f"INSERT INTO %s(%s) VALUES %%s RETURNING {column_name} " % (table_name, cols) # Make query
                 extras.execute_values(cursor, query, tuples) # Excute insert query.
                 index = [row[0] for row in cursor.fetchall()][0]
             
@@ -215,13 +217,16 @@ class DBClass:
         Returns:
             [dataframe]: [it will return dataframe of the selected data from the database table.]
         """
-        sql_command = str(sql_command).replace('%',"%%") # Get sql command.
+        sql_command = str(sql_command) # Get sql command.
         try :
-        
-            connection_string = "postgresql://" + user + ":" + password + "@" + host + ":" + port + "/" + database # Make database connection string.
-            engine = create_engine(connection_string) # Create database engine.
-            data = pd.read_sql_query(sql_command, engine) #method of sqlalchemy
-            engine.dispose()
+            
+           
+            data = pd.read_sql(sql_command, connection) # Read data from database table.
+            self.update_records(connection,'commit')
+            # connection_string = "postgresql://" + user + ":" + password + "@" + host + ":" + port + "/" + database # Make database connection string.
+            # engine = create_engine(connection_string) # Create database engine.
+            # data = pd.read_sql_query(sql_command, engine) #method of sqlalchemy
+            # engine.dispose()
             return data   
         except(Exception, psycopg2.DatabaseError) as error:
             logging.info(str(error) + "check")
@@ -620,8 +625,8 @@ class DBClass:
         Return : 
                 [Dataframe] : [return the dataframe of dataset table ]
         '''
-        sql_command = "SELECT dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows,dataset_desc from mlaas.dataset_tbl Where dataset_id =" + str(dataset_id)
-        
+        # sql_command = "SELECT dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows,dataset_desc from mlaas.dataset_tbl Where dataset_id =" + str(dataset_id)
+        sql_command = "SELECT dataset_name,file_size,file_name,dataset_table_name,user_name,dataset_visibility,no_of_rows,dataset_desc from mlaas.dataset_tbl Where dataset_id =" + str(dataset_id)
         dataset_df=self.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         return dataset_df 
     
@@ -632,7 +637,7 @@ class DBClass:
         Return : 
                 [Dataframe] : [return the dataframe of project table]
         '''
-        sql_command = "SELECT original_dataset_id,dataset_id,project_name from mlaas.project_tbl where project_id='"+str(project_id)+"'"
+        sql_command = "SELECT user_name,original_dataset_id,dataset_id,project_name from mlaas.project_tbl where project_id='"+str(project_id)+"'"
        
         dataset_df=self.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         return dataset_df
@@ -852,3 +857,19 @@ class DBClass:
         
         return status
     
+
+    def get_schema_column(self,connection,schema_id):
+        '''
+        Function used to get the column name list from the schema table based on the schema id.
+        Args :
+                schema_id[(Integer)] : [Id of the schema table]
+        Return :
+                column_list[(List)] : [Name of the column ]
+
+        '''
+        sql_command = f"select column_name from mlaas.schema_tbl where schema_id = '{str(schema_id)}' order by index"
+
+        data_df = self.select_records(connection,sql_command)
+       
+        column_list = list(data_df['column_name'])
+        return column_list

@@ -45,7 +45,7 @@ log_enable = True
 LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
 logger = logging.getLogger('project_creation')
-
+DatasetObject = dataset_creation.DatasetClass()
 
 class ProjectClass:
 
@@ -109,7 +109,7 @@ class ProjectClass:
         return row_tuples
         
 
-    def make_project(self,DBObject,connection,connection_string,project_name,project_desc,page_name,dataset_desc,dataset_name,dataset_visibility,file_name ,original_dataset_id,user_name):
+    def make_project(self,DBObject,connection,connection_string,project_name,project_desc,page_name,dataset_desc,dataset_name,user_visibility,file_name ,original_dataset_id,user_name):
         """This function is used to make project and it will create main project table and also
            load project details into database main project table.
            E.g. project name : sales forecast, travel time prediction etc.
@@ -121,7 +121,7 @@ class ProjectClass:
             project_name ([string]): [name of the project.],
             project_desc ([string]): [descriptions of the project.],
             dataset_name ([string]): [name of the dataset.],
-            dataset_visibility ([string]): [visibility of the dataset.],
+            user_visibility ([string]): [visibility of the dataset.],
             file_name ([string]): [name of the file.],
             original_dataset_id ([integer]): [dataset id of the selected dataset.],
             user_name ([string]): [name of the user.]
@@ -135,49 +135,75 @@ class ProjectClass:
 
             # Get table name,schema and columns from dataset class.
             table_name,schema,cols = self.make_project_schema() 
+            dataset_table_name,dataset_schema,datset_cols = DatasetObject.make_dataset_schema()
+
             if self.project_exists(DBObject,connection,table_name,project_name,user_name) : 
                 raise ProjectAlreadyExist(500)
             
-            DatasetObject = dataset_creation.DatasetClass()
+            
 
             if original_dataset_id == None:
-                status,original_dataset_id,raw_dataset_id  = DatasetObject.make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name)   
+                status,original_dataset_id  = DatasetObject.make_dataset(DBObject,connection,connection_string,dataset_name,file_name,user_visibility,user_name,dataset_desc,page_name)   
                 
                 if status != 0:
                     return status,None,None
-                else:
-                    dataset_id = raw_dataset_id
-                
-            else:
-                
-                dataset_id,_ = DBObject.get_raw_dataset_detail(connection,original_dataset_id)
+
+            #Get the dataset details based on the original dataset id   
+            data_df = DBObject.get_dataset_detail(DBObject,connection,original_dataset_id)
             
+            #Extract the data from the dataframe variable " data_df "
+            dataset_name,file_name,file_size,old_table_name,dataset_desc,dataset_visibility = str(data_df['dataset_name'][0]),str(data_df['file_name'][0]),str(data_df['file_size'][0]),str(data_df['dataset_table_name'][0]),str(data_df['dataset_desc'][0]),str(data_df['dataset_visibility'][0])
+                
+            # Get the updated table name for the variable dataset
+            new_table_name = DBObject.get_table_name(connection,old_table_name)
+
+            page_name = 'schema mapping'
+
+            
+            row=dataset_name,file_name,file_size,new_table_name,user_visibility,user_name,dataset_desc,page_name 
+            row_tuples = [tuple(row)]
+
+            #Insert the dataset record into table
+            dataset_insert_status,dataset_id = DBObject.insert_records(connection,dataset_table_name,row_tuples,datset_cols,column_name='dataset_id')
+                
+            if dataset_insert_status == 0:
+    
+                #Create the variable table based on the  Raw dataset table.
+                create_status = DatasetObject.create_variable_dataset(DBObject,connection,dataset_id,user_name,old_table_name,new_table_name,user_visibility,dataset_visibility)
+                    
+                if create_status != 0:
+                    return create_status,None,None
+
+            else:
+                raise ProjectCreationFailed(500)
+                    
             
             # Get row for project table.
             row_tuples = self.make_project_records(project_name,project_desc,user_name,original_dataset_id,dataset_id) 
-
-            # Get status about inserting records into project table. if successful then 0 else 1. 
+            
+                
+                # Get status about inserting records into project table. if successful then 0 else 1. 
             insert_status,_ = DBObject.insert_records(connection,table_name,row_tuples,cols) 
 
-            # This condition is used to check project table and data is successfully stored into project table or not.if successful then 0 else 1. 
+                # This condition is used to check project table and data is successfully stored into project table or not.if successful then 0 else 1. 
             if insert_status == 0 :
 
                 status = 0 # Successfully Created
 
-                #function will get the schema_id and project_id from the project table
+                    #function will get the schema_id and project_id from the project table
                 project_id,schema_id = self.get_project_id(DBObject,connection,row_tuples,user_name) 
-                
-                #get the schema mapping details with column name and datatype
+                    
+                    #get the schema mapping details with column name and datatype
                 column_name_list,column_datatype_list = schema_obj.get_dataset_schema(DBObject,connection,dataset_id) 
-                
+                    
                 missing_value_lst,noise_status_lst = preprocessObj.get_preprocess_cache(dataset_id)
-                
+                    
                 missing_value_lst,noise_status_lst = list(missing_value_lst),list(noise_status_lst)
-                # column name and datatype will be inserted into schema table with schema id
-                
+                    # column name and datatype will be inserted into schema table with schema id
+                    
                 status=schema_obj.update_dataset_schema(DBObject,connection,schema_id,column_name_list,column_datatype_list,missing_flag=missing_value_lst,noise_flag=noise_status_lst)
-                
-            else :
+                    
+            else:
                 raise ProjectCreationFailed(500)
                 
             
@@ -275,12 +301,12 @@ class ProjectClass:
                 split_flags = []
                 try:
                     for i in project_df['project_id']:
-                        flag,desc = PREPROCESS_OBJ.check_split_exist(i)
-                        split_flags.append(flag)
+                        flag,desc = PREPROCESS_OBJ.check_split_exist(str(i))
+                        split_flags.append(str(flag))
                     
                 except Exception as e:
-                    return e
-
+                    return str(e)
+                    
                 project_df['split_status'] = split_flags
             
             except (ProjectDataNotFound) as exc:
@@ -370,12 +396,12 @@ class ProjectClass:
             #? Checking if Same project_name exists for the same user
             project_name=str(project_name).replace("'","''")
             sql_command = f"SELECT PROJECT_ID FROM {table_name} WHERE PROJECT_NAME = '{project_name}' AND USER_NAME = '{user_name}'"
-            #logging.info(str(sql_command) + " check error")
+           
 
             data=DBObject.select_records(connection,sql_command)
             data=len(data)
 
-            #logging.info(str(data) + " check error")
+           
             logging.info("data ingestion : ProjectClass : project_exists : execution end")
             
             #! Same project_name exists for the same user, then return status True
@@ -386,5 +412,6 @@ class ProjectClass:
         except:
             return False
 
+    
     
  
