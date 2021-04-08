@@ -23,6 +23,7 @@
                             <!-- class="active-row" -->
                             <tr *ngFor="let item of columnList;let i=index">
                                 <td>
+                                    <span hidden>{{item.is_missing}}</span>
                                     <div class="custom-control custom-checkbox mb-3">
                                         <input [disabled]="item.is_missing=='False' && activeId==1" type="checkbox" class="custom-control-input checkbox" value="{{item.column_id}}" (change)="selectColumn($event)" data-value="{{item.column_id}}" id="customCheck_{{i}}">
                                         <label class="custom-control-label" for="customCheck_{{i}}">{{item.col_name}}</label>
