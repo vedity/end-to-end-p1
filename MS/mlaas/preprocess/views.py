@@ -372,6 +372,8 @@ class CleanupSave(APIView):
                         logging.info(str(method_flag) +" checking")
                         if method_flag == 'True':
                                 visibility = request.query_params.get('visibility') #get schema id
+                                if visibility == 'undefined':
+                                        visibility='public'
                                 dataset_name = request.query_params.get('dataset_name') #get dataset name
                                 dataset_desc = request.query_params.get('dataset_desc') #get dataset desc
                         else:
