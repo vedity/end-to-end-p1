@@ -5,7 +5,7 @@ import { DataTableDirective } from 'angular-datatables';
 import { ToastrService } from 'ngx-toastr';
 import { DataCleanupApiService } from '../data-cleanup.service';
 import { Options } from 'ng5-slider';
-import { scaleandsplit } from './data-cleanup.model';
+import { scaleandsplit ,saveAsModal} from './data-cleanup.model';
 import { NgForm } from '@angular/forms';
 import { isInteractionValid } from '@fullcalendar/core/validation';
 @Component({
@@ -26,11 +26,7 @@ export class DataCleanupComponent implements OnInit {
     split_method: 'cross_validation',
     scaling_op: '0'
   };
-  saveAs: any = {
-    isPrivate: false,
-    dataset_name: "",
-    description: ""
-  }
+  saveAs: any = new saveAsModal();
   constructor(public apiService: DataCleanupApiService, public toaster: ToastrService, private modalService: NgbModal, public router: Router) { }
   @Input() public dataset_id: any;
   @Input() public title: any;
@@ -485,6 +481,8 @@ export class DataCleanupComponent implements OnInit {
               )
             }
             else {
+              this.saveAs=new saveAsModal();
+              this.saveAs.isPrivate=true;
               this.modalService.open(smallDataModal, { size: 'sm', windowClass: 'modal-holder', centered: true });
             }
           }
@@ -591,10 +589,10 @@ export class DataCleanupComponent implements OnInit {
   }
 
   saveAsDataset(flag) {
-    this.apiService.saveasOperations(this.schema_id, this.dataset_id, this.project_id, this.saveAs.dataset_name, this.saveAs.visibility, this.saveAs.dataset_desc, flag, this.fianlarray)
-      .subscribe(
-        logs => this.saveAsSuccessHandlers(logs),
-        error => this.errorHandler(error)
+    this.apiService.saveasOperations(this.schema_id, this.dataset_id, this.project_id, this.saveAs.dataset_name, this.saveAs.isPrivate, this.saveAs.description, flag, this.fianlarray)
+     .subscribe(
+       logs => this.saveAsSuccessHandlers(logs),
+       error => this.errorHandler(error)
       )
   }
   
