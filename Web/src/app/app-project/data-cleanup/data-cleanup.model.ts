@@ -15,8 +15,3 @@ export class saveAsModal{
     dataset_name?: string;
     description?: string;
 }
-export class saveAsModal{
-    isPrivate?: boolean;
-    dataset_name?: string;
-    description?: string;
-}
