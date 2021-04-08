@@ -112,7 +112,8 @@ export class DataCleanupComponent implements OnInit {
     this.getCldagStatus();
     this.dtOptions = {
       paging: false,
-      ordering: false,
+      orderFixed:[[0,'desc']],
+     // ordering:false,
       scrollCollapse: true,
       info: false,
       searching: false,
