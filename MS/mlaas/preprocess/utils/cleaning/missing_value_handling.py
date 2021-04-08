@@ -101,7 +101,7 @@ class MissingValueClass:
         sql_command = f'select count(*) as missing_value from {table_name} where "{col_name}" is null;'
         
         noise_df = DBObject.select_records(connection,sql_command)
-        
+
         if int(noise_df['missing_value'][0]) > 0:
             
             return True
