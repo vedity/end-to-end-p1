@@ -1427,3 +1427,32 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         activity_status,index = self.AT.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
 
         return activity_status
+
+    def direct_save_as(self, project_id,dataset_id,user_name,dataset_name,selected_visibility,dataset_desc):
+        
+        try:
+            DBObject,connection,connection_string = self.get_db_connection()
+            if connection == None :
+                raise DatabaseConnectionFailed(500)
+      
+            #Get the dataframe of dataset detail based on the dataset id
+            dataframe = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
+ 
+            #Extract the dataframe based on its column name as key
+            table_name,dataset_visibility,user_name = str(dataframe['dataset_table_name'][0]),str(dataframe['dataset_visibility'][0]),str(dataframe['user_name'][0])
+            
+            if dataset_visibility == 'private':
+                dataset_table_name = user_name+'."'+table_name+'"'
+            else:
+                dataset_table_name = 'public'+'."'+table_name+'"'
+                
+            status = self.SaveAs(DBObject,connection, project_id
+                                 ,table_name,user_name,dataset_visibility,
+                                 dataset_name,selected_visibility,dataset_desc)
+            
+            connection.close()
+            return status
+        
+        except (DatabaseConnectionFailed) as exc:
+            connection.close()
+            return str(exc)
