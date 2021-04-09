@@ -1203,7 +1203,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 raise DagUpdateFailed(500)
 
             activity_id = 51
-            activity_status = self.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id,user_name,dataset_name)
+            activity_status = self.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id,user_name,dataset_name,flag='True')
 
             json_data = {}
             result = requests.post(f"http://airflow:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False)#owner
@@ -1402,7 +1402,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
 
         
 
-    def get_cleanup_startend_desc(self,DBObject,connection,dataset_id,project_id,activity_id,user_name,dataset_name):
+    def get_cleanup_startend_desc(self,DBObject,connection,dataset_id,project_id,activity_id,user_name,new_dataset_name,flag=None):
         """This function will replace * into project name and get activity description of scale and split.
  
         Args:
@@ -1413,9 +1413,9 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             [String]: activity_description
         """
         activity_df = self.AT.get_activity(activity_id,"US")
-        if dataset_name == None:   
-            datasetnm_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
-            dataset_name = datasetnm_df['dataset_name'][0]
+        
+        datasetnm_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
+        dataset_name = datasetnm_df['dataset_name'][0]
         
         projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
         project_name = projectnm_df['project_name'][0]
@@ -1428,8 +1428,19 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
     
         end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
         activity_status,index = self.AT.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
-
+        
+        if new_dataset_name != None and flag != 'True': 
+            activity_id=53
+            sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
+            desc_df = DBObject.select_records(connection,sql_command)
+            activity_description = desc_df['description'][0]
+            activity_description = activity_description.replace('*',new_dataset_name)
+            logger.info("activity_description"+activity_description)
+            activity_status,index = self.AT.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
         return activity_status
+    
+    
+    
 
     def direct_save_as(self, project_id,dataset_id,user_name,dataset_name,selected_visibility,dataset_desc):
         
@@ -1452,7 +1463,15 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             status = self.SaveAs(DBObject,connection, project_id
                                  ,table_name,user_name,dataset_visibility,
                                  dataset_name,selected_visibility,dataset_desc)
-            
+            if status ==0: 
+                activity_id=53
+                sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
+                desc_df = DBObject.select_records(connection,sql_command)
+                activity_description = desc_df['description'][0]
+                activity_description = activity_description.replace('*',dataset_name)
+                logger.info("activity_description"+activity_description)
+                end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                activity_status,index = self.AT.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
             connection.close()
             return status
         
