@@ -212,7 +212,6 @@ class LinearRegressionClass:
         mae = mean_absolute_error(actual_lst,prediction_lst)
         
         actual, pred = np.array(actual_lst), np.array(prediction_lst)
-        mape = np.mean(np.nan_to_num(np.abs((actual - pred) / actual))) * 100
         
         temp_arr=np.isfinite(np.abs((actual - pred) / actual))
         abs_arr=np.abs((actual - pred) / actual)
