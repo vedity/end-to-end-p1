@@ -11,6 +11,8 @@ from common.utils.logger_handler import custom_logger as cl
 from common.utils.json_format.json_formater import *
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.ingest.ingest_exception import *
+from database import *
+from common.utils.database import db
 
 
 user_name = 'admin'
@@ -19,7 +21,8 @@ LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
 logger = logging.getLogger('activity_timeline')
 
-
+DBObject=db.DBClass()     #Get DBClass object
+connection,connection_string=DBObject.database_connection(database,user,password,host,port)      #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 
 class ActivityTimelineClass:
 
@@ -303,18 +306,20 @@ class ActivityTimelineClass:
  
             if len(activity_df) == 0 :
                 raise DataNotFound(500)
- 
-            if activity_id == 47 or activity_id == 48:
-                activity_str= activity_df[0]["activity_description"]
-                activity_description = activity_str.replace('*',experiment_name)
-            elif activity_id == 44:
+
+            projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
+            project_name = projectnm_df['project_name'][0]
+            # activity_str= activity_df[0]["activity_description"]
+            
+            if activity_id == 44:
                 activity_str= activity_df[0]["activity_description"]
                 activity_description = activity_str.replace('#',experiment_name)
                 activity_description = activity_description.replace('*',model_name)
-                # activity_description = activity_str.replace('#',experiment_name)
             else:
-                activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= experiment_name)
- 
+                activity_str= activity_df[0]["activity_description"]
+                activity_description = activity_str.replace('#',experiment_name)
+
+            activity_description = activity_description.replace('$',project_name)
             end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
             self.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time) 
                     

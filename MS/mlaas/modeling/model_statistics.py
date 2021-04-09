@@ -111,7 +111,7 @@ class ModelStatisticsClass:
                 actual_vs_prediction_json = actual_vs_prediction_df.to_dict(orient='list')
                 
             elif model_type == 'Classification':
-                
+            
                 unscaled_df,target_features = self.get_unscaled_data(experiment_id)
 
                 actual_vs_prediction_df = DataFrame(actual_vs_prediction_json) 

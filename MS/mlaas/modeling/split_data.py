@@ -88,5 +88,24 @@ class SplitData:
             valid_y = None
         return train_X,valid_X,test_X,train_y,valid_y,test_y
 
+    def get_scaled_data(self, scaled_split_params_dict):
+
+        path = "./" 
+        # Load the train, test, valid datasets 
+        train_X = np.load(path + scaled_split_params_dict['train_X_filename'], allow_pickle=True)
+        test_X = np.load(path + scaled_split_params_dict['test_X_filename'], allow_pickle=True)
+        train_y = np.load(path + scaled_split_params_dict['train_Y_filename'], allow_pickle=True)
+        test_y = np.load(path + scaled_split_params_dict['test_Y_filename'], allow_pickle=True)
+        actual_y = np.load(path + scaled_split_params_dict['actual_Y_filename'], allow_pickle=True)
+        if scaled_split_params_dict['split_method'] == 'train_valid_holdout':
+            valid_X = np.load(path + scaled_split_params_dict['valid_X_filename'], allow_pickle=True)
+            valid_y = np.load(path + scaled_split_params_dict['valid_Y_filename'], allow_pickle=True)
+        else:
+            # Validation data will be none in case the user selects 'cross_validation' in data spliting
+            valid_X = None
+            valid_y = None
+        return train_X,valid_X,test_X,train_y,valid_y,test_y,actual_y
+
     
     
+
