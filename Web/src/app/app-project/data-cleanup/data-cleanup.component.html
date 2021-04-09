@@ -7,16 +7,16 @@
             <span class="">Cleaning</span>
         </a>
         <ng-template ngbNavContent>
-            <ngx-skeleton-loader *ngIf="loaderdiv" count="7" [animation]="animation" [theme]="theme">
+            <ngx-skeleton-loader *ngIf="loaderbox" count="7" [animation]="animation" [theme]="theme">
             </ngx-skeleton-loader>
-            <div class="left-box" [hidden]="loaderdiv">
+            <div class="left-box" [hidden]="loaderbox">
                 <!-- <perfect-scrollbar style="height: 490px;"> -->
                 <fieldset [disabled]="isEnableCleanup">
                     <table class="table datadetailtable" datatable [dtOptions]="dtOptions" style="width: 100%;" *ngIf="columnList">
                         <thead>
                             <tr>
-                                <th>Column</th>
-                                <th>Handling</th>
+                                <th class="no-sort">Column</th>
+                                <th class="no-sort">Handling</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -50,7 +50,7 @@
                 <!-- </perfect-scrollbar> -->
             </div>
             <!-- [destroyOnHide]="false" -->
-            <div class="right-box" [hidden]="loaderdiv">
+            <div class="right-box" [hidden]="loaderbox">
                 <div class="right-inner">
                     <ul ngbNav #justifiednavmissing="ngbNav" [activeId]="activeId" class="nav-tabs nav noise-tabs">
                         <li [ngbNavItem]="i+1" (click)="activeId=item.tab_id;tabchange($event,item.tab_id)" *ngFor="let item of operationList;let i=index">
@@ -265,3 +265,12 @@
         </form>
     </div>
 </ng-template>
+
+<div class="loader-box" [hidden]="!loaderdiv">
+    <div class="inner-loader-box">
+        <div class="spinner-border text-warning m-1" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <p>Loading...</p>
+    </div>
+</div>

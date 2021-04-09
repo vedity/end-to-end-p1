@@ -1,7 +1,9 @@
 import { Component, HostListener, Input, OnInit, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DataTableDirective } from 'angular-datatables';
 import { ToastrService } from 'ngx-toastr';
+import { Subject } from 'rxjs';
 import { SchemaMappingApiService } from '../schema-mapping-api.service';
 @Component({
   selector: 'app-create-schema-mapping',
@@ -12,7 +14,9 @@ export class CreateSchemaMappingComponent implements OnInit {
   @ViewChild(DataTableDirective, { static: false })
   datatableElement: DataTableDirective;
   dtOptions: DataTables.Settings = {};
-  constructor(public apiService: SchemaMappingApiService, public toaster: ToastrService, private modalService: NgbModal) { }
+  dtTrigger: Subject<any> = new Subject<any>();
+
+  constructor(public apiService: SchemaMappingApiService,public router:Router, public toaster: ToastrService, private modalService: NgbModal) { }
   @Input() public dataset_id: any;
   @Input() public title: any;
   @Input() public project_id: any;
@@ -25,6 +29,7 @@ export class CreateSchemaMappingComponent implements OnInit {
     description: ""
 
   }
+  filter: boolean = true;
   displaytitle = "false";
   columnattrList: any = [];
   datatypeList: any = [];
@@ -41,39 +46,38 @@ export class CreateSchemaMappingComponent implements OnInit {
   };
 
   @HostListener('window:resize', ['$event'])
-	onResize(event) {
+  onResize(event) {
     if (this.datatableElement.dtInstance) {
       this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
         dtInstance.columns.adjust().draw();
       })
     }
-	}
+  }
 
   checkuniquecolumnname(event, id) {
     // console.log(event.target.value, id);
     if (event.target.value != "") {
       this.apiService.checkuniqueColumnName(event.target.value, this.schema_id).subscribe(
-        logs => this.checkuniquesuccessHandler(logs,id),
+        logs => this.checkuniquesuccessHandler(logs, id),
         error => this.errorHandler(error)
       )
     }
-    else{
-      $("#td_"+id).removeClass("errorstatus");
-      $(".changeerror_"+id).text('');
+    else {
+      $("#td_" + id).removeClass("errorstatus");
+      $(".changeerror_" + id).text('');
     }
   }
 
-  checkuniquesuccessHandler(data,id){
+  checkuniquesuccessHandler(data, id) {
     // console.log(data);
-    if(data.status_code=='500'){
-      $("#td_"+id).addClass("errorstatus");
-      $(".changeerror_"+id).text(data.error_msg);
+    if (data.status_code == '500') {
+      $("#td_" + id).addClass("errorstatus");
+      $(".changeerror_" + id).text(data.error_msg);
     }
-    else{
-      $("#td_"+id).removeClass("errorstatus");
-      $(".changeerror_"+id).text('');
+    else {
+      $("#td_" + id).removeClass("errorstatus");
+      $(".changeerror_" + id).text('');
     }
-    
   }
 
 
@@ -81,12 +85,12 @@ export class CreateSchemaMappingComponent implements OnInit {
   ngOnInit(): void {
     this.dtOptions = {
       paging: false,
-      ordering: false,
+      // ordering: true,
       scrollCollapse: true,
       info: false,
-      searching: false,
-      // scrollX: true,
-      scrollY: "calc(100vh - 395px)",
+      // searching: false,
+      scrollX: true,
+      scrollY: "calc(100vh - 450px)",
     }
     this.displaydiv = true;
     this.getColumnAttributeList();
@@ -105,7 +109,28 @@ export class CreateSchemaMappingComponent implements OnInit {
     this.displaydiv = false;
     this.datasetSchema = logs.response;
     this.Originaldata = logs.response;
+    setTimeout(() => {
+      if (!this.datatableElement.dtInstance) {
+        this.dtTrigger.next();
+        this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
+          dtInstance.columns().every(function () {
+            const that = this;
+            $('#input_' + this.index("visible")).on('keyup change', function () {
+              console.log(this['value']);
+              if (that.search() !== this['value']) {
+                that
+                  .search(this['value'])
+                  .draw();
+              }
+            });
+          });
+        });
+      }
+     
+    }, 0);
   }
+
+ 
 
   getColumnAttributeList() {
     this.apiService.getColumnAttributes().subscribe(
@@ -213,7 +238,7 @@ export class CreateSchemaMappingComponent implements OnInit {
     this.loaderdiv = false;
     if (data.status_code == "200") {
       this.toaster.success(data.error_msg, "Success");
-      this.getSchema(this.project_id, this.dataset_id, this.schema_id);
+      this.reset();
 
     }
     else
@@ -221,7 +246,10 @@ export class CreateSchemaMappingComponent implements OnInit {
   }
 
   reset() {
-    this.getSchema(this.project_id, this.dataset_id, this.schema_id);
+    let currentUrl = this.router.url;
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+    this.router.onSameUrlNavigation = 'reload';
+    this.router.navigate([currentUrl]);
 
   }
 
@@ -240,5 +268,10 @@ export class CreateSchemaMappingComponent implements OnInit {
 
   smallModal(smallDataModal: any) {
     this.modalService.open(smallDataModal, { size: 'sm', windowClass: 'modal-holder', centered: true });
+  }
+
+  displayfilter() {
+    this.filter = !this.filter;
+    $('.filter').val('').trigger('change');
   }
 }
