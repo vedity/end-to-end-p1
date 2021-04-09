@@ -1,5 +1,6 @@
 from selenium import webdriver  
 import time  
+import uuid
 #from selenium.webdriver.common.keys import Keys  
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -7,29 +8,104 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.select import Select
 import os
-import HTMLTestRunner
 import pandas as pd
-print("sample test case started")  
-#driver = webdriver.Chrome()  
-#driver=webdriver.firefox()  
-#driver=webdriver.ie()  
+import unittest
+import HtmlTestRunner
+
+cont = True
+user_name = []
+password = []
+UAT = []
+DatasetStatus = []
+ProjectName = []
+ProjectDesc = []
+DatasetName = []
+DatasetDesc = []
+FilePath = []
+# OutputPath = ""
+# OutputPath = "C:\\Users\\PrayagrajPandya\\Downloads\\MLaaS Datasets\\5APR-Report\\"
+
+def get_parameter(strings):
+    
+    params = []
+    for string in strings.split(","):
+        start_point = string.find('"')
+        end_point = string.find('"',start_point+1)
+        parameter = string[start_point+1:end_point]
+        if len(parameter) >= 1: params.append(parameter)
+    return params
+
+lines = """
+project_name : "name2",
+project_desc : "desc2",
+"""   
+get_parameter(lines)
+
+def get_section(section):
+    
+    all_params = []
+    
+    for i,sec in enumerate(section.split("---")):
+        if i == 0:     
+        else:
+            all_params.append(get_parameter(sec))  
+    return all_params
+
+get_section(file_string)
+
+'''
+user_name = input("Enter User Name :")
+password = input("Enter Password :")
+UAT = input("Run on UAT Server ? (y/n) :")
+if UAT == 'y' or UAT == 'Y':
+    UAT = 'y'
+else :
+    UAT = 'n'
+while cont:
+    dt_status =input("Keep Dataset Private? (y/n) :")
+    if dt_status == 'y' or dt_status == 'Y':
+        DatasetStatus.append('y')
+    else :
+        DatasetStatus.append('n')
+    ProjectName.append(input("Enter Project Name :"))
+    ProjectDesc.append(input("Enter Project Descricption :"))
+    DatasetName.append(input("Enter Dataset Name :"))
+    DatasetDesc.append(input("Enter Dataset Description :"))
+    FilePath.append(input("Enter Dataset file Path :"))
+    cont_status = input("Do you want to continue? (y,n) :")
+    if cont_status == 'y' or cont_status == 'Y':
+        cont = True
+    else:
+        cont = False
+'''
+#"C:\\Users\\PrayagrajPandya\\Downloads\\MLaaS Datasets\\Mall_Customers.csv"
+#output = "C:\\Users\\PrayagrajPandya\\Downloads\\MLaaS Datasets\\5APR-Report\\"
+
+
+print("sample test case started") 
+
+#open browser
 driver=webdriver.Firefox()
+driver.maximize_window()
 
-#maximize the window size  
-driver.maximize_window() 
+    
+class Test_Script(unittest.TestCase):
 
-
-
-class Test_Script():
-
-    def login(self,user_name,password):
-
+    def testA_login(self):
+        '''
+        This function is used to check login functionality 
+        '''
+        
         try:
+            
             self.user_name = user_name
             self.password = password
-            #navigate to the url  
-            driver.get("localhost:4200/")  #get login page 
-            #identify the login page  text box and enter the value 
+            
+            if UAT == "y" :
+                driver.get("http://isg.loginto.me:4200/") 
+            else :
+                driver.get("localhost:4200/")
+
             driver.find_element_by_id("email").clear() #clear the input
             driver.find_element_by_id("email").send_keys(user_name) #send value for email
             time.sleep(3)
@@ -40,140 +116,78 @@ class Test_Script():
             time.sleep(3) 
         except Exception:
             print(Exception)
-        # if __name__ == "__main__":
-        #     HTMLTestRunner.main()
-
-    def create_project(self):
+    
+          
+    def testB_create_project(self):
+        '''
+        #This function is create project 
+        '''
         try:
-            #creating project 
-            driver.get("http://localhost:4200/create")  #get project create page
-            driver.find_element_by_name("projectname").clear()
-            driver.find_element_by_name("projectname").send_keys("autotest1")
-            time.sleep(3) 
-            driver.find_element_by_name("description").clear()
-            driver.find_element_by_name("description").send_keys("auto discription test")
-            time.sleep(3) 
-            driver.find_element_by_name("datasetname").clear()
-            driver.find_element_by_name("datasetname").send_keys("autodatasetname1")
-            time.sleep(3)
-            driver.find_element_by_name("datasetdescription").clear()
-            driver.find_element_by_name("datasetdescription").send_keys("autodatasetdescricption1")
-            time.sleep(3)
+            #print(len(DatasetStatus))
+            for i in range(len(DatasetStatus)):
+                
+                if UAT == "y" :
 
- 
-            # files = '../ingest/dataset/CarPrice_Assignment.csv'
-            # file = {'inputfile': open(files, 'rb')}
-            driver.find_element_by_name("file").clear() 
-            driver.find_element_by_xpath("//input[@type='file']").send_keys("C:\\Users\\PrayagrajPandya\\MLaaS-Project\\end-to-end-p1\\MS\\mlaas\\CarPrice_Assignment.csv")
-            time.sleep(10)
-            driver.find_element_by_id("btnsubmit").click()
-        
-            time.sleep(5) 
-
-
-
-            #for Reset Button Test:
-            #driver.find_element_by_id("btnreset").click()
-        except Exception:
-            print(Exception)
-
-    def show_data_details(self):
-        try:
-            #get Data Detail Page
-            driver.find_element_by_id("detailicon").click()
-
-            time.sleep(10)  
-
-            #Schema mapping:
-            driver.find_element_by_id("ngb-nav-3").click()
-            time.sleep(10)
-            #driver.find_element_by_id("selectattr_1").click()
-        except Exception:
-            print(Exception)
-
-    def schema_mapping(self):
-        try:
-            excle_file = "C:\\Users\\PrayagrajPandya\\MLaaS-Project\\end-to-end-p1\\MS\\mlaas\\preprocessed_house_price_prediction_regression.csv"
-            df_files = pd.read_csv(excle_file)
-            unique_col = df_files.shape[1]
-
-            #print(unique_col)
-            #for column rename:
-            for i in range(1,unique_col+1):
-                #print("columnname_"+str(i))
-                driver.find_element_by_id("columnname_"+str(i)).clear()
-                driver.find_element_by_id("columnname_"+str(i)).send_keys("columnname_"+str(i))
+                    time.sleep(15)
+                    driver.get("http://isg.loginto.me:4200/project")    
+                    time.sleep(3)
+                    driver.find_element_by_id("create").click()
+                    time.sleep(5)
+                else : 
+                    time.sleep(15)
+                    driver.get("localhost:4200/project")
+                    time.sleep(3)
+                    driver.find_element_by_id("create").click()
+                    time.sleep(5)
+            
                 time.sleep(3)
-                pass
-            time.sleep(10)
-            driver.find_element_by_class_name("btn btn-success").click()
-            time.sleep(10)
-
-            #for select target Schema in mapping:
-            for i in range(1,unique_col+1,2):
-                s = Select(driver.find_element_by_xpath("//select[@id='selectattr_'+str(i)]"))
-                s.select_by_visible_text("Target")
+                driver.find_element_by_name("projectname").clear()
+                driver.find_element_by_name("projectname").send_keys(ProjectName[i])
+                time.sleep(3) 
+                driver.find_element_by_name("description").clear()
+                driver.find_element_by_name("description").send_keys(ProjectDesc[i])
+                time.sleep(3) 
+                driver.find_element_by_name("datasetname").clear()
+                driver.find_element_by_name("datasetname").send_keys(DatasetName[i])
                 time.sleep(3)
-                #print('selectattr_'+str(i))
-            time.sleep(10)
-            driver.find_element_by_class_name("btn btn-success").click()
-            time.sleep(10)       
-
-            #for igoner schema in mapping:
-            for i in range(2,unique_col+1,2):
-                s = Select(driver.find_element_by_xpath("//select[@id='selectattr_'+str(i)]"))
-                s.select_by_visible_text("Ignore")
+                driver.find_element_by_name("datasetdescription").clear()
+                driver.find_element_by_name("datasetdescription").send_keys(DatasetDesc[i])
                 time.sleep(3)
-                #print('selectattr_'+str(i))
-            time.sleep(10)
-            driver.find_element_by_class_name("btn btn-success").click()
-            time.sleep(10)
-           
 
+
+                driver.find_element_by_name("file").clear() 
+                driver.find_element_by_xpath("//input[@type='file']").send_keys(FilePath[i])
+                time.sleep(10)
+                
+                '''
+                if DatasetStatus[i] == "y" :
+                    pass
+                else :
+                    time.sleep(5)
+                    driver.find_element_by_id("customCheck1").click()
+                    time.sleep(3)
+                   
+                #driver.find_element_by_id("btnsubmit").click()
+                time.sleep(15) 
+                '''
+                status = driver.find_element_by_id("customCheck1").is_displayed()
+                print("is displayed method is :",status)
+                status = driver.find_element_by_id("customCheck1").is_enabled()
+                print("is enable method is :",status)
+                status = driver.find_element_by_id("customCheck1").is_selected()
+                print("is selected method is :",status)
+                status = driver.find_element_by_id("customCheck1").click()
+                print("click event is occure :")
+                time.sleep(3)
+                status = driver.find_element_by_id("customCheck1").is_selected()
+                print("is selected method after click is :"status)
+                
+            
         except Exception:
             print(Exception)
 
-    def upload_dataset_in_exisiting_project(self):
-        try:
-            ####upload new dataset and add that dataset in existing project:
-            #navigate to the url  
-            driver.get("http://localhost:4200/dataset")   #get create dataset url
-
-            driver.find_element_by_id("create").click()
-            time.sleep(3) 
-            driver.find_element_by_name("datasetname").clear()
-            driver.find_element_by_name("datasetname").send_keys("House Price")
-            time.sleep(3) 
-            driver.find_element_by_xpath("//input[@type='file']").send_keys("C:\\Users\\PrayagrajPandya\\MLaaS-Project\\end-to-end-p1\\MS\\mlaas\\preprocessed_house_price_prediction_regression.csv")
-            time.sleep(3)
-            driver.find_elements_by_name("datasetdescription").clear()
-            driver.find_element_by_name("datasetdescription").send_keys("House Price Prediction")
-            time.sleep(5)
-            driver.find_element_by_id("btnsubmit").click()
-            time.sleep(6)
-        except Exception:
-            print(Exception)
-        
-    def close_browser(self):
-        try:
-
-            ##
-            driver.get("http://localhost:4200/project")
-            #close the browser  
-            driver.close()  
-            print("sample test case successfully completed") 
-        except Exception:
-            print(Exception)
-
-
-TS =  Test_Script()
-TS.login("mehul","mehul")
-# TS.create_project()
-# TS.show_data_details()
-# TS.schema_mapping()
-# TS.upload_dataset_in_exisiting_project()
-TS.close_browser()
-
-#git clone https://gitlab.com/isgtest/end-to-end-p1.git
-
-#git pull origin uAT
+if __name__ =='__main__' :
+    
+    #for create HTML report:
+    unittest.main(testRunner=HtmlTestRunner.HTMLTestRunner(output="Reports/"))
+    

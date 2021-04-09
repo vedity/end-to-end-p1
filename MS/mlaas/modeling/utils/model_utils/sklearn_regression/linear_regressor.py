@@ -111,8 +111,11 @@ class LinearRegressionClass:
         # Average of train score(accuracy).
         test_mean = test_scores.mean(axis=1)
         # Create the learning curve dictionary.
-        learning_curve_dict = {"train_size":train_sizes.tolist(),"train_score":train_mean.tolist(),"test_score":test_mean.tolist(),
-                                "train_loss": abs(train_loss.mean(axis=1)).tolist(), "test_loss": abs(test_loss.mean(axis=1)).tolist()}
+        # learning_curve_dict = {"train_size":train_sizes.tolist(),"train_score":train_mean.tolist(),"test_score":test_mean.tolist(),
+        #                         "train_loss": abs(train_loss.mean(axis=1)).tolist(), "test_loss": abs(test_loss.mean(axis=1)).tolist()}
+        
+        learning_curve_dict = {"train_size":train_sizes.tolist(),"train_score":np.nan_to_num(train_mean).tolist(),"test_score":np.nan_to_num(test_mean).tolist(),
+                                "train_loss": abs(np.nan_to_num(train_loss).mean(axis=1)).tolist(), "test_loss": abs(np.nan_to_num(test_loss).mean(axis=1)).tolist()}
         
         return learning_curve_dict
         
@@ -208,12 +211,22 @@ class LinearRegressionClass:
         
         mae = mean_absolute_error(actual_lst,prediction_lst)
         
-        
         actual, pred = np.array(actual_lst), np.array(prediction_lst)
-        mape = np.mean(np.abs((actual - pred) / actual)) * 100
         
+        temp_arr=np.isfinite(np.abs((actual - pred) / actual))
+        abs_arr=np.abs((actual - pred) / actual)
+
+        print("temp_arr==",temp_arr)
+        print("abs_arr==",abs_arr)
+        for i,j in zip(temp_arr,abs_arr):
+            if i == False:
+                np.put(abs_arr,np.where(temp_arr == i),0)
+        
+    
+        print("updated abs_arr==",abs_arr)
+        mape = np.mean(abs_arr) * 100
+        print("mape ==",mape)
         return r2score,mse,mae,mape
-        
         
         
     def model_summary(self,X_train, X_test,y_train):
