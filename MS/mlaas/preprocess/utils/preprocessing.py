@@ -1346,22 +1346,23 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             #? Getting Dag id
             sql_command = f"select pt.cleanup_dag_id from mlaas.project_tbl pt where pt.project_id = '{project_id}'"
             dag_id_df = DBObject.select_records(connection,sql_command) 
-            dag_id = dag_id_df['cleanup_dag_id'][0]
-            if not isinstance(dag_id,pd.DataFrame): #! Failed to get dag status
+            if not isinstance(dag_id_df,pd.DataFrame): #! Failed to get dag status
                 raise NullValue(500)
+            dag_id = dag_id_df['cleanup_dag_id'][0]
 
             #? Getting Dag Status
             # sql_command = f"select cds.status from mlaas.cleanup_dag_status cds where cds.dag_id = '{dag_id}';"
             sql_command = f"select dr.state from public.dag_run dr where dr.dag_id = '{dag_id}' order by id desc limit 1"
+            logging.info(sql_command)
             status_df = DBObject.select_records(connection,sql_command) 
-            if not isinstance(dag_id,pd.DataFrame): #! Failed to get dag status
+            if not isinstance(status_df,pd.DataFrame): #! Failed to get dag status
                 raise NullValue(500)
 
             if len(status_df) == 0:
-                #? Dag isn't detected yet, so sending dag status as busy
-                return True
+                #? Dag hasn't run yet, so sending dag status as available
+                return False
             
-            status = status_df['status'][0]
+            status = status_df['state'][0]
             
             logging.info("data preprocessing : PreprocessingClass : get_dag_status : execution stop")
             # connection.close()
