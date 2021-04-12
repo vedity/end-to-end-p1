@@ -47,4 +47,6 @@ urlpatterns = [
     path('mlaas/modeling/checkrunningexperiments/', CheckRunningExperimentsClass.as_view()), 
 
     path('mlaas/modeling/modeltype/', ModelTypeClass.as_view()),     
+
+    path('mlaas/getsplitdata/', GetSplitDataClass.as_view()),     
 ]

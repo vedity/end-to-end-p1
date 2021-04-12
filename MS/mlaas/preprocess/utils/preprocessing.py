@@ -928,7 +928,16 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             DBObject,connection,connection_string = self.get_db_connection() #get db connection
             if connection == None :
                 raise DatabaseConnectionFailed(500)  
-            
+            unique_id = str(uuid.uuid1().time) #genrate unique_id
+            scale_dir = "scaled_dataset/scaled_data_" + unique_id  #genrate directory
+            CHECK_FOLDER = os.path.isdir(scale_dir) #check directory already exists or not
+            # If folder doesn't exist, then create it.
+            if not CHECK_FOLDER:
+                os.makedirs(scale_dir) #create directory
+                logger.info("Directory  Created")
+            else:
+                logger.info("Directory  already exists")
+            actual_Y_filename =  scale_dir+"/Unscaled_actual_Y_data_" + unique_id  #genrate test_Y file path           
             #? Getting Dataframe
             data_df = self.get_data_df(dataset_id,schema_id) #get dataframe
             if isinstance(data_df, str):
@@ -938,6 +947,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             target_cols += tg_cols    
             target_actual_features_df=data_df[target_cols]
             encoded_target_df=target_actual_features_df
+            np.save(actual_Y_filename,target_actual_features_df.to_numpy()) #save Y_actual
             for col in target_cols[1:]:
                 if encoded_target_df[col].dtype == 'O':
                     encoded_target_df[col] = le.fit_transform(encoded_target_df[col])  
@@ -987,15 +997,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 valid_ratio= 0
             else:
                 valid_ratio=float(valid_ratio)
-            unique_id = str(uuid.uuid1().time) #genrate unique_id
-            scale_dir = "scaled_dataset/scaled_data_" + unique_id  #genrate directory
-            CHECK_FOLDER = os.path.isdir(scale_dir) #check directory already exists or not
-            # If folder doesn't exist, then create it.
-            if not CHECK_FOLDER:
-                os.makedirs(scale_dir) #create directory
-                logger.info("Directory  Created")
-            else:
-                logger.info("Directory  already exists")
             train_X_filename = scale_dir+"/scaled_train_X_data_" + unique_id #genrate train_X file path
             train_Y_filename = scale_dir+"/scaled_train_Y_data_" + unique_id #genrate train_Y file path
             test_X_filename =  scale_dir+"/scaled_test_X_data_" + unique_id  #genrate test_X file path  
@@ -1020,7 +1021,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             np.save(train_Y_filename,Y_train.to_numpy()) #save Y_train
             np.save(test_X_filename,X_test.to_numpy()) #save X_test
             np.save(test_Y_filename,Y_test.to_numpy()) #save Y_test
-            np.save(actual_Y_filename,target_actual_features_df.to_numpy()) #save Y_actual
+            
         
             scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_ratio)+', "test_ratio":'+ str(test_ratio)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'","actual_Y_filename":"'+actual_Y_filename+".npy"+'"}' #genrate scaled split parameters
             logger.info("scaled_split_parameters=="+scaled_split_parameters)
@@ -1202,7 +1203,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 raise DagUpdateFailed(500)
 
             activity_id = 51
-            activity_status = self.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id,user_name)
+            activity_status = self.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id,user_name,dataset_name,flag='True')
 
             json_data = {}
             result = requests.post(f"http://airflow:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False)#owner
@@ -1401,7 +1402,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
 
         
 
-    def get_cleanup_startend_desc(self,DBObject,connection,dataset_id,project_id,activity_id,user_name,new_dataset_name = None):
+    def get_cleanup_startend_desc(self,DBObject,connection,dataset_id,project_id,activity_id,user_name,new_dataset_name,flag=None):
         """This function will replace * into project name and get activity description of scale and split.
  
         Args:
@@ -1412,9 +1413,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             [String]: activity_description
         """
         activity_df = self.AT.get_activity(activity_id,"US")
+        
         datasetnm_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
-        projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
         dataset_name = datasetnm_df['dataset_name'][0]
+        
+        projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
         project_name = projectnm_df['project_name'][0]
 
         if new_dataset_name == None:
@@ -1428,9 +1431,54 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
     
         end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
         activity_status,index = self.AT.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
-
+        
+        if new_dataset_name != None and flag != 'True': 
+            activity_id=53
+            sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
+            desc_df = DBObject.select_records(connection,sql_command)
+            activity_description = desc_df['description'][0]
+            activity_description = activity_description.replace('*',new_dataset_name)
+            logger.info("activity_description"+activity_description)
+            activity_status,index = self.AT.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
         return activity_status
     
+    def direct_save_as(self, project_id,dataset_id,user_name,dataset_name,selected_visibility,dataset_desc):
+        
+        try:
+            DBObject,connection,connection_string = self.get_db_connection()
+            if connection == None :
+                raise DatabaseConnectionFailed(500)
+      
+            #Get the dataframe of dataset detail based on the dataset id
+            dataframe = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
+ 
+            #Extract the dataframe based on its column name as key
+            table_name,dataset_visibility,user_name = str(dataframe['dataset_table_name'][0]),str(dataframe['dataset_visibility'][0]),str(dataframe['user_name'][0])
+            
+            if dataset_visibility == 'private':
+                dataset_table_name = user_name+'."'+table_name+'"'
+            else:
+                dataset_table_name = 'public'+'."'+table_name+'"'
+                
+            status = self.SaveAs(DBObject,connection, project_id
+                                 ,table_name,user_name,dataset_visibility,
+                                 dataset_name,selected_visibility,dataset_desc)
+            if status ==0: 
+                activity_id=53
+                sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
+                desc_df = DBObject.select_records(connection,sql_command)
+                activity_description = desc_df['description'][0]
+                activity_description = activity_description.replace('*',dataset_name)
+                logger.info("activity_description"+activity_description)
+                end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                activity_status,index = self.AT.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
+            connection.close()
+            return status
+        
+        except (DatabaseConnectionFailed) as exc:
+            connection.close()
+            return str(exc)
+        
     def operation_failed(self, DBObject, connection, activity_id, operation_id, col_name):
         '''
             Used to update Activity description when the Activity ends.

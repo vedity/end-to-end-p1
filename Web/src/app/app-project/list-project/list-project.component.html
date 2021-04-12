@@ -2,7 +2,9 @@
     <div class="col-lg-12">
         <div class="card table-card">
             <div class="card-body">
-                <div class="main-datatable">
+                <ngx-skeleton-loader *ngIf="isloaderdiv" count="7" [animation]="animation" [theme]="theme">
+                </ngx-skeleton-loader>
+                <div class="main-datatable" [hidden]="isloaderdiv">
                     <a href="javascript:void(0)" (click)="displayfilter()" id="filter-btn" class="filter-btn"><i
                             id="filtericon" class="dripicons-experiment"></i></a>
                     <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" style="width: 100%;" class="table table-centered table-nowrap">

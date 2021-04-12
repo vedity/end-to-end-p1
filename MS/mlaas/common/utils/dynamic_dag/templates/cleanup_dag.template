@@ -109,7 +109,7 @@ op_dict = {
     32 : PC_OBJ.multiply_column
 }
 
-def dag_resetter(DBObject,connection,dataset_id,project_id,dag_id,new_user_name,**kwargs):
+def dag_resetter(DBObject,connection,dataset_id,project_id,dag_id,new_user_name,dataset_name,**kwargs):
     '''
         To reset the dag status
     '''
@@ -127,13 +127,15 @@ t2= PythonOperator(
             dag=dag,
             provide_context=True,
             python_callable=PC_OBJ.update_schema_flag_status,
-            op_args=[DBObject,connection,schema_id,dataset_id,schema_column_list])
+            op_args=[DBObject,connection,schema_id,dataset_id,schema_column_list],
+            trigger_rule="all_done")
 t4= PythonOperator(
             task_id='Enable_Cleanup_Page',
             dag=dag,
             provide_context=True,
             python_callable=dag_resetter,
-            op_args=[DBObject,connection,dataset_id,project_id,main_dag_id,new_user_name])
+            op_args=[DBObject,connection,dataset_id,project_id,main_dag_id,new_user_name,dataset_name],
+            trigger_rule="all_done")
 
 if save_as == 'True':
     t3 = PythonOperator(
@@ -141,7 +143,8 @@ if save_as == 'True':
                 dag=dag,
                 provide_context=True,
                 python_callable=PC_OBJ.SaveAs,
-                op_args=[DBObject,connection,project_id,table_name,user_name,dataset_visibility,dataset_name,visibility,dataset_desc])
+                op_args=[DBObject,connection,project_id,table_name,user_name,dataset_visibility,dataset_name,visibility,dataset_desc],
+                trigger_rule="all_done")
     t2.set_downstream(t3)
     t3.set_downstream(t4)
 else:

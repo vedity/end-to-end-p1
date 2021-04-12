@@ -12,7 +12,6 @@
 // .custom-control-input:disabled~.custom-control-label::before {
 //     background-color: #5a6074 !important;
 // }
-
 .module-main {
     position: relative;
 }
@@ -416,4 +415,20 @@ table {
 
 .errorstatus {
     border-color: #f46a6a !important;
+}
+
+.sorting_asc {
+    background-image: none !important;
+}
+
+.sorting_desc {
+    background-image: none !important;
+}
+
+.sorting {
+    background-image: none !important;
+}
+
+th.no-sort {
+    background-image: none !important;
 }
