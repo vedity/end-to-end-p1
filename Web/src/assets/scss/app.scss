@@ -420,3 +420,11 @@ table.dataTable thead th,
 table.dataTable thead td {
     border-bottom: none;
 }
+
+.schema-mapping {
+    .dataTables_wrapper {
+        .dataTables_filter {
+            display: none !important;
+        }
+    }
+}

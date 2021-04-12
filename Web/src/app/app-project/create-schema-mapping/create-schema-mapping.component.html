@@ -10,7 +10,9 @@
                 </ngx-skeleton-loader>
                 <div *ngIf="!displaydiv" class="nobordertable">
                     <!-- <perfect-scrollbar class="schemamapping-row"> -->
-                    <table datatable [dtOptions]="dtOptions" class="table table-centered table-nowrap " style="width: 100%;">
+                    <a href="javascript:void(0)" (click)="displayfilter()" id="filter-btn" class="filter-btn"><i
+                            id="filtericon" class="dripicons-experiment"></i></a>
+                    <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table table-centered table-nowrap schema-mapping" style="width: 100%;">
                         <thead class="thead-light">
                             <tr>
                                 <th>
@@ -19,8 +21,20 @@
                                 <th>
                                     Data Type
                                 </th>
-                                <th>Column Attributes</th>
-                                <th>Change Column Name</th>
+                                <th class="no-sort">Column Attributes</th>
+                                <th class="no-sort">Change Column Name</th>
+                            </tr>
+                        </thead>
+                        <thead>
+                            <tr class="thead-light" [hidden]="filter">
+                                <td>
+                                    <input class="form-control filter" id="input_0" type="text" name="search-column-name" />
+                                </td>
+                                <td>
+                                    <input class="form-control filter" type="text" id="input_1" name="search-datatype" />
+                                </td>
+                                <td></td>
+                                <td></td>
                             </tr>
                         </thead>
                         <tbody>

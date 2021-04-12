@@ -46,6 +46,14 @@ export class DataCleanupApiService
     return this.httpClient.get(this.baseUrl + "preprocess/cldag_status/", { headers: this.headers,params });
   } 
 
+  getrefreshedProjectDetail(project_id){
+    this.user = JSON.parse(localStorage.getItem("currentUser"));
+    var params = new HttpParams()
+    .append("project_id", project_id)
+    .append("user_name", this.user.username)
+    return this.httpClient.get(this.baseUrl + "ingest/project/detail/", { headers: this.headers,params });
+  }
+
   saveOperations(schema_id,dataset_id,project_id,flag,data){
     this.user = JSON.parse(localStorage.getItem("currentUser"));
     var params = new HttpParams()

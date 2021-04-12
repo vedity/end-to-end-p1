@@ -210,7 +210,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         logging.info("data ingestion : ingestclass : show_data_details : execution end")
         return data_details_df,filtercount
 
-    def show_project_details(self,user_name):
+    def show_project_details(self,user_name,project_id=None):
         """This function is used to show project details.
         
         Args:
@@ -225,7 +225,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             if connection == None:
                 raise DatabaseConnectionFailed(500)
             
-            project_df = super(IngestClass,self).show_project_details(DBObject,connection,user_name) # Get dataframe of project created.
+            project_df = super(IngestClass,self).show_project_details(DBObject,connection,user_name,project_id) # Get dataframe of project created.
             project_df = project_df.to_json(orient='records')
             project_df = json.loads(project_df)
         except (DatabaseConnectionFailed) as exc:
