@@ -571,3 +571,30 @@ class DatasetNameClass(APIView):
                 else:
                         logging.info("data ingestion : DatasetNameClass : GET Method : execution stop : status_code : 200")
                         return Response({"status_code":"200","error_msg":"you can proceed","response":dataset_df}) 
+
+
+class ProjectDetailClass(APIView):
+        def get(self,request,format=None):
+                """
+                This function is used to get project detail.
+
+                Args  : 
+                        project_id[(String)] : [id of the project]
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for deletion failed or successfull),
+                        Response(false or true)
+                """
+                logging.info("data ingestion : ProjectExistClass : GET Method : execution start")
+                user_name =request.query_params.get('user_name') #get project_name
+                project_id =request.query_params.get('project_id') #get project_name
+                project_df = IngestionObj.show_project_details(user_name,project_id) #call show_project_details to retrive project detail data and it will return dataframe
+                if isinstance(project_df,str): #check the instance of dataset_df
+                        status_code,error_msg=json_obj.get_Status_code(project_df) # extract the status_code and error_msg from project_df
+                        logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code :"+ status_code)
+                        return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                else:
+                        logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code : 200")
+                        return Response({"status_code":"200","error_msg":"successfull retrival","response":project_df})  
+                
+
