@@ -191,3 +191,23 @@ class SplitFailed(Exception):
      
     def __str__(self):
         return (self.msg)
+
+class SchemaColumnUpdate(Exception):
+    """  Schema column update failed """
+    def __init__(self,status_code):
+        self.msg = "Schema column update  failed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)
+
+class SchemaColumnDeleteion(Exception):
+    """  Schema column update failed """
+    def __init__(self,status_code):
+        self.msg = "Schema column deletion failed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)

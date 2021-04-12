@@ -188,18 +188,18 @@ class ProjectClass:
                 # This condition is used to check project table and data is successfully stored into project table or not.if successful then 0 else 1. 
             if insert_status == 0 :
 
-                status = 0 # Successfully Created
+                
 
-                    #function will get the schema_id and project_id from the project table
+                #function will get the schema_id and project_id from the project table
                 project_id,schema_id = self.get_project_id(DBObject,connection,row_tuples,user_name) 
                     
-                    #get the schema mapping details with column name and datatype
+                #get the schema mapping details with column name and datatype
                 column_name_list,column_datatype_list = schema_obj.get_dataset_schema(DBObject,connection,dataset_id) 
                     
                 missing_value_lst,noise_status_lst = preprocessObj.get_preprocess_cache(dataset_id)
                     
                 missing_value_lst,noise_status_lst = list(missing_value_lst),list(noise_status_lst)
-                    # column name and datatype will be inserted into schema table with schema id
+                # column name and datatype will be inserted into schema table with schema id
                     
                 status=schema_obj.update_dataset_schema(DBObject,connection,schema_id,column_name_list,column_datatype_list,missing_flag=missing_value_lst,noise_flag=noise_status_lst)
                     

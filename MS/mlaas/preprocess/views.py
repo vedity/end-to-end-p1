@@ -392,7 +392,7 @@ class CleanupSave(APIView):
                                 operation = preprocessObj.dag_executor(project_id, dataset_id,schema_id,data,method_flag,visibility ,dataset_name ,dataset_desc,user_name)
                         else:
                                 #? Clicking save as without selection operations
-                                operation = preprocessObj.direct_save_as(project_id, dataset_id, user_name, dataset_name,
+                                operation = preprocessObj.direct_save_as(project_id, dataset_id,schema_id, user_name, dataset_name,
                                                                          visibility, dataset_desc)
                        
                         logging.info("data preprocess : CleanupSave : POST Method : execution stop")
