@@ -683,6 +683,8 @@ class DatasetClass:
             
             sql_command  = "select * from "+str(raw_table_name)
             dataframe = DBObject.select_records(connection,sql_command)
+            dataframe.to_csv('static/server/nisha/file1.csv')
+            logging("((((("+str(dataframe))
             dataframe_size = sys.getsizeof(dataframe)
             file_size = self.get_file_size(dataframe_size,flag = True)
                 
