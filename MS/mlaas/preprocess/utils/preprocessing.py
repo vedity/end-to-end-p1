@@ -943,26 +943,28 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             if isinstance(data_df, str):
                 raise GetDataDfFailed(500)
             tg_cols = DBObject.get_target_col(connection, schema_id) #get list of the target columns
-            target_cols = [data_df.columns[0]]
-            target_cols += tg_cols    
+            target_cols = [data_df.columns[0]] #select first column
+            target_cols += tg_cols     #list target_cols
             target_actual_features_df=data_df[target_cols]
             encoded_target_df=target_actual_features_df
             np.save(actual_Y_filename,target_actual_features_df.to_numpy()) #save Y_actual
+            #encode if target column is string
             for col in target_cols[1:]:
                 if encoded_target_df[col].dtype == 'O':
                     encoded_target_df[col] = le.fit_transform(encoded_target_df[col])  
                     
-            encoded_target_df=encoded_target_df[target_cols] #target_features_df
+            encoded_target_df=encoded_target_df[target_cols] #encoded_target_df
             feature_cols = list(data_df.columns) #get list of the column
             
             for col in tg_cols:
                 feature_cols.remove(col) #remove target columns from list
                     
-            input_feature_df=data_df[feature_cols]
+            input_feature_df=data_df[feature_cols] #select input fetures dataframe
+            #if there is string value the encode it
             for col in feature_cols[1:]:
                 if input_feature_df[col].dtype == 'O':
                     input_feature_df[col] = le.fit_transform(input_feature_df[col])  
-                
+            #sacle the dataframe    
             if int(scaling_type) == 0:
                 input_feature_df.iloc[:,1:] = super().standard_scaling(input_feature_df.iloc[:,1:]) #standard_scaling
             elif int(scaling_type) == 1:
