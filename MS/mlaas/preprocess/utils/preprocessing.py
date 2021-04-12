@@ -1401,7 +1401,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
 
         
 
-    def get_cleanup_startend_desc(self,DBObject,connection,dataset_id,project_id,activity_id,user_name):
+    def get_cleanup_startend_desc(self,DBObject,connection,dataset_id,project_id,activity_id,user_name,new_dataset_name = None):
         """This function will replace * into project name and get activity description of scale and split.
  
         Args:
@@ -1417,13 +1417,58 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         dataset_name = datasetnm_df['dataset_name'][0]
         project_name = projectnm_df['project_name'][0]
 
+        if new_dataset_name == None:
+            new_dataset_name = dataset_name
+
         sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
         desc_df = DBObject.select_records(connection,sql_command)
         activity_description = desc_df['description'][0]
-        activity_description = activity_description.replace('*',dataset_name)
+        activity_description = activity_description.replace('*',new_dataset_name)
         activity_description = activity_description.replace('&',project_name)
     
         end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
         activity_status,index = self.AT.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
 
         return activity_status
+    
+    def operation_failed(self, DBObject, connection, activity_id, operation_id, col_name):
+        '''
+            Used to update Activity description when the Activity ends.
+            
+            Returns:
+            --------
+            status (`Intiger`): Status of the updation.
+        '''
+        
+        logging.info("data preprocessing : CleaningClass : operation_end : execution start")
+        
+        #? Transforming the operation_id to the operation id stored in the activity timeline table. 
+        operation_id += self.op_diff
+        
+        #? Getting Activity Description
+        desc = self.get_act_desc(DBObject, connection, operation_id, col_name, code = 0)
+        
+        #? Changing the activity description in the activity detail table 
+        status = self.AT.update_activity(activity_id,desc)
+        
+        logging.info("data preprocessing : CleaningClass : operation_end : execution stop")
+        
+        return status
+    
+    # def check_failed_col(self, DBObject, connection, col_list, dag_id):
+        
+    #     sql_command = f"select ti.task_id from public.task_instance ti where ti.dag_id = '{dag_id}' and ti.state = 'failed' "
+    #     failed_df = DBObject.select_records(connection,sql_command)
+        
+    #     for failed_str in failed_df.iloc[:,0]:
+    #         params = failed_str.split('_')
+    #         if len(params) != 3:
+    #             failed_op,failed_col = int(params[1]),int(params[3])
+                
+    #         col_name = col_list[failed_col]
+            
+    #         self.operation_failed(DBObject,connection,activity_id,operation)
+                
+
+        
+    #     return 
