@@ -59,7 +59,7 @@ class DatasetExplorationClass(APIView):
             logging.info("data preprocess : DatasetExplorationClass : GET Method : execution start")
             dataset_id = request.query_params.get('dataset_id') #get datasetid     
             schema_id =request.query_params.get('schema_id') #get the schema id  
-            statics_df =  preprocessObj.get_exploration_data(dataset_id,schema_id) #pass datasetid in function
+            statics_df =  preprocessObj.get_exploration_data(DBObject, connection, dataset_id,schema_id) #pass datasetid in function
             
             if isinstance(statics_df,str): #check the instance of statics_df
                 status_code,error_msg=json_obj.get_Status_code(statics_df) # extract the status_code and error_msg from statics_df
@@ -275,7 +275,7 @@ class OperationListClass(APIView):
                         except:
                                 #? This will be the case when column ids is None
                                 return Response({"status_code":"200","error_msg":"Successfull retrival","response":[]})
-                        operation = preprocessObj.get_possible_operations(dataset_id,schema_id,column_ids) #call get_possible_operation class
+                        operation = preprocessObj.get_possible_operations(DBObject, connection, dataset_id,schema_id,column_ids) #call get_possible_operation class
                         if isinstance(operation,list):  
                                         logging.info("data preprocess : OperationListClass : POST Method : execution stop")
                                         response = [{'id' : i} for i in operation]
@@ -304,7 +304,7 @@ class MasterOperationListClass(APIView):
                 '''
                 try:
                         logging.info("data preprocess : MasterOperationListClass : GET Method : execution start")
-                        operations = preprocessObj.get_all_operations() #call get_possible_operation class
+                        operations = preprocessObj.get_all_operations(DBObject, connection) #call get_possible_operation class
                         if isinstance(operations,list):  
                                         response = json.dumps(operations)
                                         response = json.loads(response)
@@ -335,13 +335,13 @@ class GetColumnListClass(APIView):
                         
                         schema_id = request.query_params.get('schema_id') #get schema id
                         
-                        column_json = preprocessObj.get_col_names(schema_id, True)
+                        column_json = preprocessObj.get_col_names(DBObject, connection, schema_id, True)
                         if isinstance(column_json,list): 
                                         
                                         logging.info("data preprocess : GetColumnListClass : POST Method : execution stop")
                                         return Response({"status_code":"200","error_msg":"Successfull retrival","response":column_json})
                         else:
-                                        status_code,error_msg=json_obj.get_Status_code(columns) # extract the status_code and error_msg from schema_data
+                                        status_code,error_msg=json_obj.get_Status_code(column_json) # extract the status_code and error_msg from schema_data
                                         logging.info("data preprocess : GetColumnListClass : POST Method : execution stop : status_code :"+status_code)
                                         return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                 except Exception as e:
@@ -389,10 +389,10 @@ class CleanupSave(APIView):
                                                 if len(str(dic['values'][0]).strip())== 0:
                                                         return Response({"status_code":"500","error_msg":"Space is not allowed","response":"false"})
                                 #operation = preprocessObj.master_executor(project_id, dataset_id,schema_id,data,method_flag,visibility ,dataset_name ,dataset_desc )
-                                operation = preprocessObj.dag_executor(project_id, dataset_id,schema_id,data,method_flag,visibility ,dataset_name ,dataset_desc,user_name)
+                                operation = preprocessObj.dag_executor(DBObject, connection, project_id, dataset_id,schema_id,data,method_flag,visibility ,dataset_name ,dataset_desc,user_name)
                         else:
                                 #? Clicking save as without selection operations
-                                operation = preprocessObj.direct_save_as(project_id, dataset_id, user_name, dataset_name,
+                                operation = preprocessObj.direct_save_as(DBObject, connection, project_id, dataset_id, user_name, dataset_name,
                                                                          visibility, dataset_desc)
                        
                         logging.info("data preprocess : CleanupSave : POST Method : execution stop")
@@ -439,7 +439,7 @@ class ScalingSplitClass(APIView):
                         end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
                         activity_status,index = AT_OBJ.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
                         
-                        status = preprocessObj.handover(dataset_id, schema_id, project_id, user_name,split_parameters, scaling_operation)
+                        status = preprocessObj.handover(DBObject, connection, dataset_id, schema_id, project_id, user_name,split_parameters, scaling_operation)
                         if isinstance(status,str):
                                 return Response({"status_code":"500","error_msg":status,"response":"false"})
                                 
@@ -513,7 +513,7 @@ class CheckCleanupDagStatus(APIView):
                 try:
                         logging.info(" data preprocess : CheckCleanupDagStatus : GET Method : execution start")
                         project_id = request.query_params.get('project_id')
-                        flag = preprocessObj.get_dag_status(project_id)
+                        flag = preprocessObj.get_dag_status(DBObject, connection, project_id)
                         
                         logging.info(" data preprocess : CheckCleanupDagStatus : GET Method : execution stop")
                         return Response({"status_code":"200","error_msg":"Successfull retrival","response":flag})    
