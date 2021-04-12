@@ -272,7 +272,7 @@ class ProjectClass:
             return str(exc)
         
     
-    def show_project_details(self,DBObject,connection,user_name):
+    def show_project_details(self,DBObject,connection,user_name,project_id):
         """This function is used to show details about all created projects.
 
         Args:
@@ -291,7 +291,10 @@ class ProjectClass:
             
             logging.debug("data ingestion : ProjectClass : show_project_details : this will excute select query on table name : "+table_name +" based on user name : "+user_name)
             try:
-                sql_command = "SELECT p.*,d.dataset_name FROM "+ table_name + " p,mlaas.dataset_tbl d WHERE p.USER_NAME ='"+ user_name +"' and p.dataset_id = d.dataset_id"
+                if project_id is None:
+                    sql_command = "SELECT p.*,d.dataset_name FROM "+ table_name + " p,mlaas.dataset_tbl d WHERE p.USER_NAME ='"+ user_name +"' and p.dataset_id = d.dataset_id"
+                else:
+                    sql_command = "SELECT p.*,d.dataset_name FROM "+ table_name + " p,mlaas.dataset_tbl d WHERE p.project_id ="+ project_id +" and p.dataset_id = d.dataset_id"
                 
                 project_df=DBObject.select_records(connection,sql_command) # Get project details in the form of dataframe.
                 if len(project_df) == 0 or project_df is None:
