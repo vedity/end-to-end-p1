@@ -633,12 +633,46 @@ export class DataCleanupComponent implements OnInit {
       this.toaster.success(data.error_msg, 'Success')
       this.modalService.dismissAll();
       this.getCldagStatus();
-      this.loaderdiv = false;
-
+      this.refershProjectDetail();
+      // this.loaderdiv = false;
     }
     else {
       this.errorHandler(data);
     }
+  }
+
+  refershProjectDetail(){
+    this.apiService.getrefreshedProjectDetail(this.project_id).subscribe(logs=>this.refreshProjectSuccessHandler(logs),
+    error=>this.errorHandler(error))
+  }
+
+  refreshProjectSuccessHandler(data) {
+    if (data.status_code == "200") {
+      console.log(data);
+      var projct_data=data.response[0];
+      var currentParams=localStorage.getItem('preprocessing');
+      var params = {
+        "dataset_id": projct_data.dataset_id,
+        "project_id": projct_data.project_id,
+        "dataset_name": projct_data.dataset_name,
+        "project_name": projct_data.project_name, 
+        "navigate_to": JSON.parse(currentParams).navigate_to, 
+        "schema_id": projct_data.schema_id
+      }
+      console.log(params);
+      localStorage.setItem('preprocessing',JSON.stringify(params));
+      this.rendered();
+    }
+    else {
+      this.errorHandler(data);
+    }
+  }
+
+  rendered() {
+    let currentUrl = this.router.url;
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+    this.router.onSameUrlNavigation = 'reload';
+    this.router.navigate([currentUrl]);
   }
 
   smallModal(smallDataModal: any) {
