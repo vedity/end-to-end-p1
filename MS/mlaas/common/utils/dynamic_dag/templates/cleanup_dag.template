@@ -141,7 +141,7 @@ if save_as == 'True':
                 dag=dag,
                 provide_context=True,
                 python_callable=PC_OBJ.SaveAs,
-                op_args=[DBObject,connection,project_id,schema_id,table_name,user_name,dataset_visibility,dataset_name,visibility,dataset_desc],
+                op_args=[DBObject,connection,project_id,schema_id,table_name,user_name,dataset_visibility,dataset_name,visibility,dataset_desc,cleanup_flag],
                 trigger_rule="all_done")
     t2.set_downstream(t3)
     t3.set_downstream(t4)
