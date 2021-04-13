@@ -171,8 +171,11 @@ export class CreateSchemaMappingComponent implements OnInit {
       let savedata = [];
       this.loaderdiv = true;
       this.datasetSchema.forEach((element, index) => {
-        var txt_column_name = $("#columnname_" + index).val().toString();
-        var txt_column_attribute = $("#selectattr_" + index + " :selected").val().toString();
+        var txt_column_name = $("#columnname_" + index).val();
+        txt_column_name = txt_column_name == undefined ? '' : txt_column_name.toString();
+        var txt_column_attribute = $("#selectattr_" + index + " :selected").val();
+        txt_column_attribute = txt_column_attribute == undefined ? '' : txt_column_attribute.toString();
+
         if (txt_column_name == this.Originaldata[index].change_column_name && txt_column_attribute == this.Originaldata[index].column_attribute) {
 
         }
@@ -191,6 +194,7 @@ export class CreateSchemaMappingComponent implements OnInit {
       });
       if (savedata.length > 0) {
         savedata.push(this.datasetSchema[0]);
+
         // console.log(savedata);
 
         this.apiService.saveDatasetSchema(this.dataset_id, this.project_id, this.schema_id, { data: savedata }).subscribe(logs => this.savesuccessHandler(logs), error => this.errorHandler(error));
@@ -203,36 +207,36 @@ export class CreateSchemaMappingComponent implements OnInit {
     }
   }
 
-  savaAs() {
-    if ($(".schema-mapping").find(".errorstatus").length > 0) {
-      this.toaster.error('Please enter valid input', 'Error');
-    }
-    else {
-      this.loaderdiv = true;
-      let savedata = [];
-      this.datasetSchema.forEach((element, index) => {
-        var txt_column_name = $("#columnname_" + index).val().toString();
-        var txt_column_attribute = $("#selectattr_" + index + " :selected").val().toString();
-        // if(txt_column_name=="" && txt_column_attribute==""){
-        // }
-        // else{
-        //   if(txt_column_name!=element.column_name){
-        var schema = {
-          change_column_name: txt_column_name,
-          column_name: element.column_name,
-          data_type: element.data_type,
-          column_attribute: txt_column_attribute
-        }
-        savedata.push(schema);
-        //   }
-        // }
-      });
-      // console.log(this.saveAs);
-      this.apiService.saveasDatasetSchema(this.project_id, this.saveAs.dataset_name, this.saveAs.description, this.saveAs.isPrivate, "Save as", { data: savedata }).subscribe(logs => this.savesuccessHandler(logs), error => this.errorHandler(error));
+  // savaAs() {
+  //   if ($(".schema-mapping").find(".errorstatus").length > 0) {
+  //     this.toaster.error('Please enter valid input', 'Error');
+  //   }
+  //   else {
+  //     this.loaderdiv = true;
+  //     let savedata = [];
+  //     this.datasetSchema.forEach((element, index) => {
+  //       var txt_column_name = $("#columnname_" + index).val().toString();
+  //       var txt_column_attribute = $("#selectattr_" + index + " :selected").val().toString();
+  //       // if(txt_column_name=="" && txt_column_attribute==""){
+  //       // }
+  //       // else{
+  //       //   if(txt_column_name!=element.column_name){
+  //       var schema = {
+  //         change_column_name: txt_column_name,
+  //         column_name: element.column_name,
+  //         data_type: element.data_type,
+  //         column_attribute: txt_column_attribute
+  //       }
+  //       savedata.push(schema);
+  //       //   }
+  //       // }
+  //     });
+  //     // console.log(this.saveAs);
+  //     this.apiService.saveasDatasetSchema(this.project_id, this.saveAs.dataset_name, this.saveAs.description, this.saveAs.isPrivate, "Save as", { data: savedata }).subscribe(logs => this.savesuccessHandler(logs), error => this.errorHandler(error));
 
-    }
+  //   }
 
-  }
+  // }
 
   savesuccessHandler(data) {
     this.loaderdiv = false;
