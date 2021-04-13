@@ -625,7 +625,7 @@ class DatasetClass:
         except Exception as exc:
             return exc
     
-    def insert_raw_dataset(self,DBObject,connection,dataset_id,user_name,table_name,dataset_visibility,selected_visibility = None):
+    def insert_raw_dataset(self,DBObject,connection,dataset_id,schema_id,user_name,table_name,dataset_visibility,selected_visibility = None):
         '''
         Function used to create the new table based on existing table and update the "number of rows" and "table name" of the perticular dataset id
         
@@ -661,8 +661,10 @@ class DatasetClass:
                     raw_table_name = 'public."'+str(new_table_name)+'"'
                     
 
+            sql_select_string = DBObject.get_query_string(connection,schema_id)
+
             # Create the new table based on the existing table
-            sql_command = 'CREATE TABLE '+str(raw_table_name)+' AS SELECT * FROM '+str(original_table_name)
+            sql_command = f'CREATE TABLE {str(raw_table_name)} AS SELECT {sql_select_string} FROM  {str(original_table_name)}'
     
             # Execute the sql query
             create_status = DBObject.update_records(connection,sql_command)

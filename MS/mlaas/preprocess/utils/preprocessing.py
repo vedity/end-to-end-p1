@@ -1288,7 +1288,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         except Exception as e:
             return e
 
-    def SaveAs(self,DBObject,connection,project_id,table_name,user_name,dataset_visibility,dataset_name,selected_visibility,dataset_desc, **kwargs):
+    def SaveAs(self,DBObject,connection,project_id,schema_id,table_name,user_name,dataset_visibility,dataset_name,selected_visibility,dataset_desc, **kwargs):
         '''
         Function used to create a new table with updated changes and insert a new record into dataset table and update the dataset_id into the project_tbl
         '''
@@ -1319,17 +1319,22 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 table_name = table_name.replace('di_',"").replace('_tbl',"")
 
                 # Create the new table based on the existing table and return status 0 if successfull else 1 
-                dataset_insert_status = dc.insert_raw_dataset(DBObject,connection,dataset_id,user_name,table_name,dataset_visibility,selected_visibility)
+                dataset_insert_status = dc.insert_raw_dataset(DBObject,connection,dataset_id,schema_id,user_name,table_name,dataset_visibility,selected_visibility)
                                    
                 if dataset_insert_status == 0:
 
-                    # Command will update the dataset id  in the project table
-                    sql_command = f'update mlaas.project_tbl set dataset_id={str(dataset_id)} where project_id={str(project_id)}'
+                    schema_update = self.update_schema(DBObject,connection,schema_id)
+                    if schema_update == 0:
+                        # Command will update the dataset id  in the project table
+                        sql_command = f'update mlaas.project_tbl set dataset_id={str(dataset_id)} where project_id={str(project_id)}'
                                         
-                    # Execute the sql query
-                    update_status = DBObject.update_records(connection,sql_command)
+                        # Execute the sql query
+                        update_status = DBObject.update_records(connection,sql_command)
 
-                    return update_status
+                        return update_status
+                    else:
+                        return schema_update   
+                    
                 else:
                     return dataset_insert_status
 
@@ -1440,7 +1445,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             activity_status,index = self.AT.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
         return activity_status
     
-    def direct_save_as(self, DBObject, connection ,project_id,dataset_id,user_name,dataset_name,selected_visibility,dataset_desc):
+        
+    def direct_save_as(self, DBObject, connection ,project_id,dataset_id,schema_id,user_name,dataset_name,selected_visibility,dataset_desc):
         '''
             This function is executed when the save as button is clicked without selecting
             any operation.
@@ -1472,7 +1478,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             else:
                 dataset_table_name = 'public'+'."'+table_name+'"'
                 
-            status = self.SaveAs(DBObject,connection, project_id
+            status = self.SaveAs(DBObject,connection, project_id,schema_id
                                  ,table_name,user_name,dataset_visibility,
                                  dataset_name,selected_visibility,dataset_desc)
             if status ==0: 
@@ -1491,7 +1497,48 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             return status
         
         except (DatabaseConnectionFailed) as exc:
-            # connection.close()
+            return str(exc)
+    
+    def update_schema(self,DBObject,connection,schema_id):
+        """
+        function used to update schema for new dataset according to schema mapping page.
+        Args:
+            schema_id[(schema_id)] : [Selected Id of the schema table]
+
+        Return:
+            [Integer] : [retrun 0 if successfully update/delete or both else return 1 if any of them failed ]
+        """
+        try:
+            try:
+
+                prev_col_name,current_col_name = DBObject.get_schema_columnlist(connection,schema_id, type ='all')
+                
+                for prev_col,current_col in zip(prev_col_name,current_col_name):
+                    
+                    #Query will update the column name based on the new column name for that particular schema_id
+                    sql_command = f'''update mlaas.schema_tbl set column_name = '{str(current_col)}',changed_column_name = ''  where schema_id = '{str(schema_id)}' and column_name ='{str(prev_col)}' '''      
+                    
+                    #Execute the sql query
+                    update_status = DBObject.update_records(connection,sql_command)
+                    
+                    if update_status != 0:
+                        raise SchemaColumnUpdate(500)
+
+                if update_status == 0:
+                    #query will delete the columns which has "column attribute" - Ignore
+                    sql_command =f'''delete from mlaas.schema_tbl where schema_id='{str(schema_id)}' and column_attribute = 'Ignore' '''
+                    
+                    #Execute the sql query 
+                    update_status = DBObject.update_records(connection,sql_command)
+                    
+                    if update_status !=0:
+                        return SchemaColumnDeleteion(500)
+                    
+                return update_status
+            except (SchemaColumnDeleteion,SchemaColumnUpdate) as exc:
+                return exc.msg
+                
+        except Exception as exc:
             return str(exc)
         
     def operation_failed(self, DBObject, connection, activity_id, operation_id, col_name):
