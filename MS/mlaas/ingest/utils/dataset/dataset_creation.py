@@ -683,9 +683,16 @@ class DatasetClass:
             
             sql_command  = "select * from "+str(raw_table_name)
             dataframe = DBObject.select_records(connection,sql_command)
-            dataframe.to_csv('static/server/nisha/file1.csv')
-            logging("((((("+str(dataframe))
-            dataframe_size = sys.getsizeof(dataframe)
+            dataframe = dataframe.iloc[: , 1:]
+            filenm = 'CSV_'+table_name
+            if selected_visibility == 'public':   
+                fpath='static/server/public/'+str(filenm)+'.csv'      
+            else:
+                fpath='static/server/'+user_name+'/'+str(filenm)+'.csv'
+            df_path = dataframe.to_csv(fpath,index = False)
+            dataframe_size = os.path.getsize(fpath)
+            logging.info("((((("+str(dataframe_size))
+            #dataframe_size = sys.getsizeof(dataframe)
             file_size = self.get_file_size(dataframe_size,flag = True)
                 
             # update the "dataset table name"  and "no_of _rows" of the given dataset id
