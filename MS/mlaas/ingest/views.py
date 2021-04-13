@@ -380,7 +380,7 @@ class DeleteProjectDetailClass(APIView):
                         user_name=request.query_params.get('user_name') # get username
                         project_id=request.query_params.get('project_id')  #get tablename 
                         
-                        cleanup_process = PC_OBJ.get_dag_status(project_id) # check cleanup is running
+                        cleanup_process = PC_OBJ.get_dag_status(DBObject, connection, project_id) # check cleanup is running
                         if cleanup_process == True:
                                 return Response({"status_code":"500","error_msg":"Can't Delete,Cleanup Process is going on!","response":"false"}) 
 
