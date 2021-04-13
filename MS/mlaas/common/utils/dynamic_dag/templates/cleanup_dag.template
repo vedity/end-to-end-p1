@@ -115,7 +115,7 @@ def dag_end(DBObject,connection,dataset_id,project_id,dag_id,new_user_name,datas
         To reset the dag status
     '''
     activity_id = 52
-    status = PC_OBJ.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id,new_user_name,dataset_name)
+    status = PC_OBJ.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id,new_user_name,dataset_name,flag=False)
     return status
 
 #? Making Dynamic Tasks
@@ -141,7 +141,7 @@ if save_as == 'True':
                 dag=dag,
                 provide_context=True,
                 python_callable=PC_OBJ.SaveAs,
-                op_args=[DBObject,connection,project_id,schema_id,table_name,user_name,dataset_visibility,dataset_name,visibility,dataset_desc],
+                op_args=[DBObject,connection,project_id,schema_id,table_name,user_name,dataset_visibility,dataset_name,visibility,dataset_desc,cleanup_flag],
                 trigger_rule="all_done")
     t2.set_downstream(t3)
     t3.set_downstream(t4)
