@@ -68,7 +68,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
-                status = super().discard_missing_values(DBObject,connection, table_name,old_cols[i])
+                status = super(CleaningClass,self).discard_missing_values(DBObject,connection, table_name,old_cols[i])
                 if status ==0:
                     #Update the activity status for the operation performed
                     at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)

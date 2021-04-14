@@ -153,40 +153,30 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         logging.info("data preprocessing : PreprocessingClass : get_exploration_data : execution end")
         return stats_df
     
-    def save_schema_data(self,schema_data,project_id,dataset_id,schema_id,user_name):
+    def save_schema_data(self,DBObject,connection,schema_data,project_id,dataset_id,schema_id,user_name):
         try:
             logging.info("data preprocessing : PreprocessingClass : save_schema_data : execution start")
-
-            DBObject,connection,connection_string = self.get_db_connection()
-            if connection == None :
-                raise DatabaseConnectionFailed(500)
 
             status = super(PreprocessingClass,self).save_schema(DBObject,connection,schema_data,project_id,dataset_id,schema_id,user_name)
             connection.close()
             logging.info("data preprocessing : PreprocessingClass : save_schema_data : execution start")
             return status
-        except (DatabaseConnectionFailed) as exc:
-            connection.close()
-            logging.error("data preprocessing : PreprocessingClass : save_schema_data : Exception " + str(exc.msg))
+        except Exception as exc:
+            logging.error("data preprocessing : PreprocessingClass : save_schema_data : Exception " + str(exc))
             logging.error("data preprocessing : PreprocessingClass : save_schema_data : " +traceback.format_exc())
-            return exc.msg
+            return str(exc)
 
-    def get_schema_details(self,schema_id):
+    def get_schema_details(self,DBObject,connection,schema_id):
         try:
             logging.info("data preprocessing : PreprocessingClass : get_schema_details : execution start")
-            DBObject,connection,connection_string = self.get_db_connection()
-            if connection == None :
-                raise DatabaseConnectionFailed(500)
 
             status = super(PreprocessingClass,self).get_schema_data(DBObject,connection,schema_id)
-            connection.close()
             logging.info("data preprocessing : PreprocessingClass : get_schema_details : execution stop")
             return status
-        except (DatabaseConnectionFailed) as exc:
-            connection.close()
-            logging.error("data preprocessing : PreprocessingClass : get_schema_details : Exception " + str(exc.msg))
+        except (Exception) as exc:
+            logging.error("data preprocessing : PreprocessingClass : get_schema_details : Exception " + str(exc))
             logging.error("data preprocessing : PreprocessingClass : get_schema_details : " +traceback.format_exc())
-            return exc.msg
+            return exc
         
     def get_col_names(self, DBObject, connection ,schema_id, json = False,original = False):
         '''
