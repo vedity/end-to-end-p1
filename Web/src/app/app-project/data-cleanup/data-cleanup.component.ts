@@ -33,7 +33,9 @@ export class DataCleanupComponent implements OnInit {
   @Input() public project_id: any
   @Input() public schema_id: any
   @Input() public project_name: any;
+  loaderbox = false;
   loaderdiv = false;
+
   displaytitle = "false";
   errorStatus = true;
   operationList: any;
@@ -72,7 +74,8 @@ export class DataCleanupComponent implements OnInit {
   }
 
   checkvalidation(event, type) {
-    var value = event.target.value;
+    let value=event.target.value.toString().trim();
+ 
     var match = true;
     var regexfortypeinteger = /^[0-9]{1,50}$/;
     var regexfortypefloat = /^([0-9]*[.])?[0-9]+$/;
@@ -99,6 +102,10 @@ export class DataCleanupComponent implements OnInit {
         $("#" + event.target.id).addClass("errorstatus")
       }
     }
+    else{
+      $("#" + event.target.id).addClass("errorstatus")
+      $("#" + event.target.id).val('');
+    }
   }
 
   ngOnInit(): void {
@@ -109,7 +116,6 @@ export class DataCleanupComponent implements OnInit {
       clearInterval(this.setModelingInterval);
     }
     // this.getCheckSplit();
-    this.getCldagStatus();
     this.dtOptions = {
       paging: false,
       orderFixed:[[0,'desc']],
@@ -120,11 +126,12 @@ export class DataCleanupComponent implements OnInit {
       //scrollX: true,
       scrollY: "57.5vh",
     }
-    this.loaderdiv = true;
+    this.loaderbox = true;
     this.getOpertion();
     this.getColumnList();
     this.getScalingOperations();
     this.getHoldoutList();
+    this.getCldagStatus();
     // this.scaldata.test_ratio = 20;
     // this.scaldata.split_method = 'cross_validation';
     // this.scaldata.scaling_op='0'
@@ -193,11 +200,14 @@ export class DataCleanupComponent implements OnInit {
   }
 
   successHandler(logs) {
-    this.loaderdiv = false;
+    this.loaderbox = false;
   }
 
   errorHandler(error) {
+    this.loaderbox = false;
     this.loaderdiv = false;
+
+
     if (error.error_msg)
       this.toaster.error(error.error_msg, 'Error');
     else {
@@ -294,7 +304,7 @@ export class DataCleanupComponent implements OnInit {
     if (data.status_code == "200") {
       this.columnList = data.response;
       setTimeout(() => {
-        this.loaderdiv = false;
+        this.loaderbox = false;
       }, 10);
     }
     else {
@@ -431,6 +441,7 @@ export class DataCleanupComponent implements OnInit {
   fianlarray = [];
   errorflag: boolean;
   saveHanlers(isSave, smallDataModal) {
+
     this.errorflag = false;
     this.fianlarray = [];
     let arrayhandlers = [];
@@ -467,7 +478,7 @@ export class DataCleanupComponent implements OnInit {
           }
           else {
             if (isSave == 'False') {
-
+              this.loaderdiv = true;
               this.apiService.saveOperations(this.schema_id, this.dataset_id, this.project_id, isSave, this.fianlarray).subscribe(
                 logs => this.saveSuccessHandlers(logs),
                 error => this.errorHandler(error)
@@ -508,6 +519,8 @@ export class DataCleanupComponent implements OnInit {
       this.getColumnviseOperation();
       this.toaster.success(data.error_msg, 'Success')
       this.getCldagStatus();
+      this.loaderdiv = false;
+
     }
     else {
       this.errorHandler(data);
@@ -516,6 +529,8 @@ export class DataCleanupComponent implements OnInit {
 
   response: any;
   saveScale() {
+    this.loaderdiv = true;
+
     var user = JSON.parse(localStorage.getItem("currentUser"));
     if (this.scaldata.split_method == "cross_validation") {
       this.response = {
@@ -545,6 +560,7 @@ export class DataCleanupComponent implements OnInit {
         random_state: this.scaldata.train_random_state
       }
     }
+    
     this.apiService.savescalingOpertion(this.response).subscribe(
       logs => this.savescalSuccessHandlers(logs),
       error => this.errorHandler(error)
@@ -555,6 +571,8 @@ export class DataCleanupComponent implements OnInit {
     if (data.status_code == "200") {
       this.toaster.success(data.error_msg, 'Success')
       // this.getCheckSplit();
+      this.loaderdiv = false;
+
 
     }
     else {
@@ -595,6 +613,8 @@ export class DataCleanupComponent implements OnInit {
       visibility = 'private';
     else
       visibility = 'public';
+      this.loaderdiv = true;
+
     this.apiService.saveasOperations(this.schema_id, this.dataset_id, this.project_id, this.saveAs.dataset_name, visibility, this.saveAs.description, flag, this.fianlarray)
       .subscribe(
         logs => this.saveAsSuccessHandlers(logs),
@@ -612,11 +632,47 @@ export class DataCleanupComponent implements OnInit {
       this.getColumnviseOperation();
       this.toaster.success(data.error_msg, 'Success')
       this.modalService.dismissAll();
+      this.refershProjectDetail();
       this.getCldagStatus();
+      // this.loaderdiv = false;
     }
     else {
       this.errorHandler(data);
     }
+  }
+
+  refershProjectDetail(){
+    this.apiService.getrefreshedProjectDetail(this.project_id).subscribe(logs=>this.refreshProjectSuccessHandler(logs),
+    error=>this.errorHandler(error))
+  }
+
+  refreshProjectSuccessHandler(data) {
+    if (data.status_code == "200") {
+      console.log(data);
+      var projct_data=data.response[0];
+      var currentParams=localStorage.getItem('preprocessing');
+      var params = {
+        "dataset_id": projct_data.dataset_id,
+        "project_id": projct_data.project_id,
+        "dataset_name": projct_data.dataset_name,
+        "project_name": projct_data.project_name, 
+        "navigate_to": JSON.parse(currentParams).navigate_to, 
+        "schema_id": projct_data.schema_id
+      }
+      console.log(params);
+      localStorage.setItem('preprocessing',JSON.stringify(params));
+      this.rendered();
+    }
+    else {
+      this.errorHandler(data);
+    }
+  }
+
+  rendered() {
+    let currentUrl = this.router.url;
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+    this.router.onSameUrlNavigation = 'reload';
+    this.router.navigate([currentUrl]);
   }
 
   smallModal(smallDataModal: any) {

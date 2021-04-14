@@ -46,7 +46,7 @@ export class ModelingTypeComponent implements OnInit {
         dtInstance.columns.adjust();
       })
     }
-  }
+  } 
 
   ngOnInit(): void {
     this.dtOptions = {
@@ -70,15 +70,19 @@ export class ModelingTypeComponent implements OnInit {
         this.params = localStorage.getItem("modeling");
         this.params = JSON.parse(this.params);
       }
+      this.checkstatus();
       this.checkmodelType(this.params.dataset_id,this.params.project_id)
       this.currentuser = localStorage.getItem("currentUser")
       this.params.user_id = JSON.parse(this.currentuser).id;
       this.getDatasetInfo();
       this.getRunningExperimentList();
       this.getAllExperimentList();
-      if(this.runningExpList.length==0){
-        $("#switcher-list")[0].click();
-      }
+      setTimeout(() => {
+        if(this.runningExpList.length==0){
+          $("#switcher-list")[0].click();
+        }
+      }, 0);
+     
     }
   }
 
@@ -257,6 +261,7 @@ export class ModelingTypeComponent implements OnInit {
       this.errorHandler(data);
     }
   }
+
   getRunningExperimentList() {
     this.apiservice.showrunningexperimentslist(this.params.project_id).subscribe(
       logs => this.runningexpListsuccessHandler(logs)
@@ -445,6 +450,9 @@ export class ModelingTypeComponent implements OnInit {
     }
   }
 
+onClickStart(modal:any){
+  
+}
 
   smallModal(modelingmodal: any) {
     this.params.experiment_name = ''
@@ -458,6 +466,9 @@ export class ModelingTypeComponent implements OnInit {
     this.model_mode = 'Auto';
     if (val) {
       this.model_mode = 'Manual';
+      this.selectedalgorithm = "";
+      this.selectedalgorithmname = "";
+      this.paramsList = undefined;
       this.contentid = 1;
       this.getAlgorithmList();
       this.modalService.open(largeModal, { size: 'lg', windowClass: 'modal-holder', centered: true });

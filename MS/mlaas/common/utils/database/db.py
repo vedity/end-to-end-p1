@@ -332,7 +332,7 @@ class DBClass:
         schema_name = user_name.lower()
         try :
             
-            file_data_df.to_sql(table_name,engine,schema=schema_name,) # Load data into database with table structure.
+            file_data_df.to_sql(table_name,engine,schema=schema_name, chunksize=10000) # Load data into database with table structure.
             
             status = 0 # If successfully.
         except Exception as e:
@@ -388,7 +388,17 @@ class DBClass:
         if type=="schema":
             sql_command = "select column_name column_list  from mlaas.schema_tbl where schema_id ="+str(schema_id)+" and column_attribute!='Ignore' order by index"           
         elif type=="Select":
-            sql_command = "select case when changed_column_name='' then column_name else changed_column_name end column_list  from mlaas.schema_tbl where schema_id="+str(schema_id)+" and column_attribute='Select' order by index"           
+            sql_command = "select case when changed_column_name='' then column_name else changed_column_name end column_list  from mlaas.schema_tbl where schema_id="+str(schema_id)+" and column_attribute='Select' order by index"    
+        elif type== "all":
+            sql_command = "select column_name, case when changed_column_name='' then column_name else changed_column_name end column_list  from mlaas.schema_tbl where schema_id="+str(schema_id)+" order by index"
+            
+            #Execute sql query and return dataframe 
+            dataframe = self.select_records(connection,sql_command)
+            
+            #Get the previous column name and changed column name from the schema table
+            prev_col_name,current_col_name =list(dataframe['column_name']),list(dataframe['column_list']) 
+            return prev_col_name,current_col_name
+
         else:
             sql_command = "select case when changed_column_name='' then column_name else changed_column_name end column_list  from mlaas.schema_tbl where schema_id="+str(schema_id)+" and column_attribute!='Ignore' order by index"           
         
