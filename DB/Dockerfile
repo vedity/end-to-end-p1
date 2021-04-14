@@ -1,7 +1,7 @@
 FROM postgres:13.1
 COPY init.sql /docker-entrypoint-initdb.d/
-COPY postgresql.conf /tmp/postgresql.conf
-COPY updateconfig.sh /docker-entrypoint-initdb.d/updateconfig.sh
+# COPY postgresql.conf /tmp/postgresql.conf
+# COPY updateconfig.sh /docker-entrypoint-initdb.d/updateconfig.sh
 
 
 RUN chmod -R 755 /docker-entrypoint-initdb.d/init.sql

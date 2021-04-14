@@ -32,6 +32,7 @@ services:
         environment:
             - LOAD_EX=n
             - EXECUTOR=Local
+        user: "0:0"
         volumes:                                        # mount the following local folders
             - ./MS/mlaas:/usr/local/airflow/dags
             - ./MS/mlaas/mlruns:/usr/local/airflow/mlruns

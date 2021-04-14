@@ -1290,7 +1290,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         except Exception as e:
             return e
 
-    def SaveAs(self,DBObject,connection,project_id,schema_id,table_name,user_name,dataset_visibility,dataset_name,selected_visibility,dataset_desc, **kwargs):
+    def SaveAs(self,DBObject,connection,project_id,schema_id,table_name,user_name,dataset_visibility,dataset_name,selected_visibility,dataset_desc,cleanup_flag=None, **kwargs):
         '''
         Function used to create a new table with updated changes and insert a new record into dataset table and update the dataset_id into the project_tbl
         '''
@@ -1321,8 +1321,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 table_name = table_name.replace('di_',"").replace('_tbl',"")
 
                 # Create the new table based on the existing table and return status 0 if successfull else 1 
-                dataset_insert_status = dc.insert_raw_dataset(DBObject,connection,dataset_id,schema_id,user_name,table_name,dataset_visibility,selected_visibility)
-                                   
+                dataset_insert_status = dc.insert_raw_dataset(DBObject,connection,dataset_id,schema_id,user_name,table_name,dataset_visibility,cleanup_flag,selected_visibility)
+                
                 if dataset_insert_status == 0:
 
                     schema_update = self.update_schema(DBObject,connection,schema_id)
@@ -1425,13 +1425,13 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
         project_name = projectnm_df['project_name'][0]
 
-        if new_dataset_name == None:
-            new_dataset_name = dataset_name
+        # if new_dataset_name == None:
+        #     new_dataset_name = dataset_name
 
         sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
         desc_df = DBObject.select_records(connection,sql_command)
         activity_description = desc_df['description'][0]
-        activity_description = activity_description.replace('*',new_dataset_name)
+        activity_description = activity_description.replace('*',dataset_name)
         activity_description = activity_description.replace('&',project_name)
     
         end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
@@ -1482,7 +1482,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 
             status = self.SaveAs(DBObject,connection, project_id,schema_id
                                  ,table_name,user_name,dataset_visibility,
-                                 dataset_name,selected_visibility,dataset_desc)
+                                 dataset_name,selected_visibility,dataset_desc,cleanup_flag=True)
             if status ==0: 
                 activity_id=53
                 sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"

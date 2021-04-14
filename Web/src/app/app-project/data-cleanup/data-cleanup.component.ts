@@ -116,7 +116,6 @@ export class DataCleanupComponent implements OnInit {
       clearInterval(this.setModelingInterval);
     }
     // this.getCheckSplit();
-    this.getCldagStatus();
     this.dtOptions = {
       paging: false,
       orderFixed:[[0,'desc']],
@@ -132,6 +131,7 @@ export class DataCleanupComponent implements OnInit {
     this.getColumnList();
     this.getScalingOperations();
     this.getHoldoutList();
+    this.getCldagStatus();
     // this.scaldata.test_ratio = 20;
     // this.scaldata.split_method = 'cross_validation';
     // this.scaldata.scaling_op='0'
@@ -632,8 +632,8 @@ export class DataCleanupComponent implements OnInit {
       this.getColumnviseOperation();
       this.toaster.success(data.error_msg, 'Success')
       this.modalService.dismissAll();
-      this.getCldagStatus();
       this.refershProjectDetail();
+      this.getCldagStatus();
       // this.loaderdiv = false;
     }
     else {
