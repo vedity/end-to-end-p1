@@ -64,13 +64,15 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
 
+                status = 1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 status = super().discard_missing_values(DBObject,connection, table_name,old_cols[i])
-
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status ==0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                
         logging.info("data preprocessing : CleaningClass : discard_missing_values : execution stop")
         return status
     
@@ -995,6 +997,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         #? Getting Description
         sql_command = f"select replace (amt.activity_name || ' ' || amt.activity_description, '*', '{col_name}') as description from mlaas.activity_master_tbl amt where amt.activity_id = '{operation_id}' and amt.code = '{code}'"
+        
         
         desc_df = DBObject.select_records(connection,sql_command)
         if not isinstance(desc_df, pd.DataFrame):
