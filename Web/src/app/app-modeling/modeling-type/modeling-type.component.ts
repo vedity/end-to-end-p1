@@ -70,18 +70,21 @@ export class ModelingTypeComponent implements OnInit {
         this.params = localStorage.getItem("modeling");
         this.params = JSON.parse(this.params);
       }
-      this.checkstatus();
+      // this.checkstatus();
       this.checkmodelType(this.params.dataset_id,this.params.project_id)
       this.currentuser = localStorage.getItem("currentUser")
       this.params.user_id = JSON.parse(this.currentuser).id;
       this.getDatasetInfo();
-      this.getRunningExperimentList();
+      this.getRunningExperimentList('onload');
       this.getAllExperimentList();
-      setTimeout(() => {
-        if(this.runningExpList.length==0){
-          $("#switcher-list")[0].click();
-        }
-      }, 0);
+      // setTimeout(() => {
+      //   if(this.runningExpList.length==0){
+      //     $("#switcher-list")[0].click();
+      //   }
+      //   else{
+      //     this.processclass = "start";
+      //   }
+      // }, 10);
      
     }
   }
@@ -262,19 +265,31 @@ export class ModelingTypeComponent implements OnInit {
     }
   }
 
-  getRunningExperimentList() {
+  getRunningExperimentList(type='') {
     this.apiservice.showrunningexperimentslist(this.params.project_id).subscribe(
-      logs => this.runningexpListsuccessHandler(logs)
+      logs => this.runningexpListsuccessHandler(logs,type)
       // error => this.errorHandler(error)
     );
   }
 
   runningExpList: any = [];
-  runningexpListsuccessHandler(data) {
+  runningexpListsuccessHandler(data,type) {
     if (data.status_code == "200") {
       this.runningExpList = data.response;
       this.contentloaded = true;
-      
+      if(type!=''){
+        if(this.runningExpList.length==0){
+          $("#switcher-list")[0].click();
+        }
+        else{
+          // this.processclass = "start";
+          // this.processInterval = setInterval(() => {
+          //   this.getRunningExperimentList();
+          //   this.getAllExperimentList();
+          //   this.checkstatus('onload');
+          // }, 4000);
+        }
+      }
     }
     // else {
     //   this.errorHandler(data);
@@ -358,10 +373,10 @@ export class ModelingTypeComponent implements OnInit {
     }
   }
 
-  checkstatus() {
+  checkstatus(type='') {
     let currentuser = localStorage.getItem("currentUser")
     let username = JSON.parse(currentuser).username;
-    this.apiservice.checkmodelstatus(this.params.project_id, this.experiment_name, this.params.dataset_id, username).subscribe(
+    this.apiservice.checkmodelstatus(this.params.project_id, this.experiment_name, this.params.dataset_id, username,type).subscribe(
       logs => this.statusSuccessHandler(logs)
       // error=>this.errorHandler(error)
     )
@@ -450,8 +465,13 @@ export class ModelingTypeComponent implements OnInit {
     }
   }
 
-onClickStart(modal:any){
-  
+onClickStart(modelingmodal:any,largeModal:any){
+if(this.model_mode=='Auto'){
+this.smallModal(modelingmodal);
+}
+else{
+  this.LargeModal(largeModal,true);
+}
 }
 
   smallModal(modelingmodal: any) {
