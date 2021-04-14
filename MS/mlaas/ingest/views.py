@@ -384,7 +384,7 @@ class DeleteProjectDetailClass(APIView):
                         if cleanup_process == True:
                                 return Response({"status_code":"500","error_msg":"Can't Delete,Cleanup Process is going on!","response":"false"}) 
 
-                        modelling_process = PC_OBJ.get_modelling_status(project_id) #check model runnig
+                        modelling_process = PC_OBJ.get_modelling_status(DBObject,connection,project_id) #check model runnig
                         if modelling_process == True:
                                 return Response({"status_code":"500","error_msg":"Can't Delete,Model Running!","response":"false"}) 
                         project_status,dataset_id,project_name= IngestionObj.delete_project_details(project_id,user_name,DBObject,connection)  #get the project_status if project Deletion failed or successfull
