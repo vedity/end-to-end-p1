@@ -111,56 +111,56 @@ class CommonMethodClass:
             [actual_vs_prediction_json]: [it will return the actual_vs_prediction_json.]
             
         """
-            logging.info("modeling : CommonMethodClass : actual_vs_prediction_fun : execution start")
-            if model_type == 'Regression':
-                actual_vs_prediction_df = DataFrame(actual_vs_prediction_json).round(decimals = 3) #Round to the nearest 3 decimals.
-                _,target_features = self.get_unscaled_data(experiment_id) 
-                actual_vs_prediction_df.rename(columns = {target_features[0]:'index',target_features[1]:'price',target_features[1]+'_prediction':'price_prediction'}, inplace = True)
-                actual_vs_prediction_json = actual_vs_prediction_df.to_dict(orient='list')
-                
-            elif model_type == 'Classification':
-                
-                unscaled_df,target_features = self.get_unscaled_data(experiment_id)
+        logging.info("modeling : CommonMethodClass : actual_vs_prediction_fun : execution start")
+        if model_type == 'Regression':
+            actual_vs_prediction_df = DataFrame(actual_vs_prediction_json).round(decimals = 3) #Round to the nearest 3 decimals.
+            _,target_features = self.get_unscaled_data(experiment_id) 
+            actual_vs_prediction_df.rename(columns = {target_features[0]:'index',target_features[1]:'price',target_features[1]+'_prediction':'price_prediction'}, inplace = True)
+            actual_vs_prediction_json = actual_vs_prediction_df.to_dict(orient='list')
+            
+        elif model_type == 'Classification':
+            
+            unscaled_df,target_features = self.get_unscaled_data(experiment_id)
 
-                actual_vs_prediction_df = DataFrame(actual_vs_prediction_json) 
-               
-                actual_vs_prediction_df.rename(columns = {target_features[0]:'seq_id'}, inplace = True)
-                
-                final_df=pd.merge(unscaled_df, actual_vs_prediction_df, on='seq_id', how='inner')
-                
-                logging.info("final df =="+str(final_df))
-                
-                actual_vs_prediction_df = actual_vs_prediction_df.drop(['seq_id'],axis=1)
-                
-                
-                cols=actual_vs_prediction_df.columns.values.tolist()
-                actual_col=''
-                predict_col=''
-                for i in cols:
-                    if i.endswith('_prediction') :
-                        predict_col=i
-                    else:
-                        actual_col = i
-                
-                
-                classes_df = final_df[[actual_col,actual_col+'_str']]
-                logging.info("classes_df df =="+str(classes_df))
-                
-                actual_dict = classes_df.groupby(actual_col+'_str').count().to_dict()
+            actual_vs_prediction_df = DataFrame(actual_vs_prediction_json) 
+            
+            actual_vs_prediction_df.rename(columns = {target_features[0]:'seq_id'}, inplace = True)
+            
+            final_df=pd.merge(unscaled_df, actual_vs_prediction_df, on='seq_id', how='inner')
+            
+            logging.info("final df =="+str(final_df))
+            
+            actual_vs_prediction_df = actual_vs_prediction_df.drop(['seq_id'],axis=1)
+            
+            
+            cols=actual_vs_prediction_df.columns.values.tolist()
+            actual_col=''
+            predict_col=''
+            for i in cols:
+                if i.endswith('_prediction') :
+                    predict_col=i
+                else:
+                    actual_col = i
+            
+            
+            classes_df = final_df[[actual_col,actual_col+'_str']]
+            logging.info("classes_df df =="+str(classes_df))
+            
+            actual_dict = classes_df.groupby(actual_col+'_str').count().to_dict()
 
-                prediction_dict = actual_vs_prediction_df.groupby(predict_col).count().to_dict()
-                
-                act_dict = {}
-                prd_dict = {}
-                for i,j in zip(actual_dict.items(),prediction_dict.items()):
-                    act_dict.update(i[1])
-                    prd_dict.update(j[1])
-                
-                key = list(act_dict.keys())
-                actual_lst = list(act_dict.values())
-                prediction_lst = list(prd_dict.values())
-                
-                actual_vs_prediction_json = {"keys":key,"actual":actual_lst,"prediction":prediction_lst}
+            prediction_dict = actual_vs_prediction_df.groupby(predict_col).count().to_dict()
+            
+            act_dict = {}
+            prd_dict = {}
+            for i,j in zip(actual_dict.items(),prediction_dict.items()):
+                act_dict.update(i[1])
+                prd_dict.update(j[1])
+            
+            key = list(act_dict.keys())
+            actual_lst = list(act_dict.values())
+            prediction_lst = list(prd_dict.values())
+            
+            actual_vs_prediction_json = {"keys":key,"actual":actual_lst,"prediction":prediction_lst}
                 
  
             logging.info("modeling : CommonMethodClass : actual_vs_prediction_fun : execution end")
