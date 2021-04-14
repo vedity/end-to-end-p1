@@ -42,11 +42,19 @@ export class ModelingTypeApiService {
     return this.httpClient.get(this.baseUrl + "modeling/runningexperimentslist/", { headers: this.headers, params });
   }
 
-  checkmodelstatus(project_id,experiment_name,dataset_id,user_name): Observable<any> {
+  checkmodelstatus(project_id,experiment_name,dataset_id,user_name,type): Observable<any> {
    // project_id=2;
-    var params = new HttpParams().append("project_id", project_id).append("experiment_name",experiment_name)
+
+   let params;
+   if(type!='')
+     params = new HttpParams().append("project_id", project_id)
     .append("dataset_id",dataset_id)
     .append("user_name",user_name);
+    else
+    params = new HttpParams().append("project_id", project_id).append("experiment_name",experiment_name)
+    .append("dataset_id",dataset_id)
+    .append("user_name",user_name);
+
     return this.httpClient.get(this.baseUrl + "modeling/checkmodelstatus/", { headers: this.headers, params });
   }
 
