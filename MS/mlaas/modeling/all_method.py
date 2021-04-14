@@ -161,10 +161,11 @@ class CommonMethodClass:
             prediction_lst = list(prd_dict.values())
             
             actual_vs_prediction_json = {"keys":key,"actual":actual_lst,"prediction":prediction_lst}
+            
+
+        logging.info("modeling : CommonMethodClass : actual_vs_prediction_fun : execution end")
+        return actual_vs_prediction_json
                 
- 
-            logging.info("modeling : CommonMethodClass : actual_vs_prediction_fun : execution end")
-            return actual_vs_prediction_json
         
     def get_unscaled_data(self,experiment_id):
         """This function is used to get unscaled_data of particular experiment.
