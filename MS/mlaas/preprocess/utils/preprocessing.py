@@ -158,7 +158,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.info("data preprocessing : PreprocessingClass : save_schema_data : execution start")
 
             status = super(PreprocessingClass,self).save_schema(DBObject,connection,schema_data,project_id,dataset_id,schema_id,user_name)
-            connection.close()
             logging.info("data preprocessing : PreprocessingClass : save_schema_data : execution start")
             return status
         except Exception as exc:
