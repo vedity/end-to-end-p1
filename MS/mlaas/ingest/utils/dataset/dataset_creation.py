@@ -625,7 +625,7 @@ class DatasetClass:
         except Exception as exc:
             return exc
     
-    def insert_raw_dataset(self,DBObject,connection,dataset_id,schema_id,user_name,table_name,dataset_visibility,selected_visibility = None):
+    def insert_raw_dataset(self,DBObject,connection,dataset_id,schema_id,user_name,table_name,dataset_visibility,cleanup_flag,selected_visibility = None):
         '''
         Function used to create the new table based on existing table and update the "number of rows" and "table name" of the perticular dataset id
         
@@ -685,7 +685,25 @@ class DatasetClass:
             
             sql_command  = "select * from "+str(raw_table_name)
             dataframe = DBObject.select_records(connection,sql_command)
-            dataframe_size = sys.getsizeof(dataframe)
+            dataframe = dataframe.iloc[: , 1:]
+            filenm = 'CSV_'+table_name
+            if selected_visibility == 'public': 
+                if cleanup_flag == None:  
+                    fpath='dags/static/server/public/'+str(filenm)+'.csv'  
+                else:
+                     fpath='static/server/public/'+str(filenm)+'.csv'     
+            else:
+                if cleanup_flag == None:  
+                    fpath='dags/static/server/'+user_name+'/'+str(filenm)+'.csv'
+                else:
+                     fpath='static/server/'+user_name+'/'+str(filenm)+'.csv'
+                
+            logging.info("((((("+str(os.getcwd()))
+            df_path = dataframe.to_csv(fpath,index = False)
+            dataframe_size = os.path.getsize(fpath)
+            logging.info("((((("+str(dataframe_size))
+            
+            #dataframe_size = sys.getsizeof(dataframe)
             file_size = self.get_file_size(dataframe_size,flag = True)
                 
             # update the "dataset table name"  and "no_of _rows" of the given dataset id
