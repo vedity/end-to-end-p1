@@ -48,8 +48,8 @@ class SVMClassificationClass:
         self.y_test = y_test
         self.y_valid = y_valid
 
-        self.C = hyperparameters['C']
-        self.gamma = hyperparameters['gamma']
+        self.C = float(hyperparameters['C'])
+        self.gamma = float(hyperparameters['gamma'])
         self.kernel = hyperparameters['kernel']
 
 

@@ -63,7 +63,7 @@ class RidgeRegressionClass:
         self.y_test = y_test
         self.y_valid = y_valid
 
-        self.alpha = hyperparameters['alpha']
+        self.alpha = float(hyperparameters['alpha'])
         self.solver = hyperparameters['solver']
         
         self.EvalMetricsObj = EM()
