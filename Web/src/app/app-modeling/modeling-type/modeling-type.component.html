@@ -16,7 +16,9 @@
                 <div class="card-body">
                     <div class="left-box ">
                         <div class="loader {{processclass}}">Loading...</div>
-                        <button type="submit" class="btn btn-success" id="createExperiment" *ngIf="processclass=='stop'" (click)="smallModal(modelingmodal);">Start</button>
+
+                        <!-- <button type="submit" class="btn btn-success" id="createExperiment" *ngIf="processclass=='stop'" hidden (click)="smallModal(modelingmodal);">Start</button> -->
+                        <button type="submit" class="btn btn-success" id="createExperiment" *ngIf="processclass=='stop'" (click)="onClickStart(modelingmodal,largeModal)">Start</button>
                         <button type="submit" class="btn btn-success" *ngIf="processclass=='start'" (click)="processclass='stop'">Stop</button>
                     </div>
                     <div class="right-box">
@@ -368,13 +370,12 @@
 <ng-template #largeModal let-modal>
     <div class="modal-header">
         <h5> Manual Modeling </h5>
-        <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Close click')">
+        <button type="button" id="buttonclose" class="close" aria-label="Close" (click)="modal.dismiss('Close click')">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
     <div class="modal-body manul-modeling">
         <form #m="ngForm">
-            <!-- [hidden]="contentid!=1" -->
             <div class="row content-1">
                 <div class="col-md-12">
                     <h4 class="font-size-18 mt-3 mb-3">Select model</h4>

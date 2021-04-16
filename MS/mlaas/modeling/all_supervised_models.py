@@ -117,84 +117,82 @@ def run_model(model_type, algorithm_type, y_train):
 
 def supervised_models(run_id,**kwargs):
         
-# try:
-    mlflow.set_tracking_uri("postgresql+psycopg2://{}:{}@{}:{}/{}?options=-csearch_path%3Ddbo,mlflow".format(user, password, host, port, database))
-    
-    model_param_dict = ast.literal_eval(kwargs['dag_run'].conf['model_param_dict'])
-    project_id = int(model_param_dict['project_id'])
-    dataset_id = int(model_param_dict['dataset_id'])
-    user_id = int(model_param_dict['user_id'])
-
-    input_features_list, target_features_list, X_train, X_test, X_valid, y_train, y_test, y_valid, scaled_split_dict= get_model_data(user_id, project_id, dataset_id)
-    
-    if kwargs['model_mode'].lower() == 'manual':
-        run_model_flag = 1
-    else:
-        run_model_flag = run_model(kwargs['model_type'], kwargs['algorithm_type'], y_train)
-
-    if run_model_flag == 1:
+    try:
+        mlflow.set_tracking_uri("postgresql+psycopg2://{}:{}@{}:{}/{}?options=-csearch_path%3Ddbo,mlflow".format(user, password, host, port, database))
         
-        model_mode = model_param_dict['model_mode']
-        
-        model_id = kwargs['model_id']
-        model_name = kwargs['model_name']
-        model_class_name = kwargs['model_class_name']
+        model_param_dict = ast.literal_eval(kwargs['dag_run'].conf['model_param_dict'])
+        project_id = int(model_param_dict['project_id'])
+        dataset_id = int(model_param_dict['dataset_id'])
+        user_id = int(model_param_dict['user_id'])
 
-        if model_mode.lower() == 'auto':
-            hyperparameters = ast.literal_eval(kwargs['model_hyperparams'])
+        input_features_list, target_features_list, X_train, X_test, X_valid, y_train, y_test, y_valid, scaled_split_dict= get_model_data(user_id, project_id, dataset_id)
+        
+        if kwargs['model_mode'].lower() == 'manual':
+            run_model_flag = 1
         else:
-            hyperparameters = kwargs['model_hyperparams']
-        
-        if model_mode.lower() == "manual":
-            print('MANUAL')
-            hyperparameters['total_layers']=3
-            hyperparameters['neurons']=[64,16,1]
-            activation = []
-            for i in range(len(hyperparameters['neurons']) - 1):
-                activation.append(hyperparameters['activation'].lower())
+            run_model_flag = run_model(kwargs['model_type'], kwargs['algorithm_type'], y_train)
+
+        if run_model_flag == 1:
             
-            if kwargs['model_type'] == 'Regression':
-                print("REG----------------------------------------------------------")
-                activation.append('relu')
+            model_mode = model_param_dict['model_mode']
+            
+            model_id = kwargs['model_id']
+            model_name = kwargs['model_name']
+            model_class_name = kwargs['model_class_name']
+
+            if model_mode.lower() == 'auto':
+                hyperparameters = ast.literal_eval(kwargs['model_hyperparams'])
             else:
-                print("CLASSSSSSSSSSSSsss----------------------------------------------------------")
-                activation.append('sigmoid')
+                hyperparameters = kwargs['model_hyperparams']
             
-            hyperparameters['activation'] = activation
-        print("HYPERPARAMSS-----------------------------------------", hyperparameters)
+            if model_mode.lower() == "manual":
+                print('MANUAL')
+                hyperparameters['total_layers']=3
+                hyperparameters['neurons']=[64,16,1]
+                activation = []
+                for i in range(len(hyperparameters['neurons']) - 1):
+                    activation.append(hyperparameters['activation'].lower())
+                
+                if kwargs['model_type'] == 'Regression':
+                    print("REG----------------------------------------------------------")
+                    activation.append('relu')
+                else:
+                    print("CLASSSSSSSSSSSSsss----------------------------------------------------------")
+                    activation.append('sigmoid')
+                
+                hyperparameters['activation'] = activation
+            print("HYPERPARAMSS-----------------------------------------", hyperparameters)
+                
             
-        
-        experiment_name  = model_param_dict['experiment_name']
-        
-        # Create an experiment name, which must be unique and case sensitive
-        ExpObject = model_experiment.ExperimentClass(DBObject, connection, connection_string)
-        experiment, experiment_id = ExpObject.get_mlflow_experiment(experiment_name)
-        # mlflow set_experiment and run the model.
-        with mlflow.start_run(experiment_id=experiment_id) as run:
-            # Get experiment id and run id from the experiment set.
-            run_uuid = run.info.run_id
-            experiment_id = experiment.experiment_id
-            dag_run_id = run_id
-            # Add experiment
-            add_exp_status = ExpObject.add_experiments(experiment_id,experiment_name,run_uuid,
-                                                        project_id,dataset_id,user_id,
-                                                        model_id,model_mode,dag_run_id)
+            experiment_name  = model_param_dict['experiment_name']
             
-            
-            
-            # Declare Object
-            LRObject = eval(model_class_name)(input_features_list, target_features_list, 
-                                                            X_train, X_valid, X_test, y_train, y_valid, 
-                                                            y_test, scaled_split_dict,hyperparameters)
-            
-            LRObject.run_pipeline()
-            status = "success"
-    # except:
-        # status = "failed"
-        
+            # Create an experiment name, which must be unique and case sensitive
+            ExpObject = model_experiment.ExperimentClass(DBObject, connection, connection_string)
+            experiment, experiment_id = ExpObject.get_mlflow_experiment(experiment_name)
+            # mlflow set_experiment and run the model.
+            with mlflow.start_run(experiment_id=experiment_id) as run:
+                # Get experiment id and run id from the experiment set.
+                run_uuid = run.info.run_id
+                experiment_id = experiment.experiment_id
+                dag_run_id = run_id
+                # Add experiment
+                add_exp_status = ExpObject.add_experiments(experiment_id,experiment_name,run_uuid,
+                                                            project_id,dataset_id,user_id,
+                                                            model_id,model_mode,dag_run_id)
+                
+                
+                
+                # Declare Object
+                LRObject = eval(model_class_name)(input_features_list, target_features_list, 
+                                                                X_train, X_valid, X_test, y_train, y_valid, 
+                                                                y_test, scaled_split_dict,hyperparameters)
+                
+                LRObject.run_pipeline()
+                status = "success"
+    except:
+        status = "failed"
         ## Update Experiment ########
-    # finally:
+    finally:
         upd_exp_status = ExpObject.update_experiment(experiment_id,status)
-        
         print("experiment_status == ",upd_exp_status)
 

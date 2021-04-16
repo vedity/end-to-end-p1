@@ -352,7 +352,7 @@ table.dataTable tbody td {
     background: rgba(0, 0, 0, 0.6);
     text-align: center;
     vertical-align: middle;
-    z-index: 1000;
+    z-index: 2000;
     .inner-loader-box {
         position: absolute;
         top: 50%;
@@ -419,4 +419,12 @@ table {
 table.dataTable thead th,
 table.dataTable thead td {
     border-bottom: none;
+}
+
+.schema-mapping {
+    .dataTables_wrapper {
+        .dataTables_filter {
+            display: none !important;
+        }
+    }
 }
