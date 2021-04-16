@@ -608,6 +608,10 @@ class ModelStatisticsClass:
             final_df['experiment_name'] = exp_names
             columns = final_df.columns.values
 
+            logging.info("COLUMN NAMES:-       -------------"+str(columns))
+            logging.info("RESPONSE DATAAAAAAAAAAAAAAAA:-       -------------"+str(final_df.to_dict(orient='records')))
+            # logging.info("COLUMN NAMES:-       -------------"+str(columns))
+
             return {'column_names': columns, 'responsedata': final_df.to_dict(orient='records')}
 
         except (ExperimentAlreadyExist) as exc:
@@ -649,10 +653,13 @@ class ModelStatisticsClass:
             predicted_list = []
             predicted_list.append({'exp_name': experiment_names[0],'values': actual_vs_prediction_df[predicted_column].tolist()})
 
+
+            logging.info("LEN OF EXPID:- "+str(len(experiment_ids)))
+            logging.info("EXPIDS:- "+str(experiment_ids))
             for i in range(len(experiment_ids) - 1):
                 predicted_list.append({'exp_name': experiment_names[i+1],'values': self.actual_vs_prediction(experiment_ids[i+1], model_types[i+1])[predicted_column]})
 
-            comparision_dict = {'index': index, 'actual': actual, 'predicted': predicted_list}
+            comparision_dict = {'index': index, 'actual': actual, 'predicted': predicted_list, 'model_type': 'Regression'}
             
             return comparision_dict
 
@@ -667,7 +674,7 @@ class ModelStatisticsClass:
             for i in range(len(experiment_ids) - 1):
                 predicted_list.append({'exp_name': experiment_names[i+1],'values': self.actual_vs_prediction(experiment_ids[i+1], model_types[i+1])['prediction']})
 
-            comparision_dict = {'key': keys, 'actual': actual, 'predicted': predicted_list}
+            comparision_dict = {'key': keys, 'actual': actual, 'predicted': predicted_list, 'model_type': 'Classification'}
 
             return comparision_dict
 

@@ -32,17 +32,33 @@ CREATE TABLE mlaas.model_master_tbl
 	model_type text,
 	algorithm_type text,
 	target_type text,
+	model_class_name text,
 	model_created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Inserting Data into the model_master table.
-insert into mlaas.model_master_tbl values (1,'Linear_Regression_Sklearn','Simple Linear Regression Model','Regression', 'Multi','Single_Target');
+insert into mlaas.model_master_tbl values (1,'Linear_Regression','Simple Linear Regression Model','Regression', 'Multi','Single_Target','LinearRegressionClass');
+insert into mlaas.model_master_tbl values (2,'Ridge_Regression','Simple Ridge Regression Model','Regression','Multi','Single_Target','RidgeRegressionClass');
+insert into mlaas.model_master_tbl values (3,'Lasso_Regression','Simple LASSO Regression Model','Regression','Multi','Single_Target','LassoRegressionClass');
+insert into mlaas.model_master_tbl values (4,'ElasticNet_Regression','Simple ElasticNet Regression Model','Regression','Multi','Single_Target','ElasticNetClass');
+insert into mlaas.model_master_tbl values (5,'KNeighbors_Regression','KNeighbours Regression Model','Regression','Multi','Single_Target', 'KNeighborsRegressionClass');
+insert into mlaas.model_master_tbl values (6,'Decision_Tree_Regressor','Decision Tree Regression Model','Regression','Multi','Single_Target', 'DecisionTreeRegressionClass');
+insert into mlaas.model_master_tbl values (7,'Random_Forest_Regressor','Decision Tree Regression Model','Regression','Multi','Single_Target', 'RandomForestRegressionClass');
+insert into mlaas.model_master_tbl values (8,'XGBoost_Regression','Simple XGBoost Regression Model','Regression','Multi','Single_Target','XGBoostRegressionClass');
+insert into mlaas.model_master_tbl values (9,'Gradient_Boosting_Machine_Regressor','Gradient Boosting Machine Regression Model','Regression','Multi','Single_Target', 'GradientBoostingRegressionClass');
+insert into mlaas.model_master_tbl values (10,'Linear_Regression_Keras','Simple Regression Model Using Nueral Network','Regression', 'Multi', 'Single_Target','LinearRegressionKerasClass');
 
-insert into mlaas.model_master_tbl values (2,'Linear_Regression_Keras','Simple Linear Regression Model Using Nueral Network','Regression', 'Multi', 'Single_Target');
+-------------------------------------------------------CLASSIFICATION---------------------------------------------------------
 
-insert into mlaas.model_master_tbl values (3,'XGB_Regressor','Ensemble Regression Model','Regression', 'Multi', 'Single_Target');
-
-insert into mlaas.model_master_tbl values (4,'Logistic_Regression_Sklearn','Simple Logistic Regression Model','Classification','Binary','Single_Target');
+insert into mlaas.model_master_tbl values (11,'Logistic_Regression','Simple Logistic Regression Model','Classification','Binary','Single_Target','LogisticRegressionClass');
+insert into mlaas.model_master_tbl values (12,'SVM_Classification','SVM Classifcation Model','Classification','Multi','Single_Target', 'SVMClassificationClass');
+insert into mlaas.model_master_tbl values (13,'KNeighbors_Classification','KNeighbours Classifcation Model','Classification','Multi','Single_Target', 'KNeighborsClassificationClass');
+insert into mlaas.model_master_tbl values (14,'Naive_Bayes_Classification','Simple Naive Bayes Classification Model','Classification','Binary','Single_Target','NaiveBayesClassificationClass');
+insert into mlaas.model_master_tbl values (15,'Decision_Tree_Classifier','Decision Tree Classification Model','Classification','Multi','Single_Target', 'DecisionTreeClassificationClass');
+insert into mlaas.model_master_tbl values (16,'Random_Forest_Classifier','Decision Tree Classification Model','Classification','Multi','Single_Target', 'RandomForestClassificationClass');
+insert into mlaas.model_master_tbl values (17,'XGBoost_Classification','Simple XGBoost Classification Model','Classification','Multi','Single_Target','XGBoostClassificationClass');
+insert into mlaas.model_master_tbl values (18,'Gradient_Boosting_Machine_Classifier','Gradient Boosting Classification Model','Classification','Multi','Single_Target', 'GradientBoostingClassificationClass');
+insert into mlaas.model_master_tbl values (19,'Logistic_Regression_Keras','Simple Linear Classification Model Using Nueral Network','Classification', 'Binary', 'Single_Target','KerasLogisticRegressionClass');
 
 CREATE TABLE mlaas.model_hyperparams_tbl
 (
@@ -55,21 +71,168 @@ CREATE TABLE mlaas.model_hyperparams_tbl
 
 insert into mlaas.model_hyperparams_tbl values (1, '', '[]', '');
 
-insert into mlaas.model_hyperparams_tbl values (2, 'epochs', '[]', '');
 
-insert into mlaas.model_hyperparams_tbl values (2, 'learning_rate', '[0.001, 1]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (2, 'alpha', '[0.001, 1]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (2, 'solver', '["auto", "sparse_cg", "saga"]', 'dropdown');
 
-insert into mlaas.model_hyperparams_tbl values (2, 'batch_size', '[8, 16, 32, 64, 128, 256]', 'dropdown');
 
-insert into mlaas.model_hyperparams_tbl values (2, 'loss', '["Mean_Absolute_Error", "Mean_Squared_Error", "Mean_Absolute_Percentage_Error"]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (3, 'alpha', '[0.001, 1]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (3, 'selection', '["cyclic", "random"]', 'dropdown');
 
-insert into mlaas.model_hyperparams_tbl values (2, 'optimizer', '["SGD", "RMSProp", "Adam"]', 'dropdown');
 
-insert into mlaas.model_hyperparams_tbl values (2, 'activation', '["Relu", "Sigmoid", "Tanh"]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (4, 'alpha', '[0.001, 1]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (4, 'l1_ratio', '[0, 1]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (4, 'selection', '["cyclic", "random"]', 'dropdown');
 
-insert into mlaas.model_hyperparams_tbl values (3, '', '[]', '');
 
-insert into mlaas.model_hyperparams_tbl values (4, '', '[]', '');
+insert into mlaas.model_hyperparams_tbl values (5, 'n_neighbors', '[2, 40]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (5, 'metric', '["euclidean", "manhattan", "minkowski"]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (5, 'algorithm', '["auto", "ball_tree", "kd_tree"]', 'dropdown');
+
+
+insert into mlaas.model_hyperparams_tbl values (6, 'criterion', '["mse", "friedman_mse", "mae", "poisson"]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (6, 'max_depth', '[2, 30]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (6, 'max_features', '["auto", "sqrt", "log2"]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (6, 'min_impurity_decrease', '[0, 0.9]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (6, 'min_samples_leaf', '[1, 20]', 'validation');
+
+
+
+insert into mlaas.model_hyperparams_tbl values (7, 'n_estimators', '[1, 2000]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (7, 'criterion', '["friedman_mse", "mse", "mae"]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (7, 'max_depth', '[2, 30]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (7, 'max_features', '["auto", "sqrt", "log2"]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (7, 'min_impurity_decrease', '[0, 0.9]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (7, 'min_samples_leaf', '[1, 20]', 'validation');
+
+
+insert into mlaas.model_hyperparams_tbl values (8, 'learning_rate', '[0.001, 1]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (8, 'n_estimators', '[1, 200]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (8, 'max_depth', '[3, 12]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (8, 'min_child_weight', '[1, 10]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (8, 'gamma', '[0, 1]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (8, 'reg_alpha', '[0, 1]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (8, 'reg_lambda', '[0, 1]', 'validation');
+
+
+insert into mlaas.model_hyperparams_tbl values (9, 'loss', '["ls", "lad", "humber", "quantile"]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (9, 'learning_rate', '[0.001, 20]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (9, 'subsample', '[0.1, 100]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (9, 'n_estimators', '[1, 2000]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (9, 'criterion', '["mse", "friedman_mse", "mae"]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (9, 'max_depth', '[2, 30]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (9, 'max_features', '["auto", "sqrt", "log2"]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (9, 'min_impurity_decrease', '[0, 0.9]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (9, 'min_samples_leaf', '[1, 20]', 'validation');
+
+
+insert into mlaas.model_hyperparams_tbl values (10, 'epochs', '[]', '');
+insert into mlaas.model_hyperparams_tbl values (10, 'learning_rate', '[0.001, 1]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (10, 'batch_size', '[8, 16, 32, 64, 128, 256]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (10, 'loss', '["Mean_Absolute_Error", "Mean_Squared_Error", "Mean_Absolute_Percentage_Error"]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (10, 'optimizer', '["SGD", "RMSProp", "Adam"]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (10, 'activation', '["Relu", "Sigmoid", "Tanh"]', 'dropdown');
+
+------------------------------------------CLASSIFICATION--------------------------------------------------
+
+insert into mlaas.model_hyperparams_tbl values (11, 'C', '[0.001, 10]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (11, 'penalty', '["l1", "l2", "elasticnet"]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (11, 'solver', '["auto", "lbfgs", "saga"]', 'dropdown');
+
+
+insert into mlaas.model_hyperparams_tbl values (12, 'C', '[0, 100]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (12, 'gamma', '[0, 100]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (12, 'kernel', '["linear", "poly", "rbf", "sigmoid"]', 'dropdown');
+
+
+insert into mlaas.model_hyperparams_tbl values (13, 'n_neighbors', '[2, 40]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (13, 'metric', '["euclidean", "manhattan", "minkowski"]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (13, 'algorithm', '["auto", "ball_tree", "kd_tree"]', 'dropdown');
+
+
+
+insert into mlaas.model_hyperparams_tbl values (14, '', '[]', '');
+
+
+
+insert into mlaas.model_hyperparams_tbl values (15, 'criterion', '["gini", "entropy"]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (15, 'max_depth', '[2, 30]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (15, 'max_features', '["auto", "sqrt", "log2"]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (15, 'min_impurity_decrease', '[0, 0.9]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (15, 'min_samples_leaf', '[1, 20]', 'validation');
+
+
+insert into mlaas.model_hyperparams_tbl values (16, 'n_estimators', '[1, 2000]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (16, 'criterion', '["gini", "entropy"]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (16, 'max_depth', '[2, 30]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (16, 'max_features', '["auto", "sqrt", "log2"]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (16, 'min_impurity_decrease', '[0, 0.9]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (16, 'min_samples_leaf', '[1, 20]', 'validation');
+
+
+insert into mlaas.model_hyperparams_tbl values (17, 'learning_rate', '[0.001, 1]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (17, 'n_estimators', '[1, 200]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (17, 'max_depth', '[3,12]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (17, 'min_child_weight', '[1,10]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (17, 'gamma', '[0,1]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (17, 'reg_alpha', '[0,1]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (17, 'reg_lambda', '[0,1]', 'validation');
+
+
+
+insert into mlaas.model_hyperparams_tbl values (18, 'loss', '["deviance", "exponential"]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (18, 'learning_rate', '[0.001, 20]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (18, 'subsample', '[0.1, 100]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (18, 'n_estimators', '[1, 2000]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (18, 'criterion', '["mse", "friedman_mse", "mae"]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (18, 'max_depth', '[2, 30]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (18, 'max_features', '["auto", "sqrt", "log2"]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (18, 'min_impurity_decrease', '[0, 0.9]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (18, 'min_samples_leaf', '[1, 20]', 'validation');
+
+
+
+insert into mlaas.model_hyperparams_tbl values (19, 'epochs', '[]', '');
+insert into mlaas.model_hyperparams_tbl values (19, 'learning_rate', '[0.001, 1]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (19, 'batch_size', '[8, 16, 32, 64, 128, 256]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (19, 'loss', '["binary_crossentropy","categorical_crossentropy"]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (19, 'optimizer', '["SGD", "RMSProp", "Adam"]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (19, 'activation', '["Relu", "Sigmoid", "Tanh"]', 'dropdown');
+
+
+
+create table mlaas.auto_model_params
+ (
+	model_id int4, 
+	version_name varchar,
+	hyperparam varchar
+  );
+
+
+
+insert into mlaas.auto_model_params values (1, 'Initial Version for Simple Linear Regressor', '{}');
+insert into mlaas.auto_model_params values (2, 'Initial Version for Ridge Regressor', '{"alpha": 1, "solver": "auto"}');
+insert into mlaas.auto_model_params values (3, 'Initial Version for Lasso Regressor', '{"alpha": 1, "selection": "cyclic"}');
+insert into mlaas.auto_model_params values (4, 'Initial Version for Elasticnet Regressor', '{"alpha": 1, "l1_ratio": 0.5, "selection": "cyclic"}');
+insert into mlaas.auto_model_params values (5, 'Initial Version for KNeighbor Regressor', '{"n_neighbors": 11, "metric": "minkowski", "algorithm": "auto"}');
+insert into mlaas.auto_model_params values (6, 'Initial Version of DecisionTree Regression', '{"criterion": "mse", "max_depth": "None", "max_features": "auto", "min_impurity_decrease":0.1, "min_samples_leaf": 1}');
+insert into mlaas.auto_model_params values (7, 'Initial Version of RandomForest Regression', '{"n_estimators": 100, "criterion": "mse", "max_depth": "None", "max_features": "auto", "min_impurity_decrease":0.1, "min_samples_leaf": 1}');
+insert into mlaas.auto_model_params values (8, 'Initial Version for XGBoost Regressor', '{"n_estimators":100,"max_depth":6,"min_child_weight":1,"learning_rate":0.3,"gamma":0,"reg_alpha":0,"reg_lambda":1}');
+insert into mlaas.auto_model_params values (9, 'Initial Version of Gradient Boosting Regression', '{"loss": "ls", "learning_rate":0.1, "subsample":1, "n_estimators": 100, "criterion": "friedman_mse", "max_depth": "None", "max_features": "auto", "min_impurity_decrease":0.1, "min_samples_leaf": 1}');
+insert into mlaas.auto_model_params values (10, 'With 3 Layer', '{"total_layers": 3, "neurons": [64, 16, 1], "loss": "Mean_Squared_Error", "optimizer": "adam", "learning_rate": 0.01, "batch_size": 16, "activation":["relu", "relu", "relu"], "epochs": 10}');
+
+
+-----------------------------------------------------CLASSIFCATION-------------------------------------------------------
+insert into mlaas.auto_model_params values (11, 'Initial Version for Logistic Regressor', '{"C": 1, "penalty": "l2", "solver": "lbfgs"}');
+insert into mlaas.auto_model_params values (12, 'Initial Version for SVM Classifier', '{"C": 2, "gamma": "scale", "kernel": "rbf"}');
+insert into mlaas.auto_model_params values (13, 'Initial Version for KNeighbor Classifier', '{"n_neighbors": 11, "metric": "minkowski", "algorithm": "auto"}');
+insert into mlaas.auto_model_params values (14, 'Initial Version for Simple Naive Bais Classifier', '{}');
+insert into mlaas.auto_model_params values (15, 'Initial Version of DecisionTree Classification', '{"criterion": "gini", "max_depth": "None", "max_features": "auto", "min_impurity_decrease":0.1, "min_samples_leaf": 1}');
+insert into mlaas.auto_model_params values (16, 'Initial Version of RandomForest Classification', '{"n_estimators": 100, "criterion": "gini", "max_depth": "None", "max_features": "auto", "min_impurity_decrease":0.1, "min_samples_leaf": 1}');
+insert into mlaas.auto_model_params values (17, 'Initial Version for XGBoost Regressor', '{"n_estimators":100,"max_depth":6,"min_child_weight":1,"learning_rate":0.3,"gamma":0,"reg_alpha":0,"reg_lambda":1}');
+insert into mlaas.auto_model_params values (18, 'Initial Version of Gradient Boosting Classification', '{"loss": "deviance", "learning_rate":0.1, "subsample":1, "n_estimators": 100, "criterion": "friedman_mse", "max_depth": "None", "max_features": "auto", "min_impurity_decrease":0.1, "min_samples_leaf": 1}');
+insert into mlaas.auto_model_params values (19, 'binary version', '{"total_layers": 3, "neurons": [64, 16, 1], "loss": "binary_crossentropy", "optimizer": "adam", "learning_rate": 0.01, "batch_size": 16, "activation":["relu", "relu", "sigmoid"], "epochs": 10}');
+
 
 
 CREATE TABLE mlaas.model_dags_tbl
