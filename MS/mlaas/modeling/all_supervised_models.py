@@ -30,12 +30,10 @@ from modeling.utils.model_utils.sklearn_regression.lasso_regression import *
 from modeling.utils.model_utils.sklearn_regression.elasticnet_regression import *
 from modeling.utils.model_utils.keras_regression.linear_regression_keras import *
 from modeling.utils.model_utils.sklearn_regression.kneighbors_regression import *
-from modeling.utils.model_utils.sklearn_regression.svm_regression import *
 from modeling.utils.model_utils.sklearn_regression.decisiontree_regression import *
 from modeling.utils.model_utils.sklearn_regression.randomforest_regression import *
 from modeling.utils.model_utils.sklearn_regression.gradientboost_regression import *
 from modeling.utils.model_utils.sklearn_regression.xgboost_regression import *
-
 
 
 # Classification Class File Imports
@@ -145,25 +143,6 @@ def supervised_models(run_id,**kwargs):
             else:
                 hyperparameters = kwargs['model_hyperparams']
             
-            if model_mode.lower() == "manual":
-                print('MANUAL')
-                hyperparameters['total_layers']=3
-                hyperparameters['neurons']=[64,16,1]
-                activation = []
-                for i in range(len(hyperparameters['neurons']) - 1):
-                    activation.append(hyperparameters['activation'].lower())
-                
-                if kwargs['model_type'] == 'Regression':
-                    print("REG----------------------------------------------------------")
-                    activation.append('relu')
-                else:
-                    print("CLASSSSSSSSSSSSsss----------------------------------------------------------")
-                    activation.append('sigmoid')
-                
-                hyperparameters['activation'] = activation
-            print("HYPERPARAMSS-----------------------------------------", hyperparameters)
-                
-            
             experiment_name  = model_param_dict['experiment_name']
             
             # Create an experiment name, which must be unique and case sensitive
@@ -191,8 +170,9 @@ def supervised_models(run_id,**kwargs):
                 status = "success"
     except:
         status = "failed"
+        
         ## Update Experiment ########
     finally:
         upd_exp_status = ExpObject.update_experiment(experiment_id,status)
+        
         print("experiment_status == ",upd_exp_status)
-

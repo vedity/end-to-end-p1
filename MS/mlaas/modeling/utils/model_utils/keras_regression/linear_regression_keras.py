@@ -47,14 +47,11 @@ class LinearRegressionKerasClass:
         self.output_dim = len(self.target_features_list)
         
         # Hyper Parameter list
-        self.layers = int(hyperparameters['total_layers'])
-        self.neurons = list(hyperparameters['neurons'])
         self.learning_rate = float(hyperparameters['learning_rate'])
         self.epoch = int(hyperparameters['epochs'])
         self.batch_size = int(hyperparameters['batch_size'])
         self.loss = hyperparameters['loss'].lower()
         self.optimizer = hyperparameters['optimizer'].lower()
-        self.activation = list(hyperparameters['activation'])
 
         self.EvalMetricsObj = EM()
         self.MLFlowLogObj = MLFlowLogs()
@@ -62,12 +59,15 @@ class LinearRegressionKerasClass:
 
     def create_model(self):
         # Define model
+        layers = 3
+        neurons = [64, 16, 1]
+        activation = ['relu', 'relu', 'relu']
         model = tf.keras.Sequential()
-        first_layer = tf.keras.layers.Dense(units=int(self.neurons[0]), input_shape=(len(self.input_features_list), ), activation=self.activation[0].lower())
-        model.add(first_layer)
+        layer_info = tf.keras.layers.Dense(units=int(neurons[0]), input_shape=(len(self.input_features_list), ), activation=activation[0].lower())
+        model.add(layer_info)
 
-        for layer in range(self.layers-1):
-            layer_info = tf.keras.layers.Dense(units=int(self.neurons[layer+1]), activation=self.activation[layer+1].lower())
+        for layer in range(layers-1):
+            layer_info = tf.keras.layers.Dense(units=int(neurons[layer+1]), activation=activation[layer+1].lower())
             model.add(layer_info)
 
 
@@ -115,7 +115,7 @@ class LinearRegressionKerasClass:
         
         shap_data = self.X_train[:min(100, self.X_train.shape[0]), 1:]
         deepexplainer = shap.DeepExplainer(model, shap_data)
-        shap_values = deepexplainer.shap_values(shap_data[:20])
+        shap_values = deepexplainer.shap_values(shap_data[:20], check_additivity=False)
         if isinstance(shap_values, list):
             shap_values = np.array(shap_values).mean(axis=0)
         shap_values = abs(np.array(shap_values)).mean(axis=0)
@@ -183,7 +183,6 @@ class LinearRegressionKerasClass:
                          "Learning Rate": self.learning_rate,
                          "Optimizer": self.optimizer,
                          "Loss": self.loss,
-                         "Activation": self.activation,
                          "Epochs": self.epoch,
                          "Batch Size": self.batch_size,
                          "Train Size":float(train_size),"Test Size":int(test_size),

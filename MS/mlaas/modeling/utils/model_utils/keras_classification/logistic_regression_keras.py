@@ -45,14 +45,12 @@ class KerasLogisticRegressionClass:
         self.output_dim = len(self.target_features_list)
         
         # Hyper Parameter list
-        self.layers = int(hyperparameters['total_layers'])
-        self.neurons = list(hyperparameters['neurons'])
         self.learning_rate = float(hyperparameters['learning_rate'])
         self.epoch = int(hyperparameters['epochs'])
         self.batch_size = int(hyperparameters['batch_size'])
         self.loss = hyperparameters['loss'].lower()
         self.optimizer = hyperparameters['optimizer'].lower()
-        self.activation = hyperparameters['activation']
+
 
         self.EvalMetricsObj = EM()
         self.MLFlowLogObj = MLFlowLogs()
@@ -60,21 +58,27 @@ class KerasLogisticRegressionClass:
 
     def create_model(self):
         # Define model
+        layers = 3
+        neurons = [64, 16, 1]
+        activation = ['relu', 'relu', 'sigmoid']
         model = tf.keras.Sequential()
-        layer_info = tf.keras.layers.Dense(units=int(self.neurons[0]), input_shape=(len(self.input_features_list), ), activation=self.activation[0].lower())
+        layer_info = tf.keras.layers.Dense(units=int(neurons[0]), input_shape=(len(self.input_features_list), ), activation=activation[0].lower())
         model.add(layer_info)
 
-        for layer in range(self.layers-1):
-            layer_info = tf.keras.layers.Dense(units=int(self.neurons[layer+1]), activation=self.activation[layer+1].lower())
+        for layer in range(layers-1):
+            layer_info = tf.keras.layers.Dense(units=int(neurons[layer+1]), activation=activation[layer+1].lower())
             model.add(layer_info)
 
 
-        if self.optimizer == "adam":
+        if self.optimizer.lower() == "adam":
             opt = keras.optimizers.Adam(learning_rate=self.learning_rate)
             
-        elif self.optimizer == "sgd":
+        elif self.optimizer.lower() == "sgd":
             opt = keras.optimizers.SGD(learning_rate=self.learning_rate)
-            
+        
+        elif self.optimizer.lower() == 'rmsprop':
+            opt = keras.optimizers.RMSprop(learning_rate=self.learning_rate)
+        
         model.compile(loss= self.loss , optimizer=opt, metrics=["accuracy"])
 
         return model
@@ -181,7 +185,6 @@ class KerasLogisticRegressionClass:
                          "Learning Rate": self.learning_rate,
                          "Optimizer": self.optimizer,
                          "Loss": self.loss,
-                         "Activation": self.activation,
                          "Epochs": self.epoch,
                          "Batch Size": self.batch_size,
                          "Train Size":float(train_size),"Test Size":int(test_size),
