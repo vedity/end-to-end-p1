@@ -49,7 +49,7 @@ class KNeighborsClassificationClass:
         self.y_test = y_test
         self.y_valid = y_valid
 
-        self.n_neighbors = hyperparameters['n_neighbors']
+        self.n_neighbors = int(hyperparameters['n_neighbors'])
         self.metric = hyperparameters['metric']
         self.algorithm = hyperparameters['algorithm']
 
@@ -132,11 +132,14 @@ class KNeighborsClassificationClass:
             [dict]: [it will return features impact dictionary.]
         """
         
-        shap_data = self.X_train[:min(25, self.X_train.shape[0]), 1:]
+        shap_data = self.X_train[:min(20, self.X_train.shape[0]), 1:]
         kernelexplainer = shap.KernelExplainer(model.predict, shap_data)
-        shap_values = abs(kernelexplainer.shap_values(shap_data[:10])).mean(axis=0)
+        shap_values = kernelexplainer.shap_values(shap_data[:10])
+        if isinstance(shap_values, list):
+            shap_values = np.array(shap_values).mean(axis=0)
+        shap_values_mean = abs(np.array(shap_values)).mean(axis=0)
 
-        features_importance_values = shap_values / shap_values.sum()
+        features_importance_values = shap_values_mean / shap_values_mean.sum()
 
         features_df = pd.DataFrame(data=features_importance_values, index=self.input_features_list, columns=['features_importance'])
 

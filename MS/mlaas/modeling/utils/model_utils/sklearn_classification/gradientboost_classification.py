@@ -50,11 +50,11 @@ class GradientBoostingClassificationClass:
 
 
         self.loss = hyperparameters['loss']
-        self.learning_rate = hyperparameters['learning_rate']
-        self.subsample = hyperparameters['subsample']
-        self.n_estimators = hyperparameters['n_estimators']
+        self.learning_rate = float(hyperparameters['learning_rate'])
+        self.subsample = int(hyperparameters['subsample'])
+        self.n_estimators = int(hyperparameters['n_estimators'])
         self.criterion = hyperparameters['criterion']
-        self.max_features = hyperparameters['max_features']
+        self.max_features = int(hyperparameters['max_features'])
         self.min_impurity_decrease = int(hyperparameters['min_impurity_decrease'])
         self.min_samples_leaf = int(hyperparameters['min_samples_leaf'])
         if hyperparameters['max_depth'] != 'None':
