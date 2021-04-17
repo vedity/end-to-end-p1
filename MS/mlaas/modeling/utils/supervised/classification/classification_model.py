@@ -17,7 +17,7 @@ import uuid
 import logging
 import requests
 
-
+from ...model_utils.sklearn_classification import logistic_classifier
 from ...model_experiments import model_experiment
 from common.utils.logger_handler import custom_logger as cl
 

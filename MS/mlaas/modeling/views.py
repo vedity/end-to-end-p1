@@ -173,7 +173,6 @@ class StartModelClass(APIView):
                                         request_body = json.loads(data) #get all the request body parameter
                                         
                                         model_param = request_body["hyperparameters"]
-                                        logging.info('HYPERPARAMS IN VIEWS.py-------------'+str(model_param))
                                         
                                         result = ModelObject.run_model(model_param_dict,model_id,model_name,model_param)
 
