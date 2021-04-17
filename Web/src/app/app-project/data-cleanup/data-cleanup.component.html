@@ -26,7 +26,7 @@
                                     <span hidden>{{item.is_missing}}</span>
                                     <div class="custom-control custom-checkbox mb-3">
                                         <input [disabled]="item.is_missing=='False' && activeId==1" type="checkbox" class="custom-control-input checkbox" value="{{item.column_id}}" (change)="selectColumn($event)" data-value="{{item.column_id}}" id="customCheck_{{i}}">
-                                        <label class="custom-control-label" for="customCheck_{{i}}">{{item.col_name}}</label>
+                                        <label class="custom-control-label" id="customlabel_{{i}}" for="customCheck_{{i}}">{{item.col_name}}</label>
                                     </div>
                                 </td>
                                 <td class="handling-list" id="handling_{{item.column_id}}">
@@ -113,7 +113,7 @@
                         <div class="col-md-3 mb-3" *ngFor="let item of scaleOperations;let i=index">
                             <div class="custom-control custom-radio">
                                 <input type="radio" [(ngModel)]="scaldata.scaling_op" id="rescaling_{{item.id}}" name="rescaling" #rescaling="ngModel" value="{{item.id}}" class="custom-control-input">
-                                <label class="custom-control-label" for="rescaling_{{item.id}}">{{item.name}}</label>
+                                <label class="custom-control-label" id="customlabel_{{item.id}}" for="rescaling_{{item.id}}">{{item.name}}</label>
 
                             </div>
                         </div>
@@ -256,7 +256,7 @@
             <div class="form-group">
                 <div class="custom-control custom-checkbox mb-3">
                     <input type="checkbox" class="custom-control-input" (change)="saveAs.isPrivate=$event.target.checked" checked name="isprivate" id="customCheck1">
-                    <label class="custom-control-label" for="customCheck1">Keep Dataset private</label>
+                    <label class="custom-control-label" id="customlabel_isprivate" for="customCheck1">Keep Dataset private</label>
                 </div>
             </div>
             <div class="button-items text-center">
