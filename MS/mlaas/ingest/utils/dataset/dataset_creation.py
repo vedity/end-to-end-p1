@@ -542,13 +542,12 @@ class DatasetClass:
                 if data == 0:
                     #? No public dataset with same name
                     #? Is there any private dataset from you with same name?
-                    sql_command = f"SELECT dataset_id FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND USER_NAME = '{user_name}' and page_name in ('Create dataset','Create Project','schema save','Cleanup')"
-                    logging.info("-->"+str(sql_command))
+                    sql_command = f"SELECT dataset_id FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND USER_NAME = '{user_name}' and page_name in ('Create dataset','Create Project','schema save')"
+                    
                 else:
                     #! There is a public dataset with your name
                     logging.debug(f"data ingestion  :  DatasetClass  :  dataset_exist  :  A public dataset with the same dataset_name exists at dataset_id = {int(data_df['dataset_id'][0])}")
                     # return int(data_df['dataset_id'][0])
-                    logging.info("-->"+str(True))
                     return True
 
             data_df=DBObject.select_records(connection,sql_command)
@@ -716,7 +715,7 @@ class DatasetClass:
             
             #dataframe_size = sys.getsizeof(dataframe)
             file_size = self.get_file_size(dataframe_size,flag = True)
-            
+                
             # update the "dataset table name"  and "no_of _rows" of the given dataset id
             sql_command = "UPDATE mlaas.dataset_tbl SET file_name ='"+ str(filenm)+"' ,file_size = '"+str(file_size)+"', dataset_table_name='"+str(new_table_name)+"',no_of_rows = '"+str(no_of_rows)+"' where dataset_id ='"+str(dataset_id)+"'"
             

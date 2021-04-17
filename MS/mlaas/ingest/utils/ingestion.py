@@ -415,7 +415,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             dataset_visibility = str(visibility_df['dataset_visibility'][0])
             
             exist_status = super(IngestClass, self).dataset_exists(DBObject,connection,table_name,dataset_visibility,dataset_name,user_name)
-            logging.info("--->"+str(exist_status))
+            
             if exist_status==True:
                 raise DatasetAlreadyExist(500)
             logging.info(str(exist_status) + " checking ")
