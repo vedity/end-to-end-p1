@@ -2,48 +2,74 @@
     <div class="col-lg-12">
         <div class="card table-card">
             <div class="card-body">
+                <input type="hidden" id="datatablepagelength" value="10">
                 <ngx-skeleton-loader *ngIf="isloaderdiv" count="7" [animation]="animation" [theme]="theme">
                 </ngx-skeleton-loader>
                 <div class="main-datatable" [hidden]="isloaderdiv">
                     <a href="javascript:void(0)" (click)="displayfilter()" id="filter-btn" class="filter-btn"><i
                             id="filtericon" class="dripicons-experiment"></i></a>
+
                     <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" style="width: 100%;" class="table table-centered table-nowrap">
                         <thead class="thead-light">
                             <tr>
-                                <th>Project
+                                <th><label>Project</label>
                                     <img class="sort-icon" src="sort_both.png">
                                     <img class="desc-icon" src="sort_desc.png">
                                     <img class="asc-icon" src="sort_asc.png">
+                                    <div class="filter-box" [hidden]="filter">
+                                        <input class="form-control filter" value="" id="input_0" type="text" name="search-project-name" />
+                                    </div>
+                                </th>
+                                <th><label>Datasets</label>
+                                    <img class="sort-icon" src="sort_both.png">
+                                    <img class="desc-icon" src="sort_desc.png">
+                                    <img class="asc-icon" src="sort_asc.png">
+                                    <div class="filter-box" [hidden]="filter">
+                                        <input class="form-control filter" type="text" id="input_1" name="search-dataset-name" />
+                                    </div>
+                                </th>
+                                <th class="text-center"><label>Models</label>
+                                    <img class="sort-icon" src="sort_both.png">
+                                    <img class="desc-icon" src="sort_desc.png">
+                                    <img class="asc-icon" src="sort_asc.png">
+                                    <div class="filter-box" [hidden]="filter">
+                                        <select class="form-control filter" id="input_2" name="search-model-status">
+                                            <option value="">None</option>
+                                            <option value="Success">Success</option>
+                                            <option value="Pending">Pending</option>
+                                            <option value="Failed">Failed</option>
+                                            <option value="InProgress">In Progress</option>
+                                        </select>
+                                    </div>
+                                </th>
+                                <th class="text-center"><label>Deployment</label>
+                                    <img class="sort-icon" src="sort_both.png">
+                                    <img class="desc-icon" src="sort_desc.png">
+                                    <img class="asc-icon" src="sort_asc.png">
+                                    <div class="filter-box" [hidden]="filter">
+                                        <select class="form-control filter" id="input_3" name="search-deployment-status">
+                                            <option value="">None</option>
+                                            <option value="Pending">Pending</option>
+                                            <option value="Active">Active</option>
+                                            <option value="Suspended">Suspended</option>
+                                        </select>
+                                    </div>
+                                </th>
+                                <th><label>Created</label>
+                                    <img class="sort-icon" src="sort_both.png">
+                                    <img class="desc-icon" src="sort_desc.png">
+                                    <img class="asc-icon" src="sort_asc.png">
+                                    <div class="filter-box" [hidden]="filter"></div>
+                                </th>
+                                <th class="text-center">
+                                    <label>Actions</label>
+                                    <div class="filter-box" [hidden]="filter"></div>
+                                </th>
 
-                                </th>
-                                <th>Datasets
-                                    <img class="sort-icon" src="sort_both.png">
-                                    <img class="desc-icon" src="sort_desc.png">
-                                    <img class="asc-icon" src="sort_asc.png">
-
-                                </th>
-                                <th class="text-center">Models
-                                    <img class="sort-icon" src="sort_both.png">
-                                    <img class="desc-icon" src="sort_desc.png">
-                                    <img class="asc-icon" src="sort_asc.png">
-
-                                </th>
-                                <th class="text-center">Deployment
-                                    <img class="sort-icon" src="sort_both.png">
-                                    <img class="desc-icon" src="sort_desc.png">
-                                    <img class="asc-icon" src="sort_asc.png">
-
-                                </th>
-                                <th>Created
-                                    <img class="sort-icon" src="sort_both.png">
-                                    <img class="desc-icon" src="sort_desc.png">
-                                    <img class="asc-icon" src="sort_asc.png">
-                                </th>
-                                <th class="text-center">Actions</th>
                             </tr>
 
                         </thead>
-
+                        <!-- 
                         <thead>
                             <tr class="thead-light" [hidden]="filter">
                                 <td>
@@ -60,19 +86,19 @@
                                     <option value="Failed">Failed</option>
                                     <option value="InProgress">In Progress</option>
                                 </select>
-                                </td>
-                                <td>
-                                    <select class="form-control filter" id="input_3" name="search-deployment-status">
+                                        </td>
+                                        <td>
+                                            <select class="form-control filter" id="input_3" name="search-deployment-status">
                                     <option value="">None</option>
                                     <option value="Pending">Pending</option>
                                     <option value="Active">Active</option>
                                     <option value="Suspended">Suspended</option>
                                 </select>
-                                </td>
-                                <td></td>
-                                <td></td>
+                                        </td>
+                                        <td></td>
+                                        <td></td>
                             </tr>
-                        </thead>
+                        </thead> -->
                         <tbody class="tbody">
 
                             <tr *ngFor="let data of transactions">

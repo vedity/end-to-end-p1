@@ -180,7 +180,10 @@ export class DataCleanupComponent implements OnInit {
           this.rendered();
         }
       }
-     
+      if(type=="save"){
+        this.loaderdiv = false;
+        //this.rendered();
+      }
 
     }
   }
