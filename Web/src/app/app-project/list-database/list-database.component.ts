@@ -27,6 +27,7 @@ export class ListDatabaseComponent implements OnInit {
       $(".filter-box").on("click",function(event){
         event.stopPropagation();
       })
+      
     },
     drawCallback:function(e){
       $("#datatablepagelength").val(e._iDisplayLength);
