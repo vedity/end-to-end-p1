@@ -511,7 +511,7 @@ else{
   };
 
   responsearray = {};
-  nextValidate() {
+  nextValidate(modelingmodal) {
     var errorflag = false;
     var hyperparameters = {};
     if (this.selectedalgorithm != "") {
@@ -559,7 +559,8 @@ else{
     }
     if (!errorflag) {
       this.modalService.dismissAll();
-      $("#createExperiment").trigger('click');
+      this.smallModal(modelingmodal);
+      // $("#createExperiment").trigger('click');
     }
   }
 
