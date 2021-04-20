@@ -216,17 +216,6 @@ class ScheamColumnListClass(APIView):
 
         def get(self, request, format=None):
                 """
-                This class is used to get  schema column list.
-                It will take url string as mlaas/dataset_schema/column_attribute_list/.
-
-                Args  : 
-                        
-                        
-                Return : 
-                        status_code(500 or 200),
-                        error_msg(Error message for retrival failed or successfull),
-                        Response(return false if failed otherwise json data)
-       
                 this function used to get Attribute list for schema page and
 
                 Return:
