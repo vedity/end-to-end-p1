@@ -74,8 +74,8 @@ export class DataCleanupComponent implements OnInit {
   }
 
   checkvalidation(event, type) {
-    let value=event.target.value.toString().trim();
- 
+    let value = event.target.value.toString().trim();
+
     var match = true;
     var regexfortypeinteger = /^[0-9]{1,50}$/;
     var regexfortypefloat = /^([0-9]*[.])?[0-9]+$/;
@@ -102,7 +102,7 @@ export class DataCleanupComponent implements OnInit {
         $("#" + event.target.id).addClass("errorstatus")
       }
     }
-    else{
+    else {
       $("#" + event.target.id).addClass("errorstatus")
       $("#" + event.target.id).val('');
     }
@@ -116,11 +116,10 @@ export class DataCleanupComponent implements OnInit {
       clearInterval(this.setModelingInterval);
     }
     // this.getCheckSplit();
-    this.getCldagStatus();
     this.dtOptions = {
       paging: false,
-      orderFixed:[[0,'desc']],
-     // ordering:false,
+      orderFixed: [[0, 'desc']],
+      // ordering:false,
       scrollCollapse: true,
       info: false,
       searching: false,
@@ -132,6 +131,7 @@ export class DataCleanupComponent implements OnInit {
     this.getColumnList();
     this.getScalingOperations();
     this.getHoldoutList();
+    this.getCldagStatus("onload");
     // this.scaldata.test_ratio = 20;
     // this.scaldata.split_method = 'cross_validation';
     // this.scaldata.scaling_op='0'
@@ -145,21 +145,21 @@ export class DataCleanupComponent implements OnInit {
     )
   }
 
-  getCldagStatus() {
+  getCldagStatus(type = '') {
 
     this.apiService.getCldagStatus(this.project_id).subscribe(
-      logs => this.CldagSuccessHandler(logs)
+      logs => this.CldagSuccessHandler(logs, type)
     )
   }
 
   isEnableCleanup = true;
-  CldagSuccessHandler(data) {
+  CldagSuccessHandler(data, type) {
     if (data.status_code == "200") {
       this.isEnableCleanup = data.response;
       if (this.isEnableCleanup) {
         if (!this.setCleanUpInterval) {
           this.setCleanUpInterval = setInterval(() => {
-            this.getCldagStatus();
+            this.getCldagStatus(type);
           }, 10000);
         }
       }
@@ -167,7 +167,24 @@ export class DataCleanupComponent implements OnInit {
         if (this.setCleanUpInterval) {
           clearInterval(this.setCleanUpInterval);
         }
+        if (type == '') {
+          this.rendered();
+        }
+       
+        if (type == 'saveAs') {
+          this.refershProjectDetail();
+        }
+
+        if(type=="save"){
+          this.loaderdiv = false;
+          this.rendered();
+        }
       }
+      if(type=="save"){
+        this.loaderdiv = false;
+        //this.rendered();
+      }
+
     }
   }
 
@@ -441,7 +458,7 @@ export class DataCleanupComponent implements OnInit {
   fianlarray = [];
   errorflag: boolean;
   saveHanlers(isSave, smallDataModal) {
-
+    this.loaderdiv = true;
     this.errorflag = false;
     this.fianlarray = [];
     let arrayhandlers = [];
@@ -474,32 +491,39 @@ export class DataCleanupComponent implements OnInit {
             this.fianlarray.push({ "column_id": [parseInt(item)], "selected_handling": selectedhandling, "values": values })
           }
           if (this.errorflag == true) {
+            this.loaderdiv = false;
             this.toaster.error("Please enter required input", 'Error')
           }
           else {
             if (isSave == 'False') {
-              this.loaderdiv = true;
-              this.apiService.saveOperations(this.schema_id, this.dataset_id, this.project_id, isSave, this.fianlarray).subscribe(
+                this.apiService.saveOperations(this.schema_id, this.dataset_id, this.project_id, isSave, this.fianlarray).subscribe(
                 logs => this.saveSuccessHandlers(logs),
                 error => this.errorHandler(error)
               )
             }
             else {
+              this.loaderdiv = false;
+
               this.saveAs = new saveAsModal();
               this.saveAs.isPrivate = true;
               this.modalService.open(smallDataModal, { size: 'sm', windowClass: 'modal-holder', centered: true });
             }
           }
         }
-        else
+        else {
           this.toaster.error("Please enter valid input", 'Error')
+          this.loaderdiv = false;
+
+        }
 
       }
       else {
         if (isSave == 'False') {
+          this.loaderdiv = false;
           this.toaster.error("Please select any handlers", 'Error')
         }
         else {
+          this.loaderdiv = false;
           this.saveAs = new saveAsModal();
           this.saveAs.isPrivate = true;
           this.modalService.open(smallDataModal, { size: 'sm', windowClass: 'modal-holder', centered: true });
@@ -518,8 +542,7 @@ export class DataCleanupComponent implements OnInit {
       this.getColumnList();
       this.getColumnviseOperation();
       this.toaster.success(data.error_msg, 'Success')
-      this.getCldagStatus();
-      this.loaderdiv = false;
+      this.getCldagStatus('save');
 
     }
     else {
@@ -560,7 +583,7 @@ export class DataCleanupComponent implements OnInit {
         random_state: this.scaldata.train_random_state
       }
     }
-    
+
     this.apiService.savescalingOpertion(this.response).subscribe(
       logs => this.savescalSuccessHandlers(logs),
       error => this.errorHandler(error)
@@ -613,7 +636,7 @@ export class DataCleanupComponent implements OnInit {
       visibility = 'private';
     else
       visibility = 'public';
-      this.loaderdiv = true;
+    this.loaderdiv = true;
 
     this.apiService.saveasOperations(this.schema_id, this.dataset_id, this.project_id, this.saveAs.dataset_name, visibility, this.saveAs.description, flag, this.fianlarray)
       .subscribe(
@@ -632,35 +655,35 @@ export class DataCleanupComponent implements OnInit {
       this.getColumnviseOperation();
       this.toaster.success(data.error_msg, 'Success')
       this.modalService.dismissAll();
-      this.getCldagStatus();
-      this.refershProjectDetail();
-      // this.loaderdiv = false;
+      // this.refershProjectDetail();
+      this.getCldagStatus('saveAs');
+       this.loaderdiv = false;
     }
     else {
       this.errorHandler(data);
     }
   }
 
-  refershProjectDetail(){
-    this.apiService.getrefreshedProjectDetail(this.project_id).subscribe(logs=>this.refreshProjectSuccessHandler(logs),
-    error=>this.errorHandler(error))
+  refershProjectDetail() {
+    this.apiService.getrefreshedProjectDetail(this.project_id).subscribe(logs => this.refreshProjectSuccessHandler(logs),
+      error => this.errorHandler(error))
   }
 
   refreshProjectSuccessHandler(data) {
     if (data.status_code == "200") {
       console.log(data);
-      var projct_data=data.response[0];
-      var currentParams=localStorage.getItem('preprocessing');
+      var projct_data = data.response[0];
+      var currentParams = localStorage.getItem('preprocessing');
       var params = {
         "dataset_id": projct_data.dataset_id,
         "project_id": projct_data.project_id,
         "dataset_name": projct_data.dataset_name,
-        "project_name": projct_data.project_name, 
-        "navigate_to": JSON.parse(currentParams).navigate_to, 
+        "project_name": projct_data.project_name,
+        "navigate_to": JSON.parse(currentParams).navigate_to,
         "schema_id": projct_data.schema_id
       }
       console.log(params);
-      localStorage.setItem('preprocessing',JSON.stringify(params));
+      localStorage.setItem('preprocessing', JSON.stringify(params));
       this.rendered();
     }
     else {

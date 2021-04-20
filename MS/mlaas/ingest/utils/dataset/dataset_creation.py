@@ -542,12 +542,13 @@ class DatasetClass:
                 if data == 0:
                     #? No public dataset with same name
                     #? Is there any private dataset from you with same name?
-                    sql_command = f"SELECT dataset_id FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND USER_NAME = '{user_name}' and page_name in ('Create dataset','Create Project','schema save')"
-                    
+                    sql_command = f"SELECT dataset_id FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND USER_NAME = '{user_name}' and page_name in ('Create dataset','Create Project','schema save','Cleanup')"
+                    logging.info("-->"+str(sql_command))
                 else:
                     #! There is a public dataset with your name
                     logging.debug(f"data ingestion  :  DatasetClass  :  dataset_exist  :  A public dataset with the same dataset_name exists at dataset_id = {int(data_df['dataset_id'][0])}")
                     # return int(data_df['dataset_id'][0])
+                    logging.info("-->"+str(True))
                     return True
 
             data_df=DBObject.select_records(connection,sql_command)
@@ -625,7 +626,7 @@ class DatasetClass:
         except Exception as exc:
             return exc
     
-    def insert_raw_dataset(self,DBObject,connection,dataset_id,schema_id,user_name,table_name,dataset_visibility,selected_visibility = None):
+    def insert_raw_dataset(self,DBObject,connection,dataset_id,schema_id,user_name,table_name,dataset_visibility,cleanup_flag,selected_visibility = None):
         '''
         Function used to create the new table based on existing table and update the "number of rows" and "table name" of the perticular dataset id
         
@@ -685,11 +686,39 @@ class DatasetClass:
             
             sql_command  = "select * from "+str(raw_table_name)
             dataframe = DBObject.select_records(connection,sql_command)
-            dataframe_size = sys.getsizeof(dataframe)
-            file_size = self.get_file_size(dataframe_size,flag = True)
+            dataframe = dataframe.iloc[: , 1:]
+            
+            filenm = 'CSV_'+table_name
+            if selected_visibility == 'public': 
+                if cleanup_flag == None:  
+                    fpath='dags/static/server/public/'
+                else:
+                     fpath='static/server/public/'     
+            else:
+                if cleanup_flag == None:  
+                    fpath='dags/static/server/'+user_name+'/'
+                else:
+                    fpath='static/server/'+user_name+'/'
+            CHECK_FOLDER = os.path.isdir(fpath) #check directory already exists or not
+            # If folder doesn't exist, then create it.
+            if not CHECK_FOLDER:
+                os.makedirs(fpath) #create directory
+                logger.info("Directory  Created")
+            else:
+                logger.info("Directory  already exists")
                 
+            
+            fpath =fpath +str(filenm)+'.csv'
+            logging.info(fpath + " path check")
+            df_path = dataframe.to_csv(fpath,index = False)
+            dataframe_size = os.path.getsize(fpath)
+            
+            
+            #dataframe_size = sys.getsizeof(dataframe)
+            file_size = self.get_file_size(dataframe_size,flag = True)
+            
             # update the "dataset table name"  and "no_of _rows" of the given dataset id
-            sql_command = "UPDATE mlaas.dataset_tbl SET file_size = '"+str(file_size)+"', dataset_table_name='"+str(new_table_name)+"',no_of_rows = '"+str(no_of_rows)+"' where dataset_id ='"+str(dataset_id)+"'"
+            sql_command = "UPDATE mlaas.dataset_tbl SET file_name ='"+ str(filenm)+"' ,file_size = '"+str(file_size)+"', dataset_table_name='"+str(new_table_name)+"',no_of_rows = '"+str(no_of_rows)+"' where dataset_id ='"+str(dataset_id)+"'"
             
             # Execute the sql query
             update_status = DBObject.update_records(connection,sql_command)

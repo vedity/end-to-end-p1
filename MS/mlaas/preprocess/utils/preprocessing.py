@@ -153,40 +153,30 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         logging.info("data preprocessing : PreprocessingClass : get_exploration_data : execution end")
         return stats_df
     
-    def save_schema_data(self,schema_data,project_id,dataset_id,schema_id,user_name):
+    def save_schema_data(self,DBObject,connection,schema_data,project_id,dataset_id,schema_id,user_name):
         try:
             logging.info("data preprocessing : PreprocessingClass : save_schema_data : execution start")
-
-            DBObject,connection,connection_string = self.get_db_connection()
-            if connection == None :
-                raise DatabaseConnectionFailed(500)
 
             status = super(PreprocessingClass,self).save_schema(DBObject,connection,schema_data,project_id,dataset_id,schema_id,user_name)
-            connection.close()
+            # connection.close()
             logging.info("data preprocessing : PreprocessingClass : save_schema_data : execution start")
             return status
-        except (DatabaseConnectionFailed) as exc:
-            connection.close()
-            logging.error("data preprocessing : PreprocessingClass : save_schema_data : Exception " + str(exc.msg))
+        except Exception as exc:
+            logging.error("data preprocessing : PreprocessingClass : save_schema_data : Exception " + str(exc))
             logging.error("data preprocessing : PreprocessingClass : save_schema_data : " +traceback.format_exc())
-            return exc.msg
+            return str(exc)
 
-    def get_schema_details(self,schema_id):
+    def get_schema_details(self,DBObject,connection,schema_id):
         try:
             logging.info("data preprocessing : PreprocessingClass : get_schema_details : execution start")
-            DBObject,connection,connection_string = self.get_db_connection()
-            if connection == None :
-                raise DatabaseConnectionFailed(500)
 
             status = super(PreprocessingClass,self).get_schema_data(DBObject,connection,schema_id)
-            connection.close()
             logging.info("data preprocessing : PreprocessingClass : get_schema_details : execution stop")
             return status
-        except (DatabaseConnectionFailed) as exc:
-            connection.close()
-            logging.error("data preprocessing : PreprocessingClass : get_schema_details : Exception " + str(exc.msg))
+        except (Exception) as exc:
+            logging.error("data preprocessing : PreprocessingClass : get_schema_details : Exception " + str(exc))
             logging.error("data preprocessing : PreprocessingClass : get_schema_details : " +traceback.format_exc())
-            return exc.msg
+            return exc
         
     def get_col_names(self, DBObject, connection ,schema_id, json = False,original = False):
         '''
@@ -950,6 +940,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             data_df = self.get_data_df(DBObject, connection ,dataset_id,schema_id) #get dataframe
             if isinstance(data_df, str):
                 raise GetDataDfFailed(500)
+            
+
             tg_cols = DBObject.get_target_col(connection, schema_id) #get list of the target columns
             target_cols = [data_df.columns[0]] #select first column
             target_cols += tg_cols     #list target_cols
@@ -1288,7 +1280,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         except Exception as e:
             return e
 
-    def SaveAs(self,DBObject,connection,project_id,schema_id,table_name,user_name,dataset_visibility,dataset_name,selected_visibility,dataset_desc, **kwargs):
+    def SaveAs(self,DBObject,connection,project_id,schema_id,table_name,user_name,dataset_visibility,dataset_name,selected_visibility,dataset_desc,cleanup_flag=None, **kwargs):
         '''
         Function used to create a new table with updated changes and insert a new record into dataset table and update the dataset_id into the project_tbl
         '''
@@ -1319,8 +1311,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 table_name = table_name.replace('di_',"").replace('_tbl',"")
 
                 # Create the new table based on the existing table and return status 0 if successfull else 1 
-                dataset_insert_status = dc.insert_raw_dataset(DBObject,connection,dataset_id,schema_id,user_name,table_name,dataset_visibility,selected_visibility)
-                                   
+                dataset_insert_status = dc.insert_raw_dataset(DBObject,connection,dataset_id,schema_id,user_name,table_name,dataset_visibility,cleanup_flag,selected_visibility)
+                
                 if dataset_insert_status == 0:
 
                     schema_update = self.update_schema(DBObject,connection,schema_id)
@@ -1423,13 +1415,13 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
         project_name = projectnm_df['project_name'][0]
 
-        if new_dataset_name == None:
-            new_dataset_name = dataset_name
+        # if new_dataset_name == None:
+        #     new_dataset_name = dataset_name
 
         sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
         desc_df = DBObject.select_records(connection,sql_command)
         activity_description = desc_df['description'][0]
-        activity_description = activity_description.replace('*',new_dataset_name)
+        activity_description = activity_description.replace('*',dataset_name)
         activity_description = activity_description.replace('&',project_name)
     
         end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
@@ -1480,7 +1472,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 
             status = self.SaveAs(DBObject,connection, project_id,schema_id
                                  ,table_name,user_name,dataset_visibility,
-                                 dataset_name,selected_visibility,dataset_desc)
+                                 dataset_name,selected_visibility,dataset_desc,cleanup_flag=True)
             if status ==0: 
                 activity_id=53
                 sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
@@ -1541,7 +1533,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         except Exception as exc:
             return str(exc)
         
-    def operation_failed(self, DBObject, connection, activity_id, operation_id, col_name):
+    def operation_failed(self, DBObject,connection,dataset_id,project_id,new_user_name,col_name,failed_op):
         '''
             Used to update Activity description when the Activity ends.
             
@@ -1550,35 +1542,79 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             status (`Intiger`): Status of the updation.
         '''
         
-        logging.info("data preprocessing : CleaningClass : operation_end : execution start")
+        logging.info("data preprocessing : CleaningClass : operation_failed : execution start")
         
         #? Transforming the operation_id to the operation id stored in the activity timeline table. 
-        operation_id += self.op_diff
+        # operation_id += self.op_diff
         
         #? Getting Activity Description
-        desc = self.get_act_desc(DBObject, connection, operation_id, col_name, code = 0)
-        
-        #? Changing the activity description in the activity detail table 
-        status = self.AT.update_activity(activity_id,desc)
-        
-        logging.info("data preprocessing : CleaningClass : operation_end : execution stop")
-        
-        return status
-    
-    # def check_failed_col(self, DBObject, connection, col_list, dag_id):
-        
-    #     sql_command = f"select ti.task_id from public.task_instance ti where ti.dag_id = '{dag_id}' and ti.state = 'failed' "
-    #     failed_df = DBObject.select_records(connection,sql_command)
-        
-    #     for failed_str in failed_df.iloc[:,0]:
-    #         params = failed_str.split('_')
-    #         if len(params) != 3:
-    #             failed_op,failed_col = int(params[1]),int(params[3])
-                
-    #         col_name = col_list[failed_col]
+        try:
+            failed_op += self.op_diff
+            logging.info("data preprocessing : CleaningClass : operation_failed : execution start")
+            activity_description = self.get_act_desc(DBObject, connection, failed_op, col_name, code = 0)
+            logging.info(" failed description : "+str(activity_description))
             
-    #         self.operation_failed(DBObject,connection,activity_id,operation)
-                
+            activity_id = failed_op
+            end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+            status,index = self.AT.insert_user_activity(activity_id,new_user_name,project_id,dataset_id,activity_description,end_time,column_id =col_name)
+            
+            logging.info("data preprocessing : CleaningClass : operation_failed : execution stop")
+            return status
+        except Exception as exc:
+            logging.error(f"data preprocessing : CleaningClass : operation_failed :  Exception : {str(exc)} ")
+            return 1
 
+    
+    def check_failed_col(self,DBObject, connection,dataset_id,project_id,new_user_name,col_list, dag_id):
+        logging.info("data preprocessing : CleaningClass : check_failed_col : execution start")
+        try:
+            sql_command = f"select ti.task_id as task_name from public.task_instance ti where ti.dag_id = '{dag_id}' and ti.state = 'failed' "
+            failed_df = DBObject.select_records(connection,sql_command)
+
+            logging.info(" dataframe for failed task id name : "+ str(failed_df['task_name']))
+            
+            for failed_str in failed_df.iloc[:,0]:
+                params = failed_str.split('_')
+                logging.info(" split parameters : "+ str(params))
+                if len(params) != 3:
+                    failed_op,failed_col = int(params[1]),int(params[3])
+                    logging.info(f" failed operation name : {failed_op} <[]> failed_col : {failed_col} ")
+
+                col_name = col_list[failed_col] 
+                logging.info(f"column name based on failed col ID :  {col_name}")
+
+                status = self.operation_failed(DBObject,connection,dataset_id,project_id,new_user_name,col_name,failed_op)
+
+                if status !=0:
+                    break
+
+            logging.info("data preprocessing : CleaningClass  : check_failed_col : execution stop")
+            return  status
+        except Exception as exc:
+            logging.error(f"data preprocessing : CleaningClass : check_failed_col :  Exception : {str(exc)} ")
+            return 1
+    
+    def get_act_desc(self, DBObject, connection, operation_id, col_name, code = 1):
+        '''
+            Used to get preprocess activity description from the activity master table.
         
-    #     return 
+            Returns:
+            --------
+            description (`String`): Description for the activity.
+        '''
+        logging.info("data preprocessing : CleaningClass : get_activity_desc : execution start")
+        
+        #? Getting Description
+        sql_command = f"select replace (amt.activity_name || ' ' || amt.activity_description, '*', '{col_name}') as description from mlaas.activity_master_tbl amt where amt.activity_id = '{operation_id}' and amt.code = '{code}'"
+        logging.info(f"sql_command : {sql_command}" )
+
+        desc_df = DBObject.select_records(connection,sql_command)
+        if not isinstance(desc_df, pd.DataFrame):
+            return "Failed to Extract Activity Description."
+        
+        #? Fatching the description
+        description = desc_df['description'].tolist()[0]
+        
+        logging.info("data preprocessing : CleaningClass : get_activity_desc : execution stop")
+        
+        return description

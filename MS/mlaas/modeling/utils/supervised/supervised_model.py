@@ -16,6 +16,7 @@ import logging
 import requests
 import time
 
+
 from .regression.regression_model import RegressionClass as RC
 from .classification.classification_model import ProbabilisticClass as PC
 from common.utils.logger_handler import custom_logger as cl
@@ -82,16 +83,20 @@ class SupervisedClass(RC,PC):
             # Call the super class method.
             
             dag_id = self.get_dag_id(model_param_dict,db_param_dict)
+            class_name = self.get_model_class_name(model_id,db_param_dict)
             
-            #TODO this will get from front end
+            
             model_id = [model_id]
             model_name = [model_name]
             model_param = [model_param]
+            model_class_name = [class_name]
         
             template = "manual_model_dag.template"
             namespace = "manual_modeling_dags"
             file_name = dag_id + '.py'
-            master_dict = {"model_id": model_id,"model_name": model_name,"model_param": model_param}
+            
+            master_dict = {"model_id": model_id,"model_name": model_name,
+                           "model_param": model_param,"model_class_name":model_class_name}
             
 
             status = self.dag_updater(master_dict, file_name, namespace)
@@ -99,8 +104,9 @@ class SupervisedClass(RC,PC):
                 logging.error(f"Dag Updation Failed : Error : {str(status)}")
                 raise DagUpdateFailed(500)
 
-
+            
             json_data = {'conf':'{"model_param_dict":"'+str(model_param_dict)+'","master_dict":"'+str(master_dict)+'"}'}
+            logging.info("json data :"+str(json_data))
             result = requests.post(f"http://airflow:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False)#owner
 
 
@@ -111,6 +117,21 @@ class SupervisedClass(RC,PC):
 
         except Exception as e:
             return e
+    
+    def get_model_class_name(self,model_id,db_param_dict):
+        
+        DBObject=db_param_dict['DBObject']
+        connection=db_param_dict['connection']
+    
+        sql_command="select model_class_name from mlaas.model_master_tbl where model_id="+str(model_id)
+        
+        class_df = DBObject.select_records(connection,sql_command)
+        
+        class_name = class_df['model_class_name'][0]
+        
+        
+        return class_name
+        
     
     def get_dag_id(self,model_param_dict,db_param_dict):
         

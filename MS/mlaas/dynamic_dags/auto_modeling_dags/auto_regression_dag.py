@@ -18,8 +18,8 @@ from airflow.operators.email_operator import EmailOperator
 
 ### Import function from main file
 from modeling.utils.modeling_dag_utils.dag_common_utils import start_pipeline
-from modeling.all_regressor import get_regression_models
-from modeling.all_regressor import linear_regression_sklearn
+from modeling.all_supervised_models import *
+
 
 
 
@@ -34,23 +34,22 @@ start_task = PythonOperator(task_id='start_pipeline',python_callable=start_pipel
 
 
 # Get model dict 
-
-model_dict = get_regression_models()
+model_type = 'Regression'
+model_dict = get_supervised_models(model_type)
 
 model_id = model_dict['model_id']
 model_name = model_dict['model_name']
-function_name = 'Linear_Regression_Sklearn' #TODO we will get dynamic when we are developing more models.
+model_class_name = model_dict['model_class_name']
+model_hyperparams =  model_dict['hyperparam']
+algorithm_type = model_dict['algorithm_type']
 
-for model_id,model_name in zip(model_id,model_name):
+
+for model_id,model_name,model_class_name,model_hyperparams,algorithm_type in zip(model_id,model_name,model_class_name, model_hyperparams, algorithm_type):
     dynamic_task = PythonOperator(task_id=model_name,
-                                  python_callable=eval(function_name.lower()),
-                                  op_kwargs={'model_id':model_id},
+                                  python_callable=eval('supervised_models'),
+                                  op_kwargs={'model_id':model_id,'model_name':model_name, 'model_mode': 'Auto',
+                                             'model_class_name':model_class_name,'model_hyperparams':model_hyperparams,
+                                             'algorithm_type': algorithm_type, 'model_type':model_type},
                                   dag=dag)
     
     start_task >> dynamic_task
-
-
-    
-
- 
-

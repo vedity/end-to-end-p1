@@ -69,7 +69,7 @@ class CreateProjectClass(APIView):
                 try:
                         logging.info("data ingestion : CreateProjectClass : GET Method : execution start")
                         user_name  = request.query_params.get('user_name') #get Username
-                        project_df = IngestionObj.show_project_details(user_name) #call show_project_details to retrive project detail data and it will return dataframe
+                        project_df = IngestionObj.show_project_details(user_name,DBObject,connection) #call show_project_details to retrive project detail data and it will return dataframe
                         if isinstance(project_df,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(project_df) # extract the status_code and error_msg from project_df
                                 logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code :"+ status_code)
@@ -115,7 +115,7 @@ class CreateProjectClass(APIView):
                                 dataset_id = None
         
                         if dataset_id == None :
-                                exists_project_status = IngestionObj.does_project_exists(project_name,user_name) 
+                                exists_project_status = IngestionObj.does_project_exists(project_name,user_name,DBObject,connection) 
                                 if exists_project_status == False:
                                         file=request.FILES['inputfile'] #get inputfile Name
                                         try:
@@ -134,14 +134,14 @@ class CreateProjectClass(APIView):
                                         return Response({"status_code":"500","error_msg":"Project already exist","response":"false"})
                         
                                                 
-                        datasetexist_status=IngestionObj.does_dataset_exists(dataset_name,user_name) #get the status if dataset exist or not 
+                        datasetexist_status=IngestionObj.does_dataset_exists(dataset_name,user_name,DBObject,connection) #get the status if dataset exist or not 
                         if datasetexist_status != False:
                                 status_code,error_msg=json_obj.get_Status_code(datasetexist_status) # extract the status_code and error_msg from datasetexist_status
                                 logging.info("data ingestion : DatasetExistClass : GET Method : execution stop : status_code :"+status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
                                 logging.info("data ingestion : DatasetExistClass : GET Method : execution stop : status_code :200")
-                                project_Status,project_id,dataset_id=IngestionObj.create_project(project_name,project_desc,page_name,dataset_desc,dataset_name,dataset_visibility,file_name,dataset_id,user_name)    #call create_project method to create project and insert csv data into table
+                                project_Status,project_id,dataset_id=IngestionObj.create_project(project_name,project_desc,page_name,DBObject,connection,dataset_desc,dataset_name,dataset_visibility,file_name,dataset_id,user_name)    #call create_project method to create project and insert csv data into table
                                 if project_Status != 0:
                                         status_code,error_msg=json_obj.get_Status_code(project_Status) # extract the status_code and error_msg from project_Status
                                         logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+status_code)
@@ -186,7 +186,7 @@ class CreateDatasetClass(APIView):
                 try:
                         logging.info("data ingestion : CreateDatasetClass : GET Method : execution start")
                         user_name=request.query_params.get('user_name')  #get Username
-                        dataset_df=IngestionObj.show_dataset_details(user_name) #Call show_dataset_details method it will return dataset detail for specific user_name
+                        dataset_df=IngestionObj.show_dataset_details(user_name,DBObject,connection) #Call show_dataset_details method it will return dataset detail for specific user_name
                         if isinstance(dataset_df,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(dataset_df) # extract the status_code and error_msg from dataset_df
                                 logging.info("data ingestion : CreateDatasetClass : GET Method : execution stop : status_code : "+status_code)
@@ -220,7 +220,7 @@ class CreateDatasetClass(APIView):
                         dataset_visibility= request.POST.get('visibility') #get the visibility
                         dataset_desc = request.POST.get('dataset_description') #get the description
                         page_name = "Create dataset"
-                        exists_dataset_status=IngestionObj.does_dataset_exists(dataset_name,user_name) #call does_dataset_exists, check if dataset name exist for that perticular user name return false if not,otherwise true
+                        exists_dataset_status=IngestionObj.does_dataset_exists(dataset_name,user_name,DBObject,connection) #call does_dataset_exists, check if dataset name exist for that perticular user name return false if not,otherwise true
                         if exists_dataset_status == False:
                                 file=request.FILES['inputfile'] #get inputfile Name
                                 
@@ -244,7 +244,7 @@ class CreateDatasetClass(APIView):
                         else:
                                 return Response({"status_code":"500","error_msg":"Dataset name exists","response":"false"})
 
-                        dataset_Status,dataset_id=IngestionObj.create_dataset(dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name) #call create_dataset method to create dataset and insert csv data into table
+                        dataset_Status,dataset_id=IngestionObj.create_dataset(dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,DBObject,connection,connection_string) #call create_dataset method to create dataset and insert csv data into table
                         if dataset_Status != 0:
                                 status_code,error_msg=json_obj.get_Status_code(dataset_Status) # extract the status_code and error_msg from dataset_status
                                 logging.info("data ingestion : CreateDatasetClass : POST Method : execution stop : status_code :"+status_code)
@@ -308,7 +308,7 @@ class DataDetailClass(APIView):
                         if schema_id=="undefined":
                                 schema_id=None
                         rowcount=DBObject.get_row_count(connection,dataset_id) #get the row count
-                        dataset_df,filtercount=IngestionObj.show_data_details(dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter,schema_id) #call show_data_details and it will return dataset detail data in dataframe
+                        dataset_df,filtercount=IngestionObj.show_data_details(dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter,schema_id,DBObject,connection) #call show_data_details and it will return dataset detail data in dataframe
                         if isinstance(dataset_df,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(dataset_df) # extract the status_code and error_msg  from dataset_df
                                 logging.info("data ingestion : DataDetailClass : POST Method : execution stop : status_code :"+status_code)
@@ -384,10 +384,10 @@ class DeleteProjectDetailClass(APIView):
                         if cleanup_process == True:
                                 return Response({"status_code":"500","error_msg":"Can't Delete,Cleanup Process is going on!","response":"false"}) 
 
-                        modelling_process = PC_OBJ.get_modelling_status(project_id) #check model runnig
+                        modelling_process = PC_OBJ.get_modelling_status(DBObject,connection,project_id) #check model runnig
                         if modelling_process == True:
                                 return Response({"status_code":"500","error_msg":"Can't Delete,Model Running!","response":"false"}) 
-                        project_status,dataset_id,project_name= IngestionObj.delete_project_details(project_id,user_name)  #get the project_status if project Deletion failed or successfull
+                        project_status,dataset_id,project_name= IngestionObj.delete_project_details(project_id,user_name,DBObject,connection)  #get the project_status if project Deletion failed or successfull
                         if project_status != 0:
                                 status_code,error_msg=json_obj.get_Status_code(project_status) # extract the status_code and error_msg from  project_status
                                 logging.info("data ingestion : DeleteProjectDetailClass : DELETE Method : execution stop : status_code :"+status_code)
@@ -431,7 +431,7 @@ class DeleteDatasetDetailClass(APIView):
                         logging.info("data ingestion : DeleteDatasetDetailClass : DELETE Method : execution start")
                         user_name=request.query_params.get('user_name') #get user_name
                         dataset_id=request.query_params.get('dataset_id')  #get dataset_name
-                        dataset_status,dataset_name=IngestionObj.delete_dataset_detail(dataset_id,user_name) #get the dataset_status if dataset Deletion failed or successfull 
+                        dataset_status,dataset_name=IngestionObj.delete_dataset_detail(dataset_id,user_name,DBObject,connection) #get the dataset_status if dataset Deletion failed or successfull 
                         if dataset_status != 0:
                                 status_code,error_msg=json_obj.get_Status_code(dataset_status) # extract the status_code and error_msg from dataset_status
                                 logging.info("data ingestion : DeleteDatasetDetailClass : DELETE Method : execution stop : status_code :"+status_code)
@@ -478,7 +478,7 @@ class DeleteDataDetailClass(APIView):
                         logging.info("data ingestion : DeleteDataDetailClass : DELETE Method : execution start")
                         user_name=request.query_params.get('user_name')
                         table_name=request.query_params.get('table_name')  #get tablename
-                        data_detail_status=IngestionObj.delete_data_detail(table_name,user_name) 
+                        data_detail_status=IngestionObj.delete_data_detail(table_name,user_name,DBObject,connection) 
                         if data_detail_status != 0 :
                                 status_code,error_msg=json_obj.get_Status_code(data_detail_status) # extract the status_code and error_msg from data_detail_status
                                 logging.info("data ingestion : DeleteDataDetailClass : DELETE Method : execution stop : status_code :"+status_code)
@@ -510,7 +510,7 @@ class ProjectExistClass(APIView):
                 logging.info("data ingestion : ProjectExistClass : GET Method : execution start")
                 user_name = request.query_params.get('user_name') #get user_name
                 project_name =request.query_params.get('project_name') #get project_name
-                projectexist_status=IngestionObj.does_project_exists(project_name,user_name) # get status
+                projectexist_status=IngestionObj.does_project_exists(project_name,user_name,DBObject,connection) # get status
                 if projectexist_status != False:
                         status_code,error_msg=json_obj.get_Status_code(projectexist_status) # extract the status_code and error_msg from projectexist_status
                         logging.info("data ingestion : ProjectExistClass : GET Method : execution stop : status_code :"+status_code)
@@ -538,7 +538,7 @@ class DatasetExistClass(APIView):
                 logging.info("data ingestion : DatasetExistClass : GET Method : execution start")
                 user_name = request.query_params.get('user_name') #get user_name
                 dataset_name = request.query_params.get('dataset_name') #get dataset_name
-                datasetexist_status=IngestionObj.does_dataset_exists(dataset_name,user_name) #get the status if dataset exist or not 
+                datasetexist_status=IngestionObj.does_dataset_exists(dataset_name,user_name,DBObject,connection) #get the status if dataset exist or not 
                 if datasetexist_status != False:
                         status_code,error_msg=json_obj.get_Status_code(datasetexist_status) # extract the status_code and error_msg from datasetexist_status
                         logging.info("data ingestion : DatasetExistClass : GET Method : execution stop : status_code :"+status_code)
@@ -563,7 +563,7 @@ class DatasetNameClass(APIView):
                 """
                 logging.info("data ingestion : DatasetNameClass : GET Method : execution start")
                 user_name =request.query_params.get('user_name') #get user_name
-                dataset_df=IngestionObj.show_dataset_names(user_name) #retrive all dataset name for that perticular user_name
+                dataset_df=IngestionObj.show_dataset_names(user_name,DBObject,connection) #retrive all dataset name for that perticular user_name
                 if isinstance(dataset_df,str): #check the instance of dataset_df
                         status_code,error_msg=json_obj.get_Status_code(dataset_df) # extract the status_code and error_msg from dataset_df
                         logging.info("data ingestion : DatasetNameClass : GET Method : execution stop : status_code :"+status_code)
@@ -588,7 +588,7 @@ class ProjectDetailClass(APIView):
                 logging.info("data ingestion : ProjectExistClass : GET Method : execution start")
                 user_name =request.query_params.get('user_name') #get project_name
                 project_id =request.query_params.get('project_id') #get project_name
-                project_df = IngestionObj.show_project_details(user_name,project_id) #call show_project_details to retrive project detail data and it will return dataframe
+                project_df = IngestionObj.show_project_details(user_name,DBObject,connection,project_id) #call show_project_details to retrive project detail data and it will return dataframe
                 if isinstance(project_df,str): #check the instance of dataset_df
                         status_code,error_msg=json_obj.get_Status_code(project_df) # extract the status_code and error_msg from project_df
                         logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code :"+ status_code)

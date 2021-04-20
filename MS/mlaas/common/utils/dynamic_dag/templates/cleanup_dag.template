@@ -110,12 +110,13 @@ op_dict = {
     32 : PC_OBJ.multiply_column
 }
 
-def dag_end(DBObject,connection,dataset_id,project_id,dag_id,new_user_name,dataset_name,**kwargs):
+def dag_end(DBObject,connection,dataset_id,project_id,dag_id,new_user_name,dataset_name,col_list,**kwargs):
     '''
         To reset the dag status
     '''
+    status = PC_OBJ.check_failed_col(DBObject, connection,dataset_id,project_id,new_user_name,col_list, dag_id)
     activity_id = 52
-    status = PC_OBJ.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id,new_user_name,dataset_name)
+    status = PC_OBJ.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id,new_user_name,dataset_name,flag=False)
     return status
 
 #? Making Dynamic Tasks
@@ -132,7 +133,7 @@ t4= PythonOperator(
             dag=dag,
             provide_context=True,
             python_callable=dag_end,
-            op_args=[DBObject,connection,dataset_id,project_id,main_dag_id,new_user_name,dataset_name],
+            op_args=[DBObject,connection,dataset_id,project_id,main_dag_id,new_user_name,dataset_name,column_list],
             trigger_rule="all_done")
 
 if save_as == 'True':

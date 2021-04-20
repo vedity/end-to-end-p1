@@ -67,7 +67,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         logging.info("data ingestion : ingestclass : get_db_connection : execution end")
         return DBObject,connection,connection_string
     
-    def create_project(self,project_name,project_desc,page_name,dataset_desc=None,dataset_name = None,dataset_visibility = None,file_name = None,original_dataset_id = None,user_name = None):
+    def create_project(self,project_name,project_desc,page_name,DBObject,connection,dataset_desc=None,dataset_name = None,dataset_visibility = None,file_name = None,original_dataset_id = None,user_name = None):
         """This function is used to create project.
            E.g. sales forecast , travel time predictions etc.
            
@@ -110,7 +110,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         return project_status,project_id,load_dataset_id
 
         
-    def create_dataset(self,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name):
+    def create_dataset(self,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name,DBObject,connection,connection_string):
         """This function is used to create dataset.
            E.g. sales , traveltime etc.
            
@@ -126,7 +126,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         logging.info("data ingestion : ingestclass : create_dataset : execution start")
         try:
             
-            DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
+            
             if connection == None:
                 raise DatabaseConnectionFailed(500)
             dataset_status,original_dataset_id = super(IngestClass,self).make_dataset(DBObject,connection,connection_string,dataset_name,file_name,dataset_visibility,user_name,dataset_desc,page_name) # Get Status about dataset creation,if successfully then 0 else 1.
@@ -142,7 +142,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         logging.info("data ingestion : ingestclass : create_dataset : execution end")
         return dataset_status,original_dataset_id
         
-    def show_dataset_details(self,user_name):
+    def show_dataset_details(self,user_name,DBObject,connection):
         """This function is used to show dataset details.
 
         Args:
@@ -153,7 +153,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         """
         logging.info("data ingestion : ingestclass : show_dataset_details : execution start")
         try:
-            DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
+        
             if connection == None :
                 raise DatabaseConnectionFailed(500)
             
@@ -173,7 +173,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         logging.info("data ingestion : ingestclass : show_dataset_details : execution end")
         return dataset_df
 
-    def show_data_details(self,original_dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter,schema_id):
+    def show_data_details(self,original_dataset_id,start_index,length,sort_type,sort_index,global_value,customefilter,schema_id,DBObject,connection):
         """This function is used to show data details.
            It will show all the columns and rows from uploaded csv files.
 
@@ -185,7 +185,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         """
         logging.info("data ingestion : ingestclass : show_data_details : execution start")
         try:
-            DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
+            
             
             if connection == None :
                 raise DatabaseConnectionFailed(500) 
@@ -210,7 +210,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         logging.info("data ingestion : ingestclass : show_data_details : execution end")
         return data_details_df,filtercount
 
-    def show_project_details(self,user_name,project_id=None):
+    def show_project_details(self,user_name,DBObject,connection,project_id=None):
         """This function is used to show project details.
         
         Args:
@@ -221,7 +221,6 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         """
         logging.info("data ingestion : ingestclass : show_project_details : execution start")
         try:
-            DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
             if connection == None:
                 raise DatabaseConnectionFailed(500)
             
@@ -236,7 +235,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         logging.info("data ingestion : ingestclass : show_project_details : execution end")
         return project_df
     
-    def delete_project_details(self, project_id, user_name):
+    def delete_project_details(self, project_id, user_name,DBObject,connection):
         '''
         This function is used to delete an entry in the project_tbl
         
@@ -249,7 +248,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         '''
         logging.info("data ingestion : ingestclass : delete_project_details : execution start")
         try:
-            DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
+            
             if connection == None:
                 raise DatabaseConnectionFailed(500)
             
@@ -268,7 +267,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             logging.error("data ingestion : ingestclass : delete_project_details : " +traceback.format_exc())
             return exc.msg,None,None
         
-    def delete_dataset_detail(self, original_dataset_id, user_name):
+    def delete_dataset_detail(self, original_dataset_id, user_name,DBObject,connection):
         '''
         This function is used to delete an entry in the project_tbl
         
@@ -281,7 +280,6 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         '''
         logging.info("data ingestion : ingestclass : delete_dataset_details : execution start")
         try:
-            DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
             if connection == None:
                 raise DatabaseConnectionFailed(500)
             
@@ -356,7 +354,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         
 
      
-    def does_project_exists(self,project_name,user_name):
+    def does_project_exists(self,project_name,user_name,DBObject,connection):
         """This function is used to check if same name project exist or not .
 
         Args:
@@ -368,7 +366,6 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         """
         logging.info("data ingestion : ingestclass : does_project_exists : execution start")    
         try:
-            DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
             if connection == None:
                 raise DatabaseConnectionFailed(500)
             
@@ -388,7 +385,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             return exc.msg
         
     
-    def does_dataset_exists(self,dataset_name,user_name):
+    def does_dataset_exists(self,dataset_name,user_name,DBObject,connection):
         """This function is used to check existing dataset name.
 
         Args:
@@ -401,7 +398,6 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
         """
         logging.info("data ingestion : ingestclass : does_dataset_exists : execution start")    
         try:
-            DBObject,connection,connection_string = self.get_db_connection() # Get database object,connection object and connecting string.
             if connection == None:
                 raise DatabaseConnectionFailed(500)
             
@@ -419,7 +415,7 @@ class IngestClass(pj.ProjectClass,dt.DatasetClass):
             dataset_visibility = str(visibility_df['dataset_visibility'][0])
             
             exist_status = super(IngestClass, self).dataset_exists(DBObject,connection,table_name,dataset_visibility,dataset_name,user_name)
-            
+            logging.info("--->"+str(exist_status))
             if exist_status==True:
                 raise DatasetAlreadyExist(500)
             logging.info(str(exist_status) + " checking ")
