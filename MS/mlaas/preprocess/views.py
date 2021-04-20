@@ -236,8 +236,11 @@ class ScheamColumnListClass(APIView):
                 """
                 try :
                                 logging.info("data preprocess : ScheamAttributeListClass : POST Method : execution start")
-                                column_attribute = {"column_attribute":["Ignore","Target","Select"] }
-                                return Response({"status_code":"200","error_msg":"Successfull retrival","response":column_attribute})
+                                dropdowns = {
+                                        "column_attribute":["Ignore","Target","Select"],
+                                        "datatype":["number","categorical","text","timestamp"]
+                                        }
+                                return Response({"status_code":"200","error_msg":"Successfull retrival","response":dropdowns})
                 except Exception as e:
                                 logging.error("data preprocess : ScheamAttributeListClass : POST Method : Exception :" + str(e))
                                 logging.error("data preprocess : ScheamAttributeListClass : POST Method : "+ traceback.format_exc())
