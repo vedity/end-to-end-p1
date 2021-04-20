@@ -87,18 +87,30 @@ class SupervisedClass(RC,PC):
             dag_id = self.get_dag_id(basic_params_dict,db_param_dict)
             class_name = self.get_model_class_name(model_id,db_param_dict)
             
+            AlgorithmDetectorObject = AlgorithmDetector(db_param_dict)
+            
+            project_id=basic_params_dict['project_id']
+            dataset_id = basic_params_dict['dataset_id']
+            
+            model_type_dict = AlgorithmDetectorObject.get_model_type(project_id,dataset_id)
+            
+            
+            
+            basic_params_dict['algorithm_type'] = model_type_dict['algorithm_type']
+            basic_params_dict['target_type'] = model_type_dict['target_type']
             
             model_id = [model_id]
             model_name = [model_name]
             model_hyperparams = [model_hyperparams]
             model_class_name = [class_name]
+            algorithm_type = [model_type_dict['algorithm_type']] #TODO : Need to change
         
             template = "manual_model_dag.template"
             namespace = "manual_modeling_dags"
             file_name = dag_id + '.py'
             
             master_dict = {"model_id": model_id,"model_name": model_name,
-                           "model_hyperparams": model_hyperparams,"model_class_name":model_class_name}
+                           "model_hyperparams": model_hyperparams,"model_class_name":model_class_name,"algorithm_type":algorithm_type}
             
 
             status = self.dag_updater(master_dict, file_name, namespace)

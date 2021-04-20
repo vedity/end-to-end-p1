@@ -72,7 +72,7 @@ class ModelClass(SC):
             return e
 
         
-    def run_model(self,basic_params_dict,model_id,model_name,model_param):
+    def run_model(self,basic_params_dict,model_id,model_name,model_hyperparams):
         
         """This function is used to run model when model mode is in manual. 
  

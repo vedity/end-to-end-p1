@@ -203,6 +203,7 @@ def supervised_models(run_id,**kwargs):
         algorithm_type = basic_params_dict['algorithm_type']
         experiment_name  = basic_params_dict['experiment_name']
             
+        print("basic split param ==",algorithm_type)
         # Get Input,Target Features List And ALl numpy array of train test and valid datasets and also scaled splits parameters dict.
         input_features_list, target_features_list, X_train, X_test, X_valid, y_train, y_test, y_valid, scaled_split_dict= get_model_data(user_id, project_id, dataset_id)
         
@@ -211,6 +212,7 @@ def supervised_models(run_id,**kwargs):
         model_class_name = kwargs['model_class_name']
         hyperparameters = kwargs['model_hyperparams']  
         
+        print("master dict==",kwargs['algorithm_type'])
         # Check Whether Running Model is Multi Class Or Not.
         if algorithm_type != 'Binary':
             algorithm_type=algorithm_type[:-5]
