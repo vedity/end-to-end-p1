@@ -280,8 +280,6 @@ class DecisionTreeRegressionClass:
         learning_curve_dict = self.get_learning_curve(model)
         print("LEARNING CURVEE DICT")
         
-        # log mlflow parameter
-        
         # log mlflow matrix
         self.MLFlowLogObj.store_model_metrics(r2_score=r2score, mae=mae, mse=mse, mape=mape, 
                                             holdout_score=holdout_score, cv_score=cv_score)

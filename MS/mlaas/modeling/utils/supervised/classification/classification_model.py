@@ -6,8 +6,7 @@
  
 */
 '''
-
-
+# Imports All Necessary Library.
 import numpy as np
 import pandas as pd
 import json
@@ -17,29 +16,30 @@ import uuid
 import logging
 import requests
 
-
+# Imports Common Class Files.
 from ...model_experiments import model_experiment
 from common.utils.logger_handler import custom_logger as cl
 
 
+# Declare Global Object And Variables.
 user_name = 'admin'
 log_enable = True
 
 LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
-
 logger = logging.getLogger('classification_model')
+
 
 class ProbabilisticClass:
     
-    def classification_model(self,model_param_dict,db_param_dict):
+    def classification_model(self,basic_params_dict,db_param_dict):
         
         try:
             logging.info("modeling : RegressionClass : classification_model : execution start")
             
-            if model_param_dict['target_type'] == 'Single_Target':
+            if basic_params_dict['target_type'] == 'Single_Target':
                 
-                json_data = {'conf':'{"model_param_dict":"'+str(model_param_dict)+'"}'}
+                json_data = {'conf':'{"basic_params_dict":"'+str(basic_params_dict)+'"}'}
                 
                 logging.info("modeling : RegressionClass : classification_model : execution"+str(json_data))
                 

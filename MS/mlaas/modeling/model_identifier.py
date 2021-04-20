@@ -3,11 +3,11 @@
 
 --CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
  Vipul Prajapati      25-JAN-2021           1.0           Initial Version 
- Mann Purohit         02-FEB-2021           1.1           
+ Mann Purohit         02-FEB-2021           1.1           Initial Version 
 
 */
 '''
-
+# import Necessary Library.
 import ast
 import pandas as pd
 import json
@@ -16,6 +16,7 @@ import logging
 import traceback
 import datetime
 
+# Import Common Class Files.
 from .algorithm_detector import AlgorithmDetector
 from .utils.supervised.supervised_model import SupervisedClass as SC
 from .utils.model_experiments.model_experiment import ExperimentClass as EC
@@ -25,6 +26,7 @@ from .split_data import SplitData
 from common.utils.database import db
 from common.utils.logger_handler import custom_logger as cl
 
+# Declare Global Object And Variable.
 user_name = 'admin'
 log_enable = True
 
@@ -33,12 +35,11 @@ LogObject.log_setting()
 
 logger = logging.getLogger('model_identifier')
 
-class ModelClass(SC, SplitData):
+class ModelClass(SC):
     """This is the main class from which stores the methods for fetching data and implementing ML algorithms.
 
     Args:
         SC (Class): Supervised Algorithm Class, which stores all the supervised algorithms.
-        SplitData ([Class]): [Stores the variables required at the time of splitting the train,test, validation data]
     """
     def __init__(self,db_param_dict):
         
@@ -47,23 +48,22 @@ class ModelClass(SC, SplitData):
         # Get Database Object,Connection And Connection String
         self.db_param_dict = db_param_dict
     
-    def algorithm_identifier(self,model_param_dict):
-        
-        logging.info("modeling : ModelClass : algorithm_identifier : execution start")
+    def algorithm_identifier(self,basic_params_dict):
         
         """This function is used to identify the algorithm based on target selected.
             if target is selected then call superived algorithm.
             else call the unsupervised algorithm. 
         """
         # It will check wheather it is supervised algorithm or not.
+        logging.info("modeling : ModelClass : algorithm_identifier : execution start")
         try:
-            if model_param_dict['model_type'] in ('Regression','Classification'):
+            if basic_params_dict['model_type'] in ('Regression','Classification'):
                 # call  supervised algorithm method
-                result = super(ModelClass,self).supervised_algorithm(model_param_dict,self.db_param_dict)
+                result = super(ModelClass,self).supervised_algorithm(basic_params_dict,self.db_param_dict)
                 
             else:
                 # call  unsupervised algorithm method
-                result = super(ModelClass,self).unsupervised_algorithm(model_param_dict,self.db_param_dict)
+                result = super(ModelClass,self).unsupervised_algorithm(basic_params_dict,self.db_param_dict)
                 
             logging.info("modeling : ModelClass : algorithm_identifier : execution end"+str(result))
 
@@ -72,7 +72,8 @@ class ModelClass(SC, SplitData):
             return e
 
         
-    def run_model(self,model_param_dict,model_id,model_name,model_param):
+    def run_model(self,basic_params_dict,model_id,model_name,model_param):
+        
         """This function is used to run model when model mode is in manual. 
  
         Args:
@@ -84,9 +85,9 @@ class ModelClass(SC, SplitData):
         logging.info("modeling : ModelClass : run_model : execution start")
         
         # Check Whether Model Type Is Regression Or Classification.
-        if model_param_dict['model_type'] in ('Regression','Classification'):
+        if basic_params_dict['model_type'] in ('Regression','Classification'):
             # Call The Super Class (SupervisedClass) Method's. 
-            result = super(ModelClass,self).run_supervised_model(model_param_dict,self.db_param_dict,model_id,model_name,model_param)
+            result = super(ModelClass,self).run_supervised_model(basic_params_dict,self.db_param_dict,model_id,model_name,model_hyperparams)
         else:
             print("Unsupervised ML, to be implemented.")
             

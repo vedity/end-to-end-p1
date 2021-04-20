@@ -2,7 +2,6 @@ import mlflow
 
 class MLFlowLogs:
 
-
     def store_model(self, model, model_name, model_type):
         if model_type.lower() == 'sklearn':
             mlflow.sklearn.log_model(model,model_name)
@@ -17,6 +16,7 @@ class MLFlowLogs:
     def store_model_dict(self, **kwargs):
         for key in kwargs.keys():
             mlflow.log_dict(kwargs[key], str(key)+'.json')
+            
 
     def store_model_params(self, dataset_split_dict):
         for key in dataset_split_dict.keys():

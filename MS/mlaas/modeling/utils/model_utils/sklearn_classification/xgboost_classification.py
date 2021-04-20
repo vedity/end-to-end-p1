@@ -273,5 +273,5 @@ class XGBoostClassificationClass:
         self.MLFlowLogObj.store_model(model, model_name="SVM_Classifier_Model", model_type='sklearn')
         
         # mlflow.log_dict(confusion_matrix, "confusion_matrix.json")
-        print("DONEEE-     \n\n\n OKKK------------------------------")
+        print("DONE")
         

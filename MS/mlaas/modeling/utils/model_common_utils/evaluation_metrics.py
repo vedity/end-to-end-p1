@@ -6,14 +6,6 @@ from sklearn import metrics
 from sklearn.preprocessing import label_binarize
 from common.utils.exception_handler.python_exception.common.common_exception import *
 
-# user_name = 'admin'
-# log_enable = True
-
-# LogObject = cl.LogClass(user_name,log_enable)
-# LogObject.log_setting()
-
-# logger = logging.getLogger('evaluation_metrics')
-
 
 class EvaluationMetrics:
 
@@ -78,15 +70,11 @@ class EvaluationMetrics:
             temp_arr=np.isfinite(np.abs((actual - pred) / actual))
             abs_arr=np.abs((actual - pred) / actual)
 
-            print("temp_arr==",temp_arr)
-            print("abs_arr==",abs_arr)
             for i,j in zip(temp_arr,abs_arr):
                 if i == False:
                     np.put(abs_arr,np.where(temp_arr == i),0)
-        
-            print("updated abs_arr==",abs_arr)
+                    
             mape = np.mean(abs_arr) * 100
-            print("mape ==",mape)
             
             return r2score,mse,mae,mape
         

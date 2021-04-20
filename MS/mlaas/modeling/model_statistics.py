@@ -1,4 +1,14 @@
+'''
+/*CHANGE HISTORY
 
+--CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
+Shivani Bhalodiya      25-JAN-2021           1.0           Initial Version 
+Mann Purohit           02-FEB-2021           1.1           Initial Version 
+
+*/
+'''
+
+# Imports Necessary Library.
 import json
 import pandas as pd
 import numpy as np
@@ -7,14 +17,16 @@ from database import *
 from pandas import DataFrame
 import logging
 import traceback
+
+# Imports Common Class Files.
 from common.utils.logger_handler import custom_logger as cl
 from common.utils.exception_handler.python_exception.modeling.modeling_exception import *
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.modeling.modeling_exception import *
 from common.utils.database import db
-
-# from MS.mlaas.modeling.views import SelectAlgorithmClass
 from modeling.all_method import CommonMethodClass
+
+# Declare Global Object And Varibles.
 user_name = 'admin'
 log_enable = True
  
@@ -22,13 +34,12 @@ LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
  
 logger = logging.getLogger('view')
-DBObject=db.DBClass()     #Get DBClass object
+DBObject=db.DBClass()     
 connection,connection_string=DBObject.database_connection(database,user,password,host,port)      #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 
 db_param_dict = {'DBObject':DBObject,'connection':connection,'connection_string':connection_string}
-
-
 cmobj = CommonMethodClass(db_param_dict)
+
 
 
 class ModelStatisticsClass:

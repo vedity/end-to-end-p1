@@ -1,3 +1,12 @@
+'''
+/*CHANGE HISTORY
+
+--CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
+ Mann Purohit      25-JAN-2021           1.0           Initial Version 
+ 
+*/
+'''
+
 # Keras specific
 import pandas as pd
 import numpy as np
@@ -118,6 +127,7 @@ class KerasLogisticRegressionClass:
         shap_data = self.X_train[:min(100, self.X_train.shape[0]), 1:]
         deepexplainer = shap.DeepExplainer(model, shap_data)
         shap_values = deepexplainer.shap_values(shap_data[:20])
+        
         if isinstance(shap_values, list):
             shap_values = np.array(shap_values).mean(axis=0)
         shap_values = abs(np.array(shap_values)).mean(axis=0)
