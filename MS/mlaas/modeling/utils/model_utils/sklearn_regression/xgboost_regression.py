@@ -124,7 +124,7 @@ class XGBoostRegressionClass:
         x_train = self.X_train[:,1:]
         y_train = self.y_train[:,-1]
  
-        shap_data = self.X_train[:min(500, self.X_train.shape[0]), 1:]
+        shap_data = self.X_train[:min(100, self.X_train.shape[0]), 1:]
         tree_explainer = shap.TreeExplainer(model, shap_data)
         tree_shap_values = tree_explainer.shap_values(shap_data, check_additivity=False)
 
@@ -269,7 +269,7 @@ class XGBoostRegressionClass:
         
          # Store the Machine Learning Model.
         self.MLFlowLogObj.store_model(model, model_name="XGBoost_Regression", model_type='sklearn')
-        print("ENDING\n\n\n\n\n DONE--------------------------------------------")
+        print("ENDING")
         
         
 

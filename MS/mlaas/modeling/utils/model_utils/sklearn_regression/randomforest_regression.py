@@ -283,8 +283,6 @@ class RandomForestRegressionClass:
         learning_curve_dict = self.get_learning_curve(model)
         print("LEARNING CURVEE DICT")
         
-        # log mlflow parameter
-        
         # log mlflow matrix
         self.MLFlowLogObj.store_model_metrics(r2_score=r2score, mae=mae, mse=mse, mape=mape, 
                                             holdout_score=holdout_score, cv_score=cv_score)
@@ -298,4 +296,4 @@ class RandomForestRegressionClass:
         # Store the Machine Learning Model.
         self.MLFlowLogObj.store_model(model, model_name="RandomForestRegression", model_type='sklearn')
 
-        print("ENDING\n\n\n\n\n DONE--------------------------------------------")
+        print("ENDING")

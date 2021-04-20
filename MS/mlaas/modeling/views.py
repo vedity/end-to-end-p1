@@ -137,12 +137,13 @@ class StartModelClass(APIView):
                         
                         ModelObject = ModelClass(db_param_dict)# Initializing the ModelClass
 
-                        model_param_dict = {'model_mode':model_mode,'model_type':model_type,
-                                'experiment_name':experiment_name,'experiment_desc':experiment_desc,
-                                'user_id':user_id,'project_id':project_id,'dataset_id':dataset_id}
+                        basic_params_dict = {'model_mode':model_mode,'model_type':model_type,
+                                             'experiment_name':experiment_name,'experiment_desc':experiment_desc,
+                                             'user_id':user_id,'project_id':project_id,'dataset_id':dataset_id}
                         
+                        # Check Model Requirement
                         model_req_status = AlgorithmDetectorObj.check_model_requirements(project_id)
-                        logging.info("modeling : StartModelClass : POST Method : execution start"+str(model_req_status))
+                        
                         if model_req_status == True:
 
                                 if model_mode == 'Auto':
@@ -150,7 +151,8 @@ class StartModelClass(APIView):
                                         activity_id = 42
                                         timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
 
-                                        result = ModelObject.algorithm_identifier(model_param_dict)
+                                        result = ModelObject.algorithm_identifier(basic_params_dict)
+                                        
                                         if result.status_code != 200:
                                                 # status_code,error_msg=json_obj.get_Status_code(learning_curve_json) # extract the status_code and error_msg from project_df
                                                 logging.info("modeling : StartModelClass : GET Method : execution : status_code :"+ result)
@@ -172,10 +174,10 @@ class StartModelClass(APIView):
                                         data = json.dumps(request.data)
                                         request_body = json.loads(data) #get all the request body parameter
                                         
-                                        model_param = request_body["hyperparameters"]
-                                        logging.info('HYPERPARAMS IN VIEWS.py-------------'+str(model_param))
+                                        model_hyperparams = request_body["hyperparameters"]
                                         
-                                        result = ModelObject.run_model(model_param_dict,model_id,model_name,model_param)
+                                        
+                                        result = ModelObject.run_model(basic_params_dict,model_id,model_name,model_hyperparams)
 
                                         if result.status_code != 200:
                                                 # status_code,error_msg=json_obj.get_Status_code(learning_curve_json) # extract the status_code and error_msg from project_df
