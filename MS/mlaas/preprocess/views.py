@@ -238,7 +238,19 @@ class ScheamColumnListClass(APIView):
                                 logging.info("data preprocess : ScheamAttributeListClass : POST Method : execution start")
                                 dropdowns = {
                                         "column_attribute":["Ignore","Target","Select"],
-                                        "datatype":["number","categorical","text","timestamp"]
+                                        "datatype":["number","categorical","text","timestamp"],
+                                        "datetime_options":[
+                                                "DD/MM/YYYY",
+                                                "MM/DD/YYYY",
+                                                "YYYY/MM/DD",
+                                                "DD-MM-YYYY",
+                                                "MM-DD-YYYY",
+                                                "YYYY-MM-DD",
+                                                "DDth Mon, YYYY",
+                                                "DD Mon, YYYY",
+                                                "YYYY Mon, DD",
+                                                "Custom"
+                                                ]
                                         }
                                 return Response({"status_code":"200","error_msg":"Successfull retrival","response":dropdowns})
                 except Exception as e:
