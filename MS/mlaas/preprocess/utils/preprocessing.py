@@ -1114,7 +1114,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             dag_id='Cleanup_dag_'+str(id)
 
             template = "cleanup_dag.template"
-            namespace = "Cleanup_Dags"
+            namespace = "cleanup_dags"
 
             # #? Inserting into Dag_Status Table
             # col = "dag_id,status"
@@ -1170,7 +1170,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             op_dict, val_dict = self.reorder_operations(request)
             
             template = "cleanup_dag.template"
-            namespace = "Cleanup_Dags"
+            namespace = "cleanup_dags"
             file_name = dag_id + ".py"
 
             master_dict = {
@@ -1233,7 +1233,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.info("data preprocessing : PreprocessingClass : dag_updater : execution start")
             
             #? Reading the file
-            with open(f"dynamic_dags/{namespace}/{file}","r") as ro:
+            with open(f"project_dags/{namespace}/{file}","r") as ro:
                 content = ro.read()
         
             new_dic = str(dic)
