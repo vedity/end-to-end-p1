@@ -28,12 +28,12 @@ from modeling.utils.model_utils.sklearn_regression.linear_regression import *
 from modeling.utils.model_utils.sklearn_regression.ridge_regression import *
 from modeling.utils.model_utils.sklearn_regression.lasso_regression import *
 from modeling.utils.model_utils.sklearn_regression.elasticnet_regression import *
-from modeling.utils.model_utils.keras_regression.linear_regression_keras import *
 from modeling.utils.model_utils.sklearn_regression.kneighbors_regression import *
 from modeling.utils.model_utils.sklearn_regression.decisiontree_regression import *
 from modeling.utils.model_utils.sklearn_regression.randomforest_regression import *
 from modeling.utils.model_utils.sklearn_regression.gradientboost_regression import *
 from modeling.utils.model_utils.sklearn_regression.xgboost_regression import *
+# from modeling.utils.model_utils.keras_regression.linear_regression_keras import *
 
 # Classification Class File Imports
 from modeling.utils.model_utils.sklearn_classification.logistic_regression import *
@@ -44,7 +44,7 @@ from modeling.utils.model_utils.sklearn_classification.naive_bayes_classificatio
 from modeling.utils.model_utils.sklearn_classification.randomforest_classification import *
 from modeling.utils.model_utils.sklearn_classification.gradientboost_classification import *
 from modeling.utils.model_utils.sklearn_classification.xgboost_classification import *
-from modeling.utils.model_utils.keras_classification.logistic_regression_keras import *
+# from modeling.utils.model_utils.keras_classification.logistic_regression_keras import *
 
 # Common Class File Imports
 from modeling.utils.model_experiments import model_experiment
@@ -211,7 +211,7 @@ def supervised_models(run_id,**kwargs):
         model_class_name = kwargs['model_class_name']
         hyperparameters = kwargs['model_hyperparams']  
         
-        # Check Whether Running Model is Multi Claa Or Not.
+        # Check Whether Running Model is Multi Class Or Not.
         if algorithm_type != 'Binary':
             algorithm_type=algorithm_type[:-5]
         

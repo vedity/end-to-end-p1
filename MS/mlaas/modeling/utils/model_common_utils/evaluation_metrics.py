@@ -1,9 +1,20 @@
+'''
+/*CHANGE HISTORY
+
+--CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
+ Mann Purohit       25-JAN-2021           1.0           Initial Version 
+ 
+*/
+'''
+
+# All Necessary Imports
 import logging
 import pandas as pd
 import numpy as np
-
 from sklearn import metrics
 from sklearn.preprocessing import label_binarize
+
+# Common Class File Imports
 from common.utils.exception_handler.python_exception.common.common_exception import *
 
 

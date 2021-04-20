@@ -8,20 +8,14 @@
 '''
 
 
-# Keras specific
+# All Necessary Imports
 import pandas as pd
 import numpy as np
 import pickle
 import tensorflow as tf
 import shap
-
-from modeling.utils.model_common_utils.evaluation_metrics import EvaluationMetrics as EM
-from modeling.utils.model_common_utils.mlflow_artifacts import MLFlowLogs 
 from tensorflow import keras
 tf.compat.v1.disable_eager_execution()
-
-
-
 from sklearn.model_selection import ( train_test_split, 
                                      GridSearchCV, 
                                      cross_val_score, 
@@ -30,10 +24,14 @@ from sklearn.model_selection import ( train_test_split,
 
 from sklearn.metrics import *
 
+# Common Class File Imports
+from modeling.utils.model_common_utils.evaluation_metrics import EvaluationMetrics as EM
+from modeling.utils.model_common_utils.mlflow_artifacts import MLFlowLogs 
+
 
 class LinearRegressionKerasClass:
     
-    def __init__(self,input_features_list,target_features_list,# labels,
+    def __init__(self,input_features_list,target_features_list,
                 X_train, X_valid, X_test, y_train, y_valid, y_test, scaled_split_dict,
                 hyperparameters):
         

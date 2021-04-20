@@ -18,7 +18,7 @@ PC_OBJ = PreprocessingClass(database,user,password,host,port)
 
 yesterday_date = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')
 
-main_dag_id = "Cleanup_dag_138374924463225110"
+main_dag_id = "Cleanup_dag_138381998235105970"
 
 args = {
     'owner': 'airflow',
@@ -36,7 +36,7 @@ dag = DAG(
 
 #? Getting Required Parameters
 
-master_dict = {'active': 1, 'operation_dict': {1: [5], 2: [3, 5]}, 'values_dict': {1: [''], 2: ['', '']}, 'schema_id': '4', 'dataset_id': '7', 'project_id': '4', 'save_as': 'False', 'visibility': None, 'dataset_name': None, 'dataset_desc': None, 'user_name': 'abhishek'} 
+master_dict = {'active': 0} 
 
 if int(master_dict['active']) == 0:
     sys.exit()
@@ -53,6 +53,7 @@ else:
     dataset_desc = master_dict['dataset_desc']
     new_user_name = master_dict['user_name']
 
+#Note: This thing might be causing the connection issues
 DBObject,connection,connection_string = PC_OBJ.get_db_connection()
 if connection == None :
     raise DatabaseConnectionFailed(500)
@@ -69,8 +70,8 @@ else:
     dataset_table_name = 'public'+'."'+table_name+'"'
 
 #get the Column list
-column_list = PC_OBJ.get_col_names(schema_id)
-old_column_list = PC_OBJ.get_col_names(schema_id,json = False,original = True)
+column_list = PC_OBJ.get_col_names(DBObject, connection ,schema_id)
+old_column_list = PC_OBJ.get_col_names(DBObject, connection ,schema_id,json = False,original = True)
 
 schema_column_list = DBObject.get_schema_column(connection,schema_id)
 
@@ -109,16 +110,14 @@ op_dict = {
     32 : PC_OBJ.multiply_column
 }
 
-def dag_resetter(DBObject,connection,dataset_id,project_id,dag_id,new_user_name,dataset_name,**kwargs):
+def dag_end(DBObject,connection,dataset_id,project_id,dag_id,new_user_name,dataset_name,col_list,**kwargs):
     '''
         To reset the dag status
     '''
-    sql_command = f"update mlaas.cleanup_dag_status set status ='0' where dag_id = '{dag_id}'"
-    update_status = DBObject.update_records(connection,sql_command)
+    status = PC_OBJ.check_failed_col(DBObject, connection,dataset_id,project_id,new_user_name,col_list, dag_id)
     activity_id = 52
-    status = PC_OBJ.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id,new_user_name,dataset_name)
-    connection.close()
-    return update_status
+    status = PC_OBJ.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id,new_user_name,dataset_name,flag=False)
+    return status
 
 #? Making Dynamic Tasks
 t1= DummyOperator(task_id='start',dag=dag)
@@ -133,8 +132,8 @@ t4= PythonOperator(
             task_id='Enable_Cleanup_Page',
             dag=dag,
             provide_context=True,
-            python_callable=dag_resetter,
-            op_args=[DBObject,connection,dataset_id,project_id,main_dag_id,new_user_name,dataset_name],
+            python_callable=dag_end,
+            op_args=[DBObject,connection,dataset_id,project_id,main_dag_id,new_user_name,dataset_name,column_list],
             trigger_rule="all_done")
 
 if save_as == 'True':
@@ -143,7 +142,7 @@ if save_as == 'True':
                 dag=dag,
                 provide_context=True,
                 python_callable=PC_OBJ.SaveAs,
-                op_args=[DBObject,connection,project_id,table_name,user_name,dataset_visibility,dataset_name,visibility,dataset_desc],
+                op_args=[DBObject,connection,project_id,schema_id,table_name,user_name,dataset_visibility,dataset_name,visibility,dataset_desc],
                 trigger_rule="all_done")
     t2.set_downstream(t3)
     t3.set_downstream(t4)

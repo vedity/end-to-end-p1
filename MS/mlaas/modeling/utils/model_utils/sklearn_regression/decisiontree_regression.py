@@ -275,7 +275,7 @@ class DecisionTreeRegressionClass:
         print("HOLDOUTR SCOREE")
         # get model summary
         model_summary = self.model_summary() # high level model summary
-        print("MODEL SUMMARYYYYYYYYYYYY")
+        print("MODEL SUMMARY")
         # get model learning curve
         learning_curve_dict = self.get_learning_curve(model)
         print("LEARNING CURVEE DICT")
@@ -293,4 +293,4 @@ class DecisionTreeRegressionClass:
         # Store the Machine Learning Model.
         self.MLFlowLogObj.store_model(model, model_name="DecisionTreeRegression", model_type='sklearn')
 
-        print("ENDING\n\n\n\n\n DONE--------------------------------------------")
+        print("ENDING")
