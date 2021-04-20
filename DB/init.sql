@@ -46,7 +46,7 @@ insert into mlaas.model_master_tbl values (6,'Decision_Tree_Regressor','Decision
 insert into mlaas.model_master_tbl values (7,'Random_Forest_Regressor','Decision Tree Regression Model','Regression','Multi','Single_Target', 'RandomForestRegressionClass');
 insert into mlaas.model_master_tbl values (8,'XGBoost_Regression','Simple XGBoost Regression Model','Regression','Multi','Single_Target','XGBoostRegressionClass');
 insert into mlaas.model_master_tbl values (9,'Gradient_Boosting_Machine_Regressor','Gradient Boosting Machine Regression Model','Regression','Multi','Single_Target', 'GradientBoostingRegressionClass');
-insert into mlaas.model_master_tbl values (10,'Linear_Regression_Keras','Simple Regression Model Using Nueral Network','Regression', 'Multi', 'Single_Target','LinearRegressionKerasClass');
+-- insert into mlaas.model_master_tbl values (10,'Linear_Regression_Keras','Simple Regression Model Using Nueral Network','Regression', 'Multi', 'Single_Target','LinearRegressionKerasClass');
 
 -------------------------------------------------------CLASSIFICATION---------------------------------------------------------
 
@@ -58,7 +58,7 @@ insert into mlaas.model_master_tbl values (15,'Decision_Tree_Classifier','Decisi
 insert into mlaas.model_master_tbl values (16,'Random_Forest_Classifier','Decision Tree Classification Model','Classification','Multi','Single_Target', 'RandomForestClassificationClass');
 insert into mlaas.model_master_tbl values (17,'XGBoost_Classification','Simple XGBoost Classification Model','Classification','Multi','Single_Target','XGBoostClassificationClass');
 insert into mlaas.model_master_tbl values (18,'Gradient_Boosting_Machine_Classifier','Gradient Boosting Classification Model','Classification','Multi','Single_Target', 'GradientBoostingClassificationClass');
-insert into mlaas.model_master_tbl values (19,'Logistic_Regression_Keras','Simple Linear Classification Model Using Nueral Network','Classification', 'Binary', 'Single_Target','KerasLogisticRegressionClass');
+-- insert into mlaas.model_master_tbl values (19,'Logistic_Regression_Keras','Simple Linear Classification Model Using Nueral Network','Classification', 'Binary', 'Single_Target','KerasLogisticRegressionClass');
 
 CREATE TABLE mlaas.model_hyperparams_tbl
 (
@@ -126,11 +126,11 @@ insert into mlaas.model_hyperparams_tbl values (9, 'min_impurity_decrease', '[0,
 insert into mlaas.model_hyperparams_tbl values (9, 'min_samples_leaf', '[1, 20]', 'validation');
 
 
-insert into mlaas.model_hyperparams_tbl values (10, 'epochs', '[]', '');
-insert into mlaas.model_hyperparams_tbl values (10, 'learning_rate', '[0.001, 1]', 'validation');
-insert into mlaas.model_hyperparams_tbl values (10, 'batch_size', '[8, 16, 32, 64, 128, 256]', 'dropdown');
-insert into mlaas.model_hyperparams_tbl values (10, 'loss', '["Mean_Absolute_Error", "Mean_Squared_Error", "Mean_Absolute_Percentage_Error"]', 'dropdown');
-insert into mlaas.model_hyperparams_tbl values (10, 'optimizer', '["SGD", "RMSProp", "Adam"]', 'dropdown');
+-- insert into mlaas.model_hyperparams_tbl values (10, 'epochs', '[]', '');
+-- insert into mlaas.model_hyperparams_tbl values (10, 'learning_rate', '[0.001, 1]', 'validation');
+-- insert into mlaas.model_hyperparams_tbl values (10, 'batch_size', '[8, 16, 32, 64, 128, 256]', 'dropdown');
+-- insert into mlaas.model_hyperparams_tbl values (10, 'loss', '["Mean_Absolute_Error", "Mean_Squared_Error", "Mean_Absolute_Percentage_Error"]', 'dropdown');
+-- insert into mlaas.model_hyperparams_tbl values (10, 'optimizer', '["SGD", "RMSProp", "Adam"]', 'dropdown');
 
 ------------------------------------------CLASSIFICATION--------------------------------------------------
 
@@ -191,11 +191,11 @@ insert into mlaas.model_hyperparams_tbl values (18, 'min_samples_leaf', '[1, 20]
 
 
 
-insert into mlaas.model_hyperparams_tbl values (19, 'epochs', '[]', '');
-insert into mlaas.model_hyperparams_tbl values (19, 'learning_rate', '[0.001, 1]', 'validation');
-insert into mlaas.model_hyperparams_tbl values (19, 'batch_size', '[8, 16, 32, 64, 128, 256]', 'dropdown');
-insert into mlaas.model_hyperparams_tbl values (19, 'loss', '["binary_crossentropy","categorical_crossentropy"]', 'dropdown');
-insert into mlaas.model_hyperparams_tbl values (19, 'optimizer', '["SGD", "RMSProp", "Adam"]', 'dropdown');
+-- insert into mlaas.model_hyperparams_tbl values (19, 'epochs', '[]', '');
+-- insert into mlaas.model_hyperparams_tbl values (19, 'learning_rate', '[0.001, 1]', 'validation');
+-- insert into mlaas.model_hyperparams_tbl values (19, 'batch_size', '[8, 16, 32, 64, 128, 256]', 'dropdown');
+-- insert into mlaas.model_hyperparams_tbl values (19, 'loss', '["binary_crossentropy","categorical_crossentropy"]', 'dropdown');
+-- insert into mlaas.model_hyperparams_tbl values (19, 'optimizer', '["SGD", "RMSProp", "Adam"]', 'dropdown');
 
 
 
@@ -217,7 +217,7 @@ insert into mlaas.auto_model_params values (6, 'Initial Version of DecisionTree 
 insert into mlaas.auto_model_params values (7, 'Initial Version of RandomForest Regression', '{"n_estimators": 100, "criterion": "mse", "max_depth": "None", "max_features": "auto", "min_impurity_decrease":0.1, "min_samples_leaf": 1}');
 insert into mlaas.auto_model_params values (8, 'Initial Version for XGBoost Regressor', '{"n_estimators":100,"max_depth":6,"min_child_weight":1,"learning_rate":0.3,"gamma":0,"reg_alpha":0,"reg_lambda":1}');
 insert into mlaas.auto_model_params values (9, 'Initial Version of Gradient Boosting Regression', '{"loss": "ls", "learning_rate":0.1, "subsample":1, "n_estimators": 100, "criterion": "friedman_mse", "max_depth": "None", "max_features": "auto", "min_impurity_decrease":0.1, "min_samples_leaf": 1}');
-insert into mlaas.auto_model_params values (10, 'With 3 Layer', '{"loss": "Mean_Squared_Error", "optimizer": "adam", "learning_rate": 0.01, "batch_size": 16, "epochs": 10}');
+-- insert into mlaas.auto_model_params values (10, 'With 3 Layer', '{"loss": "Mean_Squared_Error", "optimizer": "adam", "learning_rate": 0.01, "batch_size": 16, "epochs": 10}');
 
 
 -----------------------------------------------------CLASSIFCATION-------------------------------------------------------
@@ -229,7 +229,7 @@ insert into mlaas.auto_model_params values (15, 'Initial Version of DecisionTree
 insert into mlaas.auto_model_params values (16, 'Initial Version of RandomForest Classification', '{"n_estimators": 100, "criterion": "gini", "max_depth": "None", "max_features": "auto", "min_impurity_decrease":0.1, "min_samples_leaf": 1}');
 insert into mlaas.auto_model_params values (17, 'Initial Version for XGBoost Regressor', '{"n_estimators":100,"max_depth":6,"min_child_weight":1,"learning_rate":0.3,"gamma":0,"reg_alpha":0,"reg_lambda":1}');
 insert into mlaas.auto_model_params values (18, 'Initial Version of Gradient Boosting Classification', '{"loss": "deviance", "learning_rate":0.1, "subsample":1, "n_estimators": 100, "criterion": "friedman_mse", "max_depth": "None", "max_features": "auto", "min_impurity_decrease":0.1, "min_samples_leaf": 1}');
-insert into mlaas.auto_model_params values (19, 'binary version', '{"loss": "binary_crossentropy", "optimizer": "adam", "learning_rate": 0.01, "batch_size": 16, "epochs": 10}');
+-- insert into mlaas.auto_model_params values (19, 'binary version', '{"loss": "binary_crossentropy", "optimizer": "adam", "learning_rate": 0.01, "batch_size": 16, "epochs": 10}');
 
 
 

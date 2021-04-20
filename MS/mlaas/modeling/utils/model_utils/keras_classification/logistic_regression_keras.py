@@ -1,27 +1,35 @@
-# Keras specific
+'''
+/*CHANGE HISTORY
+
+--CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
+ Mann Purohit      25-JAN-2021           1.0           Initial Version 
+ 
+*/
+'''
+
+# All Necessary Imports
 import pandas as pd
 import numpy as np
 import pickle
 import tensorflow as tf
 import shap
-
-from modeling.utils.model_common_utils.evaluation_metrics import EvaluationMetrics as EM
-from modeling.utils.model_common_utils.mlflow_artifacts import MLFlowLogs 
-from tensorflow import keras 
-
-
+from sklearn.metrics import *
 from sklearn.model_selection import ( train_test_split, 
                                      GridSearchCV, 
                                      cross_val_score, 
                                      cross_val_predict,
                                      KFold )
 
-from sklearn.metrics import *
+from tensorflow import keras 
+
+# Common Class File Imports
+from modeling.utils.model_common_utils.evaluation_metrics import EvaluationMetrics as EM
+from modeling.utils.model_common_utils.mlflow_artifacts import MLFlowLogs 
 
 
 class KerasLogisticRegressionClass:
     
-    def __init__(self,input_features_list,target_features_list,# labels,
+    def __init__(self,input_features_list,target_features_list,
                 X_train, X_valid, X_test, y_train, y_valid, y_test, scaled_split_dict,
                 hyperparameters):
         
@@ -118,6 +126,7 @@ class KerasLogisticRegressionClass:
         shap_data = self.X_train[:min(100, self.X_train.shape[0]), 1:]
         deepexplainer = shap.DeepExplainer(model, shap_data)
         shap_values = deepexplainer.shap_values(shap_data[:20])
+        
         if isinstance(shap_values, list):
             shap_values = np.array(shap_values).mean(axis=0)
         shap_values = abs(np.array(shap_values)).mean(axis=0)
