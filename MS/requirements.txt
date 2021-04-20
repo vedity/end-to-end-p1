@@ -11,6 +11,6 @@ mlflow==1.13.1
 sklearn
 selenium
 shap
-tensorflow
+# tensorflow
 xgboost
 #pyspark
