@@ -543,7 +543,7 @@ class DatasetClass:
                     #? No public dataset with same name
                     #? Is there any private dataset from you with same name?
                     sql_command = f"SELECT dataset_id FROM {table_name} WHERE DATASET_NAME = '{dataset_name}' AND USER_NAME = '{user_name}' and page_name in ('Create dataset','Create Project','schema save','Cleanup')"
-                    logging.info("-->"+str(sql_command))
+            
                 else:
                     #! There is a public dataset with your name
                     logging.debug(f"data ingestion  :  DatasetClass  :  dataset_exist  :  A public dataset with the same dataset_name exists at dataset_id = {int(data_df['dataset_id'][0])}")
