@@ -582,8 +582,8 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
             try:
-                if status == 0:
-                #Insert the activity for the operation
+                status=1
+                
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 status = self.rmv_noise(DBObject, connection, old_cols[i], table_name)
