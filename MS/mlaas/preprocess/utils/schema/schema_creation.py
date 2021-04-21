@@ -34,7 +34,7 @@ class SchemaClass:
         # schema table name
         table_name = 'mlaas.schema_tbl'
         # Columns for schema table
-        cols = 'schema_id,column_name,changed_column_name,data_type,column_attribute,missing_flag,noise_flag' 
+        cols = 'schema_id,column_name,changed_column_name,data_type,column_attribute,missing_flag,noise_flag,date_format' 
         # Schema of schema_table
         schema ="index bigserial,"\
                 "schema_id bigint,"\
@@ -83,8 +83,10 @@ class SchemaClass:
             #get the column list and datatype  based on given table name
             column_name_list,predicted_datatype = self.get_attribute_datatype(connection,DBObject,table_name)
 
+            date_format = ["MM/DD/YYYY" if i == "timestamp" else "" for i in predicted_datatype]
+
             logging.info("data preprocess : SchemaClass :get_dataset_schema : execution stop")
-            return column_name_list,predicted_datatype
+            return column_name_list,predicted_datatype,date_format
 
         except (DatasetDataNotFound,DataNotFound,DatabaseConnectionFailed) as exc:
             logging.error("data preprocess : SchemaClass : get_dataset_schema : Exception " + str(exc.msg))
@@ -402,7 +404,7 @@ class SchemaClass:
             logging.error("data preprocess : SchemaClass : get_column_list : " +traceback.format_exc())
             return str(exc)
 
-    def update_dataset_schema(self,DBObject,connection,schema_id,column_name_list,column_datatype_list,change_column_name=None,column_attribute_list=None,index_list=None,missing_flag=None,noise_flag=None,flag = False): ###
+    def update_dataset_schema(self,DBObject,connection,schema_id,column_name_list,column_datatype_list,change_column_name=None,column_attribute_list=None,index_list=None,missing_flag=None,noise_flag=None,flag = False,date_format = None): ###
         """
         this function used to insert the records into a table if not exist otherwise it will update the existing schema data record from the table.
         Args:
@@ -429,7 +431,7 @@ class SchemaClass:
             if status == True and flag == False :
                 new_cols_lst = change_column_name
                 cols_attribute_lst = column_attribute_list
-                   
+                
                 for index,new_col,col_attr in zip(index_list,new_cols_lst,cols_attribute_lst): 
 
                     #sql command for updating change_column_name and column_attribute column  based on index column value
@@ -449,9 +451,9 @@ class SchemaClass:
                 prev_cols_lst = column_name_list
                 new_cols_lst = ''
                 cols_attribute_lst = 'Select'
-                for prev_col,new_dtype,missing_value,noise_value in zip(prev_cols_lst,prev_dtype_lst,missing_flag,noise_flag): 
+                for prev_col,new_dtype,missing_value,noise_value,date_frmt in zip(prev_cols_lst,prev_dtype_lst,missing_flag,noise_flag,date_format): 
 
-                    row = schema_id,prev_col,new_cols_lst,new_dtype,cols_attribute_lst,str(missing_value),str(noise_value)
+                    row = schema_id,prev_col,new_cols_lst,new_dtype,cols_attribute_lst,str(missing_value),str(noise_value),date_frmt
 
                     # Make record for project table
                     row_tuples = [tuple(row)] 
@@ -519,7 +521,7 @@ class SchemaClass:
             table_name,_,_ = self.get_schema()
             
             # sql command to get details from schema table  based on  schema id 
-            sql_command = "select case when changed_column_name ='' then column_name else changed_column_name end column_list,index,data_type,column_attribute  from "+str(table_name)+" where schema_id="+str(schema_id)+" order by index"           
+            sql_command = "select case when changed_column_name ='' then column_name else changed_column_name end column_list,index,data_type,column_attribute,date_format from "+str(table_name)+" where schema_id="+str(schema_id)+" order by index"           
         
             #execute sql commnad if data exist then return dataframe else return None
             schema_df = DBObject.select_records(connection,sql_command) 
@@ -528,10 +530,10 @@ class SchemaClass:
                 raise SchemaDataNotFound(500)
 
             #store all the schema table data into 
-            index,column_name,data_type,column_attribute = schema_df['index'],schema_df['column_list'],schema_df['data_type'],schema_df['column_attribute']
+            index,column_name,data_type,column_attribute,date_format = schema_df['index'],schema_df['column_list'],schema_df['data_type'],schema_df['column_attribute'],schema_df['date_format']
             
             #get the appropriate structure format  
-            schema_data=json_obj.get_schema_format(index,column_name,data_type,column_attribute)
+            schema_data=json_obj.get_schema_format(index,column_name,data_type,column_attribute,date_format)
             
             logging.info("data preprocess : SchemaClass : get_schema_data : execution stop")
             return schema_data

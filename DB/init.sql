@@ -343,7 +343,8 @@ CREATE TABLE mlaas.schema_tbl (
 	data_type text NULL,
 	column_attribute text NULL,
 	missing_flag text NULL,
-	noise_flag text NULL
+	noise_flag text NULL,
+	"date_format" text NULL
 );
 
 --Create activity_deatil table
