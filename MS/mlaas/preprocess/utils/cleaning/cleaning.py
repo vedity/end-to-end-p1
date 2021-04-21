@@ -92,6 +92,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
             try:
+                status = 1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
                 
@@ -102,11 +103,12 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
 
                 if flag == True:
                     return impute_value
-                    
+            
                 status = self.perform_missing_value_imputation(DBObject,connection, table_name,old_cols[i],impute_value)
 
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
 
             except Exception as exc:
                 return exc
@@ -130,6 +132,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
             try:
+                status =1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
                 
@@ -141,7 +144,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 
                 #Update the activity status for the operation performed
                 status = self.perform_missing_value_imputation(DBObject,connection, table_name,old_cols[i],impute_value)
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                
+                if status == 0:
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
             
             except Exception as exc:
                 return exc
@@ -162,7 +167,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
             try:
-
+                status =1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
@@ -172,9 +177,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 impute_value = round(dataframe['impute_value'][0],5)
                 
                 status = self.perform_missing_value_imputation(DBObject,connection, table_name,old_cols[i],impute_value)
-
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
 
             except Exception as exc:
                 return exc
@@ -196,6 +201,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
             try:
+                status =1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
@@ -207,8 +213,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 
                 status = self.perform_missing_value_imputation(DBObject,connection, table_name,old_cols[i],impute_value)
 
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
 
             except Exception as exc:
                 return exc
@@ -236,7 +243,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
 
         for i,col_name in enumerate(cols):
             try:
-
+                status =1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
@@ -245,8 +252,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
             
                 status = self.perform_missing_value_imputation(DBObject,connection, table_name,old_cols[i],value)
 
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
 
             except Exception as exc:
                 logging.error(str(exc))
@@ -272,7 +280,8 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
             try:
-
+                
+                status =1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
@@ -287,9 +296,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 logging.info(str(impute_value) + " impute_value ")
 
                 status = self.perform_missing_value_imputation(DBObject,connection, table_name,old_cols[i],impute_value)
-
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
 
             except Exception as exc:
                 return exc
@@ -313,6 +322,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
             try:
+                status =1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
@@ -329,9 +339,10 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 impute_string = impute_string[:len(impute_string)-1]
         
                 status = super().random_sample_imputation(DBObject,connection,table_name,old_cols[i],impute_string)
-
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
                  
             except Exception as exc:
                 return str(exc)
@@ -373,13 +384,15 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
             try:
+                status =1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 status = self.rmv_noise(DBObject, connection, old_cols[i], table_name)
-
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
 
             except Exception as exc:
                 return exc
@@ -402,13 +415,15 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
             try:
+                status =1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 status = self.rmv_noise(DBObject, connection, old_cols[i], table_name)
 
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
 
             except Exception as exc:
                 return exc
@@ -433,13 +448,16 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
             try:
+
+                status =1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 status = self.rmv_noise(DBObject, connection, old_cols[i], table_name)
 
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
 
             except Exception as exc:
                 return exc
@@ -464,13 +482,15 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
             try:
+                status =1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 status = self.rmv_noise(DBObject, connection, old_cols[i], table_name)
 
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
 
             except Exception as exc:
                 return exc
@@ -495,13 +515,16 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
             try:
+
+                status =1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 status = self.rmv_noise(DBObject, connection, old_cols[i], table_name)
 
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
 
             except Exception as exc:
                 return exc
@@ -526,13 +549,15 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
             try:
+                status =1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 status = self.rmv_noise(DBObject, connection, old_cols[i], table_name)
 
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
 
             except Exception as exc:
                 return exc
@@ -557,13 +582,15 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
             try:
-                #Insert the activity for the operation
+                status=1
+                
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 status = self.rmv_noise(DBObject, connection, old_cols[i], table_name)
 
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
 
             except Exception as exc:
                 return exc
@@ -588,13 +615,16 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
             try:
+
+                status =1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 status = self.rmv_noise(DBObject, connection, old_cols[i], table_name)
 
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
 
             except Exception as exc:
                 return exc
@@ -621,14 +651,15 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
             try:
+                status =1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 status = super().delete_above(DBObject,connection,table_name,old_cols[i],val)
                 logging.info(str(status))
-
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
                 
             except Exception as exc:
                 return str(exc)
@@ -649,15 +680,16 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
             try:
-
+                status =1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 status = super().delete_below(DBObject,connection,table_name,old_cols[i],val)
                 logging.info(str(status))
 
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
                 
             except Exception as exc:
                 return str(exc)
@@ -679,15 +711,16 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
             try:
-
+                status =1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 status = self.remove_outliers(DBObject,connection,dataset_table_name,old_cols[i], detect_method = 0)
                 logging.info(str(status))
 
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
                 
             except Exception as exc:
                 return str(exc)
@@ -711,14 +744,16 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         for i,col_name in enumerate(cols):
             try:
                 
+                status =1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 status = self.remove_outliers(DBObject,connection,dataset_table_name,old_cols[i], detect_method = 1)
                 logging.info(str(status))
 
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
 
             except Exception as exc:
                 return str(exc)
@@ -742,6 +777,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
             try:
+                status =1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
@@ -753,8 +789,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 status = self.replace_outliers(DBObject,connection,table_name,old_cols[i],impute_value, 0)                
                 logging.info(str(status))
 
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
             except Exception as exc:
                 return str(exc)
 
@@ -777,6 +814,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
             try:
+                status =1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
@@ -786,8 +824,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 
                 status = self.replace_outliers(DBObject,connection,table_name,old_cols[i],impute_value,1)
 
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
                 
             except Exception as exc:
                 return str(exc)
@@ -810,6 +849,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
             try:
+                status =1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
@@ -821,8 +861,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 
                 status = self.replace_outliers(DBObject,connection,table_name,old_cols[i],impute_value, 0)
 
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
 
                 logging.info(str(status))
             except Exception as exc:
@@ -845,6 +886,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
             try:
+                status =1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
@@ -855,8 +897,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 
                 status = self.replace_outliers(DBObject,connection,table_name,old_cols[i],impute_value,1)
 
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
                 
             except Exception as exc:
                 return str(exc)
@@ -878,6 +921,8 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
             try:
+
+                status =1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
@@ -889,8 +934,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 status = self.replace_outliers(DBObject,connection,table_name,old_cols[i],impute_value, 0)
                 logging.info(str(status))
 
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
 
             except Exception as exc:
                 return str(exc)
@@ -913,6 +959,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         for i,col_name in enumerate(cols):
             try:
+                status =1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
@@ -922,8 +969,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 
                 status = self.replace_outliers(DBObject,connection,table_name,old_cols[i],impute_value,1)
 
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
                 
             except Exception as exc:
                 return str(exc)
@@ -949,13 +997,15 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
             for i,col_name in enumerate(cols):
 
+                status =1
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 status = super().apply_log_transformation(DBObject,connection,table_name,old_cols[i])
 
-                #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    #Update the activity status for the operation performed
+                    at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
                 
         except Exception as exc:
                 return str(exc)

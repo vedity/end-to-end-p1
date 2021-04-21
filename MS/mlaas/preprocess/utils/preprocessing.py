@@ -1270,7 +1270,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             new_str = content[:bracket_start] + new_dic + content[bracket_end + 1:]
         
             #? Writing into the file
-            with open(f"dynamic_dags/{namespace}/{file}", 'w') as wo:
+            with open(f"project_dags/{namespace}/{file}", 'w') as wo:
                 wo.write(new_str)
 
             logging.info("data preprocessing : PreprocessingClass : dag_updater : execution stop")

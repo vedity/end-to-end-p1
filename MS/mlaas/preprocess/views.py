@@ -216,17 +216,6 @@ class ScheamColumnListClass(APIView):
 
         def get(self, request, format=None):
                 """
-                This class is used to get  schema column list.
-                It will take url string as mlaas/dataset_schema/column_attribute_list/.
-
-                Args  : 
-                        
-                        
-                Return : 
-                        status_code(500 or 200),
-                        error_msg(Error message for retrival failed or successfull),
-                        Response(return false if failed otherwise json data)
-       
                 this function used to get Attribute list for schema page and
 
                 Return:
@@ -238,7 +227,19 @@ class ScheamColumnListClass(APIView):
                                 logging.info("data preprocess : ScheamAttributeListClass : POST Method : execution start")
                                 dropdowns = {
                                         "column_attribute":["Ignore","Target","Select"],
-                                        "datatype":["number","categorical","text","timestamp"]
+                                        "datatype":["number","categorical","text","timestamp"],
+                                        "datetime_options":[
+                                                "DD/MM/YYYY",
+                                                "MM/DD/YYYY",
+                                                "YYYY/MM/DD",
+                                                "DD-MM-YYYY",
+                                                "MM-DD-YYYY",
+                                                "YYYY-MM-DD",
+                                                "DDth Mon, YYYY",
+                                                "DD Mon, YYYY",
+                                                "YYYY Mon, DD",
+                                                "Custom"
+                                                ]
                                         }
                                 return Response({"status_code":"200","error_msg":"Successfull retrival","response":dropdowns})
                 except Exception as e:
@@ -524,4 +525,18 @@ class CheckCleanupDagStatus(APIView):
                 except Exception as e:
                         logging.error("data preprocess : CheckCleanupDagStatus : GET Method  " + str(e))
                         logging.error(" data preprocess : CheckCleanupDagStatus : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})    
+
+
+class FeatureAlgoList(APIView):
+
+        def get(self, request, format=None):
+                try:
+                        logging.info(" data preprocess : SelectedFeatureAlgo : GET Method : execution start")
+                        feature_algo = {"column_list":['item_id','item_name','description'],"option_list":[{"name":"Chi Square","colums":{"item_id":"true","item_name":"true","description":"true"}},{"name":"Mutual Information","colums":{"item_id":"false","item_name":"true","description":"flase"}},{"name":"ANOVA f-test","colums":{"item_id":"false","item_name":"false","description":"true"}},{"name":"Recursive Feature Elimination","colums":{"item_id":"true","item_name":"false","description":"flase"}},{"name":"Coorelation","colums":{"item_id":"true","item_name":"false","description":"flase"}}]}
+                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":feature_algo})   
+
+                except Exception as e:
+                        logging.error("data preprocess : SelectedFeatureAlgo : GET Method  " + str(e))
+                        logging.error(" data preprocess : SelectedFeatureAlgo : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":"Failed","response":str(e)})    
