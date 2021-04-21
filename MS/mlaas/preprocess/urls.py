@@ -48,4 +48,7 @@ urlpatterns = [
     
     #url for check cleanup dag status
     path('mlaas/preprocess/cldag_status/',CheckCleanupDagStatus.as_view()),
+
+    #feature selection algorithm list
+    path('mlaas/preprocess/feature_list/',FeatureAlgoList.as_view()),
 ]
