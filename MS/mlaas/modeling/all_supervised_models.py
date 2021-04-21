@@ -235,17 +235,17 @@ def supervised_models(run_id,**kwargs):
             
                 # Declare CLass File Object.
                 LRObject = eval(model_class_name)(input_features_list, target_features_list,
-                                                  X_train, X_valid, X_test, y_train, y_valid, y_test,
-                                                  scaled_split_dict,hyperparameters)
+                                                    X_train, X_valid, X_test, y_train, y_valid, y_test,
+                                                    scaled_split_dict,hyperparameters)
                 # Run model pipleine.
                 LRObject.run_pipeline()
-               
+                
                 # Update Model Status.
                 upd_exp_status = ExpObject.update_experiment(experiment_id,'success')
   
                 
     except:
-        # Update Model Status.
+        # # Update Model Status.
         upd_exp_status = ExpObject.update_experiment(experiment_id,'failed')
         
         

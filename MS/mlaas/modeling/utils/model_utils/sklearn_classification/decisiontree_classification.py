@@ -49,9 +49,10 @@ class DecisionTreeClassificationClass:
         self.y_valid = y_valid
 
         self.criterion = hyperparameters['criterion']
-        self.max_features = int(hyperparameters['max_features'])
-        self.min_impurity_decrease = int(hyperparameters['min_impurity_decrease'])
+        self.max_features = hyperparameters['max_features']
+        self.min_impurity_decrease = float(hyperparameters['min_impurity_decrease'])
         self.min_samples_leaf = int(hyperparameters['min_samples_leaf'])
+        
         if hyperparameters['max_depth'] != 'None':
             self.max_depth = int(hyperparameters['max_depth'])
         else:

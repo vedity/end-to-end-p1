@@ -462,7 +462,7 @@ class ModelStatisticsClass:
             columns = final_df.columns.values
 
             logging.info("COLUMN NAMES:-       -------------"+str(columns))
-            logging.info("RESPONSE DATAAAAAAAAAAAAAAAA:-       -------------"+str(final_df.to_dict(orient='records')))
+            logging.info("RESPONSE DATA:-       -------------"+str(final_df.to_dict(orient='records')))
             # logging.info("COLUMN NAMES:-       -------------"+str(columns))
 
             logging.info("modeling : ModelStatisticsClass : compare_experiments_grid : Exception End")

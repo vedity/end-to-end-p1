@@ -115,9 +115,9 @@ insert into mlaas.model_hyperparams_tbl values (8, 'reg_alpha', '[0, 1]', 'valid
 insert into mlaas.model_hyperparams_tbl values (8, 'reg_lambda', '[0, 1]', 'validation');
 
 
-insert into mlaas.model_hyperparams_tbl values (9, 'loss', '["ls", "lad", "humber", "quantile"]', 'dropdown');
+insert into mlaas.model_hyperparams_tbl values (9, 'loss', '["ls", "lad","quantile"]', 'dropdown');
 insert into mlaas.model_hyperparams_tbl values (9, 'learning_rate', '[0.001, 20]', 'validation');
-insert into mlaas.model_hyperparams_tbl values (9, 'subsample', '[0.1, 100]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (9, 'subsample', '[0.1, 1]', 'validation');
 insert into mlaas.model_hyperparams_tbl values (9, 'n_estimators', '[1, 2000]', 'validation');
 insert into mlaas.model_hyperparams_tbl values (9, 'criterion', '["mse", "friedman_mse", "mae"]', 'dropdown');
 insert into mlaas.model_hyperparams_tbl values (9, 'max_depth', '[2, 30]', 'validation');
@@ -181,7 +181,7 @@ insert into mlaas.model_hyperparams_tbl values (17, 'reg_lambda', '[0,1]', 'vali
 
 insert into mlaas.model_hyperparams_tbl values (18, 'loss', '["deviance", "exponential"]', 'dropdown');
 insert into mlaas.model_hyperparams_tbl values (18, 'learning_rate', '[0.001, 20]', 'validation');
-insert into mlaas.model_hyperparams_tbl values (18, 'subsample', '[0.1, 100]', 'validation');
+insert into mlaas.model_hyperparams_tbl values (18, 'subsample', '[0.1, 1]', 'validation');
 insert into mlaas.model_hyperparams_tbl values (18, 'n_estimators', '[1, 2000]', 'validation');
 insert into mlaas.model_hyperparams_tbl values (18, 'criterion', '["mse", "friedman_mse", "mae"]', 'dropdown');
 insert into mlaas.model_hyperparams_tbl values (18, 'max_depth', '[2, 30]', 'validation');
