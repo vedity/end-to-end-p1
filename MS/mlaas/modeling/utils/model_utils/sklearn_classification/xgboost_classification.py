@@ -120,7 +120,7 @@ class XGBoostClassificationClass:
         x_train = self.X_train[:,1:]
         y_train = self.y_train[:,-1]
  
-        shap_data = x_train[:min(500,x_train.shape[0])]
+        shap_data = x_train[:min(100,x_train.shape[0])]
         tree_explainer = shap.TreeExplainer(model,shap_data)
         shap_values = tree_explainer.shap_values(shap_data, check_additivity=False)
         
@@ -273,5 +273,5 @@ class XGBoostClassificationClass:
         self.MLFlowLogObj.store_model(model, model_name="SVM_Classifier_Model", model_type='sklearn')
         
         # mlflow.log_dict(confusion_matrix, "confusion_matrix.json")
-        print("DONEEE-     \n\n\n OKKK------------------------------")
+        print("DONE")
         

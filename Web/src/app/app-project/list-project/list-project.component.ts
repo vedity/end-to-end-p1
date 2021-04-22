@@ -14,10 +14,19 @@ import Swal from 'sweetalert2';
 export class ListProjectComponent implements OnInit {
   @ViewChild(DataTableDirective, { static: false })
   datatableElement: DataTableDirective;
+  pagelength=10;
   dtOptions: DataTables.Settings = {
     scrollCollapse: true,
     scrollY: "calc(100vh - 420px)",
-    
+    preDrawCallback:function(e){
+      $(".filter-box").on("click",function(event){
+        event.stopPropagation();
+      })
+    },
+    drawCallback:function(e){
+      $("#datatablepagelength").val(e._iDisplayLength);
+    },
+     pageLength:10
   };
   isloaderdiv:boolean=true;
   animation = "progress-dark";
@@ -41,11 +50,16 @@ export class ListProjectComponent implements OnInit {
     }
 	}
 
+//   $('.main-datatable').on( 'length.dt', function ( e, settings, len ) {
+//     console.log( 'New page length: '+len );
+// } );
+
   ngOnInit(): void {
     this.getproject();
   }
 
   getproject() {
+    
     this.apiService.getproject().subscribe(
       logs => this.successHandler(logs),
       error => this.errorHandler(error)
@@ -71,14 +85,6 @@ export class ListProjectComponent implements OnInit {
                 .draw();
             }
           });
-
-          // $('select_'+this.index("visible")).on('change', function () {
-          //   if (that.search() !== this['value']) {
-          //     that
-          //       .search(this['value'])
-          //       .draw();
-          //   }
-          // });
         });
       });
     }
@@ -100,6 +106,7 @@ export class ListProjectComponent implements OnInit {
   }
 
   rendered() {
+    this.dtOptions.pageLength=parseInt($("#datatablepagelength").val().toString());
     this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
       dtInstance.columns().every(function () {
         const that = this;
@@ -110,19 +117,15 @@ export class ListProjectComponent implements OnInit {
               .draw();
           }
         });
-        // $('select', this.header()).on('change', function () {
-        //   if (that.search() !== this['value']) {
-        //     that
-        //       .search(this['value'])
-        //       .draw();
-        //   }
-        // });
       });
       dtInstance.destroy();
     });
   }
 
   confirm(id) {
+    console.log($("#datatablepagelength").val());
+    
+    this.pagelength=parseInt($("#datatablepagelength").val().toString());
     Swal.fire({
       title: 'Are you sure?',
       text: 'You won\'t be able to revert this!',

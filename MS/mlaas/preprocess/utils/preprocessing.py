@@ -74,7 +74,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         self.host = host # Host Name
         self.port = port # Port Number
         self.AT = activity_timeline.ActivityTimelineClass(database, user, password, host, port)
-        self.op_diff = 8 #difference between database_operation ids & universal operation ids
+        # self.op_diff = 8 #difference between database_operation ids & universal operation ids
         
     def get_db_connection(self):
         """This function is used to initialize database connection.
@@ -273,7 +273,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                             operation_dict = {}
                             operation_dict['id'] = j
                             operation_dict['name'] = data['activity_name']
-                            operation_dict['operation_id'] = data['activity_id']
+                            operation_dict['operation_id'] = int(data['activity_id'][3:]) #? Converting String operation_id to integer operation_id
                             operation_dict['user_input'] = data['user_input']
                             operation_dict['check_type'] = data['check_type']
                             handlers.append(operation_dict)
@@ -486,30 +486,30 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     if missing_flag == 'True':
                         #? Adding Missing Value Operations
                         if col_type == 0:
-                            operations += [1,6,7,8,9,10,11,13]
+                            operations += [1,51,61,71,81,91,101,121]
                         elif col_type == 1:
-                            operations += [1,6,7,8,9,10,13]
+                            operations += [1,51,61,71,81,91,121]
                         elif col_type == 2 or col_type == 3:
-                            operations += [1,11,12]
+                            operations += [1,101,111]
                         
                     
                     #? Is there any noise in the column?
                     if noise_flag == 'True':
-                        operations += [2,5,14,15,16,17,18,19]
+                        operations += [11,41,131,141,151,161,171,181]
                     
                     #? Outlier Removal & Scaling Operations for numeric; Encoding ops for Categorical
                     if missing_flag == 'False' and noise_flag == 'False':
                         if col_type == 0 or col_type == 1:
-                            operations += [3,4,20,21,22,23,24,25,26]
+                            operations += [21,31,191,201,211,221,231,241,251]
                         if col_type == 2 or col_type == 3:
-                            operations += [27,28]
+                            operations += [261,271]
                         if col_type == 0:
-                            operations += [28]
+                            operations += [271]
                         
                     #? Math operations
                     if noise_flag == 'False':
                         if col_type == 0 or col_type == 1:
-                            operations += [29,30,31,32]
+                            operations += [281,291,301,311]
                             
                     all_col_operations.append(operations)
                 
@@ -529,7 +529,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 
                 logging.info("data preprocessing : PreprocessingClass : get_possible_operations : execution End")
                 # connection.close()
-                return [i+self.op_diff for i in final_op_list]    
+                # return [i+self.op_diff for i in final_op_list]    
+                return final_op_list
             
             except Exception as exc:
                 # connection.close()
@@ -615,13 +616,13 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             operation_dict = {}
             for dic in data:
                 for op in dic['selected_handling']:
-                    operation_dict[op-self.op_diff] = operation_dict.get(op-self.op_diff,[]) + dic['column_id']
+                    operation_dict[op] = operation_dict.get(op,[]) + dic['column_id']
             
             #? Getting Values in a cleaned formate
             value_dict = {}
             for dic in data:
                 for i,op in enumerate(dic['selected_handling']):
-                    value_dict[op-self.op_diff] = value_dict.get(op-self.op_diff,[]) + [dic['values'][i]]
+                    value_dict[op] = value_dict.get(op,[]) + [dic['values'][i]]
             
             #? Sorting both dictionaries
             operation_dict = {k: v for k, v in sorted(operation_dict.items(), key=lambda item: item[0])}
@@ -1117,7 +1118,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             dag_id='Cleanup_dag_'+str(id)
 
             template = "cleanup_dag.template"
-            namespace = "Cleanup_Dags"
+            namespace = "cleanup_dags"
 
             # #? Inserting into Dag_Status Table
             # col = "dag_id,status"
@@ -1173,7 +1174,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             op_dict, val_dict = self.reorder_operations(request)
             
             template = "cleanup_dag.template"
-            namespace = "Cleanup_Dags"
+            namespace = "cleanup_dags"
             file_name = dag_id + ".py"
 
             master_dict = {
@@ -1198,7 +1199,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 logging.error(f"Dag Updation Failed : Error : {str(status)}")
                 raise DagUpdateFailed(500)
 
-            activity_id = 51
+            activity_id = 'cl_1'
             activity_status = self.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id,user_name,dataset_name,flag='True')
 
             json_data = {}
@@ -1236,7 +1237,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.info("data preprocessing : PreprocessingClass : dag_updater : execution start")
             
             #? Reading the file
-            with open(f"dynamic_dags/{namespace}/{file}","r") as ro:
+            with open(f"project_dags/{namespace}/{file}","r") as ro:
                 content = ro.read()
         
             new_dic = str(dic)
@@ -1273,7 +1274,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             new_str = content[:bracket_start] + new_dic + content[bracket_end + 1:]
         
             #? Writing into the file
-            with open(f"dynamic_dags/{namespace}/{file}", 'w') as wo:
+            with open(f"project_dags/{namespace}/{file}", 'w') as wo:
                 wo.write(new_str)
 
             logging.info("data preprocessing : PreprocessingClass : dag_updater : execution stop")
@@ -1347,6 +1348,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             #? Getting Dag id
             sql_command = f"select pt.cleanup_dag_id from mlaas.project_tbl pt where pt.project_id = '{project_id}'"
+            logging.info("------------>"+sql_command)
             dag_id_df = DBObject.select_records(connection,sql_command) 
             if not isinstance(dag_id_df,pd.DataFrame): #! Failed to get dag status
                 raise NullValue(500)
@@ -1431,7 +1433,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         activity_status,index = self.AT.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
         
         if new_dataset_name != None and flag != 'True': 
-            activity_id=53
+            activity_id='cl_3'
             sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
             desc_df = DBObject.select_records(connection,sql_command)
             activity_description = desc_df['description'][0]
@@ -1477,7 +1479,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                                  ,table_name,user_name,dataset_visibility,
                                  dataset_name,selected_visibility,dataset_desc,cleanup_flag=True)
             if status ==0: 
-                activity_id=53
+                activity_id='cl_3'
                 sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
                 desc_df = DBObject.select_records(connection,sql_command)
                 activity_description = desc_df['description'][0]
@@ -1552,7 +1554,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         
         #? Getting Activity Description
         try:
-            failed_op += self.op_diff
+            # failed_op += self.op_diff
             logging.info("data preprocessing : CleaningClass : operation_failed : execution start")
             activity_description = self.get_act_desc(DBObject, connection, failed_op, col_name, code = 0)
             logging.info(" failed description : "+str(activity_description))

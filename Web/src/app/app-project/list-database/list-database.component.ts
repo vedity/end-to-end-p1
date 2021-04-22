@@ -18,10 +18,21 @@ import { Router } from '@angular/router';
 export class ListDatabaseComponent implements OnInit {
   @ViewChild(DataTableDirective, { static: false })
   datatableElement: DataTableDirective;
+  classfilter:any="nofilter"
   dtOptions: DataTables.Settings = {
     scrollCollapse: true,
     scrollY: "calc(100vh - 520px)",
-    autoWidth:false
+    autoWidth:false,
+    preDrawCallback:function(e){
+      $(".filter-box").on("click",function(event){
+        event.stopPropagation();
+      })
+      
+    },
+    drawCallback:function(e){
+      $("#datatablepagelength").val(e._iDisplayLength);
+    },
+     pageLength:10
   };
   dtTrigger: Subject<any> = new Subject<any>();
   data: createdataset = new createdataset();
@@ -72,9 +83,7 @@ export class ListDatabaseComponent implements OnInit {
       this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
         dtInstance.columns().every(function () {
           const that = this;
-          
           $('#input_'+ this.index("visible")).on('keyup change', function () {
-            console.log(this['value']);
             if (that.search() !== this['value']) {
               that
                 .search(this['value'])
@@ -87,6 +96,7 @@ export class ListDatabaseComponent implements OnInit {
     }
     else {
       this.rendered();
+
     }
     setTimeout(() => {
       this.isloaderdiv=false;
@@ -102,10 +112,11 @@ export class ListDatabaseComponent implements OnInit {
     }
   }
 
- 
+
 
   displayfilter() {
     this.filter = !this.filter;
+    $(".filter-tr").toggleClass("nofilter");
     $('.filter').val('').trigger('change');
   }
 
@@ -140,52 +151,31 @@ export class ListDatabaseComponent implements OnInit {
     });
   }
 
-  
+
+
+  // rendered() {
+  //   let currentUrl = this.router.url;
+  //   this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+  //   this.router.onSameUrlNavigation = 'reload';
+  //   this.router.navigate([currentUrl]);
+  // }
 
   rendered() {
-    let currentUrl = this.router.url;
-    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-    this.router.onSameUrlNavigation = 'reload';
-    this.router.navigate([currentUrl]);
+    this.dtOptions.pageLength=parseInt($("#datatablepagelength").val().toString());
+    this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
+      dtInstance.columns().every(function () {
+        const that = this;
+        $('#input_'+ this.index("visible")).on('keyup change', function () {
+          if (that.search() !== this['value']) {
+            that
+              .search(this['value'])
+              .draw();
+          }
+        });
+      });
+      dtInstance.destroy();
+    });
+    this.dtTrigger.next();
   }
 
-  // errorStatus: boolean = true
-  // save() {
-  //   let savedata = new FormData();
-  //   var user = JSON.parse(localStorage.getItem("currentUser"));
-  //   savedata.append('user_name', user.username)//.user_name="admin";
-  //   savedata.append('dataset_name', this.data.datasetname);
-  //   if (this.data.isprivate)
-  //     savedata.append('visibility', "private");
-  //   else
-  //     savedata.append('visibility', "public");
-  //   savedata.append('inputfile', this.datasetfile);
-  //   savedata.append('dataset_description', this.data.datasetdescription);
-  //   this.loaderdiv = true;
-  //   this.modalService.dismissAll();
-  //   this.apiService.savedataset(savedata).subscribe(
-  //     logs => this.savesuccess(logs),
-  //     error => this.errorHandler(error)
-  //   )
-  // }
-
-  // savesuccess(data) {
-  //   if (data.status_code == "200") {
-
-  //     this.loaderdiv = false;
-  //     this.getdataset();
-  //   }
-  //   else
-  //     this.errorHandler(data);
-  // }
-
-  // smallModal(smallDataModal: any) {
-  //   this.data = new createdataset();
-  //   this.data.isprivate=true;
-  //   this.datasetnameuniqueerror = false;
-  //   this.errorStatus=true;
-  //   this.modalService.open(smallDataModal, { size: 'sm',windowClass:'modal-holder', centered: true });
-  //   bsCustomFileInput.init();
-
-  // }
 }

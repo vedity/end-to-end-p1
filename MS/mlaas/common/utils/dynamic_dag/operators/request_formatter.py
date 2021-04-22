@@ -12,7 +12,7 @@ class RestToTemplateWrapperOperator(TemplateOperator):
         super().__init__(*args, **kwargs)
         self.script_dir = os.path.dirname(__file__)
         self.dynamic_dag_dir = os.environ.get(
-            'DYNAMIC_DAG_DIR', '/usr/local/airflow/dags/dynamic_dags')
+            'DYNAMIC_DAG_DIR', '/usr/local/airflow/dags/project_dags')
         
     def execute(self, context):
         

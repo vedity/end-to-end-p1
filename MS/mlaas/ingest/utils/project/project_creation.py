@@ -194,14 +194,14 @@ class ProjectClass:
                 project_id,schema_id = self.get_project_id(DBObject,connection,row_tuples,user_name) 
                     
                 #get the schema mapping details with column name and datatype
-                column_name_list,column_datatype_list = schema_obj.get_dataset_schema(DBObject,connection,dataset_id) 
+                column_name_list,column_datatype_list,date_format = schema_obj.get_dataset_schema(DBObject,connection,dataset_id) 
                     
                 missing_value_lst,noise_status_lst = preprocessObj.get_preprocess_cache(DBObject,connection,dataset_id)
                     
                 missing_value_lst,noise_status_lst = list(missing_value_lst),list(noise_status_lst)
                 # column name and datatype will be inserted into schema table with schema id
                     
-                status=schema_obj.update_dataset_schema(DBObject,connection,schema_id,column_name_list,column_datatype_list,missing_flag=missing_value_lst,noise_flag=noise_status_lst)
+                status=schema_obj.update_dataset_schema(DBObject,connection,schema_id,column_name_list,column_datatype_list,missing_flag=missing_value_lst,noise_flag=noise_status_lst,date_format=date_format)
                     
             else:
                 raise ProjectCreationFailed(500)
@@ -399,12 +399,12 @@ class ProjectClass:
             #? Checking if Same project_name exists for the same user
             project_name=str(project_name).replace("'","''")
             sql_command = f"SELECT PROJECT_ID FROM {table_name} WHERE PROJECT_NAME = '{project_name}' AND USER_NAME = '{user_name}'"
-           
+
 
             data=DBObject.select_records(connection,sql_command)
             data=len(data)
 
-           
+
             logging.info("data ingestion : ProjectClass : project_exists : execution end")
             
             #! Same project_name exists for the same user, then return status True

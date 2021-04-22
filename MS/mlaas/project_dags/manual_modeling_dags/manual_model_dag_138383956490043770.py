@@ -16,7 +16,7 @@ from modeling.all_supervised_models import *
 
 args = {'owner': 'airflow','start_date': airflow.utils.dates.days_ago(1),'provide_context': True,}
 
-main_dag_id = #DAG_ID
+main_dag_id = "manual_model_dag_138383956490043770"
 
 dag = DAG(dag_id=main_dag_id,default_args=args,catchup=False,schedule_interval = '@once',)
 
@@ -27,7 +27,7 @@ start_task = PythonOperator(task_id='start_pipeline',python_callable=start_pipel
 
 # Get model dict 
 
-master_dict = #MASTER_DICT
+master_dict = {}
 
 if len(master_dict) != 0:
 

@@ -18,7 +18,7 @@ PC_OBJ = PreprocessingClass(database,user,password,host,port)
 
 yesterday_date = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')
 
-main_dag_id = #DAG_ID
+main_dag_id = "Cleanup_dag_138383956455727980"
 
 args = {
     'owner': 'airflow',
@@ -36,7 +36,7 @@ dag = DAG(
 
 #? Getting Required Parameters
 
-master_dict = #MASTER_DICT 
+master_dict = {'active': 1, 'operation_dict': {271: [8]}, 'values_dict': {271: ['']}, 'schema_id': '7', 'dataset_id': '13', 'project_id': '7', 'save_as': 'False', 'visibility': None, 'dataset_name': None, 'dataset_desc': None, 'user_name': 'abhishek'} 
 
 if int(master_dict['active']) == 0:
     sys.exit()

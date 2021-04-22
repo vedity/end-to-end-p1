@@ -49,9 +49,10 @@ class DecisionTreeRegressionClass:
         self.y_valid = y_valid
 
         self.criterion = hyperparameters['criterion']
-        self.max_features = int(hyperparameters['max_features'])
-        self.min_impurity_decrease = int(hyperparameters['min_impurity_decrease'])
+        self.max_features = hyperparameters['max_features']
+        self.min_impurity_decrease = float(hyperparameters['min_impurity_decrease'])
         self.min_samples_leaf = int(hyperparameters['min_samples_leaf'])
+        
         if hyperparameters['max_depth'] != 'None':
             self.max_depth = int(hyperparameters['max_depth'])
         else:
@@ -275,12 +276,10 @@ class DecisionTreeRegressionClass:
         print("HOLDOUTR SCOREE")
         # get model summary
         model_summary = self.model_summary() # high level model summary
-        print("MODEL SUMMARYYYYYYYYYYYY")
+        print("MODEL SUMMARY")
         # get model learning curve
         learning_curve_dict = self.get_learning_curve(model)
         print("LEARNING CURVEE DICT")
-        
-        # log mlflow parameter
         
         # log mlflow matrix
         self.MLFlowLogObj.store_model_metrics(r2_score=r2score, mae=mae, mse=mse, mape=mape, 
@@ -295,4 +294,4 @@ class DecisionTreeRegressionClass:
         # Store the Machine Learning Model.
         self.MLFlowLogObj.store_model(model, model_name="DecisionTreeRegression", model_type='sklearn')
 
-        print("ENDING\n\n\n\n\n DONE--------------------------------------------")
+        print("ENDING")

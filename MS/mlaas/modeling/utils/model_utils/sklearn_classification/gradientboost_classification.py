@@ -51,12 +51,13 @@ class GradientBoostingClassificationClass:
 
         self.loss = hyperparameters['loss']
         self.learning_rate = float(hyperparameters['learning_rate'])
-        self.subsample = int(hyperparameters['subsample'])
+        self.subsample = float(hyperparameters['subsample'])
         self.n_estimators = int(hyperparameters['n_estimators'])
         self.criterion = hyperparameters['criterion']
-        self.max_features = int(hyperparameters['max_features'])
-        self.min_impurity_decrease = int(hyperparameters['min_impurity_decrease'])
+        self.max_features = hyperparameters['max_features']
+        self.min_impurity_decrease = float(hyperparameters['min_impurity_decrease'])
         self.min_samples_leaf = int(hyperparameters['min_samples_leaf'])
+        
         if hyperparameters['max_depth'] != 'None':
             self.max_depth = int(hyperparameters['max_depth'])
         else:
@@ -316,4 +317,4 @@ class GradientBoostingClassificationClass:
         self.MLFlowLogObj.store_model(model, model_name="GradientBoosting_Classification", model_type='sklearn')
         
         # mlflow.log_dict(confusion_matrix, "confusion_matrix.json")
-        print("DONEEE-     \n\n\n OKKK------------------------------")
+        print("DONE")
