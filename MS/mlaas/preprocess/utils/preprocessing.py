@@ -705,10 +705,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
     #             col_names = [column_list[i] for i in col]
     #             try:
     #                 if op == 1:
-    #                     status = self.discard_missing_values(DBObject,connection,column_list, dataset_table_name, col)
-    #                     if status == 0:
-    #                         for col_name in col_names:
-    #                             sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
+    #                     status = self.delete_low_variance_column(DBObject,connection,project_id,schema_id,column_list,column_list, dataset_table_name)
+    #                     # status = self.delete_duplicate_column(DBObject,connection,project_id,schema_id, dataset_table_name)
+    #                     # if status == 0:
+    #                     #     for col_name in col_names:
+    #                     #         sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
                         
     #                 elif op == 2:
     #                     status = self.discard_noise(DBObject,connection,column_list, dataset_table_name, col)
@@ -866,6 +867,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                         
     #                 elif op == 32:
     #                     status = self.multiply_column(DBObject,connection,column_list, dataset_table_name, col, value)
+                    
+                
                         
     #                 if status != 0:
     #                     #? Sql function Failed

@@ -71,6 +71,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         
         return super().robust_scaling(dataframe)
     
+    
     # def custom_scaling(self, dataframe, max, min):
         
     #     logging.info("data preprocessing : TransformationClass : duplicate_data_removal : execution start")
@@ -98,7 +99,84 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
 
     #     logging.info("data preprocessing : TransformationClass : label_encoding : execution stop")
     #     return dataframe
+    def delete_duplicate_records(self,DBObject,connection,project_id,column_list,old_column_list, table_name, **kwargs):
+        '''
+            Operation id: ?
+        '''
+        
+        logging.info("data preprocessing : CleaningClass : delete_duplicate_records : execution start")
+        try:
+            
+            col_string = ''
+            # operation_id = 7
+            for x in old_column_list:
+                col_string += '"'+str(x)+'",'
     
+            status = super().delete_duplicate_records(DBObject,connection,table_name,col_string[:-1])
+                
+        except Exception as exc:
+                return str(exc)
+        logging.info("data preprocessing : CleaningClass : delete_duplicate_records : execution stop")
+        return status
+    
+    def delete_duplicate_column(self,DBObject,connection,schema_id,project_id, table_name):
+        '''
+            Operation id: ?
+        '''
+        
+        logging.info("data preprocessing : TransformationClass : delete_duplicate_column : execution start")
+        try:
+            # #Insert the activity for the operation
+            # activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
+
+            status,column_list = super().delete_duplicate_column(DBObject,connection,schema_id,table_name)
+
+            # if status==0:
+            #     #Update the activity status for the operation performed
+            #     at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+            return status
+        except Exception as exc:
+            logging.info("data preprocessing : TransformationClass : delete_duplicate_column : Exception : "+str(exc))
+            return 1
+
+        
+
+    def delete_low_variance_column(self,DBObject,connection,project_id,schema_id,column_list,old_column_list, table_name,variance=0.5, **kwargs):
+        '''
+            Operation id: ?
+        '''
+        
+        logging.info("data preprocessing : TransformationClass : delete_low_variance_column : execution start")
+        try:
+
+            #Initialize the empty list
+            variance_column = []
+            status = 0
+
+            for index,col_name in enumerate(old_column_list):
+
+                #Query to get Boolean value  "True" if column variance is less ten te given variance else return "False"
+                sql_command = f'''select  case when VARIANCE("{col_name}") < {str(variance)} then 'True' else 'False' end as variance_status from {table_name}  '''
+                
+                #Execute the sql query
+                dataframe = DBObject.select_records(connection,sql_command)
+                if str(dataframe['variance_status'][0]) =='True':
+
+                    #Append Name of column into a list variable called "variance_column"
+                    variance_column.append(column_list[index])
+
+                    #Delete the column from the table
+                    status = super().delete_column(DBObject,connection,schema_id,table_name,col_name)
+                
+        except Exception as exc:
+                logging.info("data preprocessing : TransformationClass : delete_low_variance_column : Exception : "+str(exc))
+                return 1
+
+        logging.info("data preprocessing : TransformationClass : delete_low_variance_column : execution stop")
+        return status
+    
+
+
     def label_encoding(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
             Operation id: 27

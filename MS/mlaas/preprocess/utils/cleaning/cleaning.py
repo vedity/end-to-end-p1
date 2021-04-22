@@ -931,6 +931,131 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : repl_outliers_mode_z_score : execution stop")
         return status
     
+
+    def repl_outliers_iqr_proximity(self,DBObject,connection,project_id,column_list,old_column_list, table_name,col, **kwargs):
+        '''
+            Operation id: ?
+        '''
+        logging.info("data preprocessing : CleaningClass : repl_outliers_iqr_proximity : execution start")
+        try:
+            
+            #Extract the column name based on the column id's
+            cols = [column_list[i] for i in col]
+            old_cols = [old_column_list[i] for i in col]
+        
+            # #Operation Id to get activity details
+            # operation_id =
+            
+            for i,col_name in enumerate(cols):
+
+                # #Insert the activity for the operation
+                # activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
+                status = super().replace_outliers(DBObject,connection,table_name,old_cols[i],impute_value = None , detect_method = 2,method_type = 'iqr_proximity')
+                
+                # #Update the activity status for the operation performed
+                # at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                
+        except Exception as exc:
+                logging.info("data preprocessing : CleaningClass : repl_outliers_iqr_proximity : Exception : "+str(exc))
+                return str(exc)
+        logging.info("data preprocessing : CleaningClass : repl_outliers_iqr_proximity : execution stop")
+        return status
+    
+
+    def repl_outliers_Gaussian_approx(self,DBObject,connection,project_id,column_list,old_column_list, table_name,col, **kwargs):
+        '''
+            Operation id: ?
+        '''
+        logging.info("data preprocessing : CleaningClass : repl_outliers_Gaussian_approx : execution start")
+        try:
+            
+            #Extract the column name based on the column id's
+            cols = [column_list[i] for i in col]
+            old_cols = [old_column_list[i] for i in col]
+        
+            # #Operation Id to get activity details
+            # operation_id =
+            
+            for i,col_name in enumerate(cols):
+
+                # #Insert the activity for the operation
+                # activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
+                status = super().replace_outliers(DBObject,connection,table_name,old_cols[i],impute_value = None , detect_method = 2,method_type = 'Gaussian_approx')
+                
+                # #Update the activity status for the operation performed
+                # at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                
+        except Exception as exc:
+                logging.info("data preprocessing : CleaningClass : repl_outliers_Gaussian_approx : Exception : "+str(exc))
+                return str(exc)
+        logging.info("data preprocessing : CleaningClass : repl_outliers_Gaussian_approx : execution stop")
+        return status
+    
+    def repl_outliers_quantiles(self,DBObject,connection,project_id,column_list,old_column_list, table_name,col, **kwargs):
+        '''
+            Operation id: ?
+        '''
+        logging.info("data preprocessing : CleaningClass : repl_outliers_quantiles : execution start")
+        try:
+            
+            #Extract the column name based on the column id's
+            cols = [column_list[i] for i in col]
+            old_cols = [old_column_list[i] for i in col]
+        
+            # #Operation Id to get activity details
+            # operation_id = ?
+            
+            for i,col_name in enumerate(cols):
+
+                # #Insert the activity for the operation
+                # activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
+                
+                lower_limit,upper_limit = super().get_upper_lower_limit(DBObject,connection,col_name,table_name,method_type = 'quantiles' ,quantile_1=0.25,quantile_2=0.75)
+                status = super().update_outliers(DBObject,connection,lower_limit,upper_limit,old_cols[i],table_name)
+                
+                # #Update the activity status for the operation performed
+                # at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                
+        except Exception as exc:
+                logging.info("data preprocessing : CleaningClass : repl_outliers_quantiles : Exception : "+str(exc))
+                return str(exc)
+        logging.info("data preprocessing : CleaningClass : repl_outliers_quantiles : execution stop")
+        return status
+    
+    def repl_outliers_arbitrarily(self,DBObject,connection,project_id,column_list,old_column_list, table_name,col, **kwargs):
+        '''
+            Operation id: ?
+        '''
+        logging.info("data preprocessing : CleaningClass : repl_outliers_arbitrarily : execution start")
+        try:
+            
+            #Extract the column name based on the column id's
+            cols = [column_list[i] for i in col]
+            old_cols = [old_column_list[i] for i in col]
+        
+            # #Operation Id to get activity details
+            # operation_id = ?
+            
+            for i,col_name in enumerate(cols):
+
+                # #Insert the activity for the operation
+                # activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
+                
+                lower_limit = 10
+                upper_limit = 90
+                status = super().update_outliers(DBObject,connection,lower_limit,upper_limit,old_cols[i],table_name)
+                
+                # #Update the activity status for the operation performed
+                # at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                
+        except Exception as exc:
+                logging.info("data preprocessing : CleaningClass : repl_outliers_arbitrarily : Exception : "+str(exc))
+                return str(exc)
+        logging.info("data preprocessing : CleaningClass : repl_outliers_arbitrarily : execution stop")
+        return status
+
+
+        
     def apply_log_transformation(self,DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
             Operation id: 26
@@ -962,25 +1087,6 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : apply_log_transformation : execution stop")
         return status
     
-    def delete_duplicate_records(self,DBObject,connection,project_id,column_list,old_column_list, table_name, **kwargs):
-        '''
-            Operation id: ?
-        '''
-        
-        logging.info("data preprocessing : CleaningClass : delete_duplicate_records : execution start")
-        try:
-            
-            col_string = ''
-            # operation_id = 7
-            for x in column_list:
-                col_string += '"'+str(x)+'",'
-    
-            status = super().delete_duplicate_records(DBObject,connection,table_name,col_string[:-1])
-                
-        except Exception as exc:
-                return str(exc)
-        logging.info("data preprocessing : CleaningClass : delete_duplicate_records : execution stop")
-        return status
 
 
     #* ACTIVITY TIMELINE FUNCTIONS
