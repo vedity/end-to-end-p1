@@ -23,29 +23,13 @@ export class ListDatabaseComponent implements OnInit {
     scrollCollapse: true,
     scrollY: "calc(100vh - 520px)",
     autoWidth:false,
+    preDrawCallback:function(e){
+      $(".filter-box").on("click",function(event){
+        event.stopPropagation();
+      })
+      
+    },
     drawCallback:function(e){
-     // if($(".filter-thead").find('.filter-tr').length==0){
-      $(".filter-thead").html('<tr class="thead-light filter-tr nofilter">'+
-      '<td>'+
-          '<input class="form-control filter" id="input_0" type="text" name="search-dataset-name" />'+
-      '</td>'+
-      '<td>'+
-          '<input class="form-control filter" id="input_1" type="text" name="search-size" />'+
-      '</td>'+
-      '<td>'+
-          '<input class="form-control filter" id="input_2" type="text" name="search-total_rows" />'+
-      '</td>'+
-      '<td>'+
-          '<select class="form-control filter" id="input_3" name="search-visibility">'+
-              '<option value="">None</option>'+
-              '<option value="Public">Public</option>'+
-              '<option value="Private">Private</option>'+
-          '</select>'+
-      '</td>'+
-      '<td><input class="form-control filter" type="text" id="input_4" name="search-created-by" /></td>'+
-      '<td></td>'
-      +'<td></td> </tr>');
-     // }
       $("#datatablepagelength").val(e._iDisplayLength);
     },
      pageLength:10
