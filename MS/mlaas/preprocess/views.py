@@ -435,7 +435,7 @@ class ScalingSplitClass(APIView):
                                 #! Some operations are still remaining before we can proceed to the modelling.
                                 return Response({"status_code":"500","error_msg":desc,"response":flag})
 
-                        activity_id = 49 
+                        activity_id = 'ss_1'
                         activity_df = AT_OBJ.get_activity(activity_id,"US")
                         projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
                         project_name = projectnm_df['project_name'][0]
@@ -448,7 +448,7 @@ class ScalingSplitClass(APIView):
                                 return Response({"status_code":"500","error_msg":status,"response":"false"})
                                 
                         logging.info("data preprocess : ScalingSplitClass : POST Method : execution stop")
-                        activity_id = 50
+                        activity_id = 'ss_2'
                         activity_df = AT_OBJ.get_activity(activity_id,"US")
                         projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
                         project_name = projectnm_df['project_name'][0]

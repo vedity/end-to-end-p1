@@ -147,7 +147,7 @@ class CreateProjectClass(APIView):
                                         logging.info("data ingestion : CreateProjectClass : POST Method : execution stop : status_code :"+status_code)
                                         return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                                 else:
-                                        activity_id = 3
+                                        activity_id = 'in_3'
                                         activity_df = timeline_Obj.get_activity(activity_id,"US")
                                         activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= project_name)
                                         end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
@@ -250,7 +250,7 @@ class CreateDatasetClass(APIView):
                                 logging.info("data ingestion : CreateDatasetClass : POST Method : execution stop : status_code :"+status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                         else:
-                                activity_id = 1
+                                activity_id = 'in_1'
                                 activity_df = timeline_Obj.get_activity(activity_id,"US")
                                 activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= dataset_name)
                                 
@@ -387,24 +387,25 @@ class DeleteProjectDetailClass(APIView):
                         modelling_process = PC_OBJ.get_modelling_status(DBObject,connection,project_id) #check model runnig
                         if modelling_process == True:
                                 return Response({"status_code":"500","error_msg":"Can't Delete,Model Running!","response":"false"}) 
-                        project_status,dataset_id,project_name= IngestionObj.delete_project_details(project_id,user_name,DBObject,connection)  #get the project_status if project Deletion failed or successfull
-                        if project_status != 0:
-                                status_code,error_msg=json_obj.get_Status_code(project_status) # extract the status_code and error_msg from  project_status
-                                logging.info("data ingestion : DeleteProjectDetailClass : DELETE Method : execution stop : status_code :"+status_code)
-                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
-                        else:
-                                activity_id = 4
-                                activity_df = timeline_Obj.get_activity(activity_id,"US")
-                                activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= project_name)
-                                end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
-                                activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time)
-                                if isinstance(activity_status,str):
-                                        status_code,error_msg=json_obj.get_Status_code(activity_status) # extract the status_code and error_msg from activity_status
+                        if cleanup_process == False and modelling_process == False:
+                                project_status,dataset_id,project_name= IngestionObj.delete_project_details(project_id,user_name,DBObject,connection)  #get the project_status if project Deletion failed or successfull
+                                if project_status != 0:
+                                        status_code,error_msg=json_obj.get_Status_code(project_status) # extract the status_code and error_msg from  project_status
                                         logging.info("data ingestion : DeleteProjectDetailClass : DELETE Method : execution stop : status_code :"+status_code)
-                                        return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                                        return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"}) 
                                 else:
-                                        logging.info("data ingestion : DeleteProjectDetailClass : DELETE Method : execution stop : status_code :200")
-                                        return Response({"status_code":"200","error_msg":"Successfully deleted","response":"true"})
+                                        activity_id = 'in_4'
+                                        activity_df = timeline_Obj.get_activity(activity_id,"US")
+                                        activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= project_name)
+                                        end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                                        activity_status,index = timeline_Obj.insert_user_activity(activity_id,user_name,project_id,str(dataset_id),activity_description,end_time)
+                                        if isinstance(activity_status,str):
+                                                status_code,error_msg=json_obj.get_Status_code(activity_status) # extract the status_code and error_msg from activity_status
+                                                logging.info("data ingestion : DeleteProjectDetailClass : DELETE Method : execution stop : status_code :"+status_code)
+                                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                                        else:
+                                                logging.info("data ingestion : DeleteProjectDetailClass : DELETE Method : execution stop : status_code :200")
+                                                return Response({"status_code":"200","error_msg":"Successfully deleted","response":"true"})
                 except Exception as e:
                         logging.error("data ingestion : DeleteProjectDetailClass : DELETE Method :  Exception : " + str(e))
                         logging.error("data ingestion : DeleteProjectDetailClass : DELETE Method : " +traceback.format_exc())
@@ -439,7 +440,7 @@ class DeleteDatasetDetailClass(APIView):
                         else:
                                 
                                 project_id=0
-                                activity_id = 2
+                                activity_id = 'in_2'
                                 activity_df = timeline_Obj.get_activity(activity_id,"US")
                                 activity_description = "{x} '{y}'".format(x=activity_df[0]["activity_description"],y= dataset_name)
                                 end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
