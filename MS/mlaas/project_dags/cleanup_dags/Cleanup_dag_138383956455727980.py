@@ -18,7 +18,7 @@ PC_OBJ = PreprocessingClass(database,user,password,host,port)
 
 yesterday_date = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')
 
-main_dag_id = "Cleanup_dag_138382921565765530"
+main_dag_id = "Cleanup_dag_138383956455727980"
 
 args = {
     'owner': 'airflow',
@@ -36,7 +36,7 @@ dag = DAG(
 
 #? Getting Required Parameters
 
-master_dict = {'active': 0} 
+master_dict = {'active': 1, 'operation_dict': {271: [8]}, 'values_dict': {271: ['']}, 'schema_id': '7', 'dataset_id': '13', 'project_id': '7', 'save_as': 'False', 'visibility': None, 'dataset_name': None, 'dataset_desc': None, 'user_name': 'abhishek'} 
 
 if int(master_dict['active']) == 0:
     sys.exit()
@@ -115,7 +115,7 @@ def dag_end(DBObject,connection,dataset_id,project_id,dag_id,new_user_name,datas
         To reset the dag status
     '''
     status = PC_OBJ.check_failed_col(DBObject, connection,dataset_id,project_id,new_user_name,col_list, dag_id)
-    activity_id = 52
+    activity_id = 'cl_2'
     status = PC_OBJ.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id,new_user_name,dataset_name,flag=False)
     return status
 

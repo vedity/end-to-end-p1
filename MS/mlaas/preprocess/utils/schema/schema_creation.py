@@ -180,7 +180,7 @@ class SchemaClass:
             change_column_name = [] # get change column 
             
             index_list = [] #get the index id
- 
+
             target_count = 0
             for count in range(len(schema_data)):
 
@@ -303,15 +303,15 @@ class SchemaClass:
             
             #check length of  change_column_lst if true append 5 as ID
             if len(change_column_lst)!=0:
-                activity_id.append(5)
+                activity_id.append('sm_5')
 
             #check length of  target_column_lst if true append 6 as ID
             if len(target_column_lst)!=0:
-                activity_id.append(6)
+                activity_id.append('sm_6')
 
             #check length of  target_column_lst if true append 7 as ID
             if len(ignore_column_lst)!=0:
-                activity_id.append(7)
+                activity_id.append('sm_7')
             
             status = 0 
             for id in activity_id:
@@ -324,18 +324,18 @@ class SchemaClass:
 
                 activity=""
 
-                if id==5:
+                if id=='sm_5':
                     column_string = " "
                     column_string = activity_description+" <br/>"
                     for count in range(len(change_column_lst)):
                         column_string += str(column_lst[count])+" <-> "+str(change_column_lst[count])+"<br/> "
                     activity = column_string
 
-                elif id==6:
+                elif id=='sm_6':
                     column_target=",".join(target_column_lst)
                     activity = activity_description.replace('*',column_target).replace('$',dataset_name)+","
 
-                elif id==7:
+                elif id=='sm_7':
                     column_ignore=",".join(ignore_column_lst)
                     activity = activity_description.replace('*',column_ignore)+","
                 

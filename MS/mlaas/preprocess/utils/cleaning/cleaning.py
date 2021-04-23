@@ -41,7 +41,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     '''
     
     def __init__(self):
-        self.op_diff = 8
+        # self.op_diff = 8
         self.AT = activity_timeline.ActivityTimelineClass(database, user, password, host, port)
         
     
@@ -54,7 +54,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         
         #Operation Id to get activity details
-        operation_id = 1
+        operation_id = 'dp_1'
 
         logging.info("data preprocessing : CleaningClass : discard_missing_values : execution start")
 
@@ -84,7 +84,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : mean_imputation : execution start" + str(col))
 
         #Operation Id to get activity details
-        operation_id = 6
+        operation_id = 'dp_51'
 
         #Extract the column name based on the column id's
         cols = [column_list[i] for i in col]
@@ -124,7 +124,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : median_imputation : execution start")
         
         #Operation Id to get activity details
-        operation_id = 7
+        operation_id = 'dp_61'
         
         #Extract the column name based on the column id's
         cols = [column_list[i] for i in col]
@@ -163,7 +163,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         old_cols = [old_column_list[i] for i in col]
         
         #Operation Id to get activity details
-        operation_id = 8
+        operation_id = 'dp_71'
         
         for i,col_name in enumerate(cols):
             try:
@@ -196,7 +196,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         old_cols = [old_column_list[i] for i in col]
         
         #Operation Id to get activity details
-        operation_id = 10
+        operation_id = 'dp_91'
 
         
         for i,col_name in enumerate(cols):
@@ -237,9 +237,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
         #Operation Id to get activity details
         if not flag:
-            operation_id = 12
+            operation_id = 'dp_111'
         else:
-            operation_id = 9
+            operation_id = 'dp_81'
 
         for i,col_name in enumerate(cols):
             try:
@@ -275,7 +275,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         old_cols = [old_column_list[i] for i in col]
         
         #Operation Id to get activity details
-        operation_id = 11
+        operation_id = 'dp_101'
 
         
         for i,col_name in enumerate(cols):
@@ -318,7 +318,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         old_cols = [old_column_list[i] for i in col]
         
         #Operation Id to get activity details
-        operation_id = 13
+        operation_id = 'dp_121'
         
         for i,col_name in enumerate(cols):
             try:
@@ -380,7 +380,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         old_cols = [old_column_list[i] for i in col]
         
         #Operation Id to get activity details
-        operation_id = 5
+        operation_id = 'dp_41'
         
         for i,col_name in enumerate(cols):
             try:
@@ -411,7 +411,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         old_cols = [old_column_list[i] for i in col]
         
         #Operation Id to get activity details
-        operation_id = 2
+        operation_id = 'dp_11'
         
         for i,col_name in enumerate(cols):
             try:
@@ -444,7 +444,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         old_cols = [old_column_list[i] for i in col]
         
         #Operation Id to get activity details
-        operation_id = 14
+        operation_id = 'dp_131'
         
         for i,col_name in enumerate(cols):
             try:
@@ -478,7 +478,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         old_cols = [old_column_list[i] for i in col]
         
         #Operation Id to get activity details
-        operation_id = 15
+        operation_id = 'dp_141'
         
         for i,col_name in enumerate(cols):
             try:
@@ -511,7 +511,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         old_cols = [old_column_list[i] for i in col]
         
         #Operation Id to get activity details
-        operation_id = 16
+        operation_id = 'dp_151'
         
         for i,col_name in enumerate(cols):
             try:
@@ -545,7 +545,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         old_cols = [old_column_list[i] for i in col]
         
         #Operation Id to get activity details
-        operation_id = 17
+        operation_id = 'dp_161'
         
         for i,col_name in enumerate(cols):
             try:
@@ -578,7 +578,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         old_cols = [old_column_list[i] for i in col]
         
         #Operation Id to get activity details
-        operation_id = 18
+        operation_id = 'dp_171'
         
         for i,col_name in enumerate(cols):
             try:
@@ -611,7 +611,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         old_cols = [old_column_list[i] for i in col]
         
         #Operation Id to get activity details
-        operation_id = 19
+        operation_id = 'dp_181'
         
         for i,col_name in enumerate(cols):
             try:
@@ -647,7 +647,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         old_cols = [old_column_list[i] for i in col]
         
         #Operation Id to get activity details
-        operation_id = 3
+        operation_id = 'dp_21'
         
         for i,col_name in enumerate(cols):
             try:
@@ -676,7 +676,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         old_cols = [old_column_list[i] for i in col]
         
         #Operation Id to get activity details
-        operation_id = 4
+        operation_id = 'dp_31'
         
         for i,col_name in enumerate(cols):
             try:
@@ -707,7 +707,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         old_cols = [old_column_list[i] for i in col]
         
         #Operation Id to get activity details
-        operation_id = 20
+        operation_id = 'dp_191'
         
         for i,col_name in enumerate(cols):
             try:
@@ -739,7 +739,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         old_cols = [old_column_list[i] for i in col]
         
         #Operation Id to get activity details
-        operation_id = 21
+        operation_id = 'dp_201'
         
         for i,col_name in enumerate(cols):
             try:
@@ -773,7 +773,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         old_cols = [old_column_list[i] for i in col]
         
         #Operation Id to get activity details
-        operation_id = 22
+        operation_id = 'dp_211'
         
         for i,col_name in enumerate(cols):
             try:
@@ -810,7 +810,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         old_cols = [old_column_list[i] for i in col]
         
         #Operation Id to get activity details
-        operation_id = 23
+        operation_id = 'dp_221'
         
         for i,col_name in enumerate(cols):
             try:
@@ -845,7 +845,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         old_cols = [old_column_list[i] for i in col]
         
         #Operation Id to get activity details
-        operation_id = 24
+        operation_id = 'dp_231'
         
         for i,col_name in enumerate(cols):
             try:
@@ -882,7 +882,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         old_cols = [old_column_list[i] for i in col]
         
         #Operation Id to get activity details
-        operation_id = 25
+        operation_id = 'dp_241'
         
         for i,col_name in enumerate(cols):
             try:
@@ -917,7 +917,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         old_cols = [old_column_list[i] for i in col]
         
         #Operation Id to get activity details
-        operation_id = 7
+        operation_id = 'dp_7'
         
         for i,col_name in enumerate(cols):
             try:
@@ -955,7 +955,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         old_cols = [old_column_list[i] for i in col]
         
         #Operation Id to get activity details
-        operation_id = 7
+        operation_id = 'dp_7'
         
         for i,col_name in enumerate(cols):
             try:
@@ -991,7 +991,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
             old_cols = [old_column_list[i] for i in col]
         
             #Operation Id to get activity details
-            operation_id = 26
+            operation_id = 'dp_251'
             
             
         
@@ -1021,7 +1021,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         try:
             
             col_string = ''
-            # operation_id = 7
+            # operation_id = 'dp_7
             for x in column_list:
                 col_string += '"'+str(x)+'",'
     
@@ -1071,7 +1071,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : operation_start : execution start")
             
         #? Transforming the operation_id to the operation id stored in the activity timeline table. 
-        operation_id += self.op_diff
+        # operation_id += self.op_diff
         
         #? Getting Activity Description
         desc = self.get_act_desc(DBObject, connection, operation_id, col_name, code = 1)
@@ -1100,7 +1100,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : operation_end : execution start")
         
         #? Transforming the operation_id to the operation id stored in the activity timeline table. 
-        operation_id += self.op_diff
+        # operation_id += self.op_diff
         
         #? Getting Activity Description
         desc = self.get_act_desc(DBObject, connection, operation_id, col_name, code = 2)
@@ -1124,7 +1124,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : operation_end : execution start")
         
         #? Transforming the operation_id to the operation id stored in the activity timeline table. 
-        operation_id += self.op_diff
+        # operation_id += self.op_diff
         
         #? Getting Activity Description
         desc = self.get_act_desc(DBObject, connection, operation_id, col_name, code = 0)

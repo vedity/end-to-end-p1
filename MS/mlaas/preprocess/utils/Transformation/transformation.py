@@ -42,7 +42,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
     '''
     
     def __init__(self):
-        self.op_diff = 8
+        # self.op_diff = 8
         self.AT = activity_timeline.ActivityTimelineClass(database, user, password, host, port)
     
     #* RESCALING
@@ -104,7 +104,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
             Operation id: 27
         '''
         #Operation Id to get activity details
-        operation_id = 27
+        operation_id = 'dp_261'
 
         logging.info("data preprocessing : TransformationClass : label_encoding : execution start" + str(col))
 
@@ -140,7 +140,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         old_cols = [old_column_list[i] for i in col]
         
         #Operation Id to get activity details
-        operation_id = 28
+        operation_id = 'dp_271'
 
         for i,col_name in enumerate(cols):
             try:
@@ -188,7 +188,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         logging.info("data preprocessing : TransformationClass : add_to_column : execution start")
         
         #Operation Id to get activity details
-        operation_id = 29
+        operation_id = 'dp_281'
 
         operation = '+'
         
@@ -217,7 +217,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         '''
         logging.info("data preprocessing : TransformationClass : subtract_from_column : execution start")
         #Operation Id to get activity details
-        operation_id = 30
+        operation_id = 'dp_291'
 
         operation = '-'
         
@@ -247,7 +247,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         
         operation = '*'
         #Operation Id to get activity details
-        operation_id = 32
+        operation_id = 'dp_311'
 
         cols = [column_list[i] for i in col]
         old_cols = [old_column_list[i] for i in col]
@@ -276,7 +276,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         
         operation = '/'
         #Operation Id to get activity details
-        operation_id = 31
+        operation_id = 'dp_301'
 
         cols = [column_list[i] for i in col]
         old_cols = [old_column_list[i] for i in col]
@@ -335,7 +335,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         logging.info("data preprocessing : TransformationClass : operation_start : execution start")
             
         #? Transforming the operation_id to the operation id stored in the activity timeline table. 
-        operation_id += self.op_diff
+        # operation_id += self.op_diff
         
         #? Getting Activity Description
         desc = self.get_act_desc(DBObject, connection, operation_id, col_name, code = 1)
@@ -364,7 +364,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         logging.info("data preprocessing : TransformationClass : operation_end : execution start")
         
         #? Transforming the operation_id to the operation id stored in the activity timeline table. 
-        operation_id += self.op_diff
+        # operation_id += self.op_diff
         
         #? Getting Activity Description
         desc = self.get_act(DBObject, connection, operation_id, col_name, code = 2)

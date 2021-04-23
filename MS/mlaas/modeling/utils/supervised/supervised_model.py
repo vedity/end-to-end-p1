@@ -85,7 +85,7 @@ class SupervisedClass(RC,PC):
             # Call the super class method.
             
             dag_id = self.get_dag_id(basic_params_dict,db_param_dict)
-            class_name = self.get_model_class_name(model_id,db_param_dict)
+            class_name,model_algorithm_type = self.get_model_class_name(model_id,db_param_dict)
             
             AlgorithmDetectorObject = AlgorithmDetector(db_param_dict)
             
@@ -93,17 +93,15 @@ class SupervisedClass(RC,PC):
             dataset_id = basic_params_dict['dataset_id']
             
             model_type_dict = AlgorithmDetectorObject.get_model_type(project_id,dataset_id)
-            
-            
-            
             basic_params_dict['algorithm_type'] = model_type_dict['algorithm_type']
             basic_params_dict['target_type'] = model_type_dict['target_type']
             
+    
             model_id = [model_id]
             model_name = [model_name]
             model_hyperparams = [model_hyperparams]
             model_class_name = [class_name]
-            algorithm_type = [model_type_dict['algorithm_type']] #TODO : Need to change
+            algorithm_type = [model_algorithm_type] 
         
             template = "manual_model_dag.template"
             namespace = "manual_modeling_dags"
@@ -137,14 +135,14 @@ class SupervisedClass(RC,PC):
         DBObject=db_param_dict['DBObject']
         connection=db_param_dict['connection']
     
-        sql_command="select model_class_name from mlaas.model_master_tbl where model_id="+str(model_id)
+        sql_command="select model_class_name,algorithm_type from mlaas.model_master_tbl where model_id="+str(model_id)
         
         class_df = DBObject.select_records(connection,sql_command)
         
         class_name = class_df['model_class_name'][0]
+        algorithm_type = class_df['algorithm_type'][0]
         
-        
-        return class_name
+        return class_name,algorithm_type
         
     
     def get_dag_id(self,basic_params_dict,db_param_dict):
