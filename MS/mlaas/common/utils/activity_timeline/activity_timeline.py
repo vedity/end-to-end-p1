@@ -100,28 +100,24 @@ class ActivityTimelineClass:
             #function get the table name ,columns and schema
             table_name,cols,schema = self.get_schema() 
 
-            #check if the table is created or not
-            create_status = self.is_existing_schema(DBObject,connection,table_name,schema) 
+            
+            rows = activity_id,user_name,project_id,dataset_id,activity_description,end_time,column_id,parameter
 
-            if create_status ==True:
-                rows = activity_id,user_name,project_id,dataset_id,activity_description,end_time,column_id,parameter
-
-                #form the tuple of sql values to be inserted
-                row_tuples = [tuple(rows)]
+            #form the tuple of sql values to be inserted
+            row_tuples = [tuple(rows)]
                 
-                #insert the record and return 1 if inserted else return 1
-                status,index = DBObject.insert_records(connection,table_name,row_tuples,cols,column_name='index') 
+            #insert the record and return 1 if inserted else return 1
+            status,index = DBObject.insert_records(connection,table_name,row_tuples,cols,column_name='index') 
 
-                if status == 1:
+            if status == 1:
                     raise ActivityInsertionFailed(500)
 
-            else:
-                raise ActivityTableNotFound(500)
+           
 
             logging.info("Common : ActivityTimelineClass : insert_user_activity : execution stop")
             return status,index
 
-        except (ActivityInsertionFailed,DatabaseConnectionFailed,ActivityTableNotFound) as exc:
+        except (ActivityInsertionFailed,DatabaseConnectionFailed) as exc:
             logging.error("Common : ActivityTimelineClass : get_user_activity : Exception " + str(exc.msg))
             logging.error("Common : ActivityTimelineClass : get_user_activity : " +traceback.format_exc())
             return exc.msg,None
@@ -169,39 +165,7 @@ class ActivityTimelineClass:
             logging.error("Common : ActivityTimelineClass : get_user_activity : " +traceback.format_exc())
             return exc.msg
 
-    def is_existing_schema(self,DBObject,connection,table_name,schema):
-        """
-        this function checks activity table created or not,If not then it will create the table
-
-        Args : 
-                table_name[(String)] : [Name of the table]
-                Schema[(String)] : [structure of activity table]
-        Return :
-                [Boolean] : [return True if exists or created else False if any error occurred]
-        """ 
-        try :
-            logging.info("Common : ActivityTimelineClass : is_existing_schema : execution start")
-            Flag = False
-
-            #check if the table is exist or not
-            status = DBObject.is_existing_table(connection,table_name,'mlaas') 
-            
-            # check if status false then create table 
-            if status == 'False':
-                create_status = DBObject.create_table(connection,table_name,schema)                
-                Flag =  True
-
-            #if status is True then table is already exist
-            elif status == 'True':
-                Flag =  True
-
-            logging.info("Common : ActivityTimelineClass : is_existing_schema : execution stop")
-            return Flag
-
-        except (TableCreationFailed) as exc:
-            logging.error("Common : ActivityTimelineClass : is_existing_schema : Exception " + str(exc.msg))
-            logging.error("Common : ActivityTimelineClass : is_existing_schema : " +traceback.format_exc())
-            return exc.msg
+    
 
 
     def get_activity(self,id,language,code=0):

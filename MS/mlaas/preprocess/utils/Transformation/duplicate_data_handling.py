@@ -51,10 +51,12 @@ class RemoveDuplicateRecordClass:
             logging.info("Preprocess : RemoveDuplicateRecordClass : getDuplicateColumns : Exception : "+str(exc))
             return None
 
-    def delete_duplicate_records(self,DBObject,connection,schema_id,table_name,column_string):
+    def delete_duplicate_records(self,DBObject,connection,table_name,column_string):
         """
         Function will remove the duplicate rows from the given table name
         Args  :
+                DBObject [(Object)]     : [DB Class Object.]
+                connection [(Object)]   : [Postgres Connection object]
                 table_name[(String)] : [Name of the table]
                 column_string[(String)] : [the query string of column name use to identify duplicate rows ]
         Return :
@@ -80,7 +82,10 @@ class RemoveDuplicateRecordClass:
         """
         Function will detect the duplicate columns in the dataframe and delete those columns from the table
         Args  :
-                table_name[(String)] : [Name of the table]
+                DBObject [(Object)]     : [DB Class Object.]
+                connection [(Object)]   : [Postgres Connection object]
+                schema_id[(Integer)]    : [Id from the schema table]
+                table_name[(String)]    : [Name of the table]
         Return :
                 [Integer | list] : [Return the status 0 if success else 1 ,list of the duplicate column names]
         """
@@ -123,6 +128,9 @@ class RemoveDuplicateRecordClass:
         """
         function will delete the the column from the table
         Args:
+            DBObject [(Object)]     : [DB Class Object.]
+            connection [(Object)]   : [Postgres Connection object]
+            schema_id[(Integer)]    : [Id from the schema table]
             table_name[(String)]  :  [Name of the table]
             column_name[(String)] :  [Name the column]
         Return:

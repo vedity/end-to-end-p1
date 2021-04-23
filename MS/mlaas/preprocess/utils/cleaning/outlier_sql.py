@@ -209,9 +209,14 @@ class OutliersTreatmentClass:
 
                 status = self.update_outliers(DBObject,connection,lower_limit,upper_limit,col_name,table_name)
             
+            #Local factor outlier Method
+            elif detect_method == 3:
+                
+                status = self.local_factor_outlier(DBObject,connection,col_name,table_name,impute_value,method_type)
+            
             #? Invalid Input
             else:
-                return 3
+                return 1
             logging.info("data preprocessing : OutliersTreatmentClass : replace_outliers : execution stop")
             return status
         except Exception as exc:
@@ -248,6 +253,11 @@ class OutliersTreatmentClass:
             elif detect_method == 1:
                     
                 status = self.z_score_analysis(DBObject,connection,table_name,col_name,discard_missing = True)
+            
+            #Local factor outlier Method
+            elif detect_method == 2:
+                
+                status = self.local_factor_outlier(DBObject,connection,col_name,table_name,method_type =1)
                 
            
             #? Invalid Input
@@ -285,6 +295,8 @@ class OutliersTreatmentClass:
         """
         Function will find out the minimum and maximum limit based on the method type selected by user.
         Args:
+                DBObject [(Object)]     : [DB Class Object.]
+                connection [(Object)]   : [Postgres Connection object]
                 col_name[(String)]     : [Name of the column]
                 table_name[(String)]   : [Name of the table]
                 method_type[(String)]  : [Method name selected by user]
@@ -341,6 +353,8 @@ class OutliersTreatmentClass:
         Find Average and standard deviation of the column.
 
         Args:
+                DBObject [(Object)]     : [DB Class Object.]
+                connection [(Object)]   : [Postgres Connection object]
                 col_name[(String)]   : [Name of the column]
                 table_name[(String)] : [Name of the table]
         Return:
@@ -362,9 +376,11 @@ class OutliersTreatmentClass:
             logging.error("data preprocessing : OutliersTreatmentClass : get_column_statistics : Exception : "+str(exc))
             return None
     
-    def local_factor_outlier(self,DBObject,connection,col_name,table_name):
+    def local_factor_outlier(self,DBObject,connection,col_name,table_name,impute_value = None,method_type = None):
         """
         Args : 
+                DBObject [(Object)]     : [DB Class Object.]
+                connection [(Object)]   : [Postgres Connection object]
                 col_name[(String)]   : [Name of the column]
                 table_name[(String)] : [Name of the table]
         Return:
@@ -374,8 +390,8 @@ class OutliersTreatmentClass:
             logging.info("data preprocessing : OutliersTreatmentClass : local_factor_outlier : execution start")
             
             #Get the column data from table
-            sql_command = f'''select {col_name} from {table_name} ''' # Get update query
-            logging.info("Sql_command :  local_factor_outlier : "+str(sql_command))
+            sql_command = f'''select "{str(col_name)}" from {table_name} ''' # Get update query
+            logging.info("Sql_command :  local_factor_outlier : Get column values: "+str(sql_command))
 
             #Get the dataframe from execute table
             dataframe = DBObject.select_records(connection,sql_command)
@@ -383,8 +399,8 @@ class OutliersTreatmentClass:
             # Convert into numpy array
             numpy_data  = dataframe.to_numpy()
 
-            I#initialize the object
-            lof_obj = LocalOutlierFactor()
+            #initialize the object
+            lof_obj = LocalOutlierFactor(n_neighbors=20,contamination=0.1)
 
             #Fit and predict outliers
             trained_data = lof_obj.fit_predict(numpy_data)
@@ -396,17 +412,27 @@ class OutliersTreatmentClass:
             
             #?check with the corresponding row index of original dataframe
             #Get the index from dataframe where row is False (-1) means outlier 
-            index_list = list(df[outlier_data].index)
+            index_list = list(dataframe[outlier_data].index)
 
             logging.info('local_factor_outlier : index list : outliers : '+str(index_list))
 
             #Form a query string with comma seperated index value
             in_query =",".join(str(x) for x in index_list)
 
+            if method_type == 0:
+                sql_command = f''' UPDATE {table_name} SET "{str(col_name)}"=
+                                CASE  WHEN (SELECT DATA_TYPE  FROM INFORMATION_SCHEMA.COLUMNS WHERE 
+                                TABLE_NAME = '{str(table_name.split('.')[-1][1:-1])}' AND COLUMN_NAME = '{col_name}') IN ('bigint') THEN CAST({impute_value} as BIGINT) ELSE {str(impute_value)} END 
+                                WHERE INDEX IN ({in_query}) '''
+                logging.info("Sql_command :  local_factor_outlier : Replace outlier: "+str(sql_command))
+            else:
+                sql_command = f''' Delete from  {table_name} where index in ({in_query}) '''
+                logging.info("Sql_command :  local_factor_outlier : Remove outlier: "+str(sql_command))
 
+            status = DBObject.update_records(connection,sql_command)
             logging.info("data preprocessing : OutliersTreatmentClass : local_factor_outlier : execution end")
+            return status
 
-            return in_query
         except Exception as exc:
             logging.error("data preprocessing : OutliersTreatmentClass : local_factor_outlier : Exception : "+str(exc))
             return 1
@@ -416,6 +442,8 @@ class OutliersTreatmentClass:
         Function will replace the outliers with the given upper and lower limit
 
         Args:
+            DBObject [(Object)]     : [DB Class Object.]
+            connection [(Object)]   : [Postgres Connection object]
             lower_limit[(Integer)]  : [minimum distribution limit]
             upper_limit[(Integer)]  : [maximum distribution limit]
             col_name[(String)]      : [Name of the column]
@@ -439,14 +467,14 @@ class OutliersTreatmentClass:
             return 1
     
 
-    def replace_lfo_outlier(self,DBOject,connection,col_name,table_name,impute_value,in_query= None):
-        try:
-            sql_command = f''' update {table_name} set "{str(col_name)}"='{str(impute_value)}' where index in ({in_query}) '''
-            status = DBOject.select_records(connection,sql_command)
+    # def update_lfo_outlier(self,DBObject,connection,col_name,table_name,impute_value,in_query= None):
+    #     try:
+    #         sql_command = f''' update {table_name} set "{str(col_name)}"='{str(impute_value)}' where index in ({in_query}) '''
+    #         status = DBObject.update_records(connection,sql_command)
 
-            return status
-        except Exception as exc:
-            return 1
+    #         return status
+    #     except Exception as exc:
+    #         return 1
 
     
     
