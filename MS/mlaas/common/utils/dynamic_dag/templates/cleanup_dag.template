@@ -110,7 +110,8 @@ op_dict = {
     281 : PC_OBJ.add_to_column,
     291 : PC_OBJ.subtract_from_column,
     301 : PC_OBJ.divide_column,
-    311 : PC_OBJ.multiply_column
+    311 : PC_OBJ.multiply_column,
+    321 : PC_OBJ.split_date_column
 }
 
 def dag_end(DBObject,connection,dataset_id,project_id,dag_id,new_user_name,dataset_name,col_list,**kwargs):
@@ -207,7 +208,8 @@ for index in operation.keys():
             281 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
             291 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
             301 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
-            311 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]]
+            311 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
+            321 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]]
         }
         
         dynamicTask = PythonOperator(

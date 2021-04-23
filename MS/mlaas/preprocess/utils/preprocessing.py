@@ -471,8 +471,10 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     elif col in num_cols:
                         col_type = 1
                     #? Column is categorical
-                    elif predicted_datatype.startswith('ca'):
+                    elif predicted_datatype.startswith('ca'): #Categorical column
                         col_type = 2
+                    elif predicted_datatype.startswith('t'): #Timestamp column
+                        col_type = 4
                     else:
                         col_type = 3
 
@@ -510,6 +512,10 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     if noise_flag == 'False':
                         if col_type == 0 or col_type == 1:
                             operations += [281,291,301,311]
+                            
+                    #? Adding Feature Engineering Operation
+                    if col_type == 4:
+                        operations += [321]
                             
                     all_col_operations.append(operations)
                 
@@ -1348,7 +1354,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             #? Getting Dag id
             sql_command = f"select pt.cleanup_dag_id from mlaas.project_tbl pt where pt.project_id = '{project_id}'"
-            logging.info("------------>"+sql_command)
             dag_id_df = DBObject.select_records(connection,sql_command) 
             if not isinstance(dag_id_df,pd.DataFrame): #! Failed to get dag status
                 raise NullValue(500)

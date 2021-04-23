@@ -11,8 +11,8 @@ __pycache__
 mlruns
 scaled_dataset/*
 *.npy
-project_dags/cleanup_dags
-project_dags/manual_modeling_dags
+MS/mlaas/project_dags/cleanup_dags/*
+MS/mlaas/project_dags/manual_modeling_dags/*
 
 ### Angular ###
 # compiled output

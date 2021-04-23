@@ -397,6 +397,7 @@ Insert into mlaas.parent_activity_tbl values(3,'Outlier Handling',2);
 Insert into mlaas.parent_activity_tbl values(4,'Scaling',2);
 Insert into mlaas.parent_activity_tbl values(5,'Encoding',2);
 Insert into mlaas.parent_activity_tbl values(6,'Math Operations',2);
+Insert into mlaas.parent_activity_tbl values(8,'Feature Engineering',2);
 
 
 --Insert preprocess_tab_tbl

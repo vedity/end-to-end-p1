@@ -227,7 +227,7 @@ class ScheamColumnListClass(APIView):
                                 logging.info("data preprocess : ScheamAttributeListClass : POST Method : execution start")
                                 dropdowns = {
                                         "column_attribute":["Ignore","Target","Select"],
-                                        "datatype":["number","categorical","text","timestamp"],
+                                        "datatype":["numerical","categorical","text","timestamp"],
                                         "datetime_options":[
                                                 "DD/MM/YYYY",
                                                 "MM/DD/YYYY",
