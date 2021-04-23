@@ -17,6 +17,7 @@ from . import duplicate_data_handling as ddh
 from . import feature_scaling as fs
 from . import categorical_encoding as ce
 from . import math_functions as mf
+from . import feature_engineering as fe
 
 #* Commong Utilities
 from common.utils.database import db
@@ -36,7 +37,7 @@ logger = logging.getLogger('transformation')
 
 
 
-class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass, ce.EncodeClass, mf.MathOperationsClass):
+class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass, ce.EncodeClass, mf.MathOperationsClass, fe.FeatureEngineeringClass):
     '''
         Handles orchastration of the transforamtion related Functions.
     '''
@@ -297,6 +298,32 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         logging.info("data preprocessing : TransformationClass : divide_column : execution stop")
         return status
     
+    def split_date_column(self, DBObject, connection, project_id, column_list,old_column_list, table_name, col, **kwargs):
+        '''
+            Operation id: 321
+        '''
+        logging.info("data preprocessing : TransformationClass : split_date_column : execution start")
+    
+        operation_id = 'dp_321'
+        
+        cols = [column_list[i] for i in col]
+        old_cols = [old_column_list[i] for i in col]
+        
+        for i,col_name in enumerate(cols):
+            try:
+                #Insert the activity for the operation
+                activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
+
+                status = self.datetime_fe(DBObject, connection, old_cols[i], table_name)
+                
+                #Update the activity status for the operation performed
+                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+
+            except Exception as exc:
+                return exc
+    
+        logging.info("data preprocessing : TransformationClass : split_date_column : execution stop")
+        return status
     
     #* ACTIVITY TIMELINE FUNCTIONS
     

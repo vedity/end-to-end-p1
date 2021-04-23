@@ -397,6 +397,7 @@ Insert into mlaas.parent_activity_tbl values(3,'Outlier Handling',2);
 Insert into mlaas.parent_activity_tbl values(4,'Scaling',2);
 Insert into mlaas.parent_activity_tbl values(5,'Encoding',2);
 Insert into mlaas.parent_activity_tbl values(6,'Math Operations',2);
+Insert into mlaas.parent_activity_tbl values(8,'Feature Engineering',2);
 
 
 --Insert preprocess_tab_tbl
@@ -509,6 +510,9 @@ Insert into mlaas.activity_master_tbl values (101,'dp_301','Divide from column',
 Insert into mlaas.activity_master_tbl values (102,'dp_311','Multiply into column','operation on column * failed','US','Operation',0,6,1,2);
 Insert into mlaas.activity_master_tbl values (103,'dp_311','Multiply into column','operation on column * in process','US','Operation',1,6,1,2);
 Insert into mlaas.activity_master_tbl values (104,'dp_311','Multiply into column','operation on column * completed','US','Operation',2,6,1,2);
+Insert into mlaas.activity_master_tbl values (102,'dp_321','Extract Datetime Features','operation on column * failed','US','Operation',0,8,0,0);
+Insert into mlaas.activity_master_tbl values (103,'dp_321','Extract Datetime Features','operation on column * in process','US','Operation',1,8,0,0);
+Insert into mlaas.activity_master_tbl values (104,'dp_321','Extract Datetime Features','operation on column * completed','US','Operation',2,8,0,0);
 Insert into mlaas.activity_master_tbl values (105,'md_41','Created Experiment','You have created experiment "#" for project "$"','US','Operation',0,-1,0,0);
 Insert into mlaas.activity_master_tbl values (106,'md_42','Selected Auto Modeling','You have selected Auto Modeling for experiment "#" of project "$"','US','Operation',0,-1,0,0);
 Insert into mlaas.activity_master_tbl values (107,'md_43','Selected Manual Modeling','You have selected Manual Modeling for experiment "#" of project "$"','US','Operation',0,-1,0,0);
