@@ -27,18 +27,17 @@ export class ListDatabaseComponent implements OnInit {
       $(".filter-box").on("click",function(event){
         event.stopPropagation();
       })
-      
+
     },
     drawCallback:function(e){
       $("#datatablepagelength").val(e._iDisplayLength);
     },
      pageLength:10
   };
+  
   dtTrigger: Subject<any> = new Subject<any>();
-  data: createdataset = new createdataset();
   filter: boolean = true;
   loaderdiv = false;
-  f: NgForm;
   isloaderdiv:boolean=true;
   animation = "progress-dark";
   theme = {
@@ -112,8 +111,6 @@ export class ListDatabaseComponent implements OnInit {
     }
   }
 
-
-
   displayfilter() {
     this.filter = !this.filter;
     $(".filter-tr").toggleClass("nofilter");
@@ -150,15 +147,6 @@ export class ListDatabaseComponent implements OnInit {
       }
     });
   }
-
-
-
-  // rendered() {
-  //   let currentUrl = this.router.url;
-  //   this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-  //   this.router.onSameUrlNavigation = 'reload';
-  //   this.router.navigate([currentUrl]);
-  // }
 
   rendered() {
     this.dtOptions.pageLength=parseInt($("#datatablepagelength").val().toString());
