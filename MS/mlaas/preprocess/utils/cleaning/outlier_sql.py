@@ -8,6 +8,8 @@
 '''
 
 import logging
+import numpy as np
+from sklearn.neighbors import LocalOutlierFactor
 from common.utils.logger_handler import custom_logger as cl
 
 #* Defining Logger
@@ -42,18 +44,12 @@ class OutliersTreatmentClass:
         '''
         try:
             logging.info("data preprocessing : OutliersTreatmentClass : extreme_value_analysis : execution start")
-            # #? Finding Quartiles
-            sql_command = 'select PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY "'+str(col_name)+'") AS quartile_25,PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY "'+str(col_name)+'") AS quartile_75 from '+str(table_name)
-            dataframe = DBObject.select_records(connection,sql_command)
             
-            q1,q3 = float(dataframe['quartile_25'][0]),float(dataframe['quartile_75'][0])
-
-            # #? Finding Boundaries of the normal data
-            iqr = q3-q1
-            upper_limit = q3 + (iqr * 1.5)
-            # upper_limit_extreme = q3 + (iqr * 3)
-            lower_limit = q1 - (iqr * 1.5)
-            # lower_limit_extreme = q1 - (iqr * 3)
+            
+            # #? Finding lower limit and upper limit  based on the Quartiles
+            lower_limit,upper_limit =self.get_upper_lower_limit(DBObject,connection,col_name,table_name,method_type = 'extreme_value_analysis')
+            if lower_limit == upper_limit == None:
+                return 1
 
             if discard_missing == True:
 
@@ -89,13 +85,11 @@ class OutliersTreatmentClass:
         try:
             logging.info("data preprocessing : OutliersTreatmentClass : z_score_analysis : execution start")
 
-            #Find Average and standard deviation of the column
-            sql_command = f'select avg("{str(col_name)}"),STDDEV("{str(col_name)}") from {table_name}'
-            logging.info("Sql_command : z_score_analysis : "+str(sql_command))
-
-            dataframe = DBObject.select_records(connection,sql_command)
-
-            avg_value,stddev_value =  round(dataframe['avg'][0],4),round(dataframe['stddev'][0],4)
+            dataframe = self.get_column_statistics(DBObject,connection,col_name,table_name)
+            if len(dataframe)==0 or dataframe is None:
+                return 1
+            else:
+                avg_value,stddev_value =  round(dataframe['avg'][0],4),round(dataframe['stddev'][0],4)
             logging.info("Averag value : "+str(avg_value)+" : standard deviation : "+str(stddev_value))
 
             if discard_missing == True:
@@ -170,7 +164,7 @@ class OutliersTreatmentClass:
         except:
             return 1
     
-    def replace_outliers(self,DBObject,connection,table_name,col_name,impute_value, detect_method, log = False):
+    def replace_outliers(self,DBObject,connection,table_name,col_name,impute_value, detect_method,method_type = None, log = False):
         '''
             Returns a series where the outliers are replaced with the given function(Mean of Median)
             
@@ -202,17 +196,27 @@ class OutliersTreatmentClass:
             if detect_method == 0:
 
                 status = self.extreme_value_analysis(DBObject,connection,col_name,table_name,impute_value)
-                
             
             #? Z-Score Method
             elif detect_method == 1:
                 
-                    
                 status = self.z_score_analysis(DBObject,connection,table_name,col_name,impute_value)
+            
+            #Censoring 
+            elif detect_method == 2:
+
+                lower_limit,upper_limit = self.get_upper_lower_limit(DBObject,connection,col_name,table_name,method_type )
+
+                status = self.update_outliers(DBObject,connection,lower_limit,upper_limit,col_name,table_name)
+            
+            #Local factor outlier Method
+            elif detect_method == 3:
+                
+                status = self.local_factor_outlier(DBObject,connection,col_name,table_name,impute_value,method_type)
             
             #? Invalid Input
             else:
-                return 3
+                return 1
             logging.info("data preprocessing : OutliersTreatmentClass : replace_outliers : execution stop")
             return status
         except Exception as exc:
@@ -249,10 +253,16 @@ class OutliersTreatmentClass:
             elif detect_method == 1:
                     
                 status = self.z_score_analysis(DBObject,connection,table_name,col_name,discard_missing = True)
+            
+            #Local factor outlier Method
+            elif detect_method == 2:
                 
+                status = self.local_factor_outlier(DBObject,connection,col_name,table_name,method_type =1)
+                
+           
             #? Invalid Input
             else:
-                status = 3
+                status = 1
 
             logging.info("data preprocessing : OutliersTreatmentClass : remove_outliers : execution stop")
             return status
@@ -280,3 +290,191 @@ class OutliersTreatmentClass:
             return status
         except:
             return 1
+
+    def get_upper_lower_limit(self,DBObject,connection,col_name,table_name,method_type ,quantile_1=0.25,quantile_2=0.75):
+        """
+        Function will find out the minimum and maximum limit based on the method type selected by user.
+        Args:
+                DBObject [(Object)]     : [DB Class Object.]
+                connection [(Object)]   : [Postgres Connection object]
+                col_name[(String)]     : [Name of the column]
+                table_name[(String)]   : [Name of the table]
+                method_type[(String)]  : [Method name selected by user]
+                                        1)extreme_value_analysis
+                                        2)iqr_proximity
+                                        3)Gaussian_approx
+                                        4)quantiles
+                quantile_1[(Integer)]   : [By default will be 0.25 else depends on user input]
+                quantile_1[(Integer)]   : [By default will be 0.75 else depends on user input]
+            
+        Return:
+
+                upper_limit[integer] : [return maximum limit of the column ]
+                lower_limit[integer] : [return minimum limit of the column ]
+        """
+        try:
+            logging.info("data preprocessing : OutliersTreatmentClass : get_upper_lower_limit : execution start")
+            sql_command = f'select PERCENTILE_CONT({str(quantile_1)}) WITHIN GROUP (ORDER BY "{str(col_name)}") AS quartile_1,PERCENTILE_CONT({str(quantile_2)}) WITHIN GROUP (ORDER BY "{str(col_name)}") AS quartile_2 from {table_name}'
+            dataframe = DBObject.select_records(connection,sql_command)
+            
+            q1,q3 = float(dataframe['quartile_1'][0]),float(dataframe['quartile_2'][0])
+
+            # #? Finding Boundaries of the normal data
+            iqr = q3-q1
+            if method_type == 'extreme_value_analysis' or method_type == 'iqr_proximity' :
+                
+                lower_limit = q1 - (iqr * 1.5)
+                upper_limit = q3 + (iqr * 1.5)
+
+            elif method_type == 'Gaussian_approx':
+                
+                dataframe = self.get_column_statistics(DBObject,connection,col_name,table_name)
+                avg_value,stddev_value =  round(dataframe['avg'][0],4),round(dataframe['stddev'][0],4)
+                
+                lower_limit = avg_value - 3 * stddev_value
+                upper_limit = avg_value + 3 * stddev_value
+
+            elif method_type == 'quantiles':
+                lower_limit = q1
+                upper_limit = q3
+
+            logging.info(f"get_upper_lower_limit : method : {method_type} : lower_limit : {str(lower_limit)} : upper_limit : {str(upper_limit)}")
+            logging.info("data preprocessing : OutliersTreatmentClass : get_upper_lower_limit : execution ends")
+            return lower_limit,upper_limit
+
+        except Exception as exc:
+            logging.error("data preprocessing : OutliersTreatmentClass : get_upper_lower_limit : Exception : "+str(exc))
+            return None,None
+    
+        
+
+    def get_column_statistics(self,DBObject,connection,col_name,table_name):
+        """
+        Find Average and standard deviation of the column.
+
+        Args:
+                DBObject [(Object)]     : [DB Class Object.]
+                connection [(Object)]   : [Postgres Connection object]
+                col_name[(String)]   : [Name of the column]
+                table_name[(String)] : [Name of the table]
+        Return:
+                [dataframe |integer] : [return dataframe if successfully retrived else return 1 any exception occurred]
+        """
+        try:
+            logging.info("data preprocessing : OutliersTreatmentClass : get_column_statistics : execution start")
+            
+            #query will get  average and standard deviation of the given column name
+            sql_command = f'select avg("{str(col_name)}"),STDDEV("{str(col_name)}") from {table_name}'
+            logging.info("Sql_command : get_column_statistics : "+str(sql_command))
+
+            #Execute the sql query
+            dataframe = DBObject.select_records(connection,sql_command)
+
+            logging.info("data preprocessing : OutliersTreatmentClass : get_column_statistics : execution end")
+            return dataframe
+        except Exception as exc:
+            logging.error("data preprocessing : OutliersTreatmentClass : get_column_statistics : Exception : "+str(exc))
+            return None
+    
+    def local_factor_outlier(self,DBObject,connection,col_name,table_name,impute_value = None,method_type = None):
+        """
+        Args : 
+                DBObject [(Object)]     : [DB Class Object.]
+                connection [(Object)]   : [Postgres Connection object]
+                col_name[(String)]   : [Name of the column]
+                table_name[(String)] : [Name of the table]
+        Return:
+
+        """
+        try:
+            logging.info("data preprocessing : OutliersTreatmentClass : local_factor_outlier : execution start")
+            
+            #Get the column data from table
+            sql_command = f'''select "{str(col_name)}" from {table_name} ''' # Get update query
+            logging.info("Sql_command :  local_factor_outlier : Get column values: "+str(sql_command))
+
+            #Get the dataframe from execute table
+            dataframe = DBObject.select_records(connection,sql_command)
+
+            # Convert into numpy array
+            numpy_data  = dataframe.to_numpy()
+
+            #initialize the object
+            lof_obj = LocalOutlierFactor(n_neighbors=20,contamination=0.1)
+
+            #Fit and predict outliers
+            trained_data = lof_obj.fit_predict(numpy_data)
+
+
+            #?outlier_data variable will have True or False boolean value
+            #? where trained_data  variable having -1 value
+            outlier_data = trained_data ==-1
+            
+            #?check with the corresponding row index of original dataframe
+            #Get the index from dataframe where row is False (-1) means outlier 
+            index_list = list(dataframe[outlier_data].index)
+
+            logging.info('local_factor_outlier : index list : outliers : '+str(index_list))
+
+            #Form a query string with comma seperated index value
+            in_query =",".join(str(x) for x in index_list)
+
+            if method_type == 0:
+                sql_command = f''' UPDATE {table_name} SET "{str(col_name)}"=
+                                CASE  WHEN (SELECT DATA_TYPE  FROM INFORMATION_SCHEMA.COLUMNS WHERE 
+                                TABLE_NAME = '{str(table_name.split('.')[-1][1:-1])}' AND COLUMN_NAME = '{col_name}') IN ('bigint') THEN CAST({impute_value} as BIGINT) ELSE {str(impute_value)} END 
+                                WHERE INDEX IN ({in_query}) '''
+                logging.info("Sql_command :  local_factor_outlier : Replace outlier: "+str(sql_command))
+            else:
+                sql_command = f''' Delete from  {table_name} where index in ({in_query}) '''
+                logging.info("Sql_command :  local_factor_outlier : Remove outlier: "+str(sql_command))
+
+            status = DBObject.update_records(connection,sql_command)
+            logging.info("data preprocessing : OutliersTreatmentClass : local_factor_outlier : execution end")
+            return status
+
+        except Exception as exc:
+            logging.error("data preprocessing : OutliersTreatmentClass : local_factor_outlier : Exception : "+str(exc))
+            return 1
+    
+    def update_outliers(self,DBObject,connection,lower_limit,upper_limit,col_name,table_name):
+        """
+        Function will replace the outliers with the given upper and lower limit
+
+        Args:
+            DBObject [(Object)]     : [DB Class Object.]
+            connection [(Object)]   : [Postgres Connection object]
+            lower_limit[(Integer)]  : [minimum distribution limit]
+            upper_limit[(Integer)]  : [maximum distribution limit]
+            col_name[(String)]      : [Name of the column]
+            table_name[(string)]    : [Name of the table]
+
+        Return : 
+                [Integer] : [return 0 if successfull else 1]
+        """
+        try:
+            logging.info("data preprocessing : OutliersTreatmentClass : update_outliers : execution start")
+            
+            sql_command = f'''Update {table_name} set "{col_name}"= case when  "{col_name}" < {str(lower_limit)} then '{str(lower_limit)}' when "{col_name}" > {str(upper_limit)} then '{str(upper_limit)}' end ''' # Get update query
+            logging.info("Sql_command :  update_outliers with lower_limit : "+str(sql_command))
+
+            status = DBObject.update_records(connection,sql_command)
+
+            logging.info("data preprocessing : OutliersTreatmentClass : update_outliers : execution end")
+            return status
+        except Exception as exc:
+            logging.error("data preprocessing : OutliersTreatmentClass : update_outliers : Exception : "+str(exc))
+            return 1
+    
+
+    # def update_lfo_outlier(self,DBObject,connection,col_name,table_name,impute_value,in_query= None):
+    #     try:
+    #         sql_command = f''' update {table_name} set "{str(col_name)}"='{str(impute_value)}' where index in ({in_query}) '''
+    #         status = DBObject.update_records(connection,sql_command)
+
+    #         return status
+    #     except Exception as exc:
+    #         return 1
+
+    
+    
