@@ -18,7 +18,7 @@ PC_OBJ = PreprocessingClass(database,user,password,host,port)
 
 yesterday_date = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')
 
-main_dag_id = #DAG_ID
+main_dag_id = "Cleanup_dag_138383750624340720"
 
 args = {
     'owner': 'airflow',
@@ -36,7 +36,7 @@ dag = DAG(
 
 #? Getting Required Parameters
 
-master_dict = #MASTER_DICT 
+master_dict = {'active': 0} 
 
 if int(master_dict['active']) == 0:
     sys.exit()
@@ -77,41 +77,37 @@ schema_column_list = DBObject.get_schema_column(connection,schema_id)
 
 op_dict = {
     1 : PC_OBJ.discard_missing_values,
-    11 : PC_OBJ.discard_noise,
-    21 : PC_OBJ.delete_above,
-    31 : PC_OBJ.delete_below,
-    41 : PC_OBJ.remove_noise,
-    51 : PC_OBJ.mean_imputation,
-    61 : PC_OBJ.median_imputation,
-    71 : PC_OBJ.mode_imputation,
-    81 : PC_OBJ.missing_category_imputation,
-    91 : PC_OBJ.end_of_distribution,
-    101 : PC_OBJ.frequent_category_imputation,
-    111 : PC_OBJ.missing_category_imputation,
-    121 : PC_OBJ.random_sample_imputation,
-    131 : PC_OBJ.repl_noise_mean,
-    141 : PC_OBJ.repl_noise_median,
-    151 : PC_OBJ.repl_noise_mode,
-    161 : PC_OBJ.repl_noise_eod,
-    171 : PC_OBJ.repl_noise_random_sample,
-    181 : PC_OBJ.repl_noise_arbitrary_val,
-    191 : PC_OBJ.rem_outliers_ext_val_analysis,
-    201 : PC_OBJ.rem_outliers_z_score,
-    202 : PC_OBJ.rem_outliers_lof,
-    211 : PC_OBJ.repl_outliers_mean_ext_val_analysis,
-    221 : PC_OBJ.repl_outliers_mean_z_score,
-    231 : PC_OBJ.repl_outliers_med_ext_val_analysis,
-    241 : PC_OBJ.repl_outliers_med_z_score,
-    242 : PC_OBJ.repl_outliers_mean_lof,
-    243 : PC_OBJ.repl_outliers_median_lof,
-    251 : PC_OBJ.apply_log_transformation,
-    261 : PC_OBJ.label_encoding,
-    271 : PC_OBJ.one_hot_encoding,
-    281 : PC_OBJ.add_to_column,
-    291 : PC_OBJ.subtract_from_column,
-    301 : PC_OBJ.divide_column,
-    311 : PC_OBJ.multiply_column,
-    321 : PC_OBJ.split_date_column
+    2 : PC_OBJ.discard_noise,
+    3 : PC_OBJ.delete_above,
+    4 : PC_OBJ.delete_below,
+    5 : PC_OBJ.remove_noise,
+    6 : PC_OBJ.mean_imputation,
+    7 : PC_OBJ.median_imputation,
+    8 : PC_OBJ.mode_imputation,
+    9 : PC_OBJ.missing_category_imputation,
+    10 : PC_OBJ.end_of_distribution,
+    11 : PC_OBJ.frequent_category_imputation,
+    12 : PC_OBJ.missing_category_imputation,
+    13 : PC_OBJ.random_sample_imputation,
+    14 : PC_OBJ.repl_noise_mean,
+    15 : PC_OBJ.repl_noise_median,
+    16 : PC_OBJ.repl_noise_mode,
+    17 : PC_OBJ.repl_noise_eod,
+    18 : PC_OBJ.repl_noise_random_sample,
+    19 : PC_OBJ.repl_noise_arbitrary_val,
+    20 : PC_OBJ.rem_outliers_ext_val_analysis,
+    21 : PC_OBJ.rem_outliers_z_score,
+    22 : PC_OBJ.repl_outliers_mean_ext_val_analysis,
+    23 : PC_OBJ.repl_outliers_mean_z_score,
+    24 : PC_OBJ.repl_outliers_med_ext_val_analysis,
+    25 : PC_OBJ.repl_outliers_med_z_score,
+    26 : PC_OBJ.apply_log_transformation,
+    27 : PC_OBJ.label_encoding,
+    28 : PC_OBJ.one_hot_encoding,
+    29 : PC_OBJ.add_to_column,
+    30 : PC_OBJ.subtract_from_column,
+    31 : PC_OBJ.divide_column,
+    32 : PC_OBJ.multiply_column
 }
 
 def dag_end(DBObject,connection,dataset_id,project_id,dag_id,new_user_name,dataset_name,col_list,**kwargs):
@@ -119,7 +115,7 @@ def dag_end(DBObject,connection,dataset_id,project_id,dag_id,new_user_name,datas
         To reset the dag status
     '''
     status = PC_OBJ.check_failed_col(DBObject, connection,dataset_id,project_id,new_user_name,col_list, dag_id)
-    activity_id = 'cl_2'
+    activity_id = 52
     status = PC_OBJ.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id,new_user_name,dataset_name,flag=False)
     return status
 
@@ -175,41 +171,37 @@ for index in operation.keys():
         #? Which parameters should be given to which function
         param_dict = {
             1 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            2 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            3 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
+            4 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
+            5 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            6 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            7 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            8 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            9 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j], True],
+            10 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
             11 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            21 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
+            12 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
+            13 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            14 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            15 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            16 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            17 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            18 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            19 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
+            20 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            21 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            22 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            23 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            24 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            25 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            26 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            27 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
+            28 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], schema_id],
+            29 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
+            30 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
             31 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
-            41 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            51 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            61 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            71 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            81 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j], True],
-            91 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            101 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            111 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
-            121 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            131 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            141 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            151 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            161 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            171 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            181 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
-            191 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            201 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            202 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            211 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            221 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            231 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            241 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            242 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            243 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            251 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            261 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            271 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], schema_id],
-            281 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
-            291 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
-            301 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
-            311 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
-            321 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]]
+            32 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]]
         }
         
         dynamicTask = PythonOperator(
