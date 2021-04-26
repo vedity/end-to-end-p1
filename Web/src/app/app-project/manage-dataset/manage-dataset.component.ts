@@ -23,9 +23,6 @@ export class ManageDatasetComponent implements OnInit {
     bsCustomFileInput.init();
   }
 
-  // create() {
-  //   this.router.navigate(['create']);
-  // }
   datasetfile: File;
   handleFileInput(data: FileList) {
     if (data.length > 0) {
