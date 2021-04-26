@@ -54,12 +54,14 @@ class FSUtilityClass():
         return col
 
 
-    def selectkbest_extra_column(self,DBObject,connection,schema_id,col_lst):
+    def selectkbest_extra_column(self,DBObject,connection,schema_id,col_lst,algo_column):
 
         col = self.fetch_column(DBObject,connection,schema_id)
         extra = {}
         for i in col:
-            if i not in col_lst:
+            if i not in col_lst and i not in algo_column:
+                extra[i]="True"
+            elif i not in col_lst and i in algo_column:
                 extra[i]="False"
             else:
                 extra[i]="True"

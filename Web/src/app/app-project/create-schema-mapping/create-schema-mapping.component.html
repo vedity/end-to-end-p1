@@ -181,8 +181,8 @@
                     <ul *ngFor="let item of featuresList.option_list">
                         <li class="title" title="{{item.name}}">{{item.name}}</li>
                         <li *ngFor="let subitem of featuresList.column_list">
-                            <i *ngIf="item.colums[subitem]=='true'" class="mdi mdi-check-bold"></i>
-                            <i *ngIf="item.colums[subitem]=='false'" class="mdi mdi-close"></i>
+                            <i *ngIf="item.colums[subitem]=='True'" class="mdi mdi-check-bold"></i>
+                            <i *ngIf="item.colums[subitem]=='False'" class="mdi mdi-close"></i>
                         </li>
                         <!-- <li><i class="mdi mdi-close"></i></li>
                         <li><i class="mdi mdi-check-bold"></i></li>

@@ -9,6 +9,7 @@ from .mutual_info import MutualInfoClass
 from .chisq import ChiSquareClass
 from .RFE import RFEClass
 from .anova import AnovaClass
+from .coorelation import CoorelationClass
 import logging
 import warnings
 warnings.filterwarnings("ignore")
@@ -19,6 +20,7 @@ mi = MutualInfoClass()
 cs = ChiSquareClass()
 rfe = RFEClass()
 an = AnovaClass()
+cf = CoorelationClass()
 class FeatureSelectionClass():
 
     def algo_call(self,DBObject,connection,dataset_id,schema_id,target_col,choice):
@@ -35,9 +37,12 @@ class FeatureSelectionClass():
             mutual_col = mi.get_mutual_info(DBObject,connection,dataset_id,schema_id,target_col)
 
             #anova
-            anova_col = an.get_anova_info(DBObject,connection,dataset_id,schema_id,target_col)    
+            anova_col = an.get_anova_info(DBObject,connection,dataset_id,schema_id,target_col)   
 
-        return chisq_col,rfe_col,mutual_col,anova_col
+            #coorelation
+            co_col = cf.get_coorelation(DBObject,connection,dataset_id,schema_id,target_col)
+
+        return chisq_col,rfe_col,mutual_col,anova_col,co_col
 
     def get_extra_column(self,DBObject,connection,schema_id,col_lst):
 
@@ -47,7 +52,7 @@ class FeatureSelectionClass():
             if i not in col_lst:
                 # val = i+":False"
                 # extra_col.append(val)
-                extra_col[i] = "False"
+                extra_col[i] = "True"
             else:
                 continue
         return extra_col,col
