@@ -1,5 +1,6 @@
 import pandas as pd
 import logging
+import traceback
 from common.utils.logger_handler import custom_logger as cl
 from ..schema import schema_creation as sc
 
@@ -21,7 +22,7 @@ class RemoveDuplicateRecordClass:
                 [List] : [ return list of duplicate column name else empty list if not found ]
         """
         try:
-            logging.info("Preprocess : RemoveDuplicateRecordClass : getDuplicateColumns : execution start")
+            logging.info("data preprocessing : RemoveDuplicateRecordClass : getDuplicateColumns : execution start")
             # Create an empty set
             duplicateColumnNames = []
             
@@ -45,10 +46,11 @@ class RemoveDuplicateRecordClass:
                     # if equal then adding to list
                     if col.equals(other_col):
                         duplicateColumnNames.append(df.columns.values[y])
-            logging.info("Preprocess : RemoveDuplicateRecordClass : getDuplicateColumns : execution ends")
+            logging.info("data preprocessing : RemoveDuplicateRecordClass : getDuplicateColumns : execution ends")
             return duplicateColumnNames
         except Exception as exc:
-            logging.info("Preprocess : RemoveDuplicateRecordClass : getDuplicateColumns : Exception : "+str(exc))
+            logging.error("data preprocessing : RemoveDuplicateRecordClass : getDuplicateColumns : Exception : "+str(exc))
+            logging.error("data preprocessing : RemoveDuplicateRecordClass : getDuplicateColumns : " +traceback.format_exc())
             return None
 
     def delete_duplicate_records(self,DBObject,connection,table_name,column_string):
@@ -63,7 +65,7 @@ class RemoveDuplicateRecordClass:
                 [Integer ] : [Return the status 0 if success else 1 ]
         
         """
-        logging.info("Preprocess : RemoveDuplicateRecordClass : delete_duplicate_records : execution start")
+        logging.info("data preprocessing : RemoveDuplicateRecordClass : delete_duplicate_records : execution start")
         try:
             sql_command = f'delete from {table_name} where index not in (select min(index) from {table_name} group by {column_string})'
 
@@ -72,10 +74,11 @@ class RemoveDuplicateRecordClass:
             status = DBObject.update_records(connection,sql_command)
             
         except Exception as exc:
-            logging.info("Preprocess : RemoveDuplicateRecordClass : delete_duplicate_records : Exception : "+str(exc))
+            logging.error("data preprocessing : RemoveDuplicateRecordClass : delete_duplicate_records : Exception : "+str(exc))
+            logging.error("data preprocessing : RemoveDuplicateRecordClass : delete_duplicate_records : " +traceback.format_exc())
             status = 1
         
-        logging.info("Preprocess : RemoveDuplicateRecordClass : delete_duplicate_records : execution stop")
+        logging.info("data preprocessing : RemoveDuplicateRecordClass : delete_duplicate_records : execution stop")
         return status
 
     def delete_duplicate_column(self,DBObject,connection,schema_id,table_name):
@@ -91,7 +94,7 @@ class RemoveDuplicateRecordClass:
         """
 
         try:
-            logging.info("Preprocess : RemoveDuplicateRecordClass : delete_duplicate_column : execution start  ")
+            logging.info("data preprocessing : RemoveDuplicateRecordClass : delete_duplicate_column : execution start  ")
 
             #Get all table data
             sql_command = f'select * from {table_name}'
@@ -116,11 +119,12 @@ class RemoveDuplicateRecordClass:
                 else:
                     status = 0
 
-            logging.info("Preprocess : RemoveDuplicateRecordClass : delete_duplicate_column : execution ends  ")
+            logging.info("data preprocessing : RemoveDuplicateRecordClass : delete_duplicate_column : execution ends  ")
             return status,col_list
 
         except Exception as exc:
-            logging.info("Preprocess : RemoveDuplicateRecordClass : delete_duplicate_column : Exception : "+str(exc))
+            logging.error("data preprocessing : RemoveDuplicateRecordClass : delete_duplicate_column : Exception : "+str(exc))
+            logging.error("data preprocessing : RemoveDuplicateRecordClass : delete_duplicate_column : " +traceback.format_exc())
             return 1,None
         
     
@@ -137,7 +141,7 @@ class RemoveDuplicateRecordClass:
             [Integer|String] : [return 0 if successfully performed the operation else return 1,
                                 return String if any exception occurred ]
         """
-        logging.info("Preprocess : RemoveDuplicateRecordClass : delete_column : execution start")
+        logging.info("data preprocessing : RemoveDuplicateRecordClass : delete_column : execution start")
         try:
             sql_command = f'ALTER TABLE {table_name} DROP "{column_name}" '
 
@@ -149,9 +153,10 @@ class RemoveDuplicateRecordClass:
                 
                 status = schemaObj.delete_schema_record(DBObject,connection,schema_id,col_name = column_name)
         except Exception as exc:
-            logging.info("Preprocess : RemoveDuplicateRecordClass : delete_column : Exception : "+str(exc))
+            logging.error("data preprocessing : RemoveDuplicateRecordClass : delete_column : Exception : "+str(exc))
+            logging.error("data preprocessing : RemoveDuplicateRecordClass : delete_column : " +traceback.format_exc())
             status = 1
         
-        logging.info("Preprocess : RemoveDuplicateRecordClass : delete_column : execution stop")
+        logging.info("data preprocessing : RemoveDuplicateRecordClass : delete_column : execution stop")
         return status
 

@@ -26,6 +26,8 @@ from .cleaning import cleaning
 from .Transformation import transformation as trs
 from .Transformation import split_data 
 from .Transformation.model_type_identifier import ModelType
+from common.utils.activity_timeline import activity_timeline
+from database import *
 
 #* Library Imports
 import os
@@ -74,7 +76,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         self.host = host # Host Name
         self.port = port # Port Number
         self.AT = activity_timeline.ActivityTimelineClass(database, user, password, host, port)
-        # self.op_diff = 8 #difference between database_operation ids & universal operation ids
         
     def get_db_connection(self):
         """This function is used to initialize database connection.
@@ -502,7 +503,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     #? Outlier Removal & Scaling Operations for numeric; Encoding ops for Categorical
                     if missing_flag == 'False' and noise_flag == 'False':
                         if col_type == 0 or col_type == 1:
-                            operations += [21,31,191,201,202,211,221,231,241,242,243,251]
+                            operations += [21,31,191,201,202,211,221,231,241,242,243,244,245,251]
                         if col_type == 2 or col_type == 3:
                             operations += [261,271]
                         if col_type == 0:

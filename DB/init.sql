@@ -498,6 +498,12 @@ Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_242','Replace Outliers
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_243','Replace Outliers with Median using Local Factor Outlier Detection','operation on column * failed','US','Operation',0,3,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_243','Replace Outliers with Median using Local Factor Outlier Detection','operation on column * in process','US','Operation',1,3,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_243','Replace Outliers with Median using Local Factor Outlier Detection','operation on column * completed','US','Operation',2,3,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_244','Replace Outliers using IQR Proximity Rule','operation on column * failed','US','Operation',0,3,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_244','Replace Outliers using IQR Proximity Rule','operation on column * in process','US','Operation',1,3,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_244','Replace Outliers using IQR Proximity Rule','operation on column * completed','US','Operation',2,3,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_245','Replace Outliers using Gaussian Approximation','operation on column * failed','US','Operation',0,3,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_245','Replace Outliers using Gaussian Approximation','operation on column * in process','US','Operation',1,3,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_245','Replace Outliers using Gaussian Approximation','operation on column * completed','US','Operation',2,3,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_251','Apply Log Transformation','operation on column * failed','US','Operation',0,3,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_251','Apply Log Transformation','operation on column * in process','US','Operation',1,3,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_251','Apply Log Transformation','operation on column * completed','US','Operation',2,3,0,0);

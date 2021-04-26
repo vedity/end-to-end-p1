@@ -300,7 +300,8 @@ class GradientBoostingClassificationClass:
         holdout_score = self.EvalMetricsObj.holdout_score(self.y_test, prediction_lst, model_type='Classification') # default 80:20 splits (r2-score)
         print(" holdout_score ")
 
-        precision_recall_dict = self.EvalMetricsObj.get_precision_recall(model, self.X_test, self.y_test)
+        # precision_recall_dict = self.EvalMetricsObj.get_precision_recall(model, self.X_test, self.y_test)
+        confusion_matrix_dict = self.EvalMetricsObj.get_confusion_matrix(actual_lst,prediction_lst)
 
         # log mlflow matrix
         self.MLFlowLogObj.store_model_metrics(accuracy=accuracy, recall=recall, precision=precision, f1_score=f1_score,
@@ -308,7 +309,7 @@ class GradientBoostingClassificationClass:
 
         # log artifacts (output files)
         self.MLFlowLogObj.store_model_dict(learning_curve=learning_curve_dict, features_importance=features_impact_dict,
-                                            model_summary=model_summary, predictions=final_result_dict, precision_recall=precision_recall_dict)
+                                            model_summary=model_summary, predictions=final_result_dict,confusion_matrix=confusion_matrix_dict)
 
         # log mlflow parameter
         self.MLFlowLogObj.store_model_params(self.dataset_split_dict)

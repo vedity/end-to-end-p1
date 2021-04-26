@@ -46,7 +46,7 @@ export class ModelingTypeApiService {
    // project_id=2;
 
    let params;
-   if(type!='')
+   if(type=='onload')
      params = new HttpParams().append("project_id", project_id)
     .append("dataset_id",dataset_id)
     .append("user_name",user_name);

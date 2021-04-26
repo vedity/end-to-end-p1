@@ -16,7 +16,7 @@ export class CreateSchemaMappingComponent implements OnInit {
   dtOptions: DataTables.Settings = {};
   dtTrigger: Subject<any> = new Subject<any>();
 
-  constructor(public apiService: SchemaMappingApiService,public router:Router, public toaster: ToastrService, private modalService: NgbModal) { }
+  constructor(public apiService: SchemaMappingApiService, public router: Router, public toaster: ToastrService, private modalService: NgbModal) { }
   @Input() public dataset_id: any;
   @Input() public title: any;
   @Input() public project_id: any;
@@ -27,12 +27,13 @@ export class CreateSchemaMappingComponent implements OnInit {
     isPrivate: false,
     dataset_name: "",
     description: ""
-
   }
+  selectdatetimeoption = "";
   filter: boolean = true;
   displaytitle = "false";
   columnattrList: any = [];
   datatypeList: any = [];
+  datetimeoptionList: any = [];
   datasetSchema: any = [];
   Originaldata: any = [];
   displaydiv = false;
@@ -94,6 +95,7 @@ export class CreateSchemaMappingComponent implements OnInit {
     }
     this.displaydiv = true;
     this.getColumnAttributeList();
+    this.getFeatureSelection();
     // console.log(this.project_id, this.dataset_id);
     this.getSchema(this.project_id, this.dataset_id, this.schema_id);
   }
@@ -126,11 +128,11 @@ export class CreateSchemaMappingComponent implements OnInit {
           });
         });
       }
-     
+
     }, 0);
   }
 
- 
+
 
   getColumnAttributeList() {
     this.apiService.getColumnAttributes().subscribe(
@@ -139,19 +141,93 @@ export class CreateSchemaMappingComponent implements OnInit {
     )
   }
 
-  getDataTypeList() {
-    this.apiService.getDatatypeList().subscribe(
-      logs => this.DatatypeSuccessHandler(logs),
+  // getDataTypeList() {
+  //   this.apiService.getDatatypeList().subscribe(
+  //     logs => this.DatatypeSuccessHandler(logs),
+  //     error => this.errorHandler(error)
+  //   )
+  // }
+
+  // DatatypeSuccessHandler(data) {
+  //   this.datatypeList = data.response.attribute_name;
+  // }
+
+  currentmodelId: any;
+  DatatypeModal(dateModal: any, item, i) {
+    console.log(item);
+    this.currentmodelId = i;
+    $("#datetimeformattooltip_" + i).prop("hidden", true);
+
+    if (item == "timestamp")
+      this.modalService.open(dateModal, { size: 'sm', windowClass: 'modal-holder', centered: true });
+  }
+
+  savetimestamp() {
+    console.log(this.currentmodelId);
+    console.log(this.selectdatetimeoption);
+    if (this.selectdatetimeoption != "") {
+      if (this.selectdatetimeoption != 'Custom') {
+        $("#datetimeformat_" + this.currentmodelId).val(this.selectdatetimeoption);
+        $("#datetimeformattooltip_" + this.currentmodelId).prop("hidden", false);
+        this.currentmodelId = '';
+        this.selectdatetimeoption = '';
+        this.modalService.dismissAll();
+      }
+      else {
+        var format = $("#custome-dateformate").val();
+        if (format != "") {
+          $("#datetimeformat_" + this.currentmodelId).val(format);
+          $("#datetimeformattooltip_" + this.currentmodelId).prop("hidden", false);
+          this.currentmodelId = '';
+          this.selectdatetimeoption = '';
+          this.modalService.dismissAll();
+        }
+        else {
+          this.toaster.error("Please enter custom datetime format", "Error");
+        }
+      }
+    }
+    else {
+      this.toaster.error("Please select any datetime format", "Error");
+    }
+
+
+  }
+
+  featuresList: any;
+  getFeatureSelection() {
+    this.apiService.getfeatureSelection().subscribe(
+      logs => this.SuccessFeatureSelection(logs),
       error => this.errorHandler(error)
     )
   }
 
-  DatatypeSuccessHandler(data) {
-    this.datatypeList = data.response.attribute_name;
+  SuccessFeatureSelection(data) {
+    if (data.status_code == "200") {
+      this.featuresList = data.response;
+      console.log(this.featuresList);
+
+    }
+    else {
+      this.errorHandler(data);
+    }
+  }
+
+  currentcontet = "";
+  displaytooltip(tooltip, id) {
+    this.currentcontet = $("#datetimeformat_" + id).val().toString();
+    tooltip.open();
+  }
+
+  hidetooltip(tooltip) {
+    tooltip.close();
   }
 
   columnattributesSuccessHandler(data) {
     this.columnattrList = data.response.column_attribute;
+    this.datatypeList = data.response.datatype;
+    this.datetimeoptionList = data.response.datetime_options;
+
   }
 
   errorHandler(error) {
@@ -175,27 +251,36 @@ export class CreateSchemaMappingComponent implements OnInit {
         txt_column_name = txt_column_name == undefined ? '' : txt_column_name.toString();
         var txt_column_attribute = $("#selectattr_" + index + " :selected").val();
         txt_column_attribute = txt_column_attribute == undefined ? '' : txt_column_attribute.toString();
-
-        if (txt_column_name == this.Originaldata[index].change_column_name && txt_column_attribute == this.Originaldata[index].column_attribute) {
-
+        var txt_datatype = $("#selectdatatype_" + index + " :selected").val();
+        txt_datatype = txt_datatype == undefined ? '' : txt_datatype.toString();
+        var date_format = $("#datetimeformat_" + index).val();
+        date_format = date_format == undefined ? '' : date_format.toString();
+        if (txt_column_name == this.Originaldata[index].change_column_name && txt_column_attribute == this.Originaldata[index].column_attribute && txt_datatype == this.Originaldata[index].data_type) {
         }
         else {
           if (txt_column_name != element.column_name) {
-            var schema = {
-              change_column_name: txt_column_name,
-              index: element.index,
-              column_name: element.column_name,
-              data_type: element.data_type,
-              column_attribute: txt_column_attribute
+            if (txt_datatype == 'timestamp' && date_format == '') {
+              this.toaster.error('Please select any datetime format', 'Error');
             }
-            savedata.push(schema);
+            else {
+              var schema = {
+                change_column_name: txt_column_name,
+                index: element.index,
+                column_name: element.column_name,
+                data_type: txt_datatype,
+                date_format: date_format,
+                column_attribute: txt_column_attribute
+              }
+              savedata.push(schema);
+            }
           }
         }
       });
       if (savedata.length > 0) {
         savedata.push(this.datasetSchema[0]);
 
-        // console.log(savedata);
+        console.log(savedata);
+        this.loaderdiv = false;
 
         this.apiService.saveDatasetSchema(this.dataset_id, this.project_id, this.schema_id, { data: savedata }).subscribe(logs => this.savesuccessHandler(logs), error => this.errorHandler(error));
 
@@ -277,5 +362,9 @@ export class CreateSchemaMappingComponent implements OnInit {
   displayfilter() {
     this.filter = !this.filter;
     $('.filter').val('').trigger('change');
+  }
+
+  largeModal(schemarecommodate: any) {
+    this.modalService.open(schemarecommodate, { size: 'lg', windowClass: 'modal-holder', centered: true });
   }
 }
