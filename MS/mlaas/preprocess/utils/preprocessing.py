@@ -456,7 +456,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 for id in column_ids:
                     
                     #? Getting metadata for selected column
-                    # prev_col_name = old_col_list[id]
+                    prev_col_name = old_col_list[id]
                     col = data_df.columns[id]
                     missing_flag = missing_flags[id]
                     noise_flag = noise_flags[id]
@@ -503,7 +503,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     #? Outlier Removal & Scaling Operations for numeric; Encoding ops for Categorical
                     if missing_flag == 'False' and noise_flag == 'False':
                         if col_type == 0 or col_type == 1:
-                            operations += [21,31,191,201,202,211,221,231,241,242,243,244,245,251]
+                            operations += [21,31,191,201,202,211,221,231,241,242,243,244,245]
                         if col_type == 2 or col_type == 3:
                             operations += [261,271]
                         if col_type == 0:
@@ -513,6 +513,15 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     if noise_flag == 'False':
                         if col_type == 0 or col_type == 1:
                             operations += [281,291,301,311]
+                            is_positve_flag,is_zero_flag=DBObject.check_column_type(connection,dataset_id,prev_col_name)
+                            logger.info("is_zero_flag"+str(is_zero_flag)+"==is_positve_flag"+str(is_positve_flag))
+                            operations+=[256,254]
+                            if is_positve_flag ==True:
+                                operations += [252,255] 
+                            if is_zero_flag == False:
+                                operations += [253]  
+                            if is_zero_flag == False and is_positve_flag == True:
+                                operations += [251]  
                             
                     #? Adding Feature Engineering Operation
                     if col_type == 4:

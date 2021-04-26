@@ -883,62 +883,112 @@ class DBClass:
        
         column_list = list(data_df['column_name'])
         return column_list
+    
+    def change_datatype(self, connection,column_string, table_name,type='float8'):
+        """[it will change data type of table]
 
-    def get_feature_df(self, connection, dataset_id,col):
-            '''
-                Returns a dataframe containing data of given dataset_id & schema_id.  
-                If schema_id is not given then it returns whole datatable without schema changes. 
-                
-                Args:
-                    connection(Object): Postgres Connection Object.
-                    dataset_id(Intiger): id of the dataset.
-                    schema_id(Intiger) [default None]: id of the dataset in the schema table.
-                    
-                Returns:
-                    data_df(pandas.DataFrame): Dataframe containing the data.
-            '''
+        Args:
+            column_string ([type]): [column name which we want to change type]
+            table_name ([type]): [table name]
+
+        Returns:
+            [status]: [0,1]
+        """
+        sql_command = f'ALTER TABLE {table_name} ALTER COLUMN "{str(column_string)}" type "{type}"'
+        logger.info("sql_command==="+sql_command) 
+        status = self.update_records(connection,sql_command)   
+        return status
+           
+    def get_column_df(self, connection, table_name,column_string):
+        
+        """[This function return specific column dataframe]
+
+        Returns:
+            [pandas df]: [specific column df]
+        """
+        
+        sql_command = f'SELECT "{str(column_string)}" FROM {table_name} order by index'
+        data_df = self.select_records(connection,sql_command)   
+        return data_df 
+    
+    def get_tablename(self,connection,dataset_id):
+        """[This function used to get table name from dataset_id]
+
+        Args:
+            connection ([object]): [[psetgres connection string]
+            dataset_id ([integer]): [dataset_id]
+
+        Raises:
+            EntryNotFound: [Dataset Entry is not found]
+
+        Returns:
+            [table_name]: [it will return dataset table name]
+        """
+        
+        #? getting the name of the dataset_tbl
+        table_name,_,_ = DatasetObject.make_dataset_schema()
+        
+        #? Getting user_name and dataset_visibility
+        sql_command = f"SELECT USER_NAME,DATASET_VISIBILITY,DATASET_TABLE_NAME,no_of_rows FROM {table_name} WHERE dataset_id = '{dataset_id}'"
+        visibility_df = self.select_records(connection,sql_command) 
+        if len(visibility_df) != 0: 
+            user_name,dataset_visibility = visibility_df['user_name'][0],visibility_df['dataset_visibility'][0]
+        #? No entry for the given dataset_id        
+        else: raise EntryNotFound(500)
+        
+        #? Getting CSV table name
+        dataset_table_name = visibility_df['dataset_table_name'][0]
+        dataset_table_name = '"'+ dataset_table_name+'"'
+        
+        #? changing the database schema for the public databases
+        if dataset_visibility == 'public':
+            user_name = 'public'
             
-            try:
-                logging.info("database : DBClass : get_dataset_df : execution start")
-                
-                #? getting the name of the dataset_tbl
-                table_name,_,_ = DatasetObject.make_dataset_schema()
-                
-                #? Getting user_name and dataset_visibility
-                sql_command = f"SELECT USER_NAME,DATASET_VISIBILITY,DATASET_TABLE_NAME,no_of_rows FROM {table_name} WHERE dataset_id = '{dataset_id}'"
-                visibility_df = self.select_records(connection,sql_command) 
-                if len(visibility_df) != 0: 
-                    user_name,dataset_visibility = visibility_df['user_name'][0],visibility_df['dataset_visibility'][0]
-                #? No entry for the given dataset_id        
-                else: raise EntryNotFound(500)
-                
-                #? Getting CSV table name
-                dataset_table_name = visibility_df['dataset_table_name'][0]
-                dataset_table_name = '"'+ dataset_table_name+'"'
-                
-                #? changing the database schema for the public databases
-                if dataset_visibility == 'public':
-                    user_name = 'public'
-                
-                #? Get Whole table
-                query_string = ""
-                for i in range(len(col)):
-                    query_string += '"'+col[i]+'",'
-                
-                query_string = query_string[:len(query_string)-1]
-                logging.info("+++>"+str(query_string))
-                
-                sql_command = f"SELECT {query_string} FROM {user_name}.{dataset_table_name}"
-                logging.info("))))"+str(sql_command))
-                    
-                data_df = self.select_records(connection,sql_command)    
-                data_df = data_df.replace([''],np.NaN)
-                
-                logging.info("database : DBClass : get_dataset_df : execution stop")
+        dataset_table_name=user_name+"."+dataset_table_name
+        return dataset_table_name
+    
+    
+    def check_column_type(self,connection,dataset_id,prev_col_name):
+        """[check the column contains positive,negative and zero]
 
-                return data_df
-                
-            except (EntryNotFound) as exc:
-                logging.error("database : DBClass : get_dataset_df : Exception " + str(exc.msg))
-                logging.error("database : DBClass : get_dataset_df : " +traceback.format_exc())
-                return exc.msg
+        Args:
+            dataset_id ([type]): [dataset_id]
+            prev_col_name ([type]): [old column name]
+
+        Returns:
+            [is_positve_flag]: [flag True or Flaseption]
+            [is_zero_flag]: [flag True or Flase]
+
+        """
+        
+        tablename=self.get_tablename(connection,dataset_id)
+        
+        sql_command=f'select count(*) as negative_count from {tablename} where "{prev_col_name}"<0'
+        
+        negative_data_df = self.select_records(connection,sql_command)
+        
+        negative_count = negative_data_df['negative_count'].tolist()[0]
+        
+        if negative_count == 0:
+            is_positve_flag=True
+        else:
+            is_positve_flag=False
+        
+       
+        sql_command=f'select count(*) as zero_count from {tablename} where "{prev_col_name}"=0'
+        
+        zero_data_df = self.select_records(connection,sql_command)
+        
+        zero_count = zero_data_df['zero_count'].tolist()[0]
+        if zero_count == 0:
+            is_zero_flag=False
+        else:
+            is_zero_flag=True
+            
+        return is_positve_flag,is_zero_flag
+            
+            
+        
+       
+        
+
