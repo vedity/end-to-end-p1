@@ -18,7 +18,7 @@ PC_OBJ = PreprocessingClass(database,user,password,host,port)
 
 yesterday_date = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')
 
-main_dag_id = "Cleanup_dag_138384811889668950"
+main_dag_id = "Cleanup_dag_138387346760937780"
 
 args = {
     'owner': 'airflow',
@@ -36,7 +36,7 @@ dag = DAG(
 
 #? Getting Required Parameters
 
-master_dict = {'active': 1, 'operation_dict': {202: [3], 242: [5], 243: [6]}, 'values_dict': {202: [''], 242: [''], 243: ['']}, 'schema_id': '6', 'dataset_id': '14', 'project_id': '6', 'save_as': 'False', 'visibility': None, 'dataset_name': None, 'dataset_desc': None, 'user_name': 'abhishek'} 
+master_dict = {'active': 1, 'operation_dict': {321: [4]}, 'values_dict': {321: ['']}, 'schema_id': '35', 'dataset_id': '37', 'project_id': '35', 'save_as': 'False', 'visibility': None, 'dataset_name': None, 'dataset_desc': None, 'user_name': 'abhishek'} 
 
 if int(master_dict['active']) == 0:
     sys.exit()
@@ -110,7 +110,8 @@ op_dict = {
     281 : PC_OBJ.add_to_column,
     291 : PC_OBJ.subtract_from_column,
     301 : PC_OBJ.divide_column,
-    311 : PC_OBJ.multiply_column
+    311 : PC_OBJ.multiply_column,
+    321 : PC_OBJ.split_date_column
 }
 
 def dag_end(DBObject,connection,dataset_id,project_id,dag_id,new_user_name,dataset_name,col_list,**kwargs):
@@ -207,7 +208,8 @@ for index in operation.keys():
             281 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
             291 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
             301 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
-            311 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]]
+            311 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
+            321 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], schema_id]
         }
         
         dynamicTask = PythonOperator(

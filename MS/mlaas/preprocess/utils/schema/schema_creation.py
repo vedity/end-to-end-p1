@@ -252,6 +252,7 @@ class SchemaClass:
             
             if schema_status ==0:
                 
+                #? Reseting the scale & split status on successful schema updation
                 sql_command = "update mlaas.project_tbl set input_features =null,target_features =null ,scaled_split_parameters =null,problem_type =null where project_id ="+str(project_id)
                 
                 status = DBObject.update_records(connection,sql_command) 

@@ -50,6 +50,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def discard_missing_values(self,DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
             Operation id: dp_1
+            Operation desc: Remove all the rows containing missing values.
         '''
         
         
@@ -79,6 +80,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def mean_imputation(self, DBObject,connection,project_id,column_list,old_column_list,table_name, col,flag = False, **kwargs):
         '''
             Operation id: dp_51
+            Operation desc: Replace missing values with mean of that column.
         '''
         
         logging.info("data preprocessing : CleaningClass : mean_imputation : execution start" + str(col))
@@ -119,6 +121,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def median_imputation(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
             Operation id: dp_61
+            Operation desc: Replace missing values with median of tht column.
         '''
         
         logging.info("data preprocessing : CleaningClass : median_imputation : execution start")
@@ -157,6 +160,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def mode_imputation(self,  DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
             Operation id: dp_71
+            Operation desc: Replace missing values with the mode of that column.
         '''
         logging.info("data preprocessing : CleaningClass : mode_imputation : execution start")
         cols = [column_list[i] for i in col]
@@ -190,6 +194,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def end_of_distribution(self,DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
             Operation id: dp_91
+            Operation desc: Replace missing values with largest possible non-outlier value.
         '''
         logging.info("data preprocessing : CleaningClass : end_of_distribution : execution start")
         cols = [column_list[i] for i in col]
@@ -226,6 +231,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def missing_category_imputation(self,DBObject,connection,project_id,column_list,old_column_list, table_name, col,value ,flag = False, **kwargs):
         '''
             Operation id: dp_81
+            Operation desc: Replace missing with used given string value.
         '''
         logging.info(" checking " +str(value))
         logging.info("data preprocessing : CleaningClass : missing_category_imputation : execution start")
@@ -267,6 +273,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def frequent_category_imputation(self,DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
             Operation id: dp_101
+            Operation desc: Replace missing value with the most occuring category value.
         '''
         
         logging.info("data preprocessing : CleaningClass : frequent_category_imputation : execution start")
@@ -310,6 +317,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def random_sample_imputation(self, DBObject,connection,project_id,column_list,old_column_list, table_name,col, **kwargs):
         '''
             Operation id: dp_121
+            Operation desc: Replace missing values with the random values from the column.
         '''
         
         logging.info("data preprocessing : CleaningClass : random_sample_imputation : execution start")
@@ -355,6 +363,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def remove_noise(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
             Operation id: dp_41
+            Operation desc: Make missing value where there is a noise.
         '''
         
         logging.info("data preprocessing : CleaningClass : remove_noise : execution start")
@@ -385,6 +394,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def discard_noise(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
             Operation id: dp_11
+            Operation desc: Remove rows containing the noise.
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_noise_mean : execution start")
@@ -418,6 +428,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def repl_noise_mean(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
             Operation id: dp_131
+            Operation desc: Replace noise with the mean of the column.
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_noise_mean : execution start")
@@ -452,6 +463,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def repl_noise_median(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
             Operation id: dp_141
+            Operation desc: replace noise with median of the column.
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_noise_median : execution start")
@@ -485,6 +497,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def repl_noise_mode(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
             Operation id: dp_151
+            Operation desc: replace noise with mode of the column.
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_noise_mode : execution start")
@@ -519,6 +532,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def repl_noise_eod(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
             Operation id: dp_161
+            Operation desc: Replace noise with max possible vale that not an outlier.
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_noise_eod : execution start")
@@ -552,6 +566,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def repl_noise_random_sample(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
             Operation id: dp_171
+            Operation desc: replace noise with random values of the column.
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_noise_random_sample : execution start")
@@ -585,6 +600,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def repl_noise_arbitrary_val(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, value, **kwargs):
         '''
             Operation id: dp_181
+            Operation desc: Replace noise with value given by user.
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_noise_arbitrary_val : execution start")
@@ -622,6 +638,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def delete_above(self, DBObject,connection,project_id,column_list,old_column_list, table_name,col,val, **kwargs):
         '''
             Operation id: dp_21
+            Operation desc: delete rows where given column's value if above given value.
         '''
         
         logging.info("data preprocessing : CleaningClass : delete_below : execution start")
@@ -651,6 +668,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def delete_below(self, DBObject,connection,project_id,column_list,old_column_list, table_name,col,val, **kwargs):
         '''
             Operation id: dp_31
+            Operation desc: delete rows where given column's value is below given value.
         '''
         
         logging.info("data preprocessing : CleaningClass : delete_below : execution start")
@@ -681,6 +699,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def rem_outliers_ext_val_analysis(self, DBObject,connection,project_id,column_list,old_column_list, dataset_table_name,col, **kwargs):
         '''
             Operation id: dp_191
+            Operation desc:
         '''
         
         logging.info("data preprocessing : CleaningClass : rem_outliers_ext_val_analysis : execution start")
@@ -713,6 +732,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def rem_outliers_z_score(self,DBObject,connection,project_id,column_list,old_column_list, dataset_table_name,col, **kwargs):
         '''
             Operation id: dp_201
+            Operation desc:
         '''
         
         logging.info("data preprocessing : CleaningClass : rem_outliers_z_score : execution start")
@@ -746,6 +766,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def rem_outliers_lof(self, DBObject,connection,project_id,column_list,old_column_list, dataset_table_name,col, **kwargs):
         '''
             Operation id: dp_202
+            Operation desc:
         '''
         
         logging.info("data preprocessing : CleaningClass : rem_outliers_lof : execution start")
@@ -780,6 +801,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def repl_outliers_mean_ext_val_analysis(self, DBObject,connection,project_id,column_list,old_column_list, table_name,col, **kwargs):
         '''
             Operation id: dp_211
+            Operation desc:
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_outliers_mean_ext_val_analysis : execution start")
@@ -816,6 +838,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def repl_outliers_mean_z_score(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
             Operation id: dp_221
+            Operation desc:
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_outliers_mean_z_score : execution start")
@@ -852,6 +875,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def repl_outliers_med_ext_val_analysis(self, DBObject,connection,project_id,column_list,old_column_list, table_name,col, **kwargs):
         '''
             Operation id: dp_231
+            Operation desc:
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_outliers_med_ext_val_analysis : execution start")
@@ -890,6 +914,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def repl_outliers_med_z_score(self,DBObject,connection,project_id,column_list,old_column_list, table_name,col, **kwargs):
         '''
             Operation id: dp_241
+            Operation desc:
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_outliers_med_z_score : execution start")
@@ -924,6 +949,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def repl_outliers_mode_ext_val_analysis(self, DBObject,connection,project_id,column_list,old_column_list, table_name,col, **kwargs):
         '''
             Operation id: dp_7
+            Operation desc:
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_outliers_mode_ext_val_analysis : execution start")
@@ -962,6 +988,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def repl_outliers_mode_z_score(self, DBObject,connection,project_id,column_list,old_column_list, table_name,col, **kwargs):
         '''
             Operation id: dp_7
+            Operation desc:
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_outliers_mode_z_score : execution start")
@@ -998,6 +1025,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def repl_outliers_mean_lof(self, DBObject,connection,project_id,column_list,old_column_list, dataset_table_name,col, **kwargs):
         '''
             Operation id: dp_242
+            Operation desc:
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_outliers_mean_lof : execution start")
@@ -1038,6 +1066,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def repl_outliers_median_lof(self, DBObject,connection,project_id,column_list,old_column_list, dataset_table_name,col, **kwargs):
         '''
             Operation id: dp_243
+            Operation desc:
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_outliers_median_lof : execution start")

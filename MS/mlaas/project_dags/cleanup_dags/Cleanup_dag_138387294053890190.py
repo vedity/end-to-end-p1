@@ -18,7 +18,7 @@ PC_OBJ = PreprocessingClass(database,user,password,host,port)
 
 yesterday_date = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')
 
-main_dag_id = #DAG_ID
+main_dag_id = "Cleanup_dag_138387294053890190"
 
 args = {
     'owner': 'airflow',
@@ -36,7 +36,7 @@ dag = DAG(
 
 #? Getting Required Parameters
 
-master_dict = #MASTER_DICT 
+master_dict = {'active': 1, 'operation_dict': {321: [4]}, 'values_dict': {321: ['']}, 'schema_id': '34', 'dataset_id': '35', 'project_id': '34', 'save_as': 'False', 'visibility': None, 'dataset_name': None, 'dataset_desc': None, 'user_name': 'abhishek'} 
 
 if int(master_dict['active']) == 0:
     sys.exit()
@@ -209,7 +209,7 @@ for index in operation.keys():
             291 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
             301 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
             311 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
-            321 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], schema_id]
+            321 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]]
         }
         
         dynamicTask = PythonOperator(

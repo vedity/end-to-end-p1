@@ -13,6 +13,9 @@ import logging
 #* Commong Utilities
 from common.utils.logger_handler import custom_logger as cl
 
+#* Relative Imports
+from ..schema import schema_creation
+
 #* Defining Logger
 user_name = 'admin'
 log_enable = True
@@ -22,11 +25,13 @@ LogObject.log_setting()
 
 logger = logging.getLogger('feature_extraction')
 
+#* Defining Objects
+sc = schema_creation.SchemaClass()
 
 class FeatureEngineeringClass:
     
     #* DATETIME FEATURE ENGINEERING
-    def datetime_fe(self, DBObject, connection, column_name, table_name):
+    def datetime_fe(self, DBObject, connection, schema_id, column_name, table_name):
         '''
             It takes a datetime column and creates below features(columns) from it,
                 - Date
@@ -90,8 +95,19 @@ class FeatureEngineeringClass:
             #? Filling data
             update_status = DBObject.update_records(connection, sql_command)
             
+            if update_status != 0:
+                raise RuntimeError
+
+            #? Updating the schema_tbl
+            length = len(col_names)
+            missing_lst = ['False']*length
+            noise_lst = ['False']*length
+            dtype_lst = ['numerical']*length
+            
+            schema_update = sc.update_dataset_schema(DBObject,connection,schema_id,col_names,dtype_lst,missing_flag=missing_lst,noise_flag=noise_lst,flag = True)
+            
             logging.info("Preprocess : FeatureEngineeringClass : datetime_fe : execution stop")
-            return update_status
+            return schema_update
             
         except Exception as e:
             logging.error(f"Preprocess : FeatureEngineeringClass : datetime_fe : execution failed : error => {str(e)}")

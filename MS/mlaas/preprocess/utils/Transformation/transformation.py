@@ -376,7 +376,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         logging.info("data preprocessing : TransformationClass : divide_column : execution stop")
         return status
     
-    def split_date_column(self, DBObject, connection, project_id, column_list,old_column_list, table_name, col, **kwargs):
+    def split_date_column(self, DBObject, connection, project_id, column_list,old_column_list, table_name, col, schema_id, **kwargs):
         '''
             Operation id: 321
         '''
@@ -392,7 +392,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
                 #Insert the activity for the operation
                 activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
-                status = self.datetime_fe(DBObject, connection, old_cols[i], table_name)
+                status = self.datetime_fe(DBObject, connection, schema_id, old_cols[i], table_name)
                 
                 #Update the activity status for the operation performed
                 at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
