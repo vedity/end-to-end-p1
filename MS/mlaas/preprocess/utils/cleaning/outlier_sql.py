@@ -315,8 +315,10 @@ class OutliersTreatmentClass:
         try:
             logging.info("data preprocessing : OutliersTreatmentClass : get_upper_lower_limit : execution start")
             sql_command = f'select PERCENTILE_CONT({str(quantile_1)}) WITHIN GROUP (ORDER BY "{str(col_name)}") AS quartile_1,PERCENTILE_CONT({str(quantile_2)}) WITHIN GROUP (ORDER BY "{str(col_name)}") AS quartile_2 from {table_name}'
-            dataframe = DBObject.select_records(connection,sql_command)
+            logging.info("Sql_command : get_upper_lower_limit( PERCENTILE_COUNTS) : "+str(sql_command))
+
             
+            dataframe = DBObject.select_records(connection,sql_command)
             q1,q3 = float(dataframe['quartile_1'][0]),float(dataframe['quartile_2'][0])
 
             # #? Finding Boundaries of the normal data
@@ -466,15 +468,6 @@ class OutliersTreatmentClass:
             logging.error("data preprocessing : OutliersTreatmentClass : update_outliers : Exception : "+str(exc))
             return 1
     
-
-    # def update_lfo_outlier(self,DBObject,connection,col_name,table_name,impute_value,in_query= None):
-    #     try:
-    #         sql_command = f''' update {table_name} set "{str(col_name)}"='{str(impute_value)}' where index in ({in_query}) '''
-    #         status = DBObject.update_records(connection,sql_command)
-
-    #         return status
-    #     except Exception as exc:
-    #         return 1
 
     
     
