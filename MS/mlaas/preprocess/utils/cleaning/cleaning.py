@@ -44,7 +44,10 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def discard_missing_values(self,DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
-            Operation id: dp_1
+        Function will delete the rows where is found the null values in that column.
+
+        Operation id: dp_1
+
         '''
         
         try:
@@ -73,13 +76,15 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
             logging.info("data preprocessing : CleaningClass : discard_missing_values : execution stop")
             return status
         except Exception as exc:
-            logging.info("data preprocessing : CleaningClass : discard_missing_values : Exception :"+str(exc))
-            return str(exc)
+            logging.error("data preprocessing : CleaningClass : discard_missing_values : Exception :"+str(exc))
+            logging.error("data preprocessing : CleaningClass : discard_missing_values : " +traceback.format_exc())
+            return 1
         
     
     def mean_imputation(self, DBObject,connection,project_id,column_list,old_column_list,table_name, col,flag = False, **kwargs):
         '''
-            Operation id: dp_51
+        Function will replace the Null  value's with mean. 
+        Operation id: dp_51
         '''
         
         logging.info("data preprocessing : CleaningClass : mean_imputation : execution start" + str(col))
@@ -114,13 +119,16 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
                 
             except Exception as exc:
-                return exc
+                logging.error("data preprocessing : CleaningClass : mean_imputation : Exception :"+str(exc))
+                logging.error(" data preprocessing : CleaningClass : mean_imputation : " +traceback.format_exc())
+                return 1
 
         logging.info("data preprocessing : CleaningClass : mean_imputation : execution stop")
         return status
     
     def median_imputation(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
+            Function will replace the Null  value's with Median. 
             Operation id: dp_61
         '''
         
@@ -155,13 +163,16 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
 
             except Exception as exc:
-                return exc
+                logging.error("data preprocessing : CleaningClass : median_imputation : Exception :"+str(exc))
+                logging.error(" data preprocessing : CleaningClass : median_imputation : " +traceback.format_exc())
+                return 1
 
         logging.info("data preprocessing : CleaningClass : median_imputation : execution stop")
         return status
     
     def mode_imputation(self,  DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
+            Function will replace the Null  value's with mode. 
             Operation id: dp_71
         '''
         logging.info("data preprocessing : CleaningClass : mode_imputation : execution start")
@@ -190,13 +201,16 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
             
             except Exception as exc:
-                return exc
+                logging.error("data preprocessing : CleaningClass : mode_imputation : Exception " +str(exc))
+                logging.error("data preprocessing : CleaningClass : mode_imputation   : " +traceback.format_exc())
+                return 1
 
         logging.info("data preprocessing : CleaningClass : mode_imputation : execution stop")
         return status
     
     def end_of_distribution(self,DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
+            Function will replace the Null  value's with extream value found in that perticular distribution of the column. 
             Operation id: dp_91
         '''
         logging.info("data preprocessing : CleaningClass : end_of_distribution : execution start")
@@ -228,13 +242,16 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
             
             except Exception as exc:
-                return exc
+                logging.error("data preprocessing : CleaningClass : end_of_distribution : Exception :" +str(exc))
+                logging.error("data preprocessing : CleaningClass : end_of_distribution : " +traceback.format_exc())
+                return 1
 
         logging.info("data preprocessing : CleaningClass : end_of_distribution : execution stop")
         return status
 
     def missing_category_imputation(self,DBObject,connection,project_id,column_list,old_column_list, table_name, col,value ,flag = False, **kwargs):
         '''
+            Function will replace the Null  value's with input value entered by the user. 
             Operation id: dp_81
         '''
         logging.info(" checking " +str(value))
@@ -269,8 +286,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
             
             except Exception as exc:
-                logging.error(str(exc))
-                return exc
+                logging.error("data preprocessing : CleaningClass : missing_category_imputation " + str(exc))
+                logging.error(" data preprocessing : CleaningClass : missing_category_imputation  : " +traceback.format_exc())
+                return 1
 
         logging.info("data preprocessing : CleaningClass : missing_category_imputation : execution stop")
         return status
@@ -278,6 +296,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
    
     def frequent_category_imputation(self,DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
+            Function will replace the Null  value's with Frequently used value in that column. 
             Operation id: dp_101
         '''
         
@@ -315,7 +334,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
             
             except Exception as exc:
-                return exc
+                logging.error(" data preprocessing : CleaningClass : frequent_category_imputation  : " +str(exc))
+                logging.error(" data preprocessing : CleaningClass : frequent_category_imputation  : " +traceback.format_exc())
+                return 1
             
 
         logging.info("data preprocessing : CleaningClass : frequent_category_imputation : execution stop")
@@ -323,6 +344,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def random_sample_imputation(self, DBObject,connection,project_id,column_list,old_column_list, table_name,col, **kwargs):
         '''
+            Function will replace the Null  value's with randomly selected value's from the column. 
             Operation id: dp_121
         '''
         
@@ -361,7 +383,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name) 
             
             except Exception as exc:
-                return str(exc)
+                logging.error("data preprocessing : CleaningClass : random_sample_imputation   : " +str(exc))
+                logging.error("data preprocessing : CleaningClass : random_sample_imputation   : " +traceback.format_exc())
+                return 1
 
         logging.info("data preprocessing : CleaningClass : random_sample_imputation : execution stop")
         return status
@@ -370,6 +394,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def remove_noise(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
+            Function will remove the noise from the column.
             Operation id: dp_41
         '''
         
@@ -395,17 +420,20 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
             
             except Exception as exc:
-                return exc
+                logging.error(" data preprocessing : CleaningClass : remove_noise : " +str(exc))
+                logging.error(" data preprocessing : CleaningClass : remove_noise : " +traceback.format_exc())
+                return 1
 
         logging.info("data preprocessing : CleaningClass : remove_noise : execution stop")
         return status
     
     def discard_noise(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
+            Function will Delete the noise from the column.
             Operation id: dp_11
         '''
         
-        logging.info("data preprocessing : CleaningClass : repl_noise_mean : execution start")
+        logging.info("data preprocessing : CleaningClass : discard_noise : execution start")
         
         cols = [column_list[i] for i in col]
         old_cols = [old_column_list[i] for i in col]
@@ -428,7 +456,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
             
             except Exception as exc:
-                return exc
+                logging.error("data preprocessing : CleaningClass : discard_noise  : " +str(exc))
+                logging.error("data preprocessing : CleaningClass : discard_noise  : " +traceback.format_exc())
+                return 1
         if status == 0:
             status = self.discard_missing_values(DBObject, connection,project_id,column_list,old_column_list, table_name, col)
 
@@ -437,6 +467,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def repl_noise_mean(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
+            Function will replace the noise with mean of the column.
             Operation id: dp_131
         '''
         
@@ -464,7 +495,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
             
             except Exception as exc:
-                return exc
+                logging.error("data preprocessing : CleaningClass : repl_noise_mean  : " +str(exc))
+                logging.error("data preprocessing : CleaningClass : repl_noise_mean  : " +traceback.format_exc())
+                return 1
         if status == 0:
             status = self.mean_imputation(DBObject, connection,project_id,column_list,old_column_list, table_name, col)
 
@@ -473,6 +506,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def repl_noise_median(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
+            Function will replace the noise with median of the column.
             Operation id: dp_141
         '''
         
@@ -499,7 +533,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
             
             except Exception as exc:
-                return exc
+                logging.error("data preprocessing : CleaningClass : repl_noise_median  : " +str(exc))
+                logging.error("data preprocessing : CleaningClass : repl_noise_median  : " +traceback.format_exc())
+                return 1
         if status == 0:
             status = self.median_imputation(DBObject, connection,project_id,column_list,old_column_list, table_name, col)
 
@@ -508,6 +544,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def repl_noise_mode(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
+            Function will replace the noise with mode of the column.
             Operation id: dp_151
         '''
         
@@ -535,7 +572,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
             
             except Exception as exc:
-                return exc
+                logging.error("data preprocessing : CleaningClass : repl_noise_mode  : " +str(exc))
+                logging.error("data preprocessing : CleaningClass : repl_noise_mode  : " +traceback.format_exc())
+                return 1
         if status == 0:
             status = self.mode_imputation(DBObject, connection,project_id,column_list,old_column_list, table_name, col)
 
@@ -544,6 +583,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def repl_noise_eod(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
+            Function will replace the noise with End of distribution method .
             Operation id: dp_161
         '''
         
@@ -570,7 +610,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
 
             except Exception as exc:
-                return exc
+                logging.error("data preprocessing : CleaningClass : repl_noise_eod  : " +str(exc))
+                logging.error("data preprocessing : CleaningClass : repl_noise_eod  : " +traceback.format_exc())
+                return 1
         if status == 0:
             status = self.end_of_distribution(DBObject, connection,project_id,column_list,old_column_list, table_name, col)
 
@@ -579,6 +621,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def repl_noise_random_sample(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
+            Function will replace the noise with Random sample imputation method 
             Operation id: dp_171
         '''
         
@@ -605,7 +648,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
 
             except Exception as exc:
-                return exc
+                logging.error("data preprocessing : CleaningClass : repl_noise_random_sample  : " +str(exc))
+                logging.error("data preprocessing : CleaningClass : repl_noise_random_sample  : " +traceback.format_exc())
+                return 1
         if status == 0:
             status = self.random_sample_imputation(DBObject, connection,project_id,column_list,old_column_list, table_name, col)
 
@@ -614,6 +659,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def repl_noise_arbitrary_val(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, value, **kwargs):
         '''
+            Function will replace the noise with impute value entered by user.
             Operation id: dp_181
         '''
         
@@ -641,7 +687,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
 
             except Exception as exc:
-                return exc
+                logging.error("data preprocessing : CleaningClass : repl_noise_arbitrary_val  : " +str(exc))
+                logging.error("data preprocessing : CleaningClass : repl_noise_arbitrary_val  : " +traceback.format_exc())
+                return 1
         if status == 0:
             status = self.missing_category_imputation(DBObject, connection,project_id,column_list,old_column_list, table_name, col, value)
 
@@ -653,6 +701,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def delete_above(self, DBObject,connection,project_id,column_list,old_column_list, table_name,col,val, **kwargs):
         '''
+            Function will delete the rows for the column value greater then value which is  entered by the user.
             Operation id: dp_21
         '''
         
@@ -678,12 +727,15 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
 
             except Exception as exc:
-                return str(exc)
+                logging.error("data preprocessing : CleaningClass : delete_below  : " +str(exc))
+                logging.error("data preprocessing : CleaningClass : delete_below  : " +traceback.format_exc())
+                return 1
         logging.info("data preprocessing : CleaningClass : delete_below : execution stop")
         return status
     
     def delete_below(self, DBObject,connection,project_id,column_list,old_column_list, table_name,col,val, **kwargs):
         '''
+            Function will delete the rows for the column value less then value which is  entered by the user.
             Operation id: dp_31
         '''
         
@@ -710,12 +762,15 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
 
             except Exception as exc:
-                return str(exc)
+                logging.error("data preprocessing : CleaningClass : delete_below  : " +str(exc))
+                logging.error("data preprocessing : CleaningClass : delete_below  : " +traceback.format_exc())
+                return 1
         logging.info("data preprocessing : CleaningClass : delete_below : execution stop")
         return status
     
     def rem_outliers_ext_val_analysis(self, DBObject,connection,project_id,column_list,old_column_list, dataset_table_name,col, **kwargs):
         '''
+            Function will Remove outlier using Extream value Analysis method.
             Operation id: dp_191
         '''
         
@@ -743,13 +798,16 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
 
             except Exception as exc:
-                return str(exc)
+                logging.error("data preprocessing : CleaningClass : rem_outliers_ext_val_analysis  : " +str(exc))
+                logging.error("data preprocessing : CleaningClass : rem_outliers_ext_val_analysis  : " +traceback.format_exc())
+                return 1
 
         logging.info("data preprocessing : CleaningClass : rem_outliers_ext_val_analysis : execution stop")
         return status
     
     def rem_outliers_z_score(self,DBObject,connection,project_id,column_list,old_column_list, dataset_table_name,col, **kwargs):
         '''
+            Function will Remove outlier using Z score method.
             Operation id: dp_201
         '''
         
@@ -778,13 +836,16 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
                     
             except Exception as exc:
-                return str(exc)
+                logging.error("data preprocessing : CleaningClass : rem_outliers_z_score  : " +str(exc))
+                logging.error("data preprocessing : CleaningClass : rem_outliers_z_score  : " +traceback.format_exc())
+                return 1
 
         logging.info("data preprocessing : CleaningClass : rem_outliers_z_score : execution stop")
         return status
     
     def rem_outliers_lof(self, DBObject,connection,project_id,column_list,old_column_list, dataset_table_name,col, **kwargs):
         '''
+            Function will Remove outlier using Local factor outlier method
             Operation id: dp_202
         '''
         
@@ -811,7 +872,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     
                 logging.info(str(status))
             except Exception as exc:
-                return str(exc)
+                logging.error("data preprocessing : CleaningClass : rem_outliers_lof  : " +str(exc))
+                logging.error("data preprocessing : CleaningClass : rem_outliers_lof  : " +traceback.format_exc())
+                return 1
             
         logging.info("data preprocessing : CleaningClass : rem_outliers_lof : execution stop")
         return status
@@ -819,6 +882,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def repl_outliers_mean_ext_val_analysis(self, DBObject,connection,project_id,column_list,old_column_list, table_name,col, **kwargs):
         '''
+            Function will Replace outlier with mean value using Extream value Analysis method.
             Operation id: dp_211
         '''
         
@@ -851,13 +915,16 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
 
             except Exception as exc:
-                return str(exc)
+                logging.error("data preprocessing : CleaningClass : rem_outliers_lof  : " +str(exc))
+                logging.error("data preprocessing : CleaningClass : rem_outliers_lof  : " +traceback.format_exc())
+                return 1
 
         logging.info("data preprocessing : CleaningClass : repl_outliers_mean_ext_val_analysis : execution stop")
         return status
     
     def repl_outliers_mean_z_score(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
+            Function will Replace outlier with mean value using Z score method
             Operation id: dp_221
         '''
         
@@ -890,13 +957,16 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
 
                 
             except Exception as exc:
-                return str(exc)
+                logging.error("data preprocessing : CleaningClass : rem_outliers_lof  : " +str(exc))
+                logging.error("data preprocessing : CleaningClass : rem_outliers_lof  : " +traceback.format_exc())
+                return 1
 
         logging.info("data preprocessing : CleaningClass : repl_outliers_mean_z_score : execution stop")
         return status
     
     def repl_outliers_med_ext_val_analysis(self, DBObject,connection,project_id,column_list,old_column_list, table_name,col, **kwargs):
         '''
+            Function will Replace outlier with median value using  Extream value Analysis method
             Operation id: dp_231
         '''
         
@@ -930,13 +1000,16 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
 
                 logging.info(str(status))
             except Exception as exc:
-                return str(exc)
+                logging.error("data preprocessing : CleaningClass : rem_outliers_lof  : " +str(exc))
+                logging.error("data preprocessing : CleaningClass : rem_outliers_lof  : " +traceback.format_exc())
+                return 1
             
         logging.info("data preprocessing : CleaningClass : repl_outliers_med_ext_val_analysis : execution stop")
         return status
     
     def repl_outliers_med_z_score(self,DBObject,connection,project_id,column_list,old_column_list, table_name,col, **kwargs):
         '''
+            Function will Replace outlier with median value usingZ score method
             Operation id: dp_241
         '''
         
@@ -968,12 +1041,15 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
 
                 
             except Exception as exc:
-                return str(exc)
+                logging.error("data preprocessing : CleaningClass : rem_outliers_lof  : " +str(exc))
+                logging.error("data preprocessing : CleaningClass : rem_outliers_lof  : " +traceback.format_exc())
+                return 1
         logging.info("data preprocessing : CleaningClass : repl_outliers_med_z_score : execution stop")
         return status
     
     def repl_outliers_mode_ext_val_analysis(self, DBObject,connection,project_id,column_list,old_column_list, table_name,col, **kwargs):
         '''
+            Function will Replace outlier with mode value using Extream value Analysis method
             Operation id: dp_7
         '''
         
@@ -1008,13 +1084,16 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
 
 
             except Exception as exc:
-                return str(exc)
+                logging.error("data preprocessing : CleaningClass : rem_outliers_lof  : " +str(exc))
+                logging.error("data preprocessing : CleaningClass : rem_outliers_lof  : " +traceback.format_exc())
+                return 1
             
         logging.info("data preprocessing : CleaningClass : repl_outliers_mode_ext_val_analysis : execution stop")
         return status
     
     def repl_outliers_mode_z_score(self, DBObject,connection,project_id,column_list,old_column_list, table_name,col, **kwargs):
         '''
+            Function will Replace outlier with mode value using Z score method
             Operation id: dp_7
         '''
         
@@ -1046,7 +1125,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
 
                 
             except Exception as exc:
-                return str(exc)
+                logging.error("data preprocessing : CleaningClass : rem_outliers_lof  : " +str(exc))
+                logging.error("data preprocessing : CleaningClass : rem_outliers_lof  : " +traceback.format_exc())
+                return 1
 
         logging.info("data preprocessing : CleaningClass : repl_outliers_mode_z_score : execution stop")
         return status
@@ -1054,6 +1135,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
 
     def repl_outliers_mean_lof(self, DBObject,connection,project_id,column_list,old_column_list, dataset_table_name,col, **kwargs):
         '''
+            Function will Replace outlier with mean value using Local factor outlier method
             Operation id: dp_242
         '''
         
@@ -1087,13 +1169,16 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 else:
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
             except Exception as exc:
-                return str(exc)
+                logging.error("data preprocessing : CleaningClass : rem_outliers_lof  : " +str(exc))
+                logging.error("data preprocessing : CleaningClass : rem_outliers_lof  : " +traceback.format_exc())
+                return 1
 
         logging.info("data preprocessing : CleaningClass : repl_outliers_mean_lof : execution stop")
         return status
     
     def repl_outliers_median_lof(self, DBObject,connection,project_id,column_list,old_column_list, dataset_table_name,col, **kwargs):
         '''
+            Function will Replace outlier with median value using Local factor outlier method
             Operation id: dp_243
         '''
         
@@ -1128,7 +1213,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 
                 logging.info(str(status))
             except Exception as exc:
-                return str(exc)
+                logging.error("data preprocessing : CleaningClass : rem_outliers_lof  : " +str(exc))
+                logging.error("data preprocessing : CleaningClass : rem_outliers_lof  : " +traceback.format_exc())
+                return 1
             
         logging.info("data preprocessing : CleaningClass : repl_outliers_median_lof : execution stop")
         return status
@@ -1138,6 +1225,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
 
     def repl_outliers_iqr_proximity(self,DBObject,connection,project_id,column_list,old_column_list, dataset_table_name,col, **kwargs):
         '''
+            Function will Replace outlier  IQR proximity rule method
             Operation id: dp_244
         '''
         logging.info("data preprocessing : CleaningClass : repl_outliers_iqr_proximity : execution start")
@@ -1164,13 +1252,15 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 
         except Exception as exc:
                 logging.info("data preprocessing : CleaningClass : repl_outliers_iqr_proximity : Exception : "+str(exc))
-                return str(exc)
+                logging.error("data preprocessing : CleaningClass : rem_outliers_lof  : " +traceback.format_exc())
+                return 1
         logging.info("data preprocessing : CleaningClass : repl_outliers_iqr_proximity : execution stop")
         return status
     
 
     def repl_outliers_Gaussian_approx(self,DBObject,connection,project_id,column_list,old_column_list, dataset_table_name,col, **kwargs):
         '''
+            Function will Replace outlier Gaussian_approximation  rule method
             Operation id: dp_245
         '''
         logging.info("data preprocessing : CleaningClass : repl_outliers_Gaussian_approx : execution start")
@@ -1197,12 +1287,14 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 
         except Exception as exc:
                 logging.info("data preprocessing : CleaningClass : repl_outliers_Gaussian_approx : Exception : "+str(exc))
-                return str(exc)
+                logging.error("data preprocessing : CleaningClass : rem_outliers_lof  : " +traceback.format_exc())
+                return 1
         logging.info("data preprocessing : CleaningClass : repl_outliers_Gaussian_approx : execution stop")
         return status
     
     def repl_outliers_quantiles(self,DBObject,connection,project_id,column_list,old_column_list, dataset_table_name,col, **kwargs):
         '''
+            Function will Replace outlier using quantiles rage given by user input.
             Operation id: ?
         '''
         logging.info("data preprocessing : CleaningClass : repl_outliers_quantiles : execution start")
@@ -1231,12 +1323,14 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 
         except Exception as exc:
                 logging.info("data preprocessing : CleaningClass : repl_outliers_quantiles : Exception : "+str(exc))
-                return str(exc)
+                logging.error("data preprocessing : CleaningClass : rem_outliers_lof  : " +traceback.format_exc())
+                return 1
         logging.info("data preprocessing : CleaningClass : repl_outliers_quantiles : execution stop")
         return status
     
     def repl_outliers_arbitrarily(self,DBObject,connection,project_id,column_list,old_column_list, table_name,col, **kwargs):
         '''
+            Function will Replace outlier using arbitrary value given by user input.
             Operation id: ?
         '''
         logging.info("data preprocessing : CleaningClass : repl_outliers_arbitrarily : execution start")
@@ -1266,7 +1360,8 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 
         except Exception as exc:
                 logging.info("data preprocessing : CleaningClass : repl_outliers_arbitrarily : Exception : "+str(exc))
-                return str(exc)
+                logging.error("data preprocessing : CleaningClass : rem_outliers_lof  : " +traceback.format_exc())
+                return 1
         logging.info("data preprocessing : CleaningClass : repl_outliers_arbitrarily : execution stop")
         return status
 
@@ -1274,6 +1369,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         
     def apply_log_transformation(self,DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
+            Function will Apply log transformation method to the column.
             Operation id: dp_251
         '''
         logging.info("data preprocessing : CleaningClass : apply_log_transformation : execution start")
@@ -1286,8 +1382,6 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
             #Operation Id to get activity details
             operation_id = 'dp_251'
             
-            
-        
             for i,col_name in enumerate(cols):
 
                 status =1
@@ -1303,7 +1397,9 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
                 
         except Exception as exc:
-                return str(exc)
+                logging.error(" data preprocessing : CleaningClass : apply_log_transformation : Exception "+str(exc))
+                logging.error("data preprocessing : CleaningClass : apply_log_transformation : " +traceback.format_exc())
+                return 1
         logging.info("data preprocessing : CleaningClass : apply_log_transformation : execution stop")
         return status
     

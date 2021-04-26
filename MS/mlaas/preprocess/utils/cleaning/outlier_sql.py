@@ -9,6 +9,7 @@
 
 import logging
 import numpy as np
+import traceback
 from sklearn.neighbors import LocalOutlierFactor
 from common.utils.logger_handler import custom_logger as cl
 
@@ -66,7 +67,9 @@ class OutliersTreatmentClass:
 
             logging.info("data preprocessing : OutliersTreatmentClass : extreme_value_analysis : execution end")
             return status
-        except:
+        except Exception as exc:
+            logging.error("data preprocessing : OutliersTreatmentClass : extreme_value_analysis : Exception : "+str(exc))
+            logging.error("data preprocessing : OutliersTreatmentClass : extreme_value_analysis : " +traceback.format_exc())
             return 1
     
     def z_score_analysis(self,DBObject,connection,table_name,col_name,impute_value = None,discard_missing = False):
@@ -106,8 +109,9 @@ class OutliersTreatmentClass:
 
             return status
         except Exception as exc:
-            logging.error(str(exc))
-            return str(exc)
+            logging.error("data preprocessing : OutliersTreatmentClass : z_score_analysis :Exception :"+str(exc))
+            logging.error("data preprocessing : OutliersTreatmentClass : z_score_analysis : " +traceback.format_exc())
+            return 1
         
     #* Below functions are used for dealing with outliers
     
@@ -134,7 +138,9 @@ class OutliersTreatmentClass:
             status = DBObject.update_records(connection,sql_command)
             logging.info("data preprocessing : OutliersTreatmentClass : delete_above : execution stop")
             return status
-        except:
+        except Exception as exc:
+            logging.error("data preprocessing : OutliersTreatmentClass : delete_above :Exception "+str(exc))
+            logging.error("data preprocessing : OutliersTreatmentClass : delete_above : " +traceback.format_exc())
             return 1
         
     def delete_below(self,DBObject,connection,table_name,col_name,val,le = False):
@@ -161,7 +167,9 @@ class OutliersTreatmentClass:
 
             logging.info("data preprocessing : OutliersTreatmentClass : delete_below : execution stop")
             return status
-        except:
+        except Exception as exc:
+            logging.error("data preprocessing : OutliersTreatmentClass : delete_below : Exception "+str(exc))
+            logging.error("data preprocessing : OutliersTreatmentClass : delete_below : " +traceback.format_exc())
             return 1
     
     def replace_outliers(self,DBObject,connection,table_name,col_name,impute_value, detect_method,method_type = None, log = False):
@@ -220,7 +228,9 @@ class OutliersTreatmentClass:
             logging.info("data preprocessing : OutliersTreatmentClass : replace_outliers : execution stop")
             return status
         except Exception as exc:
-            return str(exc)
+            logging.error("data preprocessing : OutliersTreatmentClass : replace_outliers : Exception "+str(exc))
+            logging.error("data preprocessing : OutliersTreatmentClass : replace_outliers : " +traceback.format_exc())
+            return 1
         
     def remove_outliers(self,DBObject,connection,table_name,col_name, detect_method = 0, log = False):
         '''
@@ -266,7 +276,9 @@ class OutliersTreatmentClass:
 
             logging.info("data preprocessing : OutliersTreatmentClass : remove_outliers : execution stop")
             return status
-        except:
+        except Exception as exc:
+            logging.error("data preprocessing : OutliersTreatmentClass : remove_outliers : Exception "+str(exc))
+            logging.error("data preprocessing : OutliersTreatmentClass : remove_outliers : " +traceback.format_exc())
             return 1
         
     def apply_log_transformation(self,DBObject,connection,table_name,col_name):
@@ -288,7 +300,9 @@ class OutliersTreatmentClass:
             status = DBObject.update_records(connection,sql_command)
             logging.info("data preprocessing : OutliersTreatmentClass : apply_log_transformation : execution stop")
             return status
-        except:
+        except Exception as exc:
+            logging.error("data preprocessing : OutliersTreatmentClass : apply_log_transformation : Exception "+str(exc))
+            logging.error("data preprocessing : OutliersTreatmentClass : apply_log_transformation : " +traceback.format_exc())
             return 1
 
     def get_upper_lower_limit(self,DBObject,connection,col_name,table_name,method_type ,quantile_1=0.25,quantile_2=0.75):
@@ -346,6 +360,7 @@ class OutliersTreatmentClass:
 
         except Exception as exc:
             logging.error("data preprocessing : OutliersTreatmentClass : get_upper_lower_limit : Exception : "+str(exc))
+            logging.error("data preprocessing : OutliersTreatmentClass : get_upper_lower_limit : " +traceback.format_exc())
             return None,None
     
         
@@ -376,16 +391,25 @@ class OutliersTreatmentClass:
             return dataframe
         except Exception as exc:
             logging.error("data preprocessing : OutliersTreatmentClass : get_column_statistics : Exception : "+str(exc))
+            logging.error("data preprocessing : OutliersTreatmentClass : get_column_statistics : " +traceback.format_exc())
             return None
     
     def local_factor_outlier(self,DBObject,connection,col_name,table_name,impute_value = None,method_type = None):
         """
+        Function will find out the outlier and get the index value of that outlier  delete or Replace the with impute method
+        is selected.
+
         Args : 
                 DBObject [(Object)]     : [DB Class Object.]
                 connection [(Object)]   : [Postgres Connection object]
                 col_name[(String)]   : [Name of the column]
                 table_name[(String)] : [Name of the table]
+                impute_value[(Integer|Decimal)] : [It will have Mean or Median value of the column ]
+                method_type[(Integer)] : 
+                                        0 : User want's to replace the outlier with the impute value 
+                                        1 : User want's to delete outliers
         Return:
+                [Integer] : [Return 0 if successfully operation performed else 1 if failed]
 
         """
         try:
@@ -437,6 +461,7 @@ class OutliersTreatmentClass:
 
         except Exception as exc:
             logging.error("data preprocessing : OutliersTreatmentClass : local_factor_outlier : Exception : "+str(exc))
+            logging.error("data preprocessing : OutliersTreatmentClass : local_factor_outlier : " +traceback.format_exc())
             return 1
     
     def update_outliers(self,DBObject,connection,lower_limit,upper_limit,col_name,table_name):
@@ -466,6 +491,7 @@ class OutliersTreatmentClass:
             return status
         except Exception as exc:
             logging.error("data preprocessing : OutliersTreatmentClass : update_outliers : Exception : "+str(exc))
+            logging.error("data preprocessing : OutliersTreatmentClass : update_outliers : " +traceback.format_exc())
             return 1
     
 
