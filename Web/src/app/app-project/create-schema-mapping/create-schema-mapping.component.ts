@@ -95,6 +95,7 @@ export class CreateSchemaMappingComponent implements OnInit {
     }
     this.displaydiv = true;
     this.getColumnAttributeList();
+    this.getFeatureSelection();
     // console.log(this.project_id, this.dataset_id);
     this.getSchema(this.project_id, this.dataset_id, this.schema_id);
   }
@@ -193,6 +194,35 @@ export class CreateSchemaMappingComponent implements OnInit {
 
   }
 
+  featuresList:any;
+  getFeatureSelection(){
+    this.apiService.getfeatureSelection().subscribe(
+      logs=>this.SuccessFeatureSelection(logs),
+      error=>this.errorHandler(error)
+    )
+  }
+
+  SuccessFeatureSelection(data){
+if(data.status_code=="200")
+{
+  this.featuresList=data.response;
+  console.log(this.featuresList);
+  
+} 
+else{
+  this.errorHandler(data);
+} }
+
+  currentcontet="";
+  displaytooltip(tooltip,id){
+      this.currentcontet=$("#datetimeformat_"+id).val().toString();
+      tooltip.open();
+  }
+
+  hidetooltip(tooltip){
+     tooltip.close();
+  }
+
   columnattributesSuccessHandler(data) {
     this.columnattrList = data.response.column_attribute;
     this.datatypeList = data.response.datatype;
@@ -243,7 +273,6 @@ export class CreateSchemaMappingComponent implements OnInit {
               }
               savedata.push(schema);
             }
-            
           }
         }
       });

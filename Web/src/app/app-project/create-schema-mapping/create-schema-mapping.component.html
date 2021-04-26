@@ -1,7 +1,6 @@
 <div class="page-title-box d-flex align-items-center justify-content-between">
     <h4 class="mb-0 font-size-18">Schema Mapping</h4>
-    <button type="button" class="btn btn-success schema-auto" (click)="largeModal(schemarecommodate)">Features
-        Selection</button>
+    <button type="button" class="btn btn-success schema-auto" (click)="largeModal(schemarecommodate)">Features Selection</button>
 
 </div>
 <div class="row schema-mapping">
@@ -49,19 +48,18 @@
                                 <td>
                                     <select class="form-control date-formate" id="selectdatatype_{{i}}" (change)="DatatypeModal(dateModal,$event.target.value,i)">
                                         <!-- <option value="">Select Option</option> -->
-                                        <option *ngFor="let item of datatypeList" value="{{item}}"
-                                            [selected]="item==data.data_type">{{item}}</option>
+                                        <option *ngFor="let item of datatypeList" value="{{item}}" [selected]="item==data.data_type">{{item}}</option>
                                     </select>
                                     <input class="hidden" hidden value="" id="datetimeformat_{{i}}">
-                                    <button type="button" *ngIf="data.data_type=='timestamp'" ngbTooltip="{{data.date_format}}" placement="left" class="btn"> <i
-                                            class="bx bx-calendar "></i></button>
+                                    <button type="button" *ngIf="data.data_type=='timestamp'" ngbTooltip="{{data.date_format}}" placement="left" class="btn"> <i class="bx bx-calendar "></i></button>
+                                    <button type="button" [ngbTooltip]="tipContent" hidden triggers="manual" id="datetimeformattooltip_{{i}}" #t_i="ngbTooltip" (mouseover)="displaytooltip(t_i,i)" (mouseleave)="hidetooltip(t_i)" placement="left" class="btn"> <i class="bx bx-calendar "></i></button>
+
                                     <!-- {{data.data_type}} -->
                                 </td>
                                 <td>
                                     <select class="form-control selectattr" id="selectattr_{{i}}" (change)="changeattrinute($event.target.value,i)">
                                         <!-- <option value="">Select Option</option> -->
-                                        <option *ngFor="let item of columnattrList" value="{{item}}"
-                                            [selected]="item==data.column_attribute">{{item}}
+                                        <option *ngFor="let item of columnattrList" value="{{item}}" [selected]="item==data.column_attribute">{{item}}
                                         </option>
                                     </select>
                                 </td>
@@ -70,7 +68,7 @@
                                     <!-- <input (change)="checkuniquecolumnname($event,i)" class="form-control columnname" type="text" id="columnname_{{i}}" [value]="data.change_column_name" (keydown)="checksame(data.column_name,$event.target.value,i)" (keyup)="checksame(data.column_name,$event.target.value,i)"
                                         maxlength="100"> -->
                                     <div class="invalid-feedback">
-                                        <span class="text-red changeerror_{{i}}">
+                                        <span class="text-red changeerror_{{i}}">                                       
                                         </span>
                                     </div>
                                 </td>
@@ -128,7 +126,7 @@
 <ng-template #dateModal let-modal>
     <div class="modal-header">
         <h5 class="modal-title mt-0">Change Date Format </h5>
-        <button type="button" class="close" (click)="modal.dismiss('Cross click');selectdatetimeoption='';" aria-hidden="true">×</button>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click');selectdatetimeoption=''" aria-hidden="true">×</button>
     </div>
     <div class="modal-body">
         <div class="row">
@@ -164,62 +162,34 @@
                 <div class="left-box">
                     <ul>
                         <li class="title">Column Name</li>
-                        <li>Item_Id</li>
-                        <li>Item_Name</li>
+                        <li *ngFor="let item of featuresList.column_list">{{item}}</li>
+                        <!-- <li>Item_Name</li>
                         <li>Item_Price</li>
                         <li>Item_PurchaseBy</li>
-                        <li>Item_Date</li>
+                        <li>Item_Date</li> -->
                     </ul>
                 </div>
                 <div class="right-box">
-                    <ul>
+                    <!-- <ul class="selected">
                         <li class="title">Option 1</li>
                         <li><i class="mdi mdi-check-bold"></i></li>
                         <li><i class="mdi mdi-check-bold"></i></li>
                         <li><i class="mdi mdi-check-bold"></i></li>
                         <li><i class="mdi mdi-check-bold"></i></li>
                         <li><i class="mdi mdi-close"></i></li>
+                    </ul> -->
+                    <ul *ngFor="let item of featuresList.option_list">
+                        <li class="title" title="{{item.name}}">{{item.name}}</li>
+                        <li *ngFor="let subitem of featuresList.column_list">
+                            <i *ngIf="item.colums[subitem]=='true'" class="mdi mdi-check-bold"></i>
+                            <i *ngIf="item.colums[subitem]=='false'" class="mdi mdi-close"></i>
+                        </li>
+                        <!-- <li><i class="mdi mdi-close"></i></li>
+                        <li><i class="mdi mdi-check-bold"></i></li>
+                        <li><i class="mdi mdi-check-bold"></i></li>
+                        <li><i class="mdi mdi-close"></i></li> -->
                     </ul>
-                    <ul class="selected">
-                        <li class="title">Option 2</li>
-                        <li><i class="mdi mdi-check-bold"></i></li>
-                        <li><i class="mdi mdi-close"></i></li>
-                        <li><i class="mdi mdi-check-bold"></i></li>
-                        <li><i class="mdi mdi-check-bold"></i></li>
-                        <li><i class="mdi mdi-close"></i></li>
-                    </ul>
-                    <ul>
-                        <li class="title">Option 3</li>
-                        <li><i class="mdi mdi-check-bold"></i></li>
-                        <li><i class="mdi mdi-check-bold"></i></li>
-                        <li><i class="mdi mdi-close"></i></li>
-                        <li><i class="mdi mdi-check-bold"></i></li>
-                        <li><i class="mdi mdi-close"></i></li>
-                    </ul>
-                    <ul>
-                        <li class="title">Option 4</li>
-                        <li><i class="mdi mdi-check-bold"></i></li>
-                        <li><i class="mdi mdi-check-bold"></i></li>
-                        <li><i class="mdi mdi-check-bold"></i></li>
-                        <li><i class="mdi mdi-close"></i></li>
-                        <li><i class="mdi mdi-check-bold"></i></li>
-                    </ul>
-                    <ul>
-                        <li class="title">Option 5</li>
-                        <li><i class="mdi mdi-check-bold"></i></li>
-                        <li><i class="mdi mdi-check-bold"></i></li>
-                        <li><i class="mdi mdi-check-bold"></i></li>
-                        <li><i class="mdi mdi-close"></i></li>
-                        <li><i class="mdi mdi-check-bold"></i></li>
-                    </ul>
-                    <ul>
-                        <li class="title">Option 6</li>
-                        <li><i class="mdi mdi-check-bold"></i></li>
-                        <li><i class="mdi mdi-check-bold"></i></li>
-                        <li><i class="mdi mdi-check-bold"></i></li>
-                        <li><i class="mdi mdi-close"></i></li>
-                        <li><i class="mdi mdi-check-bold"></i></li>
-                    </ul>
+
                 </div>
             </div>
             <div class="text-center mt-3">
@@ -229,3 +199,5 @@
         </div>
     </div>
 </ng-template>
+
+<ng-template #tipContent>{{currentcontet}}</ng-template>
