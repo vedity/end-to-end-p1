@@ -6,15 +6,23 @@
         <!-- <apx-chart *ngIf="responsedata" class="apex-charts" dir="ltr" [series]="simpleline.series" [chart]="simpleline.chart" [plotOptions]="simpleline.plotOptions" [yaxis]="simpleline.yaxis" [title]="simpleline.title" [stroke]="simpleline.stroke" [dataLabels]="simpleline.dataLabels"
             [xaxis]="simpleline.xaxis" [yaxis]="simpleline.yaxis" [legend]="simpleline.legend" [colors]="simpleline.colors" [fill]="simpleline.fill">
         </apx-chart> -->
-        <div id="chart-line" *ngIf="model_type=='Regression'">
+        <!-- <div id="chart-line" *ngIf="model_type=='Regression'">
             <apx-chart [series]="chartOptions1.series" [chart]="chartOptions1.chart" [xaxis]="chartOptions1.xaxis" [dataLabels]="chartOptions1.dataLabels" [colors]="chartOptions1.colors" [fill]="chartOptions1.fill" [markers]="chartOptions1.markers" [stroke]="chartOptions1.stroke"></apx-chart>
-        </div>
-        <div id="chart-line" *ngIf="model_type=='Classification'">
+        </div> -->
+        <!-- <div id="chart-line" *ngIf="model_type=='Classification'">
             <apx-chart class="apex-charts" dir="ltr" [series]="columnlabelChartexpand.series" [chart]="columnlabelChartexpand.chart" [plotOptions]="columnlabelChartexpand.plotOptions" [yaxis]="columnlabelChartexpand.yaxis" [title]="columnlabelChartexpand.title" [stroke]="columnlabelChartexpand.stroke"
                 [dataLabels]="columnlabelChartexpand.dataLabels" [xaxis]="columnlabelChartexpand.xaxis" [yaxis]="columnlabelChartexpand.yaxis" [legend]="columnlabelChartexpand.legend" [colors]="columnlabelChartexpand.colors" [fill]="columnlabelChartexpand.fill"
                 [grid]="columnlabelChartexpand.grid">
             </apx-chart>
-            <!-- <apx-chart [series]="chartOptions1.series" [chart]="chartOptions1.chart" [xaxis]="chartOptions1.xaxis" [dataLabels]="chartOptions1.dataLabels" [colors]="chartOptions1.colors" [fill]="chartOptions1.fill" [markers]="chartOptions1.markers" [stroke]="chartOptions1.stroke"></apx-chart> -->
+        </div> -->
+        <!-- <apx-chart [series]="chartOptions1.series" [chart]="chartOptions1.chart" [xaxis]="chartOptions1.xaxis" [dataLabels]="chartOptions1.dataLabels" [colors]="chartOptions1.colors" [fill]="chartOptions1.fill" [markers]="chartOptions1.markers" [stroke]="chartOptions1.stroke"></apx-chart> -->
+
+        <div id="chart-line">
+            <apx-chart [series]="chartOptions1_new.series" [chart]="chartOptions1_new.chart" [xaxis]="chartOptions1_new.xaxis" [dataLabels]="chartOptions1_new.dataLabels" [colors]="chartOptions1_new.colors" [fill]="chartOptions1_new.fill" [markers]="chartOptions1_new.markers"
+                [stroke]="chartOptions1_new.stroke"></apx-chart>
+        </div>
+        <div id="chart-line2">
+            <apx-chart [series]="chartOptions2_new.series" [chart]="chartOptions2_new.chart" [xaxis]="chartOptions2_new.xaxis" [colors]="chartOptions2_new.colors" [fill]="chartOptions2_new.fill" [yaxis]="chartOptions2_new.yaxis"></apx-chart>
         </div>
     </div>
     <div class="right-box">
