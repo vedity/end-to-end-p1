@@ -141,25 +141,41 @@ class ModelStatisticsClass:
             logging.error("modeling : ModelStatisticsClass : model_summary : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : model_summary : " +traceback.format_exc())
             return exc.msg
-        
 
-    def confusion_matrix(self, experiment_id): #TODO perform
-        """This function is used to get model_summary of particular experiment.
+    def show_confusion_matrix(self,experiment_id):
+            
+        """
+        This function retuns confusion matrix for classification models
 
         Args:
             experiment_id ([object]): [Experiment id of particular experiment.]
 
         Returns:
-            [data_frame]: [it will return the dataframe for model_summary.]
-            
+            [data_frame]: [it will return the dataframe for model_summary.]        
         """
-        logging.info("modeling : ModelStatisticsClass : confusion_matrix : Exception Start")
-        str1 = '/confusion_matrix.json'
-        artifact_uri = cmobj.get_artifact_uri(experiment_id,str1)#will get artifact_uri for particular experiment
-        confusion_matrix = cmobj.get_json(artifact_uri)# will get json data from particular artifact_uri location
-        logging.info("modeling : ModelStatisticsClass : confusion_matrix : Exception Start")
-        return confusion_matrix
 
+        unscaled_df,target_features = cmobj.get_unscaled_data(experiment_id)
+        str1 = '/confusion_matrix.json'
+        artifact_uri = cmobj.get_artifact_uri(experiment_id,str1)
+        confusion_matrix = cmobj.get_json(artifact_uri)
+        confusion_matrix_df = pd.DataFrame(confusion_matrix)
+        confusion_matrix_dict = confusion_matrix_df.to_dict()
+    
+        key = np.unique(unscaled_df[target_features[1]+'_str']).tolist()
+    
+        key_val = []
+
+        for value in confusion_matrix_dict.values():
+            thislist = []
+            for i,j in value.items():
+                thislist.append(j)
+            key_val.append(thislist)
+                  
+        confusion_matrix_json = {"key":key,"key_val":key_val}
+
+        return confusion_matrix_json    
+
+    
     def performance_metrics(self, experiment_id):
         """This function is used to get performance_metrics of particular experiment.
 
