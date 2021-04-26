@@ -282,12 +282,15 @@ export class ModelingTypeComponent implements OnInit {
           $("#switcher-list")[0].click();
         }
         else{
-          // this.processclass = "start";
-          // this.processInterval = setInterval(() => {
-          //   this.getRunningExperimentList();
-          //   this.getAllExperimentList();
-          //   this.checkstatus('onload');
-          // }, 4000);
+          if(type=='onload'){
+            // this.processclass = "start";
+            // this.processInterval = setInterval(() => {
+            //   this.getRunningExperimentList(type);
+            //   this.getAllExperimentList();
+            //   this.checkstatus(type);
+            // }, 4000);
+          }
+         
         }
       }
     }
