@@ -103,6 +103,8 @@ class FeatureEngineeringClass:
             missing_lst = ['False']*length
             noise_lst = ['False']*length
             dtype_lst = ['numerical']*length
+
+            logging.info("AAAAAAAAAAAA =>" + str(missing_lst))
             
             schema_update = sc.update_dataset_schema(DBObject,connection,schema_id,col_names,dtype_lst,missing_flag=missing_lst,noise_flag=noise_lst,flag = True)
             

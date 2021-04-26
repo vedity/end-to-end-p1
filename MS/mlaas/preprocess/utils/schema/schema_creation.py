@@ -452,6 +452,9 @@ class SchemaClass:
                 prev_cols_lst = column_name_list
                 new_cols_lst = ''
                 cols_attribute_lst = 'Select'
+                if date_format == None:
+                    date_format = ['']*len(prev_cols_lst) #Setting up date_formate in case if its not passed
+
                 for prev_col,new_dtype,missing_value,noise_value,date_frmt in zip(prev_cols_lst,prev_dtype_lst,missing_flag,noise_flag,date_format): 
 
                     row = schema_id,prev_col,new_cols_lst,new_dtype,cols_attribute_lst,str(missing_value),str(noise_value),date_frmt
