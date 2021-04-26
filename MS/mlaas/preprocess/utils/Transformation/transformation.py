@@ -17,6 +17,7 @@ from . import duplicate_data_handling as ddh
 from . import feature_scaling as fs
 from . import categorical_encoding as ce
 from . import math_functions as mf
+from . import data_transformation as dt
 from . import feature_engineering as fe
 
 #* Commong Utilities
@@ -24,6 +25,7 @@ from common.utils.database import db
 from common.utils.logger_handler import custom_logger as cl
 from common.utils.activity_timeline import activity_timeline
 from database import *
+from .. import common
 
 
 #* Defining Logger
@@ -35,9 +37,10 @@ LogObject.log_setting()
 
 logger = logging.getLogger('transformation')
 
+#Object Initialize
+commonObj = common.CommonClass()
 
-
-class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass, ce.EncodeClass, mf.MathOperationsClass, fe.FeatureEngineeringClass):
+class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass, ce.EncodeClass, mf.MathOperationsClass, fe.FeatureEngineeringClass,dt.DataTransformationClass):
     '''
         Handles orchastration of the transforamtion related Functions.
     '''
@@ -200,12 +203,16 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         for i,col_name in enumerate(cols):
             try:
                 #Insert the activity for the operation
-                activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
+                activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 status = super().label_encoding(DBObject, connection, [index,old_cols[i]], table_name)
 
                 #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                else:
+                    status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
+                
                 
             except Exception as exc:
                 return exc
@@ -231,12 +238,16 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
             try:
 
                 #Insert the activity for the operation
-                activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
+                activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 status = super().one_hot_encoding(DBObject, connection, [index,old_cols[i]], table_name, schema_id)
 
                 #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                else:
+                    status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
+                
                 
             except Exception as exc:
                 return exc
@@ -283,12 +294,16 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         for i,col_name in enumerate(cols):
             try:
                 #Insert the activity for the operation
-                activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
+                activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 status = self.perform_math_operation(DBObject, connection, table_name, old_cols[i], operation, value)
 
                 #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                else:
+                    status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
+                
 
             except Exception as exc:
                 return exc
@@ -312,12 +327,16 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         for i,col_name in enumerate(cols):
             try:
                 #Insert the activity for the operation
-                activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
+                activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 status = self.perform_math_operation(DBObject, connection, table_name, old_cols[i], operation, value)
 
                 #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                else:
+                    status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
+                
             except Exception as exc:
                 return exc
 
@@ -340,12 +359,16 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         for i,col_name in enumerate(cols):
             try:
                 #Insert the activity for the operation
-                activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
+                activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 status = self.perform_math_operation(DBObject, connection, table_name, old_cols[i], operation, value)
 
                 #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                else:
+                    status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
+                
 
             except Exception as exc:
                 return exc
@@ -369,12 +392,16 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         for i,col_name in enumerate(cols):
             try:
                 #Insert the activity for the operation
-                activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
+                activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 status = self.perform_math_operation(DBObject, connection, table_name, old_cols[i], operation, value)
 
                 #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                else:
+                    status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
+                
 
             except Exception as exc:
                 return exc
@@ -384,7 +411,9 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
     
     def split_date_column(self, DBObject, connection, project_id, column_list,old_column_list, table_name, col, schema_id, **kwargs):
         '''
-            Operation id: 321
+        
+        
+        Operation id: 321
         '''
         logging.info("data preprocessing : TransformationClass : split_date_column : execution start")
     
@@ -396,12 +425,16 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         for i,col_name in enumerate(cols):
             try:
                 #Insert the activity for the operation
-                activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
+                activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 status = self.datetime_fe(DBObject, connection, schema_id, old_cols[i], table_name)
                 
                 #Update the activity status for the operation performed
-                at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                else:
+                    status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
+                
 
             except Exception as exc:
                 return exc
@@ -409,81 +442,218 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         logging.info("data preprocessing : TransformationClass : split_date_column : execution stop")
         return status
     
-    #* ACTIVITY TIMELINE FUNCTIONS
+   
+    def logarithmic_transformation(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
+        '''
+        [This function is used to make extremely skewed distributions less skewed, especially for right-skewed distributions]
+        
+        operation_id = 'dp_251'
+        
+        '''
+        #Operation Id to get activity details
+        operation_id = 'dp_251'
+
+        logging.info("data preprocessing : TransformationClass : logarithmic_transformation : execution start" + str(col))
+
+        index = column_list[0]
+        cols = [column_list[i] for i in col]
+        old_cols = [old_column_list[i] for i in col]
+        for i,col_name in enumerate(cols):
+            try:
+                #Insert the activity for the operation
+                activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
+
+                status = super().logarithmic_transformation(DBObject, connection, [index,old_cols[i]], table_name)
+
+                #Update the activity status for the operation performed
+                if status == 0:
+                    status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                else:
+                    status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
+                
+                    
+            except Exception as exc:
+                return exc
+
+        logging.info("data preprocessing : TransformationClass : logarithmic_transformation : execution stop")
+        
+        return status
     
-    def get_act_desc(self, DBObject, connection, operation_id, col_name, code = 1):
-        '''
-            Used to get preprocess activity description from the activity master table.
-        
-            Returns:
-            --------
-            description (`String`): Description for the activity.
-        '''
-        logging.info("data preprocessing : TransformationClass : get_activity_desc : execution start")
-        
-        #? Getting Description
-        sql_command = f"select replace (amt.activity_name || ' ' || amt.activity_description, '*', '{col_name}') as description from mlaas.activity_master_tbl amt where amt.activity_id = '{operation_id}' and amt.code = '{code}'"
-        
-        desc_df = DBObject.select_records(connection,sql_command)
-        if not isinstance(desc_df, pd.DataFrame):
-            return "Failed to Extract Activity Description."
-        
-        #? Fatching the description
-        description = desc_df['description'].tolist()[0]
-        
-        logging.info("data preprocessing : TransformationClass : get_activity_desc : execution stop")
-        
-        return description
-            
-    def operation_start(self, DBObject, connection, operation_id, project_id, col_name):
-        '''
-            Used to Insert Activity in the Activity Timeline Table.
-            
-            Returns:
-            --------
-            activity_id (`Intiger`): index of the activity in the activity transection table.
-        '''
-        logging.info("data preprocessing : TransformationClass : operation_start : execution start")
-            
-        #? Transforming the operation_id to the operation id stored in the activity timeline table. 
-        # operation_id += self.op_diff
-        
-        #? Getting Activity Description
-        desc = self.get_act_desc(DBObject, connection, operation_id, col_name, code = 1)
-        
-        #? Getting Dataset_id & User_Name
-        sql_command = f"select pt.dataset_id,pt.user_name from mlaas.project_tbl pt  where pt.project_id = '{project_id}'"
-        details_df = DBObject.select_records(connection,sql_command) 
-        dataset_id,user_name = int(details_df['dataset_id'][0]),details_df['user_name'][0]
-        
-        #? Inserting the activity in the activity_detail_table
-        _,activity_id = self.AT.insert_user_activity(operation_id,user_name,project_id,dataset_id,desc,column_id =col_name)
-        
-        logging.info("data preprocessing : TransformationClass : operation_start : execution stop")
-        
-        return activity_id
     
-    def operation_end(self, DBObject, connection, activity_id, operation_id, col_name):
+    def squareroot_transformation(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
-            Used to update Activity description when the Activity ends.
-            
-            Returns:
-            --------
-            status (`Intiger`): Status of the updation.
+        [This function used for reducing right-skewed distributions]
+        
+        operation_id = 'dp_252'
         '''
+        #Operation Id to get activity details
+        operation_id = 'dp_252'
+
+        logging.info("data preprocessing : TransformationClass : squareroot_transformation : execution start" + str(col))
+
+        index = column_list[0]
+        cols = [column_list[i] for i in col]
+        old_cols = [old_column_list[i] for i in col]
+        for i,col_name in enumerate(cols):
+            try:
+                #Insert the activity for the operation
+                activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
+
+                status = super().squareroot_transformation(DBObject, connection, [index,old_cols[i]], table_name)
+
+                #Update the activity status for the operation performed
+                if status == 0:
+                    status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                else:
+                    status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
+                
+                
+            except Exception as exc:
+                return exc
+
+        logging.info("data preprocessing : TransformationClass : squareroot_transformation : execution stop")
         
-        logging.info("data preprocessing : TransformationClass : operation_end : execution start")
+        return status
+    
+    def reciprocal_transformation(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
+        '''
+        [The reciprocal reverses the order among values of the same sign, so large values become smaller]
         
-        #? Transforming the operation_id to the operation id stored in the activity timeline table. 
-        # operation_id += self.op_diff
+        operation_id = 'dp_253'
+        '''
+        #Operation Id to get activity details
+        operation_id = 'dp_253'
+
+        logging.info("data preprocessing : TransformationClass : reciprocal_transformation : execution start" + str(col))
+
+        index = column_list[0]
+        cols = [column_list[i] for i in col]
+        old_cols = [old_column_list[i] for i in col]
+        for i,col_name in enumerate(cols):
+            try:
+                #Insert the activity for the operation
+                activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
+
+                status = super().reciprocal_transformation(DBObject, connection, [index,old_cols[i]], table_name)
+
+                #Update the activity status for the operation performed
+                if status == 0:
+                    status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                else:
+                    status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
+                
+                
+            except Exception as exc:
+                return exc
+
+        logging.info("data preprocessing : TransformationClass : reciprocal_transformation : execution stop")
         
-        #? Getting Activity Description
-        desc = self.get_act(DBObject, connection, operation_id, col_name, code = 2)
+        return status
+    
+    
+    def exponential_transformation(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col,value, **kwargs):
+        '''
+        [This function used for to reduce left skewness.]
         
-        #? Changing the activity description in the activity detail table 
-        status = self.AT.update_activity(activity_id,desc)
+        operation_id = 'dp_254'
+        '''
+        #Operation Id to get activity details
+        operation_id = 'dp_254'
+
+        logging.info("data preprocessing : TransformationClass : exponential_transformation : execution start" + str(col))
+
+        index = column_list[0]
+        cols = [column_list[i] for i in col]
+        old_cols = [old_column_list[i] for i in col]
+        for i,col_name in enumerate(cols):
+            try:
+                #Insert the activity for the operation
+                activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
+
+                status = super().exponential_transformation(DBObject, connection, [index,old_cols[i]], table_name,value)
+
+                #Update the activity status for the operation performed
+                if status == 0:
+                    status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                else:
+                    status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
+                
+            except Exception as exc:
+                return exc
+
+        logging.info("data preprocessing : TransformationClass : exponential_transformation : execution stop")
         
-        logging.info("data preprocessing : TransformationClass : operation_end : execution stop")
+        return status
+    
+    def boxcox_transformation(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
+        '''
+        [A box-cox transformation is a commonly used method for transforming a non-normally distributed dataset into a more normally distributed one.
+        The basic idea behind this method is to find some value for λ such that the transformed data is as close to normally distributed as possible]
+        
+        operation_id = 'dp_255'
+        '''
+        #Operation Id to get activity details
+        operation_id = 'dp_255'
+
+        logging.info("data preprocessing : TransformationClass : boxcox_transformation : execution start" + str(col))
+
+        index = column_list[0]
+        cols = [column_list[i] for i in col]
+        old_cols = [old_column_list[i] for i in col]
+        for i,col_name in enumerate(cols):
+            try:
+                #Insert the activity for the operation
+                activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
+
+                status = super().boxcox_transformation(DBObject, connection, [index,old_cols[i]], table_name)
+
+                #Update the activity status for the operation performed
+                if status == 0:
+                    status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                else:
+                    status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
+                
+            except Exception as exc:
+                return exc
+
+        logging.info("data preprocessing : TransformationClass : boxcox_transformation : execution stop")
+        
+        return status
+    
+    def yeojohnson_transformation(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
+        '''
+        [The Yeo-Johnson transformation is an extension of the Box-Cox transformation and can be used on variables with zero and negative values]
+        
+        operation_id = 'dp_256'
+        
+        '''
+        #Operation Id to get activity details
+        operation_id = 'dp_256'
+
+        logging.info("data preprocessing : TransformationClass : yeojohnson_transformation : execution start" + str(col))
+
+        index = column_list[0]
+        cols = [column_list[i] for i in col]
+        old_cols = [old_column_list[i] for i in col]
+        for i,col_name in enumerate(cols):
+            try:
+                #Insert the activity for the operation
+                activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
+
+                status = super().yeojohnson_transformation(DBObject, connection, [index,old_cols[i]], table_name)
+
+                #Update the activity status for the operation performed
+    
+                
+                if status == 0:
+                    status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                else:
+                    status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
+                
+            except Exception as exc:
+                return exc
+
+        logging.info("data preprocessing : TransformationClass : yeojohnson_transformation : execution stop")
         
         return status
     
