@@ -156,7 +156,7 @@ export class CreateSchemaMappingComponent implements OnInit {
   DatatypeModal(dateModal: any, item, i) {
     console.log(item);
     this.currentmodelId = i;
-    $("#datetimeformattooltip_"+i).prop("hidden",true);
+    $("#datetimeformattooltip_" + i).prop("hidden", true);
 
     if (item == "timestamp")
       this.modalService.open(dateModal, { size: 'sm', windowClass: 'modal-holder', centered: true });
@@ -168,7 +168,7 @@ export class CreateSchemaMappingComponent implements OnInit {
     if (this.selectdatetimeoption != "") {
       if (this.selectdatetimeoption != 'Custom') {
         $("#datetimeformat_" + this.currentmodelId).val(this.selectdatetimeoption);
-        $("#datetimeformattooltip_"+this.currentmodelId).prop("hidden",false);
+        $("#datetimeformattooltip_" + this.currentmodelId).prop("hidden", false);
         this.currentmodelId = '';
         this.selectdatetimeoption = '';
         this.modalService.dismissAll();
@@ -177,7 +177,7 @@ export class CreateSchemaMappingComponent implements OnInit {
         var format = $("#custome-dateformate").val();
         if (format != "") {
           $("#datetimeformat_" + this.currentmodelId).val(format);
-          $("#datetimeformattooltip_"+this.currentmodelId).prop("hidden",false);
+          $("#datetimeformattooltip_" + this.currentmodelId).prop("hidden", false);
           this.currentmodelId = '';
           this.selectdatetimeoption = '';
           this.modalService.dismissAll();
@@ -194,33 +194,33 @@ export class CreateSchemaMappingComponent implements OnInit {
 
   }
 
-  featuresList:any;
-  getFeatureSelection(){
+  featuresList: any;
+  getFeatureSelection() {
     this.apiService.getfeatureSelection().subscribe(
-      logs=>this.SuccessFeatureSelection(logs),
-      error=>this.errorHandler(error)
+      logs => this.SuccessFeatureSelection(logs),
+      error => this.errorHandler(error)
     )
   }
 
-  SuccessFeatureSelection(data){
-if(data.status_code=="200")
-{
-  this.featuresList=data.response;
-  console.log(this.featuresList);
-  
-} 
-else{
-  this.errorHandler(data);
-} }
+  SuccessFeatureSelection(data) {
+    if (data.status_code == "200") {
+      this.featuresList = data.response;
+      console.log(this.featuresList);
 
-  currentcontet="";
-  displaytooltip(tooltip,id){
-      this.currentcontet=$("#datetimeformat_"+id).val().toString();
-      tooltip.open();
+    }
+    else {
+      this.errorHandler(data);
+    }
   }
 
-  hidetooltip(tooltip){
-     tooltip.close();
+  currentcontet = "";
+  displaytooltip(tooltip, id) {
+    this.currentcontet = $("#datetimeformat_" + id).val().toString();
+    tooltip.open();
+  }
+
+  hidetooltip(tooltip) {
+    tooltip.close();
   }
 
   columnattributesSuccessHandler(data) {
@@ -253,22 +253,22 @@ else{
         txt_column_attribute = txt_column_attribute == undefined ? '' : txt_column_attribute.toString();
         var txt_datatype = $("#selectdatatype_" + index + " :selected").val();
         txt_datatype = txt_datatype == undefined ? '' : txt_datatype.toString();
- var date_format=$("#datetimeformat_" + index).val();
- date_format = date_format == undefined ? '' : date_format.toString();
+        var date_format = $("#datetimeformat_" + index).val();
+        date_format = date_format == undefined ? '' : date_format.toString();
         if (txt_column_name == this.Originaldata[index].change_column_name && txt_column_attribute == this.Originaldata[index].column_attribute && txt_datatype == this.Originaldata[index].data_type) {
         }
         else {
           if (txt_column_name != element.column_name) {
-            if(txt_datatype=='timestamp' && date_format==''){
+            if (txt_datatype == 'timestamp' && date_format == '') {
               this.toaster.error('Please select any datetime format', 'Error');
             }
-            else{
+            else {
               var schema = {
                 change_column_name: txt_column_name,
                 index: element.index,
                 column_name: element.column_name,
                 data_type: txt_datatype,
-                date_format:date_format,
+                date_format: date_format,
                 column_attribute: txt_column_attribute
               }
               savedata.push(schema);
@@ -279,8 +279,8 @@ else{
       if (savedata.length > 0) {
         savedata.push(this.datasetSchema[0]);
 
-         console.log(savedata);
-         this.loaderdiv = false;
+        console.log(savedata);
+        this.loaderdiv = false;
 
         this.apiService.saveDatasetSchema(this.dataset_id, this.project_id, this.schema_id, { data: savedata }).subscribe(logs => this.savesuccessHandler(logs), error => this.errorHandler(error));
 
