@@ -12,6 +12,7 @@ import logging
 import pandas as pd
 import numpy as np
 from sklearn import metrics
+from sklearn.metrics import confusion_matrix
 from sklearn.preprocessing import label_binarize
 
 # Common Class File Imports
@@ -150,3 +151,18 @@ class EvaluationMetrics:
         precision_recall_dict = {'Precision': precision_arr, 'Recall': recall_arr, 'Threshold': threshold_arr}
 
         return precision_recall_dict
+    
+    def get_confusion_matrix(self,actual_lst,prediction_lst):
+        '''
+        This function retuns confusion matrix dictionary for classification models
+
+        Args : actual_lst [list] : A list containing actual values
+               prediction_lst [list] : A list containing predicted values
+
+        Returns : [Dictionary] Confusion Matrix dictionary 
+        '''
+        cm = confusion_matrix(actual_lst,prediction_lst)
+        confusion_matrix_df = pd.DataFrame(cm)                                                            
+        confusion_matrix_dict = confusion_matrix_df.to_dict()
+
+        return confusion_matrix_dict

@@ -388,7 +388,7 @@ class ConfusionMatrixClass(APIView):
                        
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
                         experiment_id = request.query_params.get('experiment_id') #get experiment_id
-                        confusion_matrix_json = ModelStatObject.confusion_matrix(experiment_id)# will call confusion matrix method
+                        confusion_matrix_json = ModelStatObject.show_confusion_matrix(experiment_id)# will call confusion matrix method
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
                         if isinstance(confusion_matrix_json,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(confusion_matrix_json) # extract the status_code and error_msg from project_df
