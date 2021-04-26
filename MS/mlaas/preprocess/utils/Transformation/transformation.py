@@ -105,7 +105,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
             Operation id: ?
         '''
         
-        logging.info("data preprocessing : CleaningClass : delete_duplicate_records : execution start")
+        logging.info("data preprocessing : TransformationClass : delete_duplicate_records : execution start")
         try:
             
             col_string = ''
@@ -116,8 +116,11 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
             status = super().delete_duplicate_records(DBObject,connection,table_name,col_string[:-1])
                 
         except Exception as exc:
-                return str(exc)
-        logging.info("data preprocessing : CleaningClass : delete_duplicate_records : execution stop")
+            logging.error("data preprocessing : TransformationClass : delete_duplicate_records : Exception "+str(exc))
+            logging.error("data preprocessing : TransformationClass : delete_duplicate_records : " +traceback.format_exc())
+            
+            return 1
+        logging.info("data preprocessing : TransformationClass : delete_duplicate_records : execution stop")
         return status
     
     def delete_duplicate_column(self,DBObject,connection,schema_id,project_id, table_name):
@@ -137,7 +140,9 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
             #     at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
             return status
         except Exception as exc:
-            logging.info("data preprocessing : TransformationClass : delete_duplicate_column : Exception : "+str(exc))
+            logging.error("data preprocessing : TransformationClass : delete_duplicate_column : Exception : "+str(exc))
+            logging.error("data preprocessing : TransformationClass : delete_duplicate_column : " +traceback.format_exc())
+            
             return 1
 
         
@@ -170,7 +175,8 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
                     status = super().delete_column(DBObject,connection,schema_id,table_name,col_name)
                 
         except Exception as exc:
-                logging.info("data preprocessing : TransformationClass : delete_low_variance_column : Exception : "+str(exc))
+                logging.error("data preprocessing : TransformationClass : delete_low_variance_column : Exception : "+str(exc))
+                logging.error("data preprocessing : TransformationClass : delete_low_variance_column : " +traceback.format_exc())
                 return 1
 
         logging.info("data preprocessing : TransformationClass : delete_low_variance_column : execution stop")
