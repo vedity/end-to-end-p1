@@ -26,12 +26,12 @@ class ChiSquareClass():
                 column_name,value= self.TestIndependence(df,colX=var,colY=target_col)  
                 col_lst.append(column_name)
                 #value_lst.append(column_name+value)
-                logging.info("&&&&"+str(column_name))
+
                 d = {column_name:value}
                 dict_col_value.update(d)
            else:
                 continue
-        logging.info("!!!!!!"+str(dict_col_value))
+       
         return col_lst,dict_col_value
     
     def _print_chisquare_result(self,p, colX, alpha):
@@ -39,11 +39,11 @@ class ChiSquareClass():
         #dict_col_value = {}
         if p<alpha:
             column_name = colX
-            value = ":True"
+            value = "True"
            # dict_col_value[colX] = "True"
         else:
             column_name = colX
-            value = ":False"
+            value = "False"
             #dict_col_value[colX] = "False"
 
         return column_name,value
