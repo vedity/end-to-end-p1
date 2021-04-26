@@ -16,11 +16,7 @@ from modeling.all_supervised_models import *
 
 args = {'owner': 'airflow','start_date': airflow.utils.dates.days_ago(1),'provide_context': True,}
 
-<<<<<<< HEAD:MS/mlaas/project_dags/manual_modeling_dags/manual_model_dag_138387277600326470.py
 main_dag_id = "manual_model_dag_138387277600326470"
-=======
-main_dag_id = "manual_model_dag_138383032020589490"
->>>>>>> 8108a5910efd756276ed785ceb74d0d4045faf77:MS/mlaas/project_dags/manual_modeling_dags/manual_model_dag_138383032020589490.py
 
 dag = DAG(dag_id=main_dag_id,default_args=args,catchup=False,schedule_interval = '@once',)
 

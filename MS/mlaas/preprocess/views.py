@@ -23,6 +23,10 @@ from common.utils.database import db
 from common.utils.activity_timeline import activity_timeline
 from database import *
 from .utils.Transformation import split_data
+from .utils.feature import feature_selection
+from .utils.feature.fs_utility import FSUtilityClass
+
+
 #from .utils.Visual import data_visualization
 # from .utils import data_visualization as dv
 
@@ -37,9 +41,9 @@ DBObject=db.DBClass() #Get DBClass object
 connection,connection_string=DBObject.database_connection(database,user,password,host,port) #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 preprocessObj =  preprocessing.PreprocessingClass(database,user,password,host,port) #initialize Preprocess class object
 sd = split_data.Split_Data()
-
+FS = feature_selection.FeatureSelectionClass()
 AT_OBJ = activity_timeline.ActivityTimelineClass(database, user, password, host, port)
-
+FU = FSUtilityClass()
 class DatasetExplorationClass(APIView):
     def get(self,request,format=None):
         """
@@ -227,7 +231,7 @@ class ScheamColumnListClass(APIView):
                                 logging.info("data preprocess : ScheamAttributeListClass : POST Method : execution start")
                                 dropdowns = {
                                         "column_attribute":["Ignore","Target","Select"],
-                                        "datatype":["number","categorical","text","timestamp"],
+                                        "datatype":["numerical","categorical","text","timestamp"],
                                         "datetime_options":[
                                                 "DD/MM/YYYY",
                                                 "MM/DD/YYYY",
@@ -539,4 +543,24 @@ class FeatureAlgoList(APIView):
                 except Exception as e:
                         logging.error("data preprocess : SelectedFeatureAlgo : GET Method  " + str(e))
                         logging.error(" data preprocess : SelectedFeatureAlgo : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})    
+
+
+class FeatureSelection(APIView):
+
+        def post(self, request, format=None):
+                try:
+                        logging.info(" data preprocess : FeatureSelection : GET Method : execution start")
+                        dataset_id = 224
+                        choice = 1
+                        schema_id = "71"
+                        target_col = "cylindernumber"
+                        column = FU.fetch_column(DBObject,connection,schema_id)
+                        chisq_col,rfe_col,mutual_col,anova_col = FS.algo_call(DBObject,connection,dataset_id,schema_id,target_col,choice)
+                        
+                        feature_algo = {"column_list":column,"option_list":[{"name":"Chi Square","colums":chisq_col},{"name":"Mutual Information","colums":mutual_col},{"name":"ANOVA f-test","colums":anova_col},{"name":"Recursive Feature Elimination","colums":rfe_col},{"name":"Coorelation","colums":{"item_id":"true","item_name":"false","description":"flase"}}]}
+                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":feature_algo})   
+                except Exception as e:
+                        logging.error("data preprocess : FeatureSelection : GET Method  " + str(e))
+                        logging.error(" data preprocess : FeatureSelection : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":"Failed","response":str(e)})    

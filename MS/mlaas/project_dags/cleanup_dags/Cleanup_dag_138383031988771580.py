@@ -18,7 +18,11 @@ PC_OBJ = PreprocessingClass(database,user,password,host,port)
 
 yesterday_date = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')
 
+<<<<<<< HEAD:MS/mlaas/project_dags/cleanup_dags/Cleanup_dag_138387277569135630.py
 main_dag_id = "Cleanup_dag_138387277569135630"
+=======
+main_dag_id = "Cleanup_dag_138383031988771580"
+>>>>>>> 8108a5910efd756276ed785ceb74d0d4045faf77:MS/mlaas/project_dags/cleanup_dags/Cleanup_dag_138383031988771580.py
 
 args = {
     'owner': 'airflow',

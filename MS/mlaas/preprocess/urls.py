@@ -51,4 +51,7 @@ urlpatterns = [
 
     #feature selection algorithm list
     path('mlaas/preprocess/feature_list/',FeatureAlgoList.as_view()),
+
+    #feature selection main api
+    path('mlaas/preprocess/feature_selection/',FeatureSelection.as_view()),
 ]

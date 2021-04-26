@@ -16,11 +16,7 @@ from modeling.all_supervised_models import *
 
 args = {'owner': 'airflow','start_date': airflow.utils.dates.days_ago(1),'provide_context': True,}
 
-<<<<<<< HEAD:MS/mlaas/project_dags/manual_modeling_dags/manual_model_dag_138387277600326470.py
-main_dag_id = "manual_model_dag_138387277600326470"
-=======
-main_dag_id = "manual_model_dag_138383032020589490"
->>>>>>> 8108a5910efd756276ed785ceb74d0d4045faf77:MS/mlaas/project_dags/manual_modeling_dags/manual_model_dag_138383032020589490.py
+main_dag_id = "manual_model_dag_138384811921651000"
 
 dag = DAG(dag_id=main_dag_id,default_args=args,catchup=False,schedule_interval = '@once',)
 
@@ -31,7 +27,7 @@ start_task = PythonOperator(task_id='start_pipeline',python_callable=start_pipel
 
 # Get model dict 
 
-master_dict = {'model_id': [11], 'model_name': ['Logistic_Regression'], 'model_hyperparams': [{'C': '0.11', 'penalty': 'l1', 'solver': 'auto'}], 'model_class_name': ['LogisticRegressionClass'], 'algorithm_type': ['Binary']}
+master_dict = {}
 
 if len(master_dict) != 0:
 
