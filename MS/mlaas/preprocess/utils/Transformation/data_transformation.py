@@ -7,7 +7,6 @@
 */
 '''
 
-
 #* Library Imports
 import logging
 import traceback
@@ -23,8 +22,6 @@ log_enable = True
 LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
 logger = logging.getLogger('data_transformation')
-
-
 
 class DataTransformationClass:
     

@@ -1,16 +1,10 @@
-'''
-/*CHANGE HISTORY
---CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
- Vipul Prajapati          07-DEC-2020           1.0           Initial Version 
- Vipul Prajapati          08-DEC-2020           1.1           Modification for Business Rule ****************************************************************************************/
- 
-*/
-'''
 
-
+#* Library Imports
 import logging
 import traceback
 import datetime
+
+#* Common utilities
 from database import *
 from common.utils.database import db
 from common.utils.logger_handler import custom_logger as cl
@@ -20,11 +14,14 @@ from common.utils.exception_handler.python_exception.ingest.ingest_exception imp
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
 from common.utils.activity_timeline import activity_timeline
 
+#* Defining the Logger
 user_name = 'admin'
 log_enable = True
 LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
 logger = logging.getLogger('Schema_creation')
+
+#* Defining class objects
 json_obj = JsonFormatClass()  # Initialize the JsonFormat Class
 timeline_Obj=activity_timeline.ActivityTimelineClass(database,user,password,host,port) #initialize the ActivityTimeline Class
 
@@ -92,9 +89,6 @@ class SchemaClass:
             logging.error("data preprocess : SchemaClass : get_dataset_schema : Exception " + str(exc.msg))
             logging.error("data preprocess : SchemaClass : get_dataset_schema : " +traceback.format_exc())
             return exc.msg
-
-    
-
     
     def get_attribute_datatype(self,connection,DBObject,table_name):
         """

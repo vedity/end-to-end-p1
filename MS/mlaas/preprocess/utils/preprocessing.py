@@ -8,14 +8,15 @@
 '''
 
 #* Exceptions
-from common.utils import dynamic_dag
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
-from common.utils.activity_timeline import activity_timeline
 
 #* Common utilities
 from common.utils.database import db
 from common.utils.logger_handler import custom_logger as cl
+from common.utils.activity_timeline import activity_timeline
+from common.utils.activity_timeline import activity_timeline
+from common.utils import dynamic_dag
 
 #* Class Imports
 from ingest.utils.dataset import dataset_creation
@@ -26,7 +27,6 @@ from .cleaning import cleaning
 from .Transformation import transformation as trs
 from .Transformation import split_data 
 from .Transformation.model_type_identifier import ModelType
-from common.utils.activity_timeline import activity_timeline
 from database import *
 
 #* Library Imports
@@ -44,7 +44,7 @@ import json
 import time
 import datetime
 
-
+#* Defining Logger
 user_name = 'admin'
 log_enable = True
 

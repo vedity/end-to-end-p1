@@ -1,8 +1,10 @@
+
 #* Library Imports
 import logging
 import traceback
 import pandas as pd
 
+#* Common Imports
 from common.utils.logger_handler import custom_logger as cl
 from common.utils.activity_timeline import activity_timeline
 from database import *
@@ -14,8 +16,6 @@ LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
 
 logger = logging.getLogger('Common_Cleanup_operation')
-
-
 
 class CommonClass:
     
