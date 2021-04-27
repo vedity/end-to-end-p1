@@ -8,14 +8,12 @@
 '''
 
 #* Exceptions
-from MS.mlaas.common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import ScalingFailed
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
 
 #* Common utilities
 from common.utils.database import db
 from common.utils.logger_handler import custom_logger as cl
-from common.utils.activity_timeline import activity_timeline
 from common.utils.activity_timeline import activity_timeline
 from common.utils import dynamic_dag
 
@@ -655,7 +653,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc))
             return OperationOrderingFailed(500).msg
         
-        
             
     def handover(self,DBObject, connection , dataset_id, schema_id, project_id, user_name,split_parameters,scaling_type = 0):        
         """[ This class is used to scale and split and save numpy files.]
@@ -800,6 +797,22 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             return exc.msg
         
     def update_schema_flag_status(self,DBObject,connection,schema_id,dataset_id,column_list, **kwargs):
+        '''
+            This class is used to update schema flags once the preprocessing is complete.
+
+            Args:
+            ----
+            DBObject (`object`): DBClass Object
+            connection (`object`): pycopg2.connection object
+            schema_id (`Int`): Id in the schema table
+            dataset_id (`int`): Id of the dataset
+            column_list (`list`): List of column names
+
+            Returns:
+            -------
+            status (`int`): Status of updation
+        '''
+        
         try:
             logging.info("data preprocessing : PreprocessingClass : update_schema_flag_status : execution start")
             
@@ -858,7 +871,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
             
-            result = requests.post("http://airflow:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
+            res = requests.post("http://airflow:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
 
             logging.info("data preprocessing : PreprocessingClass : get_cleanup_dag_name : execution stop")
             # connection.close()
@@ -885,6 +898,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             selected_visibility (`String`): public or private.
             dataset_name (`String`): Name of the new dataset.
             dataset_desc (`String`): Description for the dataset.
+
+            Returns:
+            -------
+            `0` : function ran successfully
+            `String`: Exception occurred
         '''
         
         try:

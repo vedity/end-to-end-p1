@@ -98,6 +98,10 @@ class CommonClass:
             #? Transforming the operation_id to the operation id stored in the activity timeline table. 
             # operation_id += self.op_diff
             
+            if activity_id == -1:
+                #? Activity insertion was failed
+                raise RuntimeError
+
             #? Getting Activity Description
             desc = self.get_act_desc(DBObject, connection, operation_id, col_name, code = 2)
             
