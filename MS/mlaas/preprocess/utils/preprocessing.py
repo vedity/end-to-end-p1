@@ -8,6 +8,7 @@
 '''
 
 #* Exceptions
+from MS.mlaas.common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import ScalingFailed
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
 
@@ -716,22 +717,25 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             for col in feature_cols[1:]:
                 if input_feature_df[col].dtype == 'O':
                     input_feature_df[col] = le.fit_transform(input_feature_df[col]) 
-                     
-            #sacle the dataframe    
-            if int(scaling_type) == 0:
-                input_feature_df.iloc[:,1:] = super().standard_scaling(input_feature_df.iloc[:,1:]) #standard_scaling
-            elif int(scaling_type) == 1:
-                input_feature_df.iloc[:,1:] = super().min_max_scaling(input_feature_df.iloc[:,1:]) #min_max_scaling
-            elif int(scaling_type) == 2:
-                input_feature_df.iloc[:,1:] = super().robust_scaling(input_feature_df.iloc[:,1:]) #robust_scaling
             
+            try:
+                #scale the dataframe    
+                if int(scaling_type) == 0:
+                    input_feature_df.iloc[:,1:] = super().standard_scaling(input_feature_df.iloc[:,1:]) #standard_scaling
+                elif int(scaling_type) == 1:
+                    input_feature_df.iloc[:,1:] = super().min_max_scaling(input_feature_df.iloc[:,1:]) #min_max_scaling
+                elif int(scaling_type) == 2:
+                    input_feature_df.iloc[:,1:] = super().robust_scaling(input_feature_df.iloc[:,1:]) #robust_scaling
+            except:
+                raise ScalingFailed(500)
+
             
             input_features_df = input_feature_df #input_features_df
             target_features_df=encoded_target_df #target_features_df           
             mt = ModelType()
             problem_type = mt.get_model_type(target_features_df) #call get_model_type
             if problem_type == None:
-                raise ModelIdentificationFailed()
+                raise ModelIdentificationFailed(500)
             model_type = problem_type[0] #model_type
             algorithm_type = problem_type[1] #algorithm type
             target_type = problem_type[2] #target type
@@ -789,7 +793,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             # connection.close()
             return status
             
-        except (DatabaseConnectionFailed,GetDataDfFailed,ProjectUpdateFailed,SplitFailed,ModelIdentificationFailed) as exc:
+        except (DatabaseConnectionFailed,GetDataDfFailed,ProjectUpdateFailed,SplitFailed,ModelIdentificationFailed,ScalingFailed) as exc:
             # connection.close()
             logging.error("data preprocessing : PreprocessingClass : handover : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : handover : " +traceback.format_exc())
