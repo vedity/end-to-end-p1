@@ -517,7 +517,7 @@ Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_255','Box-Cox Transfor
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_255','Box-Cox Transformation','operation on column * completed','US','Operation',2,7,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_256','Yeo-Johnson Transformation','operation on column * failed','US','Operation',0,7,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_256','Yeo-Johnson Transformation','operation on column * in process','US','Operation',1,7,0,0);
-Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_256','Yeo-Johnson Transformation','operation on column * completed','US','Operation',2,7,0,
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_256','Yeo-Johnson Transformation','operation on column * completed','US','Operation',2,7,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_261','Label Encoding','operation on column * failed','US','Operation',0,5,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_261','Label Encoding','operation on column * in process','US','Operation',1,5,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_261','Label Encoding','operation on column * completed','US','Operation',2,5,0,0);

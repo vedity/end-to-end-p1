@@ -1,8 +1,21 @@
+'''
+/*CHANGE HISTORY
+
+--CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
+  Abhishek Negi      17-Jan-2021           1.0           Created Class
+ 
+*/
+'''
+#* Library Imports
 import pandas as pd
 import numpy as np
 import logging
+import traceback
+
+#* Relative Imports
 from common.utils.logger_handler import custom_logger as cl
 
+#* Defining Logger
 user_name = 'admin'
 log_enable = True
 LogObject = cl.LogClass(user_name,log_enable)
@@ -14,16 +27,19 @@ class MissingValueClass:
 
     def discard_missing_values(self, DBObject,connection, table_name,col_name, condition = "is null"):
         '''
-            Returns a dataframe where all the rows where given columns have null values are removed.
+            Function will remove the rows where given columns have null values.
             
             Args:
-            -----
-            dataframe (`pandas.Dataframe`): Whole Dataframe.
-            column_id (`List`) (default = `None`): List of Columns. If `None` then considers whole dataframe.
+            
+                DBObject [(`object`)]   : [DB Class Object.]
+                connection [(`object`)] : [Postgres Connection object.]
+                table_name [(`String`)] : Name of the table. (Ex. `public.demo_tbl`)
+                col_name [(`String`)]   : Name of the Column.
+                condition[(String)] : [the condition need to be satisfied in sql query]
 
             Returns:
-            -------
-            dataframe (`pandas.Dataframe`): Dataframe with all the missing data removed.
+            
+                [(intiger)]: [Return 0 if successfully function executed else return 1]
         '''
         try:
             logging.info("Preprocess : MissingValueClass : discard_missing_values : execution start")
@@ -37,6 +53,7 @@ class MissingValueClass:
             return status
         except Exception as e:
             logging.error(f"Preprocess : MissingValueClass : discard_missing_values : execution failed : {str(e)}")
+            logging.error("Preprocess : MissingValueClass : discard_missing_values : : " +traceback.format_exc())
             return 1
     
     def perform_missing_value_imputation(self,DBObject,connection, table_name,col_name,impute_value, condition = "is null"):
@@ -44,9 +61,14 @@ class MissingValueClass:
         Function will replace column NaN value with its column mean value
         
         Args:
-                series[(pandas.Series)] : [the Series containing the column data]
+                DBObject [(`object`)]   : [DB Class Object.]
+                connection [(`object`)] : [Postgres Connection object.]
+                table_name [(`String`)] : Name of the table. (Ex. `public.demo_tbl`)
+                col_name [(`String`)]   : Name of the Column.
+                impute_value[(Integer|decimal)] : [Value that will replace with Null]
+                condition[(String)] : [the condition need to be satisfied in sql query]
         Return:
-                series[(pandas.Series)] : [return the updated series]  
+                [(intiger)]: [Return 0 if successfully function executed else return 1]  
 
         """
         try:
@@ -62,19 +84,23 @@ class MissingValueClass:
             return status
         except Exception as exc:
             logging.error(f"Preprocess : MissingValueClass : perform_missing_value_imputation : execution failed : {str(exc)}")
+            logging.error("Preprocess : MissingValueClass : perform_missing_value_imputation  : " +traceback.format_exc())
             return 1
 
     
 
     def random_sample_imputation(self,DBObject,connection,table_name,col_name,impute_value):
         '''
-            This function will impute the missing values with the values of some random values from the column.
+            This function will impute the missing values with the random values selected  from the column.
 
             Args:
             -----
-            table_name (`String`)
-            col_name (`String`)
-            impute_value (`Integer`)
+                DBObject [(`object`)]   : [DB Class Object.]
+                connection [(`object`)] : [Postgres Connection object.]
+                table_name [(`String`)] : [Name of the table. (Ex. `public.demo_tbl`)]
+                col_name [(`String`)]   : [Name of the Column.]
+            Return:
+                [(intiger)]: [Return 0 if successfully function executed else return 1]
         '''
         try:
             logging.info("Preprocess : MissingValueClass : random_sample_imputation : execution start")
@@ -87,25 +113,26 @@ class MissingValueClass:
             status = DBObject.update_records(connection,sql_command)
             logging.info("Preprocess : MissingValueClass : random_sample_imputation : execution stop")
             return status
-        except Exception as e:
-            logging.error(f"Preprocess : MissingValueClass : random_sample_imputation : execution failed : {str(e)}")
+        except Exception as exc:
+            logging.error(f"Preprocess : MissingValueClass : random_sample_imputation : execution failed : {str(exc)}")
+            logging.error("Preprocess : MissingValueClass : random_sample_imputation : " +traceback.format_exc())
             return 1
 
     
     def detect_missing_values(self, DBObject, connection, table_name, col_name):
         '''
-            Returns True if there are any missing values in the column, else returns False.
+            Function will detect the missing values in the column
             
             Args:
             -----
-            DBObject (`object`): DB Class Object.
-            connection (`object`): Postgres Connection object.
-            table_name (`String`): Name of the table. (Ex. `public.demo_tbl`)
-            col_name (`String`): Name of the Column.
+            DBObject [(`object`)]   : [DB Class Object.]
+            connection [(`object`)] : [Postgres Connection object.]
+            table_name [(`String`)] : [Name of the table. (Ex. `public.demo_tbl`)]
+            col_name [(`String`)]   : [Name of the Column.]
             
             Returns:
             --------
-            `boolean`: `True` if missing value exists else `False`.
+            [(boolean)]: [`True` if missing value exists else `False`]
         '''
         try:
             logging.info("Preprocess : MissingValueClass : detect_missing_values : execution start")
@@ -124,6 +151,7 @@ class MissingValueClass:
                 return False
         except Exception as e:
             logging.error(f"Preprocess : MissingValueClass : detect_missing_values : execution failed : {str(e)}")
+            logging.error("Preprocess : MissingValueClass : detect_missing_values : " +traceback.format_exc())
             return False
     
         
