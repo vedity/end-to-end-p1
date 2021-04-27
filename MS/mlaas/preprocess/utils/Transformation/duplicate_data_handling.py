@@ -150,8 +150,8 @@ class RemoveDuplicateRecordClass:
             status = DBObject.update_records(connection,sql_command)
 
             if status == 0:
-                
                 status = schemaObj.delete_schema_record(DBObject,connection,schema_id,col_name = column_name)
+
         except Exception as exc:
             logging.error("data preprocessing : RemoveDuplicateRecordClass : delete_column : Exception : "+str(exc))
             logging.error("data preprocessing : RemoveDuplicateRecordClass : delete_column : " +traceback.format_exc())

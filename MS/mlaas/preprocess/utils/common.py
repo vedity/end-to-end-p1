@@ -1,8 +1,19 @@
+'''
+/*CHANGE HISTORY
+
+--CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
+  Abhishek Negi         26-04-2021           1.0           Created Class
+ 
+*/
+'''
+
 #* Library Imports
 import logging
 import traceback
 import pandas as pd
 
+
+#* Relative Imports
 from common.utils.logger_handler import custom_logger as cl
 from common.utils.activity_timeline import activity_timeline
 from database import *
@@ -12,14 +23,13 @@ user_name = 'admin'
 log_enable = True
 LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
-
 logger = logging.getLogger('Common_Cleanup_operation')
 
 
-
 class CommonClass:
-        #* ACTIVITY TIMELINE FUNCTIONS
+        
     def __init__(self):
+        #* ACTIVITY TIMELINE OBJECT
         self.AT = activity_timeline.ActivityTimelineClass(database, user, password, host, port)
         
     def get_act_desc(self, DBObject, connection, operation_id, col_name, code = 1):
@@ -110,8 +120,6 @@ class CommonClass:
         
         logging.info("data preprocessing : CleaningClass : operation_end : execution start")
         
-        #? Transforming the operation_id to the operation id stored in the activity timeline table. 
-        # operation_id += self.op_diff
         
         #? Getting Activity Description
         desc = self.get_act_desc(DBObject, connection, operation_id, col_name, code = 0)

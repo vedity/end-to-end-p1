@@ -2,46 +2,46 @@
 /*CHANGE HISTORY
 
 --CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
- Jay Shukla         17-Jan-2021           1.0           Created Class
+ Abhishek Negi         17-Jan-2021           1.0           Created Class
  
 */
 '''
-
+#* Library Imports
 import logging
 import numpy as np
 import traceback
+
+#* Relative Imports
 from sklearn.neighbors import LocalOutlierFactor
 from common.utils.logger_handler import custom_logger as cl
 
 #* Defining Logger
 user_name = 'admin'
 log_enable = True
-
 LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
-
 logger = logging.getLogger('outlier')
+
 
 class OutliersTreatmentClass:
     
-    #* Below functions are used for detecting the outliers
     
     def extreme_value_analysis(self,DBObject,connection,col_name,table_name,impute_value = None,discard_missing = False):
         '''
-            Returns Probable & Extreme outliers. Best suitable for Non-Normal Distributions.
+            Find the extream outlier and update/delete the outliers Best suitable for Non-Normal Distributions.
             
             Args:
-                series[(pandas.Series)]: Column for which you want the outlier ranges.
-                outlier[(boolean)]: if false than only returns ranges.
+                DBObject [(Object)]     : [DB Class Object.]
+                connection [(Object)]   : [Postgres Connection object]
+                col_name[(String)]   : [Name of the column]
+                table_name[(String)] : [Name of the table]
+                impute_value[(Integer|Decimal)] : [It will have Mean or Median value of the column ]
+                discard_missing([Integer]) :
+                                        False : User want's to replace the outlier 
+                                        True : User want's to Remove outliers
                 
             Returns:
-                List[(Intiger|Float)]: Output list contains following 2 lists & 4 Intigers,
-                    1. List of Probable Outliers,
-                    2. List of Most-Probable Outliers
-                    3. Upper Limit for probable outliers
-                    4. Upper Limit for Most-Probable outliers
-                    5. Lower Limit for probable outliers
-                    6. Lower Limit for Most-Probable outliers
+                [(intiger)]: [Return 0 if successfully function executed else return 1] 
         '''
         try:
             logging.info("data preprocessing : OutliersTreatmentClass : extreme_value_analysis : execution start")
@@ -74,15 +74,21 @@ class OutliersTreatmentClass:
     
     def z_score_analysis(self,DBObject,connection,table_name,col_name,impute_value = None,discard_missing = False):
         '''
-            Returns list of the Outliers. Best suitable for Normal Distributions.
+            Find the extream outlier and update/delete the outliers using the Z Score Analysis method.
             
             Args:
-                Series[(pandas.Series)]: Column for which you want the outlier ranges,
-                level[(intiger|float)] (default=3)= level of the standard deviation. (Typically between 1.5 to 4).
-                outlier[(boolean)]: if false than only returns z-scores.
+                DBObject [(Object)]     : [DB Class Object.]
+                connection [(Object)]   : [Postgres Connection object]
+                col_name[(String)]   : [Name of the column]
+                table_name[(String)] : [Name of the table]
+                impute_value[(Integer|Decimal)] : [It will have Mean or Median value of the column ]
+                discard_missing([Integer]) :
+                                        False : User want's to replace the outlier 
+                                        True : User want's to Remove outliers
+                
                 
             Returns:
-                List[(intiger|float)] = List of the outliers for given standard deviation range & Z-scores for all values
+                [(intiger)]: [Return 0 if successfully function executed else return 1] 
         '''
         
         try:
@@ -113,20 +119,20 @@ class OutliersTreatmentClass:
             logging.error("data preprocessing : OutliersTreatmentClass : z_score_analysis : " +traceback.format_exc())
             return 1
         
-    #* Below functions are used for dealing with outliers
     
     def delete_above(self,DBObject,connection,table_name,col_name,val):
         '''
             Deletes rows where value of given column is greater than given value.
             
             Args:
-                data_df[(pandas.Dataframe)]: Dataframe,
-                col[(String)]: Name of the column
-                val[(intiger|float)]: deciding value
-                ge[(boolean)]: Delete values "Greater than or Eq: True" or only "Greater than: False"
-
+                DBObject [(Object)]     : [DB Class Object.]
+                connection [(Object)]   : [Postgres Connection object]
+                col_name[(String)]      : [Name of the column]
+                table_name[(string)]    : [Name of the dataset table]
+                val[(intiger|float)]    : [deciding value]
+                
             Returns:
-                pandas.Dataframe: Filtered Dataframe
+                [(intiger)]: [Return 0 if successfully function executed else return 1] 
         '''
         try:
             logging.info("data preprocessing : OutliersTreatmentClass : delete_above : execution stop")
@@ -143,18 +149,19 @@ class OutliersTreatmentClass:
             logging.error("data preprocessing : OutliersTreatmentClass : delete_above : " +traceback.format_exc())
             return 1
         
-    def delete_below(self,DBObject,connection,table_name,col_name,val,le = False):
+    def delete_below(self,DBObject,connection,table_name,col_name,val):
         '''
             Deletes rows where value of given column is lesser than given value.
             
             Args:
-                data_df[(pandas.Dataframe)]: Dataframe,
-                col[(String)]: Name of the column
-                val[(intiger|float)]: deciding value
-                ge[(boolean)]: Delete values "Less than or Eq: True" or only "Less than: False"
-
+                DBObject [(Object)]     : [DB Class Object.]
+                connection [(Object)]   : [Postgres Connection object]
+                col_name[(String)]      : [Name of the column]
+                table_name[(string)]    : [Name of the dataset table]
+                val[(intiger|float)]    : [deciding value]
+                
             Returns:
-                pandas.Dataframe: Filtered Dataframe
+                [(intiger)]: [Return 0 if successfully function executed else return 1] 
         '''
         try:
             logging.info("data preprocessing : OutliersTreatmentClass : delete_below : execution start")
@@ -174,25 +181,28 @@ class OutliersTreatmentClass:
     
     def replace_outliers(self,DBObject,connection,table_name,col_name,impute_value, detect_method,method_type = None, log = False):
         '''
-            Returns a series where the outliers are replaced with the given function(Mean of Median)
+            
+            Function will replace the the outlier with impute value(Mean/median) and the method select by user.
             
             Args:
             -----
-            series[(pandas.Series)]: column,
-            operation[(intiger)] (default = 0): which operation should be performed,
-                - 0 : mean
-                - 1 : median
-                - 2 : mode \n
-            detect_method[(intiger)] (default = 0): which method should be used to detect outliers,
+            DBObject [(Object)]     : [DB Class Object.]
+            connection [(Object)]   : [Postgres Connection object]
+            col_name[(String)]      : [Name of the column]
+            table_name[(string)]    : [Name of the table]
+            impute value [(intiger)] (default = 0): which operation should be performed [ mean| median | mode ]
+            detect_method[(intiger)] : which method should be used to detect outliers,
                 - 0 : Extreme Value Analysis
-                - 1 : Z-score method \n
-            less_probable[(boolean)] (default = False): should less probable outliers be raplaced?
-            level[(intiger)] (default = 3): level of std in Z-score method.
-            log[(boolean)] (default = False): Apply log transforamation before outlier detection?
+                - 1 : Z-score method 
+                - 2 : Censoring
+                - 3 : Local factor outlier Method
+            Method_type[(Integer)] : which operation to be performed.
+                0 : Replace with the outlier with impute value
+                1 : Delete the outlier  
                 
             Returns:
             --------
-            List[(intiger|float)]: Updated Column
+            [(intiger)]: [Return 0 if successfully function executed else return 1] 
         '''
         
         try:
@@ -234,20 +244,23 @@ class OutliersTreatmentClass:
         
     def remove_outliers(self,DBObject,connection,table_name,col_name, detect_method = 0, log = False):
         '''
-            Returns a series where the outliers are replaced with the given function(Mean of Median)
+            Function will replace the the outlier with impute value(Mean/median) and the method select by user.
             
             Args:
-                data_df[(pandas.Dataframe)]: whole dataframe,
-                col[(string)]: name of the column
-                detect_method[(intiger)] (default = 0): which method should be used to detect outliers,
-                                                            0 => Extreme Value Analysis
-                                                            1 => Z-score method
-                less_probable[(boolean)] (default = False): should less probable outliers be removed?
-                level[(intiger)] (default = 3): level of std in Z-score method.
-                log[(boolean)] (default = False): Apply log transforamation before outlier detection?
+            -----
+            DBObject [(Object)]     : [DB Class Object.]
+            connection [(Object)]   : [Postgres Connection object]
+            col_name[(String)]      : [Name of the column]
+            table_name[(string)]    : [Name of the table]
+            impute value [(intiger)] (default = 0): which operation should be performed [ mean| median | mode ]
+            detect_method[(intiger)] : which method should be used to detect outliers,
+                - 0 : Extreme Value Analysis
+                - 1 : Z-score method 
+                - 2 : Local factor outlier Method  
                 
             Returns:
-                pandas.Dataframe: Updated Dataframe
+            --------
+            [(intiger)]: [Return 0 if successfully function executed else return 1]
         '''
         
         try:
@@ -269,7 +282,6 @@ class OutliersTreatmentClass:
                 
                 status = self.local_factor_outlier(DBObject,connection,col_name,table_name,method_type =1)
                 
-           
             #? Invalid Input
             else:
                 status = 1
@@ -286,10 +298,13 @@ class OutliersTreatmentClass:
             Apply log transformation on the given column.
             
             Args:
-                series[(pandas.Series)]: column data.
+                DBObject [(Object)]     : [DB Class Object.]
+                connection [(Object)]   : [Postgres Connection object]
+                col_name[(String)]      : [Name of the column]
+                table_name[(string)]    : [Name of the table]
                 
             Returns:
-                pandas.Series: transformed series.
+                [(intiger)]: [Return 0 if successfully function executed else return 1]
         '''
         try:
             logging.info("data preprocessing : OutliersTreatmentClass : apply_log_transformation : execution start")
