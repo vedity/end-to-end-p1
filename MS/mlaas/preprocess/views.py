@@ -570,10 +570,15 @@ class FeatureAlgoList(APIView):
         def get(self, request, format=None):
                 try:
                         logging.info(" data preprocess : FeatureSelection : GET Method : execution start")
-                        dataset_id = 224
+                        dataset_id = request.query_params.get('dataset_id')
                         choice = 1
-                        schema_id = "71"
-                        target_col = "cylindernumber"
+                        schema_id = request.query_params.get('schema_id')
+                        target_col = str(request.query_params.get('target_col'))
+                        
+                        # dataset_id = 224
+                        choice = 1
+                        # schema_id = "71"
+                        # target_col = "cylindernumber"
                         column = FU.fetch_column(DBObject,connection,schema_id)
                         chisq_col,rfe_col,mutual_col,anova_col,co_col = FS.algo_call(DBObject,connection,dataset_id,schema_id,target_col,choice)
                         
