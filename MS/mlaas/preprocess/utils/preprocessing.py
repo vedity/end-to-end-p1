@@ -1032,7 +1032,23 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
 
     def SaveAs(self,DBObject,connection,project_id,schema_id,table_name,user_name,dataset_visibility,dataset_name,selected_visibility,dataset_desc,cleanup_flag=None, **kwargs):
         '''
-        Function used to create a new table with updated changes and insert a new record into dataset table and update the dataset_id into the project_tbl
+        Function used to create a new table with updated changes and insert a new record into dataset table and 
+        update the dataset_id into the project_tbl
+
+        Args :
+            DBObject ([type]): [DBClass Object]
+            connection ([type]): [Connection Object]
+            dataset_id ([type]): [dataset id of the dataset.]
+            project_id ([type]): [project id of the project table.]
+            schema_id ([type]): [schema id of the dataset.]
+            table_name ([String]): [Name of the dataset table]
+            dataset_visibility[(String)] : [ Visibility of the dataset selected]
+            dataset_name[(String)] : [dataset name input by user]
+            selected_visibility[(String)] : [visibility input by user]
+            dataset_desc[(String)] : [description input by user]
+        Return :
+            [Integer] : [return 0 if success else return 1 for failed]
+
         '''
         try:
             #? Safety measure in case if DAG calls this method with None parameters
@@ -1254,6 +1270,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         """
         function used to update schema for new dataset according to schema mapping page.
         Args:
+            DBObject ([type]): [DBClass Object]
+            connection ([type]): [Connection Object]
             schema_id[(schema_id)] : [Selected Id of the schema table]
 
         Return:

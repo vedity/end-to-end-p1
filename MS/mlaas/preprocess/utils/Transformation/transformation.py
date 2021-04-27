@@ -78,6 +78,8 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
 
     def delete_duplicate_records(self,DBObject,connection,project_id,column_list,old_column_list, table_name, **kwargs):
         '''
+            Function will delete the duplicate records from the table.
+
             Operation id: ?
         '''
         
@@ -101,6 +103,8 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
     
     def delete_duplicate_column(self,DBObject,connection,schema_id,project_id, table_name):
         '''
+            Function will delete the duplicate column from the table.
+
             Operation id: ?
         '''
         
@@ -123,6 +127,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
 
     def delete_low_variance_column(self,DBObject,connection,project_id,schema_id,column_list,old_column_list, table_name,variance=0.5, **kwargs):
         '''
+            Delete the column which has low variance. 
             Operation id: ?
         '''
         
