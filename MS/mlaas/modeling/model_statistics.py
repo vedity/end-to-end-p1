@@ -67,6 +67,24 @@ class ModelStatisticsClass:
         learning_curve_json = cmobj.set_json(json_data,3)#will round json data 
         logging.info("modeling : ModelStatisticsClass : learning_curve : Exception End" )
         return learning_curve_json
+
+    def model_failed(self, experiment_id):
+        """This function is used to get features_importance of particular experiment.
+
+        Args:
+            experiment_id ([object]): [Experiment id of particular experiment.]
+
+        Returns:
+            [data_frame]: [it will return the dataframe for features_importance.]
+            
+        """
+        logging.info("modeling : ModelStatisticsClass : model_failed_reason : Exception Start" )
+        str1 = '/model_failed_reason.json'
+        artifact_uri = cmobj.get_artifact_uri(experiment_id,str1)#will get artifact_uri for particular experiment
+        model_failed_json = cmobj.get_json(artifact_uri)# will get json data from particular artifact_uri location
+        logging.info("modeling : ModelStatisticsClass : model_failed_reason : Exception End" )
+        return model_failed_json
+
     
     def actual_vs_prediction(self,experiment_id,model_type):
         """This function is used to get actuval_vs_prediction of particular experiment.
