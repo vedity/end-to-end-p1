@@ -7,7 +7,6 @@
 */
 '''
 
-
 #* Library Imports
 import logging
 import traceback
@@ -24,8 +23,6 @@ LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
 logger = logging.getLogger('data_transformation')
 
-
-
 class DataTransformationClass:
     
     def logarithmic_transformation(self,DBObject,connection,column_string,table_name):
@@ -35,13 +32,14 @@ class DataTransformationClass:
         formula: f(x)=ln(x)
         
         Args:
-            DBObject ([object]):  Object of DBclass
-            connection ([object]): [postgres connection string]
+            DBObject ([object]):  [DB Class Object.]
+            connection ([object]):  [Postgres Connection object]
             column_string ([list]): [list of column]
-            table_name ([string]): [table name]
+            table_name ([string]): [Name of the table]
 
         Returns:
-            [status]: [return status]
+            [status]: [return 0 if successfully performed the operation else return 1]
+            
         """
         try:
             
@@ -75,13 +73,14 @@ class DataTransformationClass:
             formula: f(x)=√x
 
         Args:
-            DBObject ([object]):  Object of DBclass
-            connection ([object]): [postgres connection string]
+            DBObject ([object]):  [DB Class Object.]
+            connection ([object]):  [Postgres Connection object]
             column_string ([list]): [list of column]
-            table_name ([string]): [table name]
+            table_name ([string]): [Name of the table]
 
         Returns:
-            [status]: [return status]
+            [status]: [return 0 if successfully performed the operation else return 1]
+            
         """
         try:
             
@@ -110,14 +109,14 @@ class DataTransformationClass:
 
             formula:   f(X) = 1/X
         Args:
-            DBObject ([object]):  Object of DBclass
-            connection ([object]): [postgres connection string]
+            DBObject ([object]):  [DB Class Object.]
+            connection ([object]):  [Postgres Connection object]
             column_string ([list]): [list of column]
-            table_name ([string]): [table name]
+            table_name ([string]): [Name of the table]
 
         Returns:
-            [status]: [return status]
-
+            [status]: [return 0 if successfully performed the operation else return 1]
+            
         """
         try:
             
@@ -148,13 +147,15 @@ class DataTransformationClass:
             formula: K(X) = exp(X)
             
         Args:
-            DBObject ([object]):  Object of DBclass
-            connection ([object]): [postgres connection string]
+            DBObject ([object]):  [DB Class Object.]
+            connection ([object]):  [Postgres Connection object]
             column_string ([list]): [list of column]
-            table_name ([string]): [table name]
+            table_name ([string]): [Name of the table]
+            value([integer]): [user input]
 
         Returns:
-            [status]: [return status]
+            [status]: [return 0 if successfully performed the operation else return 1]
+            
 
         """
         try:
@@ -187,14 +188,15 @@ class DataTransformationClass:
             y(λ) = (yλ – 1) / λ  if y ≠ 0
             y(λ) = log(y)  if y = 0]
 
-         Args:
-            DBObject ([object]):  Object of DBclass
-            connection ([object]): [postgres connection string]
+        Args:
+            DBObject ([object]):  [DB Class Object.]
+            connection ([object]):  [Postgres Connection object]
             column_string ([list]): [list of column]
-            table_name ([string]): [table name]
+            table_name ([string]): [Name of the table]
 
         Returns:
-            [status]: [return status]
+            [status]: [return 0 if successfully performed the operation else return 1]
+            
 
         """
         try:
@@ -239,13 +241,14 @@ class DataTransformationClass:
             -ln(-X + 1); if λ is 2 and X is negative
         
         Args:
-            DBObject ([object]):  Object of DBclass
-            connection ([object]): [postgres connection string]
+            DBObject ([object]):  [DB Class Object.]
+            connection ([object]):  [Postgres Connection object]
             column_string ([list]): [list of column]
-            table_name ([string]): [table name]
+            table_name ([string]): [Name of the table]
 
         Returns:
-            [status]: [return status]
+            [status]: [return 0 if successfully performed the operation else return 1]
+            
         """
         try:
             
