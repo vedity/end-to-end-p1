@@ -657,21 +657,39 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         
             
     def handover(self,DBObject, connection , dataset_id, schema_id, project_id, user_name,split_parameters,scaling_type = 0):        
+        """[ This class is used to scale and split and save numpy files.]
+
+        Args:
+            DBObject ([type]): [DBclass Object]
+            connection ([type]): [Connection Object]
+            dataset_id ([type]): [dataset id of the dataset.]
+            schema_id ([type]): [schema id of the dataset.]
+            project_id ([type]): [project_id of the dataset.]
+            user_name ([type]): [user name of dataset]
+            split_parameters ([type]): [Dict of split_parameters]
+            scaling_type (int, optional): [selected  split_method]. Defaults to 0.
+
+        Returns:
+            [Integer] : [return 0 if successfull else 1]
+        """
+        
         logging.info("data preprocessing : PreprocessingClass : handover : execution start")
-        try:
+        try:    
             
             unique_id = str(uuid.uuid1().time) #genrate unique_id
-            scale_dir = "scaled_dataset/scaled_data_" + unique_id  #genrate directory
+            scale_dir = "scaled_dataset/scaled_data_" + unique_id  #genrate scale_dir path
             CHECK_FOLDER = os.path.isdir(scale_dir) #check directory already exists or not
             # If folder doesn't exist, then create it.
             if not CHECK_FOLDER:
                 os.makedirs(scale_dir) #create directory
-                logger.info("Directory  Created")
+                logger.info("data preprocessing : PreprocessingClass : handover : Directory Created")
             else:
-                logger.info("Directory  already exists")
-            actual_Y_filename =  scale_dir+"/Unscaled_actual_Y_data_" + unique_id  #genrate test_Y file path           
+                logger.info("data preprocessing : PreprocessingClass : handover :Directory  already exists")
+            
+            actual_Y_filename =  scale_dir+"/Unscaled_actual_Y_data_" + unique_id  #genrate file path for actual data
             #? Getting Dataframe
             data_df = self.get_data_df(DBObject, connection ,dataset_id,schema_id) #get dataframe
+            
             if isinstance(data_df, str):
                 raise GetDataDfFailed(500)
             
@@ -679,8 +697,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             tg_cols = DBObject.get_target_col(connection, schema_id) #get list of the target columns
             target_cols = [data_df.columns[0]] #select first column
             target_cols += tg_cols     #list target_cols
-            target_actual_features_df=data_df[target_cols]
-            encoded_target_df=target_actual_features_df
+            target_actual_features_df=data_df[target_cols] #get actual data of target column
+            encoded_target_df=target_actual_features_df #assign to encoded df
             np.save(actual_Y_filename,target_actual_features_df.to_numpy()) #save Y_actual
             #encode if target column is string
             for col in target_cols[1:]:
@@ -697,7 +715,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             #if there is string value the encode it
             for col in feature_cols[1:]:
                 if input_feature_df[col].dtype == 'O':
-                    input_feature_df[col] = le.fit_transform(input_feature_df[col])  
+                    input_feature_df[col] = le.fit_transform(input_feature_df[col]) 
+                     
             #sacle the dataframe    
             if int(scaling_type) == 0:
                 input_feature_df.iloc[:,1:] = super().standard_scaling(input_feature_df.iloc[:,1:]) #standard_scaling
@@ -711,6 +730,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             target_features_df=encoded_target_df #target_features_df           
             mt = ModelType()
             problem_type = mt.get_model_type(target_features_df) #call get_model_type
+            if problem_type == None:
+                raise ModelIdentificationFailed()
             model_type = problem_type[0] #model_type
             algorithm_type = problem_type[1] #algorithm type
             target_type = problem_type[2] #target type
@@ -768,7 +789,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             # connection.close()
             return status
             
-        except (DatabaseConnectionFailed,GetDataDfFailed,ProjectUpdateFailed,SplitFailed) as exc:
+        except (DatabaseConnectionFailed,GetDataDfFailed,ProjectUpdateFailed,SplitFailed,ModelIdentificationFailed) as exc:
             # connection.close()
             logging.error("data preprocessing : PreprocessingClass : handover : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : handover : " +traceback.format_exc())
@@ -1081,6 +1102,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.error("data preprocessing : PreprocessingClass : get_dag_status : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_dag_status : " +traceback.format_exc())
             return exc.msg
+        
     def get_modelling_status(self, DBObject, connection ,project_id):
         '''
             Used to get the dag status

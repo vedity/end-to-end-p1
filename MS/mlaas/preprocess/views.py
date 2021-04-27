@@ -421,6 +421,23 @@ class CleanupSave(APIView):
 class ScalingSplitClass(APIView):
         def post(self, request, format=None):
                 try:
+                        '''
+                        This class is used to scale and split and save numpy files.
+                        Args  : 
+                                schema_id(Integer): schema id of the dataset.
+                                dataset_id(Integer): dataset id of the dataset.
+                                project_id(Integer): project_id of the dataset.
+                                user_name(String): user name of dataset
+                                scaling_operation(Integer):selected  scaling_operation
+                                split_method(String):selected  split_method
+                                valid_ratio(Integer):selected  valid_ratio
+                                test_ratio(Integer):selected  test_ratio
+                                random_state(Integer):selected  random_state
+                        Return : 
+                                status_code(500 or 200),
+                                error_msg(Error message for retrival failed or successfull),
+                                Response(return false if failed otherwise json data)
+                        '''
                         logging.info("data preprocess : HandoverClass : POST Method : execution start")
                         schema_id = request.query_params.get('schema_id') #get schema id
                         dataset_id = request.query_params.get('dataset_id') #get dataset id
@@ -439,6 +456,7 @@ class ScalingSplitClass(APIView):
                                 #! Some operations are still remaining before we can proceed to the modelling.
                                 return Response({"status_code":"500","error_msg":desc,"response":flag})
 
+                        #Activiy TImeline started code
                         activity_id = 'ss_1'
                         activity_df = AT_OBJ.get_activity(activity_id,"US")
                         projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
@@ -452,6 +470,7 @@ class ScalingSplitClass(APIView):
                                 return Response({"status_code":"500","error_msg":status,"response":"false"})
                                 
                         logging.info("data preprocess : ScalingSplitClass : POST Method : execution stop")
+                        #Activiy Timeline ended code
                         activity_id = 'ss_2'
                         activity_df = AT_OBJ.get_activity(activity_id,"US")
                         projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
