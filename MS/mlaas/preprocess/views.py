@@ -420,8 +420,7 @@ class CleanupSave(APIView):
                 
 class ScalingSplitClass(APIView):
         def post(self, request, format=None):
-                try:
-                        '''
+                '''
                         This class is used to scale and split and save numpy files.
                         Args  : 
                                 schema_id(Integer): schema id of the dataset.
@@ -437,7 +436,8 @@ class ScalingSplitClass(APIView):
                                 status_code(500 or 200),
                                 error_msg(Error message for retrival failed or successfull),
                                 Response(return false if failed otherwise json data)
-                        '''
+                '''
+                try:
                         logging.info("data preprocess : HandoverClass : POST Method : execution start")
                         schema_id = request.query_params.get('schema_id') #get schema id
                         dataset_id = request.query_params.get('dataset_id') #get dataset id
@@ -493,6 +493,9 @@ class ScalingSplitClass(APIView):
 
 class Scalingtype(APIView):
         def get(self,request,format=None):
+                ''' 
+                        This function will provide lst of scaling methods.
+                '''
                 try :
                         logging.info("data preprocess : ScheamAttributeListClass : POST Method : execution start")
                         column_attribute = [{"id" : 0,"name": "Standard Scaler"},{"id" : 1,"name": "Min-Max"},{"id": 2,"name": "Robust"}]
@@ -504,6 +507,9 @@ class Scalingtype(APIView):
 
 class TrainValidHoldout(APIView):
         def get(self,request,format=None):
+                ''' 
+                        This function will provide list for holdout value.
+                '''
                 try :
                         logging.info("data preprocess : TrainValidHoldout : GET Method : execution start")
                         holdout = [{"id" : 2,"value": "90-5-5"},{"id" : 3,"value": "85-5-10"},{"id" : 4,"value": "80-10-10"},{"id" : 5,"value": "75-10-15"},{"id" : 6,"value": "70-15-15"},{"id" : 7,"value": "65-15-20"},{"id" : 8,"value": "60-20-20"}]
@@ -517,6 +523,9 @@ class TrainValidHoldout(APIView):
 class Check_Split(APIView):
 
         def get(self, request, format=None):
+                ''' 
+                        This function will return value if split done or none if split is pending
+                '''
                 try:
                         logging.info(" modeling : Check_Split : GET Method : execution start")
                         project_id = request.query_params.get('project_id')
@@ -537,6 +546,9 @@ class Check_Split(APIView):
 class CheckCleanupDagStatus(APIView):
 
         def get(self, request, format=None):
+                '''
+                        This function will give dag status if process is running or not
+                '''
                 try:
                         logging.info(" data preprocess : CheckCleanupDagStatus : GET Method : execution start")
                         project_id = request.query_params.get('project_id')

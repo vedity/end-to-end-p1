@@ -2,7 +2,7 @@
 /*CHANGE HISTORY
 
 --CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
- Jay Shukla         23-April-2021           1.0           Created Class
+ Jay Shukla         23-April-2021           1.0           FeatureEngineeringClass
  
 */
 '''

@@ -1,3 +1,11 @@
+'''
+/*CHANGE HISTORY
+
+--CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
+ Nisha Barad         27-Feb-2021           1.0            SplitDataClass
+ 
+*/
+'''
 
 #* Library Imports
 import numpy as np
@@ -23,7 +31,7 @@ DBObject = db.DBClass()
 ENC_OBJECT = ec()
 connection,connection_string = DBObject.database_connection(database,user,password,host,port)
 
-class Split_Data():
+class SplitDataClass():
     
     def get_split_data(self, input_df, target_df, random_state, test_size, valid_size, split_method):
             """Returns train-test or train-valid-test split on the basis of split_method.
