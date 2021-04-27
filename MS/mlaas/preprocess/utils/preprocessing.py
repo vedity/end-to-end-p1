@@ -750,11 +750,13 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 cv = 0
             random_state = split_parameters['random_state'] #get random_state
             test_ratio = split_parameters['test_ratio'] #get test_size
+            
             valid_ratio = split_parameters['valid_ratio'] #get valid_size
             if len(valid_ratio) == 0:
                 valid_ratio= 0
             else:
                 valid_ratio=float(valid_ratio)
+            
             train_X_filename = scale_dir+"/scaled_train_X_data_" + unique_id #genrate train_X file path
             train_Y_filename = scale_dir+"/scaled_train_Y_data_" + unique_id #genrate train_Y file path
             test_X_filename =  scale_dir+"/scaled_test_X_data_" + unique_id  #genrate test_X file path  
@@ -772,6 +774,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 valid_Y_filename = scale_dir+"/scaled_valid_Y_data_" + unique_id #genrate valid_Y file path     
                 np.save(valid_X_filename,X_valid.to_numpy()) #save X_valid
                 np.save(valid_Y_filename,Y_valid.to_numpy()) #save Y_valid   
+           
             Y_train_count=Y_train.shape[0] #train count
             Y_test_count =Y_test.shape[0]  #test count
             actual_Y_filename =  scale_dir+"/Unscaled_actual_Y_data_" + unique_id  #genrate test_Y file path           

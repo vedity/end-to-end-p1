@@ -1,3 +1,11 @@
+'''
+/*CHANGE HISTORY
+
+--CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
+ Jay Shukla         27-Feb-2021           1.0            FeaturnScalingClass
+ 
+*/
+'''
 
 #* Importing Libraries
 import pandas as pd
