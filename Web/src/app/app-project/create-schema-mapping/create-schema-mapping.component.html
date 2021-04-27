@@ -170,24 +170,13 @@
                     </ul>
                 </div>
                 <div class="right-box">
-                    <!-- <ul class="selected">
-                        <li class="title">Option 1</li>
-                        <li><i class="mdi mdi-check-bold"></i></li>
-                        <li><i class="mdi mdi-check-bold"></i></li>
-                        <li><i class="mdi mdi-check-bold"></i></li>
-                        <li><i class="mdi mdi-check-bold"></i></li>
-                        <li><i class="mdi mdi-close"></i></li>
-                    </ul> -->
+
                     <ul *ngFor="let item of featuresList.option_list">
                         <li class="title" title="{{item.name}}">{{item.name}}</li>
                         <li *ngFor="let subitem of featuresList.column_list">
                             <i *ngIf="item.colums[subitem]=='true'" class="mdi mdi-check-bold"></i>
                             <i *ngIf="item.colums[subitem]=='false'" class="mdi mdi-close"></i>
                         </li>
-                        <!-- <li><i class="mdi mdi-close"></i></li>
-                        <li><i class="mdi mdi-check-bold"></i></li>
-                        <li><i class="mdi mdi-check-bold"></i></li>
-                        <li><i class="mdi mdi-close"></i></li> -->
                     </ul>
 
                 </div>

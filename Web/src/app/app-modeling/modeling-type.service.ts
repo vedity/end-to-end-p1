@@ -98,6 +98,12 @@ export class ModelingTypeApiService {
     return this.httpClient.get(this.baseUrl + "modeling/performancemetrics/", { headers: this.headers, params });
   }
 
+  getConfusionMatrics(experiment_id): Observable<any> {
+    //experiment_id=2;
+    var params = new HttpParams().append("experiment_id", experiment_id);
+    return this.httpClient.get(this.baseUrl + "modeling/confusionmatrix/", { headers: this.headers, params });
+  }
+
   getModelSummary(experiment_id): Observable<any> {
    // experiment_id=2;
     var params = new HttpParams().append("experiment_id", experiment_id);

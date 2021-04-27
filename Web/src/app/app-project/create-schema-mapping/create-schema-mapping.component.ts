@@ -365,6 +365,6 @@ export class CreateSchemaMappingComponent implements OnInit {
   }
 
   largeModal(schemarecommodate: any) {
-    this.modalService.open(schemarecommodate, { size: 'lg', windowClass: 'modal-holder', centered: true });
+    this.modalService.open(schemarecommodate, { size: 'xl', windowClass: 'modal-holder', centered: true });
   }
 }
