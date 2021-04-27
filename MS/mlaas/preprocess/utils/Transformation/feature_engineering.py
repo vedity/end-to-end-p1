@@ -9,6 +9,7 @@
 
 #* Library Imports
 import logging
+import traceback
 
 #* Commong Utilities
 from common.utils.logger_handler import custom_logger as cl
@@ -104,8 +105,6 @@ class FeatureEngineeringClass:
             noise_lst = ['False']*length
             dtype_lst = ['numerical']*length
 
-            logging.info("AAAAAAAAAAAA =>" + str(missing_lst))
-            
             schema_update = sc.update_dataset_schema(DBObject,connection,schema_id,col_names,dtype_lst,missing_flag=missing_lst,noise_flag=noise_lst,flag = True)
             
             logging.info("Preprocess : FeatureEngineeringClass : datetime_fe : execution stop")
@@ -113,4 +112,5 @@ class FeatureEngineeringClass:
             
         except Exception as e:
             logging.error(f"Preprocess : FeatureEngineeringClass : datetime_fe : execution failed : error => {str(e)}")
+            logging.error(f"Preprocess : FeatureEngineeringClass : datetime_fe : execution failed : traceback => {traceback.format_exc()}")
             return 1

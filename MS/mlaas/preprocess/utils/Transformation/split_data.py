@@ -1,22 +1,28 @@
+
+#* Library Imports
 import numpy as np
 import pandas as pd
 import logging
 from sklearn.model_selection import train_test_split
+from .categorical_encoding import EncodeClass as ec
+
+#* Common Utilities
+from database import *
 from common.utils.logger_handler import custom_logger as cl
 from common.utils.database import db
-from .categorical_encoding import EncodeClass as ec
-from database import *
 
-
+#* Logger Import
 user_name = 'admin'
 log_enable = True
 LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
 logger = logging.getLogger('project_creation')
+
+#* Initializing Objects
 DBObject = db.DBClass()
 ENC_OBJECT = ec()
-
 connection,connection_string = DBObject.database_connection(database,user,password,host,port)
+
 class Split_Data():
     
     def get_split_data(self, input_df, target_df, random_state, test_size, valid_size, split_method):
@@ -98,7 +104,7 @@ class Split_Data():
     def get_missing_col_desc(self,df,col_name):
         '''
             This is a sub-function thats specifically used to get the message for 
-            unencoded columns list. This message will be shown on the frontend.
+            missing columns list. This message will be shown on the frontend.
 
             Args:
             ----
@@ -107,7 +113,7 @@ class Split_Data():
 
             Returns:
             -------
-            string (`String`): Description for unencoded column warning.
+            string (`String`): Description for missing column warning.
         '''
         try:
             logging.info("data preprocessing : EncodeClass : get_unencoded_desc : execution start")
@@ -131,6 +137,22 @@ class Split_Data():
             return str(e)
 
     def check_split_validation(self,projectid):
+        '''
+            This function checks if we are good to go for modelling or not.
+            Returns a flag & related description.
+
+            Args:
+            ----
+            projectid (`Int`): Id of the project.
+
+            Returns:
+            -------
+            flag (`Boolean`):
+                - `True` : Modelling is possible
+                - `False` :Modelling is not possible
+                
+            description (`String`): Description to be shown on the frontend.
+        '''
         try:
             logging.info("data preprocessing : Check Split : check_split_validation : execution start")
             target_sql_command = f"select count(*) from mlaas.schema_tbl where schema_id in (select schema_id from mlaas.project_tbl where project_id = '{projectid}') and column_attribute = 'Target'"
@@ -156,7 +178,7 @@ class Split_Data():
                 logging.info("data preprocessing : Check Split : check_split_validation : execution stop")
                 return False, desc
             else:
-                desc = "Continue for Scal and Split."
+                desc = "Continue for Scale and Split."
                 return True, desc
         
         except Exception as e:

@@ -12,7 +12,10 @@ from common.utils.exception_handler.python_exception.preprocessing.preprocess_ex
 
 #* Relative Imports
 from ..schema import schema_creation
+
+#* Defining Objects
 sc = schema_creation.SchemaClass()
+
 class EncodeClass:
 
     

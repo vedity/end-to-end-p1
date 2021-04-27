@@ -1,8 +1,14 @@
+
+#* Importing Libraries
 import numpy as np
 import pandas as pd
 import logging
 from sklearn.model_selection import train_test_split
+
+#* Common utilities
 from common.utils.logger_handler import custom_logger as cl
+
+#* Defining Logger
 user_name = 'admin'
 log_enable = True
 LogObject = cl.LogClass(user_name,log_enable)
