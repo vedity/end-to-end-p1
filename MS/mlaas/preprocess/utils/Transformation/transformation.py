@@ -2,7 +2,7 @@
 /*CHANGE HISTORY
 
 --CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
- Jay Shukla         17-Jan-2021           1.0           Created Class
+ Jay Shukla         17-Jan-2021           1.0           TransformationClass
  
 */
 '''
@@ -165,7 +165,8 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
 
     def label_encoding(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
-            Operation id: 27
+            This function will update column with numeric sequence.
+            Operation id: dp_261
         '''
         #Operation Id to get activity details
         operation_id = 'dp_261'
@@ -191,14 +192,17 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
                 
                 
             except Exception as exc:
-                return exc
+                logging.info("data preprocessing : TransformationClass : label_encoding : Exception : "+str(exc))
+                logging.info("data preprocessing : TransformationClass : label_encoding : " +traceback.format_exc())
+                return 1
 
         logging.info("data preprocessing : TransformationClass : label_encoding : execution stop")
         return status
 
     def one_hot_encoding(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, schema_id, **kwargs):
         '''
-            Operation id: 28
+            This function will do one hot encoding on original column and add distinct value column to table.
+            Operation id: dp_271
         '''
         
         logging.info("data preprocessing : TransformationClass : one_hot_encoding : execution start")
@@ -226,7 +230,9 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
                 
                 
             except Exception as exc:
-                return exc
+                logging.info("data preprocessing : TransformationClass : one_hot_encoding : Exception : "+str(exc))
+                logging.info("data preprocessing : TransformationClass : one_hot_encoding : " +traceback.format_exc())
+                return 1
 
         logging.info("data preprocessing : TransformationClass : one_hot_encoding : execution stop")
         return status

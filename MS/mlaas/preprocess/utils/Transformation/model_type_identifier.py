@@ -1,3 +1,11 @@
+'''
+/*CHANGE HISTORY
+
+--CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
+ Nisha Barad         27-Feb-2021           1.0            ModelTypeClass
+ 
+*/
+'''
 
 #* Importing Libraries
 import numpy as np
@@ -15,7 +23,7 @@ LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
 logger = logging.getLogger('project_creation')
 
-class ModelType():
+class ModelTypeClass:
     def get_model_type(self, target_df):   
         """Returns the list of all algorithm using the model_type and algorithm_type.
 
