@@ -54,8 +54,9 @@ logger = logging.getLogger('preprocessing')
 
 #* Object Definition
 dc = dataset_creation.DatasetClass()
-sp = split_data.Split_Data()
+sp = split_data.SplitDataClass()
 le = LabelEncoder()
+mt = ModelTypeClass()
 
 class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass, trs.TransformationClass):
     def __init__(self,database,user,password,host,port):
@@ -729,7 +730,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             input_features_df = input_feature_df #input_features_df
             target_features_df=encoded_target_df #target_features_df           
-            mt = ModelType()
+            
             problem_type = mt.get_model_type(target_features_df) #call get_model_type
             if problem_type == None:
                 raise ModelIdentificationFailed(500)
