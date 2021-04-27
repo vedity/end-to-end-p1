@@ -14,6 +14,7 @@ import numpy as np
 import json
 import ast 
 import logging
+import traceback
 import mlflow
 import mlflow.sklearn
 import uuid 
@@ -50,7 +51,7 @@ from modeling.utils.model_utils.sklearn_classification.xgboost_classification im
 from modeling.utils.model_experiments import model_experiment
 from modeling.split_data import SplitData
 from common.utils.logger_handler import custom_logger as cl
-
+from common.utils.exception_handler.python_exception.modeling.modeling_exception import *
 
 # Global Variables And Objects
 user_name = 'admin'
@@ -186,67 +187,91 @@ def supervised_models(run_id,**kwargs):
     Args:
         run_id ([string ]): [run id of the currently running dag.]
     """
+    check_flag = 'top'
     
-    # try:
+    try:
         # This will set mlflow tracking uri which will help us to store all parameters into database. 
-    mlflow.set_tracking_uri("postgresql+psycopg2://{}:{}@{}:{}/{}?options=-csearch_path%3Ddbo,mlflow".format(user, password, host, port, database))
-    
-    # Get Basis Model's Parameters.
-    basic_params_dict = ast.literal_eval(kwargs['dag_run'].conf['basic_params_dict'])
-    
-    project_id = int(basic_params_dict['project_id'])
-    dataset_id = int(basic_params_dict['dataset_id'])
-    user_id = int(basic_params_dict['user_id'])
-    
-    model_mode = basic_params_dict['model_mode']
-    model_type = basic_params_dict['model_type']
-    algorithm_type = basic_params_dict['algorithm_type']
-    experiment_name  = basic_params_dict['experiment_name']
+        mlflow.set_tracking_uri("postgresql+psycopg2://{}:{}@{}:{}/{}?options=-csearch_path%3Ddbo,mlflow".format(user, password, host, port, database))
         
-    print("basic split param ==",algorithm_type)
-    # Get Input,Target Features List And ALl numpy array of train test and valid datasets and also scaled splits parameters dict.
-    input_features_list, target_features_list, X_train, X_test, X_valid, y_train, y_test, y_valid, scaled_split_dict= get_model_data(user_id, project_id, dataset_id)
-    
-    model_id = kwargs['model_id']
-    model_name = kwargs['model_name']
-    model_class_name = kwargs['model_class_name']
-    hyperparameters = kwargs['model_hyperparams']  
-    
-    print("master dict==",kwargs['algorithm_type'])
-    # Check Whether Running Model is Multi Class Or Not.
-    if algorithm_type != 'Binary':
-        algorithm_type=algorithm_type[:-5]
-    
-    # Check Running Model Wheather It is Binary Or Multi Class Problem.     
-    if algorithm_type == kwargs['algorithm_type']:
+        # Get Basis Model's Parameters.
+        basic_params_dict = ast.literal_eval(kwargs['dag_run'].conf['basic_params_dict'])
         
-        experiment, experiment_id = ExpObject.get_mlflow_experiment(experiment_name)
-        # mlflow set_experiment and run the model.
-        with mlflow.start_run(experiment_id=experiment_id) as run:
-            # Get experiment id and run id from the experiment set.
-            run_uuid = run.info.run_id
-            experiment_id = experiment.experiment_id
-            dag_run_id = run_id
+        project_id = int(basic_params_dict['project_id'])
+        dataset_id = int(basic_params_dict['dataset_id'])
+        user_id = int(basic_params_dict['user_id'])
+        
+        model_mode = basic_params_dict['model_mode']
+        model_type = basic_params_dict['model_type']
+        algorithm_type = basic_params_dict['algorithm_type']
+        experiment_name  = basic_params_dict['experiment_name']
             
-            # Add experiment.
-            add_exp_status = ExpObject.add_experiments(experiment_id,experiment_name,run_uuid,
-                                                        project_id,dataset_id,user_id,
-                                                        model_id,model_mode,dag_run_id)
+        print("basic split param ==",algorithm_type)
+        # Get Input,Target Features List And ALl numpy array of train test and valid datasets and also scaled splits parameters dict.
+        input_features_list, target_features_list, X_train, X_test, X_valid, y_train, y_test, y_valid, scaled_split_dict= get_model_data(user_id, project_id, dataset_id)
         
-            # Declare CLass File Object.
-            LRObject = eval(model_class_name)(input_features_list, target_features_list,
-                                                X_train, X_valid, X_test, y_train, y_valid, y_test,
-                                                scaled_split_dict,hyperparameters)
-            # Run model pipleine.
-            LRObject.run_pipeline()
+        model_id = kwargs['model_id']
+        model_name = kwargs['model_name']
+        model_class_name = kwargs['model_class_name']
+        hyperparameters = kwargs['model_hyperparams']  
+        
+        print("master dict==",kwargs['algorithm_type'])
+        
+        # Check Whether Running Model is Multi Class Or Not.
+        if algorithm_type != 'Binary':
+            algorithm_type=algorithm_type[:-5]
             
-            # Update Model Status.
-            upd_exp_status = ExpObject.update_experiment(experiment_id,'success')
-
+        
+        check_flag = 'outside'
+        dag_run_id = run_id
+        # Check Running Model Wheather It is Binary Or Multi Class Problem.     
+        if algorithm_type == kwargs['algorithm_type']:
+            
+            experiment, experiment_id = ExpObject.get_mlflow_experiment(experiment_name)
+            # mlflow set_experiment and run the model.
+            with mlflow.start_run(experiment_id=experiment_id) as run:
+               
+                # Get experiment id and run id from the experiment set.
+                run_uuid = run.info.run_id
+                experiment_id = experiment.experiment_id
+                # Add experiment.
+                add_exp_status = ExpObject.add_experiments(experiment_id,experiment_name,run_uuid,
+                                                            project_id,dataset_id,user_id,
+                                                            model_id,model_mode,dag_run_id)
+            
+                # Declare CLass File Object.
+                LRObject = eval(model_class_name)(input_features_list, target_features_list,
+                                                    X_train, X_valid, X_test, y_train, y_valid, y_test,
+                                                    scaled_split_dict,hyperparameters)
                 
-    # except:
-        # # Update Model Status.
-        # upd_exp_status = ExpObject.update_experiment(experiment_id,'failed')
+                
+                check_flag = 'inside'
+                try:
+                    # Run model pipeline.
+                    LRObject.run_pipeline()
+                    # Update Model Status.
+                    upd_exp_status = ExpObject.update_experiment('success',check_flag,dag_run_id,experiment_id)
+                    
+                except ModelFailed as mf:
+                    
+                    upd_exp_status = ExpObject.update_experiment('failed',check_flag,dag_run_id,experiment_id)
+                    failed_reason=traceback.format_exc().splitlines()
+                    model_failed_reason_dict= {'main reason': mf.msg,'failed_reason':failed_reason}
+                    mlflow.log_dict(model_failed_reason_dict,'model_failed_reason.json')
+                 
+    except:
+        
+        if check_flag == 'outside':
+            upd_exp_status = ExpObject.update_experiment('Failed',check_flag,dag_run_id,model_id)
+        else:
+            upd_exp_status = ExpObject.update_experiment('Failed',check_flag,dag_run_id)
+            
+            
+      
+            
+        
+        
+        
+        
         
         
     

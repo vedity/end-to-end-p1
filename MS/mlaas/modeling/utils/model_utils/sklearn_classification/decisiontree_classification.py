@@ -17,6 +17,8 @@ import shap
 
 from modeling.utils.model_common_utils.evaluation_metrics import EvaluationMetrics as EM
 from modeling.utils.model_common_utils.mlflow_artifacts import MLFlowLogs 
+from common.utils.exception_handler.python_exception.modeling.modeling_exception import *
+
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import learning_curve
 from sklearn.preprocessing import LabelEncoder
@@ -249,62 +251,65 @@ class DecisionTreeClassificationClass:
         
         """This function is used as a pipeline which will execute function in a sequence.
         """
-        # train the model
-        model = self.train_model()
-        print("train model")
+        try :
+            func_code = "M01"
+            # train the model
+            model = self.train_model()
+            
+            func_code = "M02"
+            # get features importance
+            features_impact_dict = self.features_importance(model) 
+            
+            func_code = "M03"
+            # get actual and predicted values 
+            actual_lst,prediction_lst = self.get_actual_prediction(model)
+            
+            func_code = "M04"
+            # save prediction
+            final_result_dict = self.EvalMetricsObj.save_prediction(self.y_test, prediction_lst, self.target_features_list)
+            
+            func_code = "M05"
+            # all evaluation matrix
+            accuracy,recall,precision,f1_score = self.EvalMetricsObj.get_evaluation_matrix(actual_lst,prediction_lst, model_type='Classification')   
+            
+            func_code = "M06"
+            # get cv score
+            if self.dataset_split_dict['split_method'] == 'cross_validation':
+                cv_score = self.cv_score(model) # default k-fold with 5 (r2-score)
+            else:
+                cv_score = 0
+              
+            func_code = "M07"  
+            # get holdout score
+            holdout_score = self.EvalMetricsObj.holdout_score(self.y_test, prediction_lst, model_type='Classification') # default 80:20 splits (r2-score)
+            
+            func_code = "M08"
+            # get model summary
+            model_summary = self.model_summary() # high level model summary
+           
+            func_code = "M09"
+            # get model learning curve
+            learning_curve_dict = self.get_learning_curve(model)
+            
+            func_code = "M11"
+            # get confusion matrix
+            confusion_matrix_dict = self.EvalMetricsObj.get_confusion_matrix(actual_lst,prediction_lst)
+            
+            func_code = "M10"
+            # log mlflow matrix
+            self.MLFlowLogObj.store_model_metrics(accuracy=accuracy, recall=recall, precision=precision, f1_score=f1_score,
+                                                holdout_score=holdout_score, cv_score=cv_score)
 
-        # get model learning curve
-        learning_curve_dict = self.get_learning_curve(model)
-        print(" learning_curve_dict ")
+            # log artifacts (output files)
+            self.MLFlowLogObj.store_model_dict(learning_curve=learning_curve_dict, features_importance=features_impact_dict,
+                                                model_summary=model_summary, predictions=final_result_dict,confusion_matrix=confusion_matrix_dict)
 
-        # get features importance
-        features_impact_dict = self.features_importance(model) 
-        print("features importanace")
+            # log mlflow parameter
+            self.MLFlowLogObj.store_model_params(self.dataset_split_dict)
 
-        # get actual and predicted values 
-        actual_lst,prediction_lst = self.get_actual_prediction(model)
-        print("actual ",actual_lst)
-        print("prediction_lst ")
+            # Store the Machine Learning Model.
+            self.MLFlowLogObj.store_model(model, model_name="DecisionTree_Classification", model_type='sklearn')
 
-        # save prediction
-        final_result_dict = self.EvalMetricsObj.save_prediction(self.y_test, prediction_lst, self.target_features_list)
-        print("final_result_dict ")
-
-        # all evaluation matrix
-        accuracy,recall,precision,f1_score = self.EvalMetricsObj.get_evaluation_matrix(actual_lst,prediction_lst, model_type='Classification')   
-        print(" accuracy recall precision ")
-
-        # get cv score
-        if self.dataset_split_dict['split_method'].lower() == 'cross_validation':
-            cv_score = self.cv_score(model) # default k-fold with 5 (r2-score)
-        else:
-            cv_score = 0
-        print(" cv_score ")
-        
-        # get model summary
-        model_summary = self.model_summary() # high level model summary
-        print(" model_summary ")
-        
-        # get holdout score
-        holdout_score = self.EvalMetricsObj.holdout_score(self.y_test, prediction_lst, model_type='Classification') # default 80:20 splits (r2-score)
-        print(" holdout_score ")
-
-        # precision_recall_dict = self.EvalMetricsObj.get_precision_recall(model, self.X_test, self.y_test)
-        confusion_matrix_dict = self.EvalMetricsObj.get_confusion_matrix(actual_lst,prediction_lst)
-
-        # log mlflow matrix
-        self.MLFlowLogObj.store_model_metrics(accuracy=accuracy, recall=recall, precision=precision, f1_score=f1_score,
-                                            holdout_score=holdout_score, cv_score=cv_score)
-
-        # log artifacts (output files)
-        self.MLFlowLogObj.store_model_dict(learning_curve=learning_curve_dict, features_importance=features_impact_dict,
-                                            model_summary=model_summary, predictions=final_result_dict,confusion_matrix=confusion_matrix_dict)
-
-        # log mlflow parameter
-        self.MLFlowLogObj.store_model_params(self.dataset_split_dict)
-
-        # Store the Machine Learning Model.
-        self.MLFlowLogObj.store_model(model, model_name="DecisionTreeClassification", model_type='sklearn')
-        
-        # mlflow.log_dict(confusion_matrix, "confusion_matrix.json")
-        print("DONE")
+        except:
+            
+            raise ModelFailed(func_code)
