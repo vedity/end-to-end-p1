@@ -1,4 +1,8 @@
 
+#* Library Imports
+import pandas as pd
+import logging
+
 #* Importing Libraries
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
@@ -6,10 +10,8 @@ from sklearn.preprocessing import OneHotEncoder
 # Exceptions class
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
 
+#* Relative Imports
 from ..schema import schema_creation
-import pandas as pd
-import logging
-
 sc = schema_creation.SchemaClass()
 class EncodeClass:
 

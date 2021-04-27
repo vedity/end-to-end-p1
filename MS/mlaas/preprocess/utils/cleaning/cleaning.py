@@ -44,10 +44,8 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def discard_missing_values(self,DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
-        Function will delete the rows where is found the null values in that column.
-
-        Operation id: dp_1
-
+            Remove all the rows containing missing values.
+            Operation id: dp_1
         '''
         
         try:
@@ -83,8 +81,8 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def mean_imputation(self, DBObject,connection,project_id,column_list,old_column_list,table_name, col,flag = False, **kwargs):
         '''
-        Function will replace the Null  value's with mean. 
-        Operation id: dp_51
+            Replace missing values with mean of that column.
+            Operation id: dp_51
         '''
         
         logging.info("data preprocessing : CleaningClass : mean_imputation : execution start" + str(col))
@@ -128,7 +126,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     
     def median_imputation(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
-            Function will replace the Null  value's with Median. 
+            Replace missing values with median of tht column.
             Operation id: dp_61
         '''
         
@@ -809,6 +807,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         '''
             Function will Remove outlier using Z score method.
             Operation id: dp_201
+            
         '''
         
         logging.info("data preprocessing : CleaningClass : rem_outliers_z_score : execution start")
@@ -847,6 +846,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         '''
             Function will Remove outlier using Local factor outlier method
             Operation id: dp_202
+            
         '''
         
         logging.info("data preprocessing : CleaningClass : rem_outliers_lof : execution start")
@@ -884,6 +884,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         '''
             Function will Replace outlier with mean value using Extream value Analysis method.
             Operation id: dp_211
+            
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_outliers_mean_ext_val_analysis : execution start")
@@ -926,6 +927,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         '''
             Function will Replace outlier with mean value using Z score method
             Operation id: dp_221
+            
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_outliers_mean_z_score : execution start")
@@ -968,6 +970,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         '''
             Function will Replace outlier with median value using  Extream value Analysis method
             Operation id: dp_231
+            
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_outliers_med_ext_val_analysis : execution start")
@@ -1011,6 +1014,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         '''
             Function will Replace outlier with median value usingZ score method
             Operation id: dp_241
+            
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_outliers_med_z_score : execution start")
@@ -1051,6 +1055,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         '''
             Function will Replace outlier with mode value using Extream value Analysis method
             Operation id: dp_7
+            
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_outliers_mode_ext_val_analysis : execution start")
@@ -1095,6 +1100,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         '''
             Function will Replace outlier with mode value using Z score method
             Operation id: dp_7
+            
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_outliers_mode_z_score : execution start")
@@ -1137,6 +1143,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         '''
             Function will Replace outlier with mean value using Local factor outlier method
             Operation id: dp_242
+            
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_outliers_mean_lof : execution start")
@@ -1180,6 +1187,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         '''
             Function will Replace outlier with median value using Local factor outlier method
             Operation id: dp_243
+            
         '''
         
         logging.info("data preprocessing : CleaningClass : repl_outliers_median_lof : execution start")

@@ -18,7 +18,7 @@ PC_OBJ = PreprocessingClass(database,user,password,host,port)
 
 yesterday_date = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')
 
-main_dag_id = #DAG_ID
+main_dag_id = "Cleanup_dag_138387384731233280"
 
 args = {
     'owner': 'airflow',
@@ -36,7 +36,7 @@ dag = DAG(
 
 #? Getting Required Parameters
 
-master_dict = #MASTER_DICT 
+master_dict = {'active': 1, 'operation_dict': {321: [10]}, 'values_dict': {321: ['']}, 'schema_id': '36', 'dataset_id': '38', 'project_id': '36', 'save_as': 'False', 'visibility': None, 'dataset_name': None, 'dataset_desc': None, 'user_name': 'abhishek'} 
 
 if int(master_dict['active']) == 0:
     sys.exit()
@@ -102,16 +102,11 @@ op_dict = {
     221 : PC_OBJ.repl_outliers_mean_z_score,
     231 : PC_OBJ.repl_outliers_med_ext_val_analysis,
     241 : PC_OBJ.repl_outliers_med_z_score,
-    251 : PC_OBJ.logarithmic_transformation,
-    252 : PC_OBJ.squareroot_transformation,
-    253 : PC_OBJ.reciprocal_transformation,
-    254 : PC_OBJ.exponential_transformation,
-    255 : PC_OBJ.boxcox_transformation,
-    256 : PC_OBJ.yeojohnson_transformation,
     242 : PC_OBJ.repl_outliers_mean_lof,
     243 : PC_OBJ.repl_outliers_median_lof,
     244 : PC_OBJ.repl_outliers_iqr_proximity,
     245 : PC_OBJ.repl_outliers_Gaussian_approx,
+    251 : PC_OBJ.apply_log_transformation,
     261 : PC_OBJ.label_encoding,
     271 : PC_OBJ.one_hot_encoding,
     281 : PC_OBJ.add_to_column,
@@ -212,11 +207,6 @@ for index in operation.keys():
             244 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name,[col]],
             245 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name,[col]],
             251 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            252 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            253 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            254 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col],value[j]],
-            255 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            256 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],            
             261 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
             271 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], schema_id],
             281 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],

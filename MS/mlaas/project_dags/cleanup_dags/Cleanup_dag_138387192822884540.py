@@ -18,7 +18,7 @@ PC_OBJ = PreprocessingClass(database,user,password,host,port)
 
 yesterday_date = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')
 
-main_dag_id = #DAG_ID
+main_dag_id = "Cleanup_dag_138387192822884540"
 
 args = {
     'owner': 'airflow',
@@ -36,7 +36,7 @@ dag = DAG(
 
 #? Getting Required Parameters
 
-master_dict = #MASTER_DICT 
+master_dict = {'active': 1, 'operation_dict': {251: [1]}, 'values_dict': {251: ['']}, 'schema_id': '10', 'dataset_id': '20', 'project_id': '10', 'save_as': 'False', 'visibility': None, 'dataset_name': None, 'dataset_desc': None, 'user_name': 'riddhi'} 
 
 if int(master_dict['active']) == 0:
     sys.exit()
@@ -108,10 +108,6 @@ op_dict = {
     254 : PC_OBJ.exponential_transformation,
     255 : PC_OBJ.boxcox_transformation,
     256 : PC_OBJ.yeojohnson_transformation,
-    242 : PC_OBJ.repl_outliers_mean_lof,
-    243 : PC_OBJ.repl_outliers_median_lof,
-    244 : PC_OBJ.repl_outliers_iqr_proximity,
-    245 : PC_OBJ.repl_outliers_Gaussian_approx,
     261 : PC_OBJ.label_encoding,
     271 : PC_OBJ.one_hot_encoding,
     281 : PC_OBJ.add_to_column,
@@ -209,8 +205,6 @@ for index in operation.keys():
             241 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
             242 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
             243 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            244 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name,[col]],
-            245 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name,[col]],
             251 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
             252 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
             253 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
@@ -223,7 +217,7 @@ for index in operation.keys():
             291 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
             301 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
             311 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
-            321 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], schema_id]
+            321 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]]
         }
         
         dynamicTask = PythonOperator(

@@ -37,7 +37,7 @@ class AnovaClass():
         targetcol = FU.fetch_column(DBObject,connection,schema_id)
         targetdf = DBObject.get_feature_df(connection,dataset_id,targetcol)
         X, y = FU.load_dataset(df,target_col,targetdf)
-        
+        algo_col = list(X.columns)
         # split into train and test sets
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=1)
 
@@ -47,6 +47,6 @@ class AnovaClass():
         # what are scores for the features
         #GET column name by get_support
         vector_names = list(X.columns[fs.get_support(indices=True)])
-        col = FU.selectkbest_extra_column(DBObject,connection,schema_id,vector_names)
+        col = FU.selectkbest_extra_column(DBObject,connection,schema_id,vector_names,algo_col)
         
         return col

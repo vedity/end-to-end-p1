@@ -25,15 +25,19 @@ class MissingValueClass:
             -------
             dataframe (`pandas.Dataframe`): Dataframe with all the missing data removed.
         '''
-        logging.info("Preprocess : MissingValueClass : discard_missing_values : execution start")
+        try:
+            logging.info("Preprocess : MissingValueClass : discard_missing_values : execution start")
 
-        sql_command = f'delete from {table_name}  where "{col_name}" {condition}' # Get update query
-        logging.info(str(sql_command))
+            sql_command = f'delete from {table_name}  where "{col_name}" {condition}' # Get update query
+            logging.info(str(sql_command))
 
-        status = DBObject.update_records(connection,sql_command)
+            status = DBObject.update_records(connection,sql_command)
 
-        logging.info("Preprocess : MissingValueClass : discard_missing_values : execution stop")
-        return status
+            logging.info("Preprocess : MissingValueClass : discard_missing_values : execution stop")
+            return status
+        except Exception as e:
+            logging.error(f"Preprocess : MissingValueClass : discard_missing_values : execution failed : {str(e)}")
+            return 1
     
     def perform_missing_value_imputation(self,DBObject,connection, table_name,col_name,impute_value, condition = "is null"):
         """
@@ -57,22 +61,36 @@ class MissingValueClass:
             logging.info("Preprocess : MissingValueClass : perform_missing_value_imputation : execution stop")
             return status
         except Exception as exc:
-            return str(exc)
+            logging.error(f"Preprocess : MissingValueClass : perform_missing_value_imputation : execution failed : {str(exc)}")
+            return 1
 
     
 
     def random_sample_imputation(self,DBObject,connection,table_name,col_name,impute_value):
+        '''
+            This function will impute the missing values with the values of some random values from the column.
 
-        logging.info("Preprocess : MissingValueClass : random_sample_imputation : execution start")
-        
-        sql_command = f'update {table_name} t1 set "{col_name}" = (select "{col_name}" col from {table_name} t2 where t2."{col_name}" is not null and t1."{col_name}" is null order by random() limit 1) where t1."{col_name}" is null'
+            Args:
+            -----
+            table_name (`String`)
+            col_name (`String`)
+            impute_value (`Integer`)
+        '''
+        try:
+            logging.info("Preprocess : MissingValueClass : random_sample_imputation : execution start")
+            
+            sql_command = f'update {table_name} t1 set "{col_name}" = (select "{col_name}" col from {table_name} t2 where t2."{col_name}" is not null and t1."{col_name}" is null order by random() limit 1) where t1."{col_name}" is null'
 
-        #sql_command = f'update {table_name} c set "{col_name}" =(select  random_value from (values {impute_value}) v(random_value) where C."{col_name}" <> v.random_value order by random() limit 1) where C."{col_name}" is null'
-        logging.info("Sql_command : Update query : random_sample_imputation : "+str(sql_command))
+            #sql_command = f'update {table_name} c set "{col_name}" =(select  random_value from (values {impute_value}) v(random_value) where C."{col_name}" <> v.random_value order by random() limit 1) where C."{col_name}" is null'
+            logging.info("Sql_command : Update query : random_sample_imputation : "+str(sql_command))
 
-        status = DBObject.update_records(connection,sql_command)
-        logging.info("Preprocess : MissingValueClass : random_sample_imputation : execution stop")
-        return status
+            status = DBObject.update_records(connection,sql_command)
+            logging.info("Preprocess : MissingValueClass : random_sample_imputation : execution stop")
+            return status
+        except Exception as e:
+            logging.error(f"Preprocess : MissingValueClass : random_sample_imputation : execution failed : {str(e)}")
+            return 1
+
     
     def detect_missing_values(self, DBObject, connection, table_name, col_name):
         '''
@@ -89,15 +107,23 @@ class MissingValueClass:
             --------
             `boolean`: `True` if missing value exists else `False`.
         '''
-        sql_command = f'select count(*) as missing_value from {table_name} where "{col_name}" is null;'
-        
-        noise_df = DBObject.select_records(connection,sql_command)
+        try:
+            logging.info("Preprocess : MissingValueClass : detect_missing_values : execution start")
+            
+            sql_command = f'select count(*) as missing_value from {table_name} where "{col_name}" is null;'
+            
+            noise_df = DBObject.select_records(connection,sql_command)
 
-        if int(noise_df['missing_value'][0]) > 0:
+            logging.info("Preprocess : MissingValueClass : detect_missing_values : execution stop")
             
-            return True
-        else:
-            
+            if int(noise_df['missing_value'][0]) > 0:
+                
+                return True
+            else:
+                
+                return False
+        except Exception as e:
+            logging.error(f"Preprocess : MissingValueClass : detect_missing_values : execution failed : {str(e)}")
             return False
     
         

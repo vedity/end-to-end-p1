@@ -397,6 +397,7 @@ Insert into mlaas.parent_activity_tbl values(3,'Outlier Handling',2);
 Insert into mlaas.parent_activity_tbl values(4,'Scaling',2);
 Insert into mlaas.parent_activity_tbl values(5,'Encoding',2);
 Insert into mlaas.parent_activity_tbl values(6,'Math Operations',2);
+Insert into mlaas.parent_activity_tbl values(7,'Transformations',2);
 Insert into mlaas.parent_activity_tbl values(8,'Feature Engineering',2);
 
 
@@ -498,15 +499,25 @@ Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_242','Replace Outliers
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_243','Replace Outliers with Median using Local Factor Outlier Detection','operation on column * failed','US','Operation',0,3,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_243','Replace Outliers with Median using Local Factor Outlier Detection','operation on column * in process','US','Operation',1,3,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_243','Replace Outliers with Median using Local Factor Outlier Detection','operation on column * completed','US','Operation',2,3,0,0);
-Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_244','Replace Outliers using IQR Proximity Rule','operation on column * failed','US','Operation',0,3,0,0);
-Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_244','Replace Outliers using IQR Proximity Rule','operation on column * in process','US','Operation',1,3,0,0);
-Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_244','Replace Outliers using IQR Proximity Rule','operation on column * completed','US','Operation',2,3,0,0);
-Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_245','Replace Outliers using Gaussian Approximation','operation on column * failed','US','Operation',0,3,0,0);
-Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_245','Replace Outliers using Gaussian Approximation','operation on column * in process','US','Operation',1,3,0,0);
-Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_245','Replace Outliers using Gaussian Approximation','operation on column * completed','US','Operation',2,3,0,0);
-Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_251','Apply Log Transformation','operation on column * failed','US','Operation',0,3,0,0);
-Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_251','Apply Log Transformation','operation on column * in process','US','Operation',1,3,0,0);
-Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_251','Apply Log Transformation','operation on column * completed','US','Operation',2,3,0,0);
+
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_251','Logarithmic transformation','operation on column * failed','US','Operation',0,7,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_251','Logarithmic transformation','operation on column * in process','US','Operation',1,7,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_251','Logarithmic transformation','operation on column * completed','US','Operation',2,7,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_252','Square root transformation','operation on column * failed','US','Operation',0,7,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_252','Square root transformation','operation on column * in process','US','Operation',1,7,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_252','Square root transformation','operation on column * completed','US','Operation',2,7,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_253','Reciprocal transformation','operation on column * failed','US','Operation',0,7,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_253','Reciprocal transformation','operation on column * in process','US','Operation',1,7,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_253','Reciprocal transformation','operation on column * completed','US','Operation',2,7,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_254','Power transformation','operation on column * failed','US','Operation',0,7,1,2);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_254','Power transformation','operation on column * in process','US','Operation',1,7,1,2);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_254','Power transformation','operation on column * completed','US','Operation',2,7,1,2);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_255','Box-Cox Transformation','operation on column * failed','US','Operation',0,7,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_255','Box-Cox Transformation','operation on column * in process','US','Operation',1,7,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_255','Box-Cox Transformation','operation on column * completed','US','Operation',2,7,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_256','Yeo-Johnson Transformation','operation on column * failed','US','Operation',0,7,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_256','Yeo-Johnson Transformation','operation on column * in process','US','Operation',1,7,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_256','Yeo-Johnson Transformation','operation on column * completed','US','Operation',2,7,0,
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_261','Label Encoding','operation on column * failed','US','Operation',0,5,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_261','Label Encoding','operation on column * in process','US','Operation',1,5,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_261','Label Encoding','operation on column * completed','US','Operation',2,5,0,0);
@@ -538,3 +549,4 @@ Insert into mlaas.activity_master_tbl values (DEFAULT,'ss_2','Completed Scale An
 Insert into mlaas.activity_master_tbl values (DEFAULT,'cl_1','Cleanup Started','Cleanup started for dataset * of project &','US','Operation',0,-1,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'cl_2','Cleanup Ended','Cleanup ended for dataset * of project &','US','Operation',0,-1,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'cl_3','Dataset Created','You have created New dataset *','US','Operation',0,-1,0,0);
+
