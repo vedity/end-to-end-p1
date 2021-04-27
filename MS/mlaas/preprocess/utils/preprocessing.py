@@ -19,13 +19,13 @@ from common.utils import dynamic_dag
 
 #* Class Imports
 from ingest.utils.dataset import dataset_creation
-from .Exploration import dataset_exploration as de
+from .exploration import dataset_exploration as de
 from .schema import schema_creation as sc
 from .cleaning import noise_reduction as nr
 from .cleaning import cleaning
-from .Transformation import transformation as trs
-from .Transformation import split_data 
-from .Transformation.model_type_identifier import ModelType
+from .transformation import transformation as trs
+from .transformation import split_data 
+from .transformation.model_type_identifier import ModelType
 from database import *
 
 #* Library Imports
@@ -1180,26 +1180,31 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         try:
             logging.info("data preprocessing : PreprocessingClass : get_cleanup_startend_desc : execution start")
             
+            #? Initializing Activity 
             activity_df = self.AT.get_activity(activity_id,"US")
             
+            #? Getting Dataset Name
             datasetnm_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
             dataset_name = datasetnm_df['dataset_name'][0]
             
+            #? Getting Project name
             projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
             project_name = projectnm_df['project_name'][0]
 
-            # if new_dataset_name == None:
-            #     new_dataset_name = dataset_name
-
+            #? Getting Activity Description
             sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
             desc_df = DBObject.select_records(connection,sql_command)
+            
+            #? Replacing values
             activity_description = desc_df['description'][0]
             activity_description = activity_description.replace('*',dataset_name)
             activity_description = activity_description.replace('&',project_name)
         
+            #? Inserting user activity
             end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
             activity_status,index = self.AT.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
             
+            #? Inserting user activity for new dataset creation
             if new_dataset_name != None and flag != 'True': 
                 activity_id='cl_3'
                 sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
