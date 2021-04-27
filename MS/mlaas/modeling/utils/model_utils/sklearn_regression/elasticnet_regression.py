@@ -20,6 +20,7 @@ import pandas as pd
 from common.utils.logger_handler import custom_logger as cl
 from modeling.utils.model_common_utils.evaluation_metrics import EvaluationMetrics as EM
 from modeling.utils.model_common_utils.mlflow_artifacts import MLFlowLogs
+from common.utils.exception_handler.python_exception.modeling.modeling_exception import *
 
 # Sklearn Library  Imports.
 from sklearn.linear_model import ElasticNet
@@ -261,53 +262,65 @@ class ElasticNetClass:
 
         return cv_score_mean
         
+        
     def run_pipeline(self):
         
         """This function is used as a pipeline which will execute function in a sequence.
         """
-        # train the model
-        model = self.train_model()
-        print("TRAIN MODEL")
-        # get features importance
-        features_impact_dict = self.features_importance(model) 
-        print("FEATURE IMPORTANCE")
-        # get actual and predicted values 
-        actual_lst,prediction_lst = self.get_actual_prediction(model)
-        print("ACTUAL PREDICTION")
-        # save prediction
-        final_result_dict = self.EvalMetricsObj.save_prediction(self.y_test, prediction_lst, self.target_features_list)
-        print("FINAL RESULT")
-        # all evaluation matrix
-        r2score,mse,mae,mape = self.EvalMetricsObj.get_evaluation_matrix(actual_lst,prediction_lst, model_type='Regression')  
-        print("PERFORMANCE METRICS")
-        # get cv score
-        if self.dataset_split_dict['split_method'] == 'cross_validation':
-            cv_score = self.cv_score(model) # default k-fold with 5 (r2-score)
-        else:
-            cv_score = 0
+        try :
+            func_code = "M01"
+            # train the model
+            model = self.train_model()
             
-        print("CV SCORE")
-        # get holdout score
-        holdout_score = self.EvalMetricsObj.holdout_score(self.y_test, prediction_lst, model_type='Regression') # default 80:20 splits (r2-score)
-        print("HOLDOUT SCORE")
-        # get model summary
-        model_summary = self.model_summary() # high level model summary
-        print("MODEL SUMMARY")
-        # get model learning curve
-        learning_curve_dict = self.get_learning_curve(model)
-        print("LEARNING CURVEE DICT")
-        
-        # log mlflow matrix
-        self.MLFlowLogObj.store_model_metrics(r2_score=r2score, mae=mae, mse=mse, mape=mape, 
-                                            holdout_score=holdout_score, cv_score=cv_score)
+            func_code = "M02"
+            # get features importance
+            features_impact_dict = self.features_importance(model) 
+            
+            func_code = "M03"
+            # get actual and predicted values 
+            actual_lst,prediction_lst = self.get_actual_prediction(model)
+            
+            func_code = "M04"
+            # save prediction
+            final_result_dict = self.EvalMetricsObj.save_prediction(self.y_test, prediction_lst, self.target_features_list)
+            
+            func_code = "M05"
+            # all evaluation matrix
+            r2score,mse,mae,mape = self.EvalMetricsObj.get_evaluation_matrix(actual_lst,prediction_lst, model_type='Regression')  
+            
+            func_code = "M06"
+            # get cv score
+            if self.dataset_split_dict['split_method'] == 'cross_validation':
+                cv_score = self.cv_score(model) # default k-fold with 5 (r2-score)
+            else:
+                cv_score = 0
+              
+            func_code = "M07"  
+            # get holdout score
+            holdout_score = self.EvalMetricsObj.holdout_score(self.y_test, prediction_lst, model_type='Regression') # default 80:20 splits (r2-score)
+            
+            func_code = "M08"
+            # get model summary
+            model_summary = self.model_summary() # high level model summary
+           
+            func_code = "M09"
+            # get model learning curve
+            learning_curve_dict = self.get_learning_curve(model)
+            
+            func_code = "M10"
+            # log mlflow matrix
+            self.MLFlowLogObj.store_model_metrics(r2_score=r2score, mae=mae, mse=mse, mape=mape, 
+                                                holdout_score=holdout_score, cv_score=cv_score)
 
-        # log artifacts 
-        self.MLFlowLogObj.store_model_dict(learning_curve=learning_curve_dict, features_importance=features_impact_dict,
-                                            model_summary=model_summary, predictions=final_result_dict)
-        # log mlflow parameter
-        self.MLFlowLogObj.store_model_params(self.dataset_split_dict)
+            # log artifacts (output files)
+            self.MLFlowLogObj.store_model_dict(learning_curve=learning_curve_dict, features_importance=features_impact_dict,
+                                                model_summary=model_summary, predictions=final_result_dict)
+            # log mlflow parameter
+            self.MLFlowLogObj.store_model_params(self.dataset_split_dict)
 
-        # Store the Machine Learning Model.
-        self.MLFlowLogObj.store_model(model, model_name="Linear_Regressor_Model", model_type='sklearn')
+            # Store the Machine Learning Model.
+            self.MLFlowLogObj.store_model(model, model_name="Elastic_Net_Regression_Model", model_type='sklearn')
 
-        print("ENDING")
+        except:
+            
+            raise ModelFailed(func_code)

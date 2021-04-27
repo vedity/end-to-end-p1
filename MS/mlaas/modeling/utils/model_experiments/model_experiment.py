@@ -35,12 +35,28 @@ class ExperimentClass:
         
         return upd_exp_status
     
-    def update_experiment(self,experiment_id,status):
+    def update_experiment(self,status,check_flag,dag_run_id,id=None):
         
-        sql_command = "UPDATE "+self.table_name+" SET status='"+status+"' WHERE experiment_id="+str(experiment_id)
-        upd_exp_status = self.DBObject.update_records(self.connection,sql_command)
+        if check_flag == 'inside':
+        
+            sql_command = "UPDATE "+self.table_name+" SET status='"+status+"' WHERE experiment_id="+str(id)+" and "\
+                          "dag_run_id='"+str(dag_run_id)+"'"
+            upd_exp_status = self.DBObject.update_records(self.connection,sql_command)
+            
+        elif check_flag == 'outside':
+            
+            sql_command = "UPDATE "+self.table_name+" SET status='"+status+"' WHERE model_id="+str(id)+" and "\
+                          "dag_run_id='"+str(dag_run_id)+"'"
+                          
+            upd_exp_status = self.DBObject.update_records(self.connection,sql_command)
+            
+        else:
+            sql_command = "UPDATE "+self.table_name+" SET status='"+status+"' WHERE dag_run_id='"+str(dag_run_id)+"'"
+            upd_exp_status = self.DBObject.update_records(self.connection,sql_command)
+        
         
         return upd_exp_status
+
 
 
     def get_mlflow_experiment(self, experiment_name):
