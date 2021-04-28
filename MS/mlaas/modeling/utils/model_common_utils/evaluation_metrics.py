@@ -42,7 +42,7 @@ class EvaluationMetrics:
 
 
     
-    def get_predict_proba(self, model, X_test, algorithm_type, model_type):
+    def get_predict_proba(self, model, X_test, y_train, model_type):
         """Returns the probability values for each class.
 
         Args:
@@ -52,14 +52,17 @@ class EvaluationMetrics:
         """
 
         X_test = X_test[:, 1:]
+        y_train = y_train[:, -1]
+
+        n_classes = len(np.unique(y_train))
         
-        if algorithm_type.lower() == 'binary':
+        if n_classes == 2:
             if model_type.lower() == 'sklearn':
                 y_pred_proba = model.predict_proba(X_test)[:, 1]
             elif model_type.lower() == 'keras':
                 y_pred_proba = model.predict_proba(X_test)
         
-        elif algorithm_type.lower() == 'multi':
+        elif n_classes > 2:
             y_pred_proba = model.predict_proba(X_test)
 
         return y_pred_proba

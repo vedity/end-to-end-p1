@@ -272,6 +272,19 @@ class XGBoostClassificationClass:
             # get confusion matrix
             confusion_matrix_dict = self.EvalMetricsObj.get_confusion_matrix(actual_lst,prediction_lst)
             
+            func_code = "M12"
+            # Get probaility for each class
+            y_pred_prob = self.EvalMetricsObj.get_predict_proba(model, self.X_test, self.y_train, model_type='sklearn')
+
+            func_code = "M13"
+            # Get ROC Curve values for each class
+            roc_scores = self.EvalMetricsObj.get_performance_curve('roc_curve', model, y_pred_prob, self.y_test)
+
+            func_code = "M14"
+            # Get Precision Recall Values for each class
+            precision_recall_scores = self.EvalMetricsObj.get_performance_curve('precision_recall_curve', model, y_pred_prob, self.y_test)
+            
+
             func_code = "M10"
             # log mlflow matrix
             self.MLFlowLogObj.store_model_metrics(accuracy=accuracy, recall=recall, precision=precision, f1_score=f1_score,
@@ -279,7 +292,8 @@ class XGBoostClassificationClass:
 
             # log artifacts (output files)
             self.MLFlowLogObj.store_model_dict(learning_curve=learning_curve_dict, features_importance=features_impact_dict,
-                                                model_summary=model_summary, predictions=final_result_dict,confusion_matrix=confusion_matrix_dict)
+                                                model_summary=model_summary, predictions=final_result_dict,confusion_matrix=confusion_matrix_dict,
+                                                roc_scores=roc_scores, precision_recall_scores=precision_recall_scores)
 
             # log mlflow parameter
             self.MLFlowLogObj.store_model_params(self.dataset_split_dict)

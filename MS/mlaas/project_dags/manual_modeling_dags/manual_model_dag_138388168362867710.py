@@ -27,7 +27,7 @@ start_task = PythonOperator(task_id='start_pipeline',python_callable=start_pipel
 
 # Get model dict 
 
-master_dict = {'model_id': [11], 'model_name': ['Logistic_Regression'], 'model_hyperparams': [{'C': '1', 'penalty': 'l1', 'solver': 'lbfgs'}], 'model_class_name': ['LogisticRegressionClass'], 'algorithm_type': ['Binary']}
+master_dict = {'model_id': [11], 'model_name': ['Logistic_Regression'], 'model_hyperparams': [{'C': '1', 'penalty': 'l1', 'solver': 'auto'}], 'model_class_name': ['LogisticRegressionClass'], 'algorithm_type': ['Binary']}
 
 if len(master_dict) != 0:
 

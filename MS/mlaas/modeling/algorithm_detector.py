@@ -106,6 +106,7 @@ class AlgorithmDetector:
             problem_type = ast.literal_eval(self.DBObject.select_records(self.connection, sql_command)['problem_type'][0])
             logging.info("PRONBLEM TYPE-------------"+str(problem_type))
             algorithm_type = problem_type['algorithm_type']
+            
             logging.info("Algorithm TYPE-------------"+str(algorithm_type))
             if model_type != 'Unsupervised':
                 if len(target_features) > 2:
@@ -113,7 +114,12 @@ class AlgorithmDetector:
                 elif len(target_features) == 2:
                     target_type = 'Single_Target'
 
-                sql_command = "select model_id, model_name from mlaas.model_master_tbl where model_type='"+model_type+"'"+" and target_type='"+target_type+"' and algorithm_type='"+algorithm_type+"'"
+                if algorithm_type.lower() == 'multi':
+                    sql_command = "select model_id, model_name from mlaas.model_master_tbl where model_type='"+model_type+"'"+" and target_type='"+target_type+"' and algorithm_type='"+algorithm_type+"'"
+                
+                elif algorithm_type.lower() == 'binary':
+                    sql_command = "select model_id, model_name from mlaas.model_master_tbl where model_type='"+model_type+"'"+" and target_type='"+target_type+"'"
+
             elif model_type == 'Unsupervised':
     
                 sql_command = "select model_id, model_name from mlaas.model_master_tbl where model_type='"+model_type+"'"
