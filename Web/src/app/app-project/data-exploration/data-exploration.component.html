@@ -1,5 +1,6 @@
 <div class="page-title-box d-flex align-items-center justify-content-between">
     <h4 class="mb-0 font-size-18">Data Exploration</h4>
+    <span>{{project_name}}</span>
 </div>
 <div class="row">
     <div class="col-md-12">
@@ -11,7 +12,7 @@
                 </ngx-skeleton-loader>
                 <div *ngIf="!loaderdiv">
                     <div class="float-left">
-                        <h4 class="card-title mb-2 ">{{project_name}} > {{title}}</h4>
+                        <h4 class="card-title mb-2 ">{{title}}</h4>
                         <p class="mb-3">{{displayselectedtitle}}</p>
                     </div>
                     <div class="float-right">
