@@ -104,7 +104,7 @@ class ModelClass(SC):
             basic_params_dict (dict): contains neccessary variables.
         """
         if status_code == 200:
-            state = 'running'
+            dag_state = 'running'
                 
             exp_name = basic_params_dict['experiment_name']
             project_id = int(basic_params_dict['project_id'])
@@ -113,9 +113,9 @@ class ModelClass(SC):
             model_mode = basic_params_dict['model_mode']
 
             table_name='mlaas.model_dags_tbl'
-            cols = 'exp_name,project_id,dataset_id,user_id,model_mode,state' 
+            cols = 'exp_name,project_id,dataset_id,user_id,model_mode,dag_state' 
 
-            row = exp_name,project_id,dataset_id,user_id,model_mode,state  
+            row = exp_name,project_id,dataset_id,user_id,model_mode,dag_state  
             row_tuples = [tuple(row)]
             
             # Insert current running dag information into external model_dag_tbl.

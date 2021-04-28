@@ -160,6 +160,7 @@ class ModelStatisticsClass:
             logging.error("modeling : ModelStatisticsClass : model_summary : " +traceback.format_exc())
             return exc.msg
 
+
     def show_confusion_matrix(self,experiment_id):
             
         """
@@ -297,6 +298,7 @@ class ModelStatisticsClass:
             logging.error("modeling : ModelStatisticsClass : show_running_experiments : " +traceback.format_exc())
             return exc.msg
 
+
     def check_running_experiments(self, project_id):
 
         try:
@@ -358,7 +360,7 @@ class ModelStatisticsClass:
         
 
     def refresh_modeling(self, project_id):
-        sql_command = "select state from mlaas.model_dags_tbl where project_id="+str(project_id)+" order by execution_date limit 1"
+        sql_command = "select dag_state from mlaas.model_dags_tbl where project_id="+str(project_id)+" order by execution_date limit 1"
         state_df = self.DBObject.select_records(self.connection, sql_command)
         if state_df is None:
             raise DatabaseConnectionFailed(500)
@@ -366,7 +368,7 @@ class ModelStatisticsClass:
         if len(state_df) == 0 :
             raise DataNotFound(500)
 
-        state = state_df['state'][0]
+        state = state_df['dag_state'][0]
         if state == 'running':
             state = 0
         
@@ -448,7 +450,7 @@ class ModelStatisticsClass:
             project_upd_status = self.DBObject.update_records(self.connection,sql_command)
 
             if st != 0:
-                sql_command = "update mlaas.model_dags_tbl set state='"+status+"' where run_id='"+run_id+"'"
+                sql_command = "update mlaas.model_dags_tbl set dag_state='"+status+"' where run_id='"+run_id+"'"
                 model_dag_upd_status = self.DBObject.update_records(self.connection,sql_command)
             #status=state_df['state'][0]
             logging.info("modeling : ModelStatisticsClass : check_model_status : Exception End")
@@ -460,7 +462,6 @@ class ModelStatisticsClass:
             return exc.msg
 
     
-
     def check_existing_experiment(self,project_id, experiment_name):
         """Checks if the experiment_name entered by the user already exists in a particular project id or not.
 
@@ -566,10 +567,58 @@ class ModelStatisticsClass:
             logging.error("modeling : ModelStatisticsClass : compare_experiments_grid : " +traceback.format_exc())
             return exc.msg
 
+    def can_compare_experiments(self, experiment_ids):
+        """Calculates whether the given experiments can be compared or not.
+
+        Args:
+            experiment_ids (tuple): experiment ids
+
+        Returns:
+            compare: boolean
+        """
+        try:
+            exp_ids = tuple(experiment_ids)
+            sql_command = 'select key, value, run_uuid from mlaas.model_experiment_tbl met, mlflow.params prm where met.run_uuid=prm.run_uuid and met.experiment_id in'+str(exp_ids)
+            params_df = self.DBObject.select_records(self.connection, sql_command)
+            
+            if params_df is None:
+                raise DatabaseConnectionFailed(500)
+
+            if len(params_df) == 0 :
+                raise DataNotFound(500)
+            
+            pivot_df = params_df.pivot(index='run_uuid', columns='key', values='value')
+
+            different_list = []
+            for i in range(len(exp_ids) - 1):
+                for j in range(i+1, len(exp_ids)):
+                    if pivot_df.iloc[i, :] != pivot_df.iloc[j, :]:
+                        different_list.append(i)
+                        different_list.append(j)
+            
+            if len(different_list) != 0:
+                sql_command = 'select name from mlflow.experiments where experiment_id='+str(exp_ids)
+                exp_names_df = self.DBObject.select_records(self.connection, sql_command)
+                if exp_names_df is None:
+                    raise DatabaseConnectionFailed(500)
+
+                if len(exp_names_df) == 0:
+                    raise DataNotFound(500)
+                exp_names = list(exp_names_df['name'])
+                
+            else:
+                compare = True
+            
+            return compare
+               
+        except Exception as e:
+            return e
+
 
     def compare_experiments_graph(self, experiment_ids):
         try:
             logging.info("modeling : ModelStatisticsClass : compare_experiments_graph : Exception Start")
+            compare = self.can_compare_experiments(experiment_ids)
             sql_command = "SELECT model_type from mlaas.model_experiment_tbl met, mlaas.model_master_tbl mmt where met.model_id = mmt.model_id and met.experiment_id in"+str(experiment_ids)
             model_types_df = self.DBObject.select_records(self.connection, sql_command)
             if model_types_df is None:
@@ -626,13 +675,4 @@ class ModelStatisticsClass:
             logging.error("modeling : ModelStatisticsClass : compare_experiments_graph : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : compare_experiments_graph : " +traceback.format_exc())
             return exc.msg
-
-    # def check_compare_experiment(self, experiment_ids):
-    #     """Checks whether experiments can be compared or not.
-
-    #     Args:
-    #         experiment_ids (tuple): experiment ids.
-    #     """
-
-
         
