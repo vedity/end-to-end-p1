@@ -198,7 +198,6 @@ class ModelStatisticsClass:
         
         final_dict['classes'] = classes
         
-
         return final_dict
 
 
