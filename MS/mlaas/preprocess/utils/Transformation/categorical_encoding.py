@@ -35,7 +35,7 @@ class EncodeClass:
             table_name (string): On which table encoding will perform
             column_list (list): column list on which encoding should perform
         Returns:
-            Int: [0 : if columns updated, 1 : if column not updated]
+            Int: [0 : if columns updated, 1 : if exception]
         """
         try:
             logging.info("data preprocess : EncodeClass : label_encoding : execution start")
@@ -61,7 +61,7 @@ class EncodeClass:
         """This function do one-hot-encoding finds the distinct value and append columns with binary values
         Returns:
             Succesfull:
-                Int: [0 : if columns updated, 1 : if column not updated]
+                Int: [0 : if columns updated, 1 : if exception]
             Unsuccessfull :
                 Raise exception
         """
@@ -197,7 +197,7 @@ class EncodeClass:
                     select_val += f',case when "{column_list[1]}"={value1} then 1 else 0 END AS col{val}'
                 
                 # To add column OTHER if more then 10 distinct value
-                freq_lst = str(freq_lst)[1:-1]
+                freq_lst = str(freq_lst)[1:]
                 dist_val += f'"{column_list[1]}_other"=col,'
                 alter_val += f'add COLUMN "{column_list[1]}_other" int,'
                 select_val += f', case when "{column_list[1]}" not in ({freq_lst}) then 1 else 0 END AS col'
@@ -227,7 +227,7 @@ class EncodeClass:
             alter_val (list): List of value alter column in tbl.
 
         Returns:
-            Int: [0 : if columns updated, 1 : if column not updated]
+            Int: [0 : if columns updated, 1 : if exception]
         """
         try:
             logging.info("data preprocess : EncodeClass : add_column : execution start")
@@ -283,7 +283,7 @@ class EncodeClass:
             table_name (string): [On which table encoding will perform]
             column_list (list): [column list on which encoding should perform]
             Returns:
-            Int: [0 : if columns updated, 1 : if column not updated]
+            Int: [0 : if columns updated, 1 : if exception]
         """
         try:
             logging.info("data preprocess : EncodeClass : drop_column : execution start")
