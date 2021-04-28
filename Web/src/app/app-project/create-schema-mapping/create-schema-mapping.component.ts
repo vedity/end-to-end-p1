@@ -153,9 +153,18 @@ export class CreateSchemaMappingComponent implements OnInit {
 
   saveoption(){
     if(this.selecteditem){
-      // this.selecteditem.forEach(element => {
-      //   //var data=this.datasetSchema.find(x=)
-      // });
+      this.datasetSchema.forEach(element => {
+        var data=this.selecteditem.colums[element.column_name];
+        console.log(element);
+        console.log(data);
+        if(data=="True")
+        element.column_attribute='Select';
+        if(data=="False")
+        element.column_attribute='Ignore';
+
+        
+      });
+      
       this.datasetSchema
       this.modalService.dismissAll();
 
