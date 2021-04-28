@@ -50,5 +50,7 @@ urlpatterns = [
 
     path('mlaas/modeling/modeltype/', ModelTypeClass.as_view()),     
 
-    path('mlaas/getsplitdata/', GetSplitDataClass.as_view()),     
+    path('mlaas/getsplitdata/', GetSplitDataClass.as_view()),  
+
+    path('mlaas/modeling/modelfailed/', ModelFailedClass.as_view()),   
 ]

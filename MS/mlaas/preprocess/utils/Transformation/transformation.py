@@ -2,7 +2,7 @@
 /*CHANGE HISTORY
 
 --CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
- Jay Shukla         17-Jan-2021           1.0           Created Class
+ Jay Shukla         17-Jan-2021           1.0           TransformationClass
  
 */
 '''
@@ -27,7 +27,6 @@ from common.utils.activity_timeline import activity_timeline
 from database import *
 from .. import common
 
-
 #* Defining Logger
 user_name = 'admin'
 log_enable = True
@@ -37,7 +36,7 @@ LogObject.log_setting()
 
 logger = logging.getLogger('transformation')
 
-#Object Initialize
+#* Object Initialize
 commonObj = common.CommonClass()
 
 class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass, ce.EncodeClass, mf.MathOperationsClass, fe.FeatureEngineeringClass,dt.DataTransformationClass):
@@ -49,7 +48,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         # self.op_diff = 8
         self.AT = activity_timeline.ActivityTimelineClass(database, user, password, host, port)
     
-    #* RESCALING
+    #* SCALING
     
     def standard_scaling(self, dataframe):
         
@@ -75,36 +74,12 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         
         return super().robust_scaling(dataframe)
     
-    
-    # def custom_scaling(self, dataframe, max, min):
-        
-    #     logging.info("data preprocessing : TransformationClass : duplicate_data_removal : execution start")
-        
-    #     logging.info("data preprocessing : TransformationClass : duplicate_data_removal : execution stop")
-        
-    #     return super().custom_scaling(dataframe, max, min)
-    
-    #* Categorical Encoding
-    
-    # def label_encoding(self, dataframe, col):
-    #     '''
-    #         Operation id: 27
-    #     '''
-        
-    #     logging.info("data preprocessing : TransformationClass : label_encoding : execution start")
-        
-    #     cols = [dataframe.columns[i] for i in col]
-        
-    #     for column in cols:
-    #         try:
-    #             dataframe[column] =super().label_encoding(dataframe[column])
-    #         except:
-    #             continue
+    #* Duplicate Deletion
 
-    #     logging.info("data preprocessing : TransformationClass : label_encoding : execution stop")
-    #     return dataframe
     def delete_duplicate_records(self,DBObject,connection,project_id,column_list,old_column_list, table_name, **kwargs):
         '''
+            Function will delete the duplicate records from the table.
+
             Operation id: ?
         '''
         
@@ -128,6 +103,8 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
     
     def delete_duplicate_column(self,DBObject,connection,schema_id,project_id, table_name):
         '''
+            Function will delete the duplicate column from the table.
+
             Operation id: ?
         '''
         
@@ -148,10 +125,9 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
             
             return 1
 
-        
-
     def delete_low_variance_column(self,DBObject,connection,project_id,schema_id,column_list,old_column_list, table_name,variance=0.5, **kwargs):
         '''
+            Delete the column which has low variance. 
             Operation id: ?
         '''
         
@@ -185,11 +161,12 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         logging.info("data preprocessing : TransformationClass : delete_low_variance_column : execution stop")
         return status
     
-
+    #* Encoding 
 
     def label_encoding(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
-            Operation id: 27
+            This function will update column with numeric sequence.
+            Operation id: dp_261
         '''
         #Operation Id to get activity details
         operation_id = 'dp_261'
@@ -215,14 +192,17 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
                 
                 
             except Exception as exc:
-                return exc
+                logging.info("data preprocessing : TransformationClass : label_encoding : Exception : "+str(exc))
+                logging.info("data preprocessing : TransformationClass : label_encoding : " +traceback.format_exc())
+                return 1
 
         logging.info("data preprocessing : TransformationClass : label_encoding : execution stop")
         return status
 
     def one_hot_encoding(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, schema_id, **kwargs):
         '''
-            Operation id: 28
+            This function will do one hot encoding on original column and add distinct value column to table.
+            Operation id: dp_271
         '''
         
         logging.info("data preprocessing : TransformationClass : one_hot_encoding : execution start")
@@ -250,7 +230,9 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
                 
                 
             except Exception as exc:
-                return exc
+                logging.info("data preprocessing : TransformationClass : one_hot_encoding : Exception : "+str(exc))
+                logging.info("data preprocessing : TransformationClass : one_hot_encoding : " +traceback.format_exc())
+                return 1
 
         logging.info("data preprocessing : TransformationClass : one_hot_encoding : execution stop")
         return status

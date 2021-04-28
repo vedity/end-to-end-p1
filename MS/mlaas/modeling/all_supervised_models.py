@@ -51,7 +51,7 @@ from modeling.utils.model_utils.sklearn_classification.xgboost_classification im
 from modeling.utils.model_experiments import model_experiment
 from modeling.split_data import SplitData
 from common.utils.logger_handler import custom_logger as cl
-
+from common.utils.exception_handler.python_exception.modeling.modeling_exception import *
 
 # Global Variables And Objects
 user_name = 'admin'
@@ -251,11 +251,11 @@ def supervised_models(run_id,**kwargs):
                     # Update Model Status.
                     upd_exp_status = ExpObject.update_experiment('success',check_flag,dag_run_id,experiment_id)
                     
-                except:
-                    upd_exp_status = ExpObject.update_experiment('failed',check_flag,dag_run_id,experiment_id)
+                except ModelFailed as mf:
                     
+                    upd_exp_status = ExpObject.update_experiment('failed',check_flag,dag_run_id,experiment_id)
                     failed_reason=traceback.format_exc().splitlines()
-                    model_failed_reason_dict= {'failed_reason':failed_reason}
+                    model_failed_reason_dict= {'main reason': mf.msg,'failed_reason':failed_reason}
                     mlflow.log_dict(model_failed_reason_dict,'model_failed_reason.json')
                  
     except:

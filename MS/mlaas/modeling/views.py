@@ -848,3 +848,36 @@ class GetSplitDataClass(APIView):
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+
+class ModelFailedClass(APIView):
+ 
+        def get(self, request, format=None):
+                """
+                This function is used to check model is failed or not'
+        
+                Args  : 
+                        experiment_ids[(Integer)]   :[Id of Experiment]
+                
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival & insertions failed or successfull),
+                        Response(return false if failed otherwise json data)
+                """
+                try:
+                        logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
+                        
+                        experiment_id = request.query_params.get('experiment_id')
+
+                        model_type = ModelStatObject.model_failed(experiment_id)
+                        if isinstance(model_type,str): #check the instance of dataset_df
+                                status_code,error_msg=json_obj.get_Status_code(model_type) # extract the status_code and error_msg from project_df
+                                logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code :"+ status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        else:
+                                logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code : 200")
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":model_type})
+                        
+                except Exception as e:
+                        logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
+                        logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})

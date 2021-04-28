@@ -536,6 +536,9 @@ Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_301','Divide from colu
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_311','Multiply into column','operation on column * failed','US','Operation',0,6,1,2);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_311','Multiply into column','operation on column * in process','US','Operation',1,6,1,2);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_311','Multiply into column','operation on column * completed','US','Operation',2,6,1,2);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_321','Extract Datetime Features','operation on column * failed','US','Operation',0,8,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_321','Extract Datetime Features','operation on column * in process','US','Operation',1,8,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_321','Extract Datetime Features','operation on column * completed','US','Operation',2,8,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'md_41','Created Experiment','You have created experiment "#" for project "$"','US','Operation',0,-1,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'md_42','Selected Auto Modeling','You have selected Auto Modeling for experiment "#" of project "$"','US','Operation',0,-1,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'md_43','Selected Manual Modeling','You have selected Manual Modeling for experiment "#" of project "$"','US','Operation',0,-1,0,0);

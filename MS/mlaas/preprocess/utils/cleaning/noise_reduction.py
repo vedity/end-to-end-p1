@@ -11,6 +11,8 @@
 import pandas as pd
 import numpy as np
 from collections import Counter
+import logging
+import traceback
 
 #* Relative Imports
 from . import missing_value_handling as mvh
@@ -18,10 +20,10 @@ from . import missing_value_handling as mvh
 #* Initializing Objects
 MVH_OBJECT = mvh.MissingValueClass()
 
-#* Logging
-import logging
+#* Common Utilities
 from common.utils.logger_handler import custom_logger as cl
 
+#* Initializing Logger
 user_name = 'admin'
 log_enable = True
 LogObject = cl.LogClass(user_name,log_enable)
@@ -245,11 +247,20 @@ class RemoveNoiseClass:
         '''
             Makes Null in place of all the Noise.
         '''
-        column_name = '"' + column_name + '"'
-        sql_command = f"update {table_name} set {column_name} = Null where {column_name} !~ '[0-9.]'"
-        #logging.info("Sql_command : rmv_noise : "+str(sql_command))
-        status = DBObject.update_records(connection,sql_command)
-        return status
+        try:
+            logging.info("data preprocess : RemoveNoiseClass : rmv_noise : execution start")
+            
+            column_name = '"' + column_name + '"'
+            sql_command = f"update {table_name} set {column_name} = Null where {column_name} !~ '[0-9.]'"
+            #logging.info("Sql_command : rmv_noise : "+str(sql_command))
+            status = DBObject.update_records(connection,sql_command)
+            
+            logging.info("data preprocess : RemoveNoiseClass : rmv_noise : execution end")
+            return status
+        except Exception as e:
+            logging.error(f"data preprocess : RemoveNoiseClass : rmv_noise : execution failed : {str(e)}")
+            logging.error(f"data preprocess : RemoveNoiseClass : rmv_noise : execution failed : {traceback.format_exc()}")
+            return 1
     
     def dtct_noise(self, DBObject, connection, column_name, dataset_id = None, table_name = None):
         '''
@@ -271,24 +282,33 @@ class RemoveNoiseClass:
                 - `1` : Removable amount of noise
                 - `2` : Too Much Noise
         '''
-        column_name = '"' + column_name + '"'
-        if dataset_id is None:
-            sql_command = f"select cast((count(*)*100) as float)/(select count(*) from {table_name}) as noise_percentage from {table_name} where {column_name} !~ '[0-9.]';"  
-            #logging.info("Sql_command : dtct_noise : "+str(sql_command))
-        
-        noise_df = DBObject.select_records(connection,sql_command)
-        if not isinstance(noise_df, pd.DataFrame):
-            return 0
-        
-        noise_percentage = noise_df['noise_percentage'].tolist()[0]
-        
-        
-        if noise_percentage == 0:
-            noise_status =  0
-        elif noise_percentage <= 33:
-            noise_status = 1
-        else:
-            noise_status = 2
+        try:
+            logging.info("data preprocess : RemoveNoiseClass : dtct_noise : execution start")
             
-        return noise_status
+            column_name = '"' + column_name + '"'
+            if dataset_id is None:
+                sql_command = f"select cast((count(*)*100) as float)/(select count(*) from {table_name}) as noise_percentage from {table_name} where {column_name} !~ '[0-9.]';"  
+                #logging.info("Sql_command : dtct_noise : "+str(sql_command))
+            
+            noise_df = DBObject.select_records(connection,sql_command)
+            if not isinstance(noise_df, pd.DataFrame):
+                return 0
+            
+            noise_percentage = noise_df['noise_percentage'].tolist()[0]
+            
+            
+            if noise_percentage == 0:
+                noise_status =  0
+            elif noise_percentage <= 33:
+                noise_status = 1
+            else:
+                noise_status = 2
+            
+            logging.info("data preprocess : RemoveNoiseClass : dtct_noise : execution end")
+            
+            return noise_status
+        except Exception as e:
+            logging.info(f"data preprocess : RemoveNoiseClass : dtct_noise : execution failed : {str(e)}")
+            logging.info(f"data preprocess : RemoveNoiseClass : dtct_noise : execution failed : {traceback.format_exc()}")
+            return None
     

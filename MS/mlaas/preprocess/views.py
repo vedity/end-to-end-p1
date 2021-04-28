@@ -420,8 +420,7 @@ class CleanupSave(APIView):
                 
 class ScalingSplitClass(APIView):
         def post(self, request, format=None):
-                try:
-                        '''
+                '''
                         This class is used to scale and split and save numpy files.
                         Args  : 
                                 schema_id(Integer): schema id of the dataset.
@@ -437,7 +436,8 @@ class ScalingSplitClass(APIView):
                                 status_code(500 or 200),
                                 error_msg(Error message for retrival failed or successfull),
                                 Response(return false if failed otherwise json data)
-                        '''
+                '''
+                try:
                         logging.info("data preprocess : HandoverClass : POST Method : execution start")
                         schema_id = request.query_params.get('schema_id') #get schema id
                         dataset_id = request.query_params.get('dataset_id') #get dataset id
@@ -493,6 +493,9 @@ class ScalingSplitClass(APIView):
 
 class Scalingtype(APIView):
         def get(self,request,format=None):
+                ''' 
+                        This function will provide lst of scaling methods.
+                '''
                 try :
                         logging.info("data preprocess : ScheamAttributeListClass : POST Method : execution start")
                         column_attribute = [{"id" : 0,"name": "Standard Scaler"},{"id" : 1,"name": "Min-Max"},{"id": 2,"name": "Robust"}]
@@ -504,6 +507,9 @@ class Scalingtype(APIView):
 
 class TrainValidHoldout(APIView):
         def get(self,request,format=None):
+                ''' 
+                        This function will provide list for holdout value.
+                '''
                 try :
                         logging.info("data preprocess : TrainValidHoldout : GET Method : execution start")
                         holdout = [{"id" : 2,"value": "90-5-5"},{"id" : 3,"value": "85-5-10"},{"id" : 4,"value": "80-10-10"},{"id" : 5,"value": "75-10-15"},{"id" : 6,"value": "70-15-15"},{"id" : 7,"value": "65-15-20"},{"id" : 8,"value": "60-20-20"}]
@@ -517,6 +523,9 @@ class TrainValidHoldout(APIView):
 class Check_Split(APIView):
 
         def get(self, request, format=None):
+                ''' 
+                        This function will return value if split done or none if split is pending
+                '''
                 try:
                         logging.info(" modeling : Check_Split : GET Method : execution start")
                         project_id = request.query_params.get('project_id')
@@ -537,6 +546,9 @@ class Check_Split(APIView):
 class CheckCleanupDagStatus(APIView):
 
         def get(self, request, format=None):
+                '''
+                        This function will give dag status if process is running or not
+                '''
                 try:
                         logging.info(" data preprocess : CheckCleanupDagStatus : GET Method : execution start")
                         project_id = request.query_params.get('project_id')
@@ -550,30 +562,20 @@ class CheckCleanupDagStatus(APIView):
                         logging.error(" data preprocess : CheckCleanupDagStatus : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":"Failed","response":str(e)})    
 
-
-# class FeatureAlgoList(APIView):
-
-#         def get(self, request, format=None):
-#                 try:
-#                         logging.info(" data preprocess : SelectedFeatureAlgo : GET Method : execution start")
-#                         feature_algo = {"column_list":['item_id','item_name','description'],"option_list":[{"name":"Chi Square","colums":{"item_id":"true","item_name":"true","description":"true"}},{"name":"Mutual Information","colums":{"item_id":"false","item_name":"true","description":"flase"}},{"name":"ANOVA f-test","colums":{"item_id":"false","item_name":"false","description":"true"}},{"name":"Recursive Feature Elimination","colums":{"item_id":"true","item_name":"false","description":"flase"}},{"name":"Coorelation","colums":{"item_id":"true","item_name":"false","description":"flase"}}]}
-#                         return Response({"status_code":"200","error_msg":"Successfull retrival","response":feature_algo})   
-
-#                 except Exception as e:
-#                         logging.error("data preprocess : SelectedFeatureAlgo : GET Method  " + str(e))
-#                         logging.error(" data preprocess : SelectedFeatureAlgo : GET Method : " +traceback.format_exc())
-#                         return Response({"status_code":"500","error_msg":"Failed","response":str(e)})    
-
-
 class FeatureAlgoList(APIView):
 
         def get(self, request, format=None):
                 try:
                         logging.info(" data preprocess : FeatureSelection : GET Method : execution start")
-                        dataset_id = 224
+                        dataset_id = request.query_params.get('dataset_id')
                         choice = 1
-                        schema_id = "71"
-                        target_col = "cylindernumber"
+                        schema_id = request.query_params.get('schema_id')
+                        target_col = str(request.query_params.get('target_col'))
+                        
+                        # dataset_id = 224
+                        choice = 1
+                        # schema_id = "71"
+                        # target_col = "cylindernumber"
                         column = FU.fetch_column(DBObject,connection,schema_id)
                         chisq_col,rfe_col,mutual_col,anova_col,co_col = FS.algo_call(DBObject,connection,dataset_id,schema_id,target_col,choice)
                         

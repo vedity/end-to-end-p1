@@ -2,7 +2,7 @@
 /*CHANGE HISTORY
 
 --CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
- Jay Shukla         17-Jan-2021           1.0           Created Class
+  Abhishek Negi         17-Jan-2021           1.0           Created Class
  
 */
 '''
@@ -13,7 +13,7 @@ import traceback
 import pandas as pd
 
 #* Relative Imports
-from . import outlier_sql as ot
+from . import outlier_treatment as ot
 from . import noise_reduction as nr
 from . import missing_value_handling as mvh
 
@@ -45,6 +45,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def discard_missing_values(self,DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
             Remove all the rows containing missing values.
+
             Operation id: dp_1
         '''
         
@@ -64,7 +65,8 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                     #Insert the activity for the operation
                     activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
-                    status = super(CleaningClass,self).discard_missing_values(DBObject,connection, table_name,old_cols[i])
+                    status = self.discard_missing_values(DBObject,connection, table_name,old_cols[i])
+                    
                     #Update the activity status for the operation performed
                     if status == 0:
                         status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
@@ -108,7 +110,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
                 if flag == True:
                     return impute_value
             
-                status = commonObj.perform_missing_value_imputation(DBObject,connection, table_name,old_cols[i],impute_value)
+                status = self.perform_missing_value_imputation(DBObject,connection, table_name,old_cols[i],impute_value)
 
                 #Update the activity status for the operation performed
                 if status == 0:
@@ -171,6 +173,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def mode_imputation(self,  DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
             Function will replace the Null  value's with mode. 
+
             Operation id: dp_71
         '''
         logging.info("data preprocessing : CleaningClass : mode_imputation : execution start")
@@ -209,6 +212,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def end_of_distribution(self,DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
             Function will replace the Null  value's with extream value found in that perticular distribution of the column. 
+            
             Operation id: dp_91
         '''
         logging.info("data preprocessing : CleaningClass : end_of_distribution : execution start")

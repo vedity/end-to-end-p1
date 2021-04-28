@@ -8,14 +8,14 @@
 '''
 
 #* Exceptions
-from common.utils import dynamic_dag
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
-from common.utils.activity_timeline import activity_timeline
 
 #* Common utilities
 from common.utils.database import db
 from common.utils.logger_handler import custom_logger as cl
+from common.utils.activity_timeline import activity_timeline
+from common.utils import dynamic_dag
 
 #* Class Imports
 from ingest.utils.dataset import dataset_creation
@@ -25,8 +25,7 @@ from .cleaning import noise_reduction as nr
 from .cleaning import cleaning
 from .Transformation import transformation as trs
 from .Transformation import split_data 
-from .Transformation.model_type_identifier import ModelType
-from common.utils.activity_timeline import activity_timeline
+from .Transformation.model_type_identifier import ModelTypeClass
 from database import *
 
 #* Library Imports
@@ -44,7 +43,7 @@ import json
 import time
 import datetime
 
-
+#* Defining Logger
 user_name = 'admin'
 log_enable = True
 
@@ -55,8 +54,9 @@ logger = logging.getLogger('preprocessing')
 
 #* Object Definition
 dc = dataset_creation.DatasetClass()
-sp = split_data.Split_Data()
+sp = split_data.SplitDataClass()
 le = LabelEncoder()
+mt = ModelTypeClass()
 
 class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass, trs.TransformationClass):
     def __init__(self,database,user,password,host,port):
@@ -654,7 +654,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc))
             return OperationOrderingFailed(500).msg
         
-        
             
     def handover(self,DBObject, connection , dataset_id, schema_id, project_id, user_name,split_parameters,scaling_type = 0):        
         """[ This class is used to scale and split and save numpy files.]
@@ -716,22 +715,25 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             for col in feature_cols[1:]:
                 if input_feature_df[col].dtype == 'O':
                     input_feature_df[col] = le.fit_transform(input_feature_df[col]) 
-                     
-            #sacle the dataframe    
-            if int(scaling_type) == 0:
-                input_feature_df.iloc[:,1:] = super().standard_scaling(input_feature_df.iloc[:,1:]) #standard_scaling
-            elif int(scaling_type) == 1:
-                input_feature_df.iloc[:,1:] = super().min_max_scaling(input_feature_df.iloc[:,1:]) #min_max_scaling
-            elif int(scaling_type) == 2:
-                input_feature_df.iloc[:,1:] = super().robust_scaling(input_feature_df.iloc[:,1:]) #robust_scaling
             
+            try:
+                #scale the dataframe    
+                if int(scaling_type) == 0:
+                    input_feature_df.iloc[:,1:] = super().standard_scaling(input_feature_df.iloc[:,1:]) #standard_scaling
+                elif int(scaling_type) == 1:
+                    input_feature_df.iloc[:,1:] = super().min_max_scaling(input_feature_df.iloc[:,1:]) #min_max_scaling
+                elif int(scaling_type) == 2:
+                    input_feature_df.iloc[:,1:] = super().robust_scaling(input_feature_df.iloc[:,1:]) #robust_scaling
+            except:
+                raise ScalingFailed(500)
+
             
             input_features_df = input_feature_df #input_features_df
             target_features_df=encoded_target_df #target_features_df           
-            mt = ModelType()
+            
             problem_type = mt.get_model_type(target_features_df) #call get_model_type
             if problem_type == None:
-                raise ModelIdentificationFailed()
+                raise ModelIdentificationFailed(500)
             model_type = problem_type[0] #model_type
             algorithm_type = problem_type[1] #algorithm type
             target_type = problem_type[2] #target type
@@ -749,11 +751,13 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 cv = 0
             random_state = split_parameters['random_state'] #get random_state
             test_ratio = split_parameters['test_ratio'] #get test_size
+            
             valid_ratio = split_parameters['valid_ratio'] #get valid_size
             if len(valid_ratio) == 0:
                 valid_ratio= 0
             else:
                 valid_ratio=float(valid_ratio)
+            
             train_X_filename = scale_dir+"/scaled_train_X_data_" + unique_id #genrate train_X file path
             train_Y_filename = scale_dir+"/scaled_train_Y_data_" + unique_id #genrate train_Y file path
             test_X_filename =  scale_dir+"/scaled_test_X_data_" + unique_id  #genrate test_X file path  
@@ -771,6 +775,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 valid_Y_filename = scale_dir+"/scaled_valid_Y_data_" + unique_id #genrate valid_Y file path     
                 np.save(valid_X_filename,X_valid.to_numpy()) #save X_valid
                 np.save(valid_Y_filename,Y_valid.to_numpy()) #save Y_valid   
+           
             Y_train_count=Y_train.shape[0] #train count
             Y_test_count =Y_test.shape[0]  #test count
             actual_Y_filename =  scale_dir+"/Unscaled_actual_Y_data_" + unique_id  #genrate test_Y file path           
@@ -789,13 +794,29 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             # connection.close()
             return status
             
-        except (DatabaseConnectionFailed,GetDataDfFailed,ProjectUpdateFailed,SplitFailed,ModelIdentificationFailed) as exc:
+        except (DatabaseConnectionFailed,GetDataDfFailed,ProjectUpdateFailed,SplitFailed,ModelIdentificationFailed,ScalingFailed) as exc:
             # connection.close()
             logging.error("data preprocessing : PreprocessingClass : handover : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : handover : " +traceback.format_exc())
             return exc.msg
         
     def update_schema_flag_status(self,DBObject,connection,schema_id,dataset_id,column_list, **kwargs):
+        '''
+            This class is used to update schema flags once the preprocessing is complete.
+
+            Args:
+            ----
+            DBObject (`object`): DBClass Object
+            connection (`object`): pycopg2.connection object
+            schema_id (`Int`): Id in the schema table
+            dataset_id (`int`): Id of the dataset
+            column_list (`list`): List of column names
+
+            Returns:
+            -------
+            status (`int`): Status of updation
+        '''
+        
         try:
             logging.info("data preprocessing : PreprocessingClass : update_schema_flag_status : execution start")
             
@@ -854,7 +875,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
             
-            result = requests.post("http://airflow:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
+            res = requests.post("http://airflow:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
 
             logging.info("data preprocessing : PreprocessingClass : get_cleanup_dag_name : execution stop")
             # connection.close()
@@ -881,6 +902,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             selected_visibility (`String`): public or private.
             dataset_name (`String`): Name of the new dataset.
             dataset_desc (`String`): Description for the dataset.
+
+            Returns:
+            -------
+            `0` : function ran successfully
+            `String`: Exception occurred
         '''
         
         try:
@@ -1010,7 +1036,23 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
 
     def SaveAs(self,DBObject,connection,project_id,schema_id,table_name,user_name,dataset_visibility,dataset_name,selected_visibility,dataset_desc,cleanup_flag=None, **kwargs):
         '''
-        Function used to create a new table with updated changes and insert a new record into dataset table and update the dataset_id into the project_tbl
+        Function used to create a new table with updated changes and insert a new record into dataset table and 
+        update the dataset_id into the project_tbl
+
+        Args :
+            DBObject ([type]): [DBClass Object]
+            connection ([type]): [Connection Object]
+            dataset_id ([type]): [dataset id of the dataset.]
+            project_id ([type]): [project id of the project table.]
+            schema_id ([type]): [schema id of the dataset.]
+            table_name ([String]): [Name of the dataset table]
+            dataset_visibility[(String)] : [ Visibility of the dataset selected]
+            dataset_name[(String)] : [dataset name input by user]
+            selected_visibility[(String)] : [visibility input by user]
+            dataset_desc[(String)] : [description input by user]
+        Return :
+            [Integer] : [return 0 if success else return 1 for failed]
+
         '''
         try:
             #? Safety measure in case if DAG calls this method with None parameters
@@ -1232,6 +1274,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         """
         function used to update schema for new dataset according to schema mapping page.
         Args:
+            DBObject ([type]): [DBClass Object]
+            connection ([type]): [Connection Object]
             schema_id[(schema_id)] : [Selected Id of the schema table]
 
         Return:
