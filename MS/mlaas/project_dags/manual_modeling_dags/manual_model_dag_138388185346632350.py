@@ -27,7 +27,7 @@ start_task = PythonOperator(task_id='start_pipeline',python_callable=start_pipel
 
 # Get model dict 
 
-master_dict = {'model_id': [13], 'model_name': ['KNeighbors_Classification'], 'model_hyperparams': [{'n_neighbors': '10', 'metric': 'manhattan', 'algorithm': 'ball_tree'}], 'model_class_name': ['KNeighborsClassificationClass'], 'algorithm_type': ['Multi']}
+master_dict = {'model_id': [15], 'model_name': ['Decision_Tree_Classifier'], 'model_hyperparams': [{'criterion': 'entropy', 'max_depth': '8', 'max_features': 'auto', 'min_impurity_decrease': '0.2', 'min_samples_leaf': '2'}], 'model_class_name': ['DecisionTreeClassificationClass'], 'algorithm_type': ['Multi']}
 
 if len(master_dict) != 0:
 
