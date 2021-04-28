@@ -73,10 +73,12 @@ export class SchemaMappingApiService {
     return this.httpClient.post(this.baseUrl + "ingest/dataset_schema/save_as/", obj, { headers: this.headers, params });
   }
 
-  getfeatureSelection() {
-    // var params = new HttpParams()
-    //   .append("schema_id", schema_id)
-    return this.httpClient.get(this.baseUrl + "preprocess/feature_list/", { headers: this.headers });
+  getfeatureSelection(dataset_id,schema_id,target_col) {
+    var params = new HttpParams()
+      .append("dataset_id", dataset_id)
+      .append("schema_id", schema_id)
+      .append("target_col", target_col)
+    return this.httpClient.get(this.baseUrl + "preprocess/feature_list/", { headers: this.headers,params });
   }
 
 }

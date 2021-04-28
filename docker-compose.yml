@@ -74,15 +74,15 @@ services:
         depends_on:
             - postgres
 
-    angular:
-        build: './Web'
-        ports:
-        - "4200:4200"
-        volumes: 
-        - "/app/node_modules"
-        - "./Web:/app"
-        depends_on:
-        - web
+    # angular:
+    #     build: './Web'
+    #     ports:
+    #     - "4200:4200"
+    #     volumes: 
+    #     - "/app/node_modules"
+    #     - "./Web:/app"
+    #     depends_on:
+    #     - web
 
 volumes:
     postgres_data:
