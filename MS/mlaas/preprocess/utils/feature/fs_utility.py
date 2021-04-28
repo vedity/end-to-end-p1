@@ -48,7 +48,7 @@ class FSUtilityClass():
 
 
     def fetch_column(self,DBObject,connection,schema_id):
-        sql_command = f"select column_name from mlaas.schema_tbl where schema_id ="+str(schema_id)+"order by index ASC"
+        sql_command = f"select column_name from mlaas.schema_tbl where schema_id ="+str(schema_id)+" order by index ASC"
         df = DBObject.select_records(connection,sql_command)
         df.drop(df.index[0],inplace= True)
         col = list(df['column_name'])

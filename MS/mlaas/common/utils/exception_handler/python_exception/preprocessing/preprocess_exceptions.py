@@ -243,3 +243,13 @@ class ModelIdentificationFailed(Exception):
      
     def __str__(self):
         return (self.msg)    
+
+class ScalingFailed(Exception):
+    """  Scaling failed"""
+    def __init__(self,status_code):
+        self.msg = "Scaling failed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)    

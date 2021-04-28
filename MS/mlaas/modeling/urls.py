@@ -38,6 +38,8 @@ urlpatterns = [
 
     path('mlaas/modeling/confusionmatrix/', ConfusionMatrixClass.as_view()),
 
+    path('mlaas/modeling/roccurve/', ROCCurveClass.as_view()),
+
     path('mlaas/modeling/compareexperimentsgrid/', CompareExperimentsGridClass.as_view()),
 
     path('mlaas/modeling/compareexperimentsgraph/', CompareExperimentsGraphClass.as_view()),
@@ -48,5 +50,7 @@ urlpatterns = [
 
     path('mlaas/modeling/modeltype/', ModelTypeClass.as_view()),     
 
-    path('mlaas/getsplitdata/', GetSplitDataClass.as_view()),     
+    path('mlaas/getsplitdata/', GetSplitDataClass.as_view()),  
+
+    path('mlaas/modeling/modelfailed/', ModelFailedClass.as_view()),   
 ]

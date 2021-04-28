@@ -1,15 +1,29 @@
+'''
+/*CHANGE HISTORY
+
+--CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
+ Nisha Barad         27-Feb-2021           1.0            ModelTypeClass
+ 
+*/
+'''
+
+#* Importing Libraries
 import numpy as np
 import pandas as pd
 import logging
 from sklearn.model_selection import train_test_split
+
+#* Common utilities
 from common.utils.logger_handler import custom_logger as cl
+
+#* Defining Logger
 user_name = 'admin'
 log_enable = True
 LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
 logger = logging.getLogger('project_creation')
 
-class ModelType():
+class ModelTypeClass:
     def get_model_type(self, target_df):   
         """Returns the list of all algorithm using the model_type and algorithm_type.
 
@@ -34,7 +48,7 @@ class ModelType():
             if unq_length == 2:
                 algorithm_type = 'Binary'
             elif unq_length > 2:
-                algorithm_type = 'MultiClass'   
+                algorithm_type = 'Multi'   
                 
             if target_shape[1] == 2:
                 target_type = 'Single_Target'
