@@ -48,7 +48,7 @@ class ModelTypeClass:
             if unq_length == 2:
                 algorithm_type = 'Binary'
             elif unq_length > 2:
-                algorithm_type = 'MultiClass'   
+                algorithm_type = 'Multi'   
                 
             if target_shape[1] == 2:
                 target_type = 'Single_Target'

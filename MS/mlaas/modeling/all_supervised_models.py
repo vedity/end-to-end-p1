@@ -217,8 +217,8 @@ def supervised_models(run_id,**kwargs):
         print("master dict==",kwargs['algorithm_type'])
         
         # Check Whether Running Model is Multi Class Or Not.
-        if algorithm_type != 'Binary':
-            algorithm_type=algorithm_type[:-5]
+        # if algorithm_type != 'Binary':
+            # algorithm_type=algorithm_type[:-5]
             
         
         check_flag = 'outside'
