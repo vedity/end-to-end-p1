@@ -266,3 +266,10 @@ td {
     text-overflow: ellipsis;
     overflow: hidden;
 }
+
+.page-title-box {
+    span {
+        position: absolute;
+        top: 20px;
+    }
+}

@@ -8,8 +8,8 @@
     top: -12px;
 }
 
-.target-selected {
-    background: #4c546c;
+.Target-selected {
+    background: #4c546c !important;
     td:first-child {
         color: #fff;
     }
@@ -68,8 +68,15 @@ th.no-sort {
 
 .schema-auto {
     position: absolute;
-    right: 227px;
+    right: 230px;
     top: -4px;
+}
+
+.page-title-box {
+    span {
+        position: absolute;
+        top: 20px;
+    }
 }
 
 .schema-box {
@@ -89,6 +96,7 @@ th.no-sort {
         }
         .title {
             font-weight: 600;
+            height: 70px;
         }
     }
     .left-box {
@@ -107,7 +115,7 @@ th.no-sort {
             margin-right: 10px;
         }
         ul li {
-            width: 130px;
+            width: 160px;
             text-align: center;
         }
         ul:hover,
