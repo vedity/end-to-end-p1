@@ -42,7 +42,19 @@ class ModelFailed(Exception):
             
         elif status_code == "M10" :
             self.msg = "MLFlow Log Artifacts Failed"
-            
+        
+        elif status_code == "M11":
+            self.msg = "Get Confusion Matrix Failed"
+
+        elif status_code == "M12":
+            self.msg = "Predict Probability Failed"
+
+        elif status_code == "M13":
+            self.msg = "ROC Curve Failed"
+
+        elif status_code == "M14":
+            self.msg = "Precision Recall Curve Failed"
+
         else:
             self.msg = "Model failed"
             
