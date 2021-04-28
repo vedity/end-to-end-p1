@@ -360,7 +360,18 @@ CREATE TABLE mlaas.activity_detail_tbl (
     column_id text NULL,
     "parameter" text NULL
 );
- 
+
+CREATE TABLE mlaas.dag_management_tbl (
+	"index" serial NOT NULL,
+	dag_id text NULL,
+	allocated boolean DEFAULT true,
+	dag_type_id int NOT NULL
+)
+
+CREATE TABLE mlaas.dag_type_tbl (
+	dag_type_id int NOT NULL,
+	dag_type text NOT NULL
+)
 
 --Insert menu_tbl
 Insert into  mlaas.menu_tbl values (2,'DI','Data Ingestion',null,null,' mdi-database-import');
@@ -389,6 +400,9 @@ Insert into mlaas.user_auth_tbl values(15,'brijraj','brijraj');
 Insert into mlaas.user_auth_tbl values(16,'karishma','karishma');
 Insert into mlaas.user_auth_tbl values(17,'denisha','denisha');
 
+--Insert preprocess_tab_tbl
+Insert into mlaas.preprocess_tab_tbl values(1,'Missing Value Handling');
+Insert into mlaas.preprocess_tab_tbl values(2,'Transformation');
 
 --Insert parent_activity_tbl
 Insert into mlaas.parent_activity_tbl values(1,'Missing Value Handling',1);
@@ -400,13 +414,8 @@ Insert into mlaas.parent_activity_tbl values(6,'Math Operations',2);
 Insert into mlaas.parent_activity_tbl values(7,'Transformations',2);
 Insert into mlaas.parent_activity_tbl values(8,'Feature Engineering',2);
 
-
---Insert preprocess_tab_tbl
-Insert into mlaas.preprocess_tab_tbl values(1,'Missing Value Handling');
-Insert into mlaas.preprocess_tab_tbl values(2,'Transformation');
-
-
 --Insert activity master
+-- COLUMNS => "index", activity_id, activity_name, activity_description, "language", operation, code, parent_activity_id, user_input, check_typ
 Insert into mlaas.activity_master_tbl values (DEFAULT,'in_2','Delete Dataset','You have deleted dataset','US','Delete',0,-1,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'in_3','Create Project','You have created project','US','Create',0,-1,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'in_1','Create Dataset','You have created dataset','US','Create',0,-1,0,0);
@@ -499,7 +508,6 @@ Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_242','Replace Outliers
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_243','Replace Outliers with Median using Local Factor Outlier Detection','operation on column * failed','US','Operation',0,3,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_243','Replace Outliers with Median using Local Factor Outlier Detection','operation on column * in process','US','Operation',1,3,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_243','Replace Outliers with Median using Local Factor Outlier Detection','operation on column * completed','US','Operation',2,3,0,0);
-
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_251','Logarithmic transformation','operation on column * failed','US','Operation',0,7,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_251','Logarithmic transformation','operation on column * in process','US','Operation',1,7,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_251','Logarithmic transformation','operation on column * completed','US','Operation',2,7,0,0);
@@ -553,3 +561,6 @@ Insert into mlaas.activity_master_tbl values (DEFAULT,'cl_1','Cleanup Started','
 Insert into mlaas.activity_master_tbl values (DEFAULT,'cl_2','Cleanup Ended','Cleanup ended for dataset * of project &','US','Operation',0,-1,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'cl_3','Dataset Created','You have created New dataset *','US','Operation',0,-1,0,0);
 
+----------------------- Inserting into mlaas.dag_type_tbl -----------------------
+Insert into mlaas.dag_type_tbl values (1,'Cleanup Dag')
+Insert into mlaas.dag_type_tbl values (2,'Manual Modelling Dag')
