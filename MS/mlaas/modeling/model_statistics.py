@@ -618,7 +618,7 @@ class ModelStatisticsClass:
     def compare_experiments_graph(self, experiment_ids):
         try:
             logging.info("modeling : ModelStatisticsClass : compare_experiments_graph : Exception Start")
-            compare = self.can_compare_experiments(experiment_ids)
+            # compare = self.can_compare_experiments(experiment_ids)
             sql_command = "SELECT model_type from mlaas.model_experiment_tbl met, mlaas.model_master_tbl mmt where met.model_id = mmt.model_id and met.experiment_id in"+str(experiment_ids)
             model_types_df = self.DBObject.select_records(self.connection, sql_command)
             if model_types_df is None:
