@@ -101,15 +101,19 @@ class AlgorithmDetector:
             list: models_list, contains list of all the ML/DL models derived from the algorithm and model type.
         """
         try:
-            sql_command = 'select target_features from mlaas.project_tbl where project_id={} and dataset_id={}'.format(project_id, dataset_id)
-            target_features = ast.literal_eval(self.DBObject.select_records(self.connection, sql_command).iloc[0, 0])
+            sql_command = 'select target_features, problem_type from mlaas.project_tbl where project_id={} and dataset_id={}'.format(project_id, dataset_id)
+            target_features = ast.literal_eval(self.DBObject.select_records(self.connection, sql_command)['target_features'][0])
+            problem_type = ast.literal_eval(self.DBObject.select_records(self.connection, sql_command)['problem_type'][0])
+            logging.info("PRONBLEM TYPE-------------"+str(problem_type))
+            algorithm_type = problem_type['algorithm_type']
+            logging.info("Algorithm TYPE-------------"+str(algorithm_type))
             if model_type != 'Unsupervised':
                 if len(target_features) > 2:
                     target_type = 'Multi_Target'
                 elif len(target_features) == 2:
                     target_type = 'Single_Target'
-    
-                sql_command = "select model_id, model_name from mlaas.model_master_tbl where model_type='"+model_type+"'"+" and target_type='"+target_type+"'"
+
+                sql_command = "select model_id, model_name from mlaas.model_master_tbl where model_type='"+model_type+"'"+" and target_type='"+target_type+"' and algorithm_type='"+algorithm_type+"'"
             elif model_type == 'Unsupervised':
     
                 sql_command = "select model_id, model_name from mlaas.model_master_tbl where model_type='"+model_type+"'"

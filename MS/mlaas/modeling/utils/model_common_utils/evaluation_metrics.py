@@ -12,7 +12,7 @@ import logging
 import pandas as pd
 import numpy as np
 from sklearn import metrics
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, precision_recall_curve, roc_curve
 from sklearn.preprocessing import label_binarize
 
 # Common Class File Imports
@@ -41,6 +41,30 @@ class EvaluationMetrics:
         return final_result_dict
 
 
+    
+    def get_predict_proba(self, model, X_test, algorithm_type, model_type):
+        """Returns the probability values for each class.
+
+        Args:
+            model (ML model Object): ML model
+            algorithm_type (string): binary or multiclass
+            model_type (string): sklearn or keras
+        """
+
+        X_test = X_test[:, 1:]
+        
+        if algorithm_type.lower() == 'binary':
+            if model_type.lower() == 'sklearn':
+                y_pred_proba = model.predict_proba(X_test)[:, 1]
+            elif model_type.lower() == 'keras':
+                y_pred_proba = model.predict_proba(X_test)
+        
+        elif algorithm_type.lower() == 'multi':
+            y_pred_proba = model.predict_proba(X_test)
+
+        return y_pred_proba
+
+
     def get_evaluation_matrix(self,actual_lst,prediction_lst, model_type, lib='sklearn'):
         """This function is used to find model performance matrices.
         
@@ -60,11 +84,6 @@ class EvaluationMetrics:
             print("ACTUALLL LIST_---------------------", actual_lst[:10])
             f1_score = metrics.f1_score(actual_lst, prediction_lst, pos_label='positive',average='micro')
             print("F1SCORE-------------------------------------------------------", f1_score) 
-            # print('ACTUAL LSTTT:-         ', actual_lst.shape)
-            # classes = np.unique(actual_lst).astype(object)
-            # CM = confusion_matrix(actual_lst,prediction_lst,labels=classes)
-            # CM_df = pd.DataFrame(CM, columns=classes+'_true', index=classes+'_predicted')
-            # CM_dict = CM_df.to_dict()
             
             return round(accuracy,2),round(recall,2),round(precision,2), f1_score
         
@@ -112,45 +131,36 @@ class EvaluationMetrics:
             holdout_score = metrics.r2_score(y_actual, y_pred)
             return holdout_score
 
-    def get_precision_recall(self, model, X_test, y_test, lib='sklearn'):
+    def get_performance_curve(self, curve_name, model, y_pred_prob, y_test):
 
         y_test = y_test[:, -1]
-        X_test = X_test[:, 1:]
         
+        dict1, dict2, dict3 = dict(), dict(), dict()
+
         n_classes = len(np.unique(y_test))
         if n_classes > 2:
-            y_pred_prob = model.predict_proba(X_test)
-            y_test_encoded = label_binarize(y_test, classes=[*range(n_classes)])
-
-            precision = dict()
-            recall = dict()
-            threshold = dict()
-            recall_sum = 0
-            precision_sum = 0
-            for i in range(n_classes):
-                precision[i], recall[i], threshold[i] = metrics.precision_recall_curve(y_test_encoded[:, i],
-                                                                    y_pred_prob[:, i])
-                recall_sum += recall[i]
-                precision_sum += precision[i]
-                threshold_sum += threshold[i]
             
-            recall_arr = recall_sum / n_classes
-            precision_arr = precision_sum / n_classes
-            threshold_arr = threshold_sum / n_classes
+            y_test_encoded = label_binarize(y_test, classes=[*range(n_classes)])
+            
+            for i in range(n_classes):
+                dict1[i], dict2[i], dict3[i] = eval(curve_name)(y_test_encoded[:, i], y_pred_prob[:, i])
+                dict1[i] = dict1[i].tolist()
+                dict2[i] = dict2[i].tolist()
+                dict3[i] = dict3[i].tolist()
+
         
         elif n_classes == 2:
-            if lib == 'sklearn':
-                y_true_prob = model.predict_proba(X_test)[:, 1]
-            elif lib == 'keras':
-                y_true_prob = model.predict_proba(X_test)
-            precision_arr, recall_arr, threshold_arr = metrics.precision_recall_curve(y_test, y_true_prob)
-            precision_arr = precision_arr.tolist()
-            recall_arr = recall_arr.tolist()
-            threshold_arr = threshold_arr.tolist()
-        
-        precision_recall_dict = {'Precision': precision_arr, 'Recall': recall_arr, 'Threshold': threshold_arr}
 
-        return precision_recall_dict
+            arr1, arr2, arr3 = eval(curve_name)(y_test, y_pred_prob)
+            dict1 = {1: arr1.tolist()}
+            dict2 = {1: arr2.tolist()}
+            dict3 = {1: arr3.tolist()}
+        
+        if curve_name.lower() == 'roc_curve':
+            return {'FPR': dict1, 'TPR': dict2}# FPR is False Positive Rate, TPR is True Positive Rate
+
+        elif curve_name.lower() == 'precision_recall_curve':
+            return {'Precision' : dict1, 'Recall': dict2}
     
     def get_confusion_matrix(self,actual_lst,prediction_lst):
         '''

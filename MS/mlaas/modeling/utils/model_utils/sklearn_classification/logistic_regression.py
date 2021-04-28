@@ -244,6 +244,15 @@ class LogisticRegressionClass:
         print("actual ",actual_lst)
         print("prediction_lst ")
 
+        y_pred_prob = self.EvalMetricsObj.get_predict_proba(model, self.X_test, algorithm_type='binary', model_type='sklearn')
+        print("Y_PRED PROBA---------------------------------------",y_pred_prob)
+
+        roc_scores = self.EvalMetricsObj.get_performance_curve('roc_curve', model, y_pred_prob, self.y_test)
+        print("ROC AUC CURVE SCORES:- ---------------",roc_scores)
+
+        precision_recall_scores = self.EvalMetricsObj.get_performance_curve('precision_recall_curve', model, y_pred_prob, self.y_test)
+        print("Precision Recall CURVE SCORES:- ---------------",precision_recall_scores)
+
         # save prediction
         final_result_dict = self.EvalMetricsObj.save_prediction(self.y_test, prediction_lst, self.target_features_list)
         print("final_result_dict ")
@@ -276,7 +285,8 @@ class LogisticRegressionClass:
 
         # log artifacts (output files)
         self.MLFlowLogObj.store_model_dict(learning_curve=learning_curve_dict, features_importance=features_impact_dict,
-                                            model_summary=model_summary, predictions=final_result_dict,confusion_matrix=confusion_matrix_dict)
+                                            model_summary=model_summary, predictions=final_result_dict,confusion_matrix=confusion_matrix_dict,
+                                            precision_recall_scores=precision_recall_scores, roc_scores=roc_scores)
 
         # log mlflow parameter
         self.MLFlowLogObj.store_model_params(self.dataset_split_dict)

@@ -161,7 +161,7 @@ class ModelStatisticsClass:
         confusion_matrix_df = pd.DataFrame(confusion_matrix)
         confusion_matrix_dict = confusion_matrix_df.to_dict()
     
-        key = np.unique(unscaled_df[target_features[1]+'_str']).tolist()
+        key = np.unique(unscaled_df[target_features[1:]+'_str']).tolist()
     
         key_val = []
 
@@ -173,7 +173,35 @@ class ModelStatisticsClass:
                   
         confusion_matrix_json = {"key":key,"key_val":key_val}
 
-        return confusion_matrix_json    
+        return confusion_matrix_json
+
+
+    def show_roc_curve(self, experiment_id):
+        """Returns the scores for the AUC-ROC curve.
+
+        Args:
+            experiment_id (int): ID of the experiment.
+        """
+        logging.info("modeling : ModelStatisticsClass : show_roc_curve : Exception Start" )
+        unscaled_df,target_features = cmobj.get_unscaled_data(experiment_id)
+        str1 = '/roc_scores.json'
+        artifact_uri = cmobj.get_artifact_uri(experiment_id,str1)#will get artifact_uri for particular experiment
+        roc_scores = cmobj.get_json(artifact_uri)# will get json data from particular artifact_uri location
+        
+        classes = np.unique(unscaled_df[target_features[1]+'_str']).tolist()
+
+        final_dict = dict()
+        for key in roc_scores.keys():
+            data_dict = roc_scores[key]
+            new_dict = dict(zip(classes, list(data_dict.values())))
+            final_dict[key] = new_dict
+        
+        final_dict['classes'] = classes
+        
+
+        return final_dict
+
+
 
     
     def performance_metrics(self, experiment_id):

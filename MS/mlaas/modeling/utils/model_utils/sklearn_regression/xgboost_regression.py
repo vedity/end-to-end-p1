@@ -57,9 +57,9 @@ class XGBoostRegressionClass:
         self.max_depth = int(hyperparameters['max_depth'])
         self.min_child_weight = int(hyperparameters['min_child_weight'])
         self.n_estimators = int(hyperparameters['n_estimators'])
-        self.gamma = int(hyperparameters['gamma'])
-        self.reg_alpha = int(hyperparameters['reg_alpha'])
-        self.reg_lambda = int(hyperparameters['reg_lambda'])
+        self.gamma = float(hyperparameters['gamma'])
+        self.reg_alpha = float(hyperparameters['reg_alpha'])
+        self.reg_lambda = float(hyperparameters['reg_lambda'])
        
     
         self.EvalMetricsObj = EM()
