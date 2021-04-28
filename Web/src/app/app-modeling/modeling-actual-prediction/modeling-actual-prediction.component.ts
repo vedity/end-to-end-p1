@@ -58,7 +58,10 @@ export class ModelingActualPredictionComponent implements OnInit {
       series.push([x, y]);
       i++;
     }
+    console.log(series);
+
     return series;
+    
   }
 
   successHandler(data) {
