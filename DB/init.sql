@@ -363,8 +363,8 @@ CREATE TABLE mlaas.activity_detail_tbl (
 
 CREATE TABLE mlaas.dag_management_tbl (
 	"index" serial NOT NULL,
-	dag_id text NULL,
-	allocated boolean DEFAULT true,
+	dag_id text NOT NULL NULL,
+	allocated boolean NOT NULL DEFAULT true,
 	dag_type_id int NOT NULL
 )
 

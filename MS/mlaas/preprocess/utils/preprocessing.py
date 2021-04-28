@@ -25,7 +25,7 @@ from .cleaning import noise_reduction as nr
 from .cleaning import cleaning
 from .Transformation import transformation as trs
 from .Transformation import split_data 
-from .Transformation.model_type_identifier import ModelType
+from .Transformation.model_type_identifier import ModelTypeClass
 from database import *
 
 #* Library Imports
