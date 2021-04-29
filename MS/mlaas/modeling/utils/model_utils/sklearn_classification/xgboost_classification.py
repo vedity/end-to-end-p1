@@ -17,7 +17,7 @@ import xgboost as xgb
 from modeling.utils.model_common_utils.evaluation_metrics import EvaluationMetrics as EM
 from modeling.utils.model_common_utils.mlflow_artifacts import MLFlowLogs 
 from common.utils.exception_handler.python_exception.modeling.modeling_exception import *
-
+from modeling.utils.model_utils.function_calls import classification_func_call
 from sklearn.model_selection import ( train_test_split, 
                                      GridSearchCV, 
                                      cross_val_score, 
@@ -179,21 +179,14 @@ class XGBoostClassificationClass:
         Returns:
             [dict]: [it will return model summary.]
         """
-
-        train_size = self.X_train.shape[0]
-        test_size = self.X_test.shape[0]
+        model_summary = {}
         
-        model_summary = {"Model Name":"XGBoost_Regression",
-                         "Input Features":self.input_features_list,
-                         "Target Features":self.target_features_list,
-                         "Learning Rate": self.learning_rate,
-                         "Train Size":float(train_size),"Test Size":int(test_size),
-                         "Train Split":1-(self.dataset_split_dict['test_ratio'] + self.dataset_split_dict['valid_ratio']),
-                         "Test Split":float(self.dataset_split_dict['test_ratio']),
-                         "Random State":int(self.dataset_split_dict['random_state']),
-                         "Valid Split":self.dataset_split_dict['valid_ratio'],
-                         "CV (K-Fold )":self.dataset_split_dict['cv']}
-        
+        for key,value in self.dataset_split_dict.items():
+            if 'file' not in key:
+                model_summary[key] = value
+            
+        for key,value in self.hyperparameters.items():
+            model_summary[key] = value
         
         return model_summary
 
@@ -228,79 +221,4 @@ class XGBoostClassificationClass:
         
         """This function is used as a pipeline which will execute function in a sequence.
         """
-        try :
-            func_code = "M01"
-            # train the model
-            model = self.train_model()
-            
-            func_code = "M02"
-            # get features importance
-            features_impact_dict = self.features_importance(model) 
-            
-            func_code = "M03"
-            # get actual and predicted values 
-            actual_lst,prediction_lst = self.get_actual_prediction(model)
-            
-            func_code = "M04"
-            # save prediction
-            final_result_dict = self.EvalMetricsObj.save_prediction(self.y_test, prediction_lst, self.target_features_list)
-            
-            func_code = "M05"
-            # all evaluation matrix
-            accuracy,recall,precision,f1_score = self.EvalMetricsObj.get_evaluation_matrix(actual_lst,prediction_lst, model_type='Classification')   
-            
-            func_code = "M06"
-            # get cv score
-            if self.dataset_split_dict['split_method'] == 'cross_validation':
-                cv_score = self.cv_score(model) # default k-fold with 5 (r2-score)
-            else:
-                cv_score = 0
-              
-            func_code = "M07"  
-            # get holdout score
-            holdout_score = self.EvalMetricsObj.holdout_score(self.y_test, prediction_lst, model_type='Classification') # default 80:20 splits (r2-score)
-            
-            func_code = "M08"
-            # get model summary
-            model_summary = self.model_summary() # high level model summary
-           
-            func_code = "M09"
-            # get model learning curve
-            learning_curve_dict = self.get_learning_curve(model)
-            
-            func_code = "M11"
-            # get confusion matrix
-            confusion_matrix_dict = self.EvalMetricsObj.get_confusion_matrix(actual_lst,prediction_lst)
-            
-            func_code = "M12"
-            # Get probaility for each class
-            y_pred_prob = self.EvalMetricsObj.get_predict_proba(model, self.X_test, self.y_train, model_type='sklearn')
-
-            func_code = "M13"
-            # Get ROC Curve values for each class
-            roc_scores = self.EvalMetricsObj.get_performance_curve('roc_curve', model, y_pred_prob, self.y_test)
-
-            func_code = "M14"
-            # Get Precision Recall Values for each class
-            precision_recall_scores = self.EvalMetricsObj.get_performance_curve('precision_recall_curve', model, y_pred_prob, self.y_test)
-            
-
-            func_code = "M10"
-            # log mlflow matrix
-            self.MLFlowLogObj.store_model_metrics(accuracy=accuracy, recall=recall, precision=precision, f1_score=f1_score,
-                                                holdout_score=holdout_score, cv_score=cv_score)
-
-            # log artifacts (output files)
-            self.MLFlowLogObj.store_model_dict(learning_curve=learning_curve_dict, features_importance=features_impact_dict,
-                                                model_summary=model_summary, predictions=final_result_dict,confusion_matrix=confusion_matrix_dict,
-                                                roc_scores=roc_scores, precision_recall_scores=precision_recall_scores)
-
-            # log mlflow parameter
-            self.MLFlowLogObj.store_model_params(self.dataset_split_dict)
-
-            # Store the Machine Learning Model.
-            self.MLFlowLogObj.store_model(model, model_name="XGBoost_Classification", model_type='sklearn')
-
-        except:
-            
-            raise ModelFailed(func_code)
+        classification_func_call(self)
