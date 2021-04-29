@@ -1,7 +1,12 @@
+<div class="page-title-box d-flex align-items-center justify-content-between">
+    <h4 class="mb-0 font-size-18">Data Cleanup</h4>
+    <span>{{project_name}}</span>
+</div>
+
 <!-- <a class="btn btn-success modeling-btn" [routerLink]="['/modeling']" style="right: 290px" [state]="{selectproject:false}"> Modeling</a> -->
 <button type="button" class="btn btn-success modeling-btn" (click)="getCheckSplit()">Modeling</button>
 <a class="btn btn-success modeling-btn hidden" id="modeling-btn" [routerLink]="['/modeling']" [state]="{dataset_id: dataset_id ,project_id:project_id,selectproject:true}">Modeling</a>
-<ul ngbNav #justifiednavdatacleanup="ngbNav" [activeId]="1" class="nav-tabs nav cleanup-tabs">
+<ul ngbNav #justifiednavdatacleanup="ngbNav" [activeId]="1" class="nav-tabs nav-tabs-custom nav-justified nav cleanup-tabs">
     <li [ngbNavItem]="1">
         <a ngbNavLink title="Data Cleanup">
             <span class="">Cleaning</span>
@@ -221,7 +226,7 @@
     <div class="col-md-12">
         <div class="card table-card">
             <div class="card-body">
-                <h4 class="card-title mb-4">{{project_name}} > {{title}}</h4>
+                <h4 class="card-title mb-4">{{title}}</h4>
                 <div [ngbNavOutlet]="justifiednavdatacleanup"></div>
             </div>
         </div>

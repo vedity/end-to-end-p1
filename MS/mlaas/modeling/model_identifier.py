@@ -67,6 +67,8 @@ class ModelClass(SC):
                 
             logging.info("modeling : ModelClass : algorithm_identifier : execution end"+str(result))
 
+            self.set_experiment_state(basic_params_dict, result.status_code)
+
             return result
         except Exception as e:
             return e
@@ -88,10 +90,39 @@ class ModelClass(SC):
         if basic_params_dict['model_type'] in ('Regression','Classification'):
             # Call The Super Class (SupervisedClass) Method's. 
             result = super(ModelClass,self).run_supervised_model(basic_params_dict,self.db_param_dict,model_id,model_name,model_hyperparams)
+
+            self.set_experiment_state(basic_params_dict, result.status_code)
         else:
             print("Unsupervised ML, to be implemented.")
             
         return result
+
+    def set_experiment_state(self, basic_params_dict, status_code):
+        """This function sets the state of the experiment.
+
+        Args:
+            basic_params_dict (dict): contains neccessary variables.
+        """
+        if status_code == 200:
+            dag_state = 'running'
+                
+            exp_name = basic_params_dict['experiment_name']
+            project_id = int(basic_params_dict['project_id'])
+            user_id = int(basic_params_dict['user_id'])
+            dataset_id = int(basic_params_dict['dataset_id'])
+            model_mode = basic_params_dict['model_mode']
+
+            table_name='mlaas.model_dags_tbl'
+            cols = 'exp_name,project_id,dataset_id,user_id,model_mode,dag_state' 
+
+            row = exp_name,project_id,dataset_id,user_id,model_mode,dag_state  
+            row_tuples = [tuple(row)]
+            
+            # Insert current running dag information into external model_dag_tbl.
+            DBObject = self.db_param_dict['DBObject']
+            connection = self.db_param_dict['connection']
+            dag_status = DBObject.insert_records(connection,table_name,row_tuples,cols)
+
         
         
  

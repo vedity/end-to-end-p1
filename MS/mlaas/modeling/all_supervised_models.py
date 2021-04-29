@@ -127,27 +127,27 @@ def start_pipeline(dag,run_id,execution_date,ds,**kwargs):
     """
     # Get Model's Basic Parameter. 
     basic_params_dict = ast.literal_eval(kwargs['dag_run'].conf['basic_params_dict'])
+
     
     dag_id = dag.dag_id
     
-    model_mode = basic_params_dict['model_mode']
     project_id = int(basic_params_dict['project_id'])
     dataset_id = int(basic_params_dict['dataset_id'])
     user_id = int(basic_params_dict['user_id'])
     exp_name  = basic_params_dict['experiment_name']
-    
+
+    model_mode = basic_params_dict['model_mode']
     model_type = basic_params_dict['model_type']
     algorithm_type = basic_params_dict['algorithm_type']
-    
+
     table_name='mlaas.model_dags_tbl'
-    cols = 'dag_id,exp_name,run_id,execution_date,project_id,dataset_id,user_id,model_mode' 
-        
-    row = dag_id,exp_name ,run_id,execution_date,project_id,dataset_id,user_id,model_mode    
-    row_tuples = [tuple(row)]
+    # Update current running dag information into external model_dag_tbl.
+    sql_command = "UPDATE "+table_name+" SET dag_id='"+dag_id+"', run_id='"+run_id+"', execution_date='"+str(execution_date)+"'"\
+                  " WHERE project_id="+str(project_id)+" and exp_name='"+exp_name+"'"
     
-    # Insert current running dag information into external model_dag_tbl.
-    dag_status = DBObject.insert_records(connection,table_name,row_tuples,cols)
+    update_status = DBObject.update_records(connection, sql_command)
     
+
     table_name = 'mlaas.model_experiment_tbl'
     cols = 'project_id,dataset_id,user_id,model_id,model_mode,dag_run_id'
     
@@ -178,6 +178,7 @@ def start_pipeline(dag,run_id,execution_date,ds,**kwargs):
         row = project_id,dataset_id ,user_id,model_id,model_mode,run_id
         row_tuples = [tuple(row)]
         exp_status = DBObject.insert_records(connection,table_name,row_tuples,cols)
+
         
          
  
