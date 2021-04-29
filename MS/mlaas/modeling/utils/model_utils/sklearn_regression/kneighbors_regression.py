@@ -62,6 +62,8 @@ class KNeighborsRegressionClass:
         self.y_train = y_train
         self.y_test = y_test
         self.y_valid = y_valid
+        
+        self.hyperparameters = hyperparameters
 
         self.n_neighbors = int(hyperparameters['n_neighbors'])
         self.metric = hyperparameters['metric']

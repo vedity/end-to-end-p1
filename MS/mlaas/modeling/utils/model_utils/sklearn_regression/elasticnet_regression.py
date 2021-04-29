@@ -69,6 +69,7 @@ class ElasticNetClass:
         self.y_test = y_test
         self.y_valid = y_valid
         
+        self.hyperparameters = hyperparameters
         # Model Hyperparameters Initialization.
         self.alpha = float(hyperparameters['alpha'])
         self.l1_ratio = float(hyperparameters['l1_ratio'])

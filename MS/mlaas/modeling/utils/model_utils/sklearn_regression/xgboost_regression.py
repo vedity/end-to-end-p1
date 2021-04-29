@@ -49,6 +49,8 @@ class XGBoostRegressionClass:
         self.X_test = X_test
         self.y_test = y_test
         
+        self.hyperparameters = hyperparameters
+        
         # Hyper Parameter list
         self.learning_rate = float(hyperparameters['learning_rate'])
         self.max_depth = int(hyperparameters['max_depth'])
