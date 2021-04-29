@@ -61,7 +61,7 @@
                                         <!-- {{data.data_type}} -->
                                     </td>
                                     <td>
-                                        <select class="form-control selectattr" id="selectattr_{{i}}" (change)="changeattrinute($event.target.value,i)">
+                                        <select class="form-control selectattr" [disabled]="isFeatureSelected" id="selectattr_{{i}}" (change)="changeattrinute($event.target.value,i)">
                                         <!-- <option value="">Select Option</option> -->
                                         <option *ngFor="let item of columnattrList" [disabled]="item=='Target' && targetColumn!=0" value="{{item}}" [selected]="item==data.column_attribute">{{item}}
                                         </option>

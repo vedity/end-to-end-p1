@@ -160,4 +160,10 @@ export class ModelingTypeApiService {
     .append("schema_id", schema_id)
     return this.httpClient.get(this.baseUrl + "modeling/checksplit/", { headers: this.headers,params });
   }
+
+  getRocCurve(experiment_id){
+    var params = new HttpParams().append("experiment_id", experiment_id);
+    return this.httpClient.get(this.baseUrl + "modeling/roccurve/", { headers: this.headers, params });
+  
+  }
 }
