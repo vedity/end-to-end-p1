@@ -49,6 +49,8 @@ class RandomForestRegressionClass:
         self.y_train = y_train
         self.y_test = y_test
         self.y_valid = y_valid
+        
+        self.hyperparameters = hyperparameters
 
         self.n_estimators = int(hyperparameters['n_estimators'])
         self.criterion = hyperparameters['criterion']

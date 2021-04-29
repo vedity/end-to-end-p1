@@ -51,6 +51,8 @@ class DecisionTreeRegressionClass:
         self.y_train = y_train
         self.y_test = y_test
         self.y_valid = y_valid
+        
+        self.hyperparameters = hyperparameters
 
         self.criterion = hyperparameters['criterion']
         self.max_features = hyperparameters['max_features']
