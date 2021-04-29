@@ -45,7 +45,7 @@ class EncodeClass:
             status = DBObject.update_records(connection,sql_command)
 
             #Convert updated column datatype to Integer
-            update_dtype_sql_command = f'ALTER TABLE {table_name} ALTER COLUMN "{column_list[1]}" type "int8" USING "{column_list[1]}"::bigint;'
+            update_dtype_sql_command = f'ALTER TABLE {table_name} ALTER COLUMN "{column_list[1]}" type "int8" USING "{column_list[1]}"::int;'
             status = DBObject.update_records(connection,update_dtype_sql_command)
 
             logging.info("data preprocess : EncodeClass : label_encoding : execution end")

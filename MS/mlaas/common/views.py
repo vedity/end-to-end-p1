@@ -21,6 +21,7 @@ from .utils.logger_handler import custom_logger as cl
 from .utils.json_format.json_formater import *
 from .utils.activity_timeline import *
 from .utils.activity_timeline import activity_timeline
+from .utils.dynamic_dag import dag_utils
 
 
 user_name = 'admin'
@@ -33,6 +34,7 @@ DBObject=db.DBClass()     #Get DBClass object
 connection,connection_string=DBObject.database_connection(database,user,password,host,port) #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 timeline_Obj=activity_timeline.ActivityTimelineClass(database,user,password,host,port) #initialize ActivityTimeline Class
 json_obj = JsonFormatClass() #initialize JsonFormat Class
+dag_obj = dag_utils.DagUtilsClass()
 
 class UserLoginClass(APIView):
         
@@ -253,5 +255,17 @@ class LogFileClass(APIView):
                         logging.error("Common  : LogFileClass : GET Method : Exception :" + str(e))
                         logging.error("Common  : LogFileClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+
+class DagInfoClass(APIView):
+        def get(self,request,format=None):
+                try:
+                        index,dag_id = dag_obj.get_dag(connection)
+
+                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":(index,dag_id)})  
+                except Exception as e:
+                        logging.error("Common  : LogFileClass : GET Method : Exception :" + str(e))
+                        logging.error("Common  : LogFileClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+
 
 
