@@ -1,26 +1,23 @@
+
+#* Library Imports
 from pandas import read_csv
 from sklearn.model_selection import train_test_split
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
 from sklearn.feature_selection import mutual_info_classif
 from sklearn.preprocessing import LabelEncoder
+import logging
+import warnings
+
+#* Relative Imports
 from .fs_utility import FSUtilityClass
 from .mutual_info import MutualInfoClass
 from .chisq import ChiSquareClass
 from .RFE import RFEClass
 from .anova import AnovaClass
 from .coorelation import CoorelationClass
-import logging
-import warnings
 warnings.filterwarnings("ignore")
 
-
-# fu = FSUtilityClass()
-# mi = MutualInfoClass()
-# cs = ChiSquareClass()
-# rfe = RFEClass()
-# an = AnovaClass()
-# cf = CoorelationClass()
 class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFEClass,AnovaClass,CoorelationClass):
 
     def algo_call(self,DBObject,connection,dataset_id,schema_id,target_col,choice):
