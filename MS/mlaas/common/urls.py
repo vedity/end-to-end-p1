@@ -15,4 +15,7 @@ urlpatterns = [
     #url to read logfile 
     path('mlaas/common/logfile/',LogFileClass.as_view()),
 
+    #url to get dag details
+    path('mlaas/common/daginfo/',DagInfoClass.as_view()),
+
 ]
