@@ -19,13 +19,13 @@ from common.utils import dynamic_dag
 
 #* Class Imports
 from ingest.utils.dataset import dataset_creation
-from .Exploration import dataset_exploration as de
+from .exploration import dataset_exploration as de
 from .schema import schema_creation as sc
 from .cleaning import noise_reduction as nr
 from .cleaning import cleaning
-from .Transformation import transformation as trs
-from .Transformation import split_data 
-from .Transformation.model_type_identifier import ModelTypeClass
+from .transformation import transformation as trs
+from .transformation import split_data 
+from .transformation.model_type_identifier import ModelTypeClass
 from database import *
 
 #* Library Imports
@@ -1193,7 +1193,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             dataset_name = datasetnm_df['dataset_name'][0]
             
             #? Getting Project name
-            projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
+            projectnm_df = DBObject.get_project_detail(connection,project_id)
             project_name = projectnm_df['project_name'][0]
 
             #? Getting Activity Description
@@ -1429,3 +1429,44 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         except Exception as e:
             logging.error(f"data preprocessing : CleaningClass : get_activity_desc : execution failed : {str(e)}")
             return str(e)
+
+    def check_cleanup_status(self,DBObject,connection,project_id):
+        try:
+            logging.info("data preprocessing : CleaningClass : check_cleanup_status : execution start")
+            
+            #? Getting Dag id
+            
+            dag_id_df = DBObject.get_project_detail(connection,project_id)
+            
+            if not isinstance(dag_id_df,pd.DataFrame): #! Failed to get dag status
+                raise NullValue(500)
+
+            dag_id,model_status = str(dag_id_df['cleanup_dag_id'][0]),int(dag_id_df['model_status'])
+            
+            
+            #Query to get count value of "Success" state based on dag_id.
+            sql_command=f'''select case when count("state") >= 1 then 0 else 1 end as value
+                                from public."task_instance" where dag_id ='{dag_id}' and
+                                task_id like 'Operation%' and  state = 'success' '''
+
+            task_instance_df = DBObject.select_records(connection,sql_command) 
+                
+            #! Failed to get Count status for cleanup id
+            if not isinstance(task_instance_df,pd.DataFrame): 
+                raise NullValue(500)
+                
+            dag_instance_status = int(task_instance_df['value'][0])
+            
+            if dag_instance_status == 0 or model_status != -1 :
+                dag_status = True
+            else:
+                dag_status = False
+
+            logging.info(f"data preprocessing : CleaningClass : check_cleanup_status : execution stop :status :{dag_status}")
+
+            return dag_status
+
+        except (NullValue) as exc:
+            logging.error(f"data preprocessing : CleaningClass : check_cleanup_status : execution failed : {str(exc)}")
+            return str(exc)
+

@@ -31,7 +31,7 @@ from common.utils.database import db
 # Preprocess file imports
 from preprocess.utils import preprocessing
 from preprocess.utils.schema.schema_creation import *
-from preprocess.utils.Transformation.split_data import SplitDataClass
+from preprocess.utils.transformation.split_data import SplitDataClass
 
 #Manual modeling file imports
 from modeling.utils.modeling_dag_utils.dag_common_utils import get_modeling_dag_name

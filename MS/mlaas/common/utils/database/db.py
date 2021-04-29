@@ -640,14 +640,14 @@ class DBClass:
         dataset_df=self.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         return dataset_df 
     
-    def get_project_detail(self,DBObject,connection,project_id):
+    def get_project_detail(self,connection,project_id):
         '''This function is used to get details for project table.
         Args:
                 project_id[(Integer)] : [Id of the project table]
         Return : 
                 [Dataframe] : [return the dataframe of project table]
         '''
-        sql_command = "SELECT user_name,original_dataset_id,dataset_id,project_name from mlaas.project_tbl where project_id='"+str(project_id)+"'"
+        sql_command = "SELECT user_name,original_dataset_id,dataset_id,project_name,model_status,cleanup_dag_id from mlaas.project_tbl where project_id='"+str(project_id)+"'"
        
         dataset_df=self.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         return dataset_df
@@ -1045,8 +1045,3 @@ class DBClass:
             logging.error("database : DBClass : get_dataset_df : " +traceback.format_exc())
             return exc.msg
             
-            
-        
-       
-        
-
