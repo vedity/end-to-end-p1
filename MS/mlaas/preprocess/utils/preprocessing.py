@@ -720,10 +720,13 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 #scale the dataframe    
                 if int(scaling_type) == 0:
                     input_feature_df.iloc[:,1:] = super().standard_scaling(input_feature_df.iloc[:,1:]) #standard_scaling
+                    scale_type = 'standard_scaling' 
                 elif int(scaling_type) == 1:
                     input_feature_df.iloc[:,1:] = super().min_max_scaling(input_feature_df.iloc[:,1:]) #min_max_scaling
+                    scale_type = 'min_max_scaling' 
                 elif int(scaling_type) == 2:
                     input_feature_df.iloc[:,1:] = super().robust_scaling(input_feature_df.iloc[:,1:]) #robust_scaling
+                    scale_type = 'robust_scaling' 
             except:
                 raise ScalingFailed(500)
 
@@ -753,6 +756,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             test_ratio = split_parameters['test_ratio'] #get test_size
             
             valid_ratio = split_parameters['valid_ratio'] #get valid_size
+            logging.info("   ++valid_ratio"+str(valid_ratio))
             if len(valid_ratio) == 0:
                 valid_ratio= 0
             else:
@@ -764,7 +768,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             test_Y_filename =  scale_dir+"/scaled_test_Y_data_" + unique_id  #genrate test_Y file path     
             valid_X_filename = "None"
             valid_Y_filename = "None"
-            Y_valid_count= None
+            Y_valid_count= 0
             X_train, X_valid, X_test, Y_train, Y_valid, Y_test=sp.get_split_data(input_features_df,target_features_df, int(random_state),float(test_ratio), valid_ratio, str(split_method))
             if isinstance(X_train,str):
                 return X_train
@@ -785,7 +789,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             np.save(test_Y_filename,Y_test.to_numpy()) #save Y_test
             
         
-            scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_ratio)+', "test_ratio":'+ str(test_ratio)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'","actual_Y_filename":"'+actual_Y_filename+".npy"+'"}' #genrate scaled split parameters
+            scaled_split_parameters = '{"scaling_type":"'+str(scale_type)+'","split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_ratio)+', "test_ratio":'+ str(test_ratio)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'","actual_Y_filename":"'+actual_Y_filename+".npy"+'"}' #genrate scaled split parameters
             logger.info("scaled_split_parameters=="+scaled_split_parameters)
             sql_command = f"update mlaas.project_tbl set target_features= '{target_cols}' ,input_features='{feature_cols}',scaled_split_parameters = '{scaled_split_parameters}',problem_type = '{problem_type_dict}' where dataset_id = '{dataset_id}' and project_id = '{project_id}' and user_name= '{user_name}'"
             status = DBObject.update_records(connection, sql_command)

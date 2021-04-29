@@ -160,6 +160,7 @@ class ModelStatisticsClass:
             logging.error("modeling : ModelStatisticsClass : model_summary : " +traceback.format_exc())
             return exc.msg
 
+
     def show_confusion_matrix(self,experiment_id):
             
         """
@@ -179,7 +180,7 @@ class ModelStatisticsClass:
         confusion_matrix_df = pd.DataFrame(confusion_matrix)
         confusion_matrix_dict = confusion_matrix_df.to_dict()
     
-        key = np.unique(unscaled_df[target_features[1:]+'_str']).tolist()
+        key = np.unique(unscaled_df[target_features[1]+'_str']).tolist()
     
         key_val = []
 
@@ -218,7 +219,7 @@ class ModelStatisticsClass:
         
         return final_dict
 
-    
+
     def performance_metrics(self, experiment_id):
         """This function is used to get performance_metrics of particular experiment.
 
@@ -297,6 +298,7 @@ class ModelStatisticsClass:
             logging.error("modeling : ModelStatisticsClass : show_running_experiments : " +traceback.format_exc())
             return exc.msg
 
+
     def check_running_experiments(self, project_id):
 
         try:
@@ -356,8 +358,30 @@ class ModelStatisticsClass:
             logging.error("modeling : ModelStatisticsClass : show_all_experiments : " +traceback.format_exc())
             return exc.msg
         
+
+    def refresh_modeling(self, project_id):
+        sql_command = "select dag_state from mlaas.model_dags_tbl where project_id="+str(project_id)+" order by execution_date limit 1"
+        state_df = self.DBObject.select_records(self.connection, sql_command)
+        if state_df is None:
+            raise DatabaseConnectionFailed(500)
+
+        if len(state_df) == 0 :
+            raise DataNotFound(500)
+
+        state = state_df['dag_state'][0]
+        if state == 'running':
+            state = 0
         
-    def check_model_status(self,project_id,experiment_name):
+        if state == 'success':
+            state = 1
+
+        if state == 'failed':
+            state = 2
+        
+        return state
+
+
+    def check_model_status(self,project_id,experiment_name=None):
         """This function is used to check the 'state' of the given experiment.
 
         Args:
@@ -374,6 +398,9 @@ class ModelStatisticsClass:
         
         try:
             logging.info("modeling : ModelStatisticsClass : check_model_status : Exception Start")
+            if experiment_name == None:
+                state = self.refresh_modeling(project_id)
+                return state
             # Get dag_id and run_id from the model_dags_tbl with associated experiment_name.
             sql_command ="select dag_id,run_id from mlaas.model_dags_tbl where project_id="+str(project_id)+" and exp_name='"+experiment_name+"'"
             
@@ -382,11 +409,14 @@ class ModelStatisticsClass:
             if dag_df is None:
                 raise DatabaseConnectionFailed(500)
 
-            if len(dag_df) == 0 :
+            if len(dag_df) == 0:
                 return 0
             
             dag_id,run_id = dag_df['dag_id'][0],dag_df['run_id'][0]
-            
+            if not isinstance(dag_id, str):
+                logging.info("DAG ID:--------------------------------"+str(dag_id))
+                return 0
+
             # Get the state of the experiment associated with run_id.
             sql_command = "select state from dag_run where dag_id='"+dag_id+"' and run_id='"+run_id +"'"
             state_df = self.DBObject.select_records(self.connection, sql_command)
@@ -410,13 +440,18 @@ class ModelStatisticsClass:
                 if len(exp_state_df) == 0:
                     st=1
                 else:
-                    st=2         
+                    status = 'failed'
+                    st=2
             else:
                 st=2
             
             # Update the model_status in the project table.
             sql_command = "update mlaas.project_tbl set model_status="+str(st)+" where project_id="+str(project_id)
             project_upd_status = self.DBObject.update_records(self.connection,sql_command)
+
+            if st != 0:
+                sql_command = "update mlaas.model_dags_tbl set dag_state='"+status+"' where run_id='"+run_id+"'"
+                model_dag_upd_status = self.DBObject.update_records(self.connection,sql_command)
             #status=state_df['state'][0]
             logging.info("modeling : ModelStatisticsClass : check_model_status : Exception End")
             return st
@@ -425,8 +460,8 @@ class ModelStatisticsClass:
             logging.error("modeling : ModelStatisticsClass : check_model_status : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : check_model_status : " +traceback.format_exc())
             return exc.msg
-    
 
+    
     def check_existing_experiment(self,project_id, experiment_name):
         """Checks if the experiment_name entered by the user already exists in a particular project id or not.
 
@@ -457,7 +492,7 @@ class ModelStatisticsClass:
             logging.error("modeling : ModelStatisticsClass : check_existing_experiment : " +traceback.format_exc())
             return exc.msg
 
-        
+
     def compare_experiments_grid(self, experiment_ids):
         """This function is called when user wants to compare multiple experiments.
 
@@ -532,10 +567,58 @@ class ModelStatisticsClass:
             logging.error("modeling : ModelStatisticsClass : compare_experiments_grid : " +traceback.format_exc())
             return exc.msg
 
+    def can_compare_experiments(self, experiment_ids):
+        """Calculates whether the given experiments can be compared or not.
+
+        Args:
+            experiment_ids (tuple): experiment ids
+
+        Returns:
+            compare: boolean
+        """
+        try:
+            exp_ids = tuple(experiment_ids)
+            sql_command = 'select key, value, run_uuid from mlaas.model_experiment_tbl met, mlflow.params prm where met.run_uuid=prm.run_uuid and met.experiment_id in'+str(exp_ids)
+            params_df = self.DBObject.select_records(self.connection, sql_command)
+            
+            if params_df is None:
+                raise DatabaseConnectionFailed(500)
+
+            if len(params_df) == 0 :
+                raise DataNotFound(500)
+            
+            pivot_df = params_df.pivot(index='run_uuid', columns='key', values='value')
+
+            different_list = []
+            for i in range(len(exp_ids) - 1):
+                for j in range(i+1, len(exp_ids)):
+                    if pivot_df.iloc[i, :] != pivot_df.iloc[j, :]:
+                        different_list.append(i)
+                        different_list.append(j)
+            
+            if len(different_list) != 0:
+                sql_command = 'select name from mlflow.experiments where experiment_id='+str(exp_ids)
+                exp_names_df = self.DBObject.select_records(self.connection, sql_command)
+                if exp_names_df is None:
+                    raise DatabaseConnectionFailed(500)
+
+                if len(exp_names_df) == 0:
+                    raise DataNotFound(500)
+                exp_names = list(exp_names_df['name'])
+                
+            else:
+                compare = True
+            
+            return compare
+               
+        except Exception as e:
+            return e
+
 
     def compare_experiments_graph(self, experiment_ids):
         try:
             logging.info("modeling : ModelStatisticsClass : compare_experiments_graph : Exception Start")
+            # compare = self.can_compare_experiments(experiment_ids)
             sql_command = "SELECT model_type from mlaas.model_experiment_tbl met, mlaas.model_master_tbl mmt where met.model_id = mmt.model_id and met.experiment_id in"+str(experiment_ids)
             model_types_df = self.DBObject.select_records(self.connection, sql_command)
             if model_types_df is None:
@@ -592,5 +675,4 @@ class ModelStatisticsClass:
             logging.error("modeling : ModelStatisticsClass : compare_experiments_graph : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : compare_experiments_graph : " +traceback.format_exc())
             return exc.msg
-
         

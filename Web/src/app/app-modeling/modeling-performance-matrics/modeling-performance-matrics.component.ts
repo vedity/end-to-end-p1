@@ -10,7 +10,13 @@ import { ModelingTypeApiService } from '../modeling-type.service';
 })
 export class ModelingPerformanceMatricsComponent implements OnInit {
   @Input() public experiment_id: any;
+  @Input() public model_type: any;
   responsedata: any;
+
+  expandclass:any = "";
+  public lineColumAreaChart: any;
+  public chartOptions: any;
+
   animation = "progress-dark";
   theme = {
     'border-radius': '5px',
@@ -22,7 +28,15 @@ export class ModelingPerformanceMatricsComponent implements OnInit {
   constructor(public router: Router, public apiservice: ModelingTypeApiService, public toaster: ToastrService) { }
 
   ngOnInit(): void {
+console.log(this.model_type);
+    
     this.getPerformanceMatrics();
+    if(this.model_type=='Classification'){
+    this.getConfusionMatrics();
+    this.getRocCurve();
+    }
+    else{
+    }
   }
 
   getPerformanceMatrics() {
@@ -34,12 +48,162 @@ export class ModelingPerformanceMatricsComponent implements OnInit {
   successHandler(data) {
     if (data.status_code == "200") {
       this.responsedata = data.response;
-      // console.log(this.responsedata);
-      // this.toaster.success(data.error_msg, 'Success');
     }
     else {
       this.errorHandler(data);
     }
+  }
+
+  getRocCurve(){
+    this.apiservice.getRocCurve(this.experiment_id).subscribe(
+      logs => this.rocCurveSuccessHandler(logs),
+      error => this.errorHandler(error));
+  }
+
+  rocCurveSuccessHandler(data){
+    if(data.status_code=="200"){
+      // let series=this.generateROCData(data.response);
+      this.lineColumAreaChart = {
+        series: this.generateROCData(data.response),
+        chart: {
+          id: "chart2",
+          type: "line",
+          height: 350,
+          toolbar: {
+            show: true
+          }
+        },
+        // colors: ['#34c38f','#c3c3c3'],
+        stroke: {
+          width: 4,
+          curve: "smooth"
+        },
+        dataLabels: {
+          enabled: false
+        },
+        fill: {
+          opacity: 1
+        },
+        markers: {
+          size: 0
+        },
+        xaxis: {
+          labels: {
+            show: true,
+            formatter: function(value){
+              return value.toFixed(2).toString();
+            }
+          },
+        },
+        yaxis: {
+          labels: {
+            show: true,
+            formatter: function(value){
+              return value.toFixed(2).toString();
+            }
+          },
+        }
+      };
+    }
+    else{
+      this.errorHandler(data);
+    }
+  }
+
+  generateROCData(data){
+    var keys=data.classes;
+    var xaxis=data.FPR;
+    var yaxis=data.TPR;var serieslist=[];
+    keys.forEach(element => {
+      var x=xaxis[element]
+      var y=yaxis[element]
+      var series=[]
+      x.forEach((elem,index) => {
+        series.push([elem, y[index]]);
+      });
+      serieslist.push({name:element,data:series})
+    });
+    return serieslist;
+  }
+
+  getConfusionMatrics(){
+ this.apiservice.getConfusionMatrics(this.experiment_id).subscribe(
+  logs => this.confusionMatricsSuccessHandler(logs),
+  error => this.errorHandler(error));
+  }
+
+  confusionMatricsSuccessHandler(data){
+    if(data.status_code=="200"){
+      var matricsdata=data.response;
+      this.chartOptions = {
+        series: this.geneateConfusionmatricsdata(matricsdata),
+        chart: {
+          height: 300,
+        
+          type: "heatmap",
+          toolbar: {
+            show: false
+          }
+        },
+        dataLabels: {
+          enabled: true
+        },
+        plotOptions: {
+          heatmap: {
+            shadeIntensity: 0.5,
+            colorScale: {
+              ranges: [
+                
+                {
+                  from: 0,
+                  to: 100,
+                  color: "#34c38f"
+                },{
+                    from:101,
+                    to:1000,
+                    color:"#00A100"
+                }
+  
+              ]
+            }
+          }
+        }
+        
+      };
+    }
+    else{
+      this.errorHandler(data);
+    }
+  }
+
+  geneateConfusionmatricsdata(data){
+    let serieslist=[];
+    data.key_val.forEach((element,index) => {
+      let series=[];
+      data.key.forEach((elem,i) => {
+        series.push({x:elem,y:element[i]})
+      });
+      serieslist.push({name: data.key[index],data: series});
+    });
+    return serieslist;
+    
+  }
+
+  public generateData(count, yrange) {
+    var i = 0;
+    var series = [];
+    while (i < count) {
+      var x = "Metric" + (i + 1).toString();
+      var y =
+        Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
+
+      series.push({
+        x: x,
+        y: y
+      });
+      i++;
+    }
+    return series;
   }
 
   errorHandler(error) {
@@ -49,4 +213,13 @@ export class ModelingPerformanceMatricsComponent implements OnInit {
       this.toaster.error('Something went wrong', 'Error');
     }
   }
+  allowExpand(type) {
+    if(type=='right')
+    this.expandclass==''?this.expandclass='right-expand':this.expandclass='';
+    if(type=='left')
+    this.expandclass==''?this.expandclass='left-expand':this.expandclass='';
+    
+    window.dispatchEvent(new Event('resize'));
+  }
+  
 }

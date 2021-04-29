@@ -127,35 +127,32 @@ def start_pipeline(dag,run_id,execution_date,ds,**kwargs):
     """
     # Get Model's Basic Parameter. 
     basic_params_dict = ast.literal_eval(kwargs['dag_run'].conf['basic_params_dict'])
+
     
     dag_id = dag.dag_id
     
-    model_mode = basic_params_dict['model_mode']
     project_id = int(basic_params_dict['project_id'])
     dataset_id = int(basic_params_dict['dataset_id'])
     user_id = int(basic_params_dict['user_id'])
     exp_name  = basic_params_dict['experiment_name']
-    
+
+    model_mode = basic_params_dict['model_mode']
     model_type = basic_params_dict['model_type']
     algorithm_type = basic_params_dict['algorithm_type']
-    
+
     table_name='mlaas.model_dags_tbl'
-    cols = 'dag_id,exp_name,run_id,execution_date,project_id,dataset_id,user_id,model_mode' 
-        
-    row = dag_id,exp_name ,run_id,execution_date,project_id,dataset_id,user_id,model_mode    
-    row_tuples = [tuple(row)]
+    # Update current running dag information into external model_dag_tbl.
+    sql_command = "UPDATE "+table_name+" SET dag_id='"+dag_id+"', run_id='"+run_id+"', execution_date='"+str(execution_date)+"'"\
+                  " WHERE project_id="+str(project_id)+" and exp_name='"+exp_name+"'"
     
-    # Insert current running dag information into external model_dag_tbl.
-    dag_status = DBObject.insert_records(connection,table_name,row_tuples,cols)
+    update_status = DBObject.update_records(connection, sql_command)
     
+
     table_name = 'mlaas.model_experiment_tbl'
     cols = 'project_id,dataset_id,user_id,model_id,model_mode,dag_run_id'
     
     # Check Whether Model is running into auto or manual mode.
     if model_mode.lower() == 'auto' :
-        
-        if algorithm_type != 'Binary':
-            algorithm_type=algorithm_type[:-5]
         
         # This sql command get model ids from model master table for passed model type and algorithm type.
         sql_command = "select model_id from mlaas.model_master_tbl where model_type='"+ model_type +"'"\
@@ -178,6 +175,7 @@ def start_pipeline(dag,run_id,execution_date,ds,**kwargs):
         row = project_id,dataset_id ,user_id,model_id,model_mode,run_id
         row_tuples = [tuple(row)]
         exp_status = DBObject.insert_records(connection,table_name,row_tuples,cols)
+
         
          
  
@@ -205,7 +203,6 @@ def supervised_models(run_id,**kwargs):
         algorithm_type = basic_params_dict['algorithm_type']
         experiment_name  = basic_params_dict['experiment_name']
             
-        print("basic split param ==",algorithm_type)
         # Get Input,Target Features List And ALl numpy array of train test and valid datasets and also scaled splits parameters dict.
         input_features_list, target_features_list, X_train, X_test, X_valid, y_train, y_test, y_valid, scaled_split_dict= get_model_data(user_id, project_id, dataset_id)
         
@@ -214,12 +211,7 @@ def supervised_models(run_id,**kwargs):
         model_class_name = kwargs['model_class_name']
         hyperparameters = kwargs['model_hyperparams']  
         
-        print("master dict==",kwargs['algorithm_type'])
-        
-        # Check Whether Running Model is Multi Class Or Not.
-        # if algorithm_type != 'Binary':
-            # algorithm_type=algorithm_type[:-5]
-            
+        hyperparameters['model_name'] = model_name
         
         check_flag = 'outside'
         dag_run_id = run_id
@@ -257,6 +249,8 @@ def supervised_models(run_id,**kwargs):
                     failed_reason=traceback.format_exc().splitlines()
                     model_failed_reason_dict= {'main reason': mf.msg,'failed_reason':failed_reason}
                     mlflow.log_dict(model_failed_reason_dict,'model_failed_reason.json')
+                    
+                    raise ModelFailed(mf.status_code)
                  
     except:
         
@@ -264,6 +258,8 @@ def supervised_models(run_id,**kwargs):
             upd_exp_status = ExpObject.update_experiment('Failed',check_flag,dag_run_id,model_id)
         else:
             upd_exp_status = ExpObject.update_experiment('Failed',check_flag,dag_run_id)
+            
+        raise ModelFailed(100)
             
             
       

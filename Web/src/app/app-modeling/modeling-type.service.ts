@@ -98,6 +98,12 @@ export class ModelingTypeApiService {
     return this.httpClient.get(this.baseUrl + "modeling/performancemetrics/", { headers: this.headers, params });
   }
 
+  getConfusionMatrics(experiment_id): Observable<any> {
+    //experiment_id=2;
+    var params = new HttpParams().append("experiment_id", experiment_id);
+    return this.httpClient.get(this.baseUrl + "modeling/confusionmatrix/", { headers: this.headers, params });
+  }
+
   getModelSummary(experiment_id): Observable<any> {
    // experiment_id=2;
     var params = new HttpParams().append("experiment_id", experiment_id);
@@ -153,5 +159,11 @@ export class ModelingTypeApiService {
     var params = new HttpParams().append("project_id", project_id)
     .append("schema_id", schema_id)
     return this.httpClient.get(this.baseUrl + "modeling/checksplit/", { headers: this.headers,params });
+  }
+
+  getRocCurve(experiment_id){
+    var params = new HttpParams().append("experiment_id", experiment_id);
+    return this.httpClient.get(this.baseUrl + "modeling/roccurve/", { headers: this.headers, params });
+  
   }
 }

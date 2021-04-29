@@ -17,10 +17,10 @@
     </li>
     <li [ngbNavItem]="3">
         <a ngbNavLink>
-            <span class="font-size-12">Performance Metrics</span>
+            <span class="font-size-12">Evaluate</span>
         </a>
         <ng-template ngbNavContent>
-            <app-modeling-performance-matrics [experiment_id]="experiment_id"></app-modeling-performance-matrics>
+            <app-modeling-performance-matrics [model_type]="model_type" [experiment_id]="experiment_id"></app-modeling-performance-matrics>
         </ng-template>
     </li>
 
@@ -41,13 +41,13 @@
         </ng-template>
     </li>
     <!-- *ngIf="model_type=='Classification'" -->
-    <li [ngbNavItem]="6">
+    <!-- <li [ngbNavItem]="6">
         <a ngbNavLink>
             <span class="font-size-12">Confusion Metrics</span>
         </a>
         <ng-template ngbNavContent>
             <app-modeling-confusion-matrics [experiment_id]="experiment_id"></app-modeling-confusion-matrics>
         </ng-template>
-    </li>
+    </li> -->
 </ul>
 <div [ngbNavOutlet]="justifiednavnew"></div>

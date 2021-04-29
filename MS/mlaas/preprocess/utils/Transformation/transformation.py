@@ -169,7 +169,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
             This function will update column with numeric sequence.
             Operation id: dp_261
         '''
-        #Operation Id to get activity details
+        #Activity id for starting of label_encoding operation i.e (data preprocessing : 261)
         operation_id = 'dp_261'
 
         logging.info("data preprocessing : TransformationClass : label_encoding : execution start" + str(col))
@@ -212,7 +212,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         cols = [column_list[i] for i in col]
         old_cols = [old_column_list[i] for i in col]
         
-        #Operation Id to get activity details
+        #Activity id for starting of label_encoding operation i.e (data preprocessing : 271)
         operation_id = 'dp_271'
 
         for i,col_name in enumerate(cols):

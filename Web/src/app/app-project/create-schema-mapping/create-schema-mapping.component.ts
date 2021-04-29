@@ -15,7 +15,7 @@ export class CreateSchemaMappingComponent implements OnInit {
   datatableElement: DataTableDirective;
   dtOptions: DataTables.Settings = {};
   dtTrigger: Subject<any> = new Subject<any>();
-
+  targetColumn: any=0;
   constructor(public apiService: SchemaMappingApiService, public router: Router, public toaster: ToastrService, private modalService: NgbModal) { }
   @Input() public dataset_id: any;
   @Input() public title: any;
@@ -95,7 +95,7 @@ export class CreateSchemaMappingComponent implements OnInit {
     }
     this.displaydiv = true;
     this.getColumnAttributeList();
-    this.getFeatureSelection();
+    //this.getFeatureSelection();
     // console.log(this.project_id, this.dataset_id);
     this.getSchema(this.project_id, this.dataset_id, this.schema_id);
   }
@@ -108,7 +108,6 @@ export class CreateSchemaMappingComponent implements OnInit {
   }
 
   successHandler(logs) {
-    this.displaydiv = false;
     this.datasetSchema = logs.response;
     this.Originaldata = logs.response;
     setTimeout(() => {
@@ -128,11 +127,51 @@ export class CreateSchemaMappingComponent implements OnInit {
           });
         });
       }
-
+      if ($("tbody").find('.Target-selected').length > 0) {
+        console.log("target column exist");
+        this.targetColumn = 1;
+        console.log(this.targetColumn);
+      }
     }, 0);
+    this.displaydiv = false;
+
   }
 
+  isitemselected=false;
+  selecteditem:any;
+  selectedOption(item,i){
+    $(".featureoptios").removeClass('selected');
+    $("#option_"+i).addClass("selected");
+    this.selecteditem=item;
+    this.isitemselected=true;
+  }
 
+  canceloption(){
+    this.isitemselected=false;
+    this.selecteditem=undefined;
+  }
+
+  isFeatureSelected=false;
+  saveoption(){
+    this.isFeatureSelected=false;
+    if(this.selecteditem){
+      this.datasetSchema.forEach(element => {
+        var data=this.selecteditem.colums[element.column_name];
+        console.log(element);
+        console.log(data);
+        if(data=="True")
+        element.column_attribute='Select';
+        if(data=="False")
+        element.column_attribute='Ignore';
+        this.isFeatureSelected=true;
+      });
+      this.modalService.dismissAll();
+    }
+    else{
+    this.isitemselected=false;
+    this.selecteditem=undefined;
+    }
+  }
 
   getColumnAttributeList() {
     this.apiService.getColumnAttributes().subscribe(
@@ -195,18 +234,22 @@ export class CreateSchemaMappingComponent implements OnInit {
   }
 
   featuresList: any;
-  getFeatureSelection() {
-    this.apiService.getfeatureSelection().subscribe(
-      logs => this.SuccessFeatureSelection(logs),
+  getFeatureSelection(schemarecommodate) {
+    // var target=$('.Target-selected').prop('id').split('_')[1];
+    // var target_col=$('.columnname_'+target).prop('id').split('_')[1];
+    this.apiService.getfeatureSelection(this.dataset_id, this.schema_id, this.targetColumnName).subscribe(
+      logs => this.SuccessFeatureSelection(logs,schemarecommodate),
       error => this.errorHandler(error)
     )
   }
 
-  SuccessFeatureSelection(data) {
-    if (data.status_code == "200") {
+  SuccessFeatureSelection(data,schemarecommodate) {
+    if (data.status_code == "200" && this.startfeatureslection==true) {
       this.featuresList = data.response;
       console.log(this.featuresList);
-
+      this.displayselection = false;
+      this.modalService.open(schemarecommodate, { size: 'xl', windowClass: 'modal-holder', centered: true });
+      this.startfeatureslection=false;
     }
     else {
       this.errorHandler(data);
@@ -318,9 +361,7 @@ export class CreateSchemaMappingComponent implements OnInit {
   //     });
   //     // console.log(this.saveAs);
   //     this.apiService.saveasDatasetSchema(this.project_id, this.saveAs.dataset_name, this.saveAs.description, this.saveAs.isPrivate, "Save as", { data: savedata }).subscribe(logs => this.savesuccessHandler(logs), error => this.errorHandler(error));
-
   //   }
-
   // }
 
   savesuccessHandler(data) {
@@ -328,7 +369,6 @@ export class CreateSchemaMappingComponent implements OnInit {
     if (data.status_code == "200") {
       this.toaster.success(data.error_msg, "Success");
       this.reset();
-
     }
     else
       this.errorHandler(data);
@@ -343,9 +383,15 @@ export class CreateSchemaMappingComponent implements OnInit {
   }
 
   changeattrinute(value, i) {
-    $("#tr_" + i).removeClass("target-selected");
-    if (value == "target") {
-      $("#tr_" + i).addClass("target-selected");
+    $("#tr_" + i).removeClass("Target-selected");
+    if (value == "Target") {
+      $("#tr_" + i).addClass("Target-selected");
+    }
+    if ($("tbody").find('.Target-selected').length > 0) {
+      this.targetColumn = 1;
+    }
+    else {
+      this.targetColumn = 0;
     }
   }
 
@@ -364,7 +410,25 @@ export class CreateSchemaMappingComponent implements OnInit {
     $('.filter').val('').trigger('change');
   }
 
-  largeModal(schemarecommodate: any) {
-    this.modalService.open(schemarecommodate, { size: 'lg', windowClass: 'modal-holder', centered: true });
+  startfeatureslection=false;
+  displayselection = true;
+  targetColumnName = '';
+  startFeatureSelection(schemarecommodate: any) {
+    if ($("tbody").find('.Target-selected').length > 0) {
+      this.targetColumn = 1;
+      var target = $('.Target-selected').prop('id').split('_')[1];
+      this.targetColumnName = $('.columnname_' + target).prop('id').split('_')[1];
+      this.getFeatureSelection(schemarecommodate);
+      this.startfeatureslection=true;
+    }
+    else {
+      this.toaster.error("Please select target column first", "Error");
+      this.targetColumn = 0;
+      this.targetColumnName = '';
+    }
+  }
+
+  stopFeatureSelection(){
+    this.startfeatureslection=false;
   }
 }

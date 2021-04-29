@@ -244,6 +244,7 @@ CREATE TABLE mlaas.model_dags_tbl
 	dataset_id bigint,
 	user_id integer,
 	model_mode varchar,
+	dag_state varchar,
 	dag_created_on TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
