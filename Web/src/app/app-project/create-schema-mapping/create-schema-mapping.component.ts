@@ -15,7 +15,7 @@ export class CreateSchemaMappingComponent implements OnInit {
   datatableElement: DataTableDirective;
   dtOptions: DataTables.Settings = {};
   dtTrigger: Subject<any> = new Subject<any>();
-  targetColumn: any;
+  targetColumn: any=0;
   constructor(public apiService: SchemaMappingApiService, public router: Router, public toaster: ToastrService, private modalService: NgbModal) { }
   @Input() public dataset_id: any;
   @Input() public title: any;
@@ -151,7 +151,9 @@ export class CreateSchemaMappingComponent implements OnInit {
     this.selecteditem=undefined;
   }
 
+  isFeatureSelected=false;
   saveoption(){
+    this.isFeatureSelected=false;
     if(this.selecteditem){
       this.datasetSchema.forEach(element => {
         var data=this.selecteditem.colums[element.column_name];
@@ -161,13 +163,9 @@ export class CreateSchemaMappingComponent implements OnInit {
         element.column_attribute='Select';
         if(data=="False")
         element.column_attribute='Ignore';
-
-        
+        this.isFeatureSelected=true;
       });
-      
-      this.datasetSchema
       this.modalService.dismissAll();
-
     }
     else{
     this.isitemselected=false;
