@@ -154,9 +154,6 @@ def start_pipeline(dag,run_id,execution_date,ds,**kwargs):
     # Check Whether Model is running into auto or manual mode.
     if model_mode.lower() == 'auto' :
         
-        if algorithm_type != 'Binary':
-            algorithm_type=algorithm_type[:-5]
-        
         # This sql command get model ids from model master table for passed model type and algorithm type.
         sql_command = "select model_id from mlaas.model_master_tbl where model_type='"+ model_type +"'"\
                       " and algorithm_type='" + algorithm_type + "'"
@@ -206,7 +203,6 @@ def supervised_models(run_id,**kwargs):
         algorithm_type = basic_params_dict['algorithm_type']
         experiment_name  = basic_params_dict['experiment_name']
             
-        print("basic split param ==",algorithm_type)
         # Get Input,Target Features List And ALl numpy array of train test and valid datasets and also scaled splits parameters dict.
         input_features_list, target_features_list, X_train, X_test, X_valid, y_train, y_test, y_valid, scaled_split_dict= get_model_data(user_id, project_id, dataset_id)
         
@@ -215,12 +211,7 @@ def supervised_models(run_id,**kwargs):
         model_class_name = kwargs['model_class_name']
         hyperparameters = kwargs['model_hyperparams']  
         
-        print("master dict==",kwargs['algorithm_type'])
-        
-        # Check Whether Running Model is Multi Class Or Not.
-        # if algorithm_type != 'Binary':
-            # algorithm_type=algorithm_type[:-5]
-            
+        hyperparameters['model_name'] = model_name
         
         check_flag = 'outside'
         dag_run_id = run_id
@@ -258,6 +249,8 @@ def supervised_models(run_id,**kwargs):
                     failed_reason=traceback.format_exc().splitlines()
                     model_failed_reason_dict= {'main reason': mf.msg,'failed_reason':failed_reason}
                     mlflow.log_dict(model_failed_reason_dict,'model_failed_reason.json')
+                    
+                    raise ModelFailed(mf.status_code)
                  
     except:
         
@@ -265,6 +258,8 @@ def supervised_models(run_id,**kwargs):
             upd_exp_status = ExpObject.update_experiment('Failed',check_flag,dag_run_id,model_id)
         else:
             upd_exp_status = ExpObject.update_experiment('Failed',check_flag,dag_run_id)
+            
+        raise ModelFailed(100)
             
             
       
