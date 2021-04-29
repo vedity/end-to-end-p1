@@ -10,6 +10,7 @@ import { ModelingTypeApiService } from '../modeling-type.service';
 })
 export class ModelingPerformanceMatricsComponent implements OnInit {
   @Input() public experiment_id: any;
+  @Input() public model_type: any;
   responsedata: any;
 
   expandclass:any = "";
@@ -27,8 +28,15 @@ export class ModelingPerformanceMatricsComponent implements OnInit {
   constructor(public router: Router, public apiservice: ModelingTypeApiService, public toaster: ToastrService) { }
 
   ngOnInit(): void {
+console.log(this.model_type);
+    
     this.getPerformanceMatrics();
+    if(this.model_type=='Classification'){
     this.getConfusionMatrics();
+    this.getRocCurve();
+    }
+    else{
+    }
   }
 
   getPerformanceMatrics() {
@@ -40,124 +48,95 @@ export class ModelingPerformanceMatricsComponent implements OnInit {
   successHandler(data) {
     if (data.status_code == "200") {
       this.responsedata = data.response;
-      // console.log(this.responsedata);
-      // this.toaster.success(data.error_msg, 'Success');
+    }
+    else {
+      this.errorHandler(data);
+    }
+  }
+
+  getRocCurve(){
+    this.apiservice.getRocCurve(this.experiment_id).subscribe(
+      logs => this.rocCurveSuccessHandler(logs),
+      error => this.errorHandler(error));
+  }
+
+  rocCurveSuccessHandler(data){
+    if(data.status_code=="200"){
+      // let series=this.generateROCData(data.response);
       this.lineColumAreaChart = {
-        series: [
-          {
-            name: "Likes",
-            data: [4, 3, 10, 9, 29, 19, 22, 9, 12, 7, 19, 5, 13, 9, 17, 2, 7, 5]
-          }
-        ],
+        series: this.generateROCData(data.response),
         chart: {
-          height: 300,
-          type: "line"
+          id: "chart2",
+          type: "line",
+          height: 350,
+          toolbar: {
+            show: true
+          }
         },
+        // colors: ['#34c38f','#c3c3c3'],
         stroke: {
-          width: 7,
+          width: 4,
           curve: "smooth"
         },
-        xaxis: {
-          type: "datetime",
-          categories: [
-            "1/11/2000",
-            "2/11/2000",
-            "3/11/2000",
-            "4/11/2000",
-            "5/11/2000",
-            "6/11/2000",
-            "7/11/2000",
-            "8/11/2000",
-            "9/11/2000",
-            "10/11/2000",
-            "11/11/2000",
-            "12/11/2000",
-            "1/11/2001",
-            "2/11/2001",
-            "3/11/2001",
-            "4/11/2001",
-            "5/11/2001",
-            "6/11/2001"
-          ]
-        },
-        title: {
-          text: "Social Media",
-          align: "left",
-          style: {
-            fontSize: "16px",
-            color: "#666"
-          }
+        dataLabels: {
+          enabled: false
         },
         fill: {
-          type: "gradient",
-          gradient: {
-            shade: "dark",
-            gradientToColors: ["#34c38f"],
-            shadeIntensity: 1,
-            type: "horizontal",
-            opacityFrom: 1,
-            opacityTo: 1,
-            stops: [0, 100, 100, 100]
-          }
+          opacity: 1
         },
         markers: {
-          size: 4,
-          colors: ["#FFA41B"],
-          strokeColors: "#fff",
-          strokeWidth: 2,
-          hover: {
-            size: 7
-          }
+          size: 0
+        },
+        xaxis: {
+          labels: {
+            show: true,
+            formatter: function(value){
+              return value.toFixed(2).toString();
+            }
+          },
         },
         yaxis: {
-          min: -10,
-          max: 40,
-          title: {
-            text: "Engagement"
-          }
+          labels: {
+            show: true,
+            formatter: function(value){
+              return value.toFixed(2).toString();
+            }
+          },
         }
       };
-     
+    }
+    else{
+      this.errorHandler(data);
+    }
+  }
 
+  generateROCData(data){
+    var keys=data.classes;
+    var xaxis=data.FPR;
+    var yaxis=data.TPR;var serieslist=[];
+    keys.forEach(element => {
+      var x=xaxis[element]
+      var y=yaxis[element]
+      var series=[]
+      x.forEach((elem,index) => {
+        series.push([elem, y[index]]);
+      });
+      serieslist.push({name:element,data:series})
+    });
+    return serieslist;
+  }
+
+  getConfusionMatrics(){
+ this.apiservice.getConfusionMatrics(this.experiment_id).subscribe(
+  logs => this.confusionMatricsSuccessHandler(logs),
+  error => this.errorHandler(error));
+  }
+
+  confusionMatricsSuccessHandler(data){
+    if(data.status_code=="200"){
+      var matricsdata=data.response;
       this.chartOptions = {
-
-        series: [
-          {
-            name: "Metric1",
-            data: this.generateData(5, {
-              min: 0,
-              max: 90
-            })
-          },
-          {
-            name: "Metric2",
-            data: this.generateData(5, {
-              min: 0,
-              max: 90
-            })
-          },
-          {
-            name: "Metric3",
-            data: this.generateData(5, {
-              min: 0,
-              max: 90
-            })
-          },
-          {
-            name: "Metric4",
-            data: this.generateData(5, {
-              min: 0,
-              max: 90
-            })
-          },
-          {
-            name: "Metric5",
-            data: this.generateData(5, {
-              min: 0,
-              max: 90
-            })
-          } 
-        ],
+        series: this.geneateConfusionmatricsdata(matricsdata),
         chart: {
           height: 300,
         
@@ -191,30 +170,24 @@ export class ModelingPerformanceMatricsComponent implements OnInit {
         }
         
       };
-
-    }
-    else {
-      this.errorHandler(data);
-    }
-  }
-
-  getConfusionMatrics(){
- this.apiservice.getConfusionMatrics(this.experiment_id).subscribe(
-  logs => this.confusionMatricsSuccessHandler(logs),
-  error => this.errorHandler(error));
-  }
-
-  matricsdata:any;
-  confusionMatricsSuccessHandler(data){
-    if(data.status_code=="200"){
-      this.matricsdata=data.response;
-      console.log(this.matricsdata);
     }
     else{
       this.errorHandler(data);
     }
   }
 
+  geneateConfusionmatricsdata(data){
+    let serieslist=[];
+    data.key_val.forEach((element,index) => {
+      let series=[];
+      data.key.forEach((elem,i) => {
+        series.push({x:elem,y:element[i]})
+      });
+      serieslist.push({name: data.key[index],data: series});
+    });
+    return serieslist;
+    
+  }
 
   public generateData(count, yrange) {
     var i = 0;
@@ -230,7 +203,6 @@ export class ModelingPerformanceMatricsComponent implements OnInit {
       });
       i++;
     }
-    console.log(series)
     return series;
   }
 
@@ -241,4 +213,13 @@ export class ModelingPerformanceMatricsComponent implements OnInit {
       this.toaster.error('Something went wrong', 'Error');
     }
   }
+  allowExpand(type) {
+    if(type=='right')
+    this.expandclass==''?this.expandclass='right-expand':this.expandclass='';
+    if(type=='left')
+    this.expandclass==''?this.expandclass='left-expand':this.expandclass='';
+    
+    window.dispatchEvent(new Event('resize'));
+  }
+  
 }
