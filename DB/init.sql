@@ -363,15 +363,15 @@ CREATE TABLE mlaas.activity_detail_tbl (
 
 CREATE TABLE mlaas.dag_management_tbl (
 	"index" serial NOT NULL,
-	dag_id text NOT NULL NULL,
+	dag_id text NOT NULL,
 	allocated boolean NOT NULL DEFAULT true,
 	dag_type_id int NOT NULL
-)
+);
 
 CREATE TABLE mlaas.dag_type_tbl (
 	dag_type_id int NOT NULL,
 	dag_type text NOT NULL
-)
+);
 
 --Insert menu_tbl
 Insert into  mlaas.menu_tbl values (2,'DI','Data Ingestion',null,null,' mdi-database-import');
@@ -562,5 +562,5 @@ Insert into mlaas.activity_master_tbl values (DEFAULT,'cl_2','Cleanup Ended','Cl
 Insert into mlaas.activity_master_tbl values (DEFAULT,'cl_3','Dataset Created','You have created New dataset *','US','Operation',0,-1,0,0);
 
 ----------------------- Inserting into mlaas.dag_type_tbl -----------------------
-Insert into mlaas.dag_type_tbl values (1,'Cleanup Dag')
-Insert into mlaas.dag_type_tbl values (2,'Manual Modelling Dag')
+Insert into mlaas.dag_type_tbl values (1,'Cleanup Dag');
+Insert into mlaas.dag_type_tbl values (2,'Manual Modelling Dag');

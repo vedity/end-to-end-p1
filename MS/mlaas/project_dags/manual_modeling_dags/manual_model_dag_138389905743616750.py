@@ -16,7 +16,7 @@ from modeling.all_supervised_models import *
 
 args = {'owner': 'airflow','start_date': airflow.utils.dates.days_ago(1),'provide_context': True,}
 
-main_dag_id = "manual_model_dag_138388185346632350"
+main_dag_id = "manual_model_dag_138389905743616750"
 
 dag = DAG(dag_id=main_dag_id,default_args=args,catchup=False,schedule_interval = '@once',)
 
@@ -27,7 +27,7 @@ start_task = PythonOperator(task_id='start_pipeline',python_callable=start_pipel
 
 # Get model dict 
 
-master_dict = {'model_id': [13], 'model_name': ['KNeighbors_Classification'], 'model_hyperparams': [{'n_neighbors': '10', 'metric': 'manhattan', 'algorithm': 'ball_tree'}], 'model_class_name': ['KNeighborsClassificationClass'], 'algorithm_type': ['Multi']}
+master_dict = {}
 
 if len(master_dict) != 0:
 
