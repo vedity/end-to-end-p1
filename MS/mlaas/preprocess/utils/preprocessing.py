@@ -19,13 +19,13 @@ from common.utils import dynamic_dag
 
 #* Class Imports
 from ingest.utils.dataset import dataset_creation
-from .exploration import dataset_exploration as de
+from .Exploration import dataset_exploration as de
 from .schema import schema_creation as sc
 from .cleaning import noise_reduction as nr
 from .cleaning import cleaning
-from .transformation import transformation as trs
-from .transformation import split_data 
-from .transformation.model_type_identifier import ModelTypeClass
+from .Transformation import transformation as trs
+from .Transformation import split_data 
+from .Transformation.model_type_identifier import ModelTypeClass
 from database import *
 
 #* Library Imports
