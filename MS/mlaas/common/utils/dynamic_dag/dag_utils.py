@@ -77,6 +77,19 @@ class DagUtilsClass():
             ----
             connection (`object`): pycopg2.connection object
             index (`int | string`) (default : `None`): index of the dag in the dag_management_tbl
-            dag_id (`String`) (default : `None`):  
+            dag_id (`String`) (default : `None`): id of the dag
+
+            Returns:
+            -------
+            status (`int`): Status of dag release 
         '''
-        pass
+        try:
+            logging.info("common : DagUtilsClass : get_dag : execution start")
+            
+            logging.info("common : DagUtilsClass : get_dag : execution stop")
+
+        except Exception as e:
+            logging.error(f"common : DagUtilsClass : get_dag : execution failed : {str(e)}")
+            logging.error(f"common : DagUtilsClass : get_dag : execution failed : {traceback.format_exc()}")
+            return 1
+
