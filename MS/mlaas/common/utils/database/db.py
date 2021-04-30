@@ -640,7 +640,7 @@ class DBClass:
         dataset_df=self.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
         return dataset_df 
     
-    def get_project_detail(self,DBObject,connection,project_id):
+    def get_project_detail(self,connection,project_id):
         '''This function is used to get details for project table.
         Args:
                 project_id[(Integer)] : [Id of the project table]
