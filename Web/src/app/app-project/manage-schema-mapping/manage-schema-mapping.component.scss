@@ -1,34 +1,60 @@
-.module-main {
-    position: relative;
-}
-
-.tab-menu {
-    position: absolute;
-    right: 15px;
-    top: -12px;
-}
-
-.target-selected {
-    background: #4c546c;
-    td:first-child {
-        color: #fff;
-    }
-}
-
-.nav-pills .nav-link {
-    border-radius: 0 !important;
-    padding: 0.5rem 0.8rem !important;
-    border-right: 1px solid #32394e;
-}
-
-.nav {
-    border: 1px solid #32394e;
-}
-
-table {
-    tr {
-        td {
-            border-top: 1px solid #32394e !important;
+    // .target-selected {
+    //     background: #4c546c;
+    //     td:first-child {
+    //         color: #fff;
+    //     }
+    // }
+    // table {
+    //     tr {
+    //         td {
+    //             border-top: 1px solid #32394e !important;
+    //         }
+    //     }
+    // }
+    .page-title-right {
+        .btn {
+            display: inline-block;
+        }
+        ol {
+            display: inline-block;
+        }
+        .margin-right-btn {
+            margin-right: 50px;
         }
     }
-}
+    
+    .page-title-right {
+        position: absolute;
+        right: 0;
+    }
+    
+    h5 {
+        font-size: 0.8rem;
+        color: #c3cbe4;
+    }
+    
+    .tab-menu {
+        display: inline-block;
+        margin-right: 8px;
+    }
+    
+    .nav {
+        border: 1px solid #32394e !important;
+        li {
+            a {
+                border-radius: 0 !important;
+                padding: 0.5rem 0.8rem !important;
+                border-right: 1px solid #32394e;
+                span {
+                    display: inline-block !important;
+                }
+            }
+        }
+    }
+    
+    .page-title-box {
+        .project-title {
+            position: absolute;
+            top: 20px;
+        }
+    }

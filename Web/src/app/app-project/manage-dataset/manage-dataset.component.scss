@@ -19,91 +19,16 @@
 .page-title-right {
     .btn {
         display: inline-block;
-        margin-right: 20px;
+        // margin-right: 20px;
     }
     ol {
         display: inline-block;
     }
+    .margin-right-btn {
+        margin-right: 50px;
+    }
 }
 
-// .right-panel-timeline {
-//     background: #262b3c;
-//     position: fixed;
-//     right: -400px;
-//     top: 70px;
-//     width: 400px;
-//     z-index: 123;
-//     box-shadow: 5px -16px 17px 4px #525c7c;
-//     h4 {
-//         padding: 15px 10px 10px 10px;
-//     }
-//     .box {
-//         padding: 0px 20px;
-//     }
-//     .badge {
-//         float: right;
-//     }
-//     .verti-timeline {
-//         border-left: 3px dashed #565e76;
-//         .event-list {
-//             position: relative;
-//             padding: 0px 0px 20px 25px;
-//             p {
-//                 margin-bottom: 0px;
-//             }
-//             .bx {
-//                 width: 16px;
-//                 height: 16px;
-//                 border-radius: 50%;
-//                 background: #c3cbe4;
-//             }
-//             .color-red {
-//                 background: #f14646;
-//             }
-//             .color-blue {
-//                 background: #556ee6;
-//             }
-//             .color-green {
-//                 background: #34c38f;
-//             }
-//         }
-//     }
-//     .event-list {
-//         h5 {
-//             position: relative;
-//             span {
-//                 position: absolute;
-//                 right: 0;
-//                 font-size: 12px;
-//                 font-weight: 200;
-//             }
-//         }
-//     }
-//     .card {
-//         background: #222736;
-//     }
-// }
-// .timer-btn {
-//     position: fixed;
-//     right: 0px;
-//     width: 40px;
-//     height: 40px;
-//     background: #556ee6;
-//     top: 70px;
-//     z-index: 9999;
-//     border-top-left-radius: 5px;
-//     border-bottom-left-radius: 5px;
-//     color: #fff !important;
-//     padding: 10px;
-// }
-// .container-fluid.red {
-//     .right-panel-timeline {
-//         right: 0px;
-//     }
-//     .timer-btn {
-//         right: 400px;
-//     }
-// }
 h5 {
     font-size: 0.8rem;
     color: #c3cbe4;
@@ -111,7 +36,7 @@ h5 {
 
 .tab-menu {
     display: inline-block;
-    margin-right: 20px;
+    margin-right: 8px;
 }
 
 .nav {
@@ -152,12 +77,7 @@ h5 {
     }
 }
 
-// .create {
-//     background: #34c38f !important;
-// }
-// .delete {
-//     background: #f14646 !important;
-// }
-// .edit {
-//     background: #556ee6 !important;
-// }
+.page-title-right {
+    position: absolute;
+    right: 0;
+}

@@ -36,6 +36,7 @@ import { ModelingConfusionMatricsComponent } from './modeling-confusion-matrics/
 import { ModelingComparisonGraphComponent } from './modeling-comparison-graph/modeling-comparison-graph.component';
 import { ModelingComparisonGridComponent } from './modeling-comparison-grid/modeling-comparison-grid.component';
 import { ModelingComparisonDetailComponent } from './modeling-comparison-detail/modeling-comparison-detail.component';
+import { ModelingErrorDetailComponent } from './modeling-error-detail/modeling-error-detail.component';
 
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
@@ -45,6 +46,7 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
 @NgModule({
   declarations: [
     ModelingTypeComponent,
+    ModelingErrorDetailComponent,
     ModelingViewDetailComponent,
     ModelingLearningCurveComponent,
     ModelingFeatureImportanceComponent,

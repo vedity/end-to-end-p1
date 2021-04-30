@@ -27,7 +27,7 @@
             <div *ngIf="model_type=='Classification'">
                 <h4>Confusion Matrix</h4> <a href="javascript:void(0); " class="left-expand " (click)="allowExpand( 'left') "><i class="bx bx-expand "></i></a>
                 <div id="chart ">
-                    <apx-chart [series]="chartOptions.series " [plotOptions]="chartOptions.plotOptions " [chart]="chartOptions.chart " [dataLabels]="chartOptions.dataLabels " [title]="chartOptions.title ">
+                    <apx-chart [series]="chartOptions.series " [yaxis]="chartOptions.yaxis" [xaxis]="chartOptions.xaxis" [legend]="chartOptions.legend" [plotOptions]="chartOptions.plotOptions " [chart]="chartOptions.chart " [dataLabels]="chartOptions.dataLabels " [title]="chartOptions.title ">
                     </apx-chart>
                 </div>
             </div>

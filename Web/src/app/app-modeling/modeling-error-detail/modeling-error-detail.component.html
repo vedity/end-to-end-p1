@@ -1,0 +1,7 @@
+<div>
+    <span class="error">{{errorResponse["main reason"]}}</span>
+    <button class="btn" (click)="download()">
+    <i class="bx bx-download font-size-16 align-middle mr-1"></i></button>
+</div>
+
+<a [href]="fileUrl" hidden id="download-error" download="{{filename}}">DownloadFile</a>
