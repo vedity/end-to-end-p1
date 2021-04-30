@@ -166,4 +166,9 @@ export class ModelingTypeApiService {
     return this.httpClient.get(this.baseUrl + "modeling/roccurve/", { headers: this.headers, params });
   
   }
+
+  getModelFailedReason(experiment_id){
+    var params = new HttpParams().append("experiment_id", experiment_id);
+    return this.httpClient.get(this.baseUrl + "modeling/modelfailed/", { headers: this.headers, params });
+  }
 }

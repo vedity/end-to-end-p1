@@ -152,9 +152,12 @@ export class CreateSchemaMappingComponent implements OnInit {
   }
 
   isFeatureSelected=false;
+  selectedFeature="";
   saveoption(){
     this.isFeatureSelected=false;
+    this.selectedFeature="";
     if(this.selecteditem){
+      this.selectedFeature=this.selecteditem.name;
       this.datasetSchema.forEach(element => {
         var data=this.selecteditem.colums[element.column_name];
         console.log(element);

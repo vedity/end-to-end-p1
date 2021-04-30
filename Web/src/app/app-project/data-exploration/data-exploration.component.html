@@ -1,13 +1,7 @@
-<div class="page-title-box d-flex align-items-center justify-content-between">
-    <h4 class="mb-0 font-size-18">Data Exploration</h4>
-    <span>{{project_name}}</span>
-</div>
 <div class="row">
     <div class="col-md-12">
         <div class="card table-card">
             <div class="card-body">
-
-
                 <ngx-skeleton-loader *ngIf="loaderdiv" count="7" [animation]="animation" [theme]="theme">
                 </ngx-skeleton-loader>
                 <div *ngIf="!loaderdiv">

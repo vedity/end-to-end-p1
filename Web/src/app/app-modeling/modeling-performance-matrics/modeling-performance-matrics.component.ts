@@ -88,6 +88,9 @@ console.log(this.model_type);
           size: 0
         },
         xaxis: {
+          title:{
+            text:'FPR'
+          },
           labels: {
             show: true,
             formatter: function(value){
@@ -96,6 +99,9 @@ console.log(this.model_type);
           },
         },
         yaxis: {
+          title:{
+            text:'TPR'
+          },
           labels: {
             show: true,
             formatter: function(value){
@@ -139,7 +145,6 @@ console.log(this.model_type);
         series: this.geneateConfusionmatricsdata(matricsdata),
         chart: {
           height: 300,
-        
           type: "heatmap",
           toolbar: {
             show: false
@@ -148,6 +153,25 @@ console.log(this.model_type);
         dataLabels: {
           enabled: true
         },
+        xaxis:{
+          position: 'top',
+          title: {
+            text: 'Actual',
+            offsetY: -65,
+          },
+          labels: {
+            offsetY: 14,
+          }
+        },
+        yaxis:{
+          title: {
+            text: 'Prediction'
+          }
+        },
+        
+        legend: {
+          show: false}
+          ,
         plotOptions: {
           heatmap: {
             shadeIntensity: 0.5,
@@ -181,29 +205,14 @@ console.log(this.model_type);
     data.key_val.forEach((element,index) => {
       let series=[];
       data.key.forEach((elem,i) => {
-        series.push({x:elem,y:element[i]})
+        series.push({x:elem.toString(),y:element[i]})
       });
       serieslist.push({name: data.key[index],data: series});
     });
-    return serieslist;
+    console.log(serieslist);
+    let finalserislist=serieslist.reverse();
+    return finalserislist;
     
-  }
-
-  public generateData(count, yrange) {
-    var i = 0;
-    var series = [];
-    while (i < count) {
-      var x = "Metric" + (i + 1).toString();
-      var y =
-        Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
-
-      series.push({
-        x: x,
-        y: y
-      });
-      i++;
-    }
-    return series;
   }
 
   errorHandler(error) {
@@ -221,5 +230,4 @@ console.log(this.model_type);
     
     window.dispatchEvent(new Event('resize'));
   }
-  
 }
