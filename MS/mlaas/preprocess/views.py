@@ -459,7 +459,7 @@ class ScalingSplitClass(APIView):
                         #Activiy TImeline started code
                         activity_id = 'ss_1'
                         activity_df = AT_OBJ.get_activity(activity_id,"US")
-                        projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
+                        projectnm_df = DBObject.get_project_detail(connection,project_id)
                         project_name = projectnm_df['project_name'][0]
                         activity_description = sd.get_split_activity_desc(project_name,activity_id)
                         end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
@@ -473,7 +473,7 @@ class ScalingSplitClass(APIView):
                         #Activiy Timeline ended code
                         activity_id = 'ss_2'
                         activity_df = AT_OBJ.get_activity(activity_id,"US")
-                        projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
+                        projectnm_df = DBObject.get_project_detail(connection,project_id)
                         project_name = projectnm_df['project_name'][0]
                         activity_description = sd.get_split_activity_desc(project_name,activity_id)
                         end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
@@ -601,4 +601,27 @@ class CleanupCheckStatusClass(APIView):
                 except Exception as e:
                         logging.error("data preprocess : CleanupCheckStatusClass : GET Method  " + str(e))
                         logging.error(" data preprocess : CleanupCheckStatusClass : GET Method : " +traceback.format_exc())
-                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})   
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})
+
+class AllDagStatusClass(APIView):
+        def get(self, request, format=None):
+                try:
+                        logging.info(" data preprocess : DagStatusClass : GET Method : execution start")
+                        project_id = request.query_params.get('project_id')
+                        dataset_id = request.query_params.get('dataset_id')
+                        schema_id = request.query_params.get('schema_id')
+                        
+                        #calling function return the list of dictonery
+                        status = preprocessObj.check_all_dag_status(DBObject,connection,project_id,dataset_id,schema_id) 
+                        
+                        #!If failed to return List it will get Exception string
+                        if not isinstance(status,dict): 
+                                status_code,error_msg=json_obj.get_Status_code(status) # extract the status_code and error_msg
+                                return Response({"status_code":status_code,"error_msg":"Failed","response":str(error_msg)})
+                         
+                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":status})   
+                
+                except Exception as e:
+                        logging.error("data preprocess : DagStatusClass : GET Method  " + str(e))
+                        logging.error(" data preprocess : DagStatusClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})

@@ -52,7 +52,12 @@ urlpatterns = [
     #feature selection algorithm list
     path('mlaas/preprocess/feature_list/',FeatureAlgoList.as_view()),
     
-    path('mlaas/preprocess/check/cleanup_status/',CleanupCheckStatusClass.as_view()),
+    
+    path('mlaas/preprocess/check/status/',CleanupCheckStatusClass.as_view()),
+    
+    #Check all Dag status
+    path('mlaas/preprocess/dags/status/',AllDagStatusClass.as_view()),
+    
     # #feature selection main api
     # path('mlaas/preprocess/feature_selection/',FeatureSelection.as_view()),
 ]
