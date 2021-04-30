@@ -25,5 +25,8 @@ export class LayoutApiService {
     return this.httpClient.get(this.baseUrl + "common/activity/", { headers: this.headers, params });
   }
 
+  downloadLogFile(): Observable<any> {
+    return this.httpClient.get(this.baseUrl + "common/logfile/", { headers: this.headers });
+  }
   
 }

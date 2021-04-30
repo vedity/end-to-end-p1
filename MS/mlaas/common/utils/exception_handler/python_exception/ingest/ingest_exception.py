@@ -182,3 +182,13 @@ class DatasetColumnUpdateFailed(Exception):
 
     def __str__(self):
         return (self.msg)
+
+class VariableDatasetCreationFailed(Exception):
+    """Dataset Creation Failed Exception"""
+    def __init__(self,status_code):
+        self.msg = "Variable dataset creation failed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+
+    def __str__(self):
+        return (self.msg)

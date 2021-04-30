@@ -1,16 +1,10 @@
-'''
-/*CHANGE HISTORY
---CREATED BY--------CREATION DATE--------VERSION--------PURPOSE----------------------
- Vipul Prajapati          07-DEC-2020           1.0           Initial Version 
- Vipul Prajapati          08-DEC-2020           1.1           Modification for Business Rule ****************************************************************************************/
- 
-*/
-'''
 
-
+#* Library Imports
 import logging
 import traceback
 import datetime
+
+#* Common utilities
 from database import *
 from common.utils.database import db
 from common.utils.logger_handler import custom_logger as cl
@@ -20,11 +14,14 @@ from common.utils.exception_handler.python_exception.ingest.ingest_exception imp
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
 from common.utils.activity_timeline import activity_timeline
 
+#* Defining the Logger
 user_name = 'admin'
 log_enable = True
 LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
 logger = logging.getLogger('Schema_creation')
+
+#* Defining class objects
 json_obj = JsonFormatClass()  # Initialize the JsonFormat Class
 timeline_Obj=activity_timeline.ActivityTimelineClass(database,user,password,host,port) #initialize the ActivityTimeline Class
 
@@ -34,7 +31,7 @@ class SchemaClass:
         # schema table name
         table_name = 'mlaas.schema_tbl'
         # Columns for schema table
-        cols = 'schema_id,column_name,changed_column_name,data_type,column_attribute,missing_flag,noise_flag' 
+        cols = 'schema_id,column_name,changed_column_name,data_type,column_attribute,missing_flag,noise_flag,date_format' 
         # Schema of schema_table
         schema ="index bigserial,"\
                 "schema_id bigint,"\
@@ -62,18 +59,14 @@ class SchemaClass:
             logging.info("data preprocess : SchemaClass :get_dataset_schema : execution start")
             
             #get the dataset table details based on the dataset id
-            dataset_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
+            
+            data_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
 
             #check the dataset_df is empty or not if yes raise exception
-            if dataset_df is None or len(dataset_df) == 0:
+            if data_df is None or len(data_df) == 0:
                         raise DatasetDataNotFound(500)
-
-            dataset_records = dataset_df.to_records(index=False) # convert dataframe to a NumPy record  
-
-            dataset_name,dataset_table_name,user_name,dataset_visibility,no_of_rows,_ = dataset_records[0] # first record of dataset
-
-            dataset_name,dataset_table_name,user_name,dataset_visibility = str(dataset_name),str(dataset_table_name),str(user_name),str(dataset_visibility)
-
+            dataset_table_name,user_name,dataset_visibility = str(data_df['dataset_table_name'][0]),str(data_df['user_name'][0]),str(data_df['dataset_visibility'][0])
+            
             #check the dataset visibility if private append the user name with  dataset table name 
             #dataset visibility if public assign table name as  dataset table name we get
 
@@ -87,16 +80,15 @@ class SchemaClass:
             #get the column list and datatype  based on given table name
             column_name_list,predicted_datatype = self.get_attribute_datatype(connection,DBObject,table_name)
 
+            date_format = ["MM/DD/YYYY" if i == "timestamp" else "" for i in predicted_datatype]
+
             logging.info("data preprocess : SchemaClass :get_dataset_schema : execution stop")
-            return column_name_list,predicted_datatype
+            return column_name_list,predicted_datatype,date_format
 
         except (DatasetDataNotFound,DataNotFound,DatabaseConnectionFailed) as exc:
             logging.error("data preprocess : SchemaClass : get_dataset_schema : Exception " + str(exc.msg))
             logging.error("data preprocess : SchemaClass : get_dataset_schema : " +traceback.format_exc())
             return exc.msg
-
-    
-
     
     def get_attribute_datatype(self,connection,DBObject,table_name):
         """
@@ -163,7 +155,7 @@ class SchemaClass:
             return exc.msg
 
 
-    def save_schema(self,DBObject,connection,schema_data,project_id,dataset_id,schema_id):
+    def save_schema(self,DBObject,connection,schema_data,project_id,dataset_id,schema_id,user_name):
         """
         function used to update the changed columns values in schema table  
 
@@ -182,8 +174,8 @@ class SchemaClass:
             change_column_name = [] # get change column 
             
             index_list = [] #get the index id
- 
 
+            target_count = 0
             for count in range(len(schema_data)):
 
 
@@ -200,26 +192,49 @@ class SchemaClass:
 
                     change_column_name.append(schema_data[count]["column_name"]) #append change column name
                 else:
-                    change_column_name.append(schema_data[count]["change_column_name"])
+                    change_column_name.append(str(schema_data[count]["change_column_name"]).strip())
 
                 index_list.append(schema_data[count]["index"]) #append  index 
 
                 column_name_list.append(schema_data[count]["column_name"]) #append column_name
+                
+                #Check if  Target attribute incoming
+                if schema_data[count]["column_attribute"] == 'Target':
+
+                    #Increment variable by 1 if Target attribute is present
+                    target_count+=1
+
+                    #Check if "target_count" variable having value greater then 1 then raise exception
+                    if target_count > 1:
+                        raise TargetAttributeException(500)
 
                 column_attribute_list.append(schema_data[count]["column_attribute"]) #append attribute type
 
-            logging.info(str(change_column_name)+" change_column_name")
-            logging.info(str(column_name_list)+" column_name_list")
-            logging.info(str(column_attribute_list)+" column_attribute_list")
+           
 
             for value in change_column_name:
+                
                 if value != '':
-                    if str(change_column_name).strip().count(str(value).strip()) > 1 :
+                    #check the changed column name having same name
+                    #?if name count in canged column list is greater then one means its duplicate then raise exception 
+                    if change_column_name.count(str(value).strip()) > 1 :
                         raise ChangeColumnNameSame(500)
+
+
+
+            index_value = self.get_target_attribute_index(DBObject,connection,schema_id)
             
+            #if index value is not Zero 
+            #? Then in schema table having a column with target Attribute 
+            if index_value !=0 and column_attribute_list.count('Target')>=1:
+                #if the index value is not present in index_list raise
+                if index_value not in index_list:
+                    raise TargetAttributeExistException(500)
+
+
             column_count_value,ignore_count_value = self.get_count_value(DBObject,connection,schema_id)
 
-            if (column_count_value-ignore_count_value)== column_attribute_list.count('Ignore') and column_attribute_list.count('Select')==0 and column_attribute_list.count('Target')==0 :
+            if (column_count_value-ignore_count_value)== column_attribute_list.count('Ignore') and column_attribute_list.count('Select')>=1 and column_attribute_list.count('Target')==0 :
                 raise IgnoreColumns(500)
 
 
@@ -230,7 +245,12 @@ class SchemaClass:
             schema_status = self.update_dataset_schema(DBObject,connection,schema_id,column_name_list,column_datatype_list,change_column_name,column_attribute_list,index_list)
             
             if schema_status ==0:
-
+                
+                #? Reseting the scale & split status on successful schema updation
+                sql_command = "update mlaas.project_tbl set input_features =null,target_features =null ,scaled_split_parameters =null,problem_type =null where project_id ="+str(project_id)
+                
+                status = DBObject.update_records(connection,sql_command) 
+                
                 #get the different column list
                 column_lst,change_column_lst,target_column_lst,ignore_column_lst = self.get_column_list(column_name_list,change_column_name,column_attribute_list)
                 
@@ -239,7 +259,7 @@ class SchemaClass:
                 dataset_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
 
                 #get the 0 index  key as 'user_name' from the dataframe
-                user_name,dataset_name = str(dataset_df['user_name'][0]),str(dataset_df['dataset_name'][0])
+                dataset_name = str(dataset_df['dataset_name'][0])
                 
 
                 #get te timeline status if successfully inserted return 0 else return 1
@@ -249,7 +269,7 @@ class SchemaClass:
             logging.info("data preprocess : SchemaClass : save_schema : execution stop")
             return schema_status
 
-        except (SchemaUpdateFailed,TableCreationFailed,SameColumnNameFound,InvalidColumnNames,ChangeColumnNameSame,IgnoreColumns) as exc:
+        except (SchemaUpdateFailed,TableCreationFailed,SameColumnNameFound,InvalidColumnNames,ChangeColumnNameSame,IgnoreColumns,TargetAttributeException,TargetAttributeExistException) as exc:
             logging.error("data preprocess : ingestclass : save_schema : Exception " + str(exc.msg))
             logging.error("data preprocess : ingestclass : save_schema : " +traceback.format_exc())
             return exc.msg
@@ -278,15 +298,15 @@ class SchemaClass:
             
             #check length of  change_column_lst if true append 5 as ID
             if len(change_column_lst)!=0:
-                activity_id.append(5)
+                activity_id.append('sm_5')
 
             #check length of  target_column_lst if true append 6 as ID
             if len(target_column_lst)!=0:
-                activity_id.append(6)
+                activity_id.append('sm_6')
 
             #check length of  target_column_lst if true append 7 as ID
             if len(ignore_column_lst)!=0:
-                activity_id.append(7)
+                activity_id.append('sm_7')
             
             status = 0 
             for id in activity_id:
@@ -299,18 +319,18 @@ class SchemaClass:
 
                 activity=""
 
-                if id==5:
+                if id=='sm_5':
                     column_string = " "
                     column_string = activity_description+" <br/>"
                     for count in range(len(change_column_lst)):
                         column_string += str(column_lst[count])+" <-> "+str(change_column_lst[count])+"<br/> "
                     activity = column_string
 
-                elif id==6:
+                elif id=='sm_6':
                     column_target=",".join(target_column_lst)
                     activity = activity_description.replace('*',column_target).replace('$',dataset_name)+","
 
-                elif id==7:
+                elif id=='sm_7':
                     column_ignore=",".join(ignore_column_lst)
                     activity = activity_description.replace('*',column_ignore)+","
                 
@@ -379,7 +399,7 @@ class SchemaClass:
             logging.error("data preprocess : SchemaClass : get_column_list : " +traceback.format_exc())
             return str(exc)
 
-    def update_dataset_schema(self,DBObject,connection,schema_id,column_name_list,column_datatype_list,change_column_name=None,column_attribute_list=None,index_list=None,missing_flag=None,noise_flag=None,flag = False): ###
+    def update_dataset_schema(self,DBObject,connection,schema_id,column_name_list,column_datatype_list,change_column_name=None,column_attribute_list=None,index_list=None,missing_flag=None,noise_flag=None,flag = False,date_format = None): ###
         """
         this function used to insert the records into a table if not exist otherwise it will update the existing schema data record from the table.
         Args:
@@ -399,60 +419,57 @@ class SchemaClass:
             #get the table name and columns,and schema of the table
             schema_table_name,cols,schema = self.get_schema()
 
-            #create the schema table if already created return 1,if not return 0
-            create_status = DBObject.create_table(connection,schema_table_name,schema)
-
-            if create_status in [1,0]:
-
-                #check if values in schema table,data is exist or not. If exist then update the values else insert new record
-                status = self.is_existing_schema(DBObject,connection,schema_id)
-                if status == True and flag == False :
-                    new_cols_lst = change_column_name
-                    cols_attribute_lst = column_attribute_list
-                   
-                    for index,new_col,col_attr in zip(index_list,new_cols_lst,cols_attribute_lst): 
-
-                        #sql command for updating change_column_name and column_attribute column  based on index column value
-                        sql_command = "update "+ schema_table_name + " SET changed_column_name = '" + str(new_col) + "',"\
-                                                                    "column_attribute = '" +str(col_attr) +"'"\
-                                    " Where index ='"+str(index)+"' "
-                        
-                        logging.info(str(sql_command) + " sql")
-                        #execute sql query command
-                        status = DBObject.update_records(connection,sql_command) 
-
-                        if status ==1:
-                            raise SchemaUpdateFailed(500)
-                else:
-                    prev_dtype_lst = column_datatype_list
-                    prev_cols_lst = column_name_list
-                    new_cols_lst = ''
-                    cols_attribute_lst = 'Select'
-                    for prev_col,new_dtype,missing_value,noise_value in zip(prev_cols_lst,prev_dtype_lst,missing_flag,noise_flag): 
-
-                        row = schema_id,prev_col,new_cols_lst,new_dtype,cols_attribute_lst,str(missing_value),str(noise_value)
-
-                        # Make record for project table
-                        row_tuples = [tuple(row)] 
-                        
-                        #insert the records into schema table
-                        status,_ = DBObject.insert_records(connection,schema_table_name,row_tuples,cols) 
-                        if status ==1:
-                            raise SchemaInsertionFailed(500)
-
-                
-            else :
-                raise TableCreationFailed(500)
             
+
+            #check if values in schema table,data is exist or not. If exist then update the values else insert new record
+            status = self.is_existing_data(DBObject,connection,schema_id)
+            if status == True and flag == False :
+                new_cols_lst = change_column_name
+                cols_attribute_lst = column_attribute_list
+                
+                for index,new_col,col_attr in zip(index_list,new_cols_lst,cols_attribute_lst): 
+
+                    #sql command for updating change_column_name and column_attribute column  based on index column value
+                    sql_command = "update "+ schema_table_name + " SET changed_column_name = '" + str(new_col) + "',"\
+                                                                "column_attribute = '" +str(col_attr) +"'"\
+                                " Where index ='"+str(index)+"' "
+                        
+                    #logging.info("update_dataset_schema : sql command to update : " + str(sql_command))
+
+                    #execute sql query command
+                    status = DBObject.update_records(connection,sql_command) 
+
+                    if status ==1:
+                        raise SchemaUpdateFailed(500)
+            else:
+                prev_dtype_lst = column_datatype_list
+                prev_cols_lst = column_name_list
+                new_cols_lst = ''
+                cols_attribute_lst = 'Select'
+                if date_format == None:
+                    date_format = ['']*len(prev_cols_lst) #Setting up date_formate in case if its not passed
+
+                for prev_col,new_dtype,missing_value,noise_value,date_frmt in zip(prev_cols_lst,prev_dtype_lst,missing_flag,noise_flag,date_format): 
+
+                    row = schema_id,prev_col,new_cols_lst,new_dtype,cols_attribute_lst,str(missing_value),str(noise_value),date_frmt
+
+                    # Make record for project table
+                    row_tuples = [tuple(row)] 
+                        
+                    #insert the records into schema table
+                    status,_ = DBObject.insert_records(connection,schema_table_name,row_tuples,cols) 
+                    if status ==1:
+                        raise SchemaInsertionFailed(500)
+
             logging.info("data preprocess : SchemaClass : update_dataset_schema : execution stop ")
             return status
-        except(SchemaUpdateFailed,TableCreationFailed,SchemaInsertionFailed) as exc:
+        except(SchemaUpdateFailed,SchemaInsertionFailed) as exc:
             logging.error("data preprocess : SchemaClass : update_dataset_schema : Exception " + str(exc.msg))
             logging.error("data preprocess : SchemaClass : update_dataset_schema : " +traceback.format_exc())
             return exc.msg
 
     
-    def is_existing_schema(self,DBObject,connection,schema_id):
+    def is_existing_data(self,DBObject,connection,schema_id):
         """
         this function used to  check the  Data for the given schema Id in schema table where data is already exist or not.
 
@@ -469,7 +486,7 @@ class SchemaClass:
 
             #this sql command will get schema_id if found.
             sql_command = "select schema_id from "+ table_name +" where schema_id='"+str(schema_id)+"'"
-            logging.info(str(sql_command) + " check error" )
+            
             #execute the query string,if record exist return dataframe else None
             data=DBObject.select_records(connection,sql_command) 
 
@@ -502,7 +519,7 @@ class SchemaClass:
             table_name,_,_ = self.get_schema()
             
             # sql command to get details from schema table  based on  schema id 
-            sql_command = "select case when changed_column_name ='' then column_name else changed_column_name end column_list,index,data_type,column_attribute  from "+str(table_name)+" where schema_id="+str(schema_id)+" order by index"           
+            sql_command = "select case when changed_column_name ='' then column_name else changed_column_name end column_list,index,data_type,column_attribute,date_format from "+str(table_name)+" where schema_id="+str(schema_id)+" order by index"           
         
             #execute sql commnad if data exist then return dataframe else return None
             schema_df = DBObject.select_records(connection,sql_command) 
@@ -511,10 +528,10 @@ class SchemaClass:
                 raise SchemaDataNotFound(500)
 
             #store all the schema table data into 
-            index,column_name,data_type,column_attribute = schema_df['index'],schema_df['column_list'],schema_df['data_type'],schema_df['column_attribute']
+            index,column_name,data_type,column_attribute,date_format = schema_df['index'],schema_df['column_list'],schema_df['data_type'],schema_df['column_attribute'],schema_df['date_format']
             
             #get the appropriate structure format  
-            schema_data=json_obj.get_schema_format(index,column_name,data_type,column_attribute)
+            schema_data=json_obj.get_schema_format(index,column_name,data_type,column_attribute,date_format)
             
             logging.info("data preprocess : SchemaClass : get_schema_data : execution stop")
             return schema_data
@@ -539,7 +556,7 @@ class SchemaClass:
             schema_table_name,_,_ = self.get_schema()
 
             #get the total column count and Ignore count for the perticular schema id
-            sql_command = "select count(schema_id) as column_count,(select count(column_attribute) from "+str(schema_table_name)+" where schema_id ='"+str(schema_id)+"' and column_attribute ='Ignore') as ignore_count from "+str(schema_table_name)+" where schema_id ='"+str(schema_id)+"'"
+            sql_command = f'''select count(schema_id) as column_count,(select count(column_attribute) from {schema_table_name} where schema_id ={schema_id} and column_attribute ='Ignore') as ignore_count from {schema_table_name} where schema_id ={str(schema_id)}'''
             
             #Execute the sql command
             dataframe = DBObject.select_records(connection,sql_command)
@@ -548,6 +565,35 @@ class SchemaClass:
             column_count_value,ignore_count_value = int(dataframe['column_count'][0])-1,int(dataframe['ignore_count'][0])
 
             return column_count_value,ignore_count_value
+        except Exception as exc:
+            return str(exc),None
+    
+    def get_target_attribute_index(self,DBObject,connection,schema_id):
+        """
+        function used to get the Index value for column whose attribute type is "Target"
+
+        Args:
+            schema_id[(Integer)] : [Id of the schema table]
+
+        Return:
+            [Integer] : [return the index value of column if found else return 0 ]
+        """
+        try:
+            #get the table name and columns,and schema of the table
+            schema_table_name,_,_ = self.get_schema()
+
+            #get the total column count and Ignore count for the perticular schema id
+            sql_command = f'''select index from {schema_table_name} where  schema_id ={schema_id} and column_attribute='Target' '''
+            
+            #Execute the sql command
+            dataframe = DBObject.select_records(connection,sql_command)
+            if len(dataframe['index'])==0:
+                index_value = 0
+            else:
+                #get the total  index  value where column having target attribute
+                index_value = int(dataframe['index'][0])
+
+            return index_value
         except Exception as exc:
             return str(exc)
     

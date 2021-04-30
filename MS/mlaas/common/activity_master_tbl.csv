@@ -103,3 +103,13 @@ activity_id,activity_name,activity_description,language,operation,code,parent_ac
 40,Multiply into column,operation on column * pending,US,Operation,0,6,1,2
 40,Multiply into column,operation on column * in process,US,Operation,1,6,1,2
 40,Multiply into column,operation on column * completed,US,Operation,2,6,1,2
+41,Created Experiment,You have created experiment,US,Operation,0,-1,0,0
+42,Selected Auto Modeling,You have selected Auto Modeling for experiment,US,Operation,0,-1,0,0
+43,Selected Manual Modeling,You have selected Manual Modeling for experiment,US,Operation,0,-1,0,0
+44,Defined Modeling parameters,You have selected the algorithm * and defined the parameters for experiment #,US,Operation,0,-1,0,0
+45,Started Modeling,Modelling has been started for experiment,US,Operation,0,-1,0,0
+46,Stopped Modeling,Modelling has been stopped for experiment,US,Operation,0,-1,0,0
+47,Completed Modeling,Modeling of experiment * has been completed successfully,US,Operation,0,-1,0,0
+48,Completed Modeling,Modeling of experiment * has been completed with an error,US,Operation,0,-1,0,0
+49,'Started Scale And Split','Scaling and Spliting of * has been started','US','Operation',0,-1,0,0
+50,'Completed Scale And Split','Scaling and Spliting of * has been completed','US','Operation',0,-1,0,0

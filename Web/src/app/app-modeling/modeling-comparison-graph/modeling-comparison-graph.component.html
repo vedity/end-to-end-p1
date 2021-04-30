@@ -1,0 +1,20 @@
+<div class="row">
+    <div class="col-md-12">
+        <h4>Actual vs Prediction</h4>
+        <ngx-skeleton-loader *ngIf="!isChart" count="7" [animation]="animation" [theme]="theme">
+        </ngx-skeleton-loader>
+        <div id="chart-line" *ngIf="isChart && model_type=='Regression'">
+            <apx-chart [series]="linechart.series" [chart]="linechart.chart" [xaxis]="linechart.xaxis" [dataLabels]="linechart.dataLabels" [colors]="linechart.colors" [fill]="linechart.fill" [markers]="linechart.markers" [stroke]="linechart.stroke"></apx-chart>
+        </div>
+        <div id="chart-line" *ngIf="isChart && model_type=='Classification'">
+            <apx-chart class="apex-charts" dir="ltr" [series]="columnlabelChartexpand.series" [chart]="columnlabelChartexpand.chart" [plotOptions]="columnlabelChartexpand.plotOptions" [yaxis]="columnlabelChartexpand.yaxis" [title]="columnlabelChartexpand.title" [stroke]="columnlabelChartexpand.stroke"
+                [dataLabels]="columnlabelChartexpand.dataLabels" [xaxis]="columnlabelChartexpand.xaxis" [yaxis]="columnlabelChartexpand.yaxis" [legend]="columnlabelChartexpand.legend" [colors]="columnlabelChartexpand.colors" [fill]="columnlabelChartexpand.fill"
+                [grid]="columnlabelChartexpand.grid">
+            </apx-chart>
+
+        </div>
+
+
+    </div>
+
+</div>

@@ -1,67 +1,89 @@
-<div class="page-title-box d-flex align-items-center justify-content-between">
-    <h4 class="mb-0 font-size-18">Schema Mapping</h4>
-</div>
+<button type="button" class="btn btn-success schema-auto" *ngIf="!startfeatureslection" (click)="startFeatureSelection(schemarecommodate)">Features Selection</button>
+<button type="button" class="btn btn-success schema-auto" *ngIf="startfeatureslection" (click)="stopFeatureSelection()"><i class="bx bx-hourglass bx-spin font-size-16 align-middle me-2"></i> Stop</button>
+
+
 <div class="row schema-mapping">
     <div class="col-md-12">
         <div class="card table-card">
             <div class="card-body">
-                <h4 class="card-title mb-4">{{title}}</h4>
+                <h4 class="card-title mb-4"> {{title}}</h4>
+
                 <ngx-skeleton-loader *ngIf="displaydiv" count="7" [animation]="animation" [theme]="theme">
                 </ngx-skeleton-loader>
                 <div *ngIf="!displaydiv" class="nobordertable">
                     <!-- <perfect-scrollbar class="schemamapping-row"> -->
-                    <table datatable [dtOptions]="dtOptions" class="table table-centered table-nowrap " style="width: 100%;">
-                        <thead class="thead-light">
-                            <tr>
-                                <th>
-                                    Column Name
-                                </th>
-                                <th>
-                                    Data Type
-                                </th>
-                                <th>Column Attributes</th>
-                                <th>Change Column Name</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let data of datasetSchema;let i= index" id="tr_{{i}}" class="{{data.column_attribute}}-selected" [hidden]="i==0">
-                                <td>
-                                    {{data.column_name}}
-                                </td>
-                                <td>
-                                    <!-- <select class="form-control" >
-                    <option value="">Select Option</option>
-                    <option *ngFor="let item of datatypeList" value="{{item}}">{{item}}</option>
-                </select> -->
-                                    {{data.data_type}}
+                    <fieldset [disabled]="startfeatureslection">
+                        <p class="feature-section-name" *ngIf="isFeatureSelected">Feature Selection - {{selectedFeature}}</p>
+                        <a href="javascript:void(0)" (click)="displayfilter()" id="filter-btn" class="filter-btn"><i
+                            id="filtericon" class="dripicons-experiment"></i></a>
+                        <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table table-centered table-nowrap schema-mapping" style="width: 100%;">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>
+                                        Column Name
+                                    </th>
+                                    <th>
+                                        Data Type
+                                    </th>
+                                    <th class="no-sort">Column Attributes</th>
+                                    <th class="no-sort">Change Column Name</th>
+                                </tr>
+                            </thead>
+                            <thead>
+                                <tr class="thead-light" [hidden]="filter">
+                                    <td>
+                                        <input class="form-control filter" id="input_0" type="text" name="search-column-name" />
+                                    </td>
+                                    <td>
+                                        <input class="form-control filter" type="text" id="input_1" name="search-datatype" />
+                                    </td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let data of datasetSchema;let i= index" id="tr_{{i}}" class="{{data.column_attribute}}-selected" [hidden]="i==0">
+                                    <td class="columnname_{{i}}" id="columnname_{{data.column_name}}">
+                                        {{data.column_name}}
+                                    </td>
+                                    <td>
+                                        <select class="form-control date-formate" id="selectdatatype_{{i}}" (change)="DatatypeModal(dateModal,$event.target.value,i)">
+                                        <!-- <option value="">Select Option</option> -->
+                                        <option *ngFor="let item of datatypeList" value="{{item}}" [selected]="item==data.data_type">{{item}}</option>
+                                    </select>
+                                        <input class="hidden" hidden value="" id="datetimeformat_{{i}}">
+                                        <button type="button" *ngIf="data.data_type=='timestamp'" ngbTooltip="{{data.date_format}}" placement="left" class="btn"> <i class="bx bx-calendar "></i></button>
+                                        <button type="button" [ngbTooltip]="tipContent" hidden triggers="manual" id="datetimeformattooltip_{{i}}" #t_i="ngbTooltip" (mouseover)="displaytooltip(t_i,i)" (mouseleave)="hidetooltip(t_i)" placement="left" class="btn"> <i class="bx bx-calendar "></i></button>
 
-                                </td>
-                                <td>
-                                    <select class="form-control selectattr" id="selectattr_{{i}}" (change)="changeattrinute($event.target.value,i)">
-                                            <!-- <option value="">Select Option</option> -->
-                                            <option *ngFor="let item of columnattrList" value="{{item}}"  [selected]="item==data.column_attribute" >{{item}}
-                                            </option>
-                                        </select>
-                                </td>
-                                <td id="td_{{i}}" [ngClass]="{'errorstatus': data.change_column_name == data.column_name}">
-                                    <input (change)="checkuniquecolumnname($event,i)" class="form-control columnname" type="text" id="columnname_{{i}}" [value]="data.change_column_name" (keyup)="checkuniquecolumnname($event,i)" maxlength="100">
-                                    <!-- <input (change)="checkuniquecolumnname($event,i)" class="form-control columnname" type="text" id="columnname_{{i}}" [value]="data.change_column_name" (keydown)="checksame(data.column_name,$event.target.value,i)" (keyup)="checksame(data.column_name,$event.target.value,i)"
+                                        <!-- {{data.data_type}} -->
+                                    </td>
+                                    <td>
+                                        <select class="form-control selectattr" [disabled]="isFeatureSelected" id="selectattr_{{i}}" (change)="changeattrinute($event.target.value,i)">
+                                        <!-- <option value="">Select Option</option> -->
+                                        <option *ngFor="let item of columnattrList" [disabled]="item=='Target' && targetColumn!=0" value="{{item}}" [selected]="item==data.column_attribute">{{item}}
+                                        </option>
+                                    </select>
+                                    </td>
+                                    <td id="td_{{i}}" [ngClass]="{'errorstatus': data.change_column_name == data.column_name}">
+                                        <input (change)="checkuniquecolumnname($event,i)" class="form-control columnname" type="text" id="columnname_{{i}}" [value]="data.change_column_name" (keyup)="checkuniquecolumnname($event,i)" maxlength="100">
+                                        <!-- <input (change)="checkuniquecolumnname($event,i)" class="form-control columnname" type="text" id="columnname_{{i}}" [value]="data.change_column_name" (keydown)="checksame(data.column_name,$event.target.value,i)" (keyup)="checksame(data.column_name,$event.target.value,i)"
                                         maxlength="100"> -->
-                                    <div class="invalid-feedback">
-                                        <span class="text-red changeerror_{{i}}">                                       
+                                        <div class="invalid-feedback">
+                                            <span class="text-red changeerror_{{i}}">
                                         </span>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <!-- </perfect-scrollbar> -->
-                    <div class="button-items text-center">
-                        <button type="button" id="resetbtn" class="btn btn-secondary" (click)="reset()">Reset</button>
-                        <button type="button" id="savebtn" class="btn btn-success" (click)="save()">Save</button>
-                        <!-- <button type="button" class="btn btn-secondary" (click)="smallModal(smallDataModal)">Save
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <!-- </perfect-scrollbar> -->
+                        <div class="button-items text-center">
+                            <button type="button" id="resetbtn" class="btn btn-secondary" (click)="reset()">Reset</button>
+                            <button type="button" id="savebtn" class="btn btn-success" (click)="save()">Save</button>
+                            <!-- <button type="button" class="btn btn-secondary" (click)="smallModal(smallDataModal)">Save
                             As</button> -->
-                    </div>
+                        </div>
+                    </fieldset>
                 </div>
             </div>
         </div>
@@ -75,7 +97,9 @@
         <p>Loading...</p>
     </div>
 </div>
-<ng-template #smallDataModal let-modal>
+
+
+<!-- <ng-template #smallDataModal let-modal>
     <div class="modal-header">
         <h5 class="modal-title mt-0">Save the Dataset</h5>
         <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-hidden="true">×</button>
@@ -99,4 +123,74 @@
             <button type="button" class="btn btn-success" id="btnSaveas" (click)="savaAs()">Submit</button>
         </div>
     </div>
+</ng-template> -->
+
+<ng-template #dateModal let-modal>
+    <div class="modal-header">
+        <h5 class="modal-title mt-0">Change Date Format </h5>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click');selectdatetimeoption=''" aria-hidden="true">×</button>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-3" *ngFor="let item of datetimeoptionList;let i=index">
+                <div class="custom-control custom-radio mb-3"><input type="radio" (change)="selectdatetimeoption=item" class="custom-control-input radiobutton" id="customRadio_{{i}}" name="customRadio_0" value="{{item}}" title="dateformate">
+                    <label class="custom-control-label" for="customRadio_{{i}}" id="radiolabel_{{i}}">{{item}}</label>
+                </div>
+            </div>
+        </div>
+        <div class="row" *ngIf="selectdatetimeoption=='Custom'">
+            <div class="col-md-4">
+                <input type="text" class="form-control  custome-dateformate" id="custome-dateformate" placeholder="Enter Your Formate">
+                <a href="javascript:void(0);" class="font-size-18"><i class="bx bx-info-circle "></i></a>
+            </div>
+        </div>
+        <div class="button-items text-center">
+            <button type="button" class="btn btn-success" (click)="savetimestamp()">Save</button>
+        </div>
+    </div>
 </ng-template>
+
+<ng-template #schemarecommodate let-modal>
+    <div class="modal-header">
+        <h5> Features Selection</h5>
+        <button type="button" class="close" aria-label="Close" (click)="stopFeatureSelection();modal.dismiss('Close click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="">
+            <h4 class="mb-3 font-size-14"> Target - {{targetColumnName}} </h4>
+            <ngx-skeleton-loader *ngIf="displayselection" count="7" [animation]="animation" [theme]="theme">
+            </ngx-skeleton-loader>
+            <div *ngIf="!displayselection">
+                <div class="schema-box" *ngIf="featuresList">
+                    <div class="left-box">
+                        <ul>
+                            <li class="title">Column Name</li>
+                            <li *ngFor="let item of featuresList.column_list">{{item}}</li>
+
+                        </ul>
+                    </div>
+                    <div class="right-box">
+
+                        <ul *ngFor="let item of featuresList.option_list;let i=index;" class="featureoptios" id="option_{{i}}" (click)="selectedOption(item,i)">
+                            <li class="title" title="{{item.name}}">{{item.name}}</li>
+                            <li *ngFor="let subitem of featuresList.column_list">
+                                <i *ngIf="item.colums[subitem]=='True'" class="mdi mdi-check-bold"></i>
+                                <i *ngIf="item.colums[subitem]=='False'" class="mdi mdi-close"></i>
+                            </li>
+                        </ul>
+
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <button type="submit" class="btn btn-secondary mr-2" (click)="canceloption()">Cancel</button>
+                    <button type="submit" class="btn btn-success" [disabled]="!isitemselected" (click)="saveoption()">Ok</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #tipContent>{{currentcontet}}</ng-template>

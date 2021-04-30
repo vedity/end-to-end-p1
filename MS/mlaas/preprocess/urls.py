@@ -34,9 +34,30 @@ urlpatterns = [
     #url for save cleanup 
     path('mlaas/preprocess/cleanup/save/',CleanupSave.as_view()),
     
+    #url for scaling and split
     path('mlaas/preprocess/cleanup/scaling/',ScalingSplitClass.as_view()),
     
+    #url for scaling type
     path('mlaas/preprocess/cleanup/scaling/type/',Scalingtype.as_view()),
 
-    path('mlaas/preprocess/cleanup/holdout/',TrainValidHoldout.as_view())
+    #url for train valid holdout
+    path('mlaas/preprocess/cleanup/holdout/',TrainValidHoldout.as_view()),
+
+    #url for check scal and split 
+    path('mlaas/modeling/checksplit/',Check_Split.as_view()),
+    
+    #url for check cleanup dag status
+    path('mlaas/preprocess/cldag_status/',CheckCleanupDagStatus.as_view()),
+
+    #feature selection algorithm list
+    path('mlaas/preprocess/feature_list/',FeatureAlgoList.as_view()),
+    
+    
+    path('mlaas/preprocess/check/status/',CleanupCheckStatusClass.as_view()),
+    
+    #Check all Dag status
+    path('mlaas/preprocess/dags/status/',AllDagStatusClass.as_view()),
+    
+    # #feature selection main api
+    # path('mlaas/preprocess/feature_selection/',FeatureSelection.as_view()),
 ]

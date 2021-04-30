@@ -1,3 +1,20 @@
+.upload-btn {
+    margin-top: 35px;
+}
+
+.custom-checkbox {
+    margin-top: 43px;
+}
+
+table {
+    tr {
+        td:first-child {
+            max-width: 200px;
+            overflow: hidden;
+        }
+    }
+}
+
 .tab-menu {
     display: inline-block;
     margin-right: 20px;
@@ -22,6 +39,9 @@
     margin-bottom: 25px;
     p {
         margin-bottom: 0.5rem;
+    }
+    .badge-soft-Dark {
+        background: rgba(255, 255, 255, 0.2) !important;
     }
 }
 
@@ -48,4 +68,12 @@
 .main-row {
     height: calc(100vh - 420px);
     overflow-y: auto;
+}
+
+.icon-box {
+    a {
+        margin-right: 7px;
+        font-size: 20px;
+        display: inline-block;
+    }
 }

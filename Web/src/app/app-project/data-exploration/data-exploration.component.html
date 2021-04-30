@@ -1,12 +1,7 @@
-<div class="page-title-box d-flex align-items-center justify-content-between">
-    <h4 class="mb-0 font-size-18">Data Exploration</h4>
-</div>
 <div class="row">
     <div class="col-md-12">
         <div class="card table-card">
             <div class="card-body">
-
-
                 <ngx-skeleton-loader *ngIf="loaderdiv" count="7" [animation]="animation" [theme]="theme">
                 </ngx-skeleton-loader>
                 <div *ngIf="!loaderdiv">
@@ -48,7 +43,8 @@
                             class="mdi mdi-arrow-expand"></i></a>
                                                         <div class="col-graph">
                                                             <apx-chart class="apex-charts" dir="ltr" [series]="[{data:item['plotarray']}]" [chart]="columnlabelChart.chart" [plotOptions]="columnlabelChart.plotOptions" [yaxis]="columnlabelChart.yaxis" [title]="columnlabelChart.title" [stroke]="columnlabelChart.stroke"
-                                                                [dataLabels]="columnlabelChart.dataLabels" [xaxis]="columnlabelChart.xaxis" [legend]="columnlabelChart.legend" [colors]="item['colorarray']" [fill]="columnlabelChart.fill" [grid]="columnlabelChart.grid">
+                                                                [dataLabels]="columnlabelChart.dataLabels" [xaxis]="{ labels: {show:false},axisTicks: {show:false},axisBorder: {show:false},categories: item['category']}" [legend]="columnlabelChart.legend" [colors]="item['colorarray']"
+                                                                [fill]="columnlabelChart.fill" [grid]="columnlabelChart.grid">
                                                             </apx-chart>
                                                         </div>
                                                     </td>
@@ -100,7 +96,8 @@
                                                             class="mdi mdi-arrow-expand"></i></a>
                                                         <div class="col-graph">
                                                             <apx-chart class="apex-charts" dir="ltr" [series]="[{data:item['plotarray']}]" [chart]="columnlabelChart.chart" [plotOptions]="columnlabelChart.plotOptions" [yaxis]="columnlabelChart.yaxis" [title]="columnlabelChart.title" [stroke]="columnlabelChart.stroke"
-                                                                [dataLabels]="columnlabelChart.dataLabels" [xaxis]="columnlabelChart.xaxis" [legend]="columnlabelChart.legend" [colors]="item['colorarray']" [fill]="columnlabelChart.fill" [grid]="columnlabelChart.grid">
+                                                                [dataLabels]="columnlabelChart.dataLabels" [xaxis]="{ labels: {show:false},axisTicks: {show:false},axisBorder: {show:false},categories: item['category']}" [legend]="columnlabelChart.legend" [colors]="item['colorarray']"
+                                                                [fill]="columnlabelChart.fill" [grid]="columnlabelChart.grid">
                                                             </apx-chart>
 
                                                         </div>

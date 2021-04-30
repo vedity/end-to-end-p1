@@ -21,6 +21,7 @@ from .utils.logger_handler import custom_logger as cl
 from .utils.json_format.json_formater import *
 from .utils.activity_timeline import *
 from .utils.activity_timeline import activity_timeline
+from .utils.dynamic_dag import dag_utils
 
 
 user_name = 'admin'
@@ -33,6 +34,7 @@ DBObject=db.DBClass()     #Get DBClass object
 connection,connection_string=DBObject.database_connection(database,user,password,host,port) #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 timeline_Obj=activity_timeline.ActivityTimelineClass(database,user,password,host,port) #initialize ActivityTimeline Class
 json_obj = JsonFormatClass() #initialize JsonFormat Class
+dag_obj = dag_utils.DagUtilsClass()
 
 class UserLoginClass(APIView):
         
@@ -78,7 +80,8 @@ class UserLoginClass(APIView):
                                 logging.info("Common  : UserLoginClass : GET Method : execution : status_code :"+ status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else: 
-                                logging.info("Common  : UserLoginClass : POST Method : execution stop : status_code : 200")
+                                status = DBObject.create_score_view(connection)
+                                logging.info("Common  : UserLoginClass : POST Method : execution stop : status_code : 200 : "+str(status))
                                 return Response({"status_code":"200","error_msg":"Login Successfull","response":"true"})
                 except Exception as e:
                         logging.error("Common  : UserLoginClass : GET Method : Exception :" + str(e))
@@ -226,4 +229,43 @@ class ActivityTimelineClass(APIView):
                         logging.error("Common  : ActivityTimelineClass : GET Method : Exception :" + str(e))
                         logging.error("Common  : ActivityTimelineClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+
+class LogFileClass(APIView):
+        def get(self,request,format=None):
+                """
+                This class is used read the text of the admin_debug log file.
+                It will take url string as mlaas/common/logfile/.
+
+                Args  : 
+                        user_name[(String)]   :[User Name]
+                        
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival failed or successfull),
+                        Response(return false if failed otherwise json data)
+                """
+             
+                try:
+                        with open('./logs/admin_debug.log','r') as file:
+                                log_string = file.read()
+
+
+                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":str(log_string)})  
+                except Exception as e:
+                        logging.error("Common  : LogFileClass : GET Method : Exception :" + str(e))
+                        logging.error("Common  : LogFileClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+
+class DagInfoClass(APIView):
+        def get(self,request,format=None):
+                try:
+                        index,dag_id = dag_obj.get_dag(connection)
+
+                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":(index,dag_id)})  
+                except Exception as e:
+                        logging.error("Common  : LogFileClass : GET Method : Exception :" + str(e))
+                        logging.error("Common  : LogFileClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+
+
 

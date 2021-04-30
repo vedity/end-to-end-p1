@@ -79,7 +79,7 @@ class ExploreClass:
         #? Logical Code Begins
         try:
             data_df.reset_index(drop=True,inplace = True)
-            logging.error(str(data_df) + "  1-cha")
+            
             added_col = False
             if (type(data_df) is pd.Series):
                 arr = [0]*len(data_df)
@@ -106,8 +106,14 @@ class ExploreClass:
             stats_df.rename(columns = {'std':'Std'}, inplace = True)    
             stats_df.rename(columns = {'min':'Min Value'}, inplace = True)    
             stats_df.rename(columns = {'max':'Max Value'}, inplace = True)    
-            stats_df.rename(columns = {'top':'Most Frequent'}, inplace = True) 
-            stats_df.rename(columns = {'freq':'Most Frequency'}, inplace = True)    
+            
+            try:
+                #? Removing unnecessary columns
+                stats_df.drop('top',axis=1, inplace=True)
+                stats_df.drop('freq',axis=1, inplace=True)
+            except:
+                #? If the column wasn't already there then
+                pass
 
             #? Changing Column Datatypes
             stats_df['Mean'] = stats_df['Mean'].astype(float)
@@ -123,6 +129,8 @@ class ExploreClass:
             stats_df["Null Values"] = stats_df['Null Values'].astype(int)
             stats_df["Non-Null Values"] = stats_df['Non-Null Values'].astype(int)
             stats_df["DataCount"] = len(data_df)
+            stats_df['Most Frequency'] = np.NAN
+            stats_df['Most Frequent'] = np.NAN
             stats_df['Least Frequency'] = np.NAN
             stats_df['Least Frequent'] = np.NAN
             stats_df['Column Name'] = 0
@@ -153,13 +161,13 @@ class ExploreClass:
                 if self.get_datatype(numerical_columns,col).startswith("Ca"):
                     try:
                         most_frequent, least_frequent, most_occurrence, least_occurrence = self.get_max_min_occurrence(data_df[col])
-                        stats_df.iloc[i,2] = most_frequent
-                        stats_df.iloc[i,3] = most_occurrence
+                        stats_df.iloc[i,-8] = most_frequent
+                        stats_df.iloc[i,-9] = most_occurrence
                         stats_df.iloc[i,-6] = least_frequent
                         stats_df.iloc[i,-7] = least_occurrence
                     except:
-                        stats_df.iloc[i,2] = np.NaN
-                        stats_df.iloc[i,3] = np.NaN
+                        stats_df.iloc[i,-8] = np.NaN
+                        stats_df.iloc[i,-9] = np.NaN
                         stats_df.iloc[i,-6] = np.NaN
                         stats_df.iloc[i,-7] = np.NaN
                 i += 1

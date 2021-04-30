@@ -10,4 +10,7 @@ django-cors-headers
 mlflow==1.13.1
 sklearn
 selenium
+shap
+# tensorflow
+xgboost
 #pyspark

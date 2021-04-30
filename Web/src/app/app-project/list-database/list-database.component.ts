@@ -18,16 +18,35 @@ import { Router } from '@angular/router';
 export class ListDatabaseComponent implements OnInit {
   @ViewChild(DataTableDirective, { static: false })
   datatableElement: DataTableDirective;
+  classfilter:any="nofilter"
   dtOptions: DataTables.Settings = {
     scrollCollapse: true,
     scrollY: "calc(100vh - 520px)",
-    autoWidth:false
+    autoWidth:false,
+    preDrawCallback:function(e){
+      $(".filter-box").on("click",function(event){
+        event.stopPropagation();
+      })
+
+    },
+    drawCallback:function(e){
+      $("#datatablepagelength").val(e._iDisplayLength);
+    },
+     pageLength:10
   };
+  
   dtTrigger: Subject<any> = new Subject<any>();
-  data: createdataset = new createdataset();
   filter: boolean = true;
   loaderdiv = false;
-  f: NgForm;
+  isloaderdiv:boolean=true;
+  animation = "progress-dark";
+  theme = {
+    'border-radius': '5px',
+    'height': '40px',
+    'background-color': ' rgb(34 39 54)',
+    'border': '1px solid #32394e',
+    'animation-duration': '20s'
+  };
   constructor(public apiService: ProjectApiService, public toaster: ToastrService,private modalService: NgbModal,public router:Router) { }
   transactions: any = [];
 
@@ -41,8 +60,6 @@ export class ListDatabaseComponent implements OnInit {
 	}
 
   ngOnInit(): void {
-    this.data.isprivate = true;
-    bsCustomFileInput.init();
     this.getdataset();
   }
 
@@ -65,9 +82,7 @@ export class ListDatabaseComponent implements OnInit {
       this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
         dtInstance.columns().every(function () {
           const that = this;
-          
           $('#input_'+ this.index("visible")).on('keyup change', function () {
-            console.log(this['value']);
             if (that.search() !== this['value']) {
               that
                 .search(this['value'])
@@ -80,8 +95,11 @@ export class ListDatabaseComponent implements OnInit {
     }
     else {
       this.rendered();
-     // this.dtTrigger.next();
+
     }
+    setTimeout(() => {
+      this.isloaderdiv=false;
+    }, 0);
   }
 
   errorHandler(error) {
@@ -93,42 +111,9 @@ export class ListDatabaseComponent implements OnInit {
     }
   }
 
-  datasetfile: File;
-  handleFileInput(data: FileList) {
-    if (data.length > 0) {
-      this.datasetfile = data.item(0);
-    }
-  }
-
-  checkuniquedatasetname(event) {
-    var val = event.target.value;
-    if (val != "") {
-      this.apiService.checkUniqueDatasetName(val).subscribe(
-        logs => this.successUniquedatasetynamevalidation(logs, event.target),
-        error => this.errorHandler(error)
-      );
-    }
-    else {
-      this.datasetnameuniqueerror = false;
-    }
-  }
-
-  datasetnameuniqueerror: any = false;
-  successUniquedatasetynamevalidation(data, target) {
-    if (data.response == 'false') {
-      this.datasetnameuniqueerror = true;
-      target.className = target.className.replace("ng-valid", " ");
-      target.className = target.className + " ng-invalid";
-    }
-    else {
-      this.datasetnameuniqueerror = false;
-      target.className = target.className.replace("ng-invalid", " ");
-      target.className = target.className + " ng-valid";
-    }
-  }
-
   displayfilter() {
     this.filter = !this.filter;
+    $(".filter-tr").toggleClass("nofilter");
     $('.filter').val('').trigger('change');
   }
 
@@ -163,69 +148,22 @@ export class ListDatabaseComponent implements OnInit {
     });
   }
 
-  
-
   rendered() {
-    let currentUrl = this.router.url;
-    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-    this.router.onSameUrlNavigation = 'reload';
-    this.router.navigate([currentUrl]);
-
-    // this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
-    //   dtInstance.destroy();
-    //   dtInstance.columns().every(function () {
-    //     const that = this;
-    //     $('#input_'+ this.index("visible")).on('keyup change', function () {
-    //       if (that.search() !== this['value']) {
-    //         that
-    //           .search(this['value'])
-    //           .draw();
-    //       }
-    //     });
-    //   });
-    // });
-    // this.dtTrigger.next();
+    this.dtOptions.pageLength=parseInt($("#datatablepagelength").val().toString());
+    this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
+      dtInstance.columns().every(function () {
+        const that = this;
+        $('#input_'+ this.index("visible")).on('keyup change', function () {
+          if (that.search() !== this['value']) {
+            that
+              .search(this['value'])
+              .draw();
+          }
+        });
+      });
+      dtInstance.destroy();
+    });
+    this.dtTrigger.next();
   }
 
-  errorStatus: boolean = true
-  save() {
-    let savedata = new FormData();
-    var user = JSON.parse(localStorage.getItem("currentUser"));
-    savedata.append('user_name', user.username)//.user_name="admin";
-    savedata.append('dataset_name', this.data.datasetname);
-    if (this.data.isprivate)
-      savedata.append('visibility', "private");
-    else
-      savedata.append('visibility', "public");
-
-    savedata.append('inputfile', this.datasetfile);
-    savedata.append('dataset_description', this.data.datasetdescription);
-    this.loaderdiv = true;
-    this.modalService.dismissAll();
-    this.apiService.savedataset(savedata).subscribe(
-      logs => this.savesuccess(logs),
-      error => this.errorHandler(error)
-    )
-  }
-
-  savesuccess(data) {
-    if (data.status_code == "200") {
-
-      this.loaderdiv = false;
-     // $(".custom-file-label").text("Choose file");
-      this.getdataset();
-    }
-    else
-      this.errorHandler(data);
-  }
-
-  smallModal(smallDataModal: any) {
-    this.data = new createdataset();
-    this.data.isprivate=true;
-    this.datasetnameuniqueerror = false;
-    this.errorStatus=true;
-    this.modalService.open(smallDataModal, { size: 'sm',windowClass:'modal-holder', centered: true });
-    bsCustomFileInput.init();
-
-  }
 }

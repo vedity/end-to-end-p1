@@ -9,11 +9,19 @@
     h4 {
         padding: 15px 10px 10px 10px;
     }
+    .card-header {
+        background-color: transparent !important;
+    }
     .box {
-        padding: 0px 20px;
+        position: relative;
     }
     .badge {
         float: right;
+    }
+    p {
+        span {
+            color: #fff;
+        }
     }
     .verti-timeline {
         border-left: 3px dashed #565e76;
@@ -61,13 +69,89 @@
     right: 0px;
     width: 40px;
     height: 40px;
-    background: #556ee6;
-    top: 70px;
+    background: #34c38f;
+    top: 86px;
     z-index: 9999;
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
     color: #fff !important;
     padding: 10px;
+}
+
+.container-fluid.red {
+    .right-panel-timeline {
+        right: 0px;
+    }
+    .timer-btn {
+        right: 400px;
+    }
+}
+
+h5 {
+    font-size: 0.8rem;
+    color: #c3cbe4;
+}
+
+.search-box {
+    text-align: right;
+    margin-bottom: 15px;
+    label {
+        margin-right: 20px;
+    }
+    .form-control {
+        width: 250px;
+        display: inline-block;
+        border-radius: 2px;
+        color: #bfc8e2;
+        border: 1px solid #32394e !important;
+        background-color: #222736 !important;
+    }
+}
+
+.spinner-border {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+    border: 0.15em solid currentColor;
+    border-right-color: transparent;
+    vertical-align: top;
+    margin-top: 0;
+}
+
+.filter-box {
+    .search-box {
+        position: absolute;
+        right: 50px;
+        top: 10px;
+        .form-control {
+            width: 175px !important;
+        }
+    }
+    .filter-btn-timeline {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        .dropdown-menu {
+            right: 0 !important;
+            left: auto !important;
+        }
+    }
+}
+
+.filter-timeline {
+    position: absolute;
+    right: 0px;
+    top: -55px;
+    .btn {
+        background-color: #32394e;
+        line-height: 1.7;
+        border-radius: 50%;
+        width: 33px;
+        height: 33px;
+    }
+    .dropdown-menu {
+        right: 0 !important;
+        left: auto !important;
+    }
 }
 
 .page-content.open {

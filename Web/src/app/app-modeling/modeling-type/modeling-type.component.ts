@@ -5,25 +5,17 @@ import { DataTableDirective } from 'angular-datatables';
 import { ToastrService } from 'ngx-toastr';
 //  import { manualmodeling } from './modeling.model';
 import { ModelingTypeApiService } from '../modeling-type.service';
-import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
 @Component({
   selector: 'app-modeling-type',
   templateUrl: './modeling-type.component.html',
   styleUrls: ['./modeling-type.component.scss']
 })
 export class ModelingTypeComponent implements OnInit {
-  // mySwitch: boolean = false;
-  // public data:manualmodeling;
-  timePeriods = [
-    'Experiment 1','Experiment 2','Experiment 3','Experiment 4'
-  ];
-
- 
-  isDisplayRunning=true;
-  model_type="Regression";
-  currentuser:any;
-  splitmethodselection="crossvalidation";
-  hyperparams='sklearn';
+  isDisplayRunning = true;
+  model_type = "";
+  currentuser: any;
+  splitmethodselection = "crossvalidation";
+  hyperparams = 'sklearn';
   @ViewChild(DataTableDirective, { static: false })
   datatableElement: DataTableDirective;
   dtOptions: DataTables.Settings = {};
@@ -45,19 +37,18 @@ export class ModelingTypeComponent implements OnInit {
   public modelDescription: any;
   processclass: any = "stop";
   processInterval: any;
-  lineColumAreaChart:any;
+  lineColumAreaChart: any;
 
   @HostListener('window:resize', ['$event'])
-	onResize(event) {
+  onResize(event) {
     if (this.datatableElement) {
       this.datatableElement.dtInstance.then((dtInstance: DataTables.Api) => {
         dtInstance.columns.adjust();
       })
     }
-	}
-  
+  } 
+
   ngOnInit(): void {
-   let projectdatamodel;
     this.dtOptions = {
       paging: false,
       ordering: false,
@@ -66,107 +57,151 @@ export class ModelingTypeComponent implements OnInit {
       searching: false,
       scrollY: "calc(100vh - 545px)",
     }
-    this.params = history.state;
 
-    if (this.params.dataset_id != undefined) {
-      localStorage.setItem("modeling", JSON.stringify(this.params));
+    this.params = history.state;
+    if (this.params.isFromMenu == true) {
+      this.getproject();
+      $(".openmodal").trigger('click');
+    } else {
+      if (this.params.dataset_id != undefined) {
+        localStorage.setItem("modeling", JSON.stringify(this.params));
+      }
+      else {
+        this.params = localStorage.getItem("modeling");
+        this.params = JSON.parse(this.params);
+      }
+      // this.checkstatus();
+      this.checkmodelType(this.params.dataset_id,this.params.project_id)
+      this.currentuser = localStorage.getItem("currentUser")
+      this.params.user_id = JSON.parse(this.currentuser).id;
+      this.getDatasetInfo();
+      this.getRunningExperimentList('onload');
+      this.getAllExperimentList();
+      // setTimeout(() => {
+      //   if(this.runningExpList.length==0){
+      //     $("#switcher-list")[0].click();
+      //   }
+      //   else{
+      //     this.processclass = "start";
+      //   }
+      // }, 10);
+     
+    }
+  }
+
+  checkmodelType(dataset_id,project_id){
+    this.apiservice.checkmodelType(dataset_id,project_id).subscribe(
+      logs=>this.modelTypeSuccessHandlers(logs),
+      error=>this.errorHandler(error)
+    )
+  }
+
+  modelTypeSuccessHandlers(data){
+    if(data.status_code=="200"){
+      this.model_type=data.response.model_type;
+      console.log(this.model_type);
+    }
+    else{
+      this.errorHandler(data);
+    }
+  }
+
+  projectList: any;
+  getproject() {
+    this.apiservice.getproject().subscribe(
+      logs => this.successProjectListHandler(logs),
+      error => this.errorHandler(error)
+    );
+  }
+
+  successProjectListHandler(data) {
+    if (data.status_code == "200") {
+      this.projectList = data.response;
     }
     else {
-      if(this.params.selectproject==false){
-        $(".openmodal").trigger('click');
-      }
-    //this.modalService.open(projectdatamodel, { size: 'lg', windowClass: 'modal-holder', centered: true });
-      this.params = localStorage.getItem("params");
-      this.params = JSON.parse(this.params);
+      this.projectList = []
     }
+  }
 
-    this.lineColumAreaChart = {
-      chart: {
-          height: 200,
-          type: 'line',
-          stacked: false,
-          toolbar: {
-              show: false
-          }
-      },
-      stroke: {
-          width: [2, 2, 4],
-      },
-      colors: ['#f46a6a', '#34c38f'],
-      series: [{
-          name: 'Experiment 1',
-          data: [23, 11, 50, 70, 13, 56, 37, 78, 44, 22, 30]
-      }, {
-          name: 'Experiment 2',
-          data: [23, 10, 22, 30, 13, 20, 31, 21, 40, 20, 32]
-      }],
-      fill: {
-          opacity: [0.85, 1],
-          gradient: {
-              inverseColors: false,
-              shade: 'light',
-              type: 'vertical',
-              opacityFrom: 0.85,
-              opacityTo: 0.55,
-              stops: [0, 100, 100, 100]
-          }
-      },
-      // tslint:disable-next-line: max-line-length
-      labels: ['01/01/2003', '02/01/2003', '03/01/2003', '04/01/2003', '05/01/2003', '06/01/2003', '07/01/2003', '08/01/2003', '09/01/2003', '10/01/2003', '11/01/2003'],
-      markers: {
-          size: [0,2]
-      },
-      legend: {
-          offsetY: 5,
-      },
-      xaxis: {
-          type: 'datetime',
-      },
-      yaxis: {
-          title: {
-              text: 'Points',
-          },
-      },
-      tooltip: {
-          shared: true,
-          intersect: false,
-          y: {
-              formatter(y) {
-                  if (typeof y !== 'undefined') {
-                      return y.toFixed(0) + ' points';
-                  }
-                  return y;
-              }
-          }
-      },
-      grid: {
-          borderColor: '#f1f1f1'
+  projectdata: any;
+  setproject(value) {
+    console.log(value);
+    if (value != "") {
+      var projects = this.projectList.filter(function (elem) {
+        if (elem.project_id == value)
+          return elem
+      })
+      this.getCheckSplit(projects[0].project_id,projects[0].schema_id);
+      this.projectdata = projects[0];
+    }
+    else {
+      this.projectdata = undefined
+    }
+    console.log(this.projectdata);
+  }
+
+  setModeling() {
+    if (this.projectdata != undefined) {
+      this.params = {
+        dataset_id: this.projectdata.dataset_id,
+        dataset_name: this.projectdata.dataset_name,
+        project_id: this.projectdata.project_id, navigate_to: "/project",
+        schema_id: this.projectdata.schema_id
       }
-    };
-    this.currentuser = localStorage.getItem("currentUser")
-    this.params.user_id = JSON.parse(this.currentuser).id;
-    console.log(this.currentuser);
-    this.getDatasetInfo();
-    this.getRunningExperimentList();
-    this.getAllExperimentList();
-    
+      localStorage.setItem("modeling", JSON.stringify(this.params));
+      this.currentuser = localStorage.getItem("currentUser")
+      this.params.user_id = JSON.parse(this.currentuser).id;
+      this.checkmodelType(this.projectdata.dataset_id,this.projectdata.project_id)
+
+      this.getDatasetInfo();
+      this.getRunningExperimentList();
+      this.getAllExperimentList();
+      setTimeout(() => {
+      this.modalService.dismissAll();
+      }, 0);
+    }
+    else {
+      this.toaster.error("Please select any project", "Error");
+    }
   }
 
-  drop(event: CdkDragDrop<string[]>) {
-    moveItemInArray(this.timePeriods, event.previousIndex, event.currentIndex);
-  }
-  
+  // checkrunningExperiment() {
+  //   this.apiservice.checkrunningExperiment(this.params.project_id).subscribe(
+  //     logs => this.checkrunningexpuccessHandler(logs),
+  //     //  error=>this.errorHandler(error)
+  //   )
+  // }
+
+  // checkrunningexpuccessHandler(data) {
+  //   if (data.status_code == "200") {
+  //     if (data.response.exp_name != "") {
+  //       this.processInterval = setInterval(() => {
+  //         this.getRunningExperimentList();
+  //         this.getAllExperimentList();
+  //         this.checkstatus();
+  //       }, 4000);
+  //     }
+  //   }
+  //   // else {
+  //   //   this.errorHandler(data);
+  //   // }
+  // }
+
   compareIds = [];
-  setCopmareIds(val, id) {
+  compareExps = [];
+  setCopmareIds(val, id,name) {
     // console.log(val, id);
     if (val == true) {
       this.compareIds.push(id);
+      this.compareExps.push({id:id,name:name});
     }
     else {
       // console.log(this.compareIds.indexOf(id));
       var index = this.compareIds.indexOf(id);
       if (index != -1) {
         this.compareIds.splice(index, 1);
+      this.compareExps.splice(index,1);
+
       }
     }
     // console.log(this.compareIds);
@@ -183,10 +218,10 @@ export class ModelingTypeComponent implements OnInit {
       logs => this.successHandler(logs),
       error => this.errorHandler(error));
 
-  } 
-  
+  }
+
   getAlgorithmList() {
-    this.apiservice.getAlgorithmList(this.params.dataset_id, this.params.project_id,this.model_type).subscribe(
+    this.apiservice.getAlgorithmList(this.params.dataset_id, this.params.project_id, this.model_type).subscribe(
       logs => this.successAlgorithmListHandler(logs),
       error => this.errorHandler(error));
   }
@@ -196,24 +231,26 @@ export class ModelingTypeComponent implements OnInit {
     if (data.status_code == "200") {
       this.algorithmlist = data.response;
       console.log(this.algorithmlist);
-      
     }
     else {
       this.errorHandler(data);
     }
   }
 
-  selectedalgorithm:any;
-  getHyperParams(val){
-    this.selectedalgorithm=val;
-    if(val!=""){
-
+  selectedalgorithm: any;
+  selectedalgorithmname: any;
+  getHyperParams(event) {
+    let val = event.target.value;
+    this.selectedalgorithm = val;
+    this.selectedalgorithmname = event.target.selectedOptions[0].innerText;
+    console.log(this.selectedalgorithmname);
+    if (val != "") {
       this.apiservice.getHyperparamsList(val).subscribe(
         logs => this.successParamsListHandler(logs),
         error => this.errorHandler(error));
     }
     else
-    this.paramsList=null
+      this.paramsList = null
   }
 
   paramsList: any;
@@ -221,94 +258,115 @@ export class ModelingTypeComponent implements OnInit {
     if (data.status_code == "200") {
       this.paramsList = data.response;
       console.log(this.paramsList);
-      
+
     }
     else {
       this.errorHandler(data);
     }
   }
-  getRunningExperimentList() {
+
+  getRunningExperimentList(type='') {
     this.apiservice.showrunningexperimentslist(this.params.project_id).subscribe(
-      logs => this.runningexpListsuccessHandler(logs),
-      error => this.errorHandler(error));
+      logs => this.runningexpListsuccessHandler(logs,type)
+      // error => this.errorHandler(error)
+    );
   }
 
-runningExpList: any = [];
-  runningexpListsuccessHandler(data) {
+  runningExpList: any = [];
+  runningexpListsuccessHandler(data,type) {
     if (data.status_code == "200") {
       this.runningExpList = data.response;
       this.contentloaded = true;
+      if(type!=''){
+        if(this.runningExpList.length==0){
+          $("#switcher-list")[0].click();
+        }
+        else{
+          if(type=='onload'){
+            // this.processclass = "start";
+            // this.processInterval = setInterval(() => {
+            //   this.getRunningExperimentList(type);
+            //   this.getAllExperimentList();
+            //   this.checkstatus(type);
+            // }, 4000);
+          }
+         
+        }
+      }
     }
-    else {
-      this.errorHandler(data);
-    }
+    // else {
+    //   this.errorHandler(data);
+    // }
   }
 
   getAllExperimentList() {
     this.apiservice.showallexperimentslist(this.params.project_id).subscribe(
-      logs => this.allexpListsuccessHandler(logs),
-      error => this.errorHandler(error));
+      logs => this.allexpListsuccessHandler(logs)
+      // error => this.errorHandler(error)
+    );
   }
 
   allExpList: any = [];
   allexpListsuccessHandler(data) {
     if (data.status_code == "200") {
-      this.allExpList=[];
+      this.allExpList = [];
       this.allExpList = data.response;
       this.contentloaded = true;
     }
-    else {
-      this.errorHandler(data);
-    }
+    // else {
+    //   this.errorHandler(data);
+    // }
   }
 
 
-  startModel(model_mode) {
-    this.processclass = "start";
+  startModel() {
+
     this.experiment_name = this.params.experiment_name;
     this.experiment_desc = this.params.experiment_desc;
     console.log(this.currentuser);
     let currentuser = localStorage.getItem("currentUser")
     let username = JSON.parse(currentuser).username;
     let obj;
-    if(model_mode=="Auto"){
+    if (this.model_mode == "Auto") {
       obj = {
         user_name: username,
-        dataset_id:this.params.dataset_id,
+        dataset_id: this.params.dataset_id,
         project_id: this.params.project_id,
-        model_mode: model_mode,
-        model_type:this.model_type,
+        model_mode: this.model_mode,
+        model_type: this.model_type,
         experiment_name: this.params.experiment_name,
         experiment_desc: this.params.experiment_desc,
-        model_id:0
+        model_id: 0,
+        model_name: undefined
       }
     }
-    else{
+    else {
       obj = {
         user_name: username,
-        dataset_id:this.params.dataset_id,
+        dataset_id: this.params.dataset_id,
         project_id: this.params.project_id,
-        model_mode: model_mode,
-        model_type:this.model_type,
+        model_mode: this.model_mode,
+        model_type: this.model_type,
         experiment_name: this.params.experiment_name,
         experiment_desc: this.params.experiment_desc,
-        model_id:this.responsearray["model_id"],
-        hyperparameters:this.responsearray["hyperparameters"]
+        model_id: this.responsearray["model_id"],
+        model_name: this.responsearray["model_name"],
+        hyperparameters: this.responsearray["hyperparameters"]
       }
       this.modalService.dismissAll();
     }
-    
+
     console.log(obj);
-    
+
     this.apiservice.startModeling(obj).subscribe(
-      logs=>this.startsuccessHandler(logs),
-      error=>this.errorHandler(error)
+      logs => this.startsuccessHandler(logs),
+      error => this.errorHandler(error)
     )
 
   }
 
-  changeDisplay(){
-    this.isDisplayRunning=!this.isDisplayRunning
+  changeDisplay() {
+    this.isDisplayRunning = !this.isDisplayRunning
   }
 
   stopModel() {
@@ -318,31 +376,38 @@ runningExpList: any = [];
     }
   }
 
-  checkstatus(){
-    this.apiservice.checkmodelstatus(this.params.project_id,this.experiment_name).subscribe(
-      logs=>this.statusSuccessHandler(logs),
-      error=>this.errorHandler(error)
+  checkstatus(type='') {
+    let currentuser = localStorage.getItem("currentUser")
+    let username = JSON.parse(currentuser).username;
+    this.apiservice.checkmodelstatus(this.params.project_id, this.experiment_name, this.params.dataset_id, username,type).subscribe(
+      logs => this.statusSuccessHandler(logs)
+      // error=>this.errorHandler(error)
     )
   }
 
-  statusSuccessHandler(data){
+  statusSuccessHandler(data) {
     if (data.status_code == "200") {
-      if(data.response=="failed" || data.response=="success")
-      this.stopModel();
+      if (data.response == "failed" || data.response == "success")
+        this.stopModel();
     }
-    else{
+    else {
       this.errorHandler(data);
     }
   }
 
   startsuccessHandler(data) {
     if (data.status_code == "200") {
+      this.processclass = "start";
+      this.modalService.dismissAll();
       this.toaster.success(data.error_msg, 'Success');
+      if(!this.isDisplayRunning){
+          $("#switcher-list")[0].click();
+      }
       this.processInterval = setInterval(() => {
         this.getRunningExperimentList();
         this.getAllExperimentList();
         this.checkstatus();
-      }, 5000);
+      }, 4000);
     }
     else {
       this.errorHandler(data);
@@ -368,64 +433,84 @@ runningExpList: any = [];
   }
 
   modeltitle: any;
-  current_experiment_id:any;
-  current_model_type:any;
+  current_experiment_id: any;
+  current_model_type: any;
+  itemstatus:any;
   extraLarge(exlargeModal: any, obj) {
     this.modeltitle = obj.experiment_name;
-    this.current_experiment_id=obj.experiment_id;
-    this.current_model_type=obj.model_type;
+    this.current_experiment_id = obj.experiment_id;
+    this.current_model_type = obj.model_type;
+    this.itemstatus=obj.status;
+    if(this.itemstatus=="success")
     this.modalService.open(exlargeModal, { size: 'xl', windowClass: 'modal-holder', centered: true });
+    if(this.itemstatus=="failed")
+    this.modalService.open(exlargeModal, { size: 'sm', windowClass: 'modal-holder', centered: true });
   };
 
-  checkexperimentname(event)
-{
-  var val=event.target.value;
-  if(val!=""){
-    this.apiservice.checkexperimentname(val).subscribe(
-      logs=>this.checksuccessHandler(logs,event.target),
-      error=>this.errorHandler(error)
-    )
+  checkexperimentname(event) {
+    var val = event.target.value;
+    if (val != "") {
+      this.apiservice.checkexperimentname(val, this.params.project_id).subscribe(
+        logs => this.checksuccessHandler(logs, event.target),
+        error => this.errorHandler(error)
+      )
+    }
+    else
+      this.checkuniuqename = false;
   }
-  else
-  this.checkuniuqename = false;
-}
 
-checkuniuqename=true;
-checksuccessHandler(data,target){
-  if (data.status_code == '200') {
-    this.checkuniuqename = true;
-    target.className = target.className.replace("ng-invalid", " ");
-    target.className = target.className + " ng-valid";
+  checkuniuqename = true;
+  checksuccessHandler(data, target) {
+    if (data.status_code == '200') {
+      this.checkuniuqename = true;
+      target.className = target.className.replace("ng-invalid", " ");
+      target.className = target.className + " ng-valid";
+    }
+    else {
+      this.checkuniuqename = false;
+      target.className = target.className.replace("ng-valid", " ");
+      target.className = target.className + " ng-invalid";
+    }
   }
-  else {
-    this.checkuniuqename = false;
-    target.className = target.className.replace("ng-valid", " ");
-    target.className = target.className + " ng-invalid";
-  }
-}
 
+onClickStart(modelingmodal:any,largeModal:any){
+if(this.model_mode=='Auto'){
+this.smallModal(modelingmodal);
+}
+else{
+  this.LargeModal(largeModal,true);
+}
+}
 
   smallModal(modelingmodal: any) {
-   
+    this.params.experiment_name = ''
+    this.params.experiment_desc = ''
     this.modalService.open(modelingmodal, { size: 'md', windowClass: 'modal-holder', centered: true });
   }
 
+  model_mode = 'Auto';
   contentid = 0;
   LargeModal(largeModal: any, val) {
+    this.model_mode = 'Auto';
     if (val) {
-
+      this.model_mode = 'Manual';
+      this.selectedalgorithm = "";
+      this.selectedalgorithmname = "";
+      this.paramsList = undefined;
       this.contentid = 1;
       this.getAlgorithmList();
       this.modalService.open(largeModal, { size: 'lg', windowClass: 'modal-holder', centered: true });
     }
   };
 
-  compareLarge (compareModal: any) 
-  {
-    this.modalService.open(compareModal, { size: 'xl',windowClass:'modal-holder', centered: true });
+  compareExperiment(compareModal: any) {
+    console.log(this.compareIds);
+    this.modalService.open(compareModal, { size: 'xl', windowClass: 'modal-holder', centered: true });
+   
+    
   };
 
-  ProjectData(projectModal:any){
+  ProjectData(projectModal: any) {
     this.modalService.open(projectModal, { size: 'lg', windowClass: 'modal-holder', centered: true });
   }
 
@@ -433,56 +518,78 @@ checksuccessHandler(data,target){
     this.contentid = id;
   };
 
-  responsearray={};
-  nextValidate(){
-    var errorflag=false;
-    var hyperparameters={};
-    if(this.selectedalgorithm!=""){
+  responsearray = {};
+  nextValidate(modelingmodal) {
+    var errorflag = false;
+    var hyperparameters = {};
+    if (this.selectedalgorithm != "") {
       $(".hyperparamsinput").removeClass("errorinput")
-      if(this.paramsList.length>0){
-        var hyperparameters={};
-          this.paramsList.forEach(element => {
-            let val;
-            if(element.display_type==""){
-              val = $("#txt_"+element.hyperparameter).val();
+      if (this.paramsList.length > 0) {
+        var hyperparameters = {};
+        this.paramsList.forEach(element => {
+          let val;
+          if (element.display_type == "") {
+            val = $("#txt_" + element.param_name).val();
+          }
+          if (element.display_type == "validation") {
+            val = $("#txt_" + element.param_name).val();
+            var valid = element.param_value;
+            if (val >= valid[0] && val <= valid[1]) {
             }
-            if(element.display_type=="validation"){
-              val = $("#txt_"+element.hyperparameter).val();
-              var valid=element.param_value;
-              if(val>=valid[0] && val<=valid[1]){
-              }
-              else{
-                errorflag=true;
-                $("#txt_"+element.hyperparameter).addClass("errorinput")
-              }
+            else {
+              errorflag = true;
+              $("#txt_" + element.param_name).addClass("errorinput")
             }
-            if(element.display_type=="dropdown"){
-              val = $("#txt_"+element.hyperparameter).val();
-            }
-            if(val!=""){
-            element.value=val;
-            hyperparameters[element.hyperparameter]=val;
-            }
-            else
-            {
-            $("#txt_"+element.hyperparameter).addClass("errorinput")
-            errorflag=true;
-            }
-          });
-        if(errorflag)
-      this.toaster.error("Please enter all valid input",'Error');
-          
+          }
+          if (element.display_type == "dropdown") {
+            val = $("#txt_" + element.param_name).val();
+          }
+          if (val != "") {
+            element.value = val;
+            hyperparameters[element.param_name] = val;
+          }
+          else {
+            $("#txt_" + element.param_name).addClass("errorinput")
+            errorflag = true;
+          }
+        });
+        if (errorflag)
+          this.toaster.error("Please enter all valid input", 'Error');
+
       }
-      this.responsearray["model_id"]=this.selectedalgorithm;
-      this.responsearray["hyperparameters"]=hyperparameters;
+      this.responsearray["model_id"] = this.selectedalgorithm;
+      this.responsearray["model_name"] = this.selectedalgorithmname;
+      this.responsearray["hyperparameters"] = hyperparameters;
     }
-    else{
-      this.toaster.error("Please select model",'Error');
-      errorflag=true
+    else {
+      this.toaster.error("Please select model", 'Error');
+      errorflag = true
     }
-    if(!errorflag){
+    if (!errorflag) {
       this.modalService.dismissAll();
-      $("#createExperiment").trigger('click');
+      this.smallModal(modelingmodal);
+      // $("#createExperiment").trigger('click');
     }
   }
+
+  getCheckSplit(project_id,schema_id) {
+    return this.apiservice.getCheckSplit(project_id,schema_id).subscribe(
+      logs => this.checksplitSuccessHandler(logs)
+    );
+  }
+
+  isEnableModeling = false;
+  checksplitSuccessHandler(data) {
+    if (data.status_code == "200") {
+      this.isEnableModeling = data.response;
+      if (!this.isEnableModeling)
+        this.toaster.error(data.error_msg, 'Error');
+    }
+    else {
+      this.isEnableModeling = false;
+      this.toaster.error(data.error_msg, 'Error');
+
+    }
+  }
+
 }

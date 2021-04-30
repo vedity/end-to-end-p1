@@ -39,3 +39,38 @@ table {
         background-image: none;
     }
 }
+
+.icon-box {
+    a {
+        margin-right: 7px;
+        font-size: 20px;
+        display: inline-block;
+    }
+}
+
+a.disabled {
+    pointer-events: none;
+    cursor: default;
+}
+
+a.disabled {
+    pointer-events: none;
+    cursor: default;
+}
+
+table {
+    th {
+        padding: 0 !important;
+        border: none !important;
+        label {
+            padding: 10px 18px;
+        }
+    }
+}
+
+.filter-box {
+    position: relative;
+    height: 50px;
+    padding: 1px !important;
+    background-color: #2a3042;
+}

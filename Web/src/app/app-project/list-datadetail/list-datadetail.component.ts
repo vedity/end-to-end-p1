@@ -12,6 +12,7 @@ import { SchemaMappingApiService } from '../schema-mapping-api.service';
 })
 export class ListDatadetailComponent implements OnInit {
     @Input() public title: any;
+    @Input() public project_name: any;
     @Input() public dataset_id: any;
     @Input() public navigate_to: any;
     @Input() public displaytitle: any;

@@ -4,4 +4,7 @@ numpy
 scipy
 mlflow==1.13.1
 sklearn
+shap
+tensorflow
+xgboost
 

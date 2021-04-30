@@ -337,3 +337,49 @@ ul {
         display: none;
     }
 }
+
+.perfomance-metrics {
+    .left-box,
+    .right-box {
+        width: 50%;
+        display: inline-block;
+        margin-right: -5px;
+        position: relative;
+        vertical-align: top;
+        a {
+            position: absolute;
+            right: 25px;
+            top: 5px;
+        }
+    }
+    .left-box {
+        padding-right: 10px;
+    }
+    .right-box {
+        padding-left: 10px;
+    }
+}
+
+.left-expand {
+    .table {
+        display: none;
+    }
+    .right-box {
+        display: none;
+    }
+    .left-box {
+        width: 100%;
+    }
+}
+
+.right-expand {
+    .table {
+        display: none;
+    }
+    .right-box {
+        width: 100%;
+    }
+    .left-box {
+        display: none;
+    }
+}

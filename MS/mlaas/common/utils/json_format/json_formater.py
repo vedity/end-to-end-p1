@@ -134,8 +134,15 @@ class JsonFormatClass:
                 json_data=[]
             final_json_data.insert(0,{"id": 1,
                 "label": 'MENU',
-                "isTitle": 'true'
+                "isTitle": 'true'      
             })
+            final_json_data.insert(7,{"id": 7,
+                "label": 'Modeling',
+                "link":"/modeling/type",
+                "icon": 'mdi-database-export',
+                "subItems": []
+            })
+            
             logging.info("Common : JsonFormatClass : menu_nested_format : execution stop")
             return final_json_data
         except Exception as exc:
@@ -167,7 +174,7 @@ class JsonFormatClass:
             logging.error("data preprocess : SchemaClass : get_column_name : " +traceback.format_exc())
             return str(exc)
 
-    def get_schema_format(self,index,column_name,data_type,column_attribute):
+    def get_schema_format(self,index,column_name,data_type,column_attribute,date_format):
         """
         function will get all updated column name and column list which are available in the dataset.
         Args : 
@@ -185,6 +192,7 @@ class JsonFormatClass:
                         "data_type":data_type[x],
                         "column_attribute":column_attribute[x],
                         "change_column_name":"",
+                        "date_format": date_format[x]
                     }
                     json_data.append(temp_dict)
             logging.info("Common : JsonFormatClass : get_schema_format : execution stop")

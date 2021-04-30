@@ -3,10 +3,33 @@
 <div class="row modal-summary" *ngIf="responsedata">
     <div class="col-md-12">
         <div class="line">
-            <label>Name :</label> <span>{{responsedata["Model Name"]}}</span>
+            <label>Model Name :</label> <span>{{responsedata["Model Name"]}}</span>
         </div>
         <div class="line">
-            <label>Train Size :</label> <span>{{responsedata["Train Size"]}}kb</span>
+            <label>Model Description :</label> <span>{{responsedata["Model_Description"]}}</span>
+        </div>
+        <div class="line">
+            <label>Input Features :</label>
+            <span class="detail-txt">
+                <span *ngFor="let item of responsedata['Input Features']">{{item}}</span>
+            </span>
+
+        </div>
+        <div class="line">
+            <label>Target Features :</label>
+            <span class="detail-txt">
+                <span *ngFor="let item of responsedata['Target Features']">{{item}}</span>
+            </span>
+
+        </div>
+        <!-- <div class="line">
+            <label>Input Features :</label> <span *ngFor="let item of responsedata['Input Features']">{{item}}, &nbsp;</span>
+        </div>
+        <div class="line">
+            <label>Target Features :</label> <span *ngFor="let item of responsedata['Target Features']">{{item}} 1, &nbsp;</span>
+        </div> -->
+        <div class="line">
+            <label>Train Size :</label> <span>{{responsedata["Train Size"]}}</span>
         </div>
         <div class="line">
             <label>Train Split :</label> <span>{{responsedata["Train Split"]}}</span>
@@ -15,8 +38,12 @@
             <label>Test Size :</label> <span>{{responsedata["Test Size"]}}</span>
         </div>
         <div class="line">
-            <label>Test Size :</label> <span>{{responsedata["Test Size"]}}mb</span>
+            <label>Valid Split :</label> <span>{{responsedata["Valid Split"]}}</span>
         </div>
+        <div class="line">
+            <label>CV (K-Fold ) :</label> <span>{{responsedata["CV (K-Fold )"]}}</span>
+        </div>
+
         <div class="line">
             <label>Random State :</label> <span>{{responsedata["Random State"]}}</span>
         </div>

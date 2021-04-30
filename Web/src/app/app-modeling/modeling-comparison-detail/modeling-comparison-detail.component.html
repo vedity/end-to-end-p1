@@ -1,0 +1,27 @@
+<ul ngbNav #justifiednavcompare="ngbNav" [activeId]="1" class="nav-pills nav-justified nav">
+    <li [ngbNavItem]="1">
+        <a ngbNavLink>
+            <span class="font-size-18"><i class="bx bx-line-chart"></i></span>
+        </a>
+        <ng-template ngbNavContent>
+            <app-modeling-comparison-graph [compareIds]="compareIds" [model_type]="model_type"></app-modeling-comparison-graph>
+        </ng-template>
+    </li>
+    <li [ngbNavItem]="2">
+        <a ngbNavLink>
+            <span class="font-size-18"><i class="bx bx-spreadsheet"></i></span>
+        </a>
+        <ng-template ngbNavContent>
+            <app-modeling-comparison-grid [compareIds]="compareIds" [model_type]="model_type"></app-modeling-comparison-grid>
+        </ng-template>
+    </li>
+</ul>
+<div class="experiment-list">
+
+    <div class="expe-name" *ngFor="let item of compareExps">
+        <p>{{item.name}}
+            <!-- <a href="javascript:void(0)" title="Remove" *ngIf="compareIds.length>2"><i class="mdi mdi-close"></i></a> -->
+        </p>
+    </div>
+</div>
+<div [ngbNavOutlet]="justifiednavcompare"></div>

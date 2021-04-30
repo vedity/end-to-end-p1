@@ -23,9 +23,9 @@ Automation Testing:
     - docker exec ms_container sh -c "cd testing && python -m unittest ingest_test"
     - docker exec ms_container sh -c "cd testing && python -m unittest preprocess_test"
   only:
-    - development
+    # - development
     # - uat
-    # - master
+    - master
 
 Creating Testing Docker Images:
   image: docker:latest
@@ -88,6 +88,7 @@ Creating Testing Docker Images:
   only:
     # - uat
     - UAT
+    - uAT
 
 Creating Production Docker Images:
   image: docker:latest

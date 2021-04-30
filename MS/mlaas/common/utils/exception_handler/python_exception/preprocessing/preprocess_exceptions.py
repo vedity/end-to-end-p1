@@ -151,3 +151,115 @@ class EcondingFailed(Exception):
      
     def __str__(self):
         return (self.msg)
+
+class TargetAttributeException(Exception):
+    """ Target Attribute Exception """
+    def __init__(self,status_code):
+        self.msg = "Only single target column is allowed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)
+
+class TargetAttributeExistException(Exception):
+    """ Target Attribute Exception """
+    def __init__(self,status_code):
+        self.msg = "Target column already selected !"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)
+
+class SelectAttributeRequired(Exception):
+    """ Target Attribute Exception """
+    def __init__(self,status_code):
+        self.msg = "Select attribute are required!"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)
+
+class SplitFailed(Exception):
+    """  Scale and Split Failed"""
+    def __init__(self,status_code):
+        self.msg = "Split Failed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)
+
+class SchemaColumnUpdate(Exception):
+    """  Schema column update failed """
+    def __init__(self,status_code):
+        self.msg = "Schema column update  failed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)
+
+class SchemaColumnDeleteion(Exception):
+    """  Schema column update failed """
+    def __init__(self,status_code):
+        self.msg = "Schema column deletion failed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)
+
+
+class DataTypeUpdateFailed(Exception):
+    """  Schema column update failed """
+    def __init__(self,status_code):
+        self.msg = "Data type Updation failed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)
+    
+class DataTransFormationFailed(Exception):
+    """  Schema column update failed """
+    def __init__(self,status_code):
+        self.msg = "Data transformation failed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)
+    
+    
+class ModelIdentificationFailed(Exception):
+    """  Model Type identifier failed"""
+    def __init__(self,status_code):
+        self.msg = "Model Type identifier failed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)    
+
+class ScalingFailed(Exception):
+    """  Scaling failed"""
+    def __init__(self,status_code):
+        self.msg = "Scaling failed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)   
+
+class TransformationFailed(Exception):
+    """  Transformation operation failed"""
+    def __init__(self,status_code):
+        self.msg = "Tranformation Operation failed"
+        self.status_code = status_code
+        self.msg = "status_code:" + str(status_code) + ",error_msg:"+self.msg
+     
+    def __str__(self):
+        return (self.msg)

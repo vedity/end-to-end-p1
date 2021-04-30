@@ -4,7 +4,7 @@
         <div class="col-12">
             <div class="page-title-box d-flex align-items-center justify-content-between">
                 <h4 class="mb-0 font-size-18">Modeling</h4>
-                <a href="javascript:void(0);" [routerLink]="['/schema']" [state]="{activeId:5,navigate_to:'modeling'}" title="back" class="back-btn">Back</a>
+                <a href="javascript:void(0);" [routerLink]="['/cleanup']" title="back" class="back-btn">Back</a>
                 <div class="page-title-right">
                 </div>
             </div>
@@ -16,17 +16,19 @@
                 <div class="card-body">
                     <div class="left-box ">
                         <div class="loader {{processclass}}">Loading...</div>
-                        <button type="submit" class="btn btn-success" id="createExperiment" *ngIf="processclass=='stop'" (click)="smallModal(modelingmodal)">Start</button>
+
+                        <!-- <button type="submit" class="btn btn-success" id="createExperiment" *ngIf="processclass=='stop'" hidden (click)="smallModal(modelingmodal);">Start</button> -->
+                        <button type="submit" class="btn btn-success" id="createExperiment" *ngIf="processclass=='stop'" (click)="onClickStart(modelingmodal,largeModal)">Start</button>
                         <button type="submit" class="btn btn-success" *ngIf="processclass=='start'" (click)="processclass='stop'">Stop</button>
                     </div>
                     <div class="right-box">
                         <div class="radio-group">
                             <div class="custom-control custom-radio mr-3">
-                                <input type="radio" id="customRadio1" name="customRadio" (click)="model_type='Regression'" checked class="custom-control-input">
+                                <input type="radio" id="customRadio1" name="customRadio" (click)="model_type='Regression'" [checked]="model_type=='Regression'" class="custom-control-input">
                                 <label class="custom-control-label" for="customRadio1">Regression</label>
                             </div>
                             <div class="custom-control custom-radio ">
-                                <input type="radio" id="customRadio2" name="customRadio" (click)="model_type='Classification'" class="custom-control-input">
+                                <input type="radio" id="customRadio2" name="customRadio" (click)="model_type='Classification'" [checked]="model_type=='Classification'" class="custom-control-input">
                                 <label class="custom-control-label" for="customRadio2">Classification</label>
                             </div>
                         </div>
@@ -75,10 +77,10 @@
             <h4 class="mb-4">Experiment List</h4>
             <ngx-skeleton-loader [hidden]="contentloaded" count="7" [animation]="animation" [theme]="theme">
             </ngx-skeleton-loader>
-            <button type="button" class="btn btn-success comper-btn" [disabled]="!iscompare" (click)="compareLarge(compareModal)">Comparison</button>
+            <button type="button" class="btn btn-success comper-btn" [disabled]="!iscompare" (click)="compareExperiment(compareModal)">Comparison</button>
             <div class="right-detail-box">
                 <span class="switcher switcher-1">
-                    <input type="checkbox" id="switcher-1" value="true" (click)="changeDisplay()">
+                    <input type="checkbox" id="switcher-list" value="true" (click)="changeDisplay()">
                     <label for="switcher-1"></label>
                 </span>
             </div>
@@ -96,7 +98,7 @@
                                         <div class="card-body">
                                             <h4 class="card-title mb-4">
                                                 <div class="custom-control custom-checkbox">
-                                                    <input type="checkbox" class="custom-control-input" [disabled]="item.status!='success'" (change)="setCopmareIds($event.target.checked,item.experiment_id)" id="customCheck_{{i}}">
+                                                    <input type="checkbox" class="custom-control-input" [disabled]="item.status!='success'" (change)="setCopmareIds($event.target.checked,item.experiment_id,item.experiment_name)" id="customCheck_{{i}}">
                                                     <label class="custom-control-label" for="customCheck_{{i}}">{{item.experiment_name}}</label>
                                                 </div> <span class="date-time">{{item.exp_created_on | date: 'MMM dd,
                                                     yyyy, hh:mm a'}}</span>
@@ -127,7 +129,7 @@
                                                 <p>{{item.cv_score}}</p>
                                             </div>
                                             <div class="text-right">
-                                                <button class="btn btn-outline-success" (click)="extraLarge(exlargeModal,item)">View
+                                                <button class="btn btn-outline-success" [disabled]="item.status!='success' && item.status!='failed' " (click)="extraLarge(exlargeModal,item)">View
                                                     Detail </button>
                                             </div>
                                         </div>
@@ -147,7 +149,7 @@
                                         <div class="card-body">
                                             <h4 class="card-title mb-4">
                                                 <div class="custom-control custom-checkbox">
-                                                    <input type="checkbox" class="custom-control-input" (change)="setCopmareIds($event.target.checked,item.experiment_id)" id="customCheck_{{i}}">
+                                                    <input type="checkbox" class="custom-control-input" (change)="setCopmareIds($event.target.checked,item.experiment_id,item.experiment_name)" id="customCheck_{{i}}">
                                                     <label class="custom-control-label" for="customCheck_{{i}}">{{item.experiment_name}}</label>
                                                 </div> <span class="date-time">{{item.exp_created_on |
                                                     date:'short'}}</span>
@@ -178,7 +180,7 @@
                                                 <p>{{item.cv_score}}</p>
                                             </div>
                                             <div class="text-right">
-                                                <button class="btn btn-outline-success" (click)="extraLarge(exlargeModal,item)">View
+                                                <button class="btn btn-outline-success" [disabled]="item.status!='success' && item.status!='failed'" (click)="extraLarge(exlargeModal,item)">View
                                                     Detail </button>
                                             </div>
                                         </div>
@@ -222,12 +224,15 @@
                                                 <tr *ngFor="let item of allExpList;let i=index" id="tr_{{item.experiment_id}}">
                                                     <td>
                                                         <div class="custom-control custom-checkbox mb-3">
-                                                            <input type="checkbox" class="custom-control-input" name="isprivate" id="customCheck_{{i}}">
+                                                            <!-- <input type="checkbox" class="custom-control-input" name="isprivate" id="customCheck_{{i}}"> -->
+                                                            <input type="checkbox" class="custom-control-input" [disabled]="item.status!='success'" (change)="setCopmareIds($event.target.checked,item.experiment_id,item.experiment_name)" id="customCheck_{{i}}">
+
                                                             <label class="custom-control-label" for="customCheck_{{i}}"></label>
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <a href="javascript:void(0);" title="View Detail" (click)="extraLarge(exlargeModal,item)">{{item.experiment_name}}</a>
+                                                        <a href="javascript:void(0);" *ngIf="item.status=='success' || item.status=='failed'" title="View Detail" (click)="extraLarge(exlargeModal,item)">{{item.experiment_name}}</a>
+                                                        <a href="javascript:void(0);" *ngIf="item.status!='success' && item.status!='failed'" class="disabled" title="View Detail">{{item.experiment_name}}</a>
                                                     </td>
                                                     <td class="model_desc">
                                                         <p>{{item.model_name}}</p>
@@ -275,12 +280,15 @@
                                                 <tr *ngFor="let item of runningExpList;let i=index" id="tr_{{item.experiment_id}}">
                                                     <td>
                                                         <div class="custom-control custom-checkbox mb-3">
-                                                            <input type="checkbox" class="custom-control-input" name="isprivate" id="customCheck_{{i}}">
+                                                            <!-- <input type="checkbox" class="custom-control-input" name="isprivate" id="customCheck_{{i}}"> -->
+                                                            <input type="checkbox" class="custom-control-input" [disabled]="item.status!='success'" (change)="setCopmareIds($event.target.checked,item.experiment_id,item.experiment_name)" id="customCheck_{{i}}">
                                                             <label class="custom-control-label" for="customCheck_{{i}}"></label>
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <a href="javascript:void(0);" title="View Detail" (click)="extraLarge(exlargeModal,item)">{{item.experiment_name}}</a>
+                                                        <a href="javascript:void(0);" *nfIf="item.status=='success'  || item.status=='failed'" title="View Detail" (click)="extraLarge(exlargeModal,item)">{{item.experiment_name}}</a>
+                                                        <a href="javascript:void(0);" *ngIf="item.status!='success' && item.status!='failed'" class="disabled" title="View Detail">{{item.experiment_name}}</a>
+
                                                     </td>
                                                     <td class="model_desc">
                                                         <p>{{item.model_name}}</p>
@@ -313,16 +321,19 @@
         Detail </button>
 </div>
 
-<ng-template #exlargeModal let-modal class="model-detail">
+<ng-template #exlargeModal let-modal class="model-detail  ">
     <div class="modal-header">
         <h5> {{modeltitle}}</h5>
         <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Close click')">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
-    <div class="modal-body statistics">
+    <div class="modal-body statistics {{itemstatus}}" *ngIf="itemstatus=='success'">
         <app-modeling-view-detail [experiment_id]="current_experiment_id" [model_type]="current_model_type">
         </app-modeling-view-detail>
+    </div>
+    <div class="modal-body statistics" *ngIf="itemstatus=='failed'">
+        <app-modeling-error-detail [experiment_id]="current_experiment_id" [model_type]="current_model_type"></app-modeling-error-detail>
     </div>
 </ng-template>
 
@@ -353,7 +364,7 @@
                 </div>
             </div>
             <div class="button-items text-center">
-                <button class="btn btn-success" [disabled]="!f.form.valid || !checkuniuqename" (click)="startModel('Auto')" (click)="modal.dismiss('Cross click')">Start</button>
+                <button class="btn btn-success" [disabled]="!f.form.valid || !checkuniuqename" (click)="startModel()">Start</button>
             </div>
         </form>
     </div>
@@ -362,80 +373,50 @@
 <ng-template #largeModal let-modal>
     <div class="modal-header">
         <h5> Manual Modeling </h5>
-        <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Close click')">
+        <button type="button" id="buttonclose" class="close" aria-label="Close" (click)="modal.dismiss('Close click')">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
     <div class="modal-body manul-modeling">
         <form #m="ngForm">
-            <!-- [hidden]="contentid!=1" -->
-            <div class="row content-1">
-                <div class="col-md-12">
-                    <h4 class="font-size-18 mt-3 mb-3">Select model</h4>
-                    <div class="form-group">
-                        <label>Select model</label>
-                        <select class="form-control" (change)="getHyperParams($event.target.value)" name="algorithm" [required]>
+            <perfect-scrollbar style="height:430px;">
+                <div class="row content-1">
+
+                    <div class="col-md-12">
+                        <h4 class="font-size-18 mt-3 mb-3">Select model</h4>
+                        <div class="form-group">
+                            <!-- <label>Select model</label> -->
+                            <select class="form-control" (change)="getHyperParams($event)" name="algorithm" [required]>
                         <option value=""> Select </option>
                         <option value="{{item.model_id}}"
                             *ngFor="let item of algorithmlist;let i=index">{{item.model_name}}</option>
                     </select>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-12" *ngIf="paramsList!=undefined">
-                    <h4 class="font-size-18 mt-3 mb-3" *ngIf="paramsList[0].hyperparameter!=''">Hyperparameter</h4>
-                </div>
-                <div class="col-md-6" *ngFor="let item of paramsList">
-                    <div class="form-group" *ngIf="item.hyperparameter!=''">
-                        <label>{{item.hyperparameter}} <span class="required-label">&nbsp;*</span></label>
+                    <div class="col-md-12" *ngIf="paramsList!=undefined">
+                        <h4 class="font-size-18 mt-3 mb-3" *ngIf="paramsList[0].param_name!=''">Hyperparameter</h4>
+                    </div>
+                    <div class="col-md-6" *ngFor="let item of paramsList">
+                        <div class="form-group" *ngIf="item.param_name!=''">
+                            <label>{{item.param_name}} <span class="required-label">&nbsp;*</span></label>
 
-                        <input type="text" class="form-control hyperparamsinput" name="{{item.hyperparameter}}" id="txt_{{item.hyperparameter}}" [required] *ngIf="item.display_type =='validation'">
-                        <input type="text" class="form-control hyperparamsinput" name="{{item.hyperparameter}}" id="txt_{{item.hyperparameter}}" [required] *ngIf="item.display_type == ''">
-                        <select class="form-control hyperparamsinput" name="{{item.hyperparameter}}" id="txt_{{item.hyperparameter}}" [required] *ngIf="item.display_type=='dropdown'">
+                            <input type="text" class="form-control hyperparamsinput" name="{{item.param_name}}" id="txt_{{item.param_name}}" [required] *ngIf="item.display_type =='validation'">
+                            <input type="text" class="form-control hyperparamsinput" name="{{item.param_name}}" id="txt_{{item.param_name}}" [required] *ngIf="item.display_type == ''">
+                            <select class="form-control hyperparamsinput" name="{{item.param_name}}" id="txt_{{item.param_name}}" [required] *ngIf="item.display_type=='dropdown'">
                         <option value="">select</option>
                         <option value="{{childitem}}" *ngFor="let childitem of item.param_value">
                             {{childitem}}
                         </option>
                     </select>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-12 text-center mb-4 mt-3">
-                    <button class="btn btn-success" type="submit" (click)="nextValidate()">Start</button>
-                </div>
+                    <div class="col-md-12 text-center mb-4 mt-3">
+                        <button class="btn btn-success" type="submit" (click)="nextValidate(modelingmodal)">Start</button>
+                    </div>
 
-            </div>
+                </div>
+            </perfect-scrollbar>
         </form>
-        <!-- <form #f="ngForm">
-            <div class="row content-2" [hidden]="contentid!=2">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="example-text-input" class="col-form-label">Experiment Name<span
-                            class="required-label">&nbsp;*</span></label>
-                        <input class="form-control" required type="text" [(ngModel)]="params.experiment_name" (change)="checkexperimentname($event)" name="experiment_name" #experiment_name="ngModel" maxlength="200">
-                        <div class="invalid-feedback" *ngIf="experiment_name.errors?.required && (experiment_name.dirty || experiment_name.touched)">
-                            <span *ngIf="experiment_name.errors?.required && (experiment_name.dirty || experiment_name.touched)" class="text-red">Please enter experiment name</span>
-                        </div>
-                        <div class="invalid-feedback" *ngIf="!checkuniuqename && !experiment_name.errors">
-                            <span class="text-red">Experiment name already exist</span>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="example-text-input" class="col-form-label">Experiment Description<span
-                            class="required-label">&nbsp;*</span></label>
-                        <textarea class="form-control" maxlength="500" [(ngModel)]="params.experiment_desc" name="experiment_desc" #experiment_desc="ngModel" required></textarea>
-                        <div class="invalid-feedback" *ngIf="experiment_desc.errors?.required && (experiment_desc.dirty || experiment_desc.touched)">
-                            <span *ngIf="experiment_desc.errors?.required && (experiment_desc.dirty || experiment_desc.touched)" class="text-red">Please enter description</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-12">
-                    <div class="text-center mb-4">
-                        <button class="btn btn-success mr-3" type="submit" (click)="showContent(1)">Previous</button>
-                        <button class="btn btn-success" [disabled]="!f.form.valid || !checkuniuqename" (click)="startModel('Manual')">Start</button>
-                    </div>
-                </div>
-            </div>
-        </form> -->
     </div>
 </ng-template>
 
@@ -447,114 +428,35 @@
         </button>
     </div>
     <div class="modal-body compare-model">
-        <ul ngbNav #justifiednavcompare="ngbNav" [activeId]="1" class="nav-pills nav-justified nav">
-            <li [ngbNavItem]="1">
-                <a ngbNavLink>
-                    <span class="font-size-18"><i class="bx bx-line-chart"></i></span>
-                </a>
-                <ng-template ngbNavContent>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h4>Loss</h4>
+        <app-modeling-comparison-detail [compareIds]="compareIds" [compareExps]="compareExps" [model_type]="model_type">
+        </app-modeling-comparison-detail>
 
-                            <apx-chart class="apex-charts" dir="ltr" [series]="lineColumAreaChart.series" [chart]="lineColumAreaChart.chart" [tooltip]="lineColumAreaChart.tooltip" [yaxis]="lineColumAreaChart.yaxis" [legend]="lineColumAreaChart.legend" [plotOptions]="lineColumAreaChart.plotOptions"
-                                [grid]="lineColumAreaChart.grid" [stroke]="lineColumAreaChart.stroke" [xaxis]="lineColumAreaChart.xaxis" [colors]="lineColumAreaChart.colors" [fill]="lineColumAreaChart.fill" [labels]="lineColumAreaChart.labels" [markers]="lineColumAreaChart.markers">
-                            </apx-chart>
-                        </div>
-                        <div class="col-md-12">
-                            <h4>Accuracy</h4>
-                            <apx-chart class="apex-charts" dir="ltr" [series]="lineColumAreaChart.series" [chart]="lineColumAreaChart.chart" [tooltip]="lineColumAreaChart.tooltip" [yaxis]="lineColumAreaChart.yaxis" [legend]="lineColumAreaChart.legend" [plotOptions]="lineColumAreaChart.plotOptions"
-                                [grid]="lineColumAreaChart.grid" [stroke]="lineColumAreaChart.stroke" [xaxis]="lineColumAreaChart.xaxis" [colors]="lineColumAreaChart.colors" [fill]="lineColumAreaChart.fill" [labels]="lineColumAreaChart.labels" [markers]="lineColumAreaChart.markers">
-                            </apx-chart>
-                        </div>
-                    </div>
-                </ng-template>
-            </li>
-            <li [ngbNavItem]="2">
-                <a ngbNavLink>
-                    <span class="font-size-18"><i class="bx bx-spreadsheet"></i></span>
-                </a>
-                <ng-template ngbNavContent>
-                    <div class="detail-compare">
-                        <div class="box title-box">
-                            <ul>
-                                <li>Experiment Fields</li>
-                                <li>Number of epoch</li>
-                                <li>Learning rate</li>
-                                <li>Batch size</li>
-                                <li>Loss</li>
-                                <li>Optimizer</li>
-                                <li>Activation</li>
-                            </ul>
-                        </div>
-                        <div cdkDropList cdkDropListOrientation="horizontal" class="example-list" (cdkDropListDropped)="drop($event)">
-
-                            <div class="box box-one example-box" *ngFor="let item of timePeriods" cdkDrag>
-                                <ul>
-                                    <li class="name">{{item}} <a href="javascript:void(0)" title="Remove"><i
-                                                class="mdi mdi-close"></i></a></li>
-                                    <li>2.2333</li>
-                                    <li>25</li>
-                                    <li>25333</li>
-                                    <li>25335</li>
-                                    <li>342</li>
-                                    <li>3242</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                    </div>
-                </ng-template>
-            </li>
-        </ul>
-        <div class="experiment-list">
-            <div class="expe-name">
-                <p>Experiment 1 <a href="javascript:void(0)" title="Remove"><i class="mdi mdi-close"></i></a></p>
-            </div>
-            <div class="expe-name">
-                <p>Experiment 2 <a href="javascript:void(0)" title="Remove"><i class="mdi mdi-close"></i></a></p>
-            </div>
-            <div class="expe-name">
-                <p>Experiment 3 <a href="javascript:void(0)" title="Remove"><i class="mdi mdi-close"></i></a></p>
-            </div>
-            <div class="expe-name">
-                <p>Experiment 4 <a href="javascript:void(0)" title="Remove"><i class="mdi mdi-close"></i></a></p>
-            </div>
-        </div>
-        <div [ngbNavOutlet]="justifiednavcompare"></div>
     </div>
 </ng-template>
 
 <ng-template #projectModal let-modal>
     <div class="modal-header">
-        <h5> Project Detail </h5>
-        <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Close click')">
+        <h5> Projects </h5>
+        <!-- <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Close click')">
             <span aria-hidden="true">&times;</span>
-        </button>
+        </button> -->
     </div>
     <div class="modal-body">
         <div class="row">
             <div class="col-md-12">
                 <div class="form-group">
                     <label>Select Project</label>
-                    <select class="form-control" (change)="hyperparams=$event.target.value">
-                        <option value="sklearn">Project 1</option>
-                        <option value="keras">Project 2</option>
+                    <select class="form-control" (change)="setproject($event.target.value)">
+                        <option value="">select</option>
+
+                        <option value="{{item.project_id}}" *ngFor="let item of projectList">{{item.project_name}}</option>
                     </select>
                 </div>
             </div>
-            <div class="col-md-12">
-                <div class="form-group">
-                    <label>Select Dataset</label>
-                    <select class="form-control" (change)="hyperparams=$event.target.value">
-                        <option value="sklearn">Dataset 1</option>
-                        <option value="keras">Dataset 2</option>
-                    </select>
-                </div>
-            </div>
+
             <div class="col-md-12">
                 <div class="text-center mb-4">
-                    <button class="btn btn-success" type="submit" (click)="modal.dismiss('Cross click')">Next</button>
+                    <button class="btn btn-success" type="submit" [disabled]="!isEnableModeling" (click)="setModeling()">Next</button>
                 </div>
             </div>
         </div>

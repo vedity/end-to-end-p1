@@ -1,0 +1,102 @@
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-flex align-items-center justify-content-between">
+            <h4 class="mb-0 font-size-18">All Datasets</h4>
+            <div class="page-title-right">
+                <div class="tab-menu">
+                    <ul ngbNav #justifiednav="ngbNav" [(activeId)]="active" class="nav-pills nav-justified">
+                        <li [ngbNavItem]="1">
+                            <a ngbNavLink>
+                                <span class=""><i class="fas fa-bars"></i></span>
+                            </a>
+                            <ng-template ngbNavContent>
+                                <app-list-database></app-list-database>
+                            </ng-template>
+                        </li>
+                        <li [ngbNavItem]="2">
+                            <a ngbNavLink>
+                                <span class=""><i class="fas fa-border-all"></i></span>
+                            </a>
+                            <ng-template ngbNavContent>
+                                <app-detailview-dataset></app-detailview-dataset>
+                            </ng-template>
+                        </li>
+                    </ul>
+                </div>
+                <button type="button" (click)="smallModal(smallDataModal)" id="create" class="btn btn-success margin-right-btn">Create Dataset</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div [ngbNavOutlet]="justifiednav"></div>
+    </div>
+</div>
+
+
+<div class="loader-box" [hidden]="!loaderdiv">
+    <div class="inner-loader-box">
+        <div class="spinner-border text-warning m-1" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <p>Loading...</p>
+    </div>
+</div>
+
+<ng-template #smallDataModal let-modal>
+    <div class="modal-header">
+        <h5 class="modal-title mt-0">Create Dataset</h5>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-hidden="true">×</button>
+    </div>
+    <div class="modal-body">
+        <form #f="ngForm" (ngSubmit)="!f.form.valid?errorStatus=!errorStatus:save();f.reset();">
+            <div class="row justify-content-md-center">
+
+                <div class="col-md-12 form-group">
+                    <label for="example-text-input" class="col-form-label">Dataset Name<span
+                            class="required-label">&nbsp;*</span></label>
+                    <input class="form-control" maxlength="150" (change)="checkuniquedatasetname($event)" type="text" required [(ngModel)]="data.datasetname" name="datasetname" #datasetname="ngModel">
+                    <div class="invalid-feedback" *ngIf="datasetname.errors?.required && (datasetname.dirty || datasetname.touched)">
+                        <span *ngIf="datasetname.errors?.required && (datasetname.dirty || datasetname.touched)" class="text-red">please enter dataset name.</span>
+                    </div>
+                    <div class="invalid-feedback" *ngIf="datasetnameuniqueerror">
+                        <span class="text-red">Dataset name already exist</span>
+                    </div>
+                </div>
+                <div class="col-md-12 form-group">
+                    <label for="example-text-input" class="col-form-label">Upload Dataset<span
+                            class="required-label">&nbsp;*</span></label>
+
+                    <div class="custom-file ">
+                        <label class="custom-file-label ">Choose file</label>
+                        <input type="file" (change)="handleFileInput($event.target.files)" [(ngModel)]="data.file" accept=".csv" name="file" #file="ngModel" class="custom-file-input">
+                        <div class="invalid-feedback" *ngIf="file.errors?.required && (file.dirty || file.touched)">
+                            <span *ngIf="file.errors?.required && (file.dirty || file.touched)" class="text-red">Please select .csv file</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12 form-group">
+                    <label class="col-form-label">Dataset Description<span class="required-label">&nbsp;*</span></label>
+                    <textarea class="form-control" maxlength="500" [(ngModel)]="data.datasetdescription" name="datasetdescription" #datasetdescription="ngModel" required></textarea>
+                    <div class="invalid-feedback" *ngIf="datasetdescription.errors?.required && (datasetdescription.dirty || datasetdescription.touched)">
+                        <span *ngIf="datasetdescription.errors?.required && (datasetdescription.dirty || datasetdescription.touched)" class="text-red">Please enter description</span>
+                    </div>
+                </div>
+                <div class="col-md-12 form-group">
+                    <div class="custom-control custom-checkbox mb-3">
+                        <input type="checkbox" class="custom-control-input" (change)="data.isprivate=$event.target.checked" checked name="isprivate" id="customCheck1">
+                        <label class="custom-control-label" for="customCheck1">Keep Dataset private</label>
+                    </div>
+                </div>
+                <div *ngIf="!errorStatus" class="invalid-feedback col-md-12">
+                    All required fields are compulsory to fill.
+                </div>
+                <div class="button-items txt-center">
+                    <button type="submit" id="btnsubmit" class="btn btn-success upload-btn">Upload Dataset</button>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</ng-template>

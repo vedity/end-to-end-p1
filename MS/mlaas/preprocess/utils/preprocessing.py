@@ -8,24 +8,25 @@
 '''
 
 #* Exceptions
-from common.utils import dynamic_dag
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
-from common.utils.activity_timeline import activity_timeline
 
 #* Common utilities
 from common.utils.database import db
 from common.utils.logger_handler import custom_logger as cl
+from common.utils.activity_timeline import activity_timeline
+from common.utils import dynamic_dag
 
 #* Class Imports
 from ingest.utils.dataset import dataset_creation
-from .Exploration import dataset_exploration as de
-from .schema import schema_creation as sc
-from .cleaning import noise_reduction as nr
-from .cleaning import cleaning
-from .Transformation import transformation as trs
-from .Transformation import split_data 
-from .Transformation.model_type_identifier import ModelType
+from preprocess.utils.Exploration import dataset_exploration as de
+from preprocess.utils.schema import schema_creation as sc
+from preprocess.utils.cleaning import noise_reduction as nr
+from preprocess.utils.cleaning import cleaning
+from preprocess.utils.Transformation import transformation as trs
+from preprocess.utils.Transformation import split_data 
+from preprocess.utils.Transformation.model_type_identifier import ModelTypeClass
+from database import *
 
 #* Library Imports
 import os
@@ -35,12 +36,17 @@ import numpy as np
 import pandas as pd
 import uuid
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
 import requests
 import uuid
 import json
 import time
+import datetime
+
+from requests.auth import HTTPBasicAuth
 
 
+#* Defining Logger
 user_name = 'admin'
 log_enable = True
 
@@ -51,7 +57,10 @@ logger = logging.getLogger('preprocessing')
 
 #* Object Definition
 dc = dataset_creation.DatasetClass()
-sp = split_data.Split_Data()
+sp = split_data.SplitDataClass()
+le = LabelEncoder()
+mt = ModelTypeClass()
+
 class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass, trs.TransformationClass):
     def __init__(self,database,user,password,host,port):
         """This constructor is used to initialize database credentials.
@@ -70,7 +79,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         self.host = host # Host Name
         self.port = port # Port Number
         self.AT = activity_timeline.ActivityTimelineClass(database, user, password, host, port)
-        self.op_diff = 8 #difference between database_operation ids & universal operation ids
         
     def get_db_connection(self):
         """This function is used to initialize database connection.
@@ -85,7 +93,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         logging.info("data preprocessing : PreprocessingClass : get_db_connection : execution end")
         return DBObject,connection,connection_string
     
-    def get_data_df(self, dataset_id, schema_id = None):
+    def get_data_df(self, DBObject, connection ,dataset_id, schema_id = None):
         '''
             Returns pandas DataFrame containing data of given dataset_id for given schema_id.  
             If schema_id is None then it returns raw table without schema changes. 
@@ -101,24 +109,22 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         try:
             logging.info("data preprocessing : PreprocessingClass : get_data_df : execution start")
             
-            DBObject,connection,connection_string = self.get_db_connection()
-            if connection == None :
-                raise DatabaseConnectionFailed(500)  
-            
             data_df = DBObject.get_dataset_df(connection, dataset_id, schema_id)
+            
             if isinstance(data_df, str):
                 raise EntryNotFound(500)
-            
+            # connection.close()
             logging.info("data preprocessing : PreprocessingClass : get_data_df : execution stop")
             
             return data_df
             
         except (DatabaseConnectionFailed,EntryNotFound) as exc:
+            # connection.close()
             logging.error("data preprocessing : PreprocessingClass : get_data_df : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_data_df : " +traceback.format_exc())
             return exc.msg
         
-    def get_exploration_data(self,dataset_id,schema_id):
+    def get_exploration_data(self,DBObject, connection ,dataset_id,schema_id):
         """
             This class returns all the statistics for the given dataset.
             
@@ -131,7 +137,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         try:
             logging.info("data preprocessing : PreprocessingClass : get_exploration_data : execution start")
             
-            data_df = self.get_data_df(dataset_id, schema_id)
+            data_df = self.get_data_df(DBObject, connection ,dataset_id, schema_id)
             logging.error(str(data_df) + "  chaclking")
             if isinstance(data_df, str):
                 raise GetDataDfFailed(500)
@@ -151,40 +157,32 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         logging.info("data preprocessing : PreprocessingClass : get_exploration_data : execution end")
         return stats_df
     
-    def save_schema_data(self,schema_data,project_id,dataset_id,schema_id):
+    def save_schema_data(self,DBObject,connection,schema_data,project_id,dataset_id,schema_id,user_name):
         try:
             logging.info("data preprocessing : PreprocessingClass : save_schema_data : execution start")
 
-            DBObject,connection,connection_string = self.get_db_connection()
-            if connection == None :
-                raise DatabaseConnectionFailed(500)
-
-            status = super(PreprocessingClass,self).save_schema(DBObject,connection,schema_data,project_id,dataset_id,schema_id)
-
+            status = super(PreprocessingClass,self).save_schema(DBObject,connection,schema_data,project_id,dataset_id,schema_id,user_name)
+            # connection.close()
             logging.info("data preprocessing : PreprocessingClass : save_schema_data : execution start")
             return status
-        except (DatabaseConnectionFailed) as exc:
-            logging.error("data preprocessing : PreprocessingClass : save_schema_data : Exception " + str(exc.msg))
+        except Exception as exc:
+            logging.error("data preprocessing : PreprocessingClass : save_schema_data : Exception " + str(exc))
             logging.error("data preprocessing : PreprocessingClass : save_schema_data : " +traceback.format_exc())
-            return exc.msg
+            return str(exc)
 
-    def get_schema_details(self,schema_id):
+    def get_schema_details(self,DBObject,connection,schema_id):
         try:
             logging.info("data preprocessing : PreprocessingClass : get_schema_details : execution start")
-            DBObject,connection,connection_string = self.get_db_connection()
-            if connection == None :
-                raise DatabaseConnectionFailed(500)
 
             status = super(PreprocessingClass,self).get_schema_data(DBObject,connection,schema_id)
-            
             logging.info("data preprocessing : PreprocessingClass : get_schema_details : execution stop")
             return status
-        except (DatabaseConnectionFailed) as exc:
-            logging.error("data preprocessing : PreprocessingClass : get_schema_details : Exception " + str(exc.msg))
+        except (Exception) as exc:
+            logging.error("data preprocessing : PreprocessingClass : get_schema_details : Exception " + str(exc))
             logging.error("data preprocessing : PreprocessingClass : get_schema_details : " +traceback.format_exc())
-            return exc.msg
+            return exc
         
-    def get_col_names(self, schema_id, json = False):
+    def get_col_names(self, DBObject, connection ,schema_id, json = False,original = False):
         '''
             It is used to get the column names.
             
@@ -199,17 +197,19 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         try:
             logging.info("data preprocessing : PreprocessingClass : get_col_names : execution start")
         
-            DBObject,connection,connection_string = self.get_db_connection()
-            if connection == None :
-                raise DatabaseConnectionFailed(500)  
-                
-            sql_command = f"select case when changed_column_name = '' then column_name else changed_column_name end column_list,case when 'True' in( missing_flag, noise_flag) then 'True' else 'False' end flag from mlaas.schema_tbl where schema_id ='{str(schema_id)}' and column_attribute !='Ignore' order by index"
+            if not original:
+                sql_command = f"select case when changed_column_name = '' then column_name else changed_column_name end column_list,case when 'True' in( missing_flag, noise_flag) then 'True' else 'False' end flag from mlaas.schema_tbl where schema_id ='{str(schema_id)}' and column_attribute !='Ignore' order by index"
+            else:
+                sql_command = f"select column_name as column_list,case when 'True' in( missing_flag, noise_flag) then 'True' else 'False' end flag from mlaas.schema_tbl where schema_id ='{str(schema_id)}' and column_attribute !='Ignore' order by index"
+                logging.info(str(sql_command) + " command ")
             col_df = DBObject.select_records(connection,sql_command) 
             
             if col_df is None:
                 raise EntryNotFound(500)
             
             column_name,flag_value = list(col_df['column_list']),list(col_df['flag'])
+            
+            
             
             #? Returning column names if user doesn't want json
             if not json:
@@ -220,16 +220,17 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             json_data = [{"column_id": count, "col_name": column_name[count],"is_missing":flag_value[count]} for count in range(1,len(column_name))]
             
             logging.info("data preprocessing : PreprocessingClass : get_col_names : execution stop")
-            
+            # connection.close()
             return json_data
             
         except (DatabaseConnectionFailed,EntryNotFound) as exc:
+            # connection.close()
             logging.error("data preprocessing : PreprocessingClass : get_col_names : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_col_names : " +traceback.format_exc())
             return exc.msg
         
         
-    def get_all_operations(self):
+    def get_all_operations(self, DBObject, connection):
         '''
             This function returns all operations. It is used by the data cleanup as master api responce when the data_cleanup page is called.
             
@@ -243,10 +244,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         try:
             logging.info("data preprocessing : PreprocessingClass : get_all_operations : execution start")
             
-            DBObject,connection,connection_string = self.get_db_connection()
-            if connection == None :
-                raise DatabaseConnectionFailed(500)  
-                
             sql_command = f"select amt.activity_id,amt.activity_name,amt.user_input,amt.check_type,pat.parent_activity_name,ptt.tab_name from mlaas.activity_master_tbl amt , mlaas.parent_activity_tbl pat, mlaas.preprocess_tab_tbl ptt where amt.code = '0' and amt.parent_activity_id = pat.parent_activity_id and ptt.tab_id = pat.tab_id order by amt.activity_id"
             operations_df = DBObject.select_records(connection,sql_command) 
             
@@ -280,7 +277,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                             operation_dict = {}
                             operation_dict['id'] = j
                             operation_dict['name'] = data['activity_name']
-                            operation_dict['operation_id'] = data['activity_id']
+                            operation_dict['operation_id'] = int(data['activity_id'][3:]) #? Converting String operation_id to integer operation_id
                             operation_dict['user_input'] = data['user_input']
                             operation_dict['check_type'] = data['check_type']
                             handlers.append(operation_dict)
@@ -299,21 +296,23 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     tab_dict['operation_classes'] = operation_classes
                     master_response.append(tab_dict)
                     k += 1
-    
+                # connection.close()
                 logging.info("data preprocessing : PreprocessingClass : get_all_operations : execution stop")
                 return master_response
             
             except Exception as exc:
+                # connection.close()
                 logging.info(f"data preprocessing : PreprocessingClass : get_all_operations : Function failed : {str(exc)}")
                 return exc
             
         except (DatabaseConnectionFailed,TableNotFound) as exc:
+            # connection.close()
             logging.error("data preprocessing : PreprocessingClass : get_all_operations : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_all_operations : " +traceback.format_exc())
             return exc.msg
             
         
-    def get_preprocess_cache(self, dataset_id):
+    def get_preprocess_cache(self, DBObject, connection ,dataset_id):
         '''
             This function is used to return Missing value & Noise status for all the columns.
             This will be stored in the schema_tbl.
@@ -328,38 +327,39 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         try:
             logging.info("data preprocessing : PreprocessingClass : get_preprocess_cache : execution start")
             
-            data_df = self.get_data_df(dataset_id)
+            data_df = self.get_data_df(DBObject, connection ,dataset_id)
             if isinstance(data_df, str):
                 raise GetDataDfFailed(500)
             
-            #? Getting DB object & connection object
-            DBObject,connection,connection_string = self.get_db_connection()
-            if connection == None :
-                raise DatabaseConnectionFailed(500)
-
+            #? Getting columns
+            # sql_command = f"select st.column_name from mlaas.schema_tbl st where st.schema_id = '{schema_id}' order by index asc "
+            # col_df = DBObject.select_records(connection, sql_command)
+            # cols = col_df['column_name'].tolist()
+            
             #? Getting Table Name
             table_name = DBObject.get_active_table_name(connection, dataset_id)
             
             missing_value_status = []
             noise_status = []
             for col in data_df.columns:
-                series = data_df[col]
                 
                 #? Checking if there are missing values in the column
-                is_missing_value = series.isnull().any()
-                missing_value_status.append(is_missing_value)
+                # is_missing_value = series.isnull().any()
+                # missing_value_status.append(is_missing_value)
+                missing_value_status.append(self.detect_missing_values(DBObject, connection, table_name, col))
                 
                 #? Checking if there is noise in the column
                 noise = self.dtct_noise(DBObject, connection, col, table_name= table_name)
-                if noise == 0:
-                    noise = False
-                else: noise = True
+                if noise == 1:
+                    noise = True
+                else: noise = False
                 noise_status.append(noise)
-            
+            # connection.close()
             logging.info("data preprocessing : PreprocessingClass : get_preprocess_cache : execution stop")
             return missing_value_status,noise_status
             
         except (DatabaseConnectionFailed,EntryNotFound,GetDataDfFailed) as exc:
+            # connection.close()
             logging.error("data preprocessing : PreprocessingClass : get_preprocess_cache : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_preprocess_cache : " +traceback.format_exc())
             return exc.msg
@@ -374,6 +374,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 connection(Object): Postgres connection object.
                 
             Returns:
+                col_names(List of Strings): Column names
                 data_types(List of Strings): Predicted Datatypes of every column.
                 missing_value_status(List of booleans): State of missing values for each columns. 
                 noise_status(List of booleans): State of noise for each columns. 
@@ -383,7 +384,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             sql_command = f'''
                 select 
-                    st.data_type, st.missing_flag, st.noise_flag 
+                    st.column_name ,st.data_type, st.missing_flag, st.noise_flag 
                 from 
                     mlaas.schema_tbl st 
                 where
@@ -394,17 +395,19 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     st."index" asc ;
             '''
             cache_df = DBObject.select_records(connection,sql_command) 
+            if not isinstance(cache_df,pd.DataFrame):
+                raise ValueError
             
-            data_types, missing_status, noise_status = cache_df['data_type'],cache_df['missing_flag'],cache_df['noise_flag']
+            col_names, data_types, missing_status, noise_status = cache_df['column_name'],cache_df['data_type'],cache_df['missing_flag'],cache_df['noise_flag']
             
             logging.info("data preprocessing : PreprocessingClass : retrive_preprocess_cache : execution stop")
-            return data_types.tolist(),missing_status.tolist(), noise_status.tolist()
+            return col_names.tolist(), data_types.tolist(),missing_status.tolist(), noise_status.tolist()
             
         except Exception as exc:
             logging.info(f"data preprocessing : PreprocessingClass : retrive_preprocess_cache : function failed : {str(exc)}")
             return str(exc)
             
-    def get_possible_operations(self, dataset_id, schema_id, column_ids):
+    def get_possible_operations(self, DBObject, connection ,dataset_id, schema_id, column_ids):
         '''
             This function returns all possible operations for given columns.
             
@@ -420,74 +423,112 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.info("data preprocessing : PreprocessingClass : get_possible_operations : execution start")
             
             #? Getting Dataframe
-            data_df = self.get_data_df(dataset_id,schema_id)
+            data_df = self.get_data_df(DBObject, connection ,dataset_id,schema_id)
             if isinstance(data_df, str):
                 raise GetDataDfFailed(500)
             
-            #? Getting DB object & connection object
-            DBObject,connection,connection_string = self.get_db_connection()
-            if connection == None :
-                raise DatabaseConnectionFailed(500)
-
             #? Getting Table Name
             table_name = DBObject.get_active_table_name(connection, dataset_id)
             
             num_cols = data_df._get_numeric_data().columns.tolist()
-            predicted_datatypes = self.get_attrbt_datatype(data_df,data_df.columns,len(data_df))
+            
+            try:
+                # predicted_datatypes = self.get_attrbt_datatype(data_df,data_df.columns,len(data_df))
+                #? Getting preprocess Cache from schema table
+                col_names,predicted_dtypes,missing_flags_original,noise_flags_original = self.retrive_preprocess_cache(DBObject, connection, schema_id)
+            except:
+                raise NullValue(500)
+            
+            old_col_list = self.get_col_names(DBObject, connection ,schema_id,json = False,original = True)
+            
+            #? Serializing that data, arranging it according to the columns sent to the frontend
+            predicted_datatypes = []
+            missing_flags = []
+            noise_flags = []
+            for i in range(len(col_names)):
+                if col_names[i] in old_col_list: #? Is the column being sent to front end?
+                    predicted_datatypes.append(predicted_dtypes[i])
+                    missing_flags.append(missing_flags_original[i])
+                    noise_flags.append(noise_flags_original[i])
             
             #? Logical function starts
             try:
                 #? Logical function starts
                 all_col_operations = []
-
+                
                 for id in column_ids:
+                    
+                    #? Getting metadata for selected column
+                    prev_col_name = old_col_list[id]
                     col = data_df.columns[id]
-                    series = data_df[col]
+                    missing_flag = missing_flags[id]
+                    noise_flag = noise_flags[id]
+                    predicted_datatype = predicted_datatypes[id]
+                    
+                    #? Array to store the operations
                     operations = []
 
                     #? Column is both numerical & categorical
-                    if (col in num_cols) and (predicted_datatypes[id].startswith('Ca')):
+                    if (col in num_cols) and (predicted_datatype.startswith('ca')):
                         col_type = 0
                     #? Column is Numerical
                     elif col in num_cols:
                         col_type = 1
                     #? Column is categorical
-                    elif predicted_datatypes[id].startswith('Ca'):
+                    elif predicted_datatype.startswith('ca'): #Categorical column
                         col_type = 2
+                    elif predicted_datatype.startswith('t'): #Timestamp column
+                        col_type = 4
                     else:
                         col_type = 3
 
-                    missing_values = data_df[col].isnull().any()
-                    noise_status = self.dtct_noise(DBObject, connection, col, table_name= table_name)
-                    if noise_status == 1:
-                        noise_status = True
-                    else: noise_status = False
+                    # missing_values = self.detect_missing_values(DBObject, connection, table_name, prev_col_name)
+                    # noise_status = self.dtct_noise(DBObject, connection, prev_col_name, table_name= table_name)
+                    # if noise_status == 1:
+                    #     noise_status = True
+                    # else: noise_status = False
                     
-                    if missing_values:
+                    #? Is there any missing value in the column?
+                    if missing_flag == 'True':
                         #? Adding Missing Value Operations
                         if col_type == 0:
-                            operations += [1,6,7,8,9,10,11,13]
+                            operations += [1,51,61,71,81,91,101,121]
                         elif col_type == 1:
-                            operations += [1,6,7,8,9,10,13]
+                            operations += [1,51,61,71,81,91,121]
                         elif col_type == 2 or col_type == 3:
-                            operations += [1,11,12]
+                            operations += [1,101,111]
+                        
                     
-                    if noise_status:
-                        operations += [2,5,14,15,16,17,18,19]
+                    #? Is there any noise in the column?
+                    if noise_flag == 'True':
+                        operations += [11,41,131,141,151,161,171,181]
                     
                     #? Outlier Removal & Scaling Operations for numeric; Encoding ops for Categorical
-                    if not missing_values and not noise_status:
+                    if missing_flag == 'False' and noise_flag == 'False':
                         if col_type == 0 or col_type == 1:
-                            operations += [3,4,20,21,22,23,24,25,26]
+                            operations += [21,31,191,201,202,211,221,231,241,242,243,244,245]
                         if col_type == 2 or col_type == 3:
-                            operations += [27,28]
+                            operations += [261,271]
                         if col_type == 0:
-                            operations += [28]
+                            operations += [271]
                         
                     #? Math operations
-                    if not noise_status:
+                    if noise_flag == 'False':
                         if col_type == 0 or col_type == 1:
-                            operations += [29,30,31,32]
+                            operations += [281,291,301,311]
+                            is_positve_flag,is_zero_flag=DBObject.check_column_type(connection,dataset_id,prev_col_name)
+                            logger.info("is_zero_flag"+str(is_zero_flag)+"==is_positve_flag"+str(is_positve_flag))
+                            operations+=[256,254]
+                            if is_positve_flag ==True:
+                                operations += [252,255] 
+                            if is_zero_flag == False:
+                                operations += [253]  
+                            if is_zero_flag == False and is_positve_flag == True:
+                                operations += [251]  
+                            
+                    #? Adding Feature Engineering Operation
+                    if col_type == 4:
+                        operations += [321]
                             
                     all_col_operations.append(operations)
                 
@@ -506,14 +547,17 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 final_op_list.sort()
                 
                 logging.info("data preprocessing : PreprocessingClass : get_possible_operations : execution End")
-                
-                return [i+self.op_diff for i in final_op_list]    
+                # connection.close()
+                # return [i+self.op_diff for i in final_op_list]    
+                return final_op_list
             
             except Exception as exc:
+                # connection.close()
                 logging.info(f"data preprocessing : PreprocessingClass : get_possible_operations : Function failed : {str(exc)}")
                 return exc
                 
-        except (DatabaseConnectionFailed,EntryNotFound,GetDataDfFailed) as exc:
+        except (DatabaseConnectionFailed,EntryNotFound,GetDataDfFailed,NullValue) as exc:
+            # connection.close()
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
             return exc.msg
@@ -591,13 +635,13 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             operation_dict = {}
             for dic in data:
                 for op in dic['selected_handling']:
-                    operation_dict[op-self.op_diff] = operation_dict.get(op-self.op_diff,[]) + dic['column_id']
+                    operation_dict[op] = operation_dict.get(op,[]) + dic['column_id']
             
             #? Getting Values in a cleaned formate
             value_dict = {}
             for dic in data:
                 for i,op in enumerate(dic['selected_handling']):
-                    value_dict[op-self.op_diff] = value_dict.get(op-self.op_diff,[]) + [dic['values'][i]]
+                    value_dict[op] = value_dict.get(op,[]) + [dic['values'][i]]
             
             #? Sorting both dictionaries
             operation_dict = {k: v for k, v in sorted(operation_dict.items(), key=lambda item: item[0])}
@@ -613,352 +657,89 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc))
             return OperationOrderingFailed(500).msg
         
-        
-    def master_executor(self, project_id,dataset_id, schema_id,request, flag ,selected_visibility,dataset_name ,dataset_desc):
-        '''
-            It takes the request from the frontend and executes the cleanup operations.
             
-            Args:
-            -----
-            dataset_id (`Intiger`): Id of the dataset.
-            schema_id (`Intiger`): Id of the dataset in the schema_tbl.
-            request (`Dict`): Request coming from the frontend.
-            save_as (`Boolean`) (default = `False`): Has the user chosen save_as option?
-            
-            Returns:
-            --------
-            Positive or Negative responce.
-        '''
-        
-        try:
-            logging.info("data preprocessing : PreprocessingClass : master_executor : execution start" + str(type(flag))+ str(flag))
-            DBObject,connection,connection_string = self.get_db_connection()
-            if connection == None :
-                raise DatabaseConnectionFailed(500)
-            #? Getting Dataframe
-            
-            #Get the dataframe of dataset detail based on the dataset id
-            dataframe = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
-
-            #Extract the dataframe based on its column name as key
-            table_name,dataset_visibility,user_name = str(dataframe['dataset_table_name'][0]),str(dataframe['dataset_visibility'][0]),str(dataframe['user_name'][0])
-            
-            if dataset_visibility == 'private':
-                dataset_table_name = user_name+'."'+table_name+'"'
-            else:
-                dataset_table_name = 'public'+'."'+table_name+'"'
-
-            #get the Column list
-            column_list = DBObject.get_column_names( connection, table_name)
-            # column_list = self.get_col_names(schema_id)
-            logging.info(str(column_list) + " column_list")
-
-            #? Getting operations in the ordered format
-            op_dict, val_dict = self.reorder_operations(request)
-            
-            operations = op_dict.keys()
-            for op in operations:
-                status = 1
-                
-                #? Getting Columns
-                col = op_dict[op]
-                temp_cols = [str(column_list[i]) for i in col]
-                # temp_col = str(temp_col)
-                # temp_col = temp_col[1:-1]
-                # temp_col = temp_col.replace('"',"'")
-                
-                #? Getting Values
-                value = val_dict[op]
-                
-                #? Making Entry in the Activity Table
-                activity_ids = []
-                for temp_col_names in temp_cols:
-                    activity_ids.append(self.operation_start(DBObject, connection, op, user_name, project_id, dataset_id, temp_col_names))
-                
-                col_names = [column_list[i] for i in col]
-                try:
-                    if op == 1:
-                        status = self.discard_missing_values(DBObject,connection,column_list, dataset_table_name, col)
-                        if status == 0:
-                            for col_name in col_names:
-                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
-                        
-                    elif op == 2:
-                        status = self.discard_noise(DBObject,connection,column_list, dataset_table_name, col)
-                        if status == 0:
-                            for col_name in col_names:
-                                sts = self.update_schema_tbl_noise_flag(DBObject,connection, schema_id, col_name)
-                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
-                        
-                    elif op == 3:
-                        status = self.delete_above(DBObject,connection,column_list, dataset_table_name, col, value)
-                        if status == 0:
-                            for col_name in col_names:
-                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
-                        
-                    elif op == 4:
-                        status = self.delete_below(DBObject,connection,column_list, dataset_table_name, col, value)
-                        if status == 0:
-                            for col_name in col_names:
-                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
-                        
-                    elif op == 5:
-                        status = self.remove_noise(DBObject,connection,column_list, dataset_table_name, col)
-                        if status == 0:
-                            for col_name in col_names:
-                                sts = self.update_schema_tbl_noise_flag(DBObject,connection, schema_id, col_name)
-                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name, "True")
-                        
-                    elif op == 6:
-                        status = self.mean_imputation(DBObject,connection,column_list, dataset_table_name, col)
-                        if status == 0:
-                            for col_name in col_names:
-                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
-                        
-                    elif op == 7:
-                        status = self.median_imputation(DBObject,connection,column_list, dataset_table_name, col)
-                        if status == 0:
-                            for col_name in col_names:
-                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
-                        
-                    elif op == 8:
-                        status = self.mode_imputation(DBObject,connection,column_list, dataset_table_name, col)
-                        if status == 0:
-                            for col_name in col_names:
-                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
-                        
-                    elif op == 9:
-                        
-                        #? Reusing the missing category imputation function for the arbitrary value imputation
-                        status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name,col, value,flag = True)
-                        if status == 0:
-                            for col_name in col_names:
-                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
-                        
-                    elif op == 10:
-                        status = self.end_of_distribution(DBObject,connection,column_list, dataset_table_name, col)
-                        if status == 0:
-                            for col_name in col_names:
-                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
-                        
-                    elif op == 11:
-                        status = self.frequent_category_imputation(DBObject,connection,column_list, dataset_table_name, col)
-                        if status == 0:
-                            for col_name in col_names:
-                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
-                        
-                    elif op == 12:
-                        status = self.missing_category_imputation(DBObject,connection,column_list, dataset_table_name, col,value)
-                        if status == 0:
-                            for col_name in col_names:
-                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
-                        
-                    elif op == 13:
-                        status = self.random_sample_imputation(DBObject,connection,column_list, dataset_table_name,col)
-                        if status == 0:
-                            for col_name in col_names:
-                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
-                        
-                    elif op == 14:
-                        status = self.repl_noise_mean(DBObject,connection,column_list, dataset_table_name,col)
-                        if status == 0:
-                            for col_name in col_names:
-                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
-                                sts = self.update_schema_tbl_noise_flag(DBObject,connection, schema_id, col_name)
-                        
-                    elif op == 15:
-                        status = self.repl_noise_median(DBObject,connection,column_list, dataset_table_name,col)
-                        if status == 0:
-                            for col_name in col_names:
-                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
-                                sts = self.update_schema_tbl_noise_flag(DBObject,connection, schema_id, col_name)
-                        
-                    elif op == 16:
-                        status = self.repl_noise_mode(DBObject,connection,column_list, dataset_table_name,col)
-                        if status == 0:
-                            for col_name in col_names:
-                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
-                                sts = self.update_schema_tbl_noise_flag(DBObject,connection, schema_id, col_name)
-                        
-                    elif op == 17:
-                        status = self.repl_noise_eod(DBObject,connection,column_list, dataset_table_name,col)
-                        if status == 0:
-                            for col_name in col_names:
-                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
-                                sts = self.update_schema_tbl_noise_flag(DBObject,connection, schema_id, col_name)
-                        
-                    elif op == 18:
-                        status = self.repl_noise_random_sample(DBObject,connection,column_list, dataset_table_name,col)
-                        if status == 0:
-                            for col_name in col_names:
-                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
-                                sts = self.update_schema_tbl_noise_flag(DBObject,connection, schema_id, col_name)
-                        
-                    elif op == 19:
-                        status = self.repl_noise_arbitrary_val(DBObject,connection,column_list, dataset_table_name,col, value)
-                        if status == 0:
-                            for col_name in col_names:
-                                sts = self.update_schema_tbl_missing_flag(DBObject,connection, schema_id, col_name)
-                                sts = self.update_schema_tbl_noise_flag(DBObject,connection, schema_id, col_name)
-                        
-                    elif op == 20:
-                        status = self.rem_outliers_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
-                        
-                    elif op == 21:
-                        status = self.rem_outliers_z_score(DBObject,connection,column_list, dataset_table_name,col)
-                        
-                    elif op == 22:
-                        status = self.repl_outliers_mean_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
-                        
-                    elif op == 23:
-                        status = self.repl_outliers_mean_z_score(DBObject,connection,column_list, dataset_table_name,col)
-                        
-                    elif op == 24:
-                        status = self.repl_outliers_med_ext_val_analysis(DBObject,connection,column_list, dataset_table_name,col)
-                        
-                    elif op == 25:
-                        status = self.repl_outliers_med_z_score(DBObject,connection,column_list, dataset_table_name,col)
-                        
-                    elif op == 26:
-                        status = self.apply_log_transformation(DBObject,connection,column_list, dataset_table_name, col)
-                        
-                    elif op == 27:
-                        status = self.label_encoding(DBObject,connection,column_list, dataset_table_name, col)
-                        
-                    elif op == 28:
-                        status = self.one_hot_encoding(DBObject,connection,column_list, dataset_table_name, col, schema_id)
-                        
-                    elif op == 29:
-                        status = self.add_to_column(DBObject,connection,column_list, dataset_table_name, col, value)
-                        
-                    elif op == 30:
-                        status = self.subtract_from_column(DBObject,connection,column_list, dataset_table_name, col, value)
-                        
-                    elif op == 31:
-                        status = self.divide_column(DBObject,connection,column_list, dataset_table_name, col, value)
-                        
-                    elif op == 32:
-                        status = self.multiply_column(DBObject,connection,column_list, dataset_table_name, col, value)
-                        
-                    if status != 0:
-                        #? Sql function Failed
-                        raise SavingFailed(500)
-                        
-                        #? Saving the dataframe into the database
-                        # data_df.drop(data_df.columns[0],axis=1, inplace = True)
-
-                        # updated_table_name = DBObject.get_table_name(connection,table_name)
-                        
-                        # if dataset_visibility == 'public':
-                        #     user_name='public'
-            
-                        # status = DBObject.load_df_into_db(connection_string,updated_table_name,data_df,user_name)
-        
-                        # sql_command = "update mlaas.dataset_tbl set dataset_table_name='"+str(updated_table_name)+"' where dataset_id='"+str(dataset_id)+"'"
-                        # logging.info(str(sql_command))
-                        # update_status = DBObject.update_records(connection,sql_command)
-                        # status = update_status
-                        # if status == 1:
-                        #     raise SavingFailed(500)
-                        # else:
-                        #     sql_command = f"drop table {dataset_table_name}"
-                        #     update_status = DBObject.update_records(connection,sql_command)
-                        #     status = update_status
-                        #     activity_status = self.operation_end(DBObject, connection, activity_id, op, temp_col)
-                    else:
-
-                        #Update all the status flag's based on the schema id
-                        status = self.update_schema_flag_status(DBObject,connection,schema_id,dataset_id)
-                        
-                        if status ==0:  
-                            #? Updating the Activity table
-                            for i,temp_col_names in enumerate(temp_cols):
-                                activity_status = self.operation_end(DBObject, connection, activity_ids[i], op, temp_col_names)
-
-                            if flag == 'True':
-                                logging.info(" call <>")
-                                save_as_status = self.SaveAs(DBObject,connection,project_id,table_name,user_name,dataset_visibility,dataset_name,selected_visibility,dataset_desc)
-                                return save_as_status
-                        else:
-                            
-                            return status
-                except Exception as exc :
-                    continue
-                    
-            logging.info("data preprocessing : PreprocessingClass : master_executor : execution stop")
-            return status
-
-        except (DatabaseConnectionFailed,GetDataDfFailed,SavingFailed) as exc:
-            logging.error(str(exc) +" Error")
-            logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
-            logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
-            return exc.msg
-            
-    def handover(self, dataset_id, schema_id, project_id, user_name,split_parameters,scaling_type = 0):
-        """[This function is used to scaled data and store numpy file into the scaled dataset folder.]
+    def handover(self,DBObject, connection , dataset_id, schema_id, project_id, user_name,split_parameters,scaling_type = 0):        
+        """[ This class is used to scale and split and save numpy files.]
 
         Args:
-            dataset_id ([type]): [to get the dataframe for scaling and split]
-            schema_id ([type]): [to get column name]
-            project_id ([type]): [to update the entry in project_tble]
-            user_name ([type]): [to update the entry in project_tble]
-            split_parameters ([type]): [for spliling]
-            scaling_type (int, optional): [get scaling type]. Defaults to 0.
-
-        Raises:
-            DatabaseConnectionFailed: [description]
-            GetDataDfFailed: [description]
-            ProjectUpdateFailed: [description]
+            DBObject ([type]): [DBclass Object]
+            connection ([type]): [Connection Object]
+            dataset_id ([type]): [dataset id of the dataset.]
+            schema_id ([type]): [schema id of the dataset.]
+            project_id ([type]): [project_id of the dataset.]
+            user_name ([type]): [user name of dataset]
+            split_parameters ([type]): [Dict of split_parameters]
+            scaling_type (int, optional): [selected  split_method]. Defaults to 0.
 
         Returns:
-            status (`Intiger`): Status of the upload.
+            [Integer] : [return 0 if successfull else 1]
         """
-        '''
-            This function is used to scaled data and store numpy file into the scaled dataset folder.
+        
+        logging.info("data preprocessing : PreprocessingClass : handover : execution start")
+        try:    
             
-            Args:
-            -----
-            data_df (`pandas.DataFrame`) = whole dataframe.
-            scaling_type (`Intiger`) (default = `0`): Type of the rescaling operation.
-                - 0 : Standard Scaling
-                - 1 : Min-max Scaling
-                - 2 : Robust Scaling
-                - 3 : Custom Scaling
-                
-            Returns:
-            -------
-            status (`Intiger`): Status of the upload.
-        '''
-        try:
-            logging.info("data preprocessing : PreprocessingClass : handover : execution start")
+            unique_id = str(uuid.uuid1().time) #genrate unique_id
+            scale_dir = "scaled_dataset/scaled_data_" + unique_id  #genrate scale_dir path
+            CHECK_FOLDER = os.path.isdir(scale_dir) #check directory already exists or not
+            # If folder doesn't exist, then create it.
+            if not CHECK_FOLDER:
+                os.makedirs(scale_dir) #create directory
+                logger.info("data preprocessing : PreprocessingClass : handover : Directory Created")
+            else:
+                logger.info("data preprocessing : PreprocessingClass : handover :Directory  already exists")
             
-            DBObject,connection,connection_string = self.get_db_connection() #get db connection
-            if connection == None :
-                raise DatabaseConnectionFailed(500)  
-            
+            actual_Y_filename =  scale_dir+"/Unscaled_actual_Y_data_" + unique_id  #genrate file path for actual data
             #? Getting Dataframe
-            data_df = self.get_data_df(dataset_id,schema_id) #get dataframe
+            data_df = self.get_data_df(DBObject, connection ,dataset_id,schema_id) #get dataframe
+            
             if isinstance(data_df, str):
                 raise GetDataDfFailed(500)
             
-            if scaling_type == 0:
-                data_df[:,1:] = self.standard_scaling(data_df[:,1:]) #standard_scaling
-            elif scaling_type == 1:
-                data_df[:,1:] = self.min_max_scaling(data_df[:,1:]) #min_max_scaling
-            elif scaling_type == 2:
-                data_df[:,1:] = self.robust_scaling(data_df[:,1:]) #robust_scaling
-                    
-            feature_cols = list(data_df.columns) #get list of the columns
+
             tg_cols = DBObject.get_target_col(connection, schema_id) #get list of the target columns
+            target_cols = [data_df.columns[0]] #select first column
+            target_cols += tg_cols     #list target_cols
+            target_actual_features_df=data_df[target_cols] #get actual data of target column
+            encoded_target_df=target_actual_features_df #assign to encoded df
+            np.save(actual_Y_filename,target_actual_features_df.to_numpy()) #save Y_actual
+            #encode if target column is string
+            for col in target_cols[1:]:
+                if encoded_target_df[col].dtype == 'O':
+                    encoded_target_df[col] = le.fit_transform(encoded_target_df[col])  
+                    
+            encoded_target_df=encoded_target_df[target_cols] #encoded_target_df
+            feature_cols = list(data_df.columns) #get list of the column
+            
             for col in tg_cols:
                 feature_cols.remove(col) #remove target columns from list
-            target_cols = [data_df.columns[0]]
-            target_cols += tg_cols #add index column from target columns list
+                    
+            input_feature_df=data_df[feature_cols] #select input fetures dataframe
+            #if there is string value the encode it
+            for col in feature_cols[1:]:
+                if input_feature_df[col].dtype == 'O':
+                    input_feature_df[col] = le.fit_transform(input_feature_df[col]) 
             
-            input_features_df = data_df[feature_cols] #input_features_df
-            target_features_df=data_df[target_cols] #target_features_df
-            mt = ModelType()
+            try:
+                #scale the dataframe    
+                if int(scaling_type) == 0:
+                    input_feature_df.iloc[:,1:] = super().standard_scaling(input_feature_df.iloc[:,1:]) #standard_scaling
+                    scale_type = 'standard_scaling' 
+                elif int(scaling_type) == 1:
+                    input_feature_df.iloc[:,1:] = super().min_max_scaling(input_feature_df.iloc[:,1:]) #min_max_scaling
+                    scale_type = 'min_max_scaling' 
+                elif int(scaling_type) == 2:
+                    input_feature_df.iloc[:,1:] = super().robust_scaling(input_feature_df.iloc[:,1:]) #robust_scaling
+                    scale_type = 'robust_scaling' 
+            except:
+                raise ScalingFailed(500)
+
+            
+            input_features_df = input_feature_df #input_features_df
+            target_features_df=encoded_target_df #target_features_df           
+            
             problem_type = mt.get_model_type(target_features_df) #call get_model_type
+            if problem_type == None:
+                raise ModelIdentificationFailed(500)
             model_type = problem_type[0] #model_type
             algorithm_type = problem_type[1] #algorithm type
             target_type = problem_type[2] #target type
@@ -969,7 +750,6 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             feature_cols = feature_cols.replace("'",'"')
             target_cols = target_cols.replace("'",'"')
 
-
             #splitting parameters
             split_method =split_parameters['split_method'] #get split_method
             cv = split_parameters['cv'] #get cv
@@ -977,96 +757,87 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 cv = 0
             random_state = split_parameters['random_state'] #get random_state
             test_ratio = split_parameters['test_ratio'] #get test_size
+            
             valid_ratio = split_parameters['valid_ratio'] #get valid_size
+            logging.info("   ++valid_ratio"+str(valid_ratio))
             if len(valid_ratio) == 0:
                 valid_ratio= 0
             else:
                 valid_ratio=float(valid_ratio)
-            unique_id = str(uuid.uuid1().time) #genrate unique_id
-            scale_dir = "scaled_dataset/scaled_data_" + unique_id  #genrate directory
-            CHECK_FOLDER = os.path.isdir(scale_dir) #check directory already exists or not
-            # If folder doesn't exist, then create it.
-            if not CHECK_FOLDER:
-                os.makedirs(scale_dir) #create directory
-                logger.info("Directory  Created")
-            else:
-                logger.info("Directory  already exists")
+            
             train_X_filename = scale_dir+"/scaled_train_X_data_" + unique_id #genrate train_X file path
             train_Y_filename = scale_dir+"/scaled_train_Y_data_" + unique_id #genrate train_Y file path
             test_X_filename =  scale_dir+"/scaled_test_X_data_" + unique_id  #genrate test_X file path  
             test_Y_filename =  scale_dir+"/scaled_test_Y_data_" + unique_id  #genrate test_Y file path     
             valid_X_filename = "None"
             valid_Y_filename = "None"
-            Y_valid_count= None
+            Y_valid_count= 0
             X_train, X_valid, X_test, Y_train, Y_valid, Y_test=sp.get_split_data(input_features_df,target_features_df, int(random_state),float(test_ratio), valid_ratio, str(split_method))
+            if isinstance(X_train,str):
+                return X_train
+
             if split_method != 'cross_validation':
                 Y_valid_count= Y_valid.shape[0]
                 valid_X_filename = scale_dir+"/scaled_valid_X_data_" + unique_id #genrate valid_X file path     
                 valid_Y_filename = scale_dir+"/scaled_valid_Y_data_" + unique_id #genrate valid_Y file path     
                 np.save(valid_X_filename,X_valid.to_numpy()) #save X_valid
                 np.save(valid_Y_filename,Y_valid.to_numpy()) #save Y_valid   
+           
             Y_train_count=Y_train.shape[0] #train count
-            Y_test_count =Y_test.shape[0]  #test count      
+            Y_test_count =Y_test.shape[0]  #test count
+            actual_Y_filename =  scale_dir+"/Unscaled_actual_Y_data_" + unique_id  #genrate test_Y file path           
             np.save(train_X_filename,X_train.to_numpy()) #save X_train
             np.save(train_Y_filename,Y_train.to_numpy()) #save Y_train
             np.save(test_X_filename,X_test.to_numpy()) #save X_test
             np.save(test_Y_filename,Y_test.to_numpy()) #save Y_test
+            
         
-            scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_ratio)+', "test_ratio":'+ str(test_ratio)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'"}' #genrate scaled split parameters
+            scaled_split_parameters = '{"scaling_type":"'+str(scale_type)+'","split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_ratio)+', "test_ratio":'+ str(test_ratio)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'","actual_Y_filename":"'+actual_Y_filename+".npy"+'"}' #genrate scaled split parameters
             logger.info("scaled_split_parameters=="+scaled_split_parameters)
             sql_command = f"update mlaas.project_tbl set target_features= '{target_cols}' ,input_features='{feature_cols}',scaled_split_parameters = '{scaled_split_parameters}',problem_type = '{problem_type_dict}' where dataset_id = '{dataset_id}' and project_id = '{project_id}' and user_name= '{user_name}'"
             status = DBObject.update_records(connection, sql_command)
             if status==1:
                 raise ProjectUpdateFailed(500)
+            # connection.close()
             return status
             
-        except (DatabaseConnectionFailed,GetDataDfFailed,ProjectUpdateFailed) as exc:
+        except (DatabaseConnectionFailed,GetDataDfFailed,ProjectUpdateFailed,SplitFailed,ModelIdentificationFailed,ScalingFailed) as exc:
+            # connection.close()
             logging.error("data preprocessing : PreprocessingClass : handover : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : handover : " +traceback.format_exc())
             return exc.msg
         
-    
-    def update_schema_tbl_missing_flag(self, DBObject, connection, schema_id, column_name, flag = "False"):
+    def update_schema_flag_status(self,DBObject,connection,schema_id,dataset_id,column_list, **kwargs):
+        '''
+            This class is used to update schema flags once the preprocessing is complete.
+
+            Args:
+            ----
+            DBObject (`object`): DBClass Object
+            connection (`object`): pycopg2.connection object
+            schema_id (`Int`): Id in the schema table
+            dataset_id (`int`): Id of the dataset
+            column_list (`list`): List of column names
+
+            Returns:
+            -------
+            status (`int`): Status of updation
+        '''
         
-        logging.info("data preprocessing : PreprocessingClass : update_schema_tbl_missing_flag : execution start")
-        
-        index = '"index"'
-        sql_command = f"update mlaas.schema_tbl set missing_flag = '{flag}' where {index} in (select {index} from mlaas.schema_tbl st where st.schema_id = '{schema_id}' and (st.changed_column_name = '{column_name}' or st.column_name = '{column_name}'))"
-        logging.info("sql_command: "+sql_command)
-        
-        status = DBObject.update_records(connection,sql_command)
-        logging.info("data preprocessing : PreprocessingClass : update_schema_tbl_missing_flag : execution stop")
-        
-        return status
-    
-    def update_schema_tbl_noise_flag(self, DBObject, connection, schema_id, column_name, flag = "False"):
-        
-        logging.info("data preprocessing : PreprocessingClass : update_schema_tbl_noise_flag : execution start")
-        
-        index = '"index"'
-        sql_command = f"update mlaas.schema_tbl set noise_flag = '{flag}' where {index} in (select {index} from mlaas.schema_tbl st where st.schema_id = '{schema_id}' and (st.changed_column_name = '{column_name}' or st.column_name = '{column_name}'))"
-        logging.info("sql_command: "+sql_command)
-        
-        status = DBObject.update_records(connection,sql_command)
-        logging.info("data preprocessing : PreprocessingClass : update_schema_tbl_noise_flag : execution stop")
-        
-        return status
-    
-    def update_schema_flag_status(self,DBObject,connection,schema_id,dataset_id, **kwargs):
         try:
             logging.info("data preprocessing : PreprocessingClass : update_schema_flag_status : execution start")
             
-            missing_flag,noise_flag = self.get_preprocess_cache(dataset_id)
+            missing_flag,noise_flag = self.get_preprocess_cache(DBObject, connection ,dataset_id)
 
             
-            for noise_flag,missing_flag in zip(missing_flag,noise_flag): 
+            for missing_flag,noise_flag,col_name in zip(missing_flag,noise_flag,column_list): 
 
                 #sql command for updating change_column_name and column_attribute column  based on index column value
                 sql_command = "update mlaas.schema_tbl SET missing_flag = '" + str(missing_flag) + "',"\
                                 "noise_flag = '" +str(noise_flag) +"'"\
-                                " Where schema_id ='"+str(schema_id)+"' "
+                                " Where schema_id ='"+str(schema_id)+"' and column_name = '"+str(col_name)+"'"
 
-                logging.info("sql_command " + sql_command) 
+                logging.info("Sql_command : update_schema_flag_status : "+str(sql_command))
                 #execute sql query command
                 status = DBObject.update_records(connection,sql_command) 
 
@@ -1092,22 +863,39 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             --------
             dag_id (`String`): the Cleanup dag id.
         '''
-        
-        id = uuid.uuid1().time
-        dag_id='Cleanup_dag_'+str(id)
+        try:
+            logging.info("data preprocessing : PreprocessingClass : get_cleanup_dag_name : execution start")
+            
+            id = uuid.uuid1().time
+            dag_id='Cleanup_dag_'+str(id)
 
-        template = "cleanup_dag.template"
-        namespace = "Cleanup_Dags"
-        
-        master_dict = {'active': 0}
-        
-        json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
-        
-        result = requests.post("http://airflow:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
+            template = "cleanup_dag.template"
+            namespace = "cleanup_dags"
 
-        return dag_id
+            # #? Inserting into Dag_Status Table
+            # col = "dag_id,status"
+            # row_data = [tuple((dag_id,'0'))]
+            # table_name = "mlaas.cleanup_dag_status"
+            # insert_status,_ = DBObject.insert_records(connection,table_name,row_data,col)
+            
+            master_dict = {'active': 0}
+            
+            json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
+            
+            res = requests.post("http://airflow-webserver:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False,auth= HTTPBasicAuth('airflow','airflow'))#owner
+
+            logging.info("data preprocessing : PreprocessingClass : get_cleanup_dag_name : execution stop")
+            # connection.close()
+            return dag_id
+        
+        except (DatabaseConnectionFailed) as exc:
+            # connection.close()
+            logging.error("data preprocessing : PreprocessingClass : get_cleanup_dag_name : Exception " + str(exc.msg))
+            logging.error("data preprocessing : PreprocessingClass : get_cleanup_dag_name : " +traceback.format_exc())
+            return exc.msg
+            
     
-    def dag_executor(self,project_id, dataset_id, schema_id, request, flag ,selected_visibility,dataset_name ,dataset_desc):
+    def dag_executor(self,DBObject, connection ,project_id, dataset_id, schema_id, request, flag ,selected_visibility,dataset_name ,dataset_desc,user_name):
         '''
             This Function is used to trigger the dag at the save time.
 
@@ -1121,23 +909,29 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             selected_visibility (`String`): public or private.
             dataset_name (`String`): Name of the new dataset.
             dataset_desc (`String`): Description for the dataset.
+
+            Returns:
+            -------
+            `0` : function ran successfully
+            `String`: Exception occurred
         '''
         
         try:
             logging.info("data preprocessing : PreprocessingClass : dag_executor : execution start")
             
-            DBObject,connection,connection_string = self.get_db_connection()
-            if connection == None :
-                raise DatabaseConnectionFailed(500)
-                
             sql_command = f"select pt.cleanup_dag_id from mlaas.project_tbl pt where pt.project_id = '{project_id}'"
             dag_id_df = DBObject.select_records(connection,sql_command) 
+            if not isinstance(dag_id_df,pd.DataFrame): return 1
             dag_id = dag_id_df['cleanup_dag_id'][0]
             
+            # #? Setting the dag as busy
+            # sql_command = f"update mlaas.cleanup_dag_status set status ='1' where dag_id = '{dag_id}'"
+            # update_status = DBObject.update_records(connection,sql_command)
+
             op_dict, val_dict = self.reorder_operations(request)
             
             template = "cleanup_dag.template"
-            namespace = "Cleanup_Dags"
+            namespace = "cleanup_dags"
             file_name = dag_id + ".py"
 
             master_dict = {
@@ -1150,28 +944,33 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             "save_as": flag,
             "visibility": selected_visibility,
             "dataset_name": dataset_name,
-            "dataset_desc": dataset_desc
+            "dataset_desc": dataset_desc,
+            "user_name": user_name
             }
             
             # json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
             # result = requests.post("http://airflow:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
-            
+
             status = self.dag_updater(master_dict, file_name, namespace)
             if not isinstance(status,int):
                 logging.error(f"Dag Updation Failed : Error : {str(status)}")
                 raise DagUpdateFailed(500)
 
+            activity_id = 'cl_1'
+            activity_status = self.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id,user_name,dataset_name,flag='True')
+
             json_data = {}
-            result = requests.post(f"http://airflow:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False)#owner
+            result = requests.post(f"http://airflow-webserver:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False,auth= HTTPBasicAuth('airflow','airflow'))#owner
             
             logging.info("DAG RUN RESULT: "+str(result))
             
             logging.info("data preprocessing : PreprocessingClass : dag_executor : execution stop")
-                
+            # connection.close()   
             return 0
         
         except (DatabaseConnectionFailed,DagUpdateFailed) as exc:
-            logging.error(str(exc) +" Error")
+            
+            # connection.close()
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_possible_operations : " +traceback.format_exc())
             return exc.msg
@@ -1195,7 +994,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.info("data preprocessing : PreprocessingClass : dag_updater : execution start")
             
             #? Reading the file
-            with open(f"dynamic_dags/{namespace}/{file}","r") as ro:
+            with open(f"project_dags/{namespace}/{file}","r") as ro:
                 content = ro.read()
         
             new_dic = str(dic)
@@ -1232,7 +1031,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             new_str = content[:bracket_start] + new_dic + content[bracket_end + 1:]
         
             #? Writing into the file
-            with open(f"dynamic_dags/{namespace}/{file}", 'w') as wo:
+            with open(f"project_dags/{namespace}/{file}", 'w') as wo:
                 wo.write(new_str)
 
             logging.info("data preprocessing : PreprocessingClass : dag_updater : execution stop")
@@ -1242,9 +1041,25 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         except Exception as e:
             return e
 
-    def SaveAs(self,DBObject,connection,project_id,table_name,user_name,dataset_visibility,dataset_name,selected_visibility,dataset_desc, **kwargs):
+    def SaveAs(self,DBObject,connection,project_id,schema_id,table_name,user_name,dataset_visibility,dataset_name,selected_visibility,dataset_desc,cleanup_flag=None, **kwargs):
         '''
-        Function used to create a new table with updated changes and insert a new record into dataset table and update the dataset_id into the project_tbl
+        Function used to create a new table with updated changes and insert a new record into dataset table and 
+        update the dataset_id into the project_tbl
+
+        Args :
+            DBObject ([type]): [DBClass Object]
+            connection ([type]): [Connection Object]
+            dataset_id ([type]): [dataset id of the dataset.]
+            project_id ([type]): [project id of the project table.]
+            schema_id ([type]): [schema id of the dataset.]
+            table_name ([String]): [Name of the dataset table]
+            dataset_visibility[(String)] : [ Visibility of the dataset selected]
+            dataset_name[(String)] : [dataset name input by user]
+            selected_visibility[(String)] : [visibility input by user]
+            dataset_desc[(String)] : [description input by user]
+        Return :
+            [Integer] : [return 0 if success else return 1 for failed]
+
         '''
         try:
             #? Safety measure in case if DAG calls this method with None parameters
@@ -1254,7 +1069,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             # Get table name,schema and columns from dataset class.
             tbl_name,schema,cols = dc.make_dataset_schema() 
             file_name = None
-            file_size = None
+            file_size = '-'
             page_name = 'Cleanup'
 
             # Make record for dataset table.
@@ -1266,24 +1081,29 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             logging.info("row tuples error"+str(row_tuples))
 
             # Insert the records into table and return status and dataset_id of the inserted values
-            insert_status,dataset_id = DBObject.insert_records(connection,tbl_name,row_tuples,cols,Flag =1)
+            insert_status,dataset_id = DBObject.insert_records(connection,tbl_name,row_tuples,cols,column_name = 'dataset_id')
                                 
             if insert_status == 0:
                                     
                 table_name = table_name.replace('di_',"").replace('_tbl',"")
 
                 # Create the new table based on the existing table and return status 0 if successfull else 1 
-                dataset_insert_status = dc.insert_raw_dataset(DBObject,connection,dataset_id,user_name,table_name,dataset_visibility,selected_visibility)
-                                   
+                dataset_insert_status = dc.insert_raw_dataset(DBObject,connection,dataset_id,schema_id,user_name,table_name,dataset_visibility,cleanup_flag,selected_visibility)
+                
                 if dataset_insert_status == 0:
 
-                    # Command will update the dataset id  in the project table
-                    sql_command = f'update mlaas.project_tbl set dataset_id={str(dataset_id)} where project_id={str(project_id)}'
+                    schema_update = self.update_schema(DBObject,connection,schema_id)
+                    if schema_update == 0:
+                        # Command will update the dataset id  in the project table
+                        sql_command = f'update mlaas.project_tbl set dataset_id={str(dataset_id)} where project_id={str(project_id)}'
                                         
-                    # Execute the sql query
-                    update_status = DBObject.update_records(connection,sql_command)
+                        # Execute the sql query
+                        update_status = DBObject.update_records(connection,sql_command)
 
-                    return update_status
+                        return update_status
+                    else:
+                        return schema_update   
+                    
                 else:
                     return dataset_insert_status
 
@@ -1291,4 +1111,417 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 return insert_status
         except Exception as exc:
             return str(exc)
+
+    def get_dag_status(self, DBObject, connection ,project_id):
+        '''
+            Used to get the dag status
+        '''
+        try:
+            logging.info("data preprocessing : PreprocessingClass : get_dag_status : execution stop")
+            
+            #? Getting Dag id
+            sql_command = f"select pt.cleanup_dag_id from mlaas.project_tbl pt where pt.project_id = '{project_id}'"
+            dag_id_df = DBObject.select_records(connection,sql_command) 
+            if not isinstance(dag_id_df,pd.DataFrame): #! Failed to get dag status
+                raise NullValue(500)
+            dag_id = dag_id_df['cleanup_dag_id'][0]
+
+            #? Getting Dag Status
+            # sql_command = f"select cds.status from mlaas.cleanup_dag_status cds where cds.dag_id = '{dag_id}';"
+            sql_command = f"select dr.state from public.dag_run dr where dr.dag_id = '{dag_id}' order by id desc limit 1"
+            logging.info(sql_command)
+            status_df = DBObject.select_records(connection,sql_command) 
+            logging.info(str(status_df) +" checking")
+            if not isinstance(status_df,pd.DataFrame): #! Failed to get dag status
+                raise NullValue(500)
+
+            if len(status_df) == 0:
+                #? Dag hasn't run yet, so sending dag status as available
+                return False
+            
+            status = status_df['state'][0]
+            
+            logging.info("data preprocessing : PreprocessingClass : get_dag_status : execution stop")
+            
+            if status == 'running':
+                return True
+            else:
+                return False      
+        except (DatabaseConnectionFailed, NullValue) as exc:
+            
+            logging.error("data preprocessing : PreprocessingClass : get_dag_status : Exception " + str(exc.msg))
+            logging.error("data preprocessing : PreprocessingClass : get_dag_status : " +traceback.format_exc())
+            return exc.msg
+        
+    def get_modelling_status(self, DBObject, connection ,project_id):
+        '''
+            Used to get the dag status
+        '''
+        try:
+            logging.info("data preprocessing : PreprocessingClass : get_dag_status : execution stop")
+            
+            sql_command = "SELECT model_status from mlaas.project_tbl where project_id='"+str(project_id)+"'"
+            model_status_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
+            status = model_status_df['model_status'][0]
+            
+            logging.info("data preprocessing : PreprocessingClass : get_dag_status : execution stop")
+            
+            if status == 0:
+                return True
+            else:
+                return False
+        except (DatabaseConnectionFailed,NullValue) as exc:
+            
+            logging.error("data preprocessing : PreprocessingClass : get_dag_status : Exception " + str(exc.msg))
+            logging.error("data preprocessing : PreprocessingClass : get_dag_status : " +traceback.format_exc())
+            return exc.msg
+
+    def get_cleanup_startend_desc(self,DBObject,connection,dataset_id,project_id,activity_id,user_name,new_dataset_name,flag=None):
+        """This function will replace * into project name and get activity description of scale and split.
+ 
+        Args:
+        project_name[String]: get project name
+        activity_id[Integer]: get activity id
+ 
+        Returns:
+            [String]: activity_description
+        """
+        try:
+            logging.info("data preprocessing : PreprocessingClass : get_cleanup_startend_desc : execution start")
+            
+            #? Initializing Activity 
+            activity_df = self.AT.get_activity(activity_id,"US")
+            
+            #? Getting Dataset Name
+            datasetnm_df = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
+            dataset_name = datasetnm_df['dataset_name'][0]
+            
+            #? Getting Project name
+            projectnm_df = DBObject.get_project_detail(connection,project_id)
+            project_name = projectnm_df['project_name'][0]
+
+            #? Getting Activity Description
+            sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
+            desc_df = DBObject.select_records(connection,sql_command)
+            
+            #? Replacing values
+            activity_description = desc_df['description'][0]
+            activity_description = activity_description.replace('*',dataset_name)
+            activity_description = activity_description.replace('&',project_name)
+        
+            #? Inserting user activity
+            end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+            activity_status,index = self.AT.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
+            
+            #? Inserting user activity for new dataset creation
+            if new_dataset_name != None and flag != 'True': 
+                activity_id='cl_3'
+                sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
+                desc_df = DBObject.select_records(connection,sql_command)
+                activity_description = desc_df['description'][0]
+                activity_description = activity_description.replace('*',new_dataset_name)
+                logger.info("activity_description"+activity_description)
+                activity_status,index = self.AT.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
+            
+            logging.info("data preprocessing : PreprocessingClass : get_cleanup_startend_desc : execution stop")
+            
+            return activity_status
+        except Exception as e:
+            logging.error(f"data preprocessing : PreprocessingClass : get_cleanup_startend_desc : execution failed : {str(e)}")
+            return 1
+        
+    def direct_save_as(self, DBObject, connection ,project_id,dataset_id,schema_id,user_name,dataset_name,selected_visibility,dataset_desc):
+        '''
+            This function is executed when the save as button is clicked without selecting
+            any operation.
+            
+            Args:
+            ----
+            project_id (`Int`): Id of the project.  
+            dataset_id (`Int`): Id of the dataset.  
+            user_name (`String`): Name of the user.
+            dataset_name (`String`): Name of the new dataset, Entered by user.
+            selected_visibility (`String`) (`public | private`): visibility of the new dataset, selected by user.   
+            dataset_desc (`String`): Description of the new dataset.
+            
+            Returns:
+            -------
+            status (`Int`): Status of Save as.
+        '''
+        try:
+            logging.info("data preprocessing : PreprocessingClass : direct_save_as : execution start")
+            
+            #Get the dataframe of dataset detail based on the dataset id
+            dataframe = DBObject.get_dataset_detail(DBObject,connection,dataset_id)
+ 
+            #Extract the dataframe based on its column name as key
+            table_name,dataset_visibility,user_name = str(dataframe['dataset_table_name'][0]),str(dataframe['dataset_visibility'][0]),str(dataframe['user_name'][0])
+            
+            if dataset_visibility == 'private':
+                dataset_table_name = user_name+'."'+table_name+'"'
+            else:
+                dataset_table_name = 'public'+'."'+table_name+'"'
+                
+            status = self.SaveAs(DBObject,connection, project_id,schema_id
+                                 ,table_name,user_name,dataset_visibility,
+                                 dataset_name,selected_visibility,dataset_desc,cleanup_flag=True)
+            if status ==0: 
+                activity_id='cl_3'
+                sql_command = f"select amt.activity_description as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
+                desc_df = DBObject.select_records(connection,sql_command)
+                activity_description = desc_df['description'][0]
+                activity_description = activity_description.replace('*',dataset_name)
+                logger.info("activity_description"+activity_description)
+                end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                activity_status,index = self.AT.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
+            # connection.close()
+        
+            logging.info("data preprocessing : PreprocessingClass : direct_save_as : execution stop")
+        
+            return status
+        
+        except (DatabaseConnectionFailed) as exc:
+            return str(exc)
+    
+    def update_schema(self,DBObject,connection,schema_id):
+        """
+        function used to update schema for new dataset according to schema mapping page.
+        Args:
+            DBObject ([type]): [DBClass Object]
+            connection ([type]): [Connection Object]
+            schema_id[(schema_id)] : [Selected Id of the schema table]
+
+        Return:
+            [Integer] : [retrun 0 if successfully update/delete or both else return 1 if any of them failed ]
+        """
+        try:
+            try:
+
+                prev_col_name,current_col_name = DBObject.get_schema_columnlist(connection,schema_id, type ='all')
+                
+                for prev_col,current_col in zip(prev_col_name,current_col_name):
+                    
+                    #Query will update the column name based on the new column name for that particular schema_id
+                    sql_command = f'''update mlaas.schema_tbl set column_name = '{str(current_col)}',changed_column_name = ''  where schema_id = '{str(schema_id)}' and column_name ='{str(prev_col)}' '''      
+                    
+                    #Execute the sql query
+                    update_status = DBObject.update_records(connection,sql_command)
+                    
+                    if update_status != 0:
+                        raise SchemaColumnUpdate(500)
+
+                if update_status == 0:
+                    #query will delete the columns which has "column attribute" - Ignore
+                    sql_command =f'''delete from mlaas.schema_tbl where schema_id='{str(schema_id)}' and column_attribute = 'Ignore' '''
+                    
+                    #Execute the sql query 
+                    update_status = DBObject.update_records(connection,sql_command)
+                    
+                    if update_status !=0:
+                        return SchemaColumnDeleteion(500)
+                    
+                return update_status
+            except (SchemaColumnDeleteion,SchemaColumnUpdate) as exc:
+                return exc.msg
+                
+        except Exception as exc:
+            return str(exc)
+        
+    def operation_failed(self, DBObject,connection,dataset_id,project_id,new_user_name,col_name,failed_op):
+        '''
+            Used to update Activity description when the Activity ends.
+            
+            Returns:
+            --------
+            status (`Intiger`): Status of the updation.
+        '''
+        
+        logging.info("data preprocessing : CleaningClass : operation_failed : execution start")
+        
+        #? Transforming the operation_id to the operation id stored in the activity timeline table. 
+        # operation_id += self.op_diff
+        
+        #? Getting Activity Description
+        try:
+            # failed_op += self.op_diff
+            logging.info("data preprocessing : PreprocessingClass : operation_failed : execution start")
+            activity_description = self.get_act_desc(DBObject, connection, failed_op, col_name, code = 0)
+            logging.info(" failed description : "+str(activity_description))
+            
+            activity_id = failed_op
+            end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+            status,index = self.AT.insert_user_activity(activity_id,new_user_name,project_id,dataset_id,activity_description,end_time,column_id =col_name)
+            
+            logging.info("data preprocessing : PreprocessingClass : operation_failed : execution stop")
+            return status
+        except Exception as exc:
+            logging.error(f"data preprocessing : PreprocessingClass : operation_failed :  Exception : {str(exc)} ")
+            return 1
+
+    
+    def check_failed_col(self,DBObject, connection,dataset_id,project_id,new_user_name,col_list, dag_id):
+        '''
+            This class checks for the failed operations and enters appropriate activity in the 
+            activity timeline.
+
+            Args:
+            -----
+            dataset_id
+            project_id
+            new_user_name (`String`): Name of th user.
+            col_list (`List of integers`): Failed column list
+            dag_id (`String`): Id of the dag
+
+            Returns:
+            -------
+            status (`Int`): Status of operation insertion
+        '''
+        
+        logging.info("data preprocessing : PreprocessingClass : check_failed_col : execution start")
+        try:
+            sql_command = f"select ti.task_id as task_name from public.task_instance ti where ti.dag_id = '{dag_id}' and ti.state = 'failed' "
+            failed_df = DBObject.select_records(connection,sql_command)
+
+            logging.info(" dataframe for failed task id name : "+ str(failed_df['task_name']))
+            
+            for failed_str in failed_df.iloc[:,0]:
+                params = failed_str.split('_')
+                logging.info(" split parameters : "+ str(params))
+                if len(params) != 3:
+                    failed_op,failed_col = int(params[1]),int(params[3])
+                    logging.info(f" failed operation name : {failed_op} <[]> failed_col : {failed_col} ")
+
+                col_name = col_list[failed_col] 
+                logging.info(f"column name based on failed col ID :  {col_name}")
+
+                status = self.operation_failed(DBObject,connection,dataset_id,project_id,new_user_name,col_name,failed_op)
+
+                if status !=0:
+                    break
+
+            logging.info("data preprocessing : PreprocessingClass  : check_failed_col : execution stop")
+            return  status
+        except Exception as exc:
+            logging.error(f"data preprocessing : PreprocessingClass : check_failed_col :  Exception : {str(exc)} ")
+            return 1
+    
+    def get_act_desc(self, DBObject, connection, operation_id, col_name, code = 1):
+        '''
+            Used to get preprocess activity description from the activity master table.
+        
+            Returns:
+            --------
+            description (`String`): Description for the activity.
+        '''
+        try:
+            logging.info("data preprocessing : PreprocessingClass : get_activity_desc : execution start")
+            
+            #? Getting Description
+            sql_command = f"select replace (amt.activity_name || ' ' || amt.activity_description, '*', '{col_name}') as description from mlaas.activity_master_tbl amt where amt.activity_id = '{operation_id}' and amt.code = '{code}'"
+            logging.info(f"sql_command : {sql_command}" )
+
+            desc_df = DBObject.select_records(connection,sql_command)
+            if not isinstance(desc_df, pd.DataFrame):
+                return "Failed to Extract Activity Description."
+            
+            #? Fatching the description
+            description = desc_df['description'].tolist()[0]
+            
+            logging.info("data preprocessing : PreprocessingClass : get_activity_desc : execution stop")
+            
+            return description
+        except Exception as e:
+            logging.error(f"data preprocessing : PreprocessingClass : get_activity_desc : execution failed : {str(e)}")
+            return str(e)
+
+    def check_cleanup_status(self,DBObject,connection,project_id):
+        """
+        Function will check cleanup / modeling operation has been done for the particular Dag Id.If any of the operation
+        is performed then it will return True else return False.
+
+        Args:
+            DBObject[(object)]   : [DB class object] 
+            connection[(Object)] : [Database connection string]
+            project_id[(String)] : [Id of the project]
+
+        Return :
+            [Boolean] : [return True if any operation performed else  False]
+        """
+        try:
+            logging.info("data preprocessing : PreprocessingClass : check_cleanup_status : execution start")
+            
+            #? Getting Dag id
+            
+            dag_id_df = DBObject.get_project_detail(connection,project_id)
+            
+            if not isinstance(dag_id_df,pd.DataFrame): #! Failed to get dag status
+                raise NullValue(500)
+
+            dag_id,model_status = str(dag_id_df['cleanup_dag_id'][0]),int(dag_id_df['model_status'])
+            
+            
+            #Query to get count value of "Success" state based on dag_id.
+            sql_command=f'''select case when count("state") >= 1 then 0 else 1 end as value
+                                from public."task_instance" where dag_id ='{dag_id}' and
+                                task_id like 'Operation%' and  state = 'success' '''
+
+            task_instance_df = DBObject.select_records(connection,sql_command) 
+                
+            #! Failed to get Count status for cleanup id
+            if not isinstance(task_instance_df,pd.DataFrame): 
+                raise NullValue(500)
+                
+            dag_instance_status = int(task_instance_df['value'][0])
+            
+            if dag_instance_status == 0 or model_status != -1 :
+                dag_status = True
+            else:
+                dag_status = False
+
+            logging.info(f"data preprocessing : PreprocessingClass : check_cleanup_status : execution stop :status :{dag_status}")
+
+            return dag_status
+
+        except (NullValue) as exc:
+            logging.error(f"data preprocessing : PreprocessingClass : check_cleanup_status : execution Exception : {str(exc)}")
+            logging.error("data preprocess : PreprocessingClass : check_cleanup_status : " +traceback.format_exc())
+            return str(exc)
+    
+
+    def check_all_dag_status(self,DBObject,connection,project_id,dataset_id,schema_id):
+        """Function will check for status for all the dag.If any of the dag found "running" state it value 
+        will be considered as True otherwise False.
+    
+        Args:
+            DBObject[(object)]   : [DB class object] 
+            connection[(Object)] : [Database connection string]
+            project_id[(String)] : [Id of the project]
+            dataset_id[(String)] : [Id of the dataset]
+            schema_id[(String)]  :  [Id of the schema]
+        
+        Return:
+            [List] : [List of dictonery with each dag value True or False]
+        """
+        try:
+            
+            logging.info(f"data preprocessing : PreprocessingClass : check_all_dag_status : execution start")
+            
+            # Get the cleanup dag status 
+            cleanup_status = self.get_dag_status(DBObject, connection ,project_id)
+            logging.info(str(cleanup_status))
+            # Get the Modeling status
+            model_status = self.get_modelling_status(DBObject,connection,project_id)
+            logging.info(str(model_status))
+            
+            dag_status ={'cleanup_dag' :str(cleanup_status),
+                          'modeling_dag': str(model_status),
+                          'feature_dag' : 'False'}
+            
+            logging.info(f"data preprocessing : PreprocessingClass : check_all_dag_status : execution end")
+            
+            return dag_status
+        except Exception as exc:
+            logging.error(f"data preprocessing : PreprocessingClass : check_all_dag_status : execution Exception : {str(exc)}")
+            logging.error("data preprocess : PreprocessingClass : check_all_dag_status : " +traceback.format_exc())
+            return str(exc) 
 
