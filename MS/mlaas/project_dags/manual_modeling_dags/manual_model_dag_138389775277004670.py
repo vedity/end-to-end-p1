@@ -16,7 +16,11 @@ from modeling.all_supervised_models import *
 
 args = {'owner': 'airflow','start_date': airflow.utils.dates.days_ago(1),'provide_context': True,}
 
-main_dag_id = "manual_model_dag_138388185346632350"
+<<<<<<< HEAD:MS/mlaas/project_dags/manual_modeling_dags/manual_model_dag_138389902949943080.py
+main_dag_id = "manual_model_dag_138389902949943080"
+=======
+main_dag_id = "manual_model_dag_138389775277004670"
+>>>>>>> fcda16aca3b3bdc2d9d7a34a768b2c39b96cd678:MS/mlaas/project_dags/manual_modeling_dags/manual_model_dag_138389775277004670.py
 
 dag = DAG(dag_id=main_dag_id,default_args=args,catchup=False,schedule_interval = '@once',)
 
@@ -27,7 +31,11 @@ start_task = PythonOperator(task_id='start_pipeline',python_callable=start_pipel
 
 # Get model dict 
 
-master_dict = {'model_id': [15], 'model_name': ['Decision_Tree_Classifier'], 'model_hyperparams': [{'criterion': 'entropy', 'max_depth': '8', 'max_features': 'auto', 'min_impurity_decrease': '0.2', 'min_samples_leaf': '2'}], 'model_class_name': ['DecisionTreeClassificationClass'], 'algorithm_type': ['Multi']}
+<<<<<<< HEAD:MS/mlaas/project_dags/manual_modeling_dags/manual_model_dag_138389902949943080.py
+master_dict = {}
+=======
+master_dict = {'model_id': [13], 'model_name': ['KNeighbors_Classification'], 'model_hyperparams': [{'n_neighbors': '11', 'metric': 'euclidean', 'algorithm': 'auto'}], 'model_class_name': ['KNeighborsClassificationClass'], 'algorithm_type': ['Multi']}
+>>>>>>> fcda16aca3b3bdc2d9d7a34a768b2c39b96cd678:MS/mlaas/project_dags/manual_modeling_dags/manual_model_dag_138389775277004670.py
 
 if len(master_dict) != 0:
 

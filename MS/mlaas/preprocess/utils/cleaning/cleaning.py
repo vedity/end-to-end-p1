@@ -55,26 +55,12 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
 
             logging.info("data preprocessing : CleaningClass : discard_missing_values : execution start")
 
-            #Extract the column name based on the column id's
-            cols = [column_list[i] for i in col]
-            old_cols = [old_column_list[i] for i in col]
+            status = commonObj.method_calling(DBObject,connection,operation_id,project_id,column_list,old_column_list, table_name, col)
+                    
+            logging.info(f"data preprocessing : CleaningClass : discard_missing_values : execution stop : status : {str(status)}")
             
-            for i,col_name in enumerate(cols):
-
-                    
-                    #Insert the activity for the operation
-                    activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
-
-                    status = self.discard_missing_values(DBObject,connection, table_name,old_cols[i])
-                    
-                    #Update the activity status for the operation performed
-                    if status == 0:
-                        status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
-                    else:
-                        status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
-                    
-            logging.info("data preprocessing : CleaningClass : discard_missing_values : execution stop")
             return status
+
         except Exception as exc:
             logging.error("data preprocessing : CleaningClass : discard_missing_values : Exception :"+str(exc))
             logging.error("data preprocessing : CleaningClass : discard_missing_values : " +traceback.format_exc())
@@ -87,44 +73,23 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
             Operation id: dp_51
         '''
         
-        logging.info("data preprocessing : CleaningClass : mean_imputation : execution start" + str(col))
+        try:
 
-        #Operation Id to get activity details
-        operation_id = 'dp_51'
+            logging.info("data preprocessing : CleaningClass : mean_imputation : execution start")
 
-        #Extract the column name based on the column id's
-        cols = [column_list[i] for i in col]
-        old_cols = [old_column_list[i] for i in col]
-        
-        for i,col_name in enumerate(cols):
-            try:
-                status = 1
-                #Insert the activity for the operation
-                activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
-                
-                sql_command = 'select AVG(cast ("'+str(old_cols[i])+'" as float)) AS impute_value from '+str(table_name)
-                dataframe = DBObject.select_records(connection,sql_command)
+            #Operation Id to get activity details
+            operation_id = 'dp_51'
 
-                impute_value = round(dataframe['impute_value'][0],5)
-
-                if flag == True:
-                    return impute_value
+            status = commonObj.method_calling(DBObject,connection,operation_id,project_id,column_list,old_column_list, table_name, col)
             
-                status = self.perform_missing_value_imputation(DBObject,connection, table_name,old_cols[i],impute_value)
+            logging.info("data preprocessing : CleaningClass : mean_imputation : execution end")
 
-                #Update the activity status for the operation performed
-                if status == 0:
-                    status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
-                else:
-                    status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
-                
-            except Exception as exc:
-                logging.error("data preprocessing : CleaningClass : mean_imputation : Exception :"+str(exc))
-                logging.error(" data preprocessing : CleaningClass : mean_imputation : " +traceback.format_exc())
-                return 1
-
-        logging.info("data preprocessing : CleaningClass : mean_imputation : execution stop")
-        return status
+            return status
+            
+        except Exception as exc:
+            logging.error("data preprocessing : CleaningClass : mean_imputation : Exception :"+str(exc))
+            logging.error(" data preprocessing : CleaningClass : mean_imputation : " +traceback.format_exc())
+            return 1
     
     def median_imputation(self, DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''

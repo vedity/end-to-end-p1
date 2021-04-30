@@ -14,7 +14,7 @@ import logging
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .utils.Exploration import dataset_exploration
+from .utils.exploration import dataset_exploration
 from .utils import preprocessing
 from .utils.cleaning import missing_value_handling
 from .utils.schema.schema_creation import *
@@ -22,7 +22,7 @@ from common.utils.json_format.json_formater import *
 from common.utils.database import db
 from common.utils.activity_timeline import activity_timeline
 from database import *
-from .utils.Transformation import split_data
+from .utils.transformation import split_data
 from .utils.feature import feature_selection
 from .utils.feature.fs_utility import FSUtilityClass
 
@@ -584,4 +584,21 @@ class FeatureAlgoList(APIView):
                 except Exception as e:
                         logging.error("data preprocess : FeatureSelection : GET Method  " + str(e))
                         logging.error(" data preprocess : FeatureSelection : GET Method : " +traceback.format_exc())
-                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})    
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)}) 
+
+class CleanupCheckStatusClass(APIView):
+
+        def get(self, request, format=None):
+                try:
+                        logging.info(" data preprocess : CleanupCheckStatusClass : GET Method : execution start")
+                        project_id = request.query_params.get('project_id')
+                        status = preprocessObj.check_cleanup_status(DBObject,connection,project_id)
+                        if not isinstance(status,bool):
+                                status_code,error_msg=json_obj.get_Status_code(status) # extract the status_code and error_msg
+                                return Response({"status_code":status_code,"error_msg":"Failed","response":str(error_msg)}) 
+                                
+                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":str(status)})   
+                except Exception as e:
+                        logging.error("data preprocess : CleanupCheckStatusClass : GET Method  " + str(e))
+                        logging.error(" data preprocess : CleanupCheckStatusClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})   

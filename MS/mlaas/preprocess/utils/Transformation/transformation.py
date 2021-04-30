@@ -24,6 +24,7 @@ from . import feature_engineering as fe
 from common.utils.database import db
 from common.utils.logger_handler import custom_logger as cl
 from common.utils.activity_timeline import activity_timeline
+from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
 from database import *
 from .. import common
 
@@ -274,7 +275,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         old_cols = [old_column_list[i] for i in col]
         
         for i,col_name in enumerate(cols):
-            try:
+            
                 #Insert the activity for the operation
                 activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
@@ -285,10 +286,8 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
                     status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
                 else:
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
-                
+                    raise TransformationFailed(500)
 
-            except Exception as exc:
-                return exc
 
         logging.info("data preprocessing : TransformationClass : add_to_column : execution stop")
         return status
@@ -307,7 +306,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         old_cols = [old_column_list[i] for i in col]
         
         for i,col_name in enumerate(cols):
-            try:
+
                 #Insert the activity for the operation
                 activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
@@ -318,10 +317,8 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
                     status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
                 else:
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
-                
-            except Exception as exc:
-                return exc
-
+                    raise TransformationFailed(500)
+        
         logging.info("data preprocessing : TransformationClass : subtract_from_column : execution stop")
         return status
     
@@ -339,7 +336,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         old_cols = [old_column_list[i] for i in col]
         
         for i,col_name in enumerate(cols):
-            try:
+            
                 #Insert the activity for the operation
                 activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
@@ -350,11 +347,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
                     status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
                 else:
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
-                
-
-            except Exception as exc:
-                return exc
-
+                    raise TransformationFailed(500)
         logging.info("data preprocessing : TransformationClass : multiply_column : execution stop")
         return status
     
@@ -372,7 +365,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         old_cols = [old_column_list[i] for i in col]
         
         for i,col_name in enumerate(cols):
-            try:
+            
                 #Insert the activity for the operation
                 activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
@@ -383,10 +376,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
                     status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
                 else:
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
-                
-
-            except Exception as exc:
-                return exc
+                    raise TransformationFailed(500)
 
         logging.info("data preprocessing : TransformationClass : divide_column : execution stop")
         return status
@@ -405,7 +395,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         old_cols = [old_column_list[i] for i in col]
         
         for i,col_name in enumerate(cols):
-            try:
+            
                 #Insert the activity for the operation
                 activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
@@ -416,10 +406,8 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
                     status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
                 else:
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
-                
+                    raise TransformationFailed(500)
 
-            except Exception as exc:
-                return exc
     
         logging.info("data preprocessing : TransformationClass : split_date_column : execution stop")
         return status
@@ -441,7 +429,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         cols = [column_list[i] for i in col]
         old_cols = [old_column_list[i] for i in col]
         for i,col_name in enumerate(cols):
-            try:
+            
                 #Insert the activity for the operation
                 activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
@@ -452,10 +440,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
                     status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
                 else:
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
-                
-                    
-            except Exception as exc:
-                return exc
+                    raise TransformationFailed(500)
 
         logging.info("data preprocessing : TransformationClass : logarithmic_transformation : execution stop")
         
@@ -477,7 +462,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         cols = [column_list[i] for i in col]
         old_cols = [old_column_list[i] for i in col]
         for i,col_name in enumerate(cols):
-            try:
+            
                 #Insert the activity for the operation
                 activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
@@ -488,10 +473,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
                     status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
                 else:
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
-                
-                
-            except Exception as exc:
-                return exc
+                    raise TransformationFailed(500)
 
         logging.info("data preprocessing : TransformationClass : squareroot_transformation : execution stop")
         
@@ -512,7 +494,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         cols = [column_list[i] for i in col]
         old_cols = [old_column_list[i] for i in col]
         for i,col_name in enumerate(cols):
-            try:
+            
                 #Insert the activity for the operation
                 activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
@@ -523,10 +505,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
                     status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
                 else:
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
-                
-                
-            except Exception as exc:
-                return exc
+                    raise TransformationFailed(500)
 
         logging.info("data preprocessing : TransformationClass : reciprocal_transformation : execution stop")
         
@@ -548,20 +527,20 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         cols = [column_list[i] for i in col]
         old_cols = [old_column_list[i] for i in col]
         for i,col_name in enumerate(cols):
-            try:
+
                 #Insert the activity for the operation
                 activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 status = super().exponential_transformation(DBObject, connection, [index,old_cols[i]], table_name,value)
 
+                
                 #Update the activity status for the operation performed
                 if status == 0:
                     status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
                 else:
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
-                
-            except Exception as exc:
-                return exc
+                    raise TransformationFailed(500)
+            
 
         logging.info("data preprocessing : TransformationClass : exponential_transformation : execution stop")
         
@@ -583,20 +562,18 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         cols = [column_list[i] for i in col]
         old_cols = [old_column_list[i] for i in col]
         for i,col_name in enumerate(cols):
-            try:
                 #Insert the activity for the operation
                 activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                 status = super().boxcox_transformation(DBObject, connection, [index,old_cols[i]], table_name)
 
+                
                 #Update the activity status for the operation performed
                 if status == 0:
                     status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
                 else:
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
-                
-            except Exception as exc:
-                return exc
+                    raise TransformationFailed(500)   
 
         logging.info("data preprocessing : TransformationClass : boxcox_transformation : execution stop")
         
@@ -618,7 +595,7 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         cols = [column_list[i] for i in col]
         old_cols = [old_column_list[i] for i in col]
         for i,col_name in enumerate(cols):
-            try:
+            
                 #Insert the activity for the operation
                 activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
@@ -629,11 +606,11 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
                 
                 if status == 0:
                     status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+
                 else:
                     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
-                
-            except Exception as exc:
-                return exc
+                    raise TransformationFailed(500)
+            
 
         logging.info("data preprocessing : TransformationClass : yeojohnson_transformation : execution stop")
         
