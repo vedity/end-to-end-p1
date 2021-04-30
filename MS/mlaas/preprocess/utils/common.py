@@ -46,6 +46,7 @@ class CommonClass(mvh.MissingValueClass):
                     activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
 
                     if operation_id == 'dp_1' :
+                        
                         status = super().discard_missing_values(DBObject,connection, table_name,old_cols[i])
 
                     elif operation_id == 'dp_51' :
@@ -53,6 +54,7 @@ class CommonClass(mvh.MissingValueClass):
                         sql_command = 'select AVG(cast ("'+str(old_cols[i])+'" as float)) AS impute_value from '+str(table_name)
                         dataframe = DBObject.select_records(connection,sql_command)
                         impute_value = round(dataframe['impute_value'][0],5)
+
                         status = super().perform_missing_value_imputation(DBObject,connection, table_name,old_cols[i],impute_value)
                     
                     #Update the activity status for the operation performed
