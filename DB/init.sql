@@ -8,16 +8,8 @@ CREATE TABLE mlaas.user_auth_table (
  	address text
  	);
 
-CREATE TABLE mlaas.user_auth_table (
- 	id int,
- 	firstName varchar(255),
- 	lastName varchar(255),
- 	address text
- 	);
 
-
-
-CREATE TABLE mlflow.model_experiment_tbl
+CREATE TABLE mlaas.model_experiment_tbl
 (
 	exp_unq_id bigserial,
 	experiment_id  integer,
@@ -241,7 +233,7 @@ insert into mlaas.auto_model_params values (18, 'Initial Version of Gradient Boo
 
 
 
-CREATE TABLE mlflow.model_dags_tbl
+CREATE TABLE mlaas.model_dags_tbl
 (
 	unq_id bigserial,
 	dag_id varchar,
