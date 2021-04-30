@@ -16,6 +16,7 @@ import pandas as pd
 #* Relative Imports
 from common.utils.logger_handler import custom_logger as cl
 from common.utils.activity_timeline import activity_timeline
+from .cleaning import missing_value_handling as mvh
 from database import *
 
 #* Defining Logger
@@ -26,12 +27,60 @@ LogObject.log_setting()
 logger = logging.getLogger('Common_Cleanup_operation')
 
 
-class CommonClass:
+class CommonClass(mvh.MissingValueClass):
         
     def __init__(self):
         #* ACTIVITY TIMELINE OBJECT
         self.AT = activity_timeline.ActivityTimelineClass(database, user, password, host, port)
-        
+
+    def method_calling(self,DBObject,connection,operation_id,project_id,column_list,old_column_list, table_name, col):
+        try:
+            #Update the activity status for the operation performed
+            #Extract the column name based on the column id's
+            cols = [column_list[i] for i in col]
+            old_cols = [old_column_list[i] for i in col]
+
+            for i,col_name in enumerate(cols):
+
+                    #Insert the activity for the operation
+                    activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
+
+                    if operation_id == 'dp_1' :
+                        
+                        status = super().discard_missing_values(DBObject,connection, table_name,old_cols[i])
+
+                    elif operation_id == 'dp_51' :
+                        
+                        sql_command = 'select AVG(cast ("'+str(old_cols[i])+'" as float)) AS impute_value from '+str(table_name)
+                        dataframe = DBObject.select_records(connection,sql_command)
+                        impute_value = round(dataframe['impute_value'][0],5)
+
+                        status = super().perform_missing_value_imputation(DBObject,connection, table_name,old_cols[i],impute_value)
+                    
+                    #Update the activity status for the operation performed
+                    status = self.update_operation_status(DBObject,connection,status,activity_id, operation_id, col_name)
+
+            return status
+        except Exception as e:
+            logging.error(f" Testing purpose : {str(e)}")
+            return str(e)
+
+    def update_operation_status(self,DBObject,connection,status,activity_id, operation_id, col_name):
+        '''
+        '''
+        try:
+            #Update the activity status for the operation performed
+            if status == 0:
+                status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+            else:
+                status = self.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
+
+            return status
+
+        except Exception as e:
+            logging.error(f"data preprocessing : CleaningClass : get_activity_desc : execution failed : {str(e)}")
+            return str(e)
+
     def get_act_desc(self, DBObject, connection, operation_id, col_name, code = 1):
         '''
             Used to get preprocess activity description from the activity master table.
@@ -150,3 +199,5 @@ class CommonClass:
         except Exception as e:
             logging.error(f"data preprocessing : CleaningClass : operation_failed : execution failed : {str(e)}")
             return 1
+    
+    

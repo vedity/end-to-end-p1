@@ -1128,6 +1128,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             sql_command = f"select dr.state from public.dag_run dr where dr.dag_id = '{dag_id}' order by id desc limit 1"
             logging.info(sql_command)
             status_df = DBObject.select_records(connection,sql_command) 
+            logging.info(str(status_df) +" checking")
             if not isinstance(status_df,pd.DataFrame): #! Failed to get dag status
                 raise NullValue(500)
 
@@ -1138,13 +1139,13 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             status = status_df['state'][0]
             
             logging.info("data preprocessing : PreprocessingClass : get_dag_status : execution stop")
-            # connection.close()
+            
             if status == 'running':
                 return True
             else:
                 return False      
         except (DatabaseConnectionFailed, NullValue) as exc:
-            # connection.close()
+            
             logging.error("data preprocessing : PreprocessingClass : get_dag_status : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_dag_status : " +traceback.format_exc())
             return exc.msg
@@ -1159,15 +1160,15 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             sql_command = "SELECT model_status from mlaas.project_tbl where project_id='"+str(project_id)+"'"
             model_status_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
             status = model_status_df['model_status'][0]
-            logging.info("------+++"+str(status))
+            
             logging.info("data preprocessing : PreprocessingClass : get_dag_status : execution stop")
-            # connection.close()
+            
             if status == 0:
                 return True
             else:
                 return False
         except (DatabaseConnectionFailed,NullValue) as exc:
-            # connection.close()
+            
             logging.error("data preprocessing : PreprocessingClass : get_dag_status : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_dag_status : " +traceback.format_exc())
             return exc.msg
@@ -1193,7 +1194,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             dataset_name = datasetnm_df['dataset_name'][0]
             
             #? Getting Project name
-            projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
+            projectnm_df = DBObject.get_project_detail(connection,project_id)
             project_name = projectnm_df['project_name'][0]
 
             #? Getting Activity Description
@@ -1340,7 +1341,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         #? Getting Activity Description
         try:
             # failed_op += self.op_diff
-            logging.info("data preprocessing : CleaningClass : operation_failed : execution start")
+            logging.info("data preprocessing : PreprocessingClass : operation_failed : execution start")
             activity_description = self.get_act_desc(DBObject, connection, failed_op, col_name, code = 0)
             logging.info(" failed description : "+str(activity_description))
             
@@ -1348,10 +1349,10 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
             status,index = self.AT.insert_user_activity(activity_id,new_user_name,project_id,dataset_id,activity_description,end_time,column_id =col_name)
             
-            logging.info("data preprocessing : CleaningClass : operation_failed : execution stop")
+            logging.info("data preprocessing : PreprocessingClass : operation_failed : execution stop")
             return status
         except Exception as exc:
-            logging.error(f"data preprocessing : CleaningClass : operation_failed :  Exception : {str(exc)} ")
+            logging.error(f"data preprocessing : PreprocessingClass : operation_failed :  Exception : {str(exc)} ")
             return 1
 
     
@@ -1373,7 +1374,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             status (`Int`): Status of operation insertion
         '''
         
-        logging.info("data preprocessing : CleaningClass : check_failed_col : execution start")
+        logging.info("data preprocessing : PreprocessingClass : check_failed_col : execution start")
         try:
             sql_command = f"select ti.task_id as task_name from public.task_instance ti where ti.dag_id = '{dag_id}' and ti.state = 'failed' "
             failed_df = DBObject.select_records(connection,sql_command)
@@ -1395,10 +1396,10 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 if status !=0:
                     break
 
-            logging.info("data preprocessing : CleaningClass  : check_failed_col : execution stop")
+            logging.info("data preprocessing : PreprocessingClass  : check_failed_col : execution stop")
             return  status
         except Exception as exc:
-            logging.error(f"data preprocessing : CleaningClass : check_failed_col :  Exception : {str(exc)} ")
+            logging.error(f"data preprocessing : PreprocessingClass : check_failed_col :  Exception : {str(exc)} ")
             return 1
     
     def get_act_desc(self, DBObject, connection, operation_id, col_name, code = 1):
@@ -1410,7 +1411,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             description (`String`): Description for the activity.
         '''
         try:
-            logging.info("data preprocessing : CleaningClass : get_activity_desc : execution start")
+            logging.info("data preprocessing : PreprocessingClass : get_activity_desc : execution start")
             
             #? Getting Description
             sql_command = f"select replace (amt.activity_name || ' ' || amt.activity_description, '*', '{col_name}') as description from mlaas.activity_master_tbl amt where amt.activity_id = '{operation_id}' and amt.code = '{code}'"
@@ -1423,9 +1424,101 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             #? Fatching the description
             description = desc_df['description'].tolist()[0]
             
-            logging.info("data preprocessing : CleaningClass : get_activity_desc : execution stop")
+            logging.info("data preprocessing : PreprocessingClass : get_activity_desc : execution stop")
             
             return description
         except Exception as e:
-            logging.error(f"data preprocessing : CleaningClass : get_activity_desc : execution failed : {str(e)}")
+            logging.error(f"data preprocessing : PreprocessingClass : get_activity_desc : execution failed : {str(e)}")
             return str(e)
+
+    def check_cleanup_status(self,DBObject,connection,project_id):
+        """
+        Function will check cleanup / modeling operation has been done for the particular Dag Id.If any of the operation
+        is performed then it will return True else return False.
+
+        Args:
+            DBObject[(object)]   : [DB class object] 
+            connection[(Object)] : [Database connection string]
+            project_id[(String)] : [Id of the project]
+
+        Return :
+            [Boolean] : [return True if any operation performed else  False]
+        """
+        try:
+            logging.info("data preprocessing : PreprocessingClass : check_cleanup_status : execution start")
+            
+            #? Getting Dag id
+            
+            dag_id_df = DBObject.get_project_detail(connection,project_id)
+            
+            if not isinstance(dag_id_df,pd.DataFrame): #! Failed to get dag status
+                raise NullValue(500)
+
+            dag_id,model_status = str(dag_id_df['cleanup_dag_id'][0]),int(dag_id_df['model_status'])
+            
+            
+            #Query to get count value of "Success" state based on dag_id.
+            sql_command=f'''select case when count("state") >= 1 then 0 else 1 end as value
+                                from public."task_instance" where dag_id ='{dag_id}' and
+                                task_id like 'Operation%' and  state = 'success' '''
+
+            task_instance_df = DBObject.select_records(connection,sql_command) 
+                
+            #! Failed to get Count status for cleanup id
+            if not isinstance(task_instance_df,pd.DataFrame): 
+                raise NullValue(500)
+                
+            dag_instance_status = int(task_instance_df['value'][0])
+            
+            if dag_instance_status == 0 or model_status != -1 :
+                dag_status = True
+            else:
+                dag_status = False
+
+            logging.info(f"data preprocessing : PreprocessingClass : check_cleanup_status : execution stop :status :{dag_status}")
+
+            return dag_status
+
+        except (NullValue) as exc:
+            logging.error(f"data preprocessing : PreprocessingClass : check_cleanup_status : execution Exception : {str(exc)}")
+            logging.error("data preprocess : PreprocessingClass : check_cleanup_status : " +traceback.format_exc())
+            return str(exc)
+    
+
+    def check_all_dag_status(self,DBObject,connection,project_id,dataset_id,schema_id):
+        """Function will check for status for all the dag.If any of the dag found "running" state it value 
+        will be considered as True otherwise False.
+    
+        Args:
+            DBObject[(object)]   : [DB class object] 
+            connection[(Object)] : [Database connection string]
+            project_id[(String)] : [Id of the project]
+            dataset_id[(String)] : [Id of the dataset]
+            schema_id[(String)]  :  [Id of the schema]
+        
+        Return:
+            [List] : [List of dictonery with each dag value True or False]
+        """
+        try:
+            
+            logging.info(f"data preprocessing : PreprocessingClass : check_all_dag_status : execution start")
+            
+            # Get the cleanup dag status 
+            cleanup_status = self.get_dag_status(DBObject, connection ,project_id)
+            logging.info(str(cleanup_status))
+            # Get the Modeling status
+            model_status = self.get_modelling_status(DBObject,connection,project_id)
+            logging.info(str(model_status))
+            
+            dag_status ={'cleanup_dag' :str(cleanup_status),
+                          'modeling_dag': str(model_status),
+                          'feature_dag' : 'False'}
+            
+            logging.info(f"data preprocessing : PreprocessingClass : check_all_dag_status : execution end")
+            
+            return dag_status
+        except Exception as exc:
+            logging.error(f"data preprocessing : PreprocessingClass : check_all_dag_status : execution Exception : {str(exc)}")
+            logging.error("data preprocess : PreprocessingClass : check_all_dag_status : " +traceback.format_exc())
+            return str(exc) 
+

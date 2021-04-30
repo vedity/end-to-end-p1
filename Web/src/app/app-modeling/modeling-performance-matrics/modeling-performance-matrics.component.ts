@@ -73,6 +73,7 @@ console.log(this.model_type);
             show: true
           }
         },
+        // colors: ['#34c38f','#c3c3c3'],
         stroke: {
           width: 4,
           curve: "smooth"
@@ -221,7 +222,6 @@ console.log(this.model_type);
       this.toaster.error('Something went wrong', 'Error');
     }
   }
-
   allowExpand(type) {
     if(type=='right')
     this.expandclass==''?this.expandclass='right-expand':this.expandclass='';
