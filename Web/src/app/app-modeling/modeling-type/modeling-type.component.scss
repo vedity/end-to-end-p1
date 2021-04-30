@@ -442,8 +442,11 @@ a {
     top: 0;
 }
 
-.model-detail {
+.model-detail.success {
     height: 550px;
+}
+
+.model-detail {
     ul {
         margin-bottom: 20px;
     }
@@ -495,7 +498,7 @@ a {
     }
 }
 
-.statistics.modal-body {
+.statistics.modal-body.success {
     height: 550px;
 }
 

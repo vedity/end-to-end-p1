@@ -129,7 +129,7 @@
                                                 <p>{{item.cv_score}}</p>
                                             </div>
                                             <div class="text-right">
-                                                <button class="btn btn-outline-success" [disabled]="item.status!='success'" (click)="extraLarge(exlargeModal,item)">View
+                                                <button class="btn btn-outline-success" [disabled]="item.status!='success' && item.status!='failed' " (click)="extraLarge(exlargeModal,item)">View
                                                     Detail </button>
                                             </div>
                                         </div>
@@ -180,7 +180,7 @@
                                                 <p>{{item.cv_score}}</p>
                                             </div>
                                             <div class="text-right">
-                                                <button class="btn btn-outline-success" [disabled]="item.status!='success'" (click)="extraLarge(exlargeModal,item)">View
+                                                <button class="btn btn-outline-success" [disabled]="item.status!='success' && item.status!='failed'" (click)="extraLarge(exlargeModal,item)">View
                                                     Detail </button>
                                             </div>
                                         </div>
@@ -231,8 +231,8 @@
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <a href="javascript:void(0);" *ngIf="item.status=='success'" title="View Detail" (click)="extraLarge(exlargeModal,item)">{{item.experiment_name}}</a>
-                                                        <a href="javascript:void(0);" *ngIf="item.status!='success'" class="disabled" title="View Detail">{{item.experiment_name}}</a>
+                                                        <a href="javascript:void(0);" *ngIf="item.status=='success' || item.status=='failed'" title="View Detail" (click)="extraLarge(exlargeModal,item)">{{item.experiment_name}}</a>
+                                                        <a href="javascript:void(0);" *ngIf="item.status!='success' && item.status!='failed'" class="disabled" title="View Detail">{{item.experiment_name}}</a>
                                                     </td>
                                                     <td class="model_desc">
                                                         <p>{{item.model_name}}</p>
@@ -286,8 +286,8 @@
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <a href="javascript:void(0);" *nfIf="item.status=='success'" title="View Detail" (click)="extraLarge(exlargeModal,item)">{{item.experiment_name}}</a>
-                                                        <a href="javascript:void(0);" *ngIf="item.status!='success'" class="disabled" title="View Detail">{{item.experiment_name}}</a>
+                                                        <a href="javascript:void(0);" *nfIf="item.status=='success'  || item.status=='failed'" title="View Detail" (click)="extraLarge(exlargeModal,item)">{{item.experiment_name}}</a>
+                                                        <a href="javascript:void(0);" *ngIf="item.status!='success' && item.status!='failed'" class="disabled" title="View Detail">{{item.experiment_name}}</a>
 
                                                     </td>
                                                     <td class="model_desc">
@@ -321,16 +321,19 @@
         Detail </button>
 </div>
 
-<ng-template #exlargeModal let-modal class="model-detail">
+<ng-template #exlargeModal let-modal class="model-detail  ">
     <div class="modal-header">
         <h5> {{modeltitle}}</h5>
         <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Close click')">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
-    <div class="modal-body statistics">
+    <div class="modal-body statistics {{itemstatus}}" *ngIf="itemstatus=='success'">
         <app-modeling-view-detail [experiment_id]="current_experiment_id" [model_type]="current_model_type">
         </app-modeling-view-detail>
+    </div>
+    <div class="modal-body statistics" *ngIf="itemstatus=='failed'">
+        <app-modeling-error-detail [experiment_id]="current_experiment_id" [model_type]="current_model_type"></app-modeling-error-detail>
     </div>
 </ng-template>
 

@@ -11,33 +11,33 @@ import { SchemaMappingApiService } from '../schema-mapping-api.service';
 })
 export class ManageSchemaMappingComponent implements OnInit {
   displaytitle = false;
-  schemamapping=false;
+  schemamapping = false;
   navigate_to = "";
-  activeId=0;
-  constructor(public apiService: SchemaMappingApiService,public activatedroute: ActivatedRoute,private modalService: NgbModal, public router: Router, private toaster: ToastrService, private http: HttpClient) { }
+  activeId = 0;
+  constructor(public apiService: SchemaMappingApiService, public activatedroute: ActivatedRoute, private modalService: NgbModal, public router: Router, private toaster: ToastrService, private http: HttpClient) { }
   title = "Data Detail List";
   dataset_id: any;
   columnlist: any = [];
   project_id: any;
-  schema_id:any;
-  params:any;
-  currentuser:any;
-  project_name:any;
-  activatedroutedata:any;
+  schema_id: any;
+  params: any;
+  currentuser: any;
+  project_name: any;
+  activatedroutedata: any;
   async ngOnInit() {
     this.params = history.state;
     if (this.params.isFromMenu == true) {
       this.getproject();
       $(".openmodal").trigger('click');
     }
-     else {
+    else {
       if (this.params.dataset_id != undefined)
         localStorage.setItem("preprocessing", JSON.stringify(this.params));
       else {
         this.params = localStorage.getItem("preprocessing");
         this.params = JSON.parse(this.params);
       }
-      
+
       if (this.params.dataset_name != undefined) {
         this.title = this.params.dataset_name;
       }
@@ -52,12 +52,12 @@ export class ManageSchemaMappingComponent implements OnInit {
         this.displaytitle = true;
       }
       this.dataset_id = this.params.dataset_id;
-      this.schema_id=this.params.schema_id;
-     
+      this.schema_id = this.params.schema_id;
+
       this.activatedroute.data.subscribe(data => {
-        this.activatedroutedata=data;
-        if(this.activatedroutedata.Activeid!=undefined)
-        this.activeId=this.activatedroutedata.Activeid;
+        this.activatedroutedata = data;
+        if (this.activatedroutedata.Activeid != undefined)
+          this.activeId = this.activatedroutedata.Activeid;
       })
       console.log(this.params);
     }
@@ -89,18 +89,18 @@ export class ManageSchemaMappingComponent implements OnInit {
         schema_id: this.projectdata.schema_id
       }
       this.dataset_id = this.params.dataset_id;
-      this.schema_id=this.params.schema_id;
-      this.title=this.params.dataset_name;
-      this.project_name=this.params.project_name;
+      this.schema_id = this.params.schema_id;
+      this.title = this.params.dataset_name;
+      this.project_name = this.params.project_name;
       this.navigate_to = this.params.navigate_to;
       this.project_id = this.params.project_id;
 
       localStorage.setItem("preprocessing", JSON.stringify(this.params));
-     
+
       this.activatedroute.data.subscribe(data => {
-        this.activatedroutedata=data;
-        if(this.activatedroutedata.Activeid!=undefined)
-        this.activeId=this.activatedroutedata.Activeid;
+        this.activatedroutedata = data;
+        if (this.activatedroutedata.Activeid != undefined)
+          this.activeId = this.activatedroutedata.Activeid;
       })
       this.modalService.dismissAll();
     }
@@ -133,18 +133,18 @@ export class ManageSchemaMappingComponent implements OnInit {
     }
   }
 
-  navigatePage(id){
+  navigatePage(id) {
     switch (id) {
       case 1:
         this.router.navigate(['/datadetail']);
         break;
-        case 2:
-          this.router.navigate(['/schema']);
-          break;
-          case 3:
+      case 2:
+        this.router.navigate(['/schema']);
+        break;
+      case 3:
         this.router.navigate(['/exploration']);
         break;
-        case 5:
+      case 5:
         this.router.navigate(['/cleanup']);
         break;
       default:

@@ -1,83 +1,82 @@
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="card table-card">
-                <div class="card-body">
-                    <input type="hidden" id="datatablepagelength" value="10">
-                    <h4 class="card-title mb-4">Dataset List</h4>
-                    <ngx-skeleton-loader *ngIf="isloaderdiv" count="7" [animation]="animation" [theme]="theme">
-                    </ngx-skeleton-loader>
-                    <div class="main-datatable" [hidden]="isloaderdiv">
-                        <a href="javascript:void(0)" (click)="displayfilter()" id="filter_btn" class="filter-btn"><i
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card table-card">
+            <div class="card-body">
+                <input type="hidden" id="datatablepagelength" value="10">
+                <h4 class="card-title mb-4">Dataset List</h4>
+                <ngx-skeleton-loader *ngIf="isloaderdiv" count="7" [animation]="animation" [theme]="theme">
+                </ngx-skeleton-loader>
+                <div class="main-datatable" [hidden]="isloaderdiv">
+                    <a href="javascript:void(0)" (click)="displayfilter()" id="filter_btn" class="filter-btn"><i
                                 class="dripicons-experiment" id="filtericon"></i></a>
-                        <table datatable [dtTrigger]="dtTrigger" [dtOptions]="dtOptions" style="width: 100%;" class="table table-centered table-nowrap" id="datatable">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th><label>Dataset</label>
-                                        <img class="sort-icon" src="sort_both.png">
-                                        <img class="desc-icon" src="sort_desc.png">
-                                        <img class="asc-icon" src="sort_asc.png">
-                                        <div class="filter-box" [hidden]="filter">
-                                            <input class="form-control filter" id="input_0" type="text" name="search-dataset-name" />
-                                        </div>
-                                    </th>
-                                    <th><label>Size</label>
-                                        <img class="sort-icon" src="sort_both.png">
-                                        <img class="desc-icon" src="sort_desc.png">
-                                        <img class="asc-icon" src="sort_asc.png">
-                                        <div class="filter-box" [hidden]="filter">
-                                            <input class="form-control filter" id="input_1" type="text" name="search-size" />
-                                        </div>
-                                    </th>
-                                    <th>
-                                        <label>No. of rows</label>
+                    <table datatable [dtTrigger]="dtTrigger" [dtOptions]="dtOptions" style="width: 100%;" class="table table-centered table-nowrap" id="datatable">
+                        <thead class="thead-light">
+                            <tr>
+                                <th><label>Dataset</label>
+                                    <img class="sort-icon" src="sort_both.png">
+                                    <img class="desc-icon" src="sort_desc.png">
+                                    <img class="asc-icon" src="sort_asc.png">
+                                    <div class="filter-box" [hidden]="filter">
+                                        <input class="form-control filter" id="input_0" type="text" name="search-dataset-name" />
+                                    </div>
+                                </th>
+                                <th><label>Size</label>
+                                    <img class="sort-icon" src="sort_both.png">
+                                    <img class="desc-icon" src="sort_desc.png">
+                                    <img class="asc-icon" src="sort_asc.png">
+                                    <div class="filter-box" [hidden]="filter">
+                                        <input class="form-control filter" id="input_1" type="text" name="search-size" />
+                                    </div>
+                                </th>
+                                <th>
+                                    <label>No. of rows</label>
 
-                                        <img class="sort-icon" src="sort_both.png">
-                                        <img class="desc-icon" src="sort_desc.png">
-                                        <img class="asc-icon" src="sort_asc.png">
-                                        <div class="filter-box" [hidden]="filter">
-                                            <input class="form-control filter" id="input_2" type="text" name="search-total_rows" />
-                                        </div>
-                                    </th>
-                                    <th class="text-center">
-                                        <label>Visibility
+                                    <img class="sort-icon" src="sort_both.png">
+                                    <img class="desc-icon" src="sort_desc.png">
+                                    <img class="asc-icon" src="sort_asc.png">
+                                    <div class="filter-box" [hidden]="filter">
+                                        <input class="form-control filter" id="input_2" type="text" name="search-total_rows" />
+                                    </div>
+                                </th>
+                                <th class="text-center">
+                                    <label>Visibility
 
                                             
                                         </label>
-                                        <img class="sort-icon" src="sort_both.png">
-                                        <img class="desc-icon" src="sort_desc.png">
-                                        <img class="asc-icon" src="sort_asc.png">
-                                        <div class="filter-box" [hidden]="filter">
-                                            <select class="form-control filter" id="input_3" name="search-visibility">
+                                    <img class="sort-icon" src="sort_both.png">
+                                    <img class="desc-icon" src="sort_desc.png">
+                                    <img class="asc-icon" src="sort_asc.png">
+                                    <div class="filter-box" [hidden]="filter">
+                                        <select class="form-control filter" id="input_3" name="search-visibility">
                                                 <option value="">None</option>
                                                 <option value="Public">Public</option>
                                                 <option value="Private">Private</option>
                                             </select>
-                                        </div>
-                                    </th>
-                                    <th>
-                                        <label>Created By</label>
-                                        <img class="sort-icon" src="sort_both.png">
-                                        <img class="desc-icon" src="sort_desc.png">
-                                        <img class="asc-icon" src="sort_asc.png">
-                                        <div class="filter-box" [hidden]="filter">
-                                            <input class="form-control filter" type="text" id="input_4" name="search-created-by" />
-                                        </div>
-                                    </th>
-                                    <th>
-                                        <label>Created On</label>
-                                        <img class="sort-icon" src="sort_both.png">
-                                        <img class="desc-icon" src="sort_desc.png">
-                                        <img class="asc-icon" src="sort_asc.png">
-                                        <div class="filter-box" [hidden]="filter"></div>
-                                    </th>
-                                    <th class="text-center">
-                                        <label>Actions</label>
-                                        <div class="filter-box" [hidden]="filter"></div>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <!--  <thead [hidden]="filter" class="filter-thead">
+                                    </div>
+                                </th>
+                                <th>
+                                    <label>Created By</label>
+                                    <img class="sort-icon" src="sort_both.png">
+                                    <img class="desc-icon" src="sort_desc.png">
+                                    <img class="asc-icon" src="sort_asc.png">
+                                    <div class="filter-box" [hidden]="filter">
+                                        <input class="form-control filter" type="text" id="input_4" name="search-created-by" />
+                                    </div>
+                                </th>
+                                <th>
+                                    <label>Created On</label>
+                                    <img class="sort-icon" src="sort_both.png">
+                                    <img class="desc-icon" src="sort_desc.png">
+                                    <img class="asc-icon" src="sort_asc.png">
+                                    <div class="filter-box" [hidden]="filter"></div>
+                                </th>
+                                <th class="text-center">
+                                    <label>Actions</label>
+                                    <div class="filter-box" [hidden]="filter"></div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <!--  <thead [hidden]="filter" class="filter-thead">
                                 <tr class="thead-light" [hidden]="filter">
                                     <td>
                                         <input class="form-control filter" id="input_0" type="text" name="search-dataset-name" />
@@ -100,35 +99,34 @@
                                     <td></td>
                                 </tr> 
                             </thead>-->
-                            <tbody class="tbody">
-                                <tr *ngFor="let data of transactions">
-                                    <td title="{{data.dataset_name}}">{{data.dataset_name}}</td>
-                                    <td>{{data.file_size}}
-                                    </td>
-                                    <td>{{data.no_of_rows}}
-                                    </td>
-                                    <td class="text-center">
-                                        <span style="display:none;" *ngIf="data.dataset_visibility==='public'">Public</span>
-                                        <span style="display:none;" *ngIf="data.dataset_visibility==='private'">Private</span>
+                        <tbody class="tbody">
+                            <tr *ngFor="let data of transactions">
+                                <td title="{{data.dataset_name}}">{{data.dataset_name}}</td>
+                                <td>{{data.file_size}}
+                                </td>
+                                <td>{{data.no_of_rows}}
+                                </td>
+                                <td class="text-center">
+                                    <span style="display:none;" *ngIf="data.dataset_visibility==='public'">Public</span>
+                                    <span style="display:none;" *ngIf="data.dataset_visibility==='private'">Private</span>
 
-                                        <i *ngIf="data.dataset_visibility==='public'" class="bx bx-globe"></i>
-                                        <i *ngIf="data.dataset_visibility==='private'" class="bx bx-lock-alt"></i>
-                                    </td>
-                                    <td>
-                                        {{data.user_name}}
-                                    </td>
-                                    <td>
-                                        {{data.created_on|date}}
-                                    </td>
-                                    <td class="text-center" style="font-size: 20px;font-weight: 700;">
-                                        <a href="javascript:void(0);" [routerLink]="['/datadetail']" id="detail_{{data.dataset_id}}" [state]="{dataset_id: data.dataset_id ,project_id:data.project_id,dataset_name:data.dataset_name,navigate_to:'/dataset',schema_id:data.schema_id }">
-                                            <i class=" bx bx-file" id="detailicon"></i></a>
-                                        <a href="javascript:void(0);" class="sa-warning" id="delete_{{data.dataset_id}}" (click)="confirm(data.dataset_id,data.dataset_name)"> <i class=" bx bx-trash" id="deleteicon"></i></a>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                                    <i *ngIf="data.dataset_visibility==='public'" class="bx bx-globe"></i>
+                                    <i *ngIf="data.dataset_visibility==='private'" class="bx bx-lock-alt"></i>
+                                </td>
+                                <td>
+                                    {{data.user_name}}
+                                </td>
+                                <td>
+                                    {{data.created_on|date}}
+                                </td>
+                                <td class="text-center" style="font-size: 20px;font-weight: 700;">
+                                    <a href="javascript:void(0);" [routerLink]="['/datadetail']" id="detail_{{data.dataset_id}}" [state]="{dataset_id: data.dataset_id ,project_id:data.project_id,dataset_name:data.dataset_name,navigate_to:'/dataset',schema_id:data.schema_id }">
+                                        <i class=" bx bx-file" id="detailicon"></i></a>
+                                    <a href="javascript:void(0);" class="sa-warning" id="delete_{{data.dataset_id}}" (click)="confirm(data.dataset_id,data.dataset_name)"> <i class=" bx bx-trash" id="deleteicon"></i></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
