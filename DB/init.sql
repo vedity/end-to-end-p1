@@ -563,5 +563,5 @@ Insert into mlaas.activity_master_tbl values (DEFAULT,'cl_2','Cleanup Ended','Cl
 Insert into mlaas.activity_master_tbl values (DEFAULT,'cl_3','Dataset Created','You have created New dataset *','US','Operation',0,-1,0,0);
 
 ----------------------- Inserting into mlaas.dag_type_tbl -----------------------
-Insert into mlaas.dag_type_tbl values (1,'Cleanup Dag')
-Insert into mlaas.dag_type_tbl values (2,'Manual Modelling Dag')
+Insert into mlaas.dag_type_tbl values (1,'Cleanup Dag');
+Insert into mlaas.dag_type_tbl values (2,'Manual Modelling Dag');

@@ -68,3 +68,15 @@ class DagUtilsClass():
             logging.error(f"common : DagUtilsClass : get_dag : execution failed : {str(e)}")
             logging.error(f"common : DagUtilsClass : get_dag : execution failed : {traceback.format_exc()}")
             return None
+
+    def release_dag(self, connection, index = None, dag_id = None):
+        '''
+            This function is used to submit the dag back to the dag pool.
+            
+            Args:
+            ----
+            connection (`object`): pycopg2.connection object
+            index (`int | string`) (default : `None`): index of the dag in the dag_management_tbl
+            dag_id (`String`) (default : `None`):  
+        '''
+        pass
