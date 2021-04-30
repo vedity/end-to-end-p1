@@ -14,7 +14,7 @@ import logging
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .utils.exploration import dataset_exploration
+from .utils.Exploration import dataset_exploration
 from .utils import preprocessing
 from .utils.cleaning import missing_value_handling
 from .utils.schema.schema_creation import *
@@ -22,7 +22,7 @@ from common.utils.json_format.json_formater import *
 from common.utils.database import db
 from common.utils.activity_timeline import activity_timeline
 from database import *
-from .utils.transformation import split_data
+from .utils.Transformation import split_data
 from .utils.feature import feature_selection
 from .utils.feature.fs_utility import FSUtilityClass
 
