@@ -98,11 +98,17 @@ table {
 
 .cleanup-tabs {
     position: absolute;
-    right: 0;
+    right: 15px;
     z-index: 999;
     width: 215px;
     .nav-link {
         padding: 0.8rem 1rem !important;
+    }
+    .nav-item .nav-link.active {
+        color: #34c38f;
+    }
+    .nav-item .nav-link::after {
+        background: #34c38f;
     }
 }
 
