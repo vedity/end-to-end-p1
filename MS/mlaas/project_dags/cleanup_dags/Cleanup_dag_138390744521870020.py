@@ -18,7 +18,7 @@ PC_OBJ = PreprocessingClass(database,user,password,host,port)
 
 yesterday_date = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')
 
-main_dag_id = "Cleanup_dag_138389980188381340"
+main_dag_id = "Cleanup_dag_138390744521870020"
 
 args = {
     'owner': 'airflow',

@@ -16,7 +16,7 @@ from modeling.all_supervised_models import *
 
 args = {'owner': 'airflow','start_date': airflow.utils.dates.days_ago(1),'provide_context': True,}
 
-main_dag_id = "manual_model_dag_138389884570296660"
+main_dag_id = "manual_model_dag_138390744553259120"
 
 dag = DAG(dag_id=main_dag_id,default_args=args,catchup=False,schedule_interval = '@once',)
 

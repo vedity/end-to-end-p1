@@ -16,7 +16,7 @@ from modeling.all_supervised_models import *
 
 args = {'owner': 'airflow','start_date': airflow.utils.dates.days_ago(1),'provide_context': True,}
 
-main_dag_id = "manual_model_dag_138389905743616750"
+main_dag_id = "manual_model_dag_138390740040887910"
 
 dag = DAG(dag_id=main_dag_id,default_args=args,catchup=False,schedule_interval = '@once',)
 
@@ -27,7 +27,7 @@ start_task = PythonOperator(task_id='start_pipeline',python_callable=start_pipel
 
 # Get model dict 
 
-master_dict = {}
+master_dict = {'model_id': [1], 'model_name': ['Linear_Regression'], 'model_hyperparams': [{}], 'model_class_name': ['LinearRegressionClass'], 'algorithm_type': ['Multi']}
 
 if len(master_dict) != 0:
 
