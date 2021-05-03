@@ -7,7 +7,9 @@
             [xaxis]="simpleline.xaxis" [yaxis]="simpleline.yaxis" [legend]="simpleline.legend" [colors]="simpleline.colors" [fill]="simpleline.fill">
         </apx-chart> -->
         <div id="chart-line" *ngIf="model_type=='Regression'">
-            <apx-chart [series]="chartOptions1.series" [chart]="chartOptions1.chart" [xaxis]="chartOptions1.xaxis" [dataLabels]="chartOptions1.dataLabels" [colors]="chartOptions1.colors" [fill]="chartOptions1.fill" [markers]="chartOptions1.markers" [stroke]="chartOptions1.stroke"></apx-chart>
+            <apx-chart [series]="chartOptions1.series" [tooltip]="chartOptions1.tooltip" [chart]="chartOptions1.chart" [xaxis]="chartOptions1.xaxis" [dataLabels]="chartOptions1.dataLabels" [colors]="chartOptions1.colors" [fill]="chartOptions1.fill" [markers]="chartOptions1.markers"
+                [stroke]="chartOptions1.stroke">
+            </apx-chart>
         </div>
         <div id="chart-line" *ngIf="model_type=='Classification'">
             <apx-chart class="apex-charts" dir="ltr" [series]="columnlabelChartexpand.series" [chart]="columnlabelChartexpand.chart" [plotOptions]="columnlabelChartexpand.plotOptions" [yaxis]="columnlabelChartexpand.yaxis" [title]="columnlabelChartexpand.title" [stroke]="columnlabelChartexpand.stroke"
