@@ -250,11 +250,7 @@ class CommonMethodClass:
             unscaled_df=pd.DataFrame(unscaled_arr,columns=target_features)
         
             unscaled_df.rename(columns = {target_features[0]:'seq_id',target_features[1]:target_features[1]+'_str'}, inplace = True)
-            
-            
-            logging.info("arr =="+str(unscaled_df))
-            logging.info("arr =="+str(target_features))
-            
+              
             logging.info("modeling : CommonMethodClass : get_unscaled_data : execution end")
             return unscaled_df,target_features
 
