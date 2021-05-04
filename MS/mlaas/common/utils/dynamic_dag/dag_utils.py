@@ -139,7 +139,7 @@ class DagUtilsClass():
             for filename in os.listdir(directory):
                 if filename.endswith(".py"):
                     #                               Table Name                   index     dag_id   allocated  dag_type_id
-                    sql_command += f"INSERT INTO mlaas.dag_management_tbl VALUES(DEFAULT,{filename[:-3]},false,1);"
+                    sql_command += f"INSERT INTO mlaas.dag_management_tbl VALUES(DEFAULT,'{filename[:-3]}',false,1);"
                 else:
                     continue
         
@@ -149,7 +149,7 @@ class DagUtilsClass():
             #? Inserting manual modelling dags
             for filename in os.listdir(directory):
                 if filename.endswith(".py"):
-                    sql_command += f"INSERT INTO mlaas.dag_management_tbl VALUES(DEFAULT,{filename[:-3]},false,2);"
+                    sql_command += f"INSERT INTO mlaas.dag_management_tbl VALUES(DEFAULT,'{filename[:-3]}',false,2);"
                 else:
                     continue
 

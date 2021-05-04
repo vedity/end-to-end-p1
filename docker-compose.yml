@@ -2,7 +2,7 @@ version: '3.7'
 services:
 
     create_dags:
-        image: python
+        image: python:3.9-slim-buster
         volumes:
             - ./MS:/MS
         command: python "MS/mlaas/common/utils/dynamic_dag/dag_creator.py"
@@ -46,7 +46,7 @@ services:
             - ./MS/mlaas/mlruns:/usr/local/airflow/mlruns
         ports:
             - "8080:8080"                               # expose port
-        command: webserver && python "dags/common/utils/dynamic_dag/dag_creator.py"
+        command: webserver
         healthcheck:
             test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
             interval: 30s
