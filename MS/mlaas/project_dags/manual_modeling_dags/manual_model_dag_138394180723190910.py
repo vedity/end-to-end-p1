@@ -27,7 +27,7 @@ start_task = PythonOperator(task_id='start_pipeline',python_callable=start_pipel
 
 # Get model dict 
 
-master_dict = {'model_id': [1], 'model_name': ['Linear_Regression'], 'model_hyperparams': [{}], 'model_class_name': ['LinearRegressionClass'], 'algorithm_type': ['Multi']}
+master_dict = {'model_id': [2], 'model_name': ['Ridge_Regression'], 'model_hyperparams': [{'alpha': '1', 'solver': 'auto'}], 'model_class_name': ['RidgeRegressionClass'], 'algorithm_type': ['Multi']}
 
 if len(master_dict) != 0:
 
