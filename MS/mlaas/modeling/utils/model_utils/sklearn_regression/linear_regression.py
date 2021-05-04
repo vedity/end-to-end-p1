@@ -190,16 +190,14 @@ class LinearRegressionClass:
         Returns:
             [dict]: [it will return model summary.]
         """
-        model_summary = {}
+        summary_dict = self.dataset_split_dict
+        summary_dict['model_name']=self.hyperparameters['model_name']
+        summary_dict['input_features_list']=self.input_features_list
+        summary_dict['target_features_list']=self.target_features_list
         
-        for key,value in self.dataset_split_dict.items():
-            if 'file' not in key:
-                model_summary[key] = value
-            
-        for key,value in self.hyperparameters.items():
-            model_summary[key] = value
+        model_summary = self.EvalMetricsObj.model_summary(summary_dict)
         
-    
+        
         return model_summary
       
       
