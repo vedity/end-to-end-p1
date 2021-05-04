@@ -37,9 +37,8 @@ LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
 logger = logging.getLogger('preprocess_view')
 
-DBObject=db.DBClass() #Get DBClass object
-connection,connection_string=DBObject.database_connection(database,user,password,host,port) #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 preprocessObj =  preprocessing.PreprocessingClass(database,user,password,host,port) #initialize Preprocess class object
+DBObject,connection,connection_string = preprocessObj.get_db_connection()
 sd = split_data.SplitDataClass()
 FS = feature_selection.FeatureSelectionClass()
 AT_OBJ = activity_timeline.ActivityTimelineClass(database, user, password, host, port)
@@ -563,27 +562,41 @@ class CheckCleanupDagStatus(APIView):
                         return Response({"status_code":"500","error_msg":"Failed","response":str(e)})    
 
 class FeatureAlgoList(APIView):
+        ''' This feature will execute the dag and store the value given by the feature selecton algorithm .
+        '''
 
+        def get(self, request, format=None):
+                try:
+                        logging.info(" data preprocess : FeatureAlgoList : GET Method : execution start")
+                        dataset_id = request.query_params.get('dataset_id') #get datasetid
+                        schema_id = request.query_params.get('schema_id') #get schemaid
+                        target_col = str(request.query_params.get('target_col')) #get targetcol
+
+                        feature_params_dict = {"dataset_id":dataset_id,"schema_id":schema_id,"target_col":target_col} #dict to pass parameters in dag 
+                        status = FS.fs_dag_executor(feature_params_dict)   
+
+                        return Response({"status_code":"200","error_msg":"Successfull","response":status})   
+                except Exception as e:
+                        logging.error("data preprocess : FeatureAlgoList : GET Method  " + str(e))
+                        logging.error(" data preprocess : FeatureAlgoList : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})    
+
+class FeatureSelectionData(APIView):
         def get(self, request, format=None):
                 try:
                         logging.info(" data preprocess : FeatureSelection : GET Method : execution start")
                         dataset_id = request.query_params.get('dataset_id')
-                        choice = 1
                         schema_id = request.query_params.get('schema_id')
                         target_col = str(request.query_params.get('target_col'))
-                        
-                        # dataset_id = 224
-                        choice = 1
-                        # schema_id = "71"
-                        # target_col = "cylindernumber"
-                        column = FU.fetch_column(DBObject,connection,schema_id)
-                        chisq_col,rfe_col,mutual_col,anova_col,co_col = FS.algo_call(DBObject,connection,dataset_id,schema_id,target_col,choice)
-                        
-                        feature_algo = {"column_list":column,"option_list":[{"name":"Chi Square","colums":chisq_col},{"name":"Mutual Information","colums":mutual_col},{"name":"ANOVA f-test","colums":anova_col},{"name":"Recursive Feature Elimination","colums":rfe_col},{"name":"Coorelation","colums":co_col}]}
-                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":feature_algo})   
+
+
+                        feature_dict = FS.data_availablity_fs(schema_id,target_col)
+                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":feature_dict})   
                 except Exception as e:
                         logging.error("data preprocess : FeatureSelection : GET Method  " + str(e))
                         logging.error(" data preprocess : FeatureSelection : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":"Failed","response":str(e)})    
+        
                         return Response({"status_code":"500","error_msg":"Failed","response":str(e)}) 
 
 class CleanupCheckStatusClass(APIView):

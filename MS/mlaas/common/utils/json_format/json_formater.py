@@ -201,5 +201,3 @@ class JsonFormatClass:
             logging.error("data preprocess : SchemaClass : get_schema_format : Exception " + str(exc))
             logging.error("data preprocess : SchemaClass : get_schema_format : " +traceback.format_exc())
             return str(exc)
-
-    
