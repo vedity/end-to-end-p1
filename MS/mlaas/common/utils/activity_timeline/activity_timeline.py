@@ -271,11 +271,11 @@ class ActivityTimelineClass:
             if len(activity_df) == 0 :
                 raise DataNotFound(500)
 
-            projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
+            projectnm_df = DBObject.get_project_detail(connection,project_id)
             project_name = projectnm_df['project_name'][0]
             # activity_str= activity_df[0]["activity_description"]
             
-            if activity_id == 44:
+            if activity_id == 'md_44':
                 activity_str= activity_df[0]["activity_description"]
                 activity_description = activity_str.replace('#',experiment_name)
                 activity_description = activity_description.replace('*',model_name)
