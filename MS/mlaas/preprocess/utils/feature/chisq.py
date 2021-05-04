@@ -14,7 +14,7 @@ class ChiSquareClass():
     dfObserved = None
     dfExpected = None
 
-    def chisq_result(self,DBObject,connection,dataset_id,schema_id,target_col):
+    def chisq_result(self,DBObject,connection,dataset_id,schema_id,target_col,**kwargs):
         col_lst = []
         value_lst = []
         dict_col_value = dict()

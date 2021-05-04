@@ -19,7 +19,7 @@ warnings.filterwarnings("ignore")
 FU = FSUtilityClass()
 
 class RFEClass():
-    def get_RFE(self,DBObject,connection,dataset_id,schema_id,target_col):
+    def get_RFE(self,DBObject,connection,dataset_id,schema_id,target_col,**kwargs):
         value_lst = []
 
         # define dataset
