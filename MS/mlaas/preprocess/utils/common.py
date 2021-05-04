@@ -13,9 +13,10 @@ import traceback
 import pandas as pd
 
 
-#* Relative Imports
+#* Common Imports
 from common.utils.logger_handler import custom_logger as cl
 from common.utils.activity_timeline import activity_timeline
+from common.utils.database import db
 from .cleaning import missing_value_handling as mvh
 from database import *
 
@@ -26,12 +27,34 @@ LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
 logger = logging.getLogger('Common_Cleanup_operation')
 
+#* Creating Required Objectss
+DBObject=db.DBClass() #Get DBClass object
+connection,connection_string=DBObject.database_connection(database,user,password,host,port) #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
+
 
 class CommonClass(mvh.MissingValueClass):
         
     def __init__(self):
         #* ACTIVITY TIMELINE OBJECT
         self.AT = activity_timeline.ActivityTimelineClass(database, user, password, host, port)
+    
+    def get_conn(self):
+        '''
+            Provides DB class object & connection when required.
+
+            Args:
+            ----
+            None
+
+            Returns:
+            ------
+            tuple : DBObject, connection
+        '''
+        #* Creating Required Objectss
+        DBObject=db.DBClass() #Get DBClass object
+        connection,connection_string=DBObject.database_connection(database,user,password,host,port) #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
+
+        return (DBObject,connection,connection_string)
 
     def method_calling(self,DBObject,connection,operation_id,project_id,column_list,old_column_list, table_name, col):
         try:
