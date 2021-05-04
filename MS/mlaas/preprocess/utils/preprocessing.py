@@ -27,7 +27,8 @@ from .Transformation import transformation as trs
 from .Transformation import split_data 
 from .Transformation.model_type_identifier import ModelTypeClass
 from database import *
-
+from . import common
+from .feature import feature_selection as fs
 #* Library Imports
 import os
 import logging
@@ -57,8 +58,11 @@ dc = dataset_creation.DatasetClass()
 sp = split_data.SplitDataClass()
 le = LabelEncoder()
 mt = ModelTypeClass()
+commonObj = common.CommonClass()
+DBObject,connection,connection_string = commonObj.get_conn()
 
-class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass, trs.TransformationClass):
+
+class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass, trs.TransformationClass,fs.FeatureSelectionClass):
     def __init__(self,database,user,password,host,port):
         """This constructor is used to initialize database credentials.
            It will initialize when object of this class is created with below parameter.
@@ -756,7 +760,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             test_ratio = split_parameters['test_ratio'] #get test_size
             
             valid_ratio = split_parameters['valid_ratio'] #get valid_size
-            logging.info("   ++valid_ratio"+str(valid_ratio))
+            
             if len(valid_ratio) == 0:
                 valid_ratio= 0
             else:

@@ -28,7 +28,7 @@ class MutualInfoClass():
 
         return X_train_fs, X_test_fs, fs
 
-    def get_mutual_info(self,DBObject,connection,dataset_id,schema_id,target_col):
+    def get_mutual_info(self,DBObject,connection,dataset_id,schema_id,target_col,**kwargs):
         # load the dataset
         value_lst = []
         col = FU.get_schema_dtype(DBObject,connection,schema_id)

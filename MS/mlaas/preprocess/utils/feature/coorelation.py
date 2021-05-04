@@ -6,7 +6,7 @@ import logging
 
 FU = FSUtilityClass()
 class CoorelationClass():
-    def get_coorelation(self,DBObject,connection,dataset_id,schema_id,target_col):
+    def get_coorelation(self,DBObject,connection,dataset_id,schema_id,target_col,**kwargs):
         col = FU.get_numeric_schema_dtype(DBObject,connection,schema_id)
         df = DBObject.get_feature_df(connection,dataset_id,col)
 

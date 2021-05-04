@@ -374,6 +374,24 @@ CREATE TABLE mlaas.dag_type_tbl (
 	dag_type text NOT NULL
 );
 
+--Create feature master table
+CREATE TABLE mlaas.feature_master_tbl (
+	id int8 NULL,
+	feature_method text NULL,
+	algo_target_type text NULL
+);
+
+
+--Create feature information table
+create  table mlaas.feature_info_tbl(
+"index" bigserial NOT NULL,
+schema_id int8 NOT NULL,
+feature_value text NOT NULL,
+feature_selection_type text NULL
+);
+
+
+
 --Insert menu_tbl
 Insert into  mlaas.menu_tbl values (2,'DI','Data Ingestion',null,null,' mdi-database-import');
 Insert into  mlaas.menu_tbl values (3,'DI','Datasets','2','/dataset',null);
@@ -414,6 +432,13 @@ Insert into mlaas.parent_activity_tbl values(5,'Encoding',2);
 Insert into mlaas.parent_activity_tbl values(6,'Math Operations',2);
 Insert into mlaas.parent_activity_tbl values(7,'Transformations',2);
 Insert into mlaas.parent_activity_tbl values(8,'Feature Engineering',2);
+
+--Insert into feature master table
+Insert into  mlaas.feature_master_tbl values (1,'Anova F-test','categorical');
+Insert into  mlaas.feature_master_tbl values (2,'Chi Square','categorical');
+Insert into  mlaas.feature_master_tbl values (3,'Coorelation','numerical');
+Insert into  mlaas.feature_master_tbl values (4,'Mutual Information','categorical');
+Insert into  mlaas.feature_master_tbl values (5,'Recursive Feature Elimination',NULL);
 
 --Insert activity master
 -- COLUMNS => "index", activity_id, activity_name, activity_description, "language", operation, code, parent_activity_id, user_input, check_typ
