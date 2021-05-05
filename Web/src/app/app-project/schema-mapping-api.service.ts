@@ -78,7 +78,21 @@ export class SchemaMappingApiService {
       .append("dataset_id", dataset_id)
       .append("schema_id", schema_id)
       .append("target_col", target_col)
-    return this.httpClient.get(this.baseUrl + "preprocess/feature_list/", { headers: this.headers,params });
+    return this.httpClient.get(this.baseUrl + "preprocess/feature_selection_data/", { headers: this.headers,params });
   }
 
+  getAllDagsStatus(project_id) {
+    var params = new HttpParams()
+      .append("project_id", project_id)
+    return this.httpClient.get(this.baseUrl + "preprocess/dags/status/", { headers: this.headers,params });
+  }
+
+  startFeatureSelection(dataset_id,schema_id,target_col) {
+    var params = new HttpParams()
+      .append("dataset_id", dataset_id)
+      .append("schema_id", schema_id)
+      .append("target_col", target_col)
+    return this.httpClient.get(this.baseUrl + "preprocess/fs_dag/", { headers: this.headers,params });
+  }
+  
 }

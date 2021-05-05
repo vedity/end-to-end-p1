@@ -37,20 +37,17 @@ export class ModelingTypeApiService {
    }
 
   showrunningexperimentslist(project_id): Observable<any> {
-   // project_id=2;
     var params = new HttpParams().append("project_id", project_id);
     return this.httpClient.get(this.baseUrl + "modeling/runningexperimentslist/", { headers: this.headers, params });
   }
 
   checkmodelstatus(project_id,experiment_name,dataset_id,user_name,type): Observable<any> {
-   // project_id=2;
-
    let params;
-   if(type=='onload')
-     params = new HttpParams().append("project_id", project_id)
-    .append("dataset_id",dataset_id)
-    .append("user_name",user_name);
-    else
+  //  if(type=='onload')
+  //   params = new HttpParams().append("project_id", project_id)
+  //   .append("dataset_id",dataset_id)
+  //   .append("user_name",user_name);
+  //   else
     params = new HttpParams().append("project_id", project_id).append("experiment_name",experiment_name)
     .append("dataset_id",dataset_id)
     .append("user_name",user_name);
