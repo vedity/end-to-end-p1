@@ -12,7 +12,7 @@
                 </ngx-skeleton-loader>
                 <div *ngIf="!displaydiv" class="nobordertable">
                     <!-- <perfect-scrollbar class="schemamapping-row"> -->
-                    <fieldset [disabled]="startfeatureslection">
+                    <fieldset [disabled]="startfeatureslection || dagsStatusRunning">
                         <p class="feature-section-name" *ngIf="isFeatureSelected">Feature Selection - {{selectedFeature}}</p>
                         <a href="javascript:void(0)" (click)="displayfilter()" id="filter-btn" class="filter-btn"><i
                             id="filtericon" class="dripicons-experiment"></i></a>
@@ -173,11 +173,11 @@
                     </div>
                     <div class="right-box">
 
-                        <ul *ngFor="let item of featuresList.option_list;let i=index;" class="featureoptios" id="option_{{i}}" (click)="selectedOption(item,i)">
+                        <ul *ngFor="let item of featuresList.data.option_list;let i=index;" class="featureoptios" id="option_{{i}}" (click)="selectedOption(item,i)">
                             <li class="title" title="{{item.name}}">{{item.name}}</li>
                             <li *ngFor="let subitem of featuresList.column_list">
-                                <i *ngIf="item.colums[subitem]=='True'" class="mdi mdi-check-bold"></i>
-                                <i *ngIf="item.colums[subitem]=='False'" class="mdi mdi-close"></i>
+                                <i *ngIf="item.column[subitem]=='True'" class="mdi mdi-check-bold"></i>
+                                <i *ngIf="item.column[subitem]=='False'" class="mdi mdi-close"></i>
                             </li>
                         </ul>
 
