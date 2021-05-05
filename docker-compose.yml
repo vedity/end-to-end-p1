@@ -1,10 +1,18 @@
 version: '3.7'
 services:
 
+    create_dags:
+        image: python:3.9-slim-buster
+        volumes:
+            - ./MS:/MS
+        command: python "MS/mlaas/common/utils/dynamic_dag/dag_creator.py"
+
     postgres:                                           # create postgres container
         build: ./DB
         hostname: postgresql
         container_name: postgres_container
+        depends_on:
+            - create_dags           
         volumes:
             - postgres_data:/var/lib/postgresql/data/
             # - postgresql.conf:/var/lib/postgresql/data/postgresql.conf

@@ -3,6 +3,7 @@
 #* Library Imports
 import logging
 import traceback
+import os
 
 #* Common Utilities
 from common.utils.database import db
@@ -59,7 +60,7 @@ class DagUtilsClass():
                 returning "index",dag_id 
             '''
             dag_df = DBObject.select_records(connection, sql_command)
-            index, dag_id = dag_df['index'],dag_df['dag_id']
+            index, dag_id = dag_df['index'][0],dag_df['dag_id'][0]
 
             logging.info("common : DagUtilsClass : get_dag : execution stop")
             return index, dag_id
@@ -84,12 +85,80 @@ class DagUtilsClass():
             status (`int`): Status of dag release 
         '''
         try:
-            logging.info("common : DagUtilsClass : get_dag : execution start")
+            logging.info("common : DagUtilsClass : release_dag : execution start")
             
-            logging.info("common : DagUtilsClass : get_dag : execution stop")
+            if not index and not dag_id:
+                #? We require at least one of these two things
+                raise RuntimeError
+
+            if index:
+                #? Index is given
+                sql_command = f'''
+                update mlaas.dag_management_tbl 
+                    set allocated=false 
+                    where "index"={index}
+                '''
+            else:
+                #? dag_id is given
+                sql_command = f'''
+                update mlaas.dag_management_tbl 
+                    set allocated=false 
+                    where dag_id={dag_id}
+                '''
+            status = DBObject.update_records(connection, sql_command)
+
+            logging.info("common : DagUtilsClass : release_dag : execution stop")
+            return status
 
         except Exception as e:
-            logging.error(f"common : DagUtilsClass : get_dag : execution failed : {str(e)}")
-            logging.error(f"common : DagUtilsClass : get_dag : execution failed : {traceback.format_exc()}")
+            logging.error(f"common : DagUtilsClass : release_dag : execution failed : {str(e)}")
+            logging.error(f"common : DagUtilsClass : release_dag : execution failed : {traceback.format_exc()}")
             return 1
 
+    def add_dag_to_table(self, connection, namespace = 'project_dags'):
+        '''
+            This function is used to add newly created dags to the dag_managemet_tbl.
+
+            Args:
+            -----
+            connection (`object`): pycopg2.conn object
+            namespace (`String`) (Default : `project_dags`): Folder where dags are stored. 
+
+            Returns:
+            -------
+            status (`Int`): Status of insertion.
+        '''
+        try:
+            logging.info("common : DagUtilsClass : add_dag_to_table : execution start")
+            
+            #? Folders where we dags are stored
+            directory = f'{namespace}/cleanup_dags'
+            sql_command = f""
+
+            #? Inserting cleanup dag
+            for filename in os.listdir(directory):
+                if filename.endswith(".py"):
+                    #                               Table Name                   index     dag_id   allocated  dag_type_id
+                    sql_command += f"INSERT INTO mlaas.dag_management_tbl VALUES(DEFAULT,'{filename[:-3]}',false,1);"
+                else:
+                    continue
+        
+            #? Folders where we dags are stored
+            directory = f'{namespace}/manual_modelling_dags'
+            
+            #? Inserting manual modelling dags
+            for filename in os.listdir(directory):
+                if filename.endswith(".py"):
+                    sql_command += f"INSERT INTO mlaas.dag_management_tbl VALUES(DEFAULT,'{filename[:-3]}',false,2);"
+                else:
+                    continue
+
+            status = DBObject.update_records(connection, sql_command)
+
+            logging.info("common : DagUtilsClass : add_dag_to_table : execution stop")
+            return status
+        except Exception as e:
+            logging.error(f"common : DagUtilsClass : add_dag_to_table : execution failed : {str(e)}")
+            logging.error(f"common : DagUtilsClass : add_dag_to_table : execution failed : {traceback.format_exc()}")
+            return 1
+    

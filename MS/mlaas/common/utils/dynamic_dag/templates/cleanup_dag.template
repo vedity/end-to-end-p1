@@ -38,7 +38,7 @@ dag = DAG(
 
 master_dict = #MASTER_DICT 
 
-if int(master_dict['active']) == 0:
+if len(master_dict) == 0:
     sys.exit()
 
 else:
@@ -128,6 +128,9 @@ def dag_end(DBObject,connection,dataset_id,project_id,dag_id,new_user_name,datas
     status = PC_OBJ.check_failed_col(DBObject, connection,dataset_id,project_id,new_user_name,col_list, dag_id)
     activity_id = 'cl_2'
     status = PC_OBJ.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id,new_user_name,dataset_name,flag=False)
+    
+    #? Shutting off the dag, making master_dict empty so it won't be executed further
+    status = PC_OBJ.dag_updater(dict(), dag_id+".py" , namespace = "cleanup_dags")
     return status
 
 #? Making Dynamic Tasks

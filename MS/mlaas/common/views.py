@@ -259,9 +259,9 @@ class LogFileClass(APIView):
 class DagInfoClass(APIView):
         def get(self,request,format=None):
                 try:
-                        index,dag_id = dag_obj.get_dag(connection)
+                        status = dag_obj.add_dag_to_table(connection)
 
-                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":(index,dag_id)})  
+                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":status})  
                 except Exception as e:
                         logging.error("Common  : LogFileClass : GET Method : Exception :" + str(e))
                         logging.error("Common  : LogFileClass : GET Method : " +traceback.format_exc())
