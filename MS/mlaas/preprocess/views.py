@@ -561,7 +561,7 @@ class CheckCleanupDagStatus(APIView):
                         logging.error(" data preprocess : CheckCleanupDagStatus : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":"Failed","response":str(e)})    
 
-class FeatureAlgoList(APIView):
+class FeatureSelectionDag(APIView):
         ''' This feature will execute the dag and store the value given by the feature selecton algorithm .
         '''
 
