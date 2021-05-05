@@ -38,17 +38,17 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
         return table_name,cols
 
 
-    def algo_call(self,dataset_id,schema_id,target_col):
+    def algo_call(self,schema_id,target_col):
         
             #fetch all column
             column = self.fetch_column(DBObject,connection,schema_id)
             column.remove(target_col)
 
             
-            feature_dict = {"target_col":target_col,"column_list":column,"option_list":[chisq_dict,rfe_dict,mutual_dict,anova_dict,co_dict]}
-            status = self.insert_feature_record(DBObject,connection,schema_id,feature_dict)
+            # feature_dict = {"target_col":target_col,"column_list":column,"option_list":[chisq_dict,rfe_dict,mutual_dict,anova_dict,co_dict]}
+            # status = self.insert_feature_record(DBObject,connection,schema_id,feature_dict)
 
-            return status
+            return column
 
     def get_extra_column(self,DBObject,connection,schema_id,col_lst):
 
@@ -230,7 +230,9 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
                 except Exception as e:
                     return e
             else:
-                return val
+                column = self.algo_call(schema_id,targetcol)
+                data = {"column_list":column,"data":val}
+                return data
 
         except Exception as e:
             return False
