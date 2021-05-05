@@ -97,6 +97,16 @@ services:
   #     retries: 5
   #   restart: always
 
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    hostname: mongodb
+    volumes:
+        - ./mongodb/data/:/data/db
+    ports:
+        - 27017:27017
+    
+ 
   web:                                             # create a MLFlow container
     build: './MS' 
     container_name: ms_container
@@ -137,3 +147,4 @@ services:
 
 volumes:
   postgres-db-volume:
+  data:
