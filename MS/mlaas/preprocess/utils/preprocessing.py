@@ -19,13 +19,13 @@ from common.utils import dynamic_dag
 
 #* Class Imports
 from ingest.utils.dataset import dataset_creation
-from .Exploration import dataset_exploration as de
-from .schema import schema_creation as sc
-from .cleaning import noise_reduction as nr
-from .cleaning import cleaning
-from .Transformation import transformation as trs
-from .Transformation import split_data 
-from .Transformation.model_type_identifier import ModelTypeClass
+from preprocess.utils.Exploration import dataset_exploration as de
+from preprocess.utils.schema import schema_creation as sc
+from preprocess.utils.cleaning import noise_reduction as nr
+from preprocess.utils.cleaning import cleaning
+from preprocess.utils.Transformation import transformation as trs
+from preprocess.utils.Transformation import split_data 
+from preprocess.utils.Transformation.model_type_identifier import ModelTypeClass
 from database import *
 from . import common
 from .feature import feature_selection as fs
@@ -43,6 +43,9 @@ import uuid
 import json
 import time
 import datetime
+
+from requests.auth import HTTPBasicAuth
+
 
 #* Defining Logger
 user_name = 'admin'
@@ -883,7 +886,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
             
-            res = requests.post("http://airflow:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
+            res = requests.post("http://airflow-webserver:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False,auth= HTTPBasicAuth('airflow','airflow'))#owner
 
             logging.info("data preprocessing : PreprocessingClass : get_cleanup_dag_name : execution stop")
             # connection.close()
@@ -961,7 +964,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             activity_status = self.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id,user_name,dataset_name,flag='True')
 
             json_data = {}
-            result = requests.post(f"http://airflow:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False)#owner
+            result = requests.post(f"http://airflow-webserver:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False,auth= HTTPBasicAuth('airflow','airflow'))#owner
             
             logging.info("DAG RUN RESULT: "+str(result))
             
