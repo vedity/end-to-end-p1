@@ -1,18 +1,17 @@
 version: '3.7'
 services:
 
-    create_dags:
-        image: python:3.9-slim-buster
-        volumes:
-            - ./MS:/MS
-        command: python "MS/mlaas/common/utils/dynamic_dag/dag_creator.py"
+    # create_dags:
+    #     image: python:3.9-slim-buster
+    #     container_name: dag_creator
+    #     volumes:
+    #         - ./MS:/MS
+    #     command: python "MS/mlaas/common/utils/dynamic_dag/dag_creator.py"
 
     postgres:                                           # create postgres container
         build: ./DB
         hostname: postgresql
         container_name: postgres_container
-        depends_on:
-            - create_dags           
         volumes:
             - postgres_data:/var/lib/postgresql/data/
             # - postgresql.conf:/var/lib/postgresql/data/postgresql.conf
@@ -57,7 +56,12 @@ services:
         build: './MS' 
         container_name: ms_container
         #command: bash -c "mlflow server --backend-store-uri ./mlflow --host 0.0.0.0 --port 5400 && python manage.py runserver 0.0.0.0:8000" # construct the container along the Dockerfile in this folder
-        command: python manage.py runserver 0.0.0.0:8000 
+        command: sh -c "
+            python manage.py runserver 0.0.0.0:8000 & 
+            sleep 150 && 
+            python common/utils/dynamic_dag/dag_creator.py && 
+            pkill -f runserver && 
+            python manage.py runserver 0.0.0.0:8000" 
         volumes: 
             - "./MS/mlaas:/mlaas"
         ports:

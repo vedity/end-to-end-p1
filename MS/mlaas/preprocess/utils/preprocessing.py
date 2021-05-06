@@ -15,20 +15,21 @@ from common.utils.exception_handler.python_exception.preprocessing.preprocess_ex
 from common.utils.database import db
 from common.utils.logger_handler import custom_logger as cl
 from common.utils.activity_timeline import activity_timeline
-from common.utils import dynamic_dag
+from common.utils.dynamic_dag import dag_utils as du
 
 #* Class Imports
 from ingest.utils.dataset import dataset_creation
-from .Exploration import dataset_exploration as de
-from .schema import schema_creation as sc
-from .cleaning import noise_reduction as nr
-from .cleaning import cleaning
-from .Transformation import transformation as trs
-from .Transformation import split_data 
-from .Transformation.model_type_identifier import ModelTypeClass
+from preprocess.utils.Exploration import dataset_exploration as de
+from preprocess.utils.schema import schema_creation as sc
+from preprocess.utils.cleaning import noise_reduction as nr
+from preprocess.utils.cleaning import cleaning
+from preprocess.utils.Transformation import transformation as trs
+from preprocess.utils.Transformation import split_data 
+from preprocess.utils.Transformation.model_type_identifier import ModelTypeClass
+from preprocess.utils import common
+from preprocess.utils.feature import feature_selection as fs
 from database import *
-from . import common
-from .feature import feature_selection as fs
+
 #* Library Imports
 import os
 import logging
@@ -58,6 +59,7 @@ dc = dataset_creation.DatasetClass()
 sp = split_data.SplitDataClass()
 le = LabelEncoder()
 mt = ModelTypeClass()
+DAG_OBJ = du.DagUtilsClass()
 commonObj = common.CommonClass()
 DBObject,connection,connection_string = commonObj.get_conn()
 
@@ -920,10 +922,13 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         try:
             logging.info("data preprocessing : PreprocessingClass : dag_executor : execution start")
             
-            sql_command = f"select pt.cleanup_dag_id from mlaas.project_tbl pt where pt.project_id = '{project_id}'"
-            dag_id_df = DBObject.select_records(connection,sql_command) 
-            if not isinstance(dag_id_df,pd.DataFrame): return 1
-            dag_id = dag_id_df['cleanup_dag_id'][0]
+            #? Getting a dag from dag pool
+            dag_index,dag_id = DAG_OBJ.get_dag(connection, dag_type=1, project_id=project_id)
+
+            # sql_command = f"select pt.cleanup_dag_id from mlaas.project_tbl pt where pt.project_id = '{project_id}'"
+            # dag_id_df = DBObject.select_records(connection,sql_command) 
+            # if not isinstance(dag_id_df,pd.DataFrame): return 1
+            # dag_id = dag_id_df['cleanup_dag_id'][0]
             
             # #? Setting the dag as busy
             # sql_command = f"update mlaas.cleanup_dag_status set status ='1' where dag_id = '{dag_id}'"
@@ -937,6 +942,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
 
             master_dict = {
             'active': 1,
+            "dag_index": dag_index,
             "operation_dict": op_dict,
             "values_dict": val_dict,
             "schema_id": schema_id,
@@ -962,7 +968,11 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
 
             json_data = {}
             result = requests.post(f"http://airflow:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False)#owner
-            
+            i = 0
+            while result.status_code==404 and i<5:
+                time.sleep(1)
+                result = requests.post(f"http://airflow:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False)#owner
+                i+=1
             logging.info("DAG RUN RESULT: "+str(result))
             
             logging.info("data preprocessing : PreprocessingClass : dag_executor : execution stop")

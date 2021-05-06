@@ -12,7 +12,7 @@ args = {'owner': 'airflow','start_date': airflow.utils.dates.days_ago(1),'provid
 
 main_dag_id = "feature_selection_dag"
 
-dag = DAG(dag_id=main_dag_id,default_args=args,catchup=False,schedule_interval = '@once',)
+dag = DAG(dag_id=main_dag_id,default_args=args,catchup=False,schedule_interval = None,)
 
 # start_task = PythonOperator(task_id='algo_call',python_callable=algo_call,dag=dag)
 start_feature_selection =  PythonOperator(
