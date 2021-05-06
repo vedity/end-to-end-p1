@@ -223,7 +223,7 @@ def supervised_models(run_id,**kwargs):
         check_flag = 'outside'
         dag_run_id = run_id
         # Check Running Model Wheather It is Binary Or Multi Class Problem.     
-        if algorithm_type == kwargs['algorithm_type']:
+        if algorithm_type == kwargs['algorithm_type'] or algorithm_type.lower() == 'binary':
             
             experiment, experiment_id = ExpObject.get_mlflow_experiment(experiment_name)
             # mlflow set_experiment and run the model.
