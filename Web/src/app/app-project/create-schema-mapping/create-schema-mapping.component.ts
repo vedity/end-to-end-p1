@@ -15,7 +15,7 @@ export class CreateSchemaMappingComponent implements OnInit {
   datatableElement: DataTableDirective;
   dtOptions: DataTables.Settings = {};
   dtTrigger: Subject<any> = new Subject<any>();
-  targetColumn: any;
+  targetColumn: any=0;
   constructor(public apiService: SchemaMappingApiService, public router: Router, public toaster: ToastrService, private modalService: NgbModal) { }
   @Input() public dataset_id: any;
   @Input() public title: any;
@@ -38,6 +38,7 @@ export class CreateSchemaMappingComponent implements OnInit {
   Originaldata: any = [];
   displaydiv = false;
   animation = "progress-dark";
+  dagsStatusRunning=false;
   theme = {
     'border-radius': '5px',
     'height': '40px',
@@ -94,10 +95,29 @@ export class CreateSchemaMappingComponent implements OnInit {
       scrollY: "calc(100vh - 450px)",
     }
     this.displaydiv = true;
+    this.getAllDagsStatus();
     this.getColumnAttributeList();
     //this.getFeatureSelection();
     // console.log(this.project_id, this.dataset_id);
     this.getSchema(this.project_id, this.dataset_id, this.schema_id);
+  }
+
+  getAllDagsStatus(){
+    this.apiService.getAllDagsStatus(this.project_id).subscribe(
+      logs=>this.dagsSuccessHandler(logs),
+      error=>this.errorHandler(error)
+    )
+  }
+
+  dagsSuccessHandler(data){
+    if(data.status_code=="200"){
+if(data.response.cleanup_dag=='True'|| data.response.modeling_dag=='True'||data.response.feature_dag=='True'){
+  this.dagsStatusRunning=true;
+}
+    }
+    else{
+      this.errorHandler(data);
+    }
   }
 
   getSchema(projectid, datasetid, schemaid) {
@@ -151,23 +171,24 @@ export class CreateSchemaMappingComponent implements OnInit {
     this.selecteditem=undefined;
   }
 
+  isFeatureSelected=false;
+  selectedFeature="";
   saveoption(){
+    this.isFeatureSelected=false;
+    this.selectedFeature="";
     if(this.selecteditem){
+      this.selectedFeature=this.selecteditem.name;
       this.datasetSchema.forEach(element => {
-        var data=this.selecteditem.colums[element.column_name];
+        var data=this.selecteditem.column[element.column_name];
         console.log(element);
         console.log(data);
         if(data=="True")
         element.column_attribute='Select';
         if(data=="False")
         element.column_attribute='Ignore';
-
-        
+        this.isFeatureSelected=true;
       });
-      
-      this.datasetSchema
       this.modalService.dismissAll();
-
     }
     else{
     this.isitemselected=false;
@@ -247,16 +268,46 @@ export class CreateSchemaMappingComponent implements OnInit {
 
   SuccessFeatureSelection(data,schemarecommodate) {
     if (data.status_code == "200" && this.startfeatureslection==true) {
-      this.featuresList = data.response;
-      console.log(this.featuresList);
-      this.displayselection = false;
-      this.modalService.open(schemarecommodate, { size: 'xl', windowClass: 'modal-holder', centered: true });
-      this.startfeatureslection=false;
+      if(data.response!=false){
+        this.featuresList = data.response;
+        console.log(this.featuresList);
+        this.displayselection = false;
+        this.modalService.open(schemarecommodate, { size: 'xl', windowClass: 'modal-holder', centered: true });
+        this.startfeatureslection=false;
+        if(this.setFeatureSelectionInterval){
+          clearInterval(this.setFeatureSelectionInterval);
+        }
+      }
+      else{
+        if(!this.setFeatureSelectionInterval){
+          this.startFeatureSelectionDags(schemarecommodate);
+        }
+      }
     }
     else {
       this.errorHandler(data);
     }
   }
+
+  startFeatureSelectionDags(schemarecommodate){
+    this.apiService.startFeatureSelection(this.dataset_id, this.schema_id, this.targetColumnName).subscribe(
+      logs=>this.startSuccessHandlers(logs,schemarecommodate),
+      error=>this.errorHandler(error)
+    )
+  }
+
+  setFeatureSelectionInterval:any;
+  startSuccessHandlers(data,schemarecommodate){
+    if(data.status_code=="200"){
+      this.setFeatureSelectionInterval=setInterval(() => {
+        this.getFeatureSelection(schemarecommodate);
+      }, 10000);
+    }
+    else{
+      this.errorHandler(data);
+    }
+  }
+
 
   currentcontet = "";
   displaytooltip(tooltip, id) {
@@ -432,5 +483,8 @@ export class CreateSchemaMappingComponent implements OnInit {
 
   stopFeatureSelection(){
     this.startfeatureslection=false;
+    if(this.setFeatureSelectionInterval){
+      clearInterval(this.setFeatureSelectionInterval);
+    }
   }
 }

@@ -180,7 +180,7 @@ class ModelStatisticsClass:
         confusion_matrix_df = pd.DataFrame(confusion_matrix)
         confusion_matrix_dict = confusion_matrix_df.to_dict()
     
-        key = np.unique(unscaled_df[target_features[1:]+'_str']).tolist()
+        key = np.unique(unscaled_df[target_features[1]+'_str']).tolist()
     
         key_val = []
 

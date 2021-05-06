@@ -50,8 +50,15 @@ urlpatterns = [
     path('mlaas/preprocess/cldag_status/',CheckCleanupDagStatus.as_view()),
 
     #feature selection algorithm list
-    path('mlaas/preprocess/feature_list/',FeatureAlgoList.as_view()),
+    path('mlaas/preprocess/fs_dag/',FeatureSelectionDag.as_view()),
 
-    # #feature selection main api
-    # path('mlaas/preprocess/feature_selection/',FeatureSelection.as_view()),
+    #feature selection main api
+    path('mlaas/preprocess/feature_selection_data/',FeatureSelectionData.as_view()),
+    
+    path('mlaas/preprocess/check/status/',CleanupCheckStatusClass.as_view()),
+    
+    #Check all Dag status
+    path('mlaas/preprocess/dags/status/',AllDagStatusClass.as_view()),
+    
+   
 ]

@@ -19,15 +19,16 @@ from common.utils import dynamic_dag
 
 #* Class Imports
 from ingest.utils.dataset import dataset_creation
-from .Exploration import dataset_exploration as de
-from .schema import schema_creation as sc
-from .cleaning import noise_reduction as nr
-from .cleaning import cleaning
-from .Transformation import transformation as trs
-from .Transformation import split_data 
-from .Transformation.model_type_identifier import ModelTypeClass
+from preprocess.utils.Exploration import dataset_exploration as de
+from preprocess.utils.schema import schema_creation as sc
+from preprocess.utils.cleaning import noise_reduction as nr
+from preprocess.utils.cleaning import cleaning
+from preprocess.utils.Transformation import transformation as trs
+from preprocess.utils.Transformation import split_data 
+from preprocess.utils.Transformation.model_type_identifier import ModelTypeClass
 from database import *
-
+from . import common
+from .feature import feature_selection as fs
 #* Library Imports
 import os
 import logging
@@ -43,6 +44,9 @@ import json
 import time
 import datetime
 
+from requests.auth import HTTPBasicAuth
+
+
 #* Defining Logger
 user_name = 'admin'
 log_enable = True
@@ -57,8 +61,11 @@ dc = dataset_creation.DatasetClass()
 sp = split_data.SplitDataClass()
 le = LabelEncoder()
 mt = ModelTypeClass()
+commonObj = common.CommonClass()
+DBObject,connection,connection_string = commonObj.get_conn()
 
-class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass, trs.TransformationClass):
+
+class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass, trs.TransformationClass,fs.FeatureSelectionClass):
     def __init__(self,database,user,password,host,port):
         """This constructor is used to initialize database credentials.
            It will initialize when object of this class is created with below parameter.
@@ -720,10 +727,13 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 #scale the dataframe    
                 if int(scaling_type) == 0:
                     input_feature_df.iloc[:,1:] = super().standard_scaling(input_feature_df.iloc[:,1:]) #standard_scaling
+                    scale_type = 'standard_scaling' 
                 elif int(scaling_type) == 1:
                     input_feature_df.iloc[:,1:] = super().min_max_scaling(input_feature_df.iloc[:,1:]) #min_max_scaling
+                    scale_type = 'min_max_scaling' 
                 elif int(scaling_type) == 2:
                     input_feature_df.iloc[:,1:] = super().robust_scaling(input_feature_df.iloc[:,1:]) #robust_scaling
+                    scale_type = 'robust_scaling' 
             except:
                 raise ScalingFailed(500)
 
@@ -753,6 +763,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             test_ratio = split_parameters['test_ratio'] #get test_size
             
             valid_ratio = split_parameters['valid_ratio'] #get valid_size
+            
             if len(valid_ratio) == 0:
                 valid_ratio= 0
             else:
@@ -764,7 +775,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             test_Y_filename =  scale_dir+"/scaled_test_Y_data_" + unique_id  #genrate test_Y file path     
             valid_X_filename = "None"
             valid_Y_filename = "None"
-            Y_valid_count= None
+            Y_valid_count= 0
             X_train, X_valid, X_test, Y_train, Y_valid, Y_test=sp.get_split_data(input_features_df,target_features_df, int(random_state),float(test_ratio), valid_ratio, str(split_method))
             if isinstance(X_train,str):
                 return X_train
@@ -785,7 +796,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             np.save(test_Y_filename,Y_test.to_numpy()) #save Y_test
             
         
-            scaled_split_parameters = '{"split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_ratio)+', "test_ratio":'+ str(test_ratio)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'","actual_Y_filename":"'+actual_Y_filename+".npy"+'"}' #genrate scaled split parameters
+            scaled_split_parameters = '{"scaling_type":"'+str(scale_type)+'","split_method":"'+str(split_method)+'" ,"cv":'+ str(cv)+',"valid_ratio":'+ str(valid_ratio)+', "test_ratio":'+ str(test_ratio)+',"random_state":'+ str(random_state)+',"valid_size":'+str(Y_valid_count)+',"train_size":'+str(Y_train_count)+',"test_size":'+str(Y_test_count)+',"train_X_filename":"'+train_X_filename+".npy"+'","train_Y_filename":"'+train_Y_filename+".npy"+'","test_X_filename":"'+test_X_filename+".npy"+'","test_Y_filename":"'+test_Y_filename+".npy"+'","valid_X_filename":"'+valid_X_filename+".npy"+'","valid_Y_filename":"'+valid_Y_filename+".npy"+'","actual_Y_filename":"'+actual_Y_filename+".npy"+'"}' #genrate scaled split parameters
             logger.info("scaled_split_parameters=="+scaled_split_parameters)
             sql_command = f"update mlaas.project_tbl set target_features= '{target_cols}' ,input_features='{feature_cols}',scaled_split_parameters = '{scaled_split_parameters}',problem_type = '{problem_type_dict}' where dataset_id = '{dataset_id}' and project_id = '{project_id}' and user_name= '{user_name}'"
             status = DBObject.update_records(connection, sql_command)
@@ -875,7 +886,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
             
-            res = requests.post("http://airflow:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
+            res = requests.post("http://airflow-webserver:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False,auth= HTTPBasicAuth('airflow','airflow'))#owner
 
             logging.info("data preprocessing : PreprocessingClass : get_cleanup_dag_name : execution stop")
             # connection.close()
@@ -953,7 +964,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             activity_status = self.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id,user_name,dataset_name,flag='True')
 
             json_data = {}
-            result = requests.post(f"http://airflow:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False)#owner
+            result = requests.post(f"http://airflow-webserver:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False,auth= HTTPBasicAuth('airflow','airflow'))#owner
             
             logging.info("DAG RUN RESULT: "+str(result))
             
@@ -1124,6 +1135,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             sql_command = f"select dr.state from public.dag_run dr where dr.dag_id = '{dag_id}' order by id desc limit 1"
             logging.info(sql_command)
             status_df = DBObject.select_records(connection,sql_command) 
+            logging.info(str(status_df) +" checking")
             if not isinstance(status_df,pd.DataFrame): #! Failed to get dag status
                 raise NullValue(500)
 
@@ -1134,13 +1146,13 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             status = status_df['state'][0]
             
             logging.info("data preprocessing : PreprocessingClass : get_dag_status : execution stop")
-            # connection.close()
+            
             if status == 'running':
                 return True
             else:
                 return False      
         except (DatabaseConnectionFailed, NullValue) as exc:
-            # connection.close()
+            
             logging.error("data preprocessing : PreprocessingClass : get_dag_status : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_dag_status : " +traceback.format_exc())
             return exc.msg
@@ -1155,15 +1167,15 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             sql_command = "SELECT model_status from mlaas.project_tbl where project_id='"+str(project_id)+"'"
             model_status_df=DBObject.select_records(connection,sql_command) # Get dataset details in the form of dataframe.
             status = model_status_df['model_status'][0]
-            logging.info("------+++"+str(status))
+            
             logging.info("data preprocessing : PreprocessingClass : get_dag_status : execution stop")
-            # connection.close()
+            
             if status == 0:
                 return True
             else:
                 return False
         except (DatabaseConnectionFailed,NullValue) as exc:
-            # connection.close()
+            
             logging.error("data preprocessing : PreprocessingClass : get_dag_status : Exception " + str(exc.msg))
             logging.error("data preprocessing : PreprocessingClass : get_dag_status : " +traceback.format_exc())
             return exc.msg
@@ -1189,7 +1201,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             dataset_name = datasetnm_df['dataset_name'][0]
             
             #? Getting Project name
-            projectnm_df = DBObject.get_project_detail(DBObject,connection,project_id)
+            projectnm_df = DBObject.get_project_detail(connection,project_id)
             project_name = projectnm_df['project_name'][0]
 
             #? Getting Activity Description
@@ -1336,7 +1348,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
         #? Getting Activity Description
         try:
             # failed_op += self.op_diff
-            logging.info("data preprocessing : CleaningClass : operation_failed : execution start")
+            logging.info("data preprocessing : PreprocessingClass : operation_failed : execution start")
             activity_description = self.get_act_desc(DBObject, connection, failed_op, col_name, code = 0)
             logging.info(" failed description : "+str(activity_description))
             
@@ -1344,10 +1356,10 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
             status,index = self.AT.insert_user_activity(activity_id,new_user_name,project_id,dataset_id,activity_description,end_time,column_id =col_name)
             
-            logging.info("data preprocessing : CleaningClass : operation_failed : execution stop")
+            logging.info("data preprocessing : PreprocessingClass : operation_failed : execution stop")
             return status
         except Exception as exc:
-            logging.error(f"data preprocessing : CleaningClass : operation_failed :  Exception : {str(exc)} ")
+            logging.error(f"data preprocessing : PreprocessingClass : operation_failed :  Exception : {str(exc)} ")
             return 1
 
     
@@ -1369,7 +1381,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             status (`Int`): Status of operation insertion
         '''
         
-        logging.info("data preprocessing : CleaningClass : check_failed_col : execution start")
+        logging.info("data preprocessing : PreprocessingClass : check_failed_col : execution start")
         try:
             sql_command = f"select ti.task_id as task_name from public.task_instance ti where ti.dag_id = '{dag_id}' and ti.state = 'failed' "
             failed_df = DBObject.select_records(connection,sql_command)
@@ -1391,10 +1403,10 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 if status !=0:
                     break
 
-            logging.info("data preprocessing : CleaningClass  : check_failed_col : execution stop")
+            logging.info("data preprocessing : PreprocessingClass  : check_failed_col : execution stop")
             return  status
         except Exception as exc:
-            logging.error(f"data preprocessing : CleaningClass : check_failed_col :  Exception : {str(exc)} ")
+            logging.error(f"data preprocessing : PreprocessingClass : check_failed_col :  Exception : {str(exc)} ")
             return 1
     
     def get_act_desc(self, DBObject, connection, operation_id, col_name, code = 1):
@@ -1406,7 +1418,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             description (`String`): Description for the activity.
         '''
         try:
-            logging.info("data preprocessing : CleaningClass : get_activity_desc : execution start")
+            logging.info("data preprocessing : PreprocessingClass : get_activity_desc : execution start")
             
             #? Getting Description
             sql_command = f"select replace (amt.activity_name || ' ' || amt.activity_description, '*', '{col_name}') as description from mlaas.activity_master_tbl amt where amt.activity_id = '{operation_id}' and amt.code = '{code}'"
@@ -1419,9 +1431,101 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             #? Fatching the description
             description = desc_df['description'].tolist()[0]
             
-            logging.info("data preprocessing : CleaningClass : get_activity_desc : execution stop")
+            logging.info("data preprocessing : PreprocessingClass : get_activity_desc : execution stop")
             
             return description
         except Exception as e:
-            logging.error(f"data preprocessing : CleaningClass : get_activity_desc : execution failed : {str(e)}")
+            logging.error(f"data preprocessing : PreprocessingClass : get_activity_desc : execution failed : {str(e)}")
             return str(e)
+
+    def check_cleanup_status(self,DBObject,connection,project_id):
+        """
+        Function will check cleanup / modeling operation has been done for the particular Dag Id.If any of the operation
+        is performed then it will return True else return False.
+
+        Args:
+            DBObject[(object)]   : [DB class object] 
+            connection[(Object)] : [Database connection string]
+            project_id[(String)] : [Id of the project]
+
+        Return :
+            [Boolean] : [return True if any operation performed else  False]
+        """
+        try:
+            logging.info("data preprocessing : PreprocessingClass : check_cleanup_status : execution start")
+            
+            #? Getting Dag id
+            
+            dag_id_df = DBObject.get_project_detail(connection,project_id)
+            
+            if not isinstance(dag_id_df,pd.DataFrame): #! Failed to get dag status
+                raise NullValue(500)
+
+            dag_id,model_status = str(dag_id_df['cleanup_dag_id'][0]),int(dag_id_df['model_status'])
+            
+            
+            #Query to get count value of "Success" state based on dag_id.
+            sql_command=f'''select case when count("state") >= 1 then 0 else 1 end as value
+                                from public."task_instance" where dag_id ='{dag_id}' and
+                                task_id like 'Operation%' and  state = 'success' '''
+
+            task_instance_df = DBObject.select_records(connection,sql_command) 
+                
+            #! Failed to get Count status for cleanup id
+            if not isinstance(task_instance_df,pd.DataFrame): 
+                raise NullValue(500)
+                
+            dag_instance_status = int(task_instance_df['value'][0])
+            
+            if dag_instance_status == 0 or model_status != -1 :
+                dag_status = True
+            else:
+                dag_status = False
+
+            logging.info(f"data preprocessing : PreprocessingClass : check_cleanup_status : execution stop :status :{dag_status}")
+
+            return dag_status
+
+        except (NullValue) as exc:
+            logging.error(f"data preprocessing : PreprocessingClass : check_cleanup_status : execution Exception : {str(exc)}")
+            logging.error("data preprocess : PreprocessingClass : check_cleanup_status : " +traceback.format_exc())
+            return str(exc)
+    
+
+    def check_all_dag_status(self,DBObject,connection,project_id,dataset_id,schema_id):
+        """Function will check for status for all the dag.If any of the dag found "running" state it value 
+        will be considered as True otherwise False.
+    
+        Args:
+            DBObject[(object)]   : [DB class object] 
+            connection[(Object)] : [Database connection string]
+            project_id[(String)] : [Id of the project]
+            dataset_id[(String)] : [Id of the dataset]
+            schema_id[(String)]  :  [Id of the schema]
+        
+        Return:
+            [List] : [List of dictonery with each dag value True or False]
+        """
+        try:
+            
+            logging.info(f"data preprocessing : PreprocessingClass : check_all_dag_status : execution start")
+            
+            # Get the cleanup dag status 
+            cleanup_status = self.get_dag_status(DBObject, connection ,project_id)
+            logging.info(str(cleanup_status))
+            # Get the Modeling status
+            model_status = self.get_modelling_status(DBObject,connection,project_id)
+            logging.info(str(model_status))
+            
+            dag_status ={'cleanup_dag' :str(cleanup_status),
+                          'modeling_dag': str(model_status),
+                          'feature_dag' : 'False'}
+            
+            logging.info(f"data preprocessing : PreprocessingClass : check_all_dag_status : execution end")
+            
+            return dag_status
+        except Exception as exc:
+            logging.error(f"data preprocessing : PreprocessingClass : check_all_dag_status : execution Exception : {str(exc)}")
+            logging.error("data preprocess : PreprocessingClass : check_all_dag_status : " +traceback.format_exc())
+            return str(exc) 
+

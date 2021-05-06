@@ -112,12 +112,46 @@ class CommonMethodClass:
             
         """
         logging.info("modeling : CommonMethodClass : actual_vs_prediction_fun : execution start")
+        
         if model_type == 'Regression':
             actual_vs_prediction_df = DataFrame(actual_vs_prediction_json).round(decimals = 3) #Round to the nearest 3 decimals.
+            # Get Original Data
+            original_data_df = self.get_original_data(experiment_id)
+            # Get Target Features
             _,target_features = self.get_unscaled_data(experiment_id) 
-            actual_vs_prediction_df.rename(columns = {target_features[0]:'index',target_features[1]:'price',target_features[1]+'_prediction':'price_prediction'}, inplace = True)
-            actual_vs_prediction_df = actual_vs_prediction_df.sort_values(by='index', ascending=False)
-            actual_vs_prediction_json = actual_vs_prediction_df.to_dict(orient='list')
+            original_data_df = original_data_df.drop(target_features[1],axis=1)
+            
+            original_data_df.rename(columns = {target_features[0]:'index'},inplace = True)
+    
+            actual_vs_prediction_df.rename(columns = {target_features[0]:'index',target_features[1]:'actual',target_features[1]+'_prediction':'prediction'}, inplace = True)
+            
+            # Final df
+            final_df = pd.merge(original_data_df, actual_vs_prediction_df, on="index")
+            
+            final_df = final_df.sort_values(by='index', ascending=False)
+            
+            final_json=final_df.to_dict(orient='list')
+            
+            popup_keys=[]
+            popup_values =[]
+            actual_vs_prediction_json={}
+            for key,value in final_json.items():
+                if key not in ('index','actual','prediction'):
+                    popup_keys.append(key)
+                    popup_values.append(value)
+                else:
+                    actual_vs_prediction_json[key] = value
+                    
+            
+            new_data_json={'popup_keys':popup_keys,'popup_values':popup_values}
+            
+            for key,value in new_data_json.items():
+                actual_vs_prediction_json[key] = value
+                
+              
+            logging.info("final output  =="+str(actual_vs_prediction_json.keys()))  
+            # actual_vs_prediction_df = actual_vs_prediction_df.sort_values(by='index', ascending=False)
+            # actual_vs_prediction_json = actual_vs_prediction_df.to_dict(orient='list')
             
         elif model_type == 'Classification':
             
@@ -167,6 +201,23 @@ class CommonMethodClass:
         logging.info("modeling : CommonMethodClass : actual_vs_prediction_fun : execution end")
         return actual_vs_prediction_json
                 
+                
+    def get_original_data(self,experiment_id):
+        
+        #TODO : Need to add exception
+        sql_command = "select dataset_id,schema_id from mlaas.project_tbl "\
+                      " where project_id in ("\
+                      " select project_id from mlaas.model_experiment_tbl "\
+                      " where experiment_id ="+str(experiment_id) + ")"   
+                      
+        ids_df = self.DBObject.select_records(self.connection, sql_command)
+        
+        dataset_id,schema_id = ids_df['dataset_id'][0],ids_df['schema_id'][0] 
+        
+        original_data_df = self.DBObject.get_dataset_df(self.connection, dataset_id, schema_id)
+         
+        return original_data_df
+        
         
     def get_unscaled_data(self,experiment_id):
         """This function is used to get unscaled_data of particular experiment.
@@ -199,11 +250,7 @@ class CommonMethodClass:
             unscaled_df=pd.DataFrame(unscaled_arr,columns=target_features)
         
             unscaled_df.rename(columns = {target_features[0]:'seq_id',target_features[1]:target_features[1]+'_str'}, inplace = True)
-            
-            
-            logging.info("arr =="+str(unscaled_df))
-            logging.info("arr =="+str(target_features))
-            
+              
             logging.info("modeling : CommonMethodClass : get_unscaled_data : execution end")
             return unscaled_df,target_features
 

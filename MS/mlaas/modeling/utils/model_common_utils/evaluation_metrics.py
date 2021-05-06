@@ -84,10 +84,10 @@ class EvaluationMetrics:
             ## Precision e Recall
             recall = metrics.recall_score(actual_lst, prediction_lst, pos_label='positive',average='micro')
             precision = metrics.precision_score(actual_lst, prediction_lst, pos_label='positive',average='micro')
-            print("PRED LIST_---------------------", prediction_lst[:10])
-            print("ACTUALLL LIST_---------------------", actual_lst[:10])
+            
+            
             f1_score = metrics.f1_score(actual_lst, prediction_lst, pos_label='positive',average='micro')
-            print("F1SCORE-------------------------------------------------------", f1_score) 
+            
             
             return round(accuracy,2),round(recall,2),round(precision,2), f1_score
         
@@ -223,3 +223,29 @@ class EvaluationMetrics:
 
         return {'PDP_Scores': pdp_values, 'classes':classes, 'input_features':input_features_list, 'target_features': target_features_list, 'index':data_index}
         
+    
+    
+    def model_summary(self,dataset_split_dict):
+        
+        model_summary = {
+                            "Model Name":dataset_split_dict['model_name'],
+                            
+                            "Input Features":dataset_split_dict['input_features_list'],
+                            "Target Features":dataset_split_dict['target_features_list'],
+                            
+                            "Scaling Type":dataset_split_dict['scaling_type'],
+                            "Split Method":dataset_split_dict['split_method'],
+                            
+                            "Train Size":float(dataset_split_dict['train_size']),
+                            "Valid Size":float(dataset_split_dict['valid_size']),
+                            "Test Size":float(dataset_split_dict['test_size']),
+                            
+                            "Train Split":float( 1 - (dataset_split_dict['test_ratio'] + dataset_split_dict['valid_ratio']) ),
+                            "Valid Split":float(dataset_split_dict['valid_ratio']),
+                            "Test Split":float(dataset_split_dict['test_ratio']),
+                            
+                            "Random State":int(dataset_split_dict['random_state']),
+                            "CV (K-Fold )":dataset_split_dict['cv']
+                         }
+        
+        return model_summary

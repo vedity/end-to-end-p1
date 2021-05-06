@@ -1,28 +1,8 @@
-.module-main {
-    position: relative;
-}
-
-.tab-menu {
-    position: absolute;
-    right: 15px;
-    top: -12px;
-}
-
 .Target-selected {
     background: #4c546c !important;
     td:first-child {
         color: #fff;
     }
-}
-
-.nav-pills .nav-link {
-    border-radius: 0 !important;
-    padding: 0.5rem 0.8rem !important;
-    border-right: 1px solid #32394e;
-}
-
-.nav {
-    border: 1px solid #32394e;
 }
 
 table {
@@ -59,24 +39,10 @@ th.no-sort {
     right: 20px !important
 }
 
-.page-title-box {
-    span {
-        position: absolute;
-        top: 20px;
-    }
-}
-
 .schema-auto {
     position: absolute;
-    right: 230px;
-    top: -4px;
-}
-
-.page-title-box {
-    span {
-        position: absolute;
-        top: 20px;
-    }
+    right: 240px;
+    top: -50px;
 }
 
 .schema-box {
@@ -139,4 +105,11 @@ th.no-sort {
     width: calc(100% - 30px);
     display: inline-block;
     margin-right: 10px;
+}
+
+.feature-section-name {
+    position: absolute;
+    right: 68px;
+    top: 18px;
+    color: #34c38f;
 }

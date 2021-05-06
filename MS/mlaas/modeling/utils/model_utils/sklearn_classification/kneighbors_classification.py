@@ -18,7 +18,7 @@ import shap
 from modeling.utils.model_common_utils.evaluation_metrics import EvaluationMetrics as EM
 from modeling.utils.model_common_utils.mlflow_artifacts import MLFlowLogs 
 from common.utils.exception_handler.python_exception.modeling.modeling_exception import *
-
+from modeling.utils.model_utils.function_calls import classification_func_call
 from sklearn.neighbors import KNeighborsClassifier  
 from sklearn.model_selection import learning_curve
 from sklearn.preprocessing import LabelEncoder
@@ -49,6 +49,8 @@ class KNeighborsClassificationClass:
         self.y_train = y_train
         self.y_test = y_test
         self.y_valid = y_valid
+        
+        self.hyperparameters = hyperparameters
 
         self.n_neighbors = int(hyperparameters['n_neighbors'])
         self.metric = hyperparameters['metric']
@@ -186,29 +188,19 @@ class KNeighborsClassificationClass:
         return actual_flat_lst,prediction_flat_lst
 
         
-    def model_summary(self): # TODO Add model hyperparameters.
+    def model_summary(self):
         
         """This function is used to get model summary.
 
         Returns:
             [dict]: [it will return model summary.]
         """
-
-        train_size = self.X_train.shape[0]
-        test_size = self.X_test.shape[0]
+        summary_dict = self.dataset_split_dict
+        summary_dict['model_name']=self.hyperparameters['model_name']
+        summary_dict['input_features_list']=self.input_features_list
+        summary_dict['target_features_list']=self.target_features_list
         
-        model_summary = {"Model Name":"KNeighbors_Classifier",
-                         "N_Neighbors": self.n_neighbors, 
-                         "Metric": self.metric,
-                         "Algorithm": self.algorithm,
-                         "Input Features":self.input_features_list,
-                         "Target Features":self.target_features_list,
-                         "Train Size":float(train_size),"Test Size":int(test_size),
-                         "Train Split":1-(self.dataset_split_dict['test_ratio'] + self.dataset_split_dict['valid_ratio']),
-                         "Test Split":float(self.dataset_split_dict['test_ratio']),
-                         "Random State":int(self.dataset_split_dict['random_state']),
-                         "Valid Split":self.dataset_split_dict['valid_ratio'],
-                         "CV (K-Fold )":self.dataset_split_dict['cv']}
+        model_summary = self.EvalMetricsObj.model_summary(summary_dict)
         
         
         return model_summary
@@ -320,3 +312,4 @@ class KNeighborsClassificationClass:
         except:
             
             raise ModelFailed(func_code)
+        # classification_func_call(self)

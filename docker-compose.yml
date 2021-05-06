@@ -1,89 +1,150 @@
-version: '3.7'
+version: '3'
+x-airflow-common:
+  &airflow-common
+  build: './airflow'
+  
+  environment:
+    &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+    AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
+    AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
+    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'false'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__API__AUTH_BACKEND: 'airflow.api.auth.backend.basic_auth'
+  volumes:
+    - ./MS/mlaas:/opt/airflow/dags
+    - ./MS/mlaas/logs:/opt/airflow/logs
+    - ./MS/mlaas/mlruns:/opt/airflow/mlruns
+  user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
+  depends_on:
+    redis:
+      condition: service_healthy
+    postgres:
+      condition: service_healthy
+
 services:
+  postgres:
+    build: './DB'
+    hostname: postgresql
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      retries: 5
+    restart: always
 
-    postgres:                                           # create postgres container
-        build: ./DB
-        hostname: postgresql
-        container_name: postgres_container
-        volumes:
-            - postgres_data:/var/lib/postgresql/data/
-            # - postgresql.conf:/var/lib/postgresql/data/postgresql.conf
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 30s
+      retries: 50
+    restart: always
 
-        # command: "-c 'config_file=/etc/postgres/postgresql.conf'"
-        # command:
-        #     - "postgres"
-        #     - "-c"
-        #     - "shared_buffers=1793GB"
-        
-       
-        ports:
-            - "5432:5432"
-        environment:
-            - POSTGRES_USER=airflow
-            - POSTGRES_PASSWORD=airflow
-            - POSTGRES_DB=airflow
+  airflow-webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - 8080:8080
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    restart: always
 
-    airflow:                                            # create airflow container
-        build: './airflow'                       # construct the container along the Dockerfile in this folder
-        container_name: airflow_container
-        restart: always
-        depends_on:
-            - postgres           
-        environment:
-            - LOAD_EX=n
-            - EXECUTOR=Local
-        user: "0:0"
-        volumes:                                        # mount the following local folders
-            - ./MS/mlaas:/usr/local/airflow/dags
-            - ./MS/mlaas/mlruns:/usr/local/airflow/mlruns
-        ports:
-            - "8080:8080"                               # expose port
-        command: webserver
-        healthcheck:
-            test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
-            interval: 30s
-            timeout: 30s
-            retries: 3
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+    restart: always
 
-    web:                                             # create a MLFlow container
-        build: './MS' 
-        container_name: ms_container
-        #command: bash -c "mlflow server --backend-store-uri ./mlflow --host 0.0.0.0 --port 5400 && python manage.py runserver 0.0.0.0:8000" # construct the container along the Dockerfile in this folder
-        command: python manage.py runserver 0.0.0.0:8000 
-        volumes: 
-            - "./MS/mlaas:/mlaas"
-        ports:
-            #- "5400:5400" 
-            - "8000:8000"
-        links:
-            - postgres
-        depends_on:
-            - mlflow
-            - airflow
+  airflow-worker:
+    <<: *airflow-common
+    command: celery worker
+    restart: always
 
-    mlflow:
-        build: './MS'
-        #command: mlflow server --backend-store-uri ./mlflow --host 0.0.0.0 --port 5400
-        command: mlflow server --backend-store-uri postgresql://airflow:airflow@postgresql:5432/airflow?options=-csearch_path%3Ddbo,mlflow --default-artifact-root file:///mlaas/mlruns --host 0.0.0.0 --port 5400
-        volumes: 
-            - "./MS/mlaas:/mlaas"
-        ports:
-            - "5400:5400"
-        links:
-            - postgres
-        depends_on:
-            - postgres
+  airflow-init:
+    <<: *airflow-common
+    command: version
+    environment:
+      <<: *airflow-common-env
+      _AIRFLOW_DB_UPGRADE: 'true'
+      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
+      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
 
-    angular:
-        build: './Web'
-        ports:
-        - "4200:4200"
-        volumes: 
-        - "/app/node_modules"
-        - "./Web:/app"
-        depends_on:
-        - web
+  # flower:
+  #   <<: *airflow-common
+  #   command: celery flower
+  #   ports:
+  #     - 5555:5555
+  #   healthcheck:
+  #     test: ["CMD", "curl", "--fail", "http://localhost:5555/"]
+  #     interval: 10s
+  #     timeout: 10s
+  #     retries: 5
+  #   restart: always
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    hostname: mongodb
+    volumes:
+        - ./mongodb/data/:/data/db
+    ports:
+        - 27017:27017
+    
+ 
+  web:                                             # create a MLFlow container
+    build: './MS' 
+    container_name: ms_container
+    #command: bash -c "mlflow server --backend-store-uri ./mlflow --host 0.0.0.0 --port 5400 && python manage.py runserver 0.0.0.0:8000" # construct the container along the Dockerfile in this folder
+    command: python manage.py runserver 0.0.0.0:8000 
+    volumes: 
+        - "./MS/mlaas:/mlaas"
+    ports:
+        #- "5400:5400" 
+        - "8000:8000"
+    links:
+        - postgres
+    depends_on:
+        - mlflow
+
+  mlflow:
+      build: './MS'
+      #command: mlflow server --backend-store-uri ./mlflow --host 0.0.0.0 --port 5400
+      command: mlflow server --backend-store-uri postgresql://airflow:airflow@postgresql:5432/airflow?options=-csearch_path%3Ddbo,mlflow --default-artifact-root file:///mlaas/mlruns --host 0.0.0.0 --port 5400
+      volumes: 
+          - "./MS/mlaas:/mlaas"
+      ports:
+          - "5400:5400"
+      links:
+          - postgres
+      depends_on:
+          - postgres
+
+  angular:
+      build: './Web'
+      ports:
+      - "4200:4200"
+      volumes: 
+      - "/app/node_modules"
+      - "./Web:/app"
+      depends_on:
+      - web
 
 volumes:
-    postgres_data:
-    # postgresql.conf:
+  postgres-db-volume:
+  data:

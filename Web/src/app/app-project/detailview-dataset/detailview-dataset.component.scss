@@ -7,23 +7,6 @@
     display: block !important;
 }
 
-.tab-menu {
-    display: inline-block;
-    margin-right: 20px;
-}
-
-.nav {
-    border: 1px solid #32394e;
-    li {
-        a {
-            border-radius: 0;
-            span {
-                display: inline-block !important;
-            }
-        }
-    }
-}
-
 .project-card {
     border: 1px solid #32394e;
     min-height: 1px;
@@ -60,12 +43,4 @@
 .main-row {
     height: calc(100vh - 420px);
     overflow-y: auto;
-}
-
-.icon-box {
-    a {
-        margin-right: 7px;
-        font-size: 20px;
-        display: inline-block;
-    }
 }

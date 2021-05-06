@@ -435,11 +435,16 @@ export class ModelingTypeComponent implements OnInit {
   modeltitle: any;
   current_experiment_id: any;
   current_model_type: any;
+  itemstatus:any;
   extraLarge(exlargeModal: any, obj) {
     this.modeltitle = obj.experiment_name;
     this.current_experiment_id = obj.experiment_id;
     this.current_model_type = obj.model_type;
+    this.itemstatus=obj.status;
+    if(this.itemstatus=="success")
     this.modalService.open(exlargeModal, { size: 'xl', windowClass: 'modal-holder', centered: true });
+    if(this.itemstatus=="failed")
+    this.modalService.open(exlargeModal, { size: 'sm', windowClass: 'modal-holder', centered: true });
   };
 
   checkexperimentname(event) {

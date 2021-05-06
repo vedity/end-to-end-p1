@@ -127,12 +127,12 @@ class StartModelClass(APIView):
                         experiment_desc ='this is for testing'
 
                         #will store created experiment activity in activity_detail_tbl
-                        activity_id = 41
+                        activity_id = 'md_41'
                         timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
                         
 
                         #will store started experiment activity in activity_detail_tbl
-                        activity_id = 45
+                        activity_id = 'md_45'
                         timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
                         
                         ModelObject = ModelClass(db_param_dict)# Initializing the ModelClass
@@ -148,7 +148,7 @@ class StartModelClass(APIView):
 
                                 if model_mode == 'Auto':
                                         #will add 'Selected Auto modeling' activity in activity_detail_tbl 
-                                        activity_id = 42
+                                        activity_id = 'md_42'
                                         timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
 
                                         result = ModelObject.algorithm_identifier(basic_params_dict)
@@ -165,10 +165,10 @@ class StartModelClass(APIView):
                                         #will add 'selected manual modeling' activity in activity_detail_tbl
                                         model_id = int(request.query_params.get('model_id'))
                                         model_name = request.query_params.get('model_name') #ASK
-                                        activity_id = 43
+                                        activity_id = 'md_43'
                                         timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
 
-                                        activity_id = 44
+                                        activity_id = 'md_44'
                                         timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name,model_name)
 
                                         data = json.dumps(request.data)
@@ -554,11 +554,11 @@ class CheckModelStatusClass(APIView):
 
                                 if(status == 'success'):
                                         #will add 'Completed modeling' activity in activity_detail_tbl
-                                        activity_id = 47
+                                        activity_id = 'md_47'
                                         timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
                                 elif(status == 'failed'):
                                         logging.info('LOG FOR Failed status----------------------------------')
-                                        activity_id = 48
+                                        activity_id = 'md_48'
                                         timeline_Obj.user_activity(activity_id,experiment_name,project_id,dataset_id,user_name)
                                         
                                 logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code : 200")

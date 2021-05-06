@@ -21,7 +21,14 @@ from .utils.logger_handler import custom_logger as cl
 from .utils.json_format.json_formater import *
 from .utils.activity_timeline import *
 from .utils.activity_timeline import activity_timeline
+from .utils.dynamic_dag import dag_utils
 
+
+import pymongo
+import gridfs
+from pymongo import MongoClient
+import os
+from io import BytesIO
 
 user_name = 'admin'
 log_enable = True
@@ -33,6 +40,36 @@ DBObject=db.DBClass()     #Get DBClass object
 connection,connection_string=DBObject.database_connection(database,user,password,host,port) #Create Connection with postgres Database which will return connection object,conection_string(For Data Retrival)
 timeline_Obj=activity_timeline.ActivityTimelineClass(database,user,password,host,port) #initialize ActivityTimeline Class
 json_obj = JsonFormatClass() #initialize JsonFormat Class
+dag_obj = dag_utils.DagUtilsClass()
+
+
+
+
+class TestMongoClass(APIView):
+        def post(self,request,format=None):
+                
+                try:
+                        myclient = pymongo.MongoClient('mongodb://mongodb:27017/')
+                        db=myclient.grid_file1
+                        filename=request.POST.get('filename')
+                        file=request.FILES['csvfile']
+                        data=file.read()
+                        fs=gridfs.GridFS(db)
+                        fs.put(data,filename =filename)
+                        #Upload completed
+                         
+                        data=db.fs.files.find_one({'filename':filename})
+                        my_id=data['_id']
+                        logger.info("ids"+str(my_id))
+                        outputdata=fs.get(my_id).read()
+                       
+                        logger.info("outputdata=="+str(type(outputdata)))
+                        logger.info("outputdata=="+str(outputdata))
+                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":"Successfull retrival"})  
+                except Exception as e:
+                        logging.error("Common  : LogFileClass : GET Method : Exception :" + str(e))
+                        logging.error("Common  : LogFileClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
 
 class UserLoginClass(APIView):
         
@@ -253,5 +290,17 @@ class LogFileClass(APIView):
                         logging.error("Common  : LogFileClass : GET Method : Exception :" + str(e))
                         logging.error("Common  : LogFileClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+
+class DagInfoClass(APIView):
+        def get(self,request,format=None):
+                try:
+                        status = dag_obj.add_dag_to_table(connection)
+
+                        return Response({"status_code":"200","error_msg":"Successfull retrival","response":status})  
+                except Exception as e:
+                        logging.error("Common  : LogFileClass : GET Method : Exception :" + str(e))
+                        logging.error("Common  : LogFileClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+
 
 

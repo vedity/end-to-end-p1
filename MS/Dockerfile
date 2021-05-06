@@ -5,3 +5,4 @@ RUN wget https://jdbc.postgresql.org/download/postgresql-42.2.6.jar
 ENV SPARK_CLASSPATH=/opt/spark/postgresql-42.2.6.jar
 COPY mlaas /mlaas
 WORKDIR /mlaas
+# CMD [python,'common/utils/dynamic_dag/dag_creator.py']

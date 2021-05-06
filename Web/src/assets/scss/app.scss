@@ -428,3 +428,19 @@ table.dataTable thead td {
         }
     }
 }
+
+.apexcharts-tooltip:hover {
+    pointer-events: all !important;
+    opacity: 1 !important;
+}
+
+.apexcharts-tooltip {
+    pointer-events: all !important;
+    cursor: pointer !important;
+    //opacity: 1 !important;
+}
+
+.apex-scroll {
+    height: 200px !important;
+    overflow: scroll !important;
+}

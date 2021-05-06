@@ -19,6 +19,8 @@ from modeling.utils.model_common_utils.evaluation_metrics import EvaluationMetri
 from modeling.utils.model_common_utils.mlflow_artifacts import MLFlowLogs 
 from common.utils.exception_handler.python_exception.modeling.modeling_exception import *
 
+from modeling.utils.model_utils.function_calls import regression_func_call
+
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.model_selection import learning_curve
 from sklearn.preprocessing import LabelEncoder
@@ -49,6 +51,8 @@ class DecisionTreeRegressionClass:
         self.y_train = y_train
         self.y_test = y_test
         self.y_valid = y_valid
+        
+        self.hyperparameters = hyperparameters
 
         self.criterion = hyperparameters['criterion']
         self.max_features = hyperparameters['max_features']
@@ -199,24 +203,12 @@ class DecisionTreeRegressionClass:
         Returns:
             [dict]: [it will return model summary.]
         """
-
-        train_size = self.X_train.shape[0]
-        test_size = self.X_test.shape[0]
+        summary_dict = self.dataset_split_dict
+        summary_dict['model_name']=self.hyperparameters['model_name']
+        summary_dict['input_features_list']=self.input_features_list
+        summary_dict['target_features_list']=self.target_features_list
         
-        model_summary = {"Model Name":"DecisionTree_Regression",
-                         "Criterion": self.criterion,
-                         "Max Depth": self.max_depth,
-                         "Max Features": self.max_features,
-                         "Minimum Impurity Decrease": self.min_impurity_decrease,
-                         "Minimum Samples Leaf": self.min_samples_leaf,
-                         "Input Features":self.input_features_list,
-                         "Target Features":self.target_features_list,
-                         "Train Size":float(train_size),"Test Size":int(test_size),
-                         "Train Split":1-(self.dataset_split_dict['test_ratio'] + self.dataset_split_dict['valid_ratio']),
-                         "Test Split":float(self.dataset_split_dict['test_ratio']),
-                         "Random State":int(self.dataset_split_dict['random_state']),
-                         "Valid Split":self.dataset_split_dict['valid_ratio'],
-                         "CV (K-Fold )":self.dataset_split_dict['cv']}
+        model_summary = self.EvalMetricsObj.model_summary(summary_dict)
         
         
         return model_summary
@@ -251,60 +243,6 @@ class DecisionTreeRegressionClass:
         
         """This function is used as a pipeline which will execute function in a sequence.
         """
-        try :
-            func_code = "M01"
-            # train the model
-            model = self.train_model()
+        regression_func_call(self)
             
-            func_code = "M02"
-            # get features importance
-            features_impact_dict = self.features_importance(model) 
-            
-            func_code = "M03"
-            # get actual and predicted values 
-            actual_lst,prediction_lst = self.get_actual_prediction(model)
-            
-            func_code = "M04"
-            # save prediction
-            final_result_dict = self.EvalMetricsObj.save_prediction(self.y_test, prediction_lst, self.target_features_list)
-            
-            func_code = "M05"
-            # all evaluation matrix
-            r2score,mse,mae,mape = self.EvalMetricsObj.get_evaluation_matrix(actual_lst,prediction_lst, model_type='Regression')  
-            
-            func_code = "M06"
-            # get cv score
-            if self.dataset_split_dict['split_method'] == 'cross_validation':
-                cv_score = self.cv_score(model) # default k-fold with 5 (r2-score)
-            else:
-                cv_score = 0
-              
-            func_code = "M07"  
-            # get holdout score
-            holdout_score = self.EvalMetricsObj.holdout_score(self.y_test, prediction_lst, model_type='Regression') # default 80:20 splits (r2-score)
-            
-            func_code = "M08"
-            # get model summary
-            model_summary = self.model_summary() # high level model summary
-           
-            func_code = "M09"
-            # get model learning curve
-            learning_curve_dict = self.get_learning_curve(model)
-            
-            func_code = "M10"
-            # log mlflow matrix
-            self.MLFlowLogObj.store_model_metrics(r2_score=r2score, mae=mae, mse=mse, mape=mape, 
-                                                holdout_score=holdout_score, cv_score=cv_score)
-
-            # log artifacts (output files)
-            self.MLFlowLogObj.store_model_dict(learning_curve=learning_curve_dict, features_importance=features_impact_dict,
-                                                model_summary=model_summary, predictions=final_result_dict)
-            # log mlflow parameter
-            self.MLFlowLogObj.store_model_params(self.dataset_split_dict)
-
-            # Store the Machine Learning Model.
-            self.MLFlowLogObj.store_model(model, model_name="Decision_Tree_Regression_Model", model_type='sklearn')
-
-        except:
-            
-            raise ModelFailed(func_code)
+        

@@ -1,19 +1,20 @@
-<ngx-skeleton-loader *ngIf="!responsedata" count="7" [animation]="animation" [theme]="theme">
+<ngx-skeleton-loader *ngIf="!responsedata" count="7 " [animation]="animation " [theme]="theme ">
 </ngx-skeleton-loader>
-<div class="perfomance-metrics {{expandclass}}">
-    <table class="table" *ngIf="responsedata">
+
+<div class="perfomance-metrics {{expandclass}} ">
+    <table class="table " *ngIf="responsedata">
         <thead>
             <tr>
-                <td *ngFor="let item of responsedata.key">{{item}}</td>
+                <td *ngFor="let item of responsedata.key ">{{item}}</td>
 
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td *ngFor="let item of responsedata.value">{{item}}</td>
+                <td *ngFor="let item of responsedata.value ">{{item}}</td>
                 <!-- <td>{{responsedata.model_name}}</td>
             <td>{{responsedata.exp_created_on | date}}</td>
-            <td>{{responsedata.value["r2 score"] | number}}</td>
+            <td>{{responsedata.value["r2 score "] | number}}</td>
             <td>{{responsedata.value.mse | number}}</td>
             <td>-</td>
             <td>{{responsedata.value.mae | number}}</td>
@@ -21,20 +22,25 @@
             </tr>
         </tbody>
     </table>
-    <div class="main">
-        <div class="left-box">
-            <h4>Confusion Matrix</h4> <a href="javascript:void(0);" class="left-expand" (click)="expandclass==''?expandclass='left-expand':expandclass=''"><i class="bx bx-expand "></i></a>
-            <div id="chart">
-                <apx-chart [series]="chartOptions.series" [plotOptions]="chartOptions.plotOptions" [chart]="chartOptions.chart" [dataLabels]="chartOptions.dataLabels" [title]="chartOptions.title">
+    <div class="main " *ngIf="responsedata">
+        <div class="left-box " *ngIf="chartOptions">
+            <div *ngIf="model_type=='Classification'">
+                <h4>Confusion Matrix</h4> <a href="javascript:void(0); " class="left-expand " (click)="allowExpand( 'left') "><i class="bx bx-expand "></i></a>
+                <div id="chart ">
+                    <apx-chart [series]="chartOptions.series " [yaxis]="chartOptions.yaxis" [xaxis]="chartOptions.xaxis" [legend]="chartOptions.legend" [plotOptions]="chartOptions.plotOptions " [chart]="chartOptions.chart " [dataLabels]="chartOptions.dataLabels " [title]="chartOptions.title ">
+                    </apx-chart>
+                </div>
+            </div>
+        </div>
+        <div class="right-box " *ngIf="lineColumAreaChart">
+            <div *ngIf="model_type=='Classification'">
+                <h4>ROC curve</h4> <a href="javascript:void(0); " class="right-expand " (click)="allowExpand( 'right') "><i
+                        class="bx bx-expand "></i></a>
+                <apx-chart class="apex-charts " dir="ltr " [series]="lineColumAreaChart.series " [chart]="lineColumAreaChart.chart " [tooltip]="lineColumAreaChart.tooltip " [yaxis]="lineColumAreaChart.yaxis " [legend]="lineColumAreaChart.legend " [plotOptions]="lineColumAreaChart.plotOptions "
+                    [grid]="lineColumAreaChart.grid " [stroke]="lineColumAreaChart.stroke " [xaxis]="lineColumAreaChart.xaxis " [colors]="lineColumAreaChart.colors " [fill]="lineColumAreaChart.fill
+    " [labels]="lineColumAreaChart.labels " [markers]="lineColumAreaChart.markers ">
                 </apx-chart>
             </div>
-
-        </div>
-        <div class="right-box">
-            <h4>ROC curve</h4> <a href="javascript:void(0);" class="right-expand" (click)="expandclass==''?expandclass='right-expand':expandclass=''"><i class="bx bx-expand "></i></a>
-            <apx-chart *ngIf="responsedata" class="apex-charts" dir="ltr" [series]="lineColumAreaChart.series" [chart]="lineColumAreaChart.chart" [tooltip]="lineColumAreaChart.tooltip" [yaxis]="lineColumAreaChart.yaxis" [legend]="lineColumAreaChart.legend" [plotOptions]="lineColumAreaChart.plotOptions"
-                [grid]="lineColumAreaChart.grid" [stroke]="lineColumAreaChart.stroke" [xaxis]="lineColumAreaChart.xaxis" [colors]="lineColumAreaChart.colors" [fill]="lineColumAreaChart.fill" [labels]="lineColumAreaChart.labels" [markers]="lineColumAreaChart.markers">
-            </apx-chart>
         </div>
     </div>
 
