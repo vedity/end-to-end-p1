@@ -18,4 +18,7 @@ urlpatterns = [
     #url to get dag details
     path('mlaas/common/daginfo/',DagInfoClass.as_view()),
 
+    
+    path('mlaas/common/test/',TestMongoClass.as_view()),
+
 ]

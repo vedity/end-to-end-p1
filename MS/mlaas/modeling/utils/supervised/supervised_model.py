@@ -18,9 +18,13 @@ import logging
 import requests
 import time
 
+from requests.auth import HTTPBasicAuth
+
+
 # Imports Common Class Files.
-from .regression.regression_model import RegressionClass as RC
-from .classification.classification_model import ProbabilisticClass as PC
+
+from modeling.utils.supervised.regression.regression_model import RegressionClass as RC
+from modeling.utils.supervised.classification.classification_model import ProbabilisticClass as PC
 from common.utils.logger_handler import custom_logger as cl
 from modeling.algorithm_detector import AlgorithmDetector
 from modeling.split_data import SplitData
@@ -119,7 +123,7 @@ class SupervisedClass(RC,PC):
             
             json_data = {'conf':'{"basic_params_dict":"'+str(basic_params_dict)+'","master_dict":"'+str(master_dict)+'"}'}
             logging.info("json data :"+str(json_data))
-            result = requests.post(f"http://airflow:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False)#owner
+            result = requests.post(f"http://airflow-webserver:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False,auth= HTTPBasicAuth('airflow','airflow'))#owner
 
 
             logging.info("dag run result: "+str(result))
