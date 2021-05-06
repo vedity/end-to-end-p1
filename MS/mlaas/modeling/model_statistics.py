@@ -202,22 +202,22 @@ class ModelStatisticsClass:
             experiment_id (int): ID of the experiment.
         """
         logging.info("modeling : ModelStatisticsClass : show_roc_curve : Exception Start" )
-        unscaled_df,target_features = cmobj.get_unscaled_data(experiment_id)
+        # unscaled_df,target_features = cmobj.get_unscaled_data(experiment_id)
         str1 = '/roc_scores.json'
         artifact_uri = cmobj.get_artifact_uri(experiment_id,str1)#will get artifact_uri for particular experiment
         roc_scores = cmobj.get_json(artifact_uri)# will get json data from particular artifact_uri location
         
-        classes = np.unique(unscaled_df[target_features[1]+'_str']).tolist()
+        # classes = np.unique(unscaled_df[target_features[1]+'_str']).tolist()
 
-        final_dict = dict()
-        for key in roc_scores.keys():
-            data_dict = roc_scores[key]
-            new_dict = dict(zip(classes, list(data_dict.values())))
-            final_dict[key] = new_dict
+        # final_dict = dict()
+        # for key in roc_scores.keys():
+        #     data_dict = roc_scores[key]
+        #     new_dict = dict(zip(classes, list(data_dict.values())))
+        #     final_dict[key] = new_dict
         
-        final_dict['classes'] = classes
+        # final_dict['classes'] = classes
         
-        return final_dict
+        return roc_scores
 
 
     def performance_metrics(self, experiment_id):
@@ -359,26 +359,24 @@ class ModelStatisticsClass:
             return exc.msg
         
 
-    def refresh_modeling(self, project_id):
-        sql_command = "select dag_state from mlaas.model_dags_tbl where project_id="+str(project_id)+" order by execution_date limit 1"
-        state_df = self.DBObject.select_records(self.connection, sql_command)
-        if state_df is None:
+    def refresh_modeling(self, project_id, dataset_id):
+        sql_command = "select dag_state,exp_name from mlaas.model_dags_tbl where project_id="+str(project_id)+" and dataset_id="+str(dataset_id)+""\
+        "order by execution_date limit 1"
+        model_dag_df = self.DBObject.select_records(self.connection, sql_command)
+        if model_dag_df is None:
             raise DatabaseConnectionFailed(500)
 
-        if len(state_df) == 0 :
+        if len(model_dag_df) == 0 :
             raise DataNotFound(500)
 
-        state = state_df['dag_state'][0]
+        state = model_dag_df['dag_state'][0]
         if state == 'running':
-            state = 0
+            exp_name = model_dag_df['exp_name'][0]
         
-        if state == 'success':
-            state = 1
-
-        if state == 'failed':
-            state = 2
+        else:
+            exp_name = ''
         
-        return state
+        return {'exp_name': exp_name}
 
 
     def check_model_status(self,project_id,experiment_name=None):
@@ -676,3 +674,48 @@ class ModelStatisticsClass:
             logging.error("modeling : ModelStatisticsClass : compare_experiments_graph : " +traceback.format_exc())
             return exc.msg
         
+
+    def show_partial_dependence_plot(self, project_id, experiment_id, feature, sclass=None):
+        """Returns the neccesary output required to plot the partial dependency plot.
+
+        Args:
+            experiment_id (int): ID of the Experiment
+            feature (string): Input feature.
+        """
+        logging.info("modeling : ModelStatisticsClass : show_partial_dependence_plot : Exception Start" )
+        str1 = '/pdp_scores.json'
+        artifact_uri = cmobj.get_artifact_uri(experiment_id,str1)#will get artifact_uri for particular experiment
+        pdp_dict = cmobj.get_json(artifact_uri)# will get json data from particular artifact_uri location
+        sql_command = "select dataset_id from mlaas.model_experiment_tbl where experiment_id="+str(experiment_id)
+        dataset_id_df = self.DBObject.select_records(self.connection, sql_command)
+        if dataset_id_df is None:
+            raise DatabaseConnectionFailed(500)
+
+        if len(dataset_id_df) == 0 :
+            raise DataNotFound(500)
+
+        dataset_id = int(dataset_id_df['dataset_id'][0])
+        
+        unscaled_data = self.DBObject.get_dataset_df(self.connection, dataset_id=dataset_id)
+        feature_data = np.array(unscaled_data[feature])
+        index = np.array(pdp_dict['index']).astype(np.int)
+        logging.info("INDEX--------------------"+str(index))
+        feature_data = feature_data[index]
+        # if issubclass(feature_data[0].dtype.type, np.integer) or issubclass(feature_data[0].dtype.type, np.floating):
+        feature_values = []
+        if isinstance(feature_data[0], int) or isinstance(feature_data[0], float):
+            unique_values = np.unique(feature_data)
+            fmin = min(unique_values)
+            fmax = max(unique_values)
+            n_uniques = len(unique_values)
+            feature_values = np.linspace(fmin, fmax, min(100, n_uniques))
+        
+        pdp_values = pdp_dict['PDP_Scores']
+        target_feature = pdp_dict['target_features']
+
+
+        # if (pdp_dict['classes'] == None) or (len(pdp_dict['classes']) == 2):
+        #     pdp_values = pdp_dict['PDP_Scores'][feature][0]
+        return {'pdp_values':pdp_values, 'feature_values':feature_values, 'target_feature':target_feature, 'classes':pdp_dict['classes']}
+        
+        logging.info("modeling : ModelStatisticsClass : show_partial_dependence_plot : Exception End" )

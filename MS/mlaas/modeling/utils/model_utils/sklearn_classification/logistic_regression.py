@@ -279,11 +279,11 @@ class LogisticRegressionClass:
 
             func_code = "M13"
             # Get ROC Curve values for each class
-            roc_scores = self.EvalMetricsObj.get_performance_curve('roc_curve', model, y_pred_prob, self.y_test)
+            roc_scores = self.EvalMetricsObj.get_performance_curve('roc_curve', model, y_pred_prob, self.y_test, self.dataset_split_dict)
 
             func_code = "M14"
             # Get Precision Recall Values for each class
-            precision_recall_scores = self.EvalMetricsObj.get_performance_curve('precision_recall_curve', model, y_pred_prob, self.y_test)
+            precision_recall_scores = self.EvalMetricsObj.get_performance_curve('precision_recall_curve', model, y_pred_prob, self.y_test, self.dataset_split_dict)
             
 
             func_code = "M10"

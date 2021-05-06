@@ -42,7 +42,7 @@ class KNeighborsClassificationClass:
         # list of target features (features to be predicted)
         self.target_features_list = target_features_list[1:]
         self.dataset_split_dict = scaled_split_dict # This object stores the variables used to split the data.  
-       
+        
         self.X_train = X_train 
         self.X_test = X_test
         self.X_valid = X_valid
@@ -293,12 +293,13 @@ class KNeighborsClassificationClass:
 
             func_code = "M13"
             # Get ROC Curve values for each class
-            roc_scores = self.EvalMetricsObj.get_performance_curve('roc_curve', model, y_pred_prob, self.y_test)
+            roc_scores = self.EvalMetricsObj.get_performance_curve('roc_curve', model, y_pred_prob, self.y_test, self.dataset_split_dict)
 
             func_code = "M14"
             # Get Precision Recall Values for each class
-            precision_recall_scores = self.EvalMetricsObj.get_performance_curve('precision_recall_curve', model, y_pred_prob, self.y_test)
+            precision_recall_scores = self.EvalMetricsObj.get_performance_curve('precision_recall_curve', model, y_pred_prob, self.y_test, self.dataset_split_dict)
             
+            pdp_scores = self.EvalMetricsObj.get_partial_dependence_scores(model, self.X_train, self.input_features_list, self.target_features_list, self.dataset_split_dict)
 
             func_code = "M10"
             # log mlflow matrix
@@ -308,7 +309,7 @@ class KNeighborsClassificationClass:
             # log artifacts (output files)
             self.MLFlowLogObj.store_model_dict(learning_curve=learning_curve_dict, features_importance=features_impact_dict,
                                                 model_summary=model_summary, predictions=final_result_dict,confusion_matrix=confusion_matrix_dict,
-                                                roc_scores=roc_scores, precision_recall_scores=precision_recall_scores)
+                                                roc_scores=roc_scores, precision_recall_scores=precision_recall_scores, pdp_scores=pdp_scores)
 
             # log mlflow parameter
             self.MLFlowLogObj.store_model_params(self.dataset_split_dict)

@@ -14,6 +14,7 @@ import numpy as np
 from sklearn import metrics
 from sklearn.metrics import confusion_matrix, precision_recall_curve, roc_curve
 from sklearn.preprocessing import label_binarize
+from sklearn.inspection import partial_dependence
 
 # Common Class File Imports
 from common.utils.exception_handler.python_exception.common.common_exception import *
@@ -134,33 +135,39 @@ class EvaluationMetrics:
             holdout_score = metrics.r2_score(y_actual, y_pred)
             return holdout_score
 
-    def get_performance_curve(self, curve_name, model, y_pred_prob, y_test):
+    def get_performance_curve(self, curve_name, model, y_pred_prob, y_test, dataset_split_dict):
 
         y_test = y_test[:, -1]
+        classes = dataset_split_dict['classes']
         
         dict1, dict2, dict3 = dict(), dict(), dict()
+        n_classes = len(classes)
 
-        n_classes = len(np.unique(y_test))
         if n_classes > 2:
             
             y_test_encoded = label_binarize(y_test, classes=[*range(n_classes)])
             
-            for i in range(n_classes):
-                dict1[i], dict2[i], dict3[i] = eval(curve_name)(y_test_encoded[:, i], y_pred_prob[:, i])
-                dict1[i] = dict1[i].tolist()
-                dict2[i] = dict2[i].tolist()
-                dict3[i] = dict3[i].tolist()
+            for i, c in enumerate(classes):
+                
+                dict1[c], dict2[c], dict3[c] = eval(curve_name)(y_test_encoded[:, i], y_pred_prob[:, i])
+                dict1[c] = dict1[c].round(3).tolist()
+                dict2[c] = dict2[c].round(3).tolist()
+                dict3[c] = dict3[c].round(3).tolist()
+            
+            final_classes = classes
 
         
         elif n_classes == 2:
-
+            
             arr1, arr2, arr3 = eval(curve_name)(y_test, y_pred_prob)
-            dict1 = {1: arr1.tolist()}
-            dict2 = {1: arr2.tolist()}
-            dict3 = {1: arr3.tolist()}
-        
+            c = classes[1]
+            dict1 = {c: arr1.round(3).tolist()}
+            dict2 = {c: arr2.round(3).tolist()}
+            dict3 = {c: arr3.round(3).tolist()}
+            final_classes = [c]
+
         if curve_name.lower() == 'roc_curve':
-            return {'FPR': dict1, 'TPR': dict2}# FPR is False Positive Rate, TPR is True Positive Rate
+            return {'FPR': dict1, 'TPR': dict2, 'classes':final_classes}# FPR is False Positive Rate, TPR is True Positive Rate
 
         elif curve_name.lower() == 'precision_recall_curve':
             return {'Precision' : dict1, 'Recall': dict2}
@@ -179,3 +186,40 @@ class EvaluationMetrics:
         confusion_matrix_dict = confusion_matrix_df.to_dict()
 
         return confusion_matrix_dict
+
+    
+    def get_partial_dependence_scores(self, model, X_train, input_features_list, target_features_list, dataset_split_dict):
+        """Returns the values needed to plot partial dependence plot.
+
+        Args:
+            model (object): ML estimator
+            X_train (array): input training data
+            y_train (array): target training data
+        """
+        data_ratio = 0.2
+        data_size = int(X_train.shape[0]*data_ratio)
+        data_index = X_train[:data_size, 0].tolist()
+        # X_train = X_train[:, 1:]
+        
+        
+        # np.random.seed(dataset_split_dict['random_state'])
+        # data_size = all_index.shape[0]
+        # index = all_index[np.random.choice(data_size, int(data_size*0.2))].astype(np.int16)
+        # print("INDEX----", index)
+        # print("INDEX TYPE------", type(index))
+        pdp_data = X_train[:data_size, 1:]
+        classes = dataset_split_dict['classes']
+
+        pdp_values = dict()
+        for index, feature in enumerate(input_features_list):
+            grid_resolution=min(100, len(np.unique(pdp_data[:, index])))
+            feature_average = partial_dependence(model, pdp_data, [index], kind='average', percentiles=[0, 1], grid_resolution=grid_resolution)
+            pdp_values[feature] = feature_average['average'][0].round(3).tolist()
+
+        if len(classes) == 2:
+            classes = [classes[1]]
+        if classes == None:
+            classes = []
+
+        return {'PDP_Scores': pdp_values, 'classes':classes, 'input_features':input_features_list, 'target_features': target_features_list, 'index':data_index}
+        
