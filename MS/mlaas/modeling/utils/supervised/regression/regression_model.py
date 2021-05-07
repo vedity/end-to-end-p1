@@ -19,6 +19,8 @@ import mlflow.sklearn
 import uuid 
 import requests
 
+from requests.auth import HTTPBasicAuth
+
 # Imports Common Class Files.
 from common.utils.logger_handler import custom_logger as cl
 
@@ -48,8 +50,8 @@ class RegressionClass:
                 
                 logging.info("modeling : RegressionClass : all_regression_model : execution"+str(json_data))
                 
-                result = requests.post("http://airflow:8080/api/experimental/dags/auto_regression_pipeline/dag_runs",data=json.dumps(json_data),verify=False)#owner
-        
+                result = requests.post("http://airflow-webserver:8080/api/experimental/dags/auto_regression_pipeline/dag_runs",data=json.dumps(json_data),verify=False,auth= HTTPBasicAuth('airflow','airflow'))#owner
+      
             else:
                 print("yet not tested")
                 

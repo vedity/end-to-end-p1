@@ -15,11 +15,11 @@ main_dag_id = "feature_selection_dag"
 dag = DAG(dag_id=main_dag_id,default_args=args,catchup=False,schedule_interval = None,)
 
 # start_task = PythonOperator(task_id='algo_call',python_callable=algo_call,dag=dag)
-start_feature_selection =  PythonOperator(
-    task_id = 'get_possible_algo',
-    python_callable = FS_OBJ.get_possible_fs_algo,
-    dag = dag
-)
+# start_feature_selection =  PythonOperator(
+#     task_id = 'get_possible_algo',
+#     python_callable = FS_OBJ.get_possible_fs_algo,
+#     dag = dag
+# )
 
 chi_sq = PythonOperator(
     task_id = 'chisq_fs',
@@ -58,4 +58,4 @@ end_feature_selection = PythonOperator(
 )
 
 
-start_feature_selection >> [chi_sq,mutual_info,anova,rfe,coorelation] >> end_feature_selection
+[chi_sq,mutual_info,anova,rfe,coorelation] >> end_feature_selection

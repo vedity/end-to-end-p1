@@ -38,17 +38,17 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
         return table_name,cols
 
 
-    def algo_call(self,dataset_id,schema_id,target_col):
+    def algo_call(self,schema_id,target_col):
         
             #fetch all column
             column = self.fetch_column(DBObject,connection,schema_id)
             column.remove(target_col)
 
             
-            feature_dict = {"target_col":target_col,"column_list":column,"option_list":[chisq_dict,rfe_dict,mutual_dict,anova_dict,co_dict]}
-            status = self.insert_feature_record(DBObject,connection,schema_id,feature_dict)
+            # feature_dict = {"target_col":target_col,"column_list":column,"option_list":[chisq_dict,rfe_dict,mutual_dict,anova_dict,co_dict]}
+            # status = self.insert_feature_record(DBObject,connection,schema_id,feature_dict)
 
-            return status
+            return column
 
     def get_extra_column(self,DBObject,connection,schema_id,col_lst):
 
@@ -70,7 +70,7 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
         logging.info("  +status"+str(status))
         return status
 
-    def fs_dag_executor(self,feature_params_dict,**kwargs):
+    def fs_dag_executor(self,feature_params_dict):
         # ti1 = kwargs['ti1']
         # feature_params_dict = ast.literal_eval(kwargs['dag_run'].conf['feature_params_dict'])
         # dataset_id = feature_params_dict["dataset_id"]
@@ -78,15 +78,16 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
         # target_col = feature_params_dict["target_col"]
 
         
-        #fs_lst = self.get_possible_fs_algo(feature_params_dict['schema_id'],feature_params_dict['target_col'],'reg')
-        #feature_params_dict['algo_list'] = fs_lst
+        fs_lst = self.get_possible_fs_algo(feature_params_dict['schema_id'],feature_params_dict['target_col'],'reg')
+        feature_params_dict['algo_list'] = fs_lst
         json_data = {'conf':'{"feature_params_dict":"'+str(feature_params_dict)+'"}'}
         result = requests.post("http://airflow:8080/api/experimental/dags/feature_selection_dag/dag_runs",data=json.dumps(json_data),verify=False)#owner
         return 0
 
-    def chisq_fs(self,**kwargs):
-        ti = kwargs['ti']
-        algo_list = ti.xcom_pull(key='possible_algo', task_ids='get_possible_algo')
+    def chisq_fs(self,run_id,**kwargs):
+        logging.info("--->"+str(run_id))
+        # ti = kwargs['ti']
+        # algo_list = ti.xcom_pull(key='possible_algo', task_ids='get_possible_algo')
         algo_id = 2
 
         feature_params_dict = ast.literal_eval(kwargs['dag_run'].conf['feature_params_dict'])
@@ -94,7 +95,7 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
         dataset_id = feature_params_dict["dataset_id"]
         schema_id = feature_params_dict["schema_id"]
         target_col = feature_params_dict["target_col"]
-        
+        algo_list = feature_params_dict["algo_list"]
         
         if algo_id not in algo_list: return 1
 
@@ -108,8 +109,8 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
         kwargs['ti'].xcom_push(key='chisq', value=chisq_dict)
 
     def mutual_fs(self,**kwargs):
-        ti = kwargs['ti']
-        algo_list = ti.xcom_pull(key='possible_algo', task_ids='get_possible_algo')
+        # ti = kwargs['ti']
+        # algo_list = ti.xcom_pull(key='possible_algo', task_ids='get_possible_algo')
         algo_id = 4
         feature_params_dict = ast.literal_eval(kwargs['dag_run'].conf['feature_params_dict'])
         #mutual
@@ -117,7 +118,7 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
         dataset_id = feature_params_dict["dataset_id"]
         schema_id = feature_params_dict["schema_id"]
         target_col = feature_params_dict["target_col"]
-        
+        algo_list = feature_params_dict["algo_list"]
         
         if algo_id not in algo_list: return 1
         
@@ -128,8 +129,8 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
         kwargs['ti'].xcom_push(key='mutual', value=mutual_dict)
 
     def anova_fs(self,**kwargs):
-        ti = kwargs['ti']
-        algo_list = ti.xcom_pull(key='possible_algo', task_ids='get_possible_algo')
+        # ti = kwargs['ti']
+        # algo_list = ti.xcom_pull(key='possible_algo', task_ids='get_possible_algo')
         algo_id = 1
         feature_params_dict = ast.literal_eval(kwargs['dag_run'].conf['feature_params_dict'])
         #anova
@@ -137,7 +138,7 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
         dataset_id = feature_params_dict["dataset_id"]
         schema_id = feature_params_dict["schema_id"]
         target_col = feature_params_dict["target_col"]
-        
+        algo_list = feature_params_dict["algo_list"]
         
         if algo_id not in algo_list: return 1
         
@@ -148,8 +149,8 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
         kwargs['ti'].xcom_push(key='anova', value=anova_dict)
 
     def rfe_fs(self,**kwargs):
-        ti = kwargs['ti']
-        algo_list = ti.xcom_pull(key='possible_algo', task_ids='get_possible_algo')
+        # ti = kwargs['ti']
+        # algo_list = ti.xcom_pull(key='possible_algo', task_ids='get_possible_algo')
         algo_id = 5
         feature_params_dict = ast.literal_eval(kwargs['dag_run'].conf['feature_params_dict'])
         #RFE
@@ -157,7 +158,7 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
         dataset_id = feature_params_dict["dataset_id"]
         schema_id = feature_params_dict["schema_id"]
         target_col = feature_params_dict["target_col"]
-        
+        algo_list = feature_params_dict["algo_list"]
         
         if algo_id not in algo_list: return 1
         
@@ -168,8 +169,8 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
         kwargs['ti'].xcom_push(key='rfe', value=rfe_dict)
 
     def coorelation_fs(self,**kwargs):
-        ti = kwargs['ti']
-        algo_list = ti.xcom_pull(key='possible_algo', task_ids='get_possible_algo')
+        # ti = kwargs['ti']
+        # algo_list = ti.xcom_pull(key='possible_algo', task_ids='get_possible_algo')
         algo_id = 3 
         feature_params_dict = ast.literal_eval(kwargs['dag_run'].conf['feature_params_dict'])
         #coorelation
@@ -177,7 +178,7 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
         dataset_id = feature_params_dict["dataset_id"]
         schema_id = feature_params_dict["schema_id"]
         target_col = feature_params_dict["target_col"]
-        
+        algo_list = feature_params_dict["algo_list"]
         
         if algo_id not in algo_list: return 1
         
@@ -229,16 +230,18 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
                 except Exception as e:
                     return e
             else:
-                return val
+                column = self.algo_call(schema_id,targetcol)
+                data = {"column_list":column,"data":val}
+                return data
 
         except Exception as e:
             return False
 
-    def get_possible_fs_algo(self,**kwargs):
-        feature_params_dict = ast.literal_eval(kwargs['dag_run'].conf['feature_params_dict'])
-        dataset_id = feature_params_dict["dataset_id"]
-        schema_id = feature_params_dict["schema_id"]
-        target_name = feature_params_dict["target_col"]
+    def get_possible_fs_algo(self,schema_id,target_name,project_type):
+        # feature_params_dict = ast.literal_eval(kwargs['dag_run'].conf['feature_params_dict'])
+        # dataset_id = feature_params_dict["dataset_id"]
+        # schema_id = feature_params_dict["schema_id"]
+        # target_name = feature_params_dict["target_col"]
 
         # Getting Target_Column type
         sql_command = f"select data_type from mlaas.schema_tbl st where st.schema_id = {schema_id} and (st.column_name='{target_name}' or st.changed_column_name='{target_name}')"
@@ -258,7 +261,7 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
 
         fs_lst = list(algo_dtype['id'])
 
-        kwargs['ti'].xcom_push(key='possible_algo', value=fs_lst)
-        
+        # kwargs['ti'].xcom_push(key='possible_algo', value=fs_lst)
+        return fs_lst
 
         

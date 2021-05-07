@@ -406,7 +406,6 @@ class ConfusionMatrixClass(APIView):
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
 
 
-
 class ROCCurveClass(APIView):
 
         def get(self, request, format=None):
@@ -443,7 +442,6 @@ class ROCCurveClass(APIView):
 
 
 
-
 #class to get actual vs prediction 
 #It will take url string as mlaas/modeling/actualvsprediction/.
 class ShowRunningExperimentsListClass(APIView):
@@ -477,6 +475,8 @@ class ShowRunningExperimentsListClass(APIView):
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+
+
                 
 #class to get all experiment list 
 #It will take url string as mlaas/modeling/showallexperimentslist/.              
@@ -568,6 +568,42 @@ class CheckModelStatusClass(APIView):
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+
+
+
+class RefreshModelingPageClass(APIView):
+        def get(self, request, format=None):
+                """
+                This function is used to check whether an experiment is running for a given project_id.
+        
+                Args  : 
+                        project_id[(Integer)]   :[Id of Project]
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival & insertions failed or successfull),
+                        Response(return false if failed otherwise json data)
+                """
+                try:
+                        logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
+                        
+                        project_id = int(request.query_params.get('project_id'))#get project id
+                        dataset_id = int(request.query_params.get('dataset_id'))#get dataset id
+                        exp_name = ModelStatObject.refresh_modeling(project_id, dataset_id)# will call show_running_experiments
+                        if isinstance(exp_name, str): #check the instance of dataset_df
+                                status_code,error_msg=json_obj.get_Status_code(exp_name) # extract the status_code and error_msg from project_df
+                                logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code :"+ status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        else:
+                                logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code : 200")
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":exp_name})
+                       
+                        return Response({"status_code":"200","error_msg":"Successfully updated","response":exp_name})
+                        
+                except Exception as e:
+                        logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
+                        logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+
 
 
 #class to get all experiment list 
@@ -881,3 +917,41 @@ class ModelFailedClass(APIView):
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})
+
+
+class PDPCurveClass(APIView):
+
+        def get(self, request, format=None):
+                """
+                This function is used to get Confusion Matrix of particular experiement
+        
+                Args  : 
+                        experiment_id[(Integer)]   :[Id of Experiment]
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival & insertions failed or successfull),
+                        Response(return false if failed otherwise json data)
+                """
+                try:
+                       
+                        logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
+                        experiment_id = int(request.query_params.get('experiment_id')) #get experiment_id
+                        project_id = int(request.query_params.get('project_id')) #get project_id
+                        feature = request.query_params.get('feature') #get feature selected by the user
+                        sclass = request.query_params.get('sclass') #get the class selected by the user.
+                        roc_curve_json = ModelStatObject.show_partial_dependence_plot(project_id, experiment_id, feature, sclass)# will call confusion matrix method
+                        logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
+                        if isinstance(roc_curve_json,str): #check the instance of dataset_df
+                                status_code,error_msg=json_obj.get_Status_code(roc_curve_json) # extract the status_code and error_msg from project_df
+                                logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code :"+ status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        else:
+                                logging.info("modeling : ModelStatisticsClass : GET Method : execution : status_code : 200")
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":roc_curve_json})
+                        return Response({"status_code":"200","error_msg":"Successfully updated","response":json.loads(roc_curve_json)})
+                        
+
+                except Exception as e:
+                        logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
+                        logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})  

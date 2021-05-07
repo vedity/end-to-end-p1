@@ -13,6 +13,7 @@ scaled_dataset/*
 *.npy
 cleanup_dags
 manual_modeling_dags
+latest
 
 ### Angular ###
 # compiled output

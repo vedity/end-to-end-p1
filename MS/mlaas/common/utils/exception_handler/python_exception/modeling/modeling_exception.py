@@ -55,6 +55,9 @@ class ModelFailed(Exception):
         elif status_code == "M14":
             self.msg = "Precision Recall Curve Failed"
 
+        elif status_code == "M15":
+            self.msg = "Get Partial Dependence Score Failed"
+
         else:
             self.msg = "Model failed"
             

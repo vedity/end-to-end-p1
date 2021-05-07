@@ -132,17 +132,19 @@ def classification_func_call(self):
 
         func_code = "M13"
         # Get ROC Curve values for each class
-        roc_scores = self.EvalMetricsObj.get_performance_curve('roc_curve', model, y_pred_prob, self.y_test)
+        roc_scores = self.EvalMetricsObj.get_performance_curve('roc_curve', model, y_pred_prob, self.y_test, self.dataset_split_dict)
 
         func_code = "M14"
         # Get Precision Recall Values for each class
-        precision_recall_scores = self.EvalMetricsObj.get_performance_curve('precision_recall_curve', model, y_pred_prob, self.y_test)
+        precision_recall_scores = self.EvalMetricsObj.get_performance_curve('precision_recall_curve', model, y_pred_prob, self.y_test, self.dataset_split_dict)
         
-
+        func_code = "M15"
+        # Get PDP Scores for every feature
+        pdp_scores = self.EvalMetricsObj.get_partial_dependence_scores(model, self.X_train, self.input_features_list, self.target_features_list, self.dataset_split_dict)
+        
         # Mlflow log artificats
-        
+
         func_code = "M10"
-        
         # Mlflow Matrix
         self.MLFlowLogObj.store_model_metrics(accuracy=accuracy, recall=recall, precision=precision, f1_score=f1_score,
                                             holdout_score=holdout_score, cv_score=cv_score)
@@ -153,7 +155,7 @@ def classification_func_call(self):
         # Mlflow Artifacts 
         self.MLFlowLogObj.store_model_dict(learning_curve=learning_curve_dict, features_importance=features_impact_dict,
                                             model_summary=model_summary, predictions=final_result_dict,confusion_matrix=confusion_matrix_dict,
-                                            roc_scores=roc_scores, precision_recall_scores=precision_recall_scores)
+                                            roc_scores=roc_scores, precision_recall_scores=precision_recall_scores,pdp_scores=pdp_scores)
 
         # Save  Model.
         self.MLFlowLogObj.store_model(model, model_name=self.hyperparameters['model_name'], model_type='sklearn')

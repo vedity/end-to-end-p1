@@ -42,7 +42,7 @@ class KNeighborsClassificationClass:
         # list of target features (features to be predicted)
         self.target_features_list = target_features_list[1:]
         self.dataset_split_dict = scaled_split_dict # This object stores the variables used to split the data.  
-       
+        
         self.X_train = X_train 
         self.X_test = X_test
         self.X_valid = X_valid
@@ -235,4 +235,81 @@ class KNeighborsClassificationClass:
         
         """This function is used as a pipeline which will execute function in a sequence.
         """
-        classification_func_call(self)
+        try :
+            func_code = "M01"
+            # train the model
+            model = self.train_model()
+            
+            func_code = "M02"
+            # get features importance
+            features_impact_dict = self.features_importance(model) 
+            
+            func_code = "M03"
+            # get actual and predicted values 
+            actual_lst,prediction_lst = self.get_actual_prediction(model)
+            
+            func_code = "M04"
+            # save prediction
+            final_result_dict = self.EvalMetricsObj.save_prediction(self.y_test, prediction_lst, self.target_features_list)
+            
+            func_code = "M05"
+            # all evaluation matrix
+            accuracy,recall,precision,f1_score = self.EvalMetricsObj.get_evaluation_matrix(actual_lst,prediction_lst, model_type='Classification')   
+            
+            func_code = "M06"
+            # get cv score
+            if self.dataset_split_dict['split_method'] == 'cross_validation':
+                cv_score = self.cv_score(model) # default k-fold with 5 (r2-score)
+            else:
+                cv_score = 0
+              
+            func_code = "M07"  
+            # get holdout score
+            holdout_score = self.EvalMetricsObj.holdout_score(self.y_test, prediction_lst, model_type='Classification') # default 80:20 splits (r2-score)
+            
+            func_code = "M08"
+            # get model summary
+            model_summary = self.model_summary() # high level model summary
+           
+            func_code = "M09"
+            # get model learning curve
+            learning_curve_dict = self.get_learning_curve(model)
+            
+            func_code = "M11"
+            # get confusion matrix
+            confusion_matrix_dict = self.EvalMetricsObj.get_confusion_matrix(actual_lst,prediction_lst)
+
+            func_code = "M12"
+            # Get probaility for each class
+            y_pred_prob = self.EvalMetricsObj.get_predict_proba(model, self.X_test, self.y_train, model_type='sklearn')
+
+            func_code = "M13"
+            # Get ROC Curve values for each class
+            roc_scores = self.EvalMetricsObj.get_performance_curve('roc_curve', model, y_pred_prob, self.y_test, self.dataset_split_dict)
+
+            func_code = "M14"
+            # Get Precision Recall Values for each class
+            precision_recall_scores = self.EvalMetricsObj.get_performance_curve('precision_recall_curve', model, y_pred_prob, self.y_test, self.dataset_split_dict)
+            
+            pdp_scores = self.EvalMetricsObj.get_partial_dependence_scores(model, self.X_train, self.input_features_list, self.target_features_list, self.dataset_split_dict)
+
+            func_code = "M10"
+            # log mlflow matrix
+            self.MLFlowLogObj.store_model_metrics(accuracy=accuracy, recall=recall, precision=precision, f1_score=f1_score,
+                                                holdout_score=holdout_score, cv_score=cv_score)
+
+            # log artifacts (output files)
+            self.MLFlowLogObj.store_model_dict(learning_curve=learning_curve_dict, features_importance=features_impact_dict,
+                                                model_summary=model_summary, predictions=final_result_dict,confusion_matrix=confusion_matrix_dict,
+                                                roc_scores=roc_scores, precision_recall_scores=precision_recall_scores, pdp_scores=pdp_scores)
+
+            # log mlflow parameter
+            self.MLFlowLogObj.store_model_params(self.dataset_split_dict)
+
+            # Store the Machine Learning Model.
+            self.MLFlowLogObj.store_model(model, model_name="Knn_Classification", model_type='sklearn')
+
+        except:
+            
+            raise ModelFailed(func_code)
+        # classification_func_call(self)

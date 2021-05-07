@@ -23,7 +23,7 @@ dag = DAG(
     description='For Creating Dynamic Dags',
 )
 
-t1 = RestToTemplateWrapperOperator(task_id="generate-dag", dag=dag, provide_context=True)
+t1 = RestToTemplateWrapperOperator(task_id="generate-dag", dag=dag)
 
 dag.doc_md = __doc__
 
