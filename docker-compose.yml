@@ -86,36 +86,36 @@ services:
       _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
       _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
 
-    mongodb:
-        image: mongo:latest
-        container_name: mongodb
-        hostname: mongodb
-        volumes:
-            - ./mongodb/data/:/data/db
-        ports:
-            - 27017:27017
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    hostname: mongodb
+    volumes:
+        - ./mongodb/data/:/data/db
+    ports:
+        - 27017:27017
       
 
-    web:                                             # create a MLFlow container
-        build: './MS' 
-        container_name: ms_container
-        #command: bash -c "mlflow server --backend-store-uri ./mlflow --host 0.0.0.0 --port 5400 && python manage.py runserver 0.0.0.0:8000" # construct the container along the Dockerfile in this folder
-        command: sh -c "
-            python manage.py runserver 0.0.0.0:8000 & 
-            sleep 150 && 
-            python common/utils/dynamic_dag/dag_creator.py && 
-            pkill -f runserver && 
-            python manage.py runserver 0.0.0.0:8000" 
-        volumes: 
-            - "./MS/mlaas:/mlaas"
-        ports:
-            #- "5400:5400" 
-            - "8000:8000"
-        links:
-            - postgres
-        depends_on:
-            - mlflow
-            
+  web:                                             # create a MLFlow container
+    build: './MS' 
+    container_name: ms_container
+    #command: bash -c "mlflow server --backend-store-uri ./mlflow --host 0.0.0.0 --port 5400 && python manage.py runserver 0.0.0.0:8000" # construct the container along the Dockerfile in this folder
+    command: sh -c "
+        python manage.py runserver 0.0.0.0:8000 & 
+        sleep 150 && 
+        python common/utils/dynamic_dag/dag_creator.py && 
+        pkill -f runserver && 
+        python manage.py runserver 0.0.0.0:8000" 
+    volumes: 
+        - "./MS/mlaas:/mlaas"
+    ports:
+        #- "5400:5400" 
+        - "8000:8000"
+    links:
+        - postgres
+    depends_on:
+        - mlflow
+        
   mlflow:
       build: './MS'
       #command: mlflow server --backend-store-uri ./mlflow --host 0.0.0.0 --port 5400
