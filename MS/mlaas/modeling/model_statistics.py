@@ -366,7 +366,7 @@ class ModelStatisticsClass:
         if model_dag_df is None:
             raise DatabaseConnectionFailed(500)
 
-        if len(model_dag_df) == 0 :
+        if len(model_dag_df['exp_name']) == 0:
             return {'exp_name': ''}
 
         state = model_dag_df['dag_state'][0]
@@ -698,7 +698,7 @@ class ModelStatisticsClass:
         unscaled_data = self.DBObject.get_dataset_df(self.connection, dataset_id=dataset_id).set_index('index')
         
         feature_data = np.array(unscaled_data.loc[index, feature])
-        
+        logging.info("SCLASS VALUE;-"+str(len(sclass)))
         feature_values = []
         pdp_values = []
         if issubclass(feature_data[0].dtype.type, np.integer) or issubclass(feature_data[0].dtype.type, np.floating):       
@@ -707,7 +707,16 @@ class ModelStatisticsClass:
             fmax = max(unique_values)
             n_uniques = len(unique_values)
             feature_values = np.linspace(fmin, fmax, min(100, n_uniques))
-            pdp_values = pdp_dict['PDP_Scores'][feature]
+            if (sclass == None) or (len(sclass) == 0):
+                pdp_values = pdp_dict['PDP_Scores'][feature][0]
+            else:
+                class_list = pdp_dict['classes']
+                try:
+                    cindex = class_list.index(int(sclass))
+                except:
+                    cindex = class_list.index(sclass)
+                    
+                pdp_values = pdp_dict['PDP_Scores'][feature][cindex]
         
         target_feature = pdp_dict['target_features']
 
