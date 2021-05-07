@@ -12,7 +12,7 @@ mlruns
 scaled_dataset/*
 *.npy
 cleanup_dags
-manual_modeling_dags
+manual_modelling_dags
 latest
 
 ### Angular ###
