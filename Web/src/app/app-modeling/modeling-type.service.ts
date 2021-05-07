@@ -19,19 +19,16 @@ export class ModelingTypeApiService {
   }
 
   getModelDescription(project_id): Observable<any> {
-   // project_id=2;
     var params = new HttpParams().append("project_id", project_id);
     return this.httpClient.get(this.baseUrl + "modeling/showexperimentslist/", { headers: this.headers, params });
   }
   
   showallexperimentslist(project_id): Observable<any> {
-   // project_id=2;
     var params = new HttpParams().append("project_id", project_id);
     return this.httpClient.get(this.baseUrl + "modeling/showallexperimentslist/", { headers: this.headers, params });
   }
 
   checkexperimentname(experiment_name,project_id): Observable<any> {
-    // project_id=2;
      var params = new HttpParams().append("experiment_name", experiment_name).append("project_id", project_id);
      return this.httpClient.get(this.baseUrl + "modeling/checkexperimentname/", { headers: this.headers, params });
    }
@@ -43,15 +40,9 @@ export class ModelingTypeApiService {
 
   checkmodelstatus(project_id,experiment_name,dataset_id,user_name,type): Observable<any> {
    let params;
-  //  if(type=='onload')
-  //   params = new HttpParams().append("project_id", project_id)
-  //   .append("dataset_id",dataset_id)
-  //   .append("user_name",user_name);
-  //   else
     params = new HttpParams().append("project_id", project_id).append("experiment_name",experiment_name)
     .append("dataset_id",dataset_id)
     .append("user_name",user_name);
-
     return this.httpClient.get(this.baseUrl + "modeling/checkmodelstatus/", { headers: this.headers, params });
   }
 
@@ -67,48 +58,39 @@ export class ModelingTypeApiService {
       .append("model_id",obj.model_id)
       .append("model_name",obj.model_name);
       return this.httpClient.post(this.baseUrl + "modeling/startmodel/",obj, { headers: this.headers ,params});
-    
-   
   }
 
   getLearningCurves(experiment_id): Observable<any> {
-   // experiment_id=2;
     var params = new HttpParams().append("experiment_id", experiment_id);
     return this.httpClient.get(this.baseUrl + "modeling/learning_curve/", { headers: this.headers, params });
   }
 
   getConfusionMatrix(experiment_id): Observable<any> {
-   // experiment_id=2;
     var params = new HttpParams().append("experiment_id", experiment_id);
     return this.httpClient.get(this.baseUrl + "modeling/confusionmatrix/", { headers: this.headers, params });
   }
 
   getFeatureImportance(experiment_id): Observable<any> {
-   // experiment_id=2;
     var params = new HttpParams().append("experiment_id", experiment_id);
     return this.httpClient.get(this.baseUrl + "modeling/featureimportance/", { headers: this.headers, params });
   }
 
   getPerformanceMatrics(experiment_id): Observable<any> {
-    //experiment_id=2;
     var params = new HttpParams().append("experiment_id", experiment_id);
     return this.httpClient.get(this.baseUrl + "modeling/performancemetrics/", { headers: this.headers, params });
   }
 
   getConfusionMatrics(experiment_id): Observable<any> {
-    //experiment_id=2;
     var params = new HttpParams().append("experiment_id", experiment_id);
     return this.httpClient.get(this.baseUrl + "modeling/confusionmatrix/", { headers: this.headers, params });
   }
 
   getModelSummary(experiment_id): Observable<any> {
-   // experiment_id=2;
     var params = new HttpParams().append("experiment_id", experiment_id);
     return this.httpClient.get(this.baseUrl + "modeling/modelsummary/", { headers: this.headers, params });
   }
 
   getActualVsPreidiction(experiment_id,model_type): Observable<any> {
-    //experiment_id=2;
     var params = new HttpParams().append("experiment_id", experiment_id)
     .append("model_type", model_type);
     return this.httpClient.get(this.baseUrl + "modeling/actualvsprediction/", { headers: this.headers, params });
@@ -161,11 +143,17 @@ export class ModelingTypeApiService {
   getRocCurve(experiment_id){
     var params = new HttpParams().append("experiment_id", experiment_id);
     return this.httpClient.get(this.baseUrl + "modeling/roccurve/", { headers: this.headers, params });
-  
   }
 
   getModelFailedReason(experiment_id){
     var params = new HttpParams().append("experiment_id", experiment_id);
     return this.httpClient.get(this.baseUrl + "modeling/modelfailed/", { headers: this.headers, params });
+  }
+
+  getModelingDagStatus(dataset_id,project_id){
+    var params = new HttpParams()
+    .append("dataset_id", dataset_id)
+    .append("project_id", project_id);
+    return this.httpClient.get(this.baseUrl + "modeling/refreshmodeling/", { headers: this.headers, params });
   }
 }
