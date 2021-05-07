@@ -64,13 +64,16 @@ def regression_func_call(self):
         # Mlflow Matrix
         self.MLFlowLogObj.store_model_metrics(r2_score=r2score, mae=mae, mse=mse, mape=mape, 
                                             holdout_score=holdout_score, cv_score=cv_score)
+        func_code = "M15"
+        # Get PDP Scores for every feature
+        pdp_scores = self.EvalMetricsObj.get_partial_dependence_scores(model, self.X_train, self.input_features_list, self.target_features_list, self.dataset_split_dict)
         
         # Mlflow Parameter
         self.MLFlowLogObj.store_model_params(self.dataset_split_dict)
 
         # Mlflow Artifacts 
         self.MLFlowLogObj.store_model_dict(learning_curve=learning_curve_dict, features_importance=features_impact_dict,
-                                            model_summary=model_summary, predictions=final_result_dict)
+                                            model_summary=model_summary, predictions=final_result_dict,pdp_scores=pdp_scores)
         
 
         # Save Model.

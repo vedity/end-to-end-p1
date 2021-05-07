@@ -3,6 +3,9 @@
 from preprocess.utils.preprocessing import PreprocessingClass
 from database import *
 
+#* Common Imports
+from common.utils.dynamic_dag import dag_utils as du
+
 #* Library Imports
 from datetime import datetime, timedelta
 import sys
@@ -15,6 +18,7 @@ from airflow.operators.python_operator import PythonOperator
 
 #* Defining Objects
 PC_OBJ = PreprocessingClass(database,user,password,host,port)
+DAG_OBJ = du.DagUtilsClass()
 
 yesterday_date = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')
 
@@ -31,7 +35,8 @@ dag = DAG(
     default_args=args,    
     description='A Dynamically Generated DAG.',
     catchup=False,
-    schedule_interval = '@once',                         
+    schedule_interval = @once
+    #is_paused_upon_creation= True,                       
 )
 
 #? Getting Required Parameters
@@ -39,10 +44,11 @@ dag = DAG(
 master_dict = #MASTER_DICT 
 
 if len(master_dict) == 0:
-    sys.exit()
+    pass
 
 else:
     operation = master_dict['operation_dict']
+    dag_index = master_dict['dag_index']
     value_dict = master_dict['values_dict']
     schema_id = int(master_dict['schema_id'])
     dataset_id = int(master_dict['dataset_id'])
@@ -121,7 +127,7 @@ op_dict = {
     321 : PC_OBJ.split_date_column
 }
 
-def dag_end(DBObject,connection,dataset_id,project_id,dag_id,new_user_name,dataset_name,col_list,**kwargs):
+def dag_end(DBObject,connection,dataset_id,project_id,dag_id,new_user_name,dataset_name,col_list,dag_index,**kwargs):
     '''
         To reset the dag status
     '''
@@ -131,6 +137,9 @@ def dag_end(DBObject,connection,dataset_id,project_id,dag_id,new_user_name,datas
     
     #? Shutting off the dag, making master_dict empty so it won't be executed further
     status = PC_OBJ.dag_updater(dict(), dag_id+".py" , namespace = "cleanup_dags")
+
+    #? Releasing the dag
+    status = DAG_OBJ.release_dag(connection, index = dag_index)
     return status
 
 #? Making Dynamic Tasks
@@ -147,7 +156,7 @@ t4= PythonOperator(
             dag=dag,
             provide_context=True,
             python_callable=dag_end,
-            op_args=[DBObject,connection,dataset_id,project_id,main_dag_id,new_user_name,dataset_name,column_list],
+            op_args=[DBObject,connection,dataset_id,project_id,main_dag_id,new_user_name,dataset_name,column_list,dag_index],
             trigger_rule="all_done")
 
 if save_as == 'True':

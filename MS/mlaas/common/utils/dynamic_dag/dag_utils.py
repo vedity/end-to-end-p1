@@ -26,7 +26,7 @@ class DagUtilsClass():
         This class provides dag related utilities.
     '''
 
-    def get_dag(self, connection, dag_type = 1, project_id = None):
+    def get_dag(self, connection, dag_type = 1, project_id = None, **kwargs):
         '''
             This function is used to get a dag from dag_pool.
 
@@ -48,6 +48,7 @@ class DagUtilsClass():
         try:
             logging.info("common : DagUtilsClass : get_dag : execution start")
 
+            #? Getting a dag from dag_management_tbl
             sql_command = f'''
             update mlaas.dag_management_tbl 
                 set allocated = true 
@@ -60,7 +61,24 @@ class DagUtilsClass():
                 returning "index",dag_id 
             '''
             dag_df = DBObject.select_records(connection, sql_command)
+            if dag_df is None: raise RuntimeError #! Failed to get the dataframe, connection issue
+            
             index, dag_id = dag_df['index'][0],dag_df['dag_id'][0]
+
+            #? Making Entry in thr Project table
+            if project_id:
+                if dag_type == 1: #? Making entry for cleanup dag
+                    sql_command = f"update mlaas.project_tbl set cleanup_dag_id = '{dag_id}' where project_id={project_id}"
+                elif dag_type == 2:#? Making entry for modelling dag
+                    sql_command = f"update mlaas.project_tbl set model_dag_id = '{dag_id}' where project_id={project_id}"
+                #? Updating the table
+                try:
+                    status = DBObject.update_records(connection, sql_command)
+                    if status == 1:
+                        raise RuntimeError
+                except Exception as e:
+                    logging.error(f"common : DagUtilsClass : get_dag : failed to update project table : {str(e)}")
+                    return None,None
 
             logging.info("common : DagUtilsClass : get_dag : execution stop")
             return index, dag_id
@@ -68,9 +86,9 @@ class DagUtilsClass():
         except Exception as e:
             logging.error(f"common : DagUtilsClass : get_dag : execution failed : {str(e)}")
             logging.error(f"common : DagUtilsClass : get_dag : execution failed : {traceback.format_exc()}")
-            return None
+            return None,None
 
-    def release_dag(self, connection, index = None, dag_id = None):
+    def release_dag(self, connection, index = None, dag_id = None, **kwargs):
         '''
             This function is used to submit the dag back to the dag pool.
             
@@ -89,6 +107,7 @@ class DagUtilsClass():
             
             if not index and not dag_id:
                 #? We require at least one of these two things
+                logging.error("common : DagUtilsClass : release_dag : dag_index or dag_id needed, None given.")
                 raise RuntimeError
 
             if index:
@@ -133,7 +152,7 @@ class DagUtilsClass():
             
             #? Folders where we dags are stored
             directory = f'{namespace}/cleanup_dags'
-            sql_command = f""
+            sql_command = "DELETE FROM mlaas.dag_management_tbl;"
 
             #? Inserting cleanup dag
             for filename in os.listdir(directory):
@@ -144,7 +163,7 @@ class DagUtilsClass():
                     continue
         
             #? Folders where we dags are stored
-            directory = f'{namespace}/manual_modelling_dags'
+            directory = f'{namespace}/manual_modeling_dags'
             
             #? Inserting manual modelling dags
             for filename in os.listdir(directory):
