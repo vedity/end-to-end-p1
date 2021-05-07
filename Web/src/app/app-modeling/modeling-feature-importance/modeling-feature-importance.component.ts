@@ -147,6 +147,7 @@ export class ModelingFeatureImportanceComponent implements OnInit {
       var display = $("."+element).text().toLowerCase().includes(search);
       $("."+element).prop('hidden',!display)
     })
+    
    // this.responsedata = result;
   }
 }
