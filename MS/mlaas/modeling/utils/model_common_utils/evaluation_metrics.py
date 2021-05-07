@@ -218,7 +218,7 @@ class EvaluationMetrics:
 
         if len(classes) == 2:
             classes = [classes[1]]
-        if classes == None:
+        if classes == []:
             classes = []
 
         return {'PDP_Scores': pdp_values, 'classes':classes, 'input_features':input_features_list, 'target_features': target_features_list, 'index':data_index}
