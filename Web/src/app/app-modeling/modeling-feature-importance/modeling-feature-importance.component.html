@@ -1,3 +1,27 @@
 <ngx-skeleton-loader *ngIf="!responsedata" count="7" [animation]="animation" [theme]="theme">
 </ngx-skeleton-loader>
-<apx-chart *ngIf="responsedata" class="apex-charts" dir="ltr" [series]="barChart.series" [chart]="barChart.chart" [plotOptions]="barChart.plotOptions" [dataLabels]="barChart.dataLabels" [xaxis]="barChart.xaxis" [colors]="barChart.colors" [grid]="barChart.grid"></apx-chart>
+<div class="row" *ngIf="responsedata">
+    <div class="col-md-4">
+        <div class="search-input">
+            <input type="text" class="form-control" placeholder="search" (keyup)="filterdata($event.target.value)">
+        </div>
+        <div class="column-list">
+            <perfect-scrollbar style="height:435px;">
+                <ul id="">
+                    <li class="filterli {{item}}" *ngFor="let item of responsedata.features_name;let i=index" (click)="getPDPCurve(item)">
+                        <a href="javascript:void(0);" [ngStyle]="{'width': ''+responsedata.norm_importance[i]+'%' }">
+                        {{item}}
+                    </a>
+                        <span>{{responsedata.norm_importance[i]}}%</span>
+                    </li>
+                </ul>
+            </perfect-scrollbar>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <ngx-skeleton-loader *ngIf="isChartLoaded" count="7" [animation]="animation" [theme]="theme">
+        </ngx-skeleton-loader>
+        <apx-chart *ngIf="!isChartLoaded" [yaxis]="chartOptions.yaxis" class="apex-charts" dir="ltr" [series]="chartOptions.series" [chart]="chartOptions.chart" [plotOptions]="chartOptions.plotOptions" [dataLabels]="chartOptions.dataLabels" [xaxis]="chartOptions.xaxis"
+            [colors]="chartOptions.colors" [grid]="chartOptions.grid"></apx-chart>
+    </div>
+</div>

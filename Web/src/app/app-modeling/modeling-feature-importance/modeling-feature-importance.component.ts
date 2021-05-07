@@ -10,8 +10,10 @@ import { ModelingTypeApiService } from '../modeling-type.service';
 })
 export class ModelingFeatureImportanceComponent implements OnInit {
   public barChart: any;
+  public chartOptions:any;
   @Input() public experiment_id: any;
   responsedata:any;
+  searchdata:any;
   animation = "progress-dark";
   theme = {
     'border-radius': '5px',
@@ -37,35 +39,37 @@ export class ModelingFeatureImportanceComponent implements OnInit {
   successHandler(data) {
     if (data.status_code == "200") {
       this.responsedata = data.response;
-      // console.log(this.responsedata);
-      this.barChart = {
-        chart: {
-          height: 400,
-          type: 'bar',
-          toolbar: {
-            show: false
-          }
-        },
-        plotOptions: {
-          bar: {
-            horizontal: true,
-          }
-        },
-        dataLabels: {
-          enabled: false
-        },
-        series: [{
-          data: this.responsedata.norm_importance
-        }],
-        colors: ['#34c38f'],
-        xaxis: {
-          // tslint:disable-next-line: max-line-length
-          categories: this.responsedata.features_name,
-        },
-        grid: {
-          borderColor: '#f1f1f1'
-        },
-      };
+      this.searchdata=data.response;
+      this.getPDPCurve(this.responsedata.features_name[0]);
+      
+      // this.barChart = {
+      //   chart: {
+      //     height: 400,
+      //     type: 'bar',
+      //     toolbar: {
+      //       show: false
+      //     }
+      //   },
+      //   plotOptions: {
+      //     bar: {
+      //       horizontal: true,
+      //     }
+      //   },
+      //   dataLabels: {
+      //     enabled: false
+      //   },
+      //   series: [{
+      //     data: this.responsedata.norm_importance
+      //   }],
+      //   colors: ['#34c38f'],
+      //   xaxis: {
+      //     // tslint:disable-next-line: max-line-length
+      //     categories: this.responsedata.features_name,
+      //   },
+      //   grid: {
+      //     borderColor: '#f1f1f1'
+      //   },
+      // };
       // this.toaster.success(data.error_msg, 'Success');
     }
     else {
@@ -73,11 +77,77 @@ export class ModelingFeatureImportanceComponent implements OnInit {
     }
   }
 
+  isChartLoaded=false;
+  getPDPCurve(feature){
+    this.isChartLoaded=true;
+    this.apiservice.getPDPCurve(this.experiment_id,1,feature,'').subscribe(
+      logs=>this.successPDPCurve(logs,feature),
+      error=>this.errorHandler(error)
+    )
+  }
+
+  successPDPCurve(data,feature){
+    if(data.status_code=="200"){
+      this.chartOptions = {
+        series: [
+          {
+            name: "pdp_values",
+            data: data.response.pdp_values
+          }
+        ],
+        chart: {
+          height: 430,
+          type: "line",
+          zoom: {
+            enabled: false
+          },
+          toolbar: {
+            show: false
+          }
+        },
+        dataLabels: {
+          enabled: false
+        },
+        colors: ['#008ffb'],
+        stroke: {
+          curve: "smooth"
+        },
+        title: {
+          text: "Product Trends by Month",
+          align: "left"
+        },
+        xaxis: {
+          title:{
+            text:feature
+          },
+          categories: data.response.feature_values
+        },
+        yaxis: {
+          title:{
+            text:data.response.target_feature[0]
+          }
+        }
+      };
+      this.isChartLoaded=false;
+    }
+    else{
+      this.errorHandler(data);
+    }
+  }
   errorHandler(error) {
     if (error.error_msg)
       this.toaster.error(error.error_msg, 'Error');
     else {
       this.toaster.error('Something went wrong', 'Error');
     }
+  }
+
+  filterdata(search) {
+    var result = this.searchdata.features_name.filter(function (element) {
+      var display = $("."+element).text().toLowerCase().includes(search);
+      $("."+element).prop('hidden',!display)
+    })
+    
+   // this.responsedata = result;
   }
 }
