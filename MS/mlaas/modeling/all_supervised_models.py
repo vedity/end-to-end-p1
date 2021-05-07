@@ -111,7 +111,14 @@ def get_model_data(user_id, project_id, dataset_id):
     
     # Get Input And Target Features List.
     input_features_list, target_features_list = SplitData().get_features_list(user_id, project_id, dataset_id, DBObject, connection)
-    
+
+    try:
+        classes = SplitData().get_original_classes(scaled_split_dict)
+        logging.info("CLASSSSSSEEEEEESSSSSSSSSSSSSSSSSSSSS--------------------------------------****************"+str(classes))
+    except:
+        classes = None
+    scaled_split_dict['classes'] = classes
+
     return input_features_list, target_features_list, X_train, X_test, X_valid, y_train, y_test, y_valid, scaled_split_dict
 
 
@@ -204,7 +211,7 @@ def supervised_models(run_id,**kwargs):
         experiment_name  = basic_params_dict['experiment_name']
             
         # Get Input,Target Features List And ALl numpy array of train test and valid datasets and also scaled splits parameters dict.
-        input_features_list, target_features_list, X_train, X_test, X_valid, y_train, y_test, y_valid, scaled_split_dict= get_model_data(user_id, project_id, dataset_id)
+        input_features_list, target_features_list, X_train, X_test, X_valid, y_train, y_test, y_valid, scaled_split_dict = get_model_data(user_id, project_id, dataset_id)
         
         model_id = kwargs['model_id']
         model_name = kwargs['model_name']
@@ -216,7 +223,7 @@ def supervised_models(run_id,**kwargs):
         check_flag = 'outside'
         dag_run_id = run_id
         # Check Running Model Wheather It is Binary Or Multi Class Problem.     
-        if algorithm_type == kwargs['algorithm_type']:
+        if algorithm_type == kwargs['algorithm_type'] or algorithm_type.lower() == 'binary':
             
             experiment, experiment_id = ExpObject.get_mlflow_experiment(experiment_name)
             # mlflow set_experiment and run the model.

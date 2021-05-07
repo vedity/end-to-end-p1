@@ -142,6 +142,8 @@ class LogisticRegressionClass:
         features_names = list(features_dict.keys())
         norm_importance = np.array(list(features_dict.values())).round(2).tolist()
 
+        norm_importance /= max(norm_importance)
+
         features_importance_dict = {'features_name': features_names, 'norm_importance': norm_importance}
 
         return features_importance_dict
