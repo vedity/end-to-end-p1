@@ -132,6 +132,7 @@ class LogisticRegressionClass:
         shap_values = abs(LinearExplainer.shap_values(shap_data)).mean(axis=0)
 
         features_importance_values = shap_values / shap_values.sum()
+        features_importance_values /= max(features_importance_values)
 
         features_df = pd.DataFrame(data=features_importance_values, index=self.input_features_list, columns=['features_importance'])
 
@@ -141,8 +142,6 @@ class LogisticRegressionClass:
 
         features_names = list(features_dict.keys())
         norm_importance = np.array(list(features_dict.values())).round(2).tolist()
-
-        norm_importance /= max(norm_importance)
 
         features_importance_dict = {'features_name': features_names, 'norm_importance': norm_importance}
 
