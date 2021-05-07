@@ -696,26 +696,23 @@ class ModelStatisticsClass:
 
         dataset_id = int(dataset_id_df['dataset_id'][0])
         
-        unscaled_data = self.DBObject.get_dataset_df(self.connection, dataset_id=dataset_id)
-        feature_data = np.array(unscaled_data[feature])
         index = np.array(pdp_dict['index']).astype(np.int)
-        logging.info("INDEX--------------------"+str(index))
-        feature_data = feature_data[index]
-        # if issubclass(feature_data[0].dtype.type, np.integer) or issubclass(feature_data[0].dtype.type, np.floating):
+        unscaled_data = self.DBObject.get_dataset_df(self.connection, dataset_id=dataset_id).set_index('index')
+        
+        feature_data = np.array(unscaled_data.loc[index, feature])
+        
         feature_values = []
-        if isinstance(feature_data[0], int) or isinstance(feature_data[0], float):
+        pdp_values = []
+        if issubclass(feature_data[0].dtype.type, np.integer) or issubclass(feature_data[0].dtype.type, np.floating):       
             unique_values = np.unique(feature_data)
             fmin = min(unique_values)
             fmax = max(unique_values)
             n_uniques = len(unique_values)
             feature_values = np.linspace(fmin, fmax, min(100, n_uniques))
+            pdp_values = pdp_dict['PDP_Scores'][feature]
         
-        pdp_values = pdp_dict['PDP_Scores']
         target_feature = pdp_dict['target_features']
 
-
-        # if (pdp_dict['classes'] == None) or (len(pdp_dict['classes']) == 2):
-        #     pdp_values = pdp_dict['PDP_Scores'][feature][0]
         return {'pdp_values':pdp_values, 'feature_values':feature_values, 'target_feature':target_feature, 'classes':pdp_dict['classes']}
         
         logging.info("modeling : ModelStatisticsClass : show_partial_dependence_plot : Exception End" )

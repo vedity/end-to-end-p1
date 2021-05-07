@@ -114,7 +114,7 @@ def get_model_data(user_id, project_id, dataset_id):
 
     try:
         classes = SplitData().get_original_classes(scaled_split_dict)
-        logging.info("CLASSSSSSEEEEEESSSSSSSSSSSSSSSSSSSSS---------------------------------****************"+str(classes))
+        logging.info("CLASSSSSSEEEEEESSSSSSSSSSSSSSSSSSSSS--------------------------------------****************"+str(classes))
     except:
         classes = None
     scaled_split_dict['classes'] = classes
