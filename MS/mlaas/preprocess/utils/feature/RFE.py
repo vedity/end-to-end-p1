@@ -15,7 +15,7 @@ from .fs_utility import FSUtilityClass
 from pandas import read_csv
 import warnings
 warnings.filterwarnings("ignore")
-
+import logging
 FU = FSUtilityClass()
 
 class RFEClass():
@@ -26,8 +26,14 @@ class RFEClass():
         col = FU.fetch_column(DBObject,connection,schema_id)
         df = DBObject.get_feature_df(connection,dataset_id,col)
         X, y = FU.load_dataset(df,target_col)
+
+        sql_command = f"select data_type from mlaas.schema_tbl st where st.schema_id = {schema_id} and (st.column_name='{target_col}' or st.changed_column_name='{target_col}')"
+        datatype_df = DBObject.select_records(connection,sql_command)
+        logging.info("--->"+str(datatype_df['data_type']))
+        if datatype_df['data_type'] == 'numerical':
+            y=y.astype('int')
         # define RFE
-        rfe = RFE(estimator=DecisionTreeClassifier(), n_features_to_select=None)
+        rfe = RFE(estimator=LogisticRegression(), n_features_to_select=None)
         # fit RFE
         rfe.fit(X, y)
         # summarize all features
