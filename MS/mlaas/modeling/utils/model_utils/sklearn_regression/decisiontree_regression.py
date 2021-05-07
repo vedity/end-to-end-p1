@@ -151,6 +151,7 @@ class DecisionTreeRegressionClass:
         shap_values = abs(np.array(shap_values)).mean(axis=0)
 
         features_importance_values = shap_values / shap_values.sum()
+        features_importance_values /= max(features_importance_values)
 
         features_df = pd.DataFrame(data=features_importance_values, index=self.input_features_list, columns=['features_importance'])
 

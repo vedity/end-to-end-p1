@@ -367,7 +367,7 @@ class ModelStatisticsClass:
             raise DatabaseConnectionFailed(500)
 
         if len(model_dag_df) == 0 :
-            raise DataNotFound(500)
+            return {'exp_name': ''}
 
         state = model_dag_df['dag_state'][0]
         if state == 'running':
