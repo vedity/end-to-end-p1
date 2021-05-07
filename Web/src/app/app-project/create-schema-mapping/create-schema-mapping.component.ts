@@ -276,6 +276,7 @@ if(data.response.cleanup_dag=='True'|| data.response.modeling_dag=='True'||data.
         this.startfeatureslection=false;
         if(this.setFeatureSelectionInterval){
           clearInterval(this.setFeatureSelectionInterval);
+          this.setFeatureSelectionInterval=undefined;
         }
       }
       else{
@@ -471,8 +472,8 @@ if(data.response.cleanup_dag=='True'|| data.response.modeling_dag=='True'||data.
       this.targetColumn = 1;
       var target = $('.Target-selected').prop('id').split('_')[1];
       this.targetColumnName = $('.columnname_' + target).prop('id').split('_')[1];
-      this.getFeatureSelection(schemarecommodate);
       this.startfeatureslection=true;
+      this.getFeatureSelection(schemarecommodate);
     }
     else {
       this.toaster.error("Please select target column first", "Error");
@@ -485,6 +486,7 @@ if(data.response.cleanup_dag=='True'|| data.response.modeling_dag=='True'||data.
     this.startfeatureslection=false;
     if(this.setFeatureSelectionInterval){
       clearInterval(this.setFeatureSelectionInterval);
+      this.setFeatureSelectionInterval=undefined;
     }
   }
 }
