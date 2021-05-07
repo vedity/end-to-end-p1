@@ -156,4 +156,13 @@ export class ModelingTypeApiService {
     .append("project_id", project_id);
     return this.httpClient.get(this.baseUrl + "modeling/refreshmodeling/", { headers: this.headers, params });
   }
+
+  getPDPCurve(experiment_id,project_id,feature,sclass){
+    var params = new HttpParams()
+    .append("experiment_id", experiment_id)
+    .append("project_id", project_id)
+    .append("feature", feature)
+    .append("sclass", sclass);
+    return this.httpClient.get(this.baseUrl + "modeling/pdpcurve/", { headers: this.headers, params });
+  }
 }

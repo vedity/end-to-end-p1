@@ -102,7 +102,9 @@ export class ModelingTypeComponent implements OnInit {
         this.checkstatus();
       }, 4000);
       }
-     console.log(data);
+      else{
+        $("#switcher-list")[0].click();
+      }
     }
     else{
       this.errorHandler(data);

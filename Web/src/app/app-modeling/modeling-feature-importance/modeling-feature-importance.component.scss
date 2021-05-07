@@ -337,3 +337,27 @@ ul {
         display: none;
     }
 }
+
+.column-list {
+    ul {
+        padding-left: 0;
+        margin-top: 20px;
+        li {
+            background-color: #222736;
+            margin-bottom: 10px;
+            list-style: none;
+            position: relative;
+        }
+        a {
+            padding: 5px 10px;
+            display: block;
+            color: #fff;
+            background: #34c38f;
+        }
+        span {
+            position: absolute;
+            right: 5px;
+            top: 5px
+        }
+    }
+}
