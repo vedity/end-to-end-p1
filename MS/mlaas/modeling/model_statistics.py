@@ -366,7 +366,7 @@ class ModelStatisticsClass:
         if model_dag_df is None:
             raise DatabaseConnectionFailed(500)
 
-        if len(model_dag_df) == 0 :
+        if len(model_dag_df['exp_name']) == 0:
             return {'exp_name': ''}
 
         state = model_dag_df['dag_state'][0]
@@ -396,9 +396,7 @@ class ModelStatisticsClass:
         
         try:
             logging.info("modeling : ModelStatisticsClass : check_model_status : Exception Start")
-            if experiment_name == None:
-                state = self.refresh_modeling(project_id)
-                return state
+            
             # Get dag_id and run_id from the model_dags_tbl with associated experiment_name.
             sql_command ="select dag_id,run_id from mlaas.model_dags_tbl where project_id="+str(project_id)+" and exp_name='"+experiment_name+"'"
             

@@ -53,6 +53,10 @@ def regression_func_call(self):
         # get model learning curve
         learning_curve_dict = self.get_learning_curve(model)
         
+        func_code = "M15"
+        # Get PDP Scores for every feature
+        pdp_scores = self.EvalMetricsObj.get_partial_dependence_scores(model, self.X_train, self.input_features_list, self.target_features_list, self.dataset_split_dict)
+
         # Mlflow log artificats
         
         func_code = "M10"

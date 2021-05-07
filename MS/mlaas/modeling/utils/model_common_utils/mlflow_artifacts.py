@@ -29,6 +29,6 @@ class MLFlowLogs:
 
     def store_model_params(self, dataset_split_dict):
         for key in dataset_split_dict.keys():
-            if 'file' not in key:
+            if ('file' or 'classes') not in key:
                 mlflow.log_param(key, dataset_split_dict[key])
         mlflow.log_param("train ratio", 1-(dataset_split_dict['test_ratio'] + dataset_split_dict['valid_ratio']))

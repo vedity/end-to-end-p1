@@ -116,7 +116,7 @@ def get_model_data(user_id, project_id, dataset_id):
         classes = SplitData().get_original_classes(scaled_split_dict)
         logging.info("CLASSSSSSEEEEEESSSSSSSSSSSSSSSSSSSSS--------------------------------------****************"+str(classes))
     except:
-        classes = None
+        classes = []
     scaled_split_dict['classes'] = classes
 
     return input_features_list, target_features_list, X_train, X_test, X_valid, y_train, y_test, y_valid, scaled_split_dict
@@ -220,6 +220,10 @@ def supervised_models(run_id,**kwargs):
         
         hyperparameters['model_name'] = model_name
         
+        if model_type.lower() != 'classification':
+            scaled_split_dict['classes'] = []
+
+
         check_flag = 'outside'
         dag_run_id = run_id
         # Check Running Model Wheather It is Binary Or Multi Class Problem.     
