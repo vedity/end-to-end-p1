@@ -20,6 +20,7 @@ from .anova import AnovaClass
 from .coorelation import CoorelationClass
 warnings.filterwarnings("ignore")
 from preprocess.utils import common  
+from requests.auth import HTTPBasicAuth
 
 
 commonObj = common.CommonClass()
@@ -81,7 +82,7 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
         fs_lst = self.get_possible_fs_algo(feature_params_dict['schema_id'],feature_params_dict['target_col'],'reg')
         feature_params_dict['algo_list'] = fs_lst
         json_data = {'conf':'{"feature_params_dict":"'+str(feature_params_dict)+'"}'}
-        result = requests.post("http://airflow:8080/api/experimental/dags/feature_selection_dag/dag_runs",data=json.dumps(json_data),verify=False)#owner
+        result = requests.post("http://airflow-webserver:8080/api/experimental/dags/feature_selection_dag/dag_runs",data=json.dumps(json_data),verify=False,auth= HTTPBasicAuth('airflow','airflow'))#owner
         return 0
 
     def chisq_fs(self,run_id,**kwargs):

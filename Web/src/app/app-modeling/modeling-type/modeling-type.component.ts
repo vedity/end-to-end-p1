@@ -70,22 +70,42 @@ export class ModelingTypeComponent implements OnInit {
         this.params = localStorage.getItem("modeling");
         this.params = JSON.parse(this.params);
       }
-      // this.checkstatus();
       this.checkmodelType(this.params.dataset_id,this.params.project_id)
       this.currentuser = localStorage.getItem("currentUser")
       this.params.user_id = JSON.parse(this.currentuser).id;
       this.getDatasetInfo();
-      this.getRunningExperimentList('onload');
+      this.getModelingDagStatus(this.params.dataset_id,this.params.project_id);
       this.getAllExperimentList();
-      // setTimeout(() => {
-      //   if(this.runningExpList.length==0){
-      //     $("#switcher-list")[0].click();
-      //   }
-      //   else{
-      //     this.processclass = "start";
-      //   }
-      // }, 10);
-     
+    }
+  }
+
+  getModelingDagStatus(dataset_id,project_id){
+    this.apiservice.getModelingDagStatus(dataset_id,project_id).subscribe(
+      logs=>this.modelDagSuccessHandlers(logs),
+      error=>this.errorHandler(error)
+    )
+  }
+
+  modelDagSuccessHandlers(data){
+    if(data.status_code=="200"){
+      if(data.response.exp_name != ''){
+        this.experiment_name=data.response.exp_name;
+        this.processclass = "start";
+      this.modalService.dismissAll();
+      this.toaster.success(data.error_msg, 'Success');
+      if(!this.isDisplayRunning){
+          $("#switcher-list")[0].click();
+      }
+      this.processInterval = setInterval(() => {
+        this.getRunningExperimentList();
+        this.getAllExperimentList();
+        this.checkstatus();
+      }, 4000);
+      }
+     console.log(data);
+    }
+    else{
+      this.errorHandler(data);
     }
   }
 
@@ -268,7 +288,6 @@ export class ModelingTypeComponent implements OnInit {
   getRunningExperimentList(type='') {
     this.apiservice.showrunningexperimentslist(this.params.project_id).subscribe(
       logs => this.runningexpListsuccessHandler(logs,type)
-      // error => this.errorHandler(error)
     );
   }
 
@@ -294,9 +313,6 @@ export class ModelingTypeComponent implements OnInit {
         }
       }
     }
-    // else {
-    //   this.errorHandler(data);
-    // }
   }
 
   getAllExperimentList() {
