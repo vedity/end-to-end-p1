@@ -130,6 +130,7 @@ class XGBoostRegressionClass:
         
         tree_shaps = abs(tree_shap_values).mean(axis=0)
         features_importance_values = tree_shaps / tree_shaps.sum()
+        features_importance_values /= max(features_importance_values)
         
         features_df = pd.DataFrame(data=features_importance_values, index=self.input_features_list, columns=['features_importance'])
 
