@@ -31,7 +31,7 @@ from modeling.split_data import SplitData
 
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.preprocessing.preprocess_exceptions import *
-from common.utils import dynamic_dag
+from common.utils.dynamic_dag import dag_utils as du
 
 
 # Declare Global Object And Variables.
@@ -42,6 +42,8 @@ LogObject = cl.LogClass(user_name,log_enable)
 LogObject.log_setting()
 logger = logging.getLogger('model_identifier')
 
+#Defining Objects
+DAG_OBJ = du.DagUtilsClass()
 
 class SupervisedClass(RC,PC):
    
@@ -88,13 +90,15 @@ class SupervisedClass(RC,PC):
             logging.info("modeling : SupervisedClass : run_regression_model : execution start") 
             # Call the super class method.
             
-            dag_id = self.get_dag_id(basic_params_dict,db_param_dict)
+            project_id=basic_params_dict['project_id']
+            dataset_id = basic_params_dict['dataset_id']
+            
+            # dag_id = self.get_dag_id(basic_params_dict,db_param_dict)
+            dag_index, dag_id = DAG_OBJ.get_dag(db_param_dict['connection'], dag_type = 2, project_id = project_id)
+    
             class_name,model_algorithm_type = self.get_model_class_name(model_id,db_param_dict)
             
             AlgorithmDetectorObject = AlgorithmDetector(db_param_dict)
-            
-            project_id=basic_params_dict['project_id']
-            dataset_id = basic_params_dict['dataset_id']
             
             model_type_dict = AlgorithmDetectorObject.get_model_type(project_id,dataset_id)
             basic_params_dict['algorithm_type'] = model_type_dict['algorithm_type']
@@ -111,15 +115,15 @@ class SupervisedClass(RC,PC):
             namespace = "manual_modeling_dags"
             file_name = dag_id + '.py'
             
-            master_dict = {"model_id": model_id,"model_name": model_name,
-                           "model_hyperparams": model_hyperparams,"model_class_name":model_class_name,"algorithm_type":algorithm_type}
             
-
+            master_dict = {"model_id": model_id,"model_name": model_name,
+                           "model_hyperparams": model_hyperparams,"model_class_name":model_class_name,"algorithm_type":algorithm_type,
+                           "dag_index":dag_index}
+            
             status = self.dag_updater(master_dict, file_name, namespace)
             if not isinstance(status,int):
                 logging.error(f"Dag Updation Failed : Error : {str(status)}")
                 raise DagUpdateFailed(500)
-
             
             json_data = {'conf':'{"basic_params_dict":"'+str(basic_params_dict)+'","master_dict":"'+str(master_dict)+'"}'}
             logging.info("json data :"+str(json_data))

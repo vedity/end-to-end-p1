@@ -52,6 +52,7 @@ from modeling.utils.model_experiments import model_experiment
 from modeling.split_data import SplitData
 from common.utils.logger_handler import custom_logger as cl
 from common.utils.exception_handler.python_exception.modeling.modeling_exception import *
+from common.utils.dynamic_dag import dag_utils as du
 
 # Global Variables And Objects
 user_name = 'admin'
@@ -67,6 +68,8 @@ connection,connection_string=DBObject.database_connection(database,user,password
 # Declare Experiment Object
 ExpObject = model_experiment.ExperimentClass(DBObject, connection, connection_string) 
 
+#Declaring dag object
+DAG_OBJ = du.DagUtilsClass()
 
 def get_supervised_models(model_type):
     """This function is used to get all supervised model based on model type (Regression or Classification).
@@ -272,7 +275,16 @@ def supervised_models(run_id,**kwargs):
         raise ModelFailed(100)
             
             
-      
+def end_pipeline(dag_index,**kwargs):
+    '''
+        To release the dag status
+    '''
+    #? Releasing the dag
+    status = DAG_OBJ.release_dag(connection, index = dag_index)
+   
+    return status
+
+
             
         
         
