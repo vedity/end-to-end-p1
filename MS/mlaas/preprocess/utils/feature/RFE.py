@@ -23,16 +23,17 @@ class RFEClass():
         value_lst = []
 
         # define dataset
-        col = FU.fetch_column(DBObject,connection,schema_id)
-        df = DBObject.get_feature_df(connection,dataset_id,col)
+        col,change_col = FU.fetch_column(DBObject,connection,schema_id)
+        df = DBObject.get_feature_df(connection,dataset_id,col,change_col)
         X, y = FU.load_dataset(df,target_col)
 
         sql_command = f"select data_type from mlaas.schema_tbl st where st.schema_id = {schema_id} and (st.column_name='{target_col}' or st.changed_column_name='{target_col}')"
         datatype_df = DBObject.select_records(connection,sql_command)
-        logging.info("--->"+str(datatype_df['data_type']))
-        if datatype_df['data_type'] == 'numerical':
-            y=y.astype('int')
+        # logging.info("--->"+str(datatype_df['data_type'][0]))
+        # if datatype_df['data_type'] == 'numerical':
+        #     y=y.astype('int')
         # define RFE
+  
         rfe = RFE(estimator=LogisticRegression(), n_features_to_select=None)
         # fit RFE
         rfe.fit(X, y)
