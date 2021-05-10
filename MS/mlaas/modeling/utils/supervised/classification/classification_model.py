@@ -17,7 +17,7 @@ import logging
 import requests
 
 
-from requests.auth import HTTPBasicAuth
+# from requests.auth import HTTPBasicAuth
 
 # Imports Common Class Files.
 from modeling.utils.model_experiments import model_experiment
@@ -46,7 +46,7 @@ class ProbabilisticClass:
                 
                 logging.info("modeling : RegressionClass : classification_model : execution"+str(json_data))
                 
-                result = requests.post("http://airflow-webserver:8080/api/experimental/dags/auto_classification_pipeline/dag_runs",data=json.dumps(json_data),verify=False,auth= HTTPBasicAuth('airflow','airflow'))#owner
+                result = requests.post("http://airflow:8080/api/experimental/dags/auto_classification_pipeline/dag_runs",data=json.dumps(json_data),verify=False)#owner
      
             else:
                 print("yet not tested")
