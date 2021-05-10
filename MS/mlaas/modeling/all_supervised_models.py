@@ -219,8 +219,10 @@ def supervised_models(run_id,**kwargs):
         hyperparameters = kwargs['model_hyperparams']  
         
         hyperparameters['model_name'] = model_name
+ 
         if model_type.lower() != 'classification':
             scaled_split_dict['classes'] = []
+
         check_flag = 'outside'
         dag_run_id = run_id
         # Check Running Model Wheather It is Binary Or Multi Class Problem.     

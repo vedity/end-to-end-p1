@@ -472,7 +472,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     predicted_datatype = predicted_datatypes[id]
                     
                     #? Array to store the operations
-                    operations = []
+                    operations = [331,332,333]
+
 
                     #? Column is both numerical & categorical
                     if (col in num_cols) and (predicted_datatype.startswith('ca')):
@@ -512,7 +513,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     #? Outlier Removal & Scaling Operations for numeric; Encoding ops for Categorical
                     if missing_flag == 'False' and noise_flag == 'False':
                         if col_type == 0 or col_type == 1:
-                            operations += [21,31,191,201,202,211,221,231,241,242,243,244,245]
+                            operations += [21,31,191,201,202,211,221,231,241,242,243,244,245,246]
                         if col_type == 2 or col_type == 3:
                             operations += [261,271]
                         if col_type == 0:

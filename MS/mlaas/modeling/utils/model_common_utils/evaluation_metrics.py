@@ -214,7 +214,7 @@ class EvaluationMetrics:
         for index, feature in enumerate(input_features_list):
             grid_resolution=min(100, len(np.unique(pdp_data[:, index])))
             feature_average = partial_dependence(model, pdp_data, [index], kind='average', percentiles=[0, 1], grid_resolution=grid_resolution)
-            pdp_values[feature] = feature_average['average'][0].round(3).tolist()
+            pdp_values[feature] = feature_average['average'].round(3).tolist()
 
         if len(classes) == 2:
             classes = [classes[1]]

@@ -14,6 +14,9 @@ import traceback
 #* Relative Imports
 from sklearn.neighbors import LocalOutlierFactor
 from common.utils.logger_handler import custom_logger as cl
+from .. import common
+#Object Initialize
+commonObj = common.CommonClass()
 
 #* Defining Logger
 user_name = 'admin'
@@ -497,7 +500,12 @@ class OutliersTreatmentClass:
         try:
             logging.info("data preprocessing : OutliersTreatmentClass : update_outliers : execution start")
             
-            sql_command = f'''Update {table_name} set "{col_name}"= case when  "{col_name}" < {str(lower_limit)} then '{str(lower_limit)}' when "{col_name}" > {str(upper_limit)} then '{str(upper_limit)}' end ''' # Get update query
+            value = commonObj.check_datatype(DBObject,connection,col_name,table_name)
+            if value == True:
+                lower_limit,upper_limit = int(lower_limit),int(upper_limit)
+                
+            sql_command = f'''Update {table_name} set "{col_name}"= case when  "{col_name}" < {str(lower_limit)} then {str(lower_limit)} when "{col_name}" > {str(upper_limit)} then {str(upper_limit)} else "{col_name}" end ''' # Get update query
+            
             logging.info("Sql_command :  update_outliers with lower_limit : "+str(sql_command))
 
             status = DBObject.update_records(connection,sql_command)
@@ -508,6 +516,8 @@ class OutliersTreatmentClass:
             logging.error("data preprocessing : OutliersTreatmentClass : update_outliers : Exception : "+str(exc))
             logging.error("data preprocessing : OutliersTreatmentClass : update_outliers : " +traceback.format_exc())
             return 1
+    
+    
     
 
     

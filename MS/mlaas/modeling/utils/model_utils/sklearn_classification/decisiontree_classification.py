@@ -141,12 +141,12 @@ class DecisionTreeClassificationClass:
             [dict]: [it will return features impact dictionary.]
         """
         
-        shap_data = self.X_train[:min(10, self.X_train.shape[0]), 1:]
+        shap_data = self.X_train[:min(100, self.X_train.shape[0]), 1:]
         treeexplainer = shap.TreeExplainer(model)
-        shap_values = treeexplainer.shap_values(shap_data[:5])
+        shap_values = treeexplainer.shap_values(shap_data[:50], check_additivity=False)
         if isinstance(shap_values, list):
             shap_values = np.array(shap_values).mean(axis=0)
-        shap_values = abs(np.array(shap_values)).mean(axis=0)
+        shap_values = (abs(np.array(shap_values)).mean(axis=0)
 
         features_importance_values = shap_values / shap_values.sum()
         features_importance_values /= max(features_importance_values)
