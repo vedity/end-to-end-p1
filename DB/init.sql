@@ -442,7 +442,7 @@ Insert into  mlaas.feature_master_tbl values (1,'Anova F-test','categorical');
 Insert into  mlaas.feature_master_tbl values (2,'Chi Square','categorical');
 Insert into  mlaas.feature_master_tbl values (3,'Coorelation','numerical');
 Insert into  mlaas.feature_master_tbl values (4,'Mutual Information','categorical');
-Insert into  mlaas.feature_master_tbl values (5,'Recursive Feature Elimination',NULL);
+Insert into  mlaas.feature_master_tbl values (5,'Recursive Feature Elimination','categorical');
 
 --Insert activity master
 -- COLUMNS => "index", activity_id, activity_name, activity_description, "language", operation, code, parent_activity_id, user_input, check_typ

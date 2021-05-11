@@ -5,7 +5,7 @@ import json
 import ast
 from database import *
 from common.utils.database import db
-from requests.auth import HTTPBasicAuth
+# from requests.auth import HTTPBasicAuth
 
 DBObject=db.DBClass()    
 connection,connection_string=DBObject.database_connection(database,user,password,host,port)  
@@ -22,7 +22,7 @@ def get_modeling_dag_name():
     
     json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
     
-    result = requests.post("http://airflow-webserver:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False,auth= HTTPBasicAuth('airflow','airflow'))#owner
+    result = requests.post("http://airflow:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
 
     return dag_id
 
