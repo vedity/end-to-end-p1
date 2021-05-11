@@ -16,3 +16,5 @@ xgboost
 #pyspark
 pymongo
 pdpbox
+lime
+dill

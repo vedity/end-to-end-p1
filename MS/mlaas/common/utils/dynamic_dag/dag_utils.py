@@ -229,6 +229,7 @@ class DagUtilsClass():
                             return length
                 else:
                     #? Closing bracket not found
+                    logging.error("common : DagUtilsClass : bracket_end_finder : ending bracket not found")
                     return -1    
             
             bracket_end = bracket_end_finder(content[bracket_start:],bracket_start)
@@ -244,5 +245,6 @@ class DagUtilsClass():
             return 0
 
         except Exception as e:
-            return e
-    
+            logging.error(f"common : DagUtilsClass : dag_updater : execution failed : {str(e)}")
+            logging.error(f"common : DagUtilsClass : dag_updater : execution failed : {traceback.format_exc()}")
+            return 1

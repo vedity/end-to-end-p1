@@ -82,7 +82,7 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
         fs_lst = self.get_possible_fs_algo(feature_params_dict['schema_id'],feature_params_dict['target_col'],'reg')
         feature_params_dict['algo_list'] = fs_lst
         json_data = {'conf':'{"feature_params_dict":"'+str(feature_params_dict)+'"}'}
-        result = requests.post("http://airflow-webserver:8080/api/experimental/dags/feature_selection_dag/dag_runs",data=json.dumps(json_data),verify=False,auth= HTTPBasicAuth('airflow','airflow'))#owner
+        result = requests.post("http://airflow:8080/api/experimental/dags/feature_selection_dag/dag_runs",data=json.dumps(json_data),verify=False)#owner
         return 0
 
     def chisq_fs(self,run_id,**kwargs):
@@ -236,6 +236,7 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
                 
                 column = self.algo_call(schema_id,targetcol)
                 data = {"column_list":column,"data":val}
+
                 return data
 
         except Exception as e:
@@ -267,5 +268,23 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
 
         # kwargs['ti'].xcom_push(key='possible_algo', value=fs_lst)
         return fs_lst
+
+
+    def get_fs_activity_desc(self,project_name,activity_id):
+        """This function will replace * into project name and get activity description of scale and split.
+
+        Args:
+        project_name[String]: get project name
+        activity_id[Integer]: get activity id
+
+        Returns:
+            [String]: activity_description
+        """
+        #project_name = '"'+project_name+'"'
+        sql_command = f"select replace (amt.activity_description, '*', '{project_name}') as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
+        desc_df = DBObject.select_records(connection,sql_command)
+        activity_description = desc_df['description'][0]
+
+        return activity_description
 
         

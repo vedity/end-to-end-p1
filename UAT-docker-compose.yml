@@ -1,0 +1,88 @@
+version: '3.7'
+services:
+
+  postgres:
+    image: registry.gitlab.com/isgtest/end-to-end-p1:db-latest
+    hostname: postgresql
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+
+  airflow:
+    image: registry.gitlab.com/isgtest/end-to-end-p1:af-latest
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      - LOAD_EX=n
+      - EXECUTOR=Local
+    user: "0:0"
+    volumes:                                        # mount the following local folders
+      - static_var:/usr/local/airflow/dags
+      - mlruns_var:/usr/local/airflow/mlruns
+    #user: "1000:1000"
+
+
+    ports:
+      - "8080:8080"                               # expose port
+    command: webserver
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+
+  web:
+    image: registry.gitlab.com/isgtest/end-to-end-p1:ms-latest
+    command: sh -c "
+            python manage.py runserver 0.0.0.0:8000 & 
+            sleep 150 && 
+            python common/utils/dynamic_dag/dag_creator.py && 
+            pkill -f runserver && 
+            python manage.py runserver 0.0.0.0:8000" 
+    ports:
+      - "8000:8000"
+    volumes:
+      - static_var:/mlaas
+      - mlruns_var:/mlaas/mlruns
+    links:
+      - postgres
+    depends_on:
+      - mlflow
+
+  mlflow:
+    image: registry.gitlab.com/isgtest/end-to-end-p1:ms-latest
+    command: mlflow server --backend-store-uri postgresql://airflow:airflow@isg.loginto.me:5432/airflow?options=-csearch_path%3Ddbo,mlflow --default-artifact-root file:///mlaas/mlruns --host 0.0.0.0 --port 5400
+    ports:
+      - "5400:5400"
+    volumes:
+      - static_var:/mlaas
+      - mlruns_var:/mlaas/mlruns
+    depends_on:
+      - postgres
+
+  angular:
+    image: registry.gitlab.com/isgtest/end-to-end-p1:web-latest
+    ports:
+      - "4200:4200"
+    depends_on:
+      - web
+
+
+
+
+
+volumes:
+  postgres_data:
+  static_var:
+  mlruns_var:
+
+
+networks:
+  backend:
+    driver: "bridge"

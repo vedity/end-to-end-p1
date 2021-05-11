@@ -571,9 +571,35 @@ class FeatureSelectionDag(APIView):
                         dataset_id = request.query_params.get('dataset_id') #get datasetid
                         schema_id = request.query_params.get('schema_id') #get schemaid
                         target_col = str(request.query_params.get('target_col')) #get targetcol
+                        # project_id = request.query_params.get('project_id') # get project_id
+                        # user_name = request.query_params.get('user_name') # get user_name
+                        project_id = 4
+                        user_name = 'nisha'
 
                         feature_params_dict = {"dataset_id":dataset_id,"schema_id":schema_id,"target_col":target_col} #dict to pass parameters in dag 
+                        
+                        
+                        #Activiy Timeline started code
+                        activity_id = 'sm_8'
+                        activity_df = AT_OBJ.get_activity(activity_id,"US")
+                        projectnm_df = DBObject.get_project_detail(connection,project_id)
+                        project_name = projectnm_df['project_name'][0]
+                        activity_description = FS.get_fs_activity_desc(project_name,activity_id)
+                        end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                        activity_status,index = AT_OBJ.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)
+                        
+                        #feature selection dag execution
                         status = FS.fs_dag_executor(feature_params_dict)   
+                        
+                        
+                        #Activiy Timeline ended code
+                        activity_id = 'sm_9'                  
+                        activity_df = AT_OBJ.get_activity(activity_id,"US")
+                        projectnm_df = DBObject.get_project_detail(connection,project_id)
+                        project_name = projectnm_df['project_name'][0]
+                        activity_description = FS.get_fs_activity_desc(project_name,activity_id)
+                        end_time = str(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+                        activity_status,index = AT_OBJ.insert_user_activity(activity_id,user_name,project_id,dataset_id,activity_description,end_time)              
 
                         return Response({"status_code":"200","error_msg":"Successfull","response":status})   
                 except Exception as e:
@@ -588,8 +614,7 @@ class FeatureSelectionData(APIView):
                         dataset_id = request.query_params.get('dataset_id')
                         schema_id = request.query_params.get('schema_id')
                         target_col = str(request.query_params.get('target_col'))
-
-
+                        
                         feature_dict = FS.data_availablity_fs(schema_id,target_col)
                         return Response({"status_code":"200","error_msg":"Successfull retrival","response":feature_dict})   
                 except Exception as e:
