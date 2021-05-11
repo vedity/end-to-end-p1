@@ -77,13 +77,12 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
         # dataset_id = feature_params_dict["dataset_id"]
         # schema_id = feature_params_dict["schema_id"]
         # target_col = feature_params_dict["target_col"]
-        
 
         
         fs_lst = self.get_possible_fs_algo(feature_params_dict['schema_id'],feature_params_dict['target_col'],'reg')
         feature_params_dict['algo_list'] = fs_lst
         json_data = {'conf':'{"feature_params_dict":"'+str(feature_params_dict)+'"}'}
-        result = requests.post("http://airflow-webserver:8080/api/experimental/dags/feature_selection_dag/dag_runs",data=json.dumps(json_data),verify=False,auth= HTTPBasicAuth('airflow','airflow'))#owner
+        result = requests.post("http://airflow:8080/api/experimental/dags/feature_selection_dag/dag_runs",data=json.dumps(json_data),verify=False)#owner
         return 0
 
     def chisq_fs(self,run_id,**kwargs):
