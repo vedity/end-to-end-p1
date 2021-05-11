@@ -638,10 +638,10 @@ class ModelStatisticsClass:
             experiment_names = list(experiment_names_df['name'])
 
             actual_vs_prediction_json = self.actual_vs_prediction(experiment_ids[0], model_types[0])
-            index_values = actual_vs_prediction_json['index']
-            actual_values = actual_vs_prediction_json['actual']
-
+            
             if model_types[0] == 'Regression':
+                index_values = actual_vs_prediction_json['index']
+                actual_values = actual_vs_prediction_json['actual']
                 # actual_vs_prediction_df = pd.DataFrame({'index':index_values, 'actual': actual_values, 'prediction': prediction_values})
                 # index = actual_vs_prediction_df['index'].tolist()
                 # predictions = actual_vs_prediction_df['prediction']
