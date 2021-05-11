@@ -640,20 +640,22 @@ class ModelStatisticsClass:
             experiment_names = list(experiment_names_df['name'])
 
             actual_vs_prediction_json = self.actual_vs_prediction(experiment_ids[0], model_types[0])
-
+            
             if model_types[0] == 'Regression':
-                actual_vs_prediction_df = pd.DataFrame(actual_vs_prediction_json)
-                index = actual_vs_prediction_df['index'].tolist()
-                predicted_column = actual_vs_prediction_df.filter(regex=('.*_prediction.*')).columns.values[0]
-                actual_column = predicted_column.replace('_prediction', '')
-                actual = actual_vs_prediction_df[actual_column].tolist()
+                index_values = actual_vs_prediction_json['index']
+                actual_values = actual_vs_prediction_json['actual']
+                # actual_vs_prediction_df = pd.DataFrame({'index':index_values, 'actual': actual_values, 'prediction': prediction_values})
+                # index = actual_vs_prediction_df['index'].tolist()
+                # predictions = actual_vs_prediction_df['prediction']
+                # actual_column = predicted_column.replace('_prediction', '')
+                # actual = actual_vs_prediction_df[actual_column].tolist()
                 predicted_list = []
-                predicted_list.append({'exp_name': experiment_names[0],'values': actual_vs_prediction_df[predicted_column].tolist()})
+                # predicted_list.append({'exp_name': experiment_names[0],'values': actual_vs_prediction_df[predicted_column].tolist()})
 
-                for i in range(len(experiment_ids) - 1):
-                    predicted_list.append({'exp_name': experiment_names[i+1],'values': self.actual_vs_prediction(experiment_ids[i+1], model_types[i+1])[predicted_column]})
+                for i in range(len(experiment_ids)):
+                    predicted_list.append({'exp_name': experiment_names[i],'values': self.actual_vs_prediction(experiment_ids[i], model_types[i])['prediction']})
 
-                comparision_dict = {'index': index, 'actual': actual, 'predicted': predicted_list,'model_type':'Regression'}
+                comparision_dict = {'index': index_values, 'actual': actual_values, 'predicted': predicted_list,'model_type':'Regression'}
                 
                 return comparision_dict
 
@@ -663,10 +665,9 @@ class ModelStatisticsClass:
                 actual = actual_vs_prediction_json['actual']
                 
                 predicted_list = []
-                predicted_list.append({'exp_name': experiment_names[0],'values': actual_vs_prediction_json['prediction']})
 
-                for i in range(len(experiment_ids) - 1):
-                    predicted_list.append({'exp_name': experiment_names[i+1],'values': self.actual_vs_prediction(experiment_ids[i+1], model_types[i+1])['prediction']})
+                for i in range(len(experiment_ids)):
+                    predicted_list.append({'exp_name': experiment_names[i],'values': self.actual_vs_prediction(experiment_ids[i], model_types[i])['prediction']})
 
                 comparision_dict = {'key': keys, 'actual': actual, 'predicted': predicted_list,'model_type':'Classification'}
                 logging.info("modeling : ModelStatisticsClass : compare_experiments_graph : Exception Start")
@@ -705,6 +706,7 @@ class ModelStatisticsClass:
         logging.info("SCLASS VALUE;-"+str(len(sclass)))
         feature_values = []
         pdp_values = []
+
         if issubclass(feature_data[0].dtype.type, np.integer) or issubclass(feature_data[0].dtype.type, np.floating):       
             unique_values = np.unique(feature_data)
             fmin = min(unique_values)
@@ -722,6 +724,9 @@ class ModelStatisticsClass:
                     
                 pdp_values = pdp_dict['PDP_Scores'][feature][cindex]
         
+        # if issubclass = string:
+        #     unique_values = sort(['mann', 'vipul'])
+
         target_feature = pdp_dict['target_features']
 
         return {'pdp_values':pdp_values, 'feature_values':feature_values, 'target_feature':target_feature, 'classes':pdp_dict['classes']}
