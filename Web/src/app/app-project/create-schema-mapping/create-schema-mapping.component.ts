@@ -178,14 +178,20 @@ if(data.response.cleanup_dag=='True'|| data.response.modeling_dag=='True'||data.
     this.selectedFeature="";
     if(this.selecteditem){
       this.selectedFeature=this.selecteditem.name;
-      this.datasetSchema.forEach(element => {
+      this.datasetSchema.forEach((element,index) => {
         var data=this.selecteditem.column[element.column_name];
         console.log(element);
         console.log(data);
         if(data=="True")
-        element.column_attribute='Select';
+        {
+          $("#selectattr_"+index).val('Select')
+        }
+        // element.column_attribute='Select';
         if(data=="False")
-        element.column_attribute='Ignore';
+        {
+          $("#selectattr_"+index).val('Ignore')
+        }
+        // element.column_attribute='Ignore';
         this.isFeatureSelected=true;
       });
       this.modalService.dismissAll();
@@ -292,7 +298,7 @@ if(data.response.cleanup_dag=='True'|| data.response.modeling_dag=='True'||data.
   
 
   startFeatureSelectionDags(schemarecommodate){
-    this.apiService.startFeatureSelection(this.dataset_id, this.schema_id, this.targetColumnName).subscribe(
+    this.apiService.startFeatureSelection(this.dataset_id, this.schema_id, this.targetColumnName,this.project_id).subscribe(
       logs=>this.startSuccessHandlers(logs,schemarecommodate),
       error=>this.errorHandler(error)
     )
