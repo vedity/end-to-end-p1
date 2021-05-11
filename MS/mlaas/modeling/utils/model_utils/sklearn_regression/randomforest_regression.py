@@ -141,7 +141,7 @@ class RandomForestRegressionClass:
             [dict]: [it will return features impact dictionary.]
         """
         
-        shap_data = self.X_train[:min(100, self.X_train.shape[0]), 1:]
+        shap_data = self.X_train[:min(50, self.X_train.shape[0]), 1:]
         treeexplainer = shap.TreeExplainer(model)
         shap_values = treeexplainer.shap_values(shap_data, check_additivity=False)
         if isinstance(shap_values, list):
