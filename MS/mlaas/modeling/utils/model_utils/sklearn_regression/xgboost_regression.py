@@ -125,7 +125,7 @@ class XGBoostRegressionClass:
             [dict]: [it will return features impact dictionary.]
         """
 
-        shap_data = self.X_train[:min(100, self.X_train.shape[0]), 1:]
+        shap_data = self.X_train[:min(20, self.X_train.shape[0]), 1:]
         tree_explainer = shap.TreeExplainer(model,shap_data)
         shap_values = tree_explainer.shap_values(shap_data, check_additivity=False)
         
