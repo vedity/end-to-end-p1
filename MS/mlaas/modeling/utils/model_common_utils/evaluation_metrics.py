@@ -15,6 +15,7 @@ from sklearn import metrics
 from sklearn.metrics import confusion_matrix, precision_recall_curve, roc_curve
 from sklearn.preprocessing import label_binarize
 from sklearn.inspection import partial_dependence
+import pdpbox.pdp as pdp
 
 # Common Class File Imports
 from common.utils.exception_handler.python_exception.common.common_exception import *
@@ -188,6 +189,8 @@ class EvaluationMetrics:
         return confusion_matrix_dict
 
     
+    
+
     def get_partial_dependence_scores(self, model, X_train, input_features_list, target_features_list, dataset_split_dict):
         """Returns the values needed to plot partial dependence plot.
 
@@ -196,26 +199,31 @@ class EvaluationMetrics:
             X_train (array): input training data
             y_train (array): target training data
         """
+
         data_ratio = 0.2
         data_size = int(X_train.shape[0]*data_ratio)
         data_index = X_train[:data_size, 0].tolist()
-        # X_train = X_train[:, 1:]
-        
-        
-        # np.random.seed(dataset_split_dict['random_state'])
-        # data_size = all_index.shape[0]
-        # index = all_index[np.random.choice(data_size, int(data_size*0.2))].astype(np.int16)
-        # print("INDEX----", index)
-        # print("INDEX TYPE------", type(index))
-        pdp_data = X_train[:data_size, 1:]
-        classes = dataset_split_dict['classes']
 
+    #     pdp_data = X_train[:data_size, 1:]
+        classes = dataset_split_dict['classes']
+        pdp_data = pd.DataFrame(X_train[:data_size, 1:], columns=input_features_list)
         pdp_values = dict()
         for index, feature in enumerate(input_features_list):
-            grid_resolution=min(100, len(np.unique(pdp_data[:, index])))
-            feature_average = partial_dependence(model, pdp_data, [index], kind='average', percentiles=[0, 1], grid_resolution=grid_resolution)
-            pdp_values[feature] = feature_average['average'].round(3).tolist()
 
+            grid_resolution=min(10, len(np.unique(pdp_data.iloc[:, index])))
+            pdp_isolate = pdp.pdp_isolate(model, pdp_data, input_features_list, feature=feature, grid_type='equal', num_grid_points=grid_resolution)
+            value_list = []
+            if isinstance(pdp_isolate, list):
+                for g in range(len(pdp_isolate)):
+                    val = pdp_isolate[g].ice_lines.mean(axis=0).tolist()
+                    value_list.append(val)
+            
+            else:
+                val = pdp_isolate.ice_lines.mean(axis=0).tolist()
+                value_list.append(val)
+            pdp_values[feature] = np.round(value_list, 3).tolist()
+            
+        
         if len(classes) == 2:
             classes = [classes[1]]
         if classes == []:
