@@ -101,11 +101,7 @@ def classification_func_call(self):
         func_code = "M03"
         # get actual and predicted values 
         actual_lst,prediction_lst = self.get_actual_prediction(model)
-        
-        func_code = "M04"
-        # save prediction
-        final_result_dict = self.EvalMetricsObj.save_prediction(self.y_test, prediction_lst, self.target_features_list)
-        
+    
         func_code = "M05"
         # all evaluation matrix
         accuracy,recall,precision,f1_score = self.EvalMetricsObj.get_evaluation_matrix(actual_lst,prediction_lst, model_type='Classification')   
@@ -136,6 +132,10 @@ def classification_func_call(self):
         func_code = "M12"
         # Get probaility for each class
         y_pred_prob = self.EvalMetricsObj.get_predict_proba(model, self.X_test, self.y_train, model_type='sklearn')
+        
+        func_code = "M04"
+        # save prediction
+        final_result_dict = self.EvalMetricsObj.save_prediction(self.y_test, prediction_lst, self.target_features_list,y_pred_prob)
 
         func_code = "M13"
         # Get ROC Curve values for each class
