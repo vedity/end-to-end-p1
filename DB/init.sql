@@ -417,6 +417,8 @@ Insert into mlaas.user_auth_tbl values(17,'denisha','denisha');
 Insert into mlaas.preprocess_tab_tbl values(1,'Missing Value Handling');
 Insert into mlaas.preprocess_tab_tbl values(2,'Transformation');
 
+
+
 --Insert parent_activity_tbl
 Insert into mlaas.parent_activity_tbl values(1,'Missing Value Handling',1);
 Insert into mlaas.parent_activity_tbl values(2,'Noise Handling',1);
@@ -426,13 +428,15 @@ Insert into mlaas.parent_activity_tbl values(5,'Encoding',2);
 Insert into mlaas.parent_activity_tbl values(6,'Math Operations',2);
 Insert into mlaas.parent_activity_tbl values(7,'Transformations',2);
 Insert into mlaas.parent_activity_tbl values(8,'Feature Engineering',2);
+Insert into mlaas.parent_activity_tbl values(9,'Duplicate Data Handling',1);
+
 
 --Insert into feature master table
 Insert into  mlaas.feature_master_tbl values (1,'Anova F-test','categorical');
 Insert into  mlaas.feature_master_tbl values (2,'Chi Square','categorical');
 Insert into  mlaas.feature_master_tbl values (3,'Coorelation','numerical');
 Insert into  mlaas.feature_master_tbl values (4,'Mutual Information','categorical');
-Insert into  mlaas.feature_master_tbl values (5,'Recursive Feature Elimination',NULL);
+Insert into  mlaas.feature_master_tbl values (5,'Recursive Feature Elimination','categorical');
 
 --Insert activity master
 -- COLUMNS => "index", activity_id, activity_name, activity_description, "language", operation, code, parent_activity_id, user_input, check_typ
@@ -516,6 +520,10 @@ Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_211','Replace Outliers
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_221','Replace Outliers with Mean using Z-score Detection','operation on column * failed','US','Operation',0,3,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_221','Replace Outliers with Mean using Z-score Detection','operation on column * in process','US','Operation',1,3,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_221','Replace Outliers with Mean using Z-score Detection','operation on column * completed','US','Operation',2,3,0,0);
+
+
+
+
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_231','Replace Outliers with Median using Extreme Value Analysis Detection','operation on column * failed','US','Operation',0,3,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_231','Replace Outliers with Median using Extreme Value Analysis Detection','operation on column * in process','US','Operation',1,3,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_231','Replace Outliers with Median using Extreme Value Analysis Detection','operation on column * completed','US','Operation',2,3,0,0);
@@ -528,6 +536,24 @@ Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_242','Replace Outliers
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_243','Replace Outliers with Median using Local Factor Outlier Detection','operation on column * failed','US','Operation',0,3,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_243','Replace Outliers with Median using Local Factor Outlier Detection','operation on column * in process','US','Operation',1,3,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_243','Replace Outliers with Median using Local Factor Outlier Detection','operation on column * completed','US','Operation',2,3,0,0);
+
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_244','Replace Outliers using IQR Proximity Rule','operation on column * failed','US','Operation',0,3,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_244','Replace Outliers using IQR Proximity Rule','operation on column * in process','US','Operation',1,3,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_244','Replace Outliers using IQR Proximity Rule','operation on column * completed','US','Operation',2,3,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_245','Replace Outliers using Gussian Approximation','operation on column * failed','US','Operation',0,3,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_245','Replace Outliers using Gussian Approximation','operation on column * in process','US','Operation',1,3,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_245','Replace Outliers using Gussian Approximation','operation on column * completed','US','Operation',2,3,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_246','Replace Outliers using Interquartile Range','operation on column * failed','US','Operation',0,3,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_246','Replace Outliers using Interquartile Range','operation on column * in process','US','Operation',1,3,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_246','Replace Outliers using Interquartile Range','operation on column * completed','US','Operation',2,3,0,0);
+
+
+
+
+
+
+
+
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_251','Logarithmic transformation','operation on column * failed','US','Operation',0,7,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_251','Logarithmic transformation','operation on column * in process','US','Operation',1,7,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_251','Logarithmic transformation','operation on column * completed','US','Operation',2,7,0,0);
@@ -567,6 +593,16 @@ Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_311','Multiply into co
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_321','Extract Datetime Features','operation on column * failed','US','Operation',0,8,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_321','Extract Datetime Features','operation on column * in process','US','Operation',1,8,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_321','Extract Datetime Features','operation on column * completed','US','Operation',2,8,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_331','Remove Duplicate Records','operation  failed','US','Operation',0,9,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_331','Remove Duplicate Records','operation  in process','US','Operation',1,9,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_331','Remove Duplicate Records','operation  completed','US','Operation',2,9,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_332','Remove Duplicate Columns','operation failed','US','Operation',0,9,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_332','Remove Duplicate Columns','operation  in process','US','Operation',1,9,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_332','Remove Duplicate Columns','operation  completed','US','Operation',2,9,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_333','Remove Low Variance column','operation  failed','US','Operation',0,9,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_333','Remove Low Variance column','operation  in process','US','Operation',1,9,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_333','Remove Low Variance column','operation completed','US','Operation',2,9,0,0);
+
 Insert into mlaas.activity_master_tbl values (DEFAULT,'md_41','Created Experiment','You have created experiment "#" for project "$"','US','Operation',0,-1,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'md_42','Selected Auto Modeling','You have selected Auto Modeling for experiment "#" of project "$"','US','Operation',0,-1,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'md_43','Selected Manual Modeling','You have selected Manual Modeling for experiment "#" of project "$"','US','Operation',0,-1,0,0);

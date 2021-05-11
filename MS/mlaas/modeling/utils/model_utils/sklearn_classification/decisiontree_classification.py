@@ -147,7 +147,7 @@ class DecisionTreeClassificationClass:
         if isinstance(shap_values, list):
             shap_values = np.array(shap_values).mean(axis=0)
         shap_values = abs(np.array(shap_values)).mean(axis=0)
-
+        
         features_importance_values = shap_values / shap_values.sum()
         features_importance_values /= max(features_importance_values)
 

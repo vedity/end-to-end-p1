@@ -987,7 +987,7 @@ class DBClass:
             
         return is_positve_flag,is_zero_flag
 
-    def get_feature_df(self, connection, dataset_id,col):
+    def get_feature_df(self, connection, dataset_id,col,change_col):
         '''
             Returns a dataframe containing data of given dataset_id & schema_id.  
             If schema_id is not given then it returns whole datatable without schema changes. 
@@ -1023,10 +1023,11 @@ class DBClass:
             if dataset_visibility == 'public':
                 user_name = 'public'
             
+           
             #? Get Whole table
             query_string = ""
             for i in range(len(col)):
-                query_string += '"'+col[i]+'",'
+                query_string +='"'+col[i]+'" as "'+change_col[i]+'",'
             
             query_string = query_string[:len(query_string)-1]
             logging.info("+++>"+str(query_string))

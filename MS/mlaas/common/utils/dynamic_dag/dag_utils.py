@@ -180,4 +180,69 @@ class DagUtilsClass():
             logging.error(f"common : DagUtilsClass : add_dag_to_table : execution failed : {str(e)}")
             logging.error(f"common : DagUtilsClass : add_dag_to_table : execution failed : {traceback.format_exc()}")
             return 1
+
+    def dag_updater(self, dic, file, namespace = '.'):
+        '''
+            Updates the dag.
+
+            Args:
+            -----
+            dic (`dictionary`): Python dictionary that you want to place in the file.
+            file (`string`): Name of the file.
+            namespace (`string`): Name of the folder inside of the dynamic_dags directory.
+
+            Returns:
+            --------
+            status (`integer | Exception`): `0` if updation was successful else error.
+        '''
+        try:
+            logging.info("common : DagUtilsClass : dag_updater : execution start")
+            
+            #? Reading the file
+            with open(f"project_dags/{namespace}/{file}","r") as ro:
+                content = ro.read()
+        
+            new_dic = str(dic)
+
+            point = content.find("master")
+            bracket_start = content.find("{",point) 
+            
+            def bracket_end_finder(string, length = 0):
+                '''
+                    A Subfunction to find the ending bracket.
+                '''
+                
+                opening_count = 0
+                length -= 1
+                flag = False
+                
+                for i in string:
+                    if i == '{':
+                        opening_count += 1
+                        flag = True
+                    elif i == '}':
+                        opening_count -= 1
+                    length += 1
+                        
+                    if flag:
+                        if opening_count == 0:
+                            return length
+                else:
+                    #? Closing bracket not found
+                    return -1    
+            
+            bracket_end = bracket_end_finder(content[bracket_start:],bracket_start)
+
+            new_str = content[:bracket_start] + new_dic + content[bracket_end + 1:]
+        
+            #? Writing into the file
+            with open(f"project_dags/{namespace}/{file}", 'w') as wo:
+                wo.write(new_str)
+
+            logging.info("common : DagUtilsClass : dag_updater : execution stop")
+            
+            return 0
+
+        except Exception as e:
+            return e
     

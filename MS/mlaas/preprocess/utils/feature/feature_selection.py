@@ -42,20 +42,20 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
     def algo_call(self,schema_id,target_col):
         
             #fetch all column
-            column = self.fetch_column(DBObject,connection,schema_id)
-            column.remove(target_col)
+            column,change_col = self.fetch_column(DBObject,connection,schema_id)
+            change_col.remove(target_col)
 
             
             # feature_dict = {"target_col":target_col,"column_list":column,"option_list":[chisq_dict,rfe_dict,mutual_dict,anova_dict,co_dict]}
             # status = self.insert_feature_record(DBObject,connection,schema_id,feature_dict)
 
-            return column
+            return change_col
 
     def get_extra_column(self,DBObject,connection,schema_id,col_lst):
 
-        col = self.fetch_column(DBObject,connection,schema_id)
+        col,change_col = self.fetch_column(DBObject,connection,schema_id)
         extra_col = {}
-        for i in col:
+        for i in change_col:
             if i not in col_lst:
                 extra_col[i] = "True"
             else:
@@ -216,27 +216,30 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
         try:
             sql_command = f"select feature_value from mlaas.feature_info_tbl where schema_id='{schema_id}';"
             data_dict = DBObject.select_records(connection,sql_command)
-
-            val = str(data_dict['feature_value'].values[0])
-            val = ast.literal_eval(val)
-
             if len(data_dict) == 0:
                 return False
 
-            elif val['target_col'] != targetcol:
+            val = str(data_dict['feature_value'].values[0])
+            val = ast.literal_eval(val)
+            name = val['target_col'] 
+            
+
+            if name != targetcol:
                 try:
+                    logging.info("+val"+str(val['target_col']))
                     sql_command = f"delete from mlaas.feature_info_tbl where schema_id='{schema_id}';"
                     status = DBObject.delete_records(connection,sql_command)
                     return False
                 except Exception as e:
-                    return e
+                    return False
             else:
+                
                 column = self.algo_call(schema_id,targetcol)
                 data = {"column_list":column,"data":val}
                 return data
 
         except Exception as e:
-            return False
+            return e
 
     def get_possible_fs_algo(self,schema_id,target_name,project_type):
         # feature_params_dict = ast.literal_eval(kwargs['dag_run'].conf['feature_params_dict'])

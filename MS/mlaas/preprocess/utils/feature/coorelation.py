@@ -7,12 +7,12 @@ import logging
 FU = FSUtilityClass()
 class CoorelationClass():
     def get_coorelation(self,DBObject,connection,dataset_id,schema_id,target_col,**kwargs):
-        col = FU.get_numeric_schema_dtype(DBObject,connection,schema_id)
-        df = DBObject.get_feature_df(connection,dataset_id,col)
+        col,change_col = FU.get_numeric_schema_dtype(DBObject,connection,schema_id)
+        df = DBObject.get_feature_df(connection,dataset_id,col,change_col)
 
         #target column Y
-        targetcol = FU.fetch_column(DBObject,connection,schema_id)
-        targetdf = DBObject.get_feature_df(connection,dataset_id,targetcol)
+        targetcol,change_col = FU.fetch_column(DBObject,connection,schema_id)
+        targetdf = DBObject.get_feature_df(connection,dataset_id,targetcol,change_col)
         X, y = FU.load_dataset(df,target_col,targetdf)
         algo_column = list(X.columns)
 

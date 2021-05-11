@@ -81,18 +81,28 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         '''
             Function will delete the duplicate records from the table.
 
-            Operation id: ?
+            Operation id: 
         '''
-        
+        operation_id = 'dp_331'
         logging.info("data preprocessing : TransformationClass : delete_duplicate_records : execution start")
         try:
             
             col_string = ''
-            # operation_id = 7
+            operation_id = 'dp_331'
+            #Insert the activity for the operation
+            col_name = "blank"
+            activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id,col_name)
+                
             for x in old_column_list:
-                col_string += '"'+str(x)+'",'
-    
+                if x != 'index':
+                    col_string += '"'+str(x)+'",'
+            
             status = super().delete_duplicate_records(DBObject,connection,table_name,col_string[:-1])
+            #Update the activity status for the operation performed
+            if status == 0:
+                status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+            else:
+                status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
                 
         except Exception as exc:
             logging.error("data preprocessing : TransformationClass : delete_duplicate_records : Exception "+str(exc))
@@ -111,14 +121,18 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
         
         logging.info("data preprocessing : TransformationClass : delete_duplicate_column : execution start")
         try:
-            # #Insert the activity for the operation
-            # activity_id = self.operation_start(DBObject, connection, operation_id, project_id, col_name)
-
+            operation_id = 'dp_332'
+            col_name = "blank"
+            activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id,col_name)
+          
             status,column_list = super().delete_duplicate_column(DBObject,connection,schema_id,table_name)
-
-            # if status==0:
-            #     #Update the activity status for the operation performed
-            #     at_status = self.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+            #Update the activity status for the operation performed
+            if status == 0:
+                status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+            else:
+                status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
+            
+            
             return status
         except Exception as exc:
             logging.error("data preprocessing : TransformationClass : delete_duplicate_column : Exception : "+str(exc))
@@ -126,34 +140,48 @@ class TransformationClass(ddh.RemoveDuplicateRecordClass, fs.FeaturnScalingClass
             
             return 1
 
-    def delete_low_variance_column(self,DBObject,connection,project_id,schema_id,column_list,old_column_list, table_name,variance=0.5, **kwargs):
+    def delete_low_variance_column(self,DBObject,connection,project_id,schema_id,column_list,old_column_list, table_name, **kwargs):
         '''
             Delete the column which has low variance. 
-            Operation id: ?
+            Operation id: dp_333
         '''
         
         logging.info("data preprocessing : TransformationClass : delete_low_variance_column : execution start")
         try:
-
+            operation_id = 'dp_333'
             #Initialize the empty list
             variance_column = []
-            status = 0
-
+            variance = 0.5
+            status = 1
+            col_name = "blank"
+            activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id,col_name)
+          
             for index,col_name in enumerate(old_column_list):
-
-                #Query to get Boolean value  "True" if column variance is less ten te given variance else return "False"
-                sql_command = f'''select  case when VARIANCE("{col_name}") < {str(variance)} then 'True' else 'False' end as variance_status from {table_name}  '''
                 
-                #Execute the sql query
-                dataframe = DBObject.select_records(connection,sql_command)
-                if str(dataframe['variance_status'][0]) =='True':
+                value = commonObj.check_datatype(DBObject,connection,col_name,table_name,datatype_check = 'text')
+                if value == False:
+                    #Query to get Boolean value  "True" if column variance is less ten te given variance else return "False"
+                    sql_command = f'''select  case when VARIANCE("{col_name}") < {str(variance)} then
+                    'True' when VARIANCE("{col_name}") is null then
+                    'True' else 'False' end as variance_status from {table_name}  '''
+                    
+                    #Execute the sql query
+                    dataframe = DBObject.select_records(connection,sql_command)
+                    if str(dataframe['variance_status'][0]) =='True':
 
-                    #Append Name of column into a list variable called "variance_column"
-                    variance_column.append(column_list[index])
+                        #Append Name of column into a list variable called "variance_column"
+                        variance_column.append(column_list[index])
 
-                    #Delete the column from the table
-                    status = super().delete_column(DBObject,connection,schema_id,table_name,col_name)
-                
+                        #Delete the column from the table
+                        status = super().delete_column(DBObject,connection,schema_id,table_name,col_name)
+                        #Update the activity status for the operation performed
+                else:
+                    status = 0
+            if status == 0:
+                status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+            else:
+                status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
+            
         except Exception as exc:
                 logging.error("data preprocessing : TransformationClass : delete_low_variance_column : Exception : "+str(exc))
                 logging.error("data preprocessing : TransformationClass : delete_low_variance_column : " +traceback.format_exc())

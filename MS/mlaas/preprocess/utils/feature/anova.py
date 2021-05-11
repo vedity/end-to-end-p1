@@ -31,11 +31,11 @@ class AnovaClass():
     def get_anova_info(self,DBObject,connection,dataset_id,schema_id,target_col,**kwargs):
         # load the dataset
         value_lst = []
-        col = FU.get_numeric_schema_dtype(DBObject,connection,schema_id)
-        df = DBObject.get_feature_df(connection,dataset_id,col)
+        col,change_col = FU.get_numeric_schema_dtype(DBObject,connection,schema_id)
+        df = DBObject.get_feature_df(connection,dataset_id,col,change_col)
         #target column Y
-        targetcol = FU.fetch_column(DBObject,connection,schema_id)
-        targetdf = DBObject.get_feature_df(connection,dataset_id,targetcol)
+        targetcol,changecol = FU.fetch_column(DBObject,connection,schema_id)
+        targetdf = DBObject.get_feature_df(connection,dataset_id,targetcol,changecol)
         X, y = FU.load_dataset(df,target_col,targetdf)
         algo_col = list(X.columns)
         # split into train and test sets
