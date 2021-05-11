@@ -100,7 +100,7 @@ class CommonMethodClass:
         return final_json_data
 
     def actual_vs_prediction_fun(self,experiment_id,model_type,actual_vs_prediction_json):
-        """This function is used to get actuval_vs_prediction of particular experiment based on model type.
+        """This function is used to get actual_vs_prediction of particular experiment based on model type.
 
         Args:
             experiment_id ([Integer]): [Experiment id of particular experiment.]
@@ -115,6 +115,7 @@ class CommonMethodClass:
         
         if model_type == 'Regression':
             actual_vs_prediction_df = DataFrame(actual_vs_prediction_json).round(decimals = 3) #Round to the nearest 3 decimals.
+            actual_vs_prediction_df=actual_vs_prediction_df.drop('residuals',axis=1)
             # Get Original Data
             original_data_df = self.get_original_data(experiment_id)
             # Get Target Features
@@ -165,7 +166,7 @@ class CommonMethodClass:
             
             logging.info("final df =="+str(final_df))
             
-            actual_vs_prediction_df = actual_vs_prediction_df.drop(['seq_id'],axis=1)
+            actual_vs_prediction_df = actual_vs_prediction_df.drop(['seq_id','prediction_prob'],axis=1)
             
             
             cols=actual_vs_prediction_df.columns.values.tolist()
@@ -217,6 +218,28 @@ class CommonMethodClass:
         original_data_df = self.DBObject.get_dataset_df(self.connection, dataset_id, schema_id)
          
         return original_data_df
+    
+    
+    def get_test_data(self,experiment_id):
+        
+        sql_command="select input_features,target_features,scaled_split_parameters from mlaas.project_tbl "\
+                    "where project_id in "\
+                                        "( select project_id from mlaas.model_experiment_tbl "\
+                                            "where experiment_id="+str(experiment_id) +")"
+
+        param_df = self.DBObject.select_records(self.connection, sql_command)
+        
+        input_features_list=eval(param_df['input_features'][0])
+        target_features_list=eval(param_df['target_features'][0])
+        scaled_split_parameters=eval(param_df['scaled_split_parameters'][0])
+        
+        train_path='./'+scaled_split_parameters['train_X_filename']
+        test_path='./'+scaled_split_parameters['test_X_filename']
+        
+        x_train_arr = np.load(train_path,allow_pickle=True)
+        x_test_arr = np.load(test_path,allow_pickle=True)
+        
+        return x_train_arr,x_test_arr,input_features_list,target_features_list
         
         
     def get_unscaled_data(self,experiment_id):

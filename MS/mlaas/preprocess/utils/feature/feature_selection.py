@@ -236,6 +236,7 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
                 
                 column = self.algo_call(schema_id,targetcol)
                 data = {"column_list":column,"data":val}
+
                 return data
 
         except Exception as e:
@@ -267,5 +268,23 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
 
         # kwargs['ti'].xcom_push(key='possible_algo', value=fs_lst)
         return fs_lst
+
+
+    def get_fs_activity_desc(self,project_name,activity_id):
+        """This function will replace * into project name and get activity description of scale and split.
+
+        Args:
+        project_name[String]: get project name
+        activity_id[Integer]: get activity id
+
+        Returns:
+            [String]: activity_description
+        """
+        #project_name = '"'+project_name+'"'
+        sql_command = f"select replace (amt.activity_description, '*', '{project_name}') as description from mlaas.activity_master_tbl amt where amt.activity_id = '{activity_id}'"
+        desc_df = DBObject.select_records(connection,sql_command)
+        activity_description = desc_df['description'][0]
+
+        return activity_description
 
         

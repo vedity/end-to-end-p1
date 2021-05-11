@@ -25,7 +25,7 @@ from common.utils.exception_handler.python_exception.common.common_exception imp
 from common.utils.exception_handler.python_exception.modeling.modeling_exception import *
 from common.utils.database import db
 from modeling.all_method import CommonMethodClass
-
+from modeling.utils.model_common_utils.model_interpretablity import ModelExplanation
 # Declare Global Object And Varibles.
 user_name = 'admin'
 log_enable = True
@@ -48,6 +48,8 @@ class ModelStatisticsClass:
         
         self.DBObject = db_param_dict['DBObject']
         self.connection = db_param_dict['connection']
+        
+        self.exp_obj = ModelExplanation(self.DBObject,self.connection)
 
     
     def learning_curve(self, experiment_id):
@@ -725,3 +727,42 @@ class ModelStatisticsClass:
         return {'pdp_values':pdp_values, 'feature_values':feature_values, 'target_feature':target_feature, 'classes':pdp_dict['classes']}
         
         logging.info("modeling : ModelStatisticsClass : show_partial_dependence_plot : Exception End" )
+        
+    
+    def show_model_explanation(self,experiment_id,exp_type):
+        
+        path = '/predictions.json'
+        artifact_uri = cmobj.get_artifact_uri(experiment_id,path)#will get artifact_uri for particular experiment
+        actual_prediction_json = cmobj.get_json(artifact_uri)# will get json data from particular artifact_uri location
+        
+        residuals_json = self.exp_obj.get_model_explanation(actual_prediction_json,exp_type)
+        
+        return residuals_json
+    
+    
+    def show_local_explanation(self,experiment_id,exp_type,seq_ids):
+        
+        #TODO : change this 
+        path = '/'
+        artifact_uri = cmobj.get_artifact_uri(experiment_id,path)#will get artifact_uri for particular experiment
+        
+        # Get Unscaled Data
+        original_data_df = cmobj.get_original_data(experiment_id)
+        
+        #Get Scaled Data
+        x_train_arr,test_x_arr,input_features_lst,target_features_list = cmobj.get_test_data(experiment_id)
+        
+        test_df = pd.DataFrame(test_x_arr,columns=input_features_lst)
+        
+        model_name,local_explanation_json=self.exp_obj.get_local_explanation(experiment_id,exp_type,artifact_uri,seq_ids,
+                                                                  original_data_df,test_df,x_train_arr,
+                                                                  input_features_lst,target_features_list)
+        
+        
+        #TODO : remove line 700
+        # local_explanation_json={'testdf':test_df}
+       
+        local_explanation_json['model_name'] = model_name
+        
+        return local_explanation_json
+
