@@ -119,26 +119,25 @@ class XGBoostClassificationClass:
 
 
     def features_importance(self,model):
-        
-        x_train = self.X_train[:,1:]
-        y_train = self.y_train[:,-1]
+        """This function is used to get features impact.
+
+        Returns:
+            [dict]: [it will return features impact dictionary.]
+        """
  
-        shap_data = x_train[:min(100,x_train.shape[0])]
+        shap_data = self.X_train[:min(100, self.X_train.shape[0]), 1:]
         tree_explainer = shap.TreeExplainer(model,shap_data)
         shap_values = tree_explainer.shap_values(shap_data, check_additivity=False)
         
         if isinstance(shap_values, list):
             shap_values = np.array(shap_values).mean(axis=0)
             
-        shap_values = abs(np.array(shap_values)).mean(axis=0)
+        shap_values = abs(np.array(shap_values).mean(axis=0))
         
-        features_importance_values = shap_values / shap_values.sum()
-        features_importance_values /= max(features_importance_values)
-        
+        features_importance_values = shap_values / max(shap_values)
+
         features_df = pd.DataFrame(data=features_importance_values, index=self.input_features_list, columns=['features_importance'])
-
         features_df = features_df.sort_values(by='features_importance', ascending=False)*100
-
         features_dict = features_df.T.to_dict(orient='records')[0]
 
         features_names = list(features_dict.keys())

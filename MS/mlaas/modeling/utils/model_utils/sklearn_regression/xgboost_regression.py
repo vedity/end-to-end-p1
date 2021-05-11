@@ -119,18 +119,22 @@ class XGBoostRegressionClass:
 
 
     def features_importance(self,model):
-        
-        x_train = self.X_train[:,1:]
-        y_train = self.y_train[:,-1]
- 
-        shap_data = self.X_train[:min(100, self.X_train.shape[0]), 1:]
-        tree_explainer = shap.TreeExplainer(model, shap_data)
-        tree_shap_values = tree_explainer.shap_values(shap_data, check_additivity=False)
+        """This function is used to get features impact.
 
+        Returns:
+            [dict]: [it will return features impact dictionary.]
+        """
+
+        shap_data = self.X_train[:min(100, self.X_train.shape[0]), 1:]
+        tree_explainer = shap.TreeExplainer(model,shap_data)
+        shap_values = tree_explainer.shap_values(shap_data, check_additivity=False)
         
-        tree_shaps = abs(tree_shap_values).mean(axis=0)
-        features_importance_values = tree_shaps / tree_shaps.sum()
-        features_importance_values /= max(features_importance_values)
+        if isinstance(shap_values, list):
+            shap_values = np.array(shap_values).mean(axis=0)
+            
+        shap_values = abs(np.array(shap_values).mean(axis=0))
+        
+        features_importance_values = shap_values / max(shap_values)
         
         features_df = pd.DataFrame(data=features_importance_values, index=self.input_features_list, columns=['features_importance'])
 

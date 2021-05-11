@@ -134,12 +134,14 @@ class SVMClassificationClass:
             [dict]: [it will return features impact dictionary.]
         """
         
-        shap_data = self.X_train[:min(25, self.X_train.shape[0]), 1:]
+        shap_data = self.X_train[:min(20, self.X_train.shape[0]), 1:]
         kernelexplainer = shap.KernelExplainer(model.predict, shap_data)
-        shap_values = abs(kernelexplainer.shap_values(shap_data[:10])).mean(axis=0)
+        shap_values = kernelexplainer.shap_values(shap_data[:10], check_additivity=False)
+        if isinstance(shap_values, list):
+            shap_values = np.array(shap_values).mean(axis=0)
+        shap_values = abs(np.array(shap_values).mean(axis=0))
 
-        features_importance_values = shap_values / shap_values.sum()
-        features_importance_values /= max(features_importance_values)
+        features_importance_values = shap_values / max(shap_values)
 
         features_df = pd.DataFrame(data=features_importance_values, index=self.input_features_list, columns=['features_importance'])
 
