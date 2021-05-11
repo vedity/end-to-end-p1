@@ -2,6 +2,7 @@ stages:
   - automation_tests
   - building_test_image
   - building_production_image
+  - deployment
 
 Automation Testing:
   image: tmaier/docker-compose:latest
@@ -136,3 +137,19 @@ Creating Production Docker Images:
 
   only:
     - master
+
+Deploying Images:
+  stage: deployment
+  tags: 
+    - shell
+  script:
+    - git fetch
+    - git checkout UAT
+    - git pull origin UAT
+    - docker-compose -f UAT-docker-compose.yml down
+    - docker image prune -a -f
+    - docker volume prune -f
+    - docker system prune -f
+    - docker-compose -f UAT-docker-compose.yml up
+  only:
+    - UAT
