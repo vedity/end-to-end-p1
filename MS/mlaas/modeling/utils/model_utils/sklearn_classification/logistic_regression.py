@@ -128,11 +128,10 @@ class LogisticRegressionClass:
         """
         
         shap_data = self.X_train[:min(100, self.X_train.shape[0]), 1:]
-        LinearExplainer = shap.LinearExplainer(model, shap_data)
-        shap_values = abs(LinearExplainer.shap_values(shap_data)).mean(axis=0)
+        linexplainer = shap.LinearExplainer(model, shap_data)
+        shap_values = abs(linexplainer.shap_values(shap_data).mean(axis=0))
 
-        features_importance_values = shap_values / shap_values.sum()
-        features_importance_values /= max(features_importance_values)
+        features_importance_values = shap_values / max(shap_values)
 
         features_df = pd.DataFrame(data=features_importance_values, index=self.input_features_list, columns=['features_importance'])
 

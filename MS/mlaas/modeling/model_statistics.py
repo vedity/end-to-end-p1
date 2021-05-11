@@ -564,6 +564,7 @@ class ModelStatisticsClass:
             logging.error("modeling : ModelStatisticsClass : compare_experiments_grid : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : compare_experiments_grid : " +traceback.format_exc())
             return exc.msg
+            
 
     def can_compare_experiments(self, experiment_ids):
         """Calculates whether the given experiments can be compared or not.
@@ -590,12 +591,13 @@ class ModelStatisticsClass:
             different_list = []
             for i in range(len(exp_ids) - 1):
                 for j in range(i+1, len(exp_ids)):
-                    if pivot_df.iloc[i, :] != pivot_df.iloc[j, :]:
+                    if sum(pivot_df.iloc[i, :] != pivot_df.iloc[j, :]) == 0:
                         different_list.append(i)
                         different_list.append(j)
             
             if len(different_list) != 0:
-                sql_command = 'select name from mlflow.experiments where experiment_id='+str(exp_ids)
+                different_exps = tuple(different_list)
+                sql_command = 'select name from mlflow.experiments where experiment_id in'+str(different_exps)
                 exp_names_df = self.DBObject.select_records(self.connection, sql_command)
                 if exp_names_df is None:
                     raise DatabaseConnectionFailed(500)
