@@ -98,7 +98,7 @@ class SplitData:
         Returns:
             [type]: [description]
         """
-        path = "/opt/airflow/dags/"
+        path = "/usr/local/airflow/dags/"
         unscaled_y = np.load(path + scaled_split_dict['actual_Y_filename'], allow_pickle=True)
         classes = np.unique(unscaled_y[:, -1]).tolist()
         
