@@ -955,3 +955,91 @@ class PDPCurveClass(APIView):
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " + str(e))
                         logging.error(" modeling : ModelStatisticsClass : GET Method : " +traceback.format_exc())
                         return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
+                
+                
+                
+class ModelExplanationClass(APIView):
+
+        def get(self, request, format=None):
+                """
+                This function is used to get model summary of particular experiment.
+        
+                Args  : 
+                        experiment_id[(Integer)]   :[Id of Experiment]
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival & insertions failed or successfull),
+                        Response(return false if failed otherwise json data).
+                """
+                try:
+                       
+                        logging.info(" modeling : ModelExplanationClass : GET Method : execution start")
+                        
+                        experiment_id = request.query_params.get('experiment_id') #get experiment_id
+                        exp_type = request.query_params.get('exp_type') #get exp_type
+                        
+                        model_explanation_json = ModelStatObject.show_model_explanation(experiment_id,exp_type)#will call model_summary method which will return summary of model
+                        
+                        logging.info("modeling : ModelExplanationClass : GET Method : execution stop : status_code :200")
+                        # print(learning_curve_json)
+                        if isinstance(model_explanation_json,str): #check the instance of dataset_df
+                                
+                                status_code,error_msg=json_obj.get_Status_code(model_explanation_json) # extract the status_code and error_msg from project_df
+                                
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code :"+ status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        else:
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code : 200")
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":model_explanation_json})
+                        
+                except Exception as e:
+                        logging.error(" modeling : ModelExplanationClass : GET Method : " + str(e))
+                        logging.error(" modeling : ModelExplanationClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
+                
+                
+                
+class LocalExplanationClass(APIView):
+
+        def get(self, request, format=None):
+                """
+                This function is used to get model summary of particular experiment.
+        
+                Args  : 
+                        experiment_id[(Integer)]   :[Id of Experiment]
+                Return : 
+                        status_code(500 or 200),
+                        error_msg(Error message for retrival & insertions failed or successfull),
+                        Response(return false if failed otherwise json data).
+                """
+                try:
+                       
+                        logging.info(" modeling : LocalExplanationClass : GET Method : execution start")
+                        
+                        experiment_id = request.query_params.get('experiment_id') #get experiment_id
+                        exp_type = request.query_params.get('exp_type') #get experiment type
+                        seq_ids = request.query_params.get('seq_ids') #get list of seq ids
+                        
+                        #TODO : change this
+                        seq_ids = [5506.0,9279.0]
+                        
+                        local_explanation_json = ModelStatObject.show_local_explanation(experiment_id,exp_type,seq_ids)#will call model_summary method which will return summary of model
+                        
+                        logging.info("modeling : LocalExplanationClass : GET Method : execution stop : status_code :200")
+                        # print(learning_curve_json)
+                        if isinstance(local_explanation_json,str): #check the instance of dataset_df
+                                
+                                status_code,error_msg=json_obj.get_Status_code(local_explanation_json) # extract the status_code and error_msg from project_df
+                                
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code :"+ status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        else:
+                                logging.info("data ingestion : CreateProjectClass : GET Method : execution : status_code : 200")
+                                return Response({"status_code":"200","error_msg":"successfull retrival","response":local_explanation_json})
+                        
+                except Exception as e:
+                        logging.error(" modeling : LocalExplanationClass : GET Method : " + str(e))
+                        logging.error(" modeling : LocalExplanationClass : GET Method : " +traceback.format_exc())
+                        return Response({"status_code":"500","error_msg":str(e),"response":"false"})  
+ 
+
