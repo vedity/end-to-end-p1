@@ -45,7 +45,7 @@ import json
 import time
 import datetime
 
-from requests.auth import HTTPBasicAuth
+# from requests.auth import HTTPBasicAuth
 
 
 #* Defining Logger
@@ -472,7 +472,8 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     predicted_datatype = predicted_datatypes[id]
                     
                     #? Array to store the operations
-                    operations = []
+                    operations = [331,332,333]
+
 
                     #? Column is both numerical & categorical
                     if (col in num_cols) and (predicted_datatype.startswith('ca')):
@@ -512,7 +513,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     #? Outlier Removal & Scaling Operations for numeric; Encoding ops for Categorical
                     if missing_flag == 'False' and noise_flag == 'False':
                         if col_type == 0 or col_type == 1:
-                            operations += [21,31,191,201,202,211,221,231,241,242,243,244,245]
+                            operations += [21,31,191,201,202,211,221,231,241,242,243,244,245,246]
                         if col_type == 2 or col_type == 3:
                             operations += [261,271]
                         if col_type == 0:
@@ -888,7 +889,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             
             json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
             
-            res = requests.post("http://airflow-webserver:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False,auth= HTTPBasicAuth('airflow','airflow'))#owner
+            res = requests.post("http://airflow:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
 
             logging.info("data preprocessing : PreprocessingClass : get_cleanup_dag_name : execution stop")
             # connection.close()
@@ -961,7 +962,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             # json_data = {'conf':'{"master_dict":"'+ str(master_dict)+'","dag_id":"'+ str(dag_id)+'","template":"'+ template+'","namespace":"'+ namespace+'"}'}
             # result = requests.post("http://airflow:8080/api/experimental/dags/dag_creator/dag_runs",data=json.dumps(json_data),verify=False)#owner
 
-            status = self.dag_updater(master_dict, file_name, namespace)
+            status = DAG_OBJ.dag_updater(master_dict, file_name, namespace)
             if not isinstance(status,int):
                 logging.error(f"Dag Updation Failed : Error : {str(status)}")
                 raise DagUpdateFailed(500)
@@ -970,7 +971,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             activity_status = self.get_cleanup_startend_desc(DBObject,connection,dataset_id,project_id,activity_id,user_name,dataset_name,flag='True')
 
             json_data = {}
-            result = requests.post(f"http://airflow-webserver:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False,auth= HTTPBasicAuth('airflow','airflow'))#owner
+            result = requests.post(f"http://airflow:8080/api/experimental/dags/{dag_id}/dag_runs",data=json.dumps(json_data),verify=False)#owner
             
             logging.info("DAG RUN RESULT: "+str(result))
             
@@ -986,71 +987,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
             return exc.msg
         
 
-    def dag_updater(self, dic, file, namespace = '.'):
-        '''
-            Updates the dag.
-
-            Args:
-            -----
-            dic (`dictionary`): Python dictionary that you want to place in the file.
-            file (`string`): Name of the file.
-            namespace (`string`): Name of the folder inside of the dynamic_dags directory.
-
-            Returns:
-            --------
-            status (`integer | Exception`): `0` if updation was successful else error.
-        '''
-        try:
-            logging.info("data preprocessing : PreprocessingClass : dag_updater : execution start")
-            
-            #? Reading the file
-            with open(f"project_dags/{namespace}/{file}","r") as ro:
-                content = ro.read()
-        
-            new_dic = str(dic)
-
-            point = content.find("master")
-            bracket_start = content.find("{",point) 
-            
-            def bracket_end_finder(string, length = 0):
-                '''
-                    A Subfunction to find the ending bracket.
-                '''
-                
-                opening_count = 0
-                length -= 1
-                flag = False
-                
-                for i in string:
-                    if i == '{':
-                        opening_count += 1
-                        flag = True
-                    elif i == '}':
-                        opening_count -= 1
-                    length += 1
-                        
-                    if flag:
-                        if opening_count == 0:
-                            return length
-                else:
-                    #? Closing bracket not found
-                    return -1    
-            
-            bracket_end = bracket_end_finder(content[bracket_start:],bracket_start)
-
-            new_str = content[:bracket_start] + new_dic + content[bracket_end + 1:]
-        
-            #? Writing into the file
-            with open(f"project_dags/{namespace}/{file}", 'w') as wo:
-                wo.write(new_str)
-
-            logging.info("data preprocessing : PreprocessingClass : dag_updater : execution stop")
-            
-            return 0
-
-        except Exception as e:
-            return e
-
+    
     def SaveAs(self,DBObject,connection,project_id,schema_id,table_name,user_name,dataset_visibility,dataset_name,selected_visibility,dataset_desc,cleanup_flag=None, **kwargs):
         '''
         Function used to create a new table with updated changes and insert a new record into dataset table and 

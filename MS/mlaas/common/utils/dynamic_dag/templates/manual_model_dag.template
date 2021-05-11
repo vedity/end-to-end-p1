@@ -12,8 +12,6 @@ from airflow.operators.email_operator import EmailOperator
 #* Relative Imports
 from modeling.all_supervised_models import *
 
-
-
 args = {'owner': 'airflow','start_date': airflow.utils.dates.days_ago(1),'provide_context': True,}
 
 main_dag_id = #DAG_ID
@@ -22,16 +20,17 @@ dag = DAG(dag_id=main_dag_id,default_args=args,catchup=False,schedule_interval =
         #is_paused_upon_creation= True,
         )
 
-
-
 start_task = PythonOperator(task_id='start_pipeline',python_callable=start_pipeline,dag=dag,)
-
 
 # Get model dict 
 
 master_dict = #MASTER_DICT
 
+    
 if len(master_dict) != 0:
+    
+    dag_index = master_dict['dag_index']  #getting dag management table index
+    end_task = PythonOperator(task_id='end_pipeline',python_callable=end_pipeline,op_args=[dag_index],dag=dag,)
 
     model_id = master_dict['model_id']
     model_name = master_dict['model_name']
@@ -47,4 +46,6 @@ if len(master_dict) != 0:
                                                'model_hyperparams':model_hyperparams},
                                     dag=dag)
         
-        start_task >> dynamic_task
+        start_task >> dynamic_task >> end_task
+
+    

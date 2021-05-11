@@ -31,8 +31,8 @@ class MutualInfoClass():
     def get_mutual_info(self,DBObject,connection,dataset_id,schema_id,target_col,**kwargs):
         # load the dataset
         value_lst = []
-        col = FU.get_schema_dtype(DBObject,connection,schema_id)
-        df = DBObject.get_feature_df(connection,dataset_id,col)
+        col,change_col = FU.get_schema_dtype(DBObject,connection,schema_id)
+        df = DBObject.get_feature_df(connection,dataset_id,col,change_col)
         X, y = FU.load_dataset(df,target_col)
         algo_col = list(X.columns)
         # split into train and test sets

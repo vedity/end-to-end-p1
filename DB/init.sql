@@ -93,7 +93,6 @@ insert into mlaas.model_hyperparams_tbl values (5, 'algorithm', '["auto", "ball_
 insert into mlaas.model_hyperparams_tbl values (6, 'criterion', '["mse", "friedman_mse", "mae", "poisson"]', 'dropdown');
 insert into mlaas.model_hyperparams_tbl values (6, 'max_depth', '[2, 30]', 'validation');
 insert into mlaas.model_hyperparams_tbl values (6, 'max_features', '["auto", "sqrt", "log2"]', 'dropdown');
-insert into mlaas.model_hyperparams_tbl values (6, 'min_impurity_decrease', '[0, 0.9]', 'validation');
 insert into mlaas.model_hyperparams_tbl values (6, 'min_samples_leaf', '[1, 20]', 'validation');
 
 
@@ -102,7 +101,6 @@ insert into mlaas.model_hyperparams_tbl values (7, 'n_estimators', '[1, 2000]', 
 insert into mlaas.model_hyperparams_tbl values (7, 'criterion', '["friedman_mse", "mse", "mae"]', 'dropdown');
 insert into mlaas.model_hyperparams_tbl values (7, 'max_depth', '[2, 30]', 'validation');
 insert into mlaas.model_hyperparams_tbl values (7, 'max_features', '["auto", "sqrt", "log2"]', 'dropdown');
-insert into mlaas.model_hyperparams_tbl values (7, 'min_impurity_decrease', '[0, 0.9]', 'validation');
 insert into mlaas.model_hyperparams_tbl values (7, 'min_samples_leaf', '[1, 20]', 'validation');
 
 
@@ -122,7 +120,6 @@ insert into mlaas.model_hyperparams_tbl values (9, 'n_estimators', '[1, 2000]', 
 insert into mlaas.model_hyperparams_tbl values (9, 'criterion', '["mse", "friedman_mse", "mae"]', 'dropdown');
 insert into mlaas.model_hyperparams_tbl values (9, 'max_depth', '[2, 30]', 'validation');
 insert into mlaas.model_hyperparams_tbl values (9, 'max_features', '["auto", "sqrt", "log2"]', 'dropdown');
-insert into mlaas.model_hyperparams_tbl values (9, 'min_impurity_decrease', '[0, 0.9]', 'validation');
 insert into mlaas.model_hyperparams_tbl values (9, 'min_samples_leaf', '[1, 20]', 'validation');
 
 
@@ -157,7 +154,6 @@ insert into mlaas.model_hyperparams_tbl values (14, '', '[]', '');
 insert into mlaas.model_hyperparams_tbl values (15, 'criterion', '["gini", "entropy"]', 'dropdown');
 insert into mlaas.model_hyperparams_tbl values (15, 'max_depth', '[2, 30]', 'validation');
 insert into mlaas.model_hyperparams_tbl values (15, 'max_features', '["auto", "sqrt", "log2"]', 'dropdown');
-insert into mlaas.model_hyperparams_tbl values (15, 'min_impurity_decrease', '[0, 0.9]', 'validation');
 insert into mlaas.model_hyperparams_tbl values (15, 'min_samples_leaf', '[1, 20]', 'validation');
 
 
@@ -165,7 +161,6 @@ insert into mlaas.model_hyperparams_tbl values (16, 'n_estimators', '[1, 2000]',
 insert into mlaas.model_hyperparams_tbl values (16, 'criterion', '["gini", "entropy"]', 'dropdown');
 insert into mlaas.model_hyperparams_tbl values (16, 'max_depth', '[2, 30]', 'validation');
 insert into mlaas.model_hyperparams_tbl values (16, 'max_features', '["auto", "sqrt", "log2"]', 'dropdown');
-insert into mlaas.model_hyperparams_tbl values (16, 'min_impurity_decrease', '[0, 0.9]', 'validation');
 insert into mlaas.model_hyperparams_tbl values (16, 'min_samples_leaf', '[1, 20]', 'validation');
 
 
@@ -186,7 +181,6 @@ insert into mlaas.model_hyperparams_tbl values (18, 'n_estimators', '[1, 2000]',
 insert into mlaas.model_hyperparams_tbl values (18, 'criterion', '["mse", "friedman_mse", "mae"]', 'dropdown');
 insert into mlaas.model_hyperparams_tbl values (18, 'max_depth', '[2, 30]', 'validation');
 insert into mlaas.model_hyperparams_tbl values (18, 'max_features', '["auto", "sqrt", "log2"]', 'dropdown');
-insert into mlaas.model_hyperparams_tbl values (18, 'min_impurity_decrease', '[0, 0.9]', 'validation');
 insert into mlaas.model_hyperparams_tbl values (18, 'min_samples_leaf', '[1, 20]', 'validation');
 
 
@@ -213,10 +207,10 @@ insert into mlaas.auto_model_params values (2, 'Initial Version for Ridge Regres
 insert into mlaas.auto_model_params values (3, 'Initial Version for Lasso Regressor', '{"alpha": 1, "selection": "cyclic"}');
 insert into mlaas.auto_model_params values (4, 'Initial Version for Elasticnet Regressor', '{"alpha": 1, "l1_ratio": 0.5, "selection": "cyclic"}');
 insert into mlaas.auto_model_params values (5, 'Initial Version for KNeighbor Regressor', '{"n_neighbors": 11, "metric": "minkowski", "algorithm": "auto"}');
-insert into mlaas.auto_model_params values (6, 'Initial Version of DecisionTree Regression', '{"criterion": "mse", "max_depth": "None", "max_features": "auto", "min_impurity_decrease":0.1, "min_samples_leaf": 1}');
-insert into mlaas.auto_model_params values (7, 'Initial Version of RandomForest Regression', '{"n_estimators": 100, "criterion": "mse", "max_depth": "None", "max_features": "auto", "min_impurity_decrease":0.1, "min_samples_leaf": 1}');
+insert into mlaas.auto_model_params values (6, 'Initial Version of DecisionTree Regression', '{"criterion": "mse", "max_depth": "None", "max_features": "auto", "min_samples_leaf": 1}');
+insert into mlaas.auto_model_params values (7, 'Initial Version of RandomForest Regression', '{"n_estimators": 100, "criterion": "mse", "max_depth": "None", "max_features": "auto", "min_samples_leaf": 1}');
 insert into mlaas.auto_model_params values (8, 'Initial Version for XGBoost Regressor', '{"n_estimators":100,"max_depth":6,"min_child_weight":1,"learning_rate":0.3,"gamma":0,"reg_alpha":0,"reg_lambda":1}');
-insert into mlaas.auto_model_params values (9, 'Initial Version of Gradient Boosting Regression', '{"loss": "ls", "learning_rate":0.1, "subsample":1, "n_estimators": 100, "criterion": "friedman_mse", "max_depth": "None", "max_features": "auto", "min_impurity_decrease":0.1, "min_samples_leaf": 1}');
+insert into mlaas.auto_model_params values (9, 'Initial Version of Gradient Boosting Regression', '{"loss": "ls", "learning_rate":0.1, "subsample":1, "n_estimators": 100, "criterion": "friedman_mse", "max_depth": "None", "max_features": "auto", "min_samples_leaf": 1}');
 -- insert into mlaas.auto_model_params values (10, 'With 3 Layer', '{"loss": "Mean_Squared_Error", "optimizer": "adam", "learning_rate": 0.01, "batch_size": 16, "epochs": 10}');
 
 
@@ -225,10 +219,10 @@ insert into mlaas.auto_model_params values (11, 'Initial Version for Logistic Re
 insert into mlaas.auto_model_params values (12, 'Initial Version for SVM Classifier', '{"C": 2, "gamma": "scale", "kernel": "rbf"}');
 insert into mlaas.auto_model_params values (13, 'Initial Version for KNeighbor Classifier', '{"n_neighbors": 11, "metric": "minkowski", "algorithm": "auto"}');
 insert into mlaas.auto_model_params values (14, 'Initial Version for Simple Naive Bais Classifier', '{}');
-insert into mlaas.auto_model_params values (15, 'Initial Version of DecisionTree Classification', '{"criterion": "gini", "max_depth": "None", "max_features": "auto", "min_impurity_decrease":0.1, "min_samples_leaf": 1}');
-insert into mlaas.auto_model_params values (16, 'Initial Version of RandomForest Classification', '{"n_estimators": 100, "criterion": "gini", "max_depth": "None", "max_features": "auto", "min_impurity_decrease":0.1, "min_samples_leaf": 1}');
+insert into mlaas.auto_model_params values (15, 'Initial Version of DecisionTree Classification', '{"criterion": "gini", "max_depth": "None", "max_features": "auto", "min_samples_leaf": 1}');
+insert into mlaas.auto_model_params values (16, 'Initial Version of RandomForest Classification', '{"n_estimators": 100, "criterion": "gini", "max_depth": "None", "max_features": "auto", "min_samples_leaf": 1}');
 insert into mlaas.auto_model_params values (17, 'Initial Version for XGBoost Regressor', '{"n_estimators":100,"max_depth":6,"min_child_weight":1,"learning_rate":0.3,"gamma":0,"reg_alpha":0,"reg_lambda":1}');
-insert into mlaas.auto_model_params values (18, 'Initial Version of Gradient Boosting Classification', '{"loss": "deviance", "learning_rate":0.1, "subsample":1, "n_estimators": 100, "criterion": "friedman_mse", "max_depth": "None", "max_features": "auto", "min_impurity_decrease":0.1, "min_samples_leaf": 1}');
+insert into mlaas.auto_model_params values (18, 'Initial Version of Gradient Boosting Classification', '{"loss": "deviance", "learning_rate":0.1, "subsample":1, "n_estimators": 100, "criterion": "friedman_mse", "max_depth": "None", "max_features": "auto", "min_samples_leaf": 1}');
 -- insert into mlaas.auto_model_params values (19, 'binary version', '{"loss": "binary_crossentropy", "optimizer": "adam", "learning_rate": 0.01, "batch_size": 16, "epochs": 10}');
 
 
@@ -423,6 +417,8 @@ Insert into mlaas.user_auth_tbl values(17,'denisha','denisha');
 Insert into mlaas.preprocess_tab_tbl values(1,'Missing Value Handling');
 Insert into mlaas.preprocess_tab_tbl values(2,'Transformation');
 
+
+
 --Insert parent_activity_tbl
 Insert into mlaas.parent_activity_tbl values(1,'Missing Value Handling',1);
 Insert into mlaas.parent_activity_tbl values(2,'Noise Handling',1);
@@ -432,13 +428,15 @@ Insert into mlaas.parent_activity_tbl values(5,'Encoding',2);
 Insert into mlaas.parent_activity_tbl values(6,'Math Operations',2);
 Insert into mlaas.parent_activity_tbl values(7,'Transformations',2);
 Insert into mlaas.parent_activity_tbl values(8,'Feature Engineering',2);
+Insert into mlaas.parent_activity_tbl values(9,'Duplicate Data Handling',1);
+
 
 --Insert into feature master table
 Insert into  mlaas.feature_master_tbl values (1,'Anova F-test','categorical');
 Insert into  mlaas.feature_master_tbl values (2,'Chi Square','categorical');
 Insert into  mlaas.feature_master_tbl values (3,'Coorelation','numerical');
 Insert into  mlaas.feature_master_tbl values (4,'Mutual Information','categorical');
-Insert into  mlaas.feature_master_tbl values (5,'Recursive Feature Elimination',NULL);
+Insert into  mlaas.feature_master_tbl values (5,'Recursive Feature Elimination','categorical');
 
 --Insert activity master
 -- COLUMNS => "index", activity_id, activity_name, activity_description, "language", operation, code, parent_activity_id, user_input, check_typ
@@ -522,6 +520,10 @@ Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_211','Replace Outliers
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_221','Replace Outliers with Mean using Z-score Detection','operation on column * failed','US','Operation',0,3,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_221','Replace Outliers with Mean using Z-score Detection','operation on column * in process','US','Operation',1,3,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_221','Replace Outliers with Mean using Z-score Detection','operation on column * completed','US','Operation',2,3,0,0);
+
+
+
+
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_231','Replace Outliers with Median using Extreme Value Analysis Detection','operation on column * failed','US','Operation',0,3,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_231','Replace Outliers with Median using Extreme Value Analysis Detection','operation on column * in process','US','Operation',1,3,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_231','Replace Outliers with Median using Extreme Value Analysis Detection','operation on column * completed','US','Operation',2,3,0,0);
@@ -534,6 +536,24 @@ Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_242','Replace Outliers
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_243','Replace Outliers with Median using Local Factor Outlier Detection','operation on column * failed','US','Operation',0,3,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_243','Replace Outliers with Median using Local Factor Outlier Detection','operation on column * in process','US','Operation',1,3,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_243','Replace Outliers with Median using Local Factor Outlier Detection','operation on column * completed','US','Operation',2,3,0,0);
+
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_244','Replace Outliers using IQR Proximity Rule','operation on column * failed','US','Operation',0,3,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_244','Replace Outliers using IQR Proximity Rule','operation on column * in process','US','Operation',1,3,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_244','Replace Outliers using IQR Proximity Rule','operation on column * completed','US','Operation',2,3,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_245','Replace Outliers using Gussian Approximation','operation on column * failed','US','Operation',0,3,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_245','Replace Outliers using Gussian Approximation','operation on column * in process','US','Operation',1,3,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_245','Replace Outliers using Gussian Approximation','operation on column * completed','US','Operation',2,3,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_246','Replace Outliers using Interquartile Range','operation on column * failed','US','Operation',0,3,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_246','Replace Outliers using Interquartile Range','operation on column * in process','US','Operation',1,3,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_246','Replace Outliers using Interquartile Range','operation on column * completed','US','Operation',2,3,0,0);
+
+
+
+
+
+
+
+
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_251','Logarithmic transformation','operation on column * failed','US','Operation',0,7,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_251','Logarithmic transformation','operation on column * in process','US','Operation',1,7,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_251','Logarithmic transformation','operation on column * completed','US','Operation',2,7,0,0);
@@ -573,6 +593,16 @@ Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_311','Multiply into co
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_321','Extract Datetime Features','operation on column * failed','US','Operation',0,8,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_321','Extract Datetime Features','operation on column * in process','US','Operation',1,8,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_321','Extract Datetime Features','operation on column * completed','US','Operation',2,8,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_331','Remove Duplicate Records','operation  failed','US','Operation',0,9,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_331','Remove Duplicate Records','operation  in process','US','Operation',1,9,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_331','Remove Duplicate Records','operation  completed','US','Operation',2,9,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_332','Remove Duplicate Columns','operation failed','US','Operation',0,9,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_332','Remove Duplicate Columns','operation  in process','US','Operation',1,9,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_332','Remove Duplicate Columns','operation  completed','US','Operation',2,9,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_333','Remove Low Variance column','operation  failed','US','Operation',0,9,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_333','Remove Low Variance column','operation  in process','US','Operation',1,9,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_333','Remove Low Variance column','operation completed','US','Operation',2,9,0,0);
+
 Insert into mlaas.activity_master_tbl values (DEFAULT,'md_41','Created Experiment','You have created experiment "#" for project "$"','US','Operation',0,-1,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'md_42','Selected Auto Modeling','You have selected Auto Modeling for experiment "#" of project "$"','US','Operation',0,-1,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'md_43','Selected Manual Modeling','You have selected Manual Modeling for experiment "#" of project "$"','US','Operation',0,-1,0,0);

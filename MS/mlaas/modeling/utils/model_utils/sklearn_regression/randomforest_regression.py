@@ -55,7 +55,6 @@ class RandomForestRegressionClass:
         self.n_estimators = int(hyperparameters['n_estimators'])
         self.criterion = hyperparameters['criterion']
         self.max_features = hyperparameters['max_features']
-        self.min_impurity_decrease = float(hyperparameters['min_impurity_decrease'])
         self.min_samples_leaf = int(hyperparameters['min_samples_leaf'])
         
         if hyperparameters['max_depth'] != 'None':
@@ -89,8 +88,7 @@ class RandomForestRegressionClass:
         #Value of C = [0,infinity] , default = 1
         #Value of gamma = [0,infinity] , default = 'scale'
         model = RandomForestRegressor(n_estimators=self.n_estimators, criterion=self.criterion, max_depth=self.max_depth, 
-                                      min_samples_leaf=self.min_samples_leaf, min_impurity_decrease=self.min_impurity_decrease, 
-                                      max_features=self.max_features)
+                                      min_samples_leaf=self.min_samples_leaf, max_features=self.max_features)
 
         # fit the model
         model.fit(X_train, y_train) 
@@ -143,15 +141,14 @@ class RandomForestRegressionClass:
             [dict]: [it will return features impact dictionary.]
         """
         
-        shap_data = self.X_train[:min(10, self.X_train.shape[0]), 1:]
+        shap_data = self.X_train[:min(50, self.X_train.shape[0]), 1:]
         treeexplainer = shap.TreeExplainer(model)
-        shap_values = treeexplainer.shap_values(shap_data[:5])
+        shap_values = treeexplainer.shap_values(shap_data, check_additivity=False)
         if isinstance(shap_values, list):
             shap_values = np.array(shap_values).mean(axis=0)
-        shap_values = abs(np.array(shap_values)).mean(axis=0)
+        shap_values = abs(np.array(shap_values).mean(axis=0))
 
-        features_importance_values = shap_values / shap_values.sum()
-        features_importance_values /= max(features_importance_values)
+        features_importance_values = shap_values / max(shap_values)
 
         features_df = pd.DataFrame(data=features_importance_values, index=self.input_features_list, columns=['features_importance'])
 

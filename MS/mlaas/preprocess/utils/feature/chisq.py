@@ -18,10 +18,10 @@ class ChiSquareClass():
         col_lst = []
         value_lst = []
         dict_col_value = dict()
-        col = FU.get_schema_dtype(DBObject,connection,schema_id)
-        df = DBObject.get_feature_df(connection,dataset_id,col)
+        col,change_col = FU.get_schema_dtype(DBObject,connection,schema_id)
+        df = DBObject.get_feature_df(connection,dataset_id,col,change_col)
         
-        for var in col:
+        for var in change_col:
            if var != target_col:
                 column_name,value= self.TestIndependence(df,colX=var,colY=target_col)  
                 col_lst.append(column_name)

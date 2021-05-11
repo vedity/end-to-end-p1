@@ -55,7 +55,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
 
             logging.info("data preprocessing : CleaningClass : discard_missing_values : execution start")
 
-            status = commonObj.method_calling(DBObject,connection,operation_id,project_id,column_list,old_column_list, table_name, col)
+            status = commonObj.method_calling(DBObject,connection,operation_id,project_id,column_list,old_column_list, table_name, col,impute_method = None)
                     
             logging.info(f"data preprocessing : CleaningClass : discard_missing_values : execution stop : status : {str(status)}")
             
@@ -80,7 +80,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
             #Operation Id to get activity details
             operation_id = 'dp_51'
 
-            status = commonObj.method_calling(DBObject,connection,operation_id,project_id,column_list,old_column_list, table_name, col)
+            status = commonObj.method_calling(DBObject,connection,operation_id,project_id,column_list,old_column_list, table_name, col,impute_method = 1)
             
             logging.info("data preprocessing : CleaningClass : mean_imputation : execution end")
 
@@ -97,43 +97,23 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
             Operation id: dp_61
         '''
         
-        logging.info("data preprocessing : CleaningClass : median_imputation : execution start")
         
         #Operation Id to get activity details
         operation_id = 'dp_61'
+
+        try:
+            logging.info("data preprocessing : CleaningClass : median_imputation : execution start")
+            
+            status = commonObj.method_calling(DBObject,connection,operation_id,project_id,column_list,old_column_list, table_name, col,impute_method = 2)
+            
+            logging.info("data preprocessing : CleaningClass : median_imputation : execution stop")
+            return status
+        except Exception as exc:
+            logging.error("data preprocessing : CleaningClass : median_imputation : Exception :"+str(exc))
+            logging.error(" data preprocessing : CleaningClass : median_imputation : " +traceback.format_exc())
+            return 1
+
         
-        #Extract the column name based on the column id's
-        cols = [column_list[i] for i in col]
-        old_cols = [old_column_list[i] for i in col]
-        
-        for i,col_name in enumerate(cols):
-            try:
-                status =1
-                #Insert the activity for the operation
-                activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
-                
-                sql_command = 'select PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY cast ("'+str(old_cols[i])+'" as float)) AS impute_value from '+str(table_name)
-                logging.info(sql_command)
-                dataframe = DBObject.select_records(connection,sql_command)
-
-                impute_value = round(dataframe['impute_value'][0],5)
-                
-                #Update the activity status for the operation performed
-                status = self.perform_missing_value_imputation(DBObject,connection, table_name,old_cols[i],impute_value)
-                
-                #Update the activity status for the operation performed
-                if status == 0:
-                    status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
-                else:
-                    status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
-
-            except Exception as exc:
-                logging.error("data preprocessing : CleaningClass : median_imputation : Exception :"+str(exc))
-                logging.error(" data preprocessing : CleaningClass : median_imputation : " +traceback.format_exc())
-                return 1
-
-        logging.info("data preprocessing : CleaningClass : median_imputation : execution stop")
-        return status
     
     def mode_imputation(self,  DBObject,connection,project_id,column_list,old_column_list, table_name, col, **kwargs):
         '''
@@ -142,34 +122,18 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
             Operation id: dp_71
         '''
         logging.info("data preprocessing : CleaningClass : mode_imputation : execution start")
-        cols = [column_list[i] for i in col]
-        old_cols = [old_column_list[i] for i in col]
+        
         
         #Operation Id to get activity details
         operation_id = 'dp_71'
         
-        for i,col_name in enumerate(cols):
-            try:
-                status =1
-                #Insert the activity for the operation
-                activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
-
-                sql_command = 'select MODE() WITHIN GROUP (ORDER BY cast ("'+str(old_cols[i])+'" as float)) AS impute_value from '+str(table_name)
-                dataframe = DBObject.select_records(connection,sql_command)
-
-                impute_value = round(dataframe['impute_value'][0],5)
-                
-                status = self.perform_missing_value_imputation(DBObject,connection, table_name,old_cols[i],impute_value)
-                #Update the activity status for the operation performed
-                if status == 0:
-                    status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
-                else:
-                    status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
-            
-            except Exception as exc:
-                logging.error("data preprocessing : CleaningClass : mode_imputation : Exception " +str(exc))
-                logging.error("data preprocessing : CleaningClass : mode_imputation   : " +traceback.format_exc())
-                return 1
+        try:
+            status = commonObj.method_calling(DBObject,connection,operation_id,project_id,column_list,old_column_list, table_name, col,impute_method = 3)
+        
+        except Exception as exc:
+            logging.error("data preprocessing : CleaningClass : mode_imputation : Exception " +str(exc))
+            logging.error("data preprocessing : CleaningClass : mode_imputation   : " +traceback.format_exc())
+            return 1
 
         logging.info("data preprocessing : CleaningClass : mode_imputation : execution stop")
         return status
@@ -1197,9 +1161,6 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
         logging.info("data preprocessing : CleaningClass : repl_outliers_median_lof : execution stop")
         return status
 
-
-
-
     def repl_outliers_iqr_proximity(self,DBObject,connection,project_id,column_list,old_column_list, dataset_table_name,col, **kwargs):
         '''
             Function will Replace outlier  IQR proximity rule method
@@ -1272,7 +1233,7 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
     def repl_outliers_quantiles(self,DBObject,connection,project_id,column_list,old_column_list, dataset_table_name,col, **kwargs):
         '''
             Function will Replace outlier using quantiles rage given by user input.
-            Operation id: ?
+            Operation id: dp_246
         '''
         logging.info("data preprocessing : CleaningClass : repl_outliers_quantiles : execution start")
         try:
@@ -1282,21 +1243,21 @@ class CleaningClass(mvh.MissingValueClass, nr.RemoveNoiseClass, ot.OutliersTreat
             old_cols = [old_column_list[i] for i in col]
         
             # #Operation Id to get activity details
-            # operation_id = ?
+            operation_id = 'dp_246'
             
             for i,col_name in enumerate(cols):
 
-                # #Insert the activity for the operation
-                # activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
+                #Insert the activity for the operation
+                activity_id = commonObj.operation_start(DBObject, connection, operation_id, project_id, col_name)
                 
                 lower_limit,upper_limit = super().get_upper_lower_limit(DBObject,connection,col_name,dataset_table_name,method_type = 'quantiles' ,quantile_1=0.25,quantile_2=0.75)
                 status = super().update_outliers(DBObject,connection,lower_limit,upper_limit,old_cols[i],dataset_table_name)
                 
                 #Update the activity status for the operation performed
-                # if status == 0:
-                #     status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
-                # else:
-                #     status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
+                if status == 0:
+                    status = commonObj.operation_end(DBObject, connection, activity_id, operation_id, col_name)
+                else:
+                    status = commonObj.operation_failed(DBObject, connection, activity_id, operation_id, col_name)
                 
         except Exception as exc:
                 logging.info("data preprocessing : CleaningClass : repl_outliers_quantiles : Exception : "+str(exc))

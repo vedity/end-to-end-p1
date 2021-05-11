@@ -37,11 +37,11 @@ start_task = PythonOperator(task_id='start_pipeline',python_callable=start_pipel
 model_type = 'Regression'
 model_dict = get_supervised_models(model_type)
 
-model_id = model_dict['model_id']
-model_name = model_dict['model_name']
-model_class_name = model_dict['model_class_name']
-model_hyperparams =  model_dict['model_hyperparams']
-algorithm_type = model_dict['algorithm_type']
+model_id = model_dict['model_id'][6:9]
+model_name = model_dict['model_name'][6:9]
+model_class_name = model_dict['model_class_name'][6:9]
+model_hyperparams =  model_dict['model_hyperparams'][6:9]
+algorithm_type = model_dict['algorithm_type'][6:9]
 
 # Create Dynamic Task.
 for model_id,model_name,model_class_name,model_hyperparams,algorithm_type in zip(model_id,model_name,model_class_name, model_hyperparams, algorithm_type):

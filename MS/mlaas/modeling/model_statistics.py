@@ -366,7 +366,7 @@ class ModelStatisticsClass:
         if model_dag_df is None:
             raise DatabaseConnectionFailed(500)
 
-        if len(model_dag_df) == 0 :
+        if len(model_dag_df['exp_name']) == 0:
             return {'exp_name': ''}
 
         state = model_dag_df['dag_state'][0]
@@ -562,6 +562,7 @@ class ModelStatisticsClass:
             logging.error("modeling : ModelStatisticsClass : compare_experiments_grid : Exception " + str(exc))
             logging.error("modeling : ModelStatisticsClass : compare_experiments_grid : " +traceback.format_exc())
             return exc.msg
+            
 
     def can_compare_experiments(self, experiment_ids):
         """Calculates whether the given experiments can be compared or not.
@@ -588,12 +589,13 @@ class ModelStatisticsClass:
             different_list = []
             for i in range(len(exp_ids) - 1):
                 for j in range(i+1, len(exp_ids)):
-                    if pivot_df.iloc[i, :] != pivot_df.iloc[j, :]:
+                    if sum(pivot_df.iloc[i, :] != pivot_df.iloc[j, :]) == 0:
                         different_list.append(i)
                         different_list.append(j)
             
             if len(different_list) != 0:
-                sql_command = 'select name from mlflow.experiments where experiment_id='+str(exp_ids)
+                different_exps = tuple(different_list)
+                sql_command = 'select name from mlflow.experiments where experiment_id in'+str(different_exps)
                 exp_names_df = self.DBObject.select_records(self.connection, sql_command)
                 if exp_names_df is None:
                     raise DatabaseConnectionFailed(500)
@@ -698,7 +700,7 @@ class ModelStatisticsClass:
         unscaled_data = self.DBObject.get_dataset_df(self.connection, dataset_id=dataset_id).set_index('index')
         
         feature_data = np.array(unscaled_data.loc[index, feature])
-        
+        logging.info("SCLASS VALUE;-"+str(len(sclass)))
         feature_values = []
         pdp_values = []
         if issubclass(feature_data[0].dtype.type, np.integer) or issubclass(feature_data[0].dtype.type, np.floating):       
@@ -707,7 +709,16 @@ class ModelStatisticsClass:
             fmax = max(unique_values)
             n_uniques = len(unique_values)
             feature_values = np.linspace(fmin, fmax, min(100, n_uniques))
-            pdp_values = pdp_dict['PDP_Scores'][feature]
+            if (sclass == None) or (len(sclass) == 0):
+                pdp_values = pdp_dict['PDP_Scores'][feature][0]
+            else:
+                class_list = pdp_dict['classes']
+                try:
+                    cindex = class_list.index(int(sclass))
+                except:
+                    cindex = class_list.index(sclass)
+                    
+                pdp_values = pdp_dict['PDP_Scores'][feature][cindex]
         
         target_feature = pdp_dict['target_features']
 

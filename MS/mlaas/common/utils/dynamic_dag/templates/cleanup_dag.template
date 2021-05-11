@@ -35,8 +35,8 @@ dag = DAG(
     default_args=args,    
     description='A Dynamically Generated DAG.',
     catchup=False,
-    schedule_interval = @once
-    #is_paused_upon_creation= True,                       
+    schedule_interval = '@once',
+#   is_paused_upon_creation= True,                          
 )
 
 #? Getting Required Parameters
@@ -48,7 +48,7 @@ if len(master_dict) == 0:
 
 else:
     operation = master_dict['operation_dict']
-    dag_index = master_dict['dag_index']
+    dag_index = master_dict['dag_index']    
     value_dict = master_dict['values_dict']
     schema_id = int(master_dict['schema_id'])
     dataset_id = int(master_dict['dataset_id'])
@@ -118,13 +118,17 @@ op_dict = {
     243 : PC_OBJ.repl_outliers_median_lof,
     244 : PC_OBJ.repl_outliers_iqr_proximity,
     245 : PC_OBJ.repl_outliers_Gaussian_approx,
+    246 : PC_OBJ.repl_outliers_quantiles,
     261 : PC_OBJ.label_encoding,
     271 : PC_OBJ.one_hot_encoding,
     281 : PC_OBJ.add_to_column,
     291 : PC_OBJ.subtract_from_column,
     301 : PC_OBJ.divide_column,
     311 : PC_OBJ.multiply_column,
-    321 : PC_OBJ.split_date_column
+    321 : PC_OBJ.split_date_column,
+    331 : PC_OBJ.delete_duplicate_records,
+    332 : PC_OBJ.delete_duplicate_column,
+    333 : PC_OBJ.delete_low_variance_column,
 }
 
 def dag_end(DBObject,connection,dataset_id,project_id,dag_id,new_user_name,dataset_name,col_list,dag_index,**kwargs):
@@ -137,9 +141,10 @@ def dag_end(DBObject,connection,dataset_id,project_id,dag_id,new_user_name,datas
     
     #? Shutting off the dag, making master_dict empty so it won't be executed further
     status = PC_OBJ.dag_updater(dict(), dag_id+".py" , namespace = "cleanup_dags")
-
+    
     #? Releasing the dag
     status = DAG_OBJ.release_dag(connection, index = dag_index)
+   
     return status
 
 #? Making Dynamic Tasks
@@ -223,21 +228,24 @@ for index in operation.keys():
             243 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
             244 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name,[col]],
             245 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name,[col]],
+            246 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name,[col]],
             251 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
             252 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
             253 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
             254 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col],value[j]],
             255 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
-            256 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],            
+            256 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],           
             261 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col]],
             271 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], schema_id],
             281 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
             291 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
             301 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
             311 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], value[j]],
-            321 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], schema_id]
+            321 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name, [col], schema_id],
+            331 : [DBObject,connection,project_id,column_list,old_column_list, dataset_table_name],
+            332 : [DBObject,connection,schema_id,project_id, dataset_table_name],
+            333 : [DBObject,connection,project_id,schema_id,column_list,old_column_list, dataset_table_name]
         }
-        
         dynamicTask = PythonOperator(
             task_id='Operation_' + str(index) + "_col_" + str(col),
             dag=dag,

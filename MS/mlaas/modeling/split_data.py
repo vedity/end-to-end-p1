@@ -73,7 +73,7 @@ class SplitData:
 
     def get_split_datasets(self, scaled_split_params_dict):
 
-        path = "/opt/airflow/dags/" 
+        path = "/usr/local/airflow/dags/" 
         # Load the train, test, valid datasets 
         train_X = np.load(path + scaled_split_params_dict['train_X_filename'], allow_pickle=True)
         test_X = np.load(path + scaled_split_params_dict['test_X_filename'], allow_pickle=True)
@@ -98,7 +98,7 @@ class SplitData:
         Returns:
             [type]: [description]
         """
-        path = "/opt/airflow/dags/"
+        path = "/usr/local/airflow/dags/" 
         unscaled_y = np.load(path + scaled_split_dict['actual_Y_filename'], allow_pickle=True)
         classes = np.unique(unscaled_y[:, -1]).tolist()
         
