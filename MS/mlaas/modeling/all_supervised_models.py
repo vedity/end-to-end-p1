@@ -225,6 +225,8 @@ def supervised_models(run_id,**kwargs):
  
         if model_type.lower() != 'classification':
             scaled_split_dict['classes'] = []
+            logging.info("NOT A CLASSIFICATION MODEL. .. CLASSSESS:-  "+str(scaled_split_dict['classes']))
+
 
         check_flag = 'outside'
         dag_run_id = run_id

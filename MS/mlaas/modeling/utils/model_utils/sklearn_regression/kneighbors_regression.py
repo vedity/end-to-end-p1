@@ -147,10 +147,9 @@ class KNeighborsRegressionClass:
         shap_values = kernelexplainer.shap_values(shap_data[:10])
         if isinstance(shap_values, list):
             shap_values = np.array(shap_values).mean(axis=0)
-        shap_values_mean = abs(np.array(shap_values)).mean(axis=0)
+        shap_values = abs(np.array(shap_values).mean(axis=0))
 
-        features_importance_values = shap_values_mean / shap_values_mean.sum()
-        features_importance_values /= max(features_importance_values)
+        features_importance_values = shap_values / max(shap_values)
 
         features_df = pd.DataFrame(data=features_importance_values, index=self.input_features_list, columns=['features_importance'])
 
