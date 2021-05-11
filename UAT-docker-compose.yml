@@ -39,7 +39,12 @@ services:
 
   web:
     image: registry.gitlab.com/isgtest/end-to-end-p1:ms-latest
-    command: python manage.py runserver 0.0.0.0:8000
+    command: sh -c "
+            python manage.py runserver 0.0.0.0:8000 & 
+            sleep 150 && 
+            python common/utils/dynamic_dag/dag_creator.py && 
+            pkill -f runserver && 
+            python manage.py runserver 0.0.0.0:8000" 
     ports:
       - "8000:8000"
     volumes:
