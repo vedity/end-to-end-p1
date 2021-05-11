@@ -93,6 +93,5 @@ export class SchemaMappingApiService {
       .append("schema_id", schema_id)
       .append("target_col", target_col)
     return this.httpClient.get(this.baseUrl + "preprocess/fs_dag/", { headers: this.headers,params });
-  }
-  
+  }  
 }
