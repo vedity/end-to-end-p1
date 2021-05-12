@@ -8,7 +8,7 @@
         <div class="column-list">
             <perfect-scrollbar style="height:435px;">
                 <ul id="">
-                    <li class="filterli {{item}}" *ngFor="let item of responsedata.features_name;let i=index" (click)="getPDPCurve(item)">
+                    <li class="filterli {{item}} filterli_{{i}}" *ngFor="let item of responsedata.features_name;let i=index" id="filterli_{{i}}" (click)="getPDPCurve(item,i)">
                         <a href="javascript:void(0);" [ngStyle]="{'width': ''+responsedata.norm_importance[i]+'%' }">
                         {{item}}
                     </a>
@@ -18,9 +18,18 @@
             </perfect-scrollbar>
         </div>
     </div>
+
     <div class="col-md-8">
         <ngx-skeleton-loader *ngIf="isChartLoaded" count="7" [animation]="animation" [theme]="theme">
         </ngx-skeleton-loader>
+        <div class="row" *ngIf="!isChartLoaded && radioClassList.length>0">
+            <div class="col-md-3" *ngFor="let item of radioClassList;let i=index">
+                <div class="custom-control custom-radio mb-3">
+                    <input type="radio" id="customRadio_{{i}}" [checked]="selectedClass==item" name="customRadio" value="{{item}}" (click)="resetChart(item);" title="{{item}}" class="custom-control-input radiobutton">
+                    <label class="custom-control-label" for="customRadio_{{i}}" id="radiolabel_{{i}}">{{item}}</label>
+                </div>
+            </div>
+        </div>
         <apx-chart *ngIf="!isChartLoaded" [yaxis]="chartOptions.yaxis" class="apex-charts" dir="ltr" [series]="chartOptions.series" [chart]="chartOptions.chart" [plotOptions]="chartOptions.plotOptions" [dataLabels]="chartOptions.dataLabels" [xaxis]="chartOptions.xaxis"
             [colors]="chartOptions.colors" [grid]="chartOptions.grid"></apx-chart>
     </div>

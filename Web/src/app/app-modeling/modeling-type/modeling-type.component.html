@@ -19,7 +19,7 @@
 
                         <!-- <button type="submit" class="btn btn-success" id="createExperiment" *ngIf="processclass=='stop'" hidden (click)="smallModal(modelingmodal);">Start</button> -->
                         <button type="submit" class="btn btn-success" id="createExperiment" *ngIf="processclass=='stop'" (click)="onClickStart(modelingmodal,largeModal)">Start</button>
-                        <button type="submit" class="btn btn-success" *ngIf="processclass=='start'" (click)="processclass='stop'">Stop</button>
+                        <button type="submit" class="btn btn-success" *ngIf="processclass=='start'" (click)="stopModel()">Stop</button>
                     </div>
                     <div class="right-box">
                         <div class="radio-group">
