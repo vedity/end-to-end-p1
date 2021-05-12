@@ -447,7 +447,8 @@ Insert into mlaas.activity_master_tbl values (DEFAULT,'in_4','Delete Project','Y
 Insert into mlaas.activity_master_tbl values (DEFAULT,'sm_5','Column name updated','You have updated the name of Columns','US','Update',0,-1,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'sm_6','Selected Target Column','You have selected Columns  *  of dataset $ as Target Columns','US','Select',0,-1,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'sm_7','Ignored Column','You have ignored Columns *','US','Ignore',0,-1,0,0);
-
+Insert into mlaas.activity_master_tbl values (DEFAULT,'sm_8','Auto Feature Selection','Auto Feature Selection on project * started','US','Started',0,-1,0,0);
+Insert into mlaas.activity_master_tbl values (DEFAULT,'sm_9','Auto Feature Selection','Auto Feature Selection on project * ended','US','Ended',0,-1,0,0);
 
 Insert into mlaas.activity_master_tbl values (DEFAULT,'in_8','Created new dataset','You have saved new dataset','US','Create',0,-1,0,0);
 Insert into mlaas.activity_master_tbl values (DEFAULT,'dp_1','Discard Missing Values','operation on column * failed','US','Operation',0,1,0,0);

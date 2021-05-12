@@ -120,16 +120,31 @@ class SchemaSaveClass(APIView):
                         dataset_id = request.query_params.get('dataset_id') #get the dataset id
                         project_id = request.query_params.get('project_id') #get the project id
                         user_name = request.query_params.get('user_name') #get user name
-                        
+                        fs_name = str(request.query_params.get('fs_name')) #get feature selection name
+                        logging.info("+fs name"+str(fs_name))
                         schema_status=preprocessObj.save_schema_data(DBObject,connection,schema_data,project_id,dataset_id,schema_id,user_name)
                         logging.info(str(schema_status)+" stauts type "+str(type(schema_status)))
                         if isinstance(schema_status,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(schema_status) # extract the status_code and error_msg from schema_status
                                 logging.info("data preprocess : SchemaSaveClass : POST Method : execution stop : status_code :"+status_code)
                                 return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
+                        # else:
+                        #         logging.info("data preprocess : SchemaSaveClass : POST Method : execution stop : status_code :200")
+                        #         return Response({"status_code":"200","error_msg":"Successfully save","response":"true"})  
+
+                        if fs_name != None:
+                                
+                                fs_status = FS.store_selected_fs(fs_name,schema_id)
+                                logging.info("+fs_status"+str(fs_status))
+                        if isinstance(fs_status,str): #check the instance of dataset_df
+                                status_code,error_msg=json_obj.get_Status_code(schema_status) # extract the status_code and error_msg from schema_status
+                                logging.info("data preprocess : SchemaSaveClass : POST Method : execution stop : status_code :"+status_code)
+                                return Response({"status_code":status_code,"error_msg":error_msg,"response":"false"})
                         else:
                                 logging.info("data preprocess : SchemaSaveClass : POST Method : execution stop : status_code :200")
-                                return Response({"status_code":"200","error_msg":"Successfully save","response":"true"})           
+                                return Response({"status_code":"200","error_msg":"Successfully save","response":"true"})  
+
+                        
                 except Exception as e:
                         logging.error("data preprocess : SchemaSaveClass : POST Method : Exception :" + str(e))
                         logging.error("data preprocess : SchemaSaveClass : POST Method : " +traceback.format_exc())
@@ -159,7 +174,9 @@ class SchemaClass(APIView):
                         schema_id=request.query_params.get('schema_id') #get schema id
                         
                         #get the schema detail,if exist then return data else return string with error_msg and status code
-                        schema_data=preprocessObj.get_schema_details(DBObject,connection,schema_id) 
+                        schema_data=preprocessObj.get_schema_details(DBObject,connection,schema_id)
+                        feature_name = FS.get_fs_name(schema_id) 
+                        schema_data = [{"feature slection":feature_name,"data":schema_data}]
                         if isinstance(schema_data,list):  
                                 logging.info("data preprocess : DatasetSchemaClass : GET Method : execution stop")
                                 return Response({"status_code":"200","error_msg":"Successfull retrival","response":schema_data})
@@ -571,10 +588,10 @@ class FeatureSelectionDag(APIView):
                         dataset_id = request.query_params.get('dataset_id') #get datasetid
                         schema_id = request.query_params.get('schema_id') #get schemaid
                         target_col = str(request.query_params.get('target_col')) #get targetcol
-                        # project_id = request.query_params.get('project_id') # get project_id
-                        # user_name = request.query_params.get('user_name') # get user_name
-                        project_id = 4
-                        user_name = 'nisha'
+                        project_id = request.query_params.get('project_id') # get project_id
+                        user_name = request.query_params.get('user_name') # get user_name
+                        # project_id = 1
+                        # user_name = 'nisha'
 
                         feature_params_dict = {"dataset_id":dataset_id,"schema_id":schema_id,"target_col":target_col} #dict to pass parameters in dag 
                         
