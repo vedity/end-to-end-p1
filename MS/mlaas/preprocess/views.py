@@ -176,10 +176,10 @@ class SchemaClass(APIView):
                         #get the schema detail,if exist then return data else return string with error_msg and status code
                         schema_data=preprocessObj.get_schema_details(DBObject,connection,schema_id)
                         feature_name = FS.get_fs_name(schema_id) 
-                        schema_data = [{"feature slection":feature_name,"data":schema_data}]
+                        schema_return ={"feature_selection":feature_name,"data":schema_data}
                         if isinstance(schema_data,list):  
                                 logging.info("data preprocess : DatasetSchemaClass : GET Method : execution stop")
-                                return Response({"status_code":"200","error_msg":"Successfull retrival","response":schema_data})
+                                return Response({"status_code":"200","error_msg":"Successfull retrival","response":schema_return})
                         else:
                                 status_code,error_msg=json_obj.get_Status_code(schema_data) # extract the status_code and error_msg from schema_data
                                 logging.info("data preprocess : DatasetSchemaClass : GET Method : execution stop : status_code :"+status_code)
