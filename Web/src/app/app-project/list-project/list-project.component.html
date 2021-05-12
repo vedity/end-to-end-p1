@@ -112,7 +112,7 @@
                                     <span style="display:none;" *ngIf="data.model_status==1">Success</span>
                                     <span style="display:none;" *ngIf="data.model_status==2">Failed</span>
 
-                                    <a [routerLink]="['/modeling']" [ngClass]="{ 'disabled': !data.split_status }" class="font-size-20 modeling" [state]="{dataset_id: data.dataset_id ,project_id:data.project_id}">
+                                    <a [routerLink]="['/modeling']" [ngClass]="{ 'disabled': data.split_status!='True' }" class="font-size-20 modeling" [state]="{dataset_id: data.dataset_id ,project_id:data.project_id}">
                                         <i *ngIf="data.model_status==-1" style="color: #a6b0cf;" title="Pending" class="dripicons-browser-upload"></i>
                                         <i *ngIf="data.model_status==0" style="color: #34c38f;" title="InProgress" class="dripicons-browser-upload Blink"></i>
                                         <i *ngIf="data.model_status==1" style="color: #3e6aec;" title="Success" class="dripicons-browser-upload"></i>

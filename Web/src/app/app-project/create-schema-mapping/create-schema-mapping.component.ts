@@ -15,7 +15,7 @@ export class CreateSchemaMappingComponent implements OnInit {
   datatableElement: DataTableDirective;
   dtOptions: DataTables.Settings = {};
   dtTrigger: Subject<any> = new Subject<any>();
-  targetColumn: any=0;
+  targetColumn: any = 0;
   constructor(public apiService: SchemaMappingApiService, public router: Router, public toaster: ToastrService, private modalService: NgbModal) { }
   @Input() public dataset_id: any;
   @Input() public title: any;
@@ -38,7 +38,7 @@ export class CreateSchemaMappingComponent implements OnInit {
   Originaldata: any = [];
   displaydiv = false;
   animation = "progress-dark";
-  dagsStatusRunning=false;
+  dagsStatusRunning = false;
   theme = {
     'border-radius': '5px',
     'height': '40px',
@@ -57,7 +57,6 @@ export class CreateSchemaMappingComponent implements OnInit {
   }
 
   checkuniquecolumnname(event, id) {
-    // console.log(event.target.value, id);
     if (event.target.value != "") {
       this.apiService.checkuniqueColumnName(event.target.value, this.schema_id).subscribe(
         logs => this.checkuniquesuccessHandler(logs, id),
@@ -71,7 +70,6 @@ export class CreateSchemaMappingComponent implements OnInit {
   }
 
   checkuniquesuccessHandler(data, id) {
-    // console.log(data);
     if (data.status_code == '500') {
       $("#td_" + id).addClass("errorstatus");
       $(".changeerror_" + id).text(data.error_msg);
@@ -82,40 +80,34 @@ export class CreateSchemaMappingComponent implements OnInit {
     }
   }
 
-
-
   ngOnInit(): void {
     this.dtOptions = {
       paging: false,
-      // ordering: true,
       scrollCollapse: true,
       info: false,
-      // searching: false,
       scrollX: true,
       scrollY: "calc(100vh - 450px)",
     }
     this.displaydiv = true;
     this.getAllDagsStatus();
     this.getColumnAttributeList();
-    //this.getFeatureSelection();
-    // console.log(this.project_id, this.dataset_id);
     this.getSchema(this.project_id, this.dataset_id, this.schema_id);
   }
 
-  getAllDagsStatus(){
+  getAllDagsStatus() {
     this.apiService.getAllDagsStatus(this.project_id).subscribe(
-      logs=>this.dagsSuccessHandler(logs),
-      error=>this.errorHandler(error)
+      logs => this.dagsSuccessHandler(logs),
+      error => this.errorHandler(error)
     )
   }
 
-  dagsSuccessHandler(data){
-    if(data.status_code=="200"){
-if(data.response.cleanup_dag=='True'|| data.response.modeling_dag=='True'||data.response.feature_dag=='True'){
-  this.dagsStatusRunning=true;
-}
+  dagsSuccessHandler(data) {
+    if (data.status_code == "200") {
+      if (data.response.cleanup_dag == 'True' || data.response.modeling_dag == 'True' || data.response.feature_dag == 'True') {
+        this.dagsStatusRunning = true;
+      }
     }
-    else{
+    else {
       this.errorHandler(data);
     }
   }
@@ -128,8 +120,12 @@ if(data.response.cleanup_dag=='True'|| data.response.modeling_dag=='True'||data.
   }
 
   successHandler(logs) {
-    this.datasetSchema = logs.response;
-    this.Originaldata = logs.response;
+    this.datasetSchema = logs.response.data;
+    this.Originaldata = logs.response.data;
+    if(logs.response.feature_selection!=null){
+      this.isFeatureSelected=true;
+      this.selectedFeature=logs.response.feature_selection;
+    }
     setTimeout(() => {
       if (!this.datatableElement.dtInstance) {
         this.dtTrigger.next();
@@ -154,51 +150,48 @@ if(data.response.cleanup_dag=='True'|| data.response.modeling_dag=='True'||data.
       }
     }, 0);
     this.displaydiv = false;
-
   }
 
-  isitemselected=false;
-  selecteditem:any;
-  selectedOption(item,i){
+  isitemselected = false;
+  selecteditem: any;
+  selectedOption(item, i) {
     $(".featureoptios").removeClass('selected');
-    $("#option_"+i).addClass("selected");
-    this.selecteditem=item;
-    this.isitemselected=true;
+    $("#option_" + i).addClass("selected");
+    this.selecteditem = item;
+    this.isitemselected = true;
   }
 
-  canceloption(){
-    this.isitemselected=false;
-    this.selecteditem=undefined;
+  canceloption() {
+    this.isitemselected = false;
+    this.selecteditem = undefined;
   }
 
-  isFeatureSelected=false;
-  selectedFeature="";
-  saveoption(){
-    this.isFeatureSelected=false;
-    this.selectedFeature="";
-    if(this.selecteditem){
-      this.selectedFeature=this.selecteditem.name;
-      this.datasetSchema.forEach((element,index) => {
-        var data=this.selecteditem.column[element.column_name];
+  isFeatureSelected = false;
+  selectedFeature = "";
+  saveoption() {
+    this.isFeatureSelected = false;
+    this.selectedFeature = "";
+    if (this.selecteditem) {
+      this.selectedFeature = this.selecteditem.name;
+      this.datasetSchema.forEach((element, index) => {
+        var data = this.selecteditem.column[element.column_name];
         console.log(element);
         console.log(data);
-        if(data=="True")
-        {
-          $("#selectattr_"+index).val('Select')
+        if (data == "True") {
+          $("#selectattr_" + index).val('Select')
         }
         // element.column_attribute='Select';
-        if(data=="False")
-        {
-          $("#selectattr_"+index).val('Ignore')
+        if (data == "False") {
+          $("#selectattr_" + index).val('Ignore')
         }
         // element.column_attribute='Ignore';
-        this.isFeatureSelected=true;
+        this.isFeatureSelected = true;
       });
       this.modalService.dismissAll();
     }
-    else{
-    this.isitemselected=false;
-    this.selecteditem=undefined;
+    else {
+      this.isitemselected = false;
+      this.selecteditem = undefined;
     }
   }
 
@@ -267,26 +260,26 @@ if(data.response.cleanup_dag=='True'|| data.response.modeling_dag=='True'||data.
     // var target=$('.Target-selected').prop('id').split('_')[1];
     // var target_col=$('.columnname_'+target).prop('id').split('_')[1];
     this.apiService.getfeatureSelection(this.dataset_id, this.schema_id, this.targetColumnName).subscribe(
-      logs => this.SuccessFeatureSelection(logs,schemarecommodate),
+      logs => this.SuccessFeatureSelection(logs, schemarecommodate),
       error => this.errorHandler(error)
     )
   }
 
-  SuccessFeatureSelection(data,schemarecommodate) {
-    if (data.status_code == "200" && this.startfeatureslection==true) {
-      if(data.response!=false){
+  SuccessFeatureSelection(data, schemarecommodate) {
+    if (data.status_code == "200" && this.startfeatureslection == true) {
+      if (data.response != false) {
         this.featuresList = data.response;
         console.log(this.featuresList);
         this.displayselection = false;
         this.modalService.open(schemarecommodate, { size: 'xl', windowClass: 'modal-holder', centered: true });
-        this.startfeatureslection=false;
-        if(this.setFeatureSelectionInterval){
+        this.startfeatureslection = false;
+        if (this.setFeatureSelectionInterval) {
           clearInterval(this.setFeatureSelectionInterval);
-          this.setFeatureSelectionInterval=undefined;
+          this.setFeatureSelectionInterval = undefined;
         }
       }
-      else{
-        if(!this.setFeatureSelectionInterval){
+      else {
+        if (!this.setFeatureSelectionInterval) {
           this.startFeatureSelectionDags(schemarecommodate);
         }
       }
@@ -295,23 +288,23 @@ if(data.response.cleanup_dag=='True'|| data.response.modeling_dag=='True'||data.
       this.errorHandler(data);
     }
   }
-  
 
-  startFeatureSelectionDags(schemarecommodate){
-    this.apiService.startFeatureSelection(this.dataset_id, this.schema_id, this.targetColumnName,this.project_id).subscribe(
-      logs=>this.startSuccessHandlers(logs,schemarecommodate),
-      error=>this.errorHandler(error)
+
+  startFeatureSelectionDags(schemarecommodate) {
+    this.apiService.startFeatureSelection(this.dataset_id, this.schema_id, this.targetColumnName, this.project_id).subscribe(
+      logs => this.startSuccessHandlers(logs, schemarecommodate),
+      error => this.errorHandler(error)
     )
   }
 
-  setFeatureSelectionInterval:any;
-  startSuccessHandlers(data,schemarecommodate){
-    if(data.status_code=="200"){
-      this.setFeatureSelectionInterval=setInterval(() => {
+  setFeatureSelectionInterval: any;
+  startSuccessHandlers(data, schemarecommodate) {
+    if (data.status_code == "200") {
+      this.setFeatureSelectionInterval = setInterval(() => {
         this.getFeatureSelection(schemarecommodate);
       }, 10000);
     }
-    else{
+    else {
       this.errorHandler(data);
     }
   }
@@ -386,7 +379,7 @@ if(data.response.cleanup_dag=='True'|| data.response.modeling_dag=='True'||data.
         console.log(savedata);
         this.loaderdiv = false;
 
-        this.apiService.saveDatasetSchema(this.dataset_id, this.project_id, this.schema_id,this.selectedFeature, { data: savedata }).subscribe(logs => this.savesuccessHandler(logs), error => this.errorHandler(error));
+        this.apiService.saveDatasetSchema(this.dataset_id, this.project_id, this.schema_id, this.selectedFeature, { data: savedata }).subscribe(logs => this.savesuccessHandler(logs), error => this.errorHandler(error));
 
       } else {
         this.loaderdiv = false;
@@ -471,7 +464,7 @@ if(data.response.cleanup_dag=='True'|| data.response.modeling_dag=='True'||data.
     $('.filter').val('').trigger('change');
   }
 
-  startfeatureslection=false;
+  startfeatureslection = false;
   displayselection = true;
   targetColumnName = '';
   startFeatureSelection(schemarecommodate: any) {
@@ -479,7 +472,7 @@ if(data.response.cleanup_dag=='True'|| data.response.modeling_dag=='True'||data.
       this.targetColumn = 1;
       var target = $('.Target-selected').prop('id').split('_')[1];
       this.targetColumnName = $('.columnname_' + target).prop('id').split('_')[1];
-      this.startfeatureslection=true;
+      this.startfeatureslection = true;
       this.getFeatureSelection(schemarecommodate);
     }
     else {
@@ -489,11 +482,11 @@ if(data.response.cleanup_dag=='True'|| data.response.modeling_dag=='True'||data.
     }
   }
 
-  stopFeatureSelection(){
-    this.startfeatureslection=false;
-    if(this.setFeatureSelectionInterval){
+  stopFeatureSelection() {
+    this.startfeatureslection = false;
+    if (this.setFeatureSelectionInterval) {
       clearInterval(this.setFeatureSelectionInterval);
-      this.setFeatureSelectionInterval=undefined;
+      this.setFeatureSelectionInterval = undefined;
     }
   }
 }
