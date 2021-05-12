@@ -46,4 +46,4 @@ e2e/*.map
 .DS_Store/
 
 # Mongo db
-mongodb
+# mongodb
