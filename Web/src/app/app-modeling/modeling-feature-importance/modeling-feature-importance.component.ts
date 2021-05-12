@@ -160,7 +160,7 @@ export class ModelingFeatureImportanceComponent implements OnInit {
         },
         yaxis: {
           title:{
-            text:yaxistitle
+            text:"prediction for "+yaxistitle
           }
         }
       };

@@ -123,6 +123,7 @@ export class CreateSchemaMappingComponent implements OnInit {
     this.datasetSchema = logs.response.data;
     this.Originaldata = logs.response.data;
     if(logs.response.feature_selection!=null){
+      this.isFeatureSelected=true;
       this.selectedFeature=logs.response.feature_selection;
     }
     setTimeout(() => {
