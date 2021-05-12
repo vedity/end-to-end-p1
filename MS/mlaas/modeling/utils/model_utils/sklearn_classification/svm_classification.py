@@ -53,7 +53,10 @@ class SVMClassificationClass:
         self.hyperparameters = hyperparameters
 
         self.C = float(hyperparameters['C'])
-        self.gamma = float(hyperparameters['gamma'])
+        try:
+            self.gamma = float(hyperparameters['gamma'])
+        except:
+            self.gamma = hyperparameters['gamma']
         self.kernel = hyperparameters['kernel']
 
 

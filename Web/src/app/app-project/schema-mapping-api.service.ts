@@ -45,13 +45,14 @@ export class SchemaMappingApiService {
 
   }
 
-  saveDatasetSchema(dataset_id, project_id, schema_id, obj): Observable<any> {
+  saveDatasetSchema(dataset_id, project_id, schema_id,fs_name, obj): Observable<any> {
     this.user = JSON.parse(localStorage.getItem("currentUser"));
     var params = new HttpParams()
       .append("user_name", this.user.username)
       .append("project_id", project_id)
       .append("dataset_id", dataset_id)
       .append("schema_id", schema_id)
+      .append('fs_name',fs_name);
     return this.httpClient.post(this.baseUrl + "ingest/preprocess/schema/save/", obj, { headers: this.headers, params });
   }
 

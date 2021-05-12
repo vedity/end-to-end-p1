@@ -386,7 +386,7 @@ if(data.response.cleanup_dag=='True'|| data.response.modeling_dag=='True'||data.
         console.log(savedata);
         this.loaderdiv = false;
 
-        this.apiService.saveDatasetSchema(this.dataset_id, this.project_id, this.schema_id, { data: savedata }).subscribe(logs => this.savesuccessHandler(logs), error => this.errorHandler(error));
+        this.apiService.saveDatasetSchema(this.dataset_id, this.project_id, this.schema_id,this.selectedFeature, { data: savedata }).subscribe(logs => this.savesuccessHandler(logs), error => this.errorHandler(error));
 
       } else {
         this.loaderdiv = false;
