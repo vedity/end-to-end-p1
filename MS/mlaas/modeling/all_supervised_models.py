@@ -165,8 +165,14 @@ def start_pipeline(dag,run_id,execution_date,ds,**kwargs):
     if model_mode.lower() == 'auto' :
         
         # This sql command get model ids from model master table for passed model type and algorithm type.
-        sql_command = "select model_id from mlaas.model_master_tbl where model_type='"+ model_type +"'"\
-                      " and algorithm_type='" + algorithm_type + "'"
+        if algorithm_type.lower() == 'binary':
+            # This sql command get model ids from model master table for passed model type and algorithm type.
+            sql_command = "select model_id from mlaas.model_master_tbl where model_type='"+ model_type +"'"\
+                          " and ( algorithm_type='" + algorithm_type + "' or algorithm_type='Multi')"
+        else:
+            # This sql command get model ids from model master table for passed model type and algorithm type.
+            sql_command = "select model_id from mlaas.model_master_tbl where model_type='"+ model_type +"'"\
+                          " and algorithm_type='" + algorithm_type + "'"
                     
         # Get Model Id DataFrame.
         model_df = DBObject.select_records(connection,sql_command)

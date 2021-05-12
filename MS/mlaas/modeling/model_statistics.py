@@ -707,12 +707,32 @@ class ModelStatisticsClass:
         feature_values = []
         pdp_values = []
 
-        if issubclass(feature_data[0].dtype.type, np.integer) or issubclass(feature_data[0].dtype.type, np.floating):       
+        if isinstance(feature_data[0], str):
+            uniques = np.unique(feature_data)
+            if len(uniques) <= 10:
+                feature_values = uniques.tolist()
+                if (sclass == None) or (len(sclass) == 0):
+                    pdp_values = pdp_dict['PDP_Scores'][feature][0]
+                else:
+                    class_list = pdp_dict['classes']
+                    try:
+                        cindex = class_list.index(int(sclass))
+                    except:
+                        cindex = class_list.index(sclass)
+                        
+                    pdp_values = pdp_dict['PDP_Scores'][feature][cindex]
+
+            else:
+                pass
+
+
+        elif issubclass(feature_data[0].dtype.type, np.integer) or issubclass(feature_data[0].dtype.type, np.floating):       
             unique_values = np.unique(feature_data)
             fmin = min(unique_values)
             fmax = max(unique_values)
             n_uniques = len(unique_values)
-            feature_values = np.linspace(fmin, fmax, min(100, n_uniques))
+            logging.info("FMIN  "+str(fmin)+ "  FMAX  "+str(fmax)+"   N_UNIQUES  "+str(n_uniques))
+            feature_values = np.linspace(fmin, fmax, min(10, n_uniques))
             if (sclass == None) or (len(sclass) == 0):
                 pdp_values = pdp_dict['PDP_Scores'][feature][0]
             else:
@@ -724,8 +744,6 @@ class ModelStatisticsClass:
                     
                 pdp_values = pdp_dict['PDP_Scores'][feature][cindex]
         
-        # if issubclass = string:
-        #     unique_values = sort(['mann', 'vipul'])
 
         target_feature = pdp_dict['target_features']
 
@@ -770,4 +788,3 @@ class ModelStatisticsClass:
         local_explanation_json['model_name'] = model_name
         
         return local_explanation_json
-
