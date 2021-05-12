@@ -214,8 +214,10 @@ export class ModelingTypeComponent implements OnInit {
   setCopmareIds(val, id,name) {
     // console.log(val, id);
     if (val == true) {
-      this.compareIds.push(id);
-      this.compareExps.push({id:id,name:name});
+      if(!this.compareIds.includes(id)){
+        this.compareIds.push(id);
+        this.compareExps.push({id:id,name:name});
+      }
     }
     else {
       // console.log(this.compareIds.indexOf(id));

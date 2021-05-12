@@ -41,6 +41,7 @@ export class ModelingComparisonGraphComponent implements OnInit {
   manageGraphCompareExperiment(data) {
     if (data.status_code == "200") {
       this.comparegraphdata = data.response;
+      this.model_type=this.comparegraphdata.model_type;
       if (this.model_type == "Classification") {
         this.drawColumnChart();
       }

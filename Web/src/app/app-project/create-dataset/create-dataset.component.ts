@@ -17,7 +17,7 @@ export class CreateDatasetComponent implements OnInit {
   filter: boolean = true;
   loaderdiv = false;
   f: NgForm;
-  
+
   ngOnInit() {
     this.data.isprivate = true;
     bsCustomFileInput.init();
@@ -29,7 +29,6 @@ export class CreateDatasetComponent implements OnInit {
       this.datasetfile = data.item(0);
     }
   }
-
   checkuniquedatasetname(event) {
     var val = event.target.value;
     if (val != "") {
