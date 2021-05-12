@@ -442,6 +442,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                 # predicted_datatypes = self.get_attrbt_datatype(data_df,data_df.columns,len(data_df))
                 #? Getting preprocess Cache from schema table
                 col_names,predicted_dtypes,missing_flags_original,noise_flags_original = self.retrive_preprocess_cache(DBObject, connection, schema_id)
+                logging.info("===>"+str(missing_flags_original)+str(noise_flags_original)) 
             except:
                 raise NullValue(500)
             
@@ -484,7 +485,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                     #? Column is categorical
                     elif predicted_datatype.startswith('ca'): #Categorical column
                         col_type = 2
-                    elif predicted_datatype.startswith('t'): #Timestamp column
+                    elif predicted_datatype.startswith('ti'): #Timestamp column
                         col_type = 4
                     else:
                         col_type = 3
@@ -502,7 +503,7 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                             operations += [1,51,61,71,81,91,101,121]
                         elif col_type == 1:
                             operations += [1,51,61,71,81,91,121]
-                        elif col_type == 2 or col_type == 3:
+                        elif col_type in [2,3,4]:
                             operations += [1,101,111]
                         
                     
@@ -550,12 +551,14 @@ class PreprocessingClass(sc.SchemaClass, de.ExploreClass, cleaning.CleaningClass
                                 break
                         if flag == True:
                             final_op_list.append(op)
+                        
                 final_op_list = list(set(final_op_list))
                 final_op_list.sort()
                 
                 logging.info("data preprocessing : PreprocessingClass : get_possible_operations : execution End")
                 # connection.close()
                 # return [i+self.op_diff for i in final_op_list]    
+                logging.info("-->+final_op_list"+str(final_op_list))
                 return final_op_list
             
             except Exception as exc:

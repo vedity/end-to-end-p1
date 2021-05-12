@@ -292,8 +292,11 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
 
         sql_command = f"select id from mlaas.feature_master_tbl where feature_method='{fs_name}';"
         fs_id = DBObject.select_records(connection,sql_command)
-        fs_id = fs_id['id'][0]
-        if fs_id != None:
+       
+        if fs_id.empty:
+            return None
+        else:
+            fs_id = fs_id['id'][0]
             sql_command = f"update mlaas.feature_info_tbl set feature_selection_type ='{fs_id}' where schema_id = {schema_id};"
             status = DBObject.update_records(connection,sql_command)
 
@@ -303,14 +306,15 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
 
         sql_command = f"select feature_selection_type from mlaas.feature_info_tbl where schema_id={schema_id};"
         fs_id = DBObject.select_records(connection,sql_command)
-        fs_id = fs_id["feature_selection_type"][0]
+        
 
-        if fs_id != None:
+        if fs_id["feature_selection_type"][0] == None:
+            return None
+        else:
+            fs_id = fs_id["feature_selection_type"][0]
             sql_command = f"select feature_method from mlaas.feature_master_tbl fmt where id={fs_id};"
             fs_name =  DBObject.select_records(connection,sql_command)
             fs_name = fs_name["feature_method"][0]
-        else:
-            return None
         
         return fs_name
 
