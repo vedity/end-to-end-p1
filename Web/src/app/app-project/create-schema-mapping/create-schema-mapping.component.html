@@ -173,7 +173,7 @@
                     </div>
                     <div class="right-box">
 
-                        <ul *ngFor="let item of featuresList.data.option_list;let i=index;" class="featureoptios" id="option_{{i}}" (click)="selectedOption(item,i)">
+                        <ul *ngFor="let item of featuresList.data.option_list;let i=index;" class="featureoptios" [ngClass]="{'selected':item.name === selectedFeature}" id="option_{{i}}" (click)="selectedOption(item,i)">
                             <li class="title" title="{{item.name}}">{{item.name}}</li>
                             <li *ngFor="let subitem of featuresList.column_list">
                                 <i *ngIf="item.column[subitem]=='True'" class="mdi mdi-check-bold"></i>
