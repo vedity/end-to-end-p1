@@ -12,6 +12,8 @@ export class ModelingFeatureImportanceComponent implements OnInit {
   public barChart: any;
   public chartOptions:any;
   @Input() public experiment_id: any;
+  @Input() public model_type: any;
+  
   responsedata:any;
   searchdata:any;
   animation = "progress-dark";
@@ -40,8 +42,8 @@ export class ModelingFeatureImportanceComponent implements OnInit {
     if (data.status_code == "200") {
       this.responsedata = data.response;
       this.searchdata=data.response;
-      this.getPDPCurve(this.responsedata.features_name[0]);
-      
+      this.getPDPCurve(this.responsedata.features_name[0],0);
+      $("."+this.responsedata.features_name[0]).addClass('selected');
       // this.barChart = {
       //   chart: {
       //     height: 400,
@@ -78,16 +80,50 @@ export class ModelingFeatureImportanceComponent implements OnInit {
   }
 
   isChartLoaded=false;
-  getPDPCurve(feature){
+  currentFeature:any;
+  currentIndex:any;
+  getPDPCurve(feature,i){
     this.isChartLoaded=true;
-    this.apiservice.getPDPCurve(this.experiment_id,1,feature,'').subscribe(
-      logs=>this.successPDPCurve(logs,feature),
+    this.currentFeature=feature;
+    this.currentIndex=i;
+    this.apiservice.getPDPCurve(this.experiment_id,1,feature,this.selectedClass).subscribe(
+      logs=>this.successPDPCurve(logs,feature,i),
       error=>this.errorHandler(error)
     )
   }
 
-  successPDPCurve(data,feature){
+  resetChart(item){
+    this.selectedClass=item;
+    this.getPDPCurve(this.currentFeature,this.currentIndex);
+  }
+
+  public radioClassList:any=[];
+  public selectedClass:any=''; 
+  successPDPCurve(data,feature,i){
+    console.log(i);
+    
+    $(".filterli").removeClass("selected");
+    $(".filterli_"+i).addClass("selected");
+    
     if(data.status_code=="200"){
+      let yaxistitle=''
+      if(data.response.classes.length==0){
+        yaxistitle=data.response.target_feature[0]
+      }
+      if(data.response.classes.length==1)
+      {
+        yaxistitle=data.response.classes[0]
+      }
+      if(data.response.classes.length>1)
+      {
+        yaxistitle=data.response.classes[0];
+        this.radioClassList=data.response.classes;
+        if(this.selectedClass=='')
+        this.selectedClass=data.response.classes[0];
+        yaxistitle=this.selectedClass;
+
+      }
+
       this.chartOptions = {
         series: [
           {
@@ -113,7 +149,7 @@ export class ModelingFeatureImportanceComponent implements OnInit {
           curve: "smooth"
         },
         title: {
-          text: "Product Trends by Month",
+          text: "PDP Curve",
           align: "left"
         },
         xaxis: {
@@ -124,7 +160,7 @@ export class ModelingFeatureImportanceComponent implements OnInit {
         },
         yaxis: {
           title:{
-            text:data.response.target_feature[0]
+            text:yaxistitle
           }
         }
       };

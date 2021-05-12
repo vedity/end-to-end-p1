@@ -352,7 +352,12 @@ ul {
             padding: 5px 10px;
             display: block;
             color: #fff;
-            background: #34c38f;
+            background: #3a4051;
+        }
+        li.selected {
+            a {
+                background: #34c38f;
+            }
         }
         span {
             position: absolute;

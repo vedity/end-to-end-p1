@@ -23,29 +23,22 @@ from common.utils.exception_handler.python_exception.common.common_exception imp
 
 class EvaluationMetrics:
 
-    def save_prediction(self,y_test,prediction_lst, target_features_list,y_pred_prob=None):
+    def save_prediction(self,y_test,prediction_lst, target_features_list):
         
         """This function is used to save test results or predictions.
         """
          
         y_df = pd.DataFrame(y_test[:,1],columns=target_features_list)
         y_df.reset_index(inplace = True, drop = True)
-        
         y_df['index']=y_test[:,0]
         append_str = '_prediction'
-        
         target_features_suf_res = [sub + append_str for sub in target_features_list]
         test_results_df = pd.DataFrame(prediction_lst, columns = target_features_suf_res) 
         
         final_result_df = pd.concat([y_df,test_results_df],axis=1)
         
-        if y_pred_prob is None:
-            residuals = np.array(final_result_df[target_features_list]) - np.array(final_result_df[target_features_suf_res])
-            final_result_df['residuals'] = residuals 
-        else:
-            final_result_df['prediction_prob'] = y_pred_prob 
-        
         final_result_dict = final_result_df.to_dict(orient='list') 
+        
         
         return final_result_dict
 
