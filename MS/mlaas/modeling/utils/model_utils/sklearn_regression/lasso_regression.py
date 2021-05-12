@@ -204,7 +204,7 @@ class LassoRegressionClass:
         summary_dict['input_features_list']=self.input_features_list
         summary_dict['target_features_list']=self.target_features_list
         
-        model_summary = self.EvalMetricsObj.model_summary(summary_dict)
+        model_summary = self.EvalMetricsObj.model_summary(summary_dict, self.hyperparameters)
         
         
         return model_summary

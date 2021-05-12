@@ -135,7 +135,7 @@ def classification_func_call(self):
         
         func_code = "M04"
         # save prediction
-        final_result_dict = self.EvalMetricsObj.save_prediction(self.y_test, prediction_lst, self.target_features_list)
+        final_result_dict = self.EvalMetricsObj.save_prediction(self.y_test, prediction_lst, self.target_features_list, y_pred_prob)
 
         func_code = "M13"
         # Get ROC Curve values for each class

@@ -23,25 +23,38 @@ from common.utils.exception_handler.python_exception.common.common_exception imp
 
 class EvaluationMetrics:
 
-    def save_prediction(self,y_test,prediction_lst, target_features_list):
+    def save_prediction(self,y_test,prediction_lst, target_features_list, y_pred_prob=None):
         
         """This function is used to save test results or predictions.
         """
          
         y_df = pd.DataFrame(y_test[:,1],columns=target_features_list)
         y_df.reset_index(inplace = True, drop = True)
+        
         y_df['index']=y_test[:,0]
         append_str = '_prediction'
+        
         target_features_suf_res = [sub + append_str for sub in target_features_list]
         test_results_df = pd.DataFrame(prediction_lst, columns = target_features_suf_res) 
         
         final_result_df = pd.concat([y_df,test_results_df],axis=1)
         
+        if y_pred_prob is None:
+            residuals = np.array(final_result_df[target_features_list]) - np.array(final_result_df[target_features_suf_res])
+            final_result_df['residuals'] = residuals 
+        else: #TODO
+            n_uniques = len(np.unique(y_test[:, -1]))
+            if n_uniques == 2:
+                final_result_df['prediction_prob'] = y_pred_prob
+                print("SAVE PRED BINARY")
+            else:
+                print("THIS IS Y_PRED IN SAVE PRED:- ", y_pred_prob)
+                final_result_df['prediction_prob'] = y_pred_prob[:, 0]
+                print("SAVE PRED Multi")
+        
         final_result_dict = final_result_df.to_dict(orient='list') 
         
-        
         return final_result_dict
-
 
     
     def get_predict_proba(self, model, X_test, y_train, model_type):
@@ -200,8 +213,8 @@ class EvaluationMetrics:
             y_train (array): target training data
         """
 
-        data_ratio = 0.2
-        data_size = int(X_train.shape[0]*data_ratio)
+        # data_ratio = 
+        data_size = min(10000, X_train.shape[0])
         data_index = X_train[:data_size, 0].tolist()
 
     #     pdp_data = X_train[:data_size, 1:]

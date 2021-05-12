@@ -731,7 +731,8 @@ class ModelStatisticsClass:
             fmin = min(unique_values)
             fmax = max(unique_values)
             n_uniques = len(unique_values)
-            feature_values = np.linspace(fmin, fmax, min(100, n_uniques))
+            logging.info("FMIN  "+str(fmin)+ "  FMAX  "+str(fmax)+"   N_UNIQUES  "+str(n_uniques))
+            feature_values = np.linspace(fmin, fmax, min(10, n_uniques))
             if (sclass == None) or (len(sclass) == 0):
                 pdp_values = pdp_dict['PDP_Scores'][feature][0]
             else:
@@ -787,4 +788,3 @@ class ModelStatisticsClass:
         local_explanation_json['model_name'] = model_name
         
         return local_explanation_json
-
