@@ -233,7 +233,13 @@ class EvaluationMetrics:
         
     
     
-    def model_summary(self,dataset_split_dict):
+    def model_summary(self,dataset_split_dict, hyperparameters):
+
+        hyperparams = hyperparameters.copy()
+        try:
+            hyperparams.pop('model_name')
+        except:
+            pass
         
         model_summary = {
                             "Model Name":dataset_split_dict['model_name'],
@@ -253,7 +259,10 @@ class EvaluationMetrics:
                             "Test Split":float(dataset_split_dict['test_ratio']),
                             
                             "Random State":int(dataset_split_dict['random_state']),
-                            "CV (K-Fold )":dataset_split_dict['cv']
+                            "CV (K-Fold )":dataset_split_dict['cv'],
+
+                            "Hyperparameters": list(hyperparams.keys()),
+                            "Values": list(hyperparams.values())
                          }
         
         return model_summary
