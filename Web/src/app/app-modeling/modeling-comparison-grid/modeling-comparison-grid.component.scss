@@ -54,6 +54,11 @@
     cursor: move;
     flex-grow: 1;
     flex-basis: 0;
+    li {
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+    }
 }
 
 .cdk-drag-preview {

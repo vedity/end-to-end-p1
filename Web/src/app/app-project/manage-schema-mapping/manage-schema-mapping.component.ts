@@ -76,7 +76,6 @@ export class ManageSchemaMappingComponent implements OnInit {
     else {
       this.projectdata = undefined
     }
-    console.log(this.projectdata);
   }
 
   setParams() {

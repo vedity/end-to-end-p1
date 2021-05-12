@@ -54,10 +54,6 @@ export class ModelingComparisonGridComponent implements OnInit {
     }
   }
 
-  // drop(event: CdkDragDrop<string[]>) {
-  //   moveItemInArray(this.compareIds, event.previousIndex, event.currentIndex);
-  // }
-
   timePeriods = [
     'Bronze age',
     'Iron age',
@@ -69,5 +65,4 @@ export class ModelingComparisonGridComponent implements OnInit {
   drop(event: CdkDragDrop<string[]>) {
     moveItemInArray(this.comparedata.responsedata, event.previousIndex, event.currentIndex);
   }
-
 }
