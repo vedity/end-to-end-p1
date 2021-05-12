@@ -85,4 +85,4 @@ def create_dags(dag_type = 1, dag_count = 100):
         connection.close()
 
 if __name__ == '__main__':
-    create_dags(dag_count=100)
+    create_dags(dag_count=4)

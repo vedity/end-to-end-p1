@@ -724,8 +724,20 @@ class ModelStatisticsClass:
                     
                 pdp_values = pdp_dict['PDP_Scores'][feature][cindex]
         
-        # if issubclass = string:
-        #     unique_values = sort(['mann', 'vipul'])
+        else:
+            uniques = np.unique(feature_data)
+            if len(uniques) <= 10:
+                feature_values = uniques.tolist()
+                if (sclass == None) or (len(sclass) == 0):
+                    pdp_values = pdp_dict['PDP_Scores'][feature][0]
+                else:
+                    class_list = pdp_dict['classes']
+                    try:
+                        cindex = class_list.index(int(sclass))
+                    except:
+                        cindex = class_list.index(sclass)
+                        
+                    pdp_values = pdp_dict['PDP_Scores'][feature][cindex]
 
         target_feature = pdp_dict['target_features']
 
