@@ -306,8 +306,8 @@ class CommonMethodClass:
         # residual_values = np.array(residuals['residuals']).reshape(-1, 1)
         # Convert dataframe into json
 
-        residuals_scaled = StandardScaler().fit_transform(residuals)
-        residual_hist = np.histogram(residuals_scaled, 10)
+        # residuals_scaled = StandardScaler().fit_transform(residuals)
+        residual_hist = np.histogram(residuals, 10)
         bins = residual_hist[1]
         fbins = np.linspace(min(bins), max(bins), 10)
         
