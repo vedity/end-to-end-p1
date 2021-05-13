@@ -58,6 +58,9 @@ class ModelFailed(Exception):
         elif status_code == "M15":
             self.msg = "Get Partial Dependence Score Failed"
 
+        elif status_code == "M16":
+            self.msg = "Lift Chart Failed"
+
         else:
             self.msg = "Model failed"
             

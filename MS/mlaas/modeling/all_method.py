@@ -19,6 +19,7 @@ from common.utils.logger_handler import custom_logger as cl
 from common.utils.exception_handler.python_exception.modeling.modeling_exception import *
 from common.utils.exception_handler.python_exception.common.common_exception import *
 from common.utils.exception_handler.python_exception.modeling.modeling_exception import *
+from sklearn.preprocessing import StandardScaler
 
 user_name = 'admin'
 log_enable = True
@@ -281,3 +282,32 @@ class CommonMethodClass:
             logging.error("modeling : CommonMethodClass : get_unscaled_data : Exception " + str(exc))
             logging.error("modeling : CommonMethodClass : get_unscaled_data : " +traceback.format_exc())
             return exc.msg
+
+
+
+    def get_residuals(self,experiment_id):
+        """[summary]
+
+        Args:
+            experiment_id ([type]): [description]
+
+        Returns:
+            [type]: [description]
+        """
+    
+        path = '/predictions.json'
+        artifact_uri = self.get_artifact_uri(experiment_id,path)#will get artifact_uri for particular experiment
+        actual_prediction_json = self.get_json(artifact_uri)# will get json data from particular artifact_uri location
+        residuals_df= pd.DataFrame(actual_prediction_json)
+        # Get Selected Columns
+        residuals = residuals_df['residuals']
+        # Sort Residuals Values
+        # residuals = residuals.sort_values(by='residuals',ascending=True)
+        # residual_values = np.array(residuals['residuals']).reshape(-1, 1)
+        # Convert dataframe into json
+
+        residuals['residuals'] = StandardScaler().fit_transform(residuals)
+        residual_hist = np.histogram(residuals, 10)
+        residuals_hist_dict = {'Frequency': residual_hist[0], 'Residuals': residual_hist[1]}
+ 
+        return residuals_hist_dict

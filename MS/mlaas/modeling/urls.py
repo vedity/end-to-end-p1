@@ -57,6 +57,8 @@ urlpatterns = [
     path('mlaas/modeling/modelfailed/', ModelFailedClass.as_view()),
     
     path('mlaas/modeling/pdpcurve/', PDPCurveClass.as_view()),
+
+    path('mlaas/modeling/residuals/', ResidualsClass.as_view()),
     
     path('mlaas/modeling/modelexplanation/', ModelExplanationClass.as_view()),
     
