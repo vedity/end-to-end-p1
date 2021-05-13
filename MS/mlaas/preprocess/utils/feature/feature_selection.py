@@ -307,8 +307,7 @@ class FeatureSelectionClass(FSUtilityClass,MutualInfoClass,ChiSquareClass,RFECla
         sql_command = f"select feature_selection_type from mlaas.feature_info_tbl where schema_id={schema_id};"
         fs_id = DBObject.select_records(connection,sql_command)
         
-
-        if fs_id["feature_selection_type"][0] == None:
+        if fs_id.empty:
             return None
         else:
             fs_id = fs_id["feature_selection_type"][0]
