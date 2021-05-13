@@ -209,16 +209,6 @@ class ModelStatisticsClass:
         artifact_uri = cmobj.get_artifact_uri(experiment_id,str1)#will get artifact_uri for particular experiment
         roc_scores = cmobj.get_json(artifact_uri)# will get json data from particular artifact_uri location
         
-        # classes = np.unique(unscaled_df[target_features[1]+'_str']).tolist()
-
-        # final_dict = dict()
-        # for key in roc_scores.keys():
-        #     data_dict = roc_scores[key]
-        #     new_dict = dict(zip(classes, list(data_dict.values())))
-        #     final_dict[key] = new_dict
-        
-        # final_dict['classes'] = classes
-        
         return roc_scores
 
 
@@ -751,6 +741,41 @@ class ModelStatisticsClass:
         
         logging.info("modeling : ModelStatisticsClass : show_partial_dependence_plot : Exception End" )
         
+
+    def show_residuals(self,experiment_id):
+        """Returns the neccesary output required to plot the residual plot.
+ 
+        Args:
+            experiment_id (int): ID of the Experiment
+        """
+        res_list_json = cmobj.get_residuals(experiment_id)
+        return res_list_json
+
+
+    def show_lift_chart(self, experiment_id, plot_size=10):
+        """[summary]
+
+        Args:
+            experiment_id ([type]): [description]
+        """
+        logging.info("modeling : ModelStatisticsClass : show_lift_chart : Exception Start" )
+        str1 = '/lift_values.json'
+        artifact_uri = cmobj.get_artifact_uri(experiment_id,str1)#will get artifact_uri for particular experiment
+        lift_dict = cmobj.get_json(artifact_uri)# will get json data from particular artifact_uri location
+        lift_values = lift_dict['lift_values']
+        n_bins = lift_dict['n_bins']
+        target_feature = lift_dict['Target_Feature']
+
+        step_size = int(n_bins/plot_size)
+        new_average_list=  []
+        for step in range(0, n_bins, step_size):
+            data_here = np.mean(lift_values[step:step+step_size], axis=0).tolist()
+            new_average_list.append(data_here)
+        
+        data_ratio = np.linspace(0.1, 1, plot_size).round(2).tolist()
+
+        return {'Data_Ratio': data_ratio, 'Predictions': new_average_list, 'Target_Feature': target_feature}
+
     
     def show_model_explanation(self,experiment_id,exp_type):
         

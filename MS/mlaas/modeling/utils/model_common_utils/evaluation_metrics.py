@@ -279,3 +279,26 @@ class EvaluationMetrics:
                          }
         
         return model_summary
+
+    
+    def lift_chart(self, y_pred, target_features, n_bins=20):
+        """[summary]
+
+        Args:
+            y_pred ([type]): [description]
+            n_bins ([type]): [description]
+        """
+        y_pred_desc = np.sort(np.array(y_pred).reshape(-1, 1), axis=0)[::-1]# Sort the Predicted values in Descending Order.
+        step = 1/n_bins # Fraction of data to cover in each bin.
+        xrange = np.arange(step, 1+step, step)
+        size = y_pred_desc.shape[0] # Total number of instances in the test dataset.
+        average_list = []
+        
+        for x in xrange: 
+            num_data = int(np.ceil(size*x))
+            data_here = y_pred_desc[:num_data]
+            average = np.mean(data_here, axis=0)
+            average_list.append(average[0].tolist())
+        
+        return {'lift_values' :average_list, 'n_bins': n_bins, 'Target_Feature': target_features[0]}
+

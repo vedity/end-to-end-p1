@@ -68,12 +68,17 @@ def regression_func_call(self):
         # Get PDP Scores for every feature
         pdp_scores = self.EvalMetricsObj.get_partial_dependence_scores(model, self.X_train, self.input_features_list, self.target_features_list, self.dataset_split_dict)
         
+        func_code = "M16"
+        # Get the Lift Chart Values for the test data
+        lift_values = self.EvalMetricsObj.lift_chart(prediction_lst, self.target_features_list)
+
         # Mlflow Parameter
         self.MLFlowLogObj.store_model_params(self.dataset_split_dict)
 
         # Mlflow Artifacts 
         self.MLFlowLogObj.store_model_dict(learning_curve=learning_curve_dict, features_importance=features_impact_dict,
-                                            model_summary=model_summary, predictions=final_result_dict,pdp_scores=pdp_scores)
+                                            model_summary=model_summary, predictions=final_result_dict,pdp_scores=pdp_scores,
+                                            lift_values=lift_values)
         
 
         # Save Model.
