@@ -306,8 +306,8 @@ class CommonMethodClass:
         # residual_values = np.array(residuals['residuals']).reshape(-1, 1)
         # Convert dataframe into json
 
-        residuals['residuals'] = StandardScaler().fit_transform(residuals)
-        residual_hist = np.histogram(residuals, 10)
+        residuals['residuals'] = StandardScaler().fit_transform(residuals['residuals'].values.reshape(-1, 1))
+        residual_hist = np.histogram(residuals['residuals'].values, 10)
         residuals_hist_dict = {'Frequency': residual_hist[0], 'Residuals': residual_hist[1]}
  
         return residuals_hist_dict

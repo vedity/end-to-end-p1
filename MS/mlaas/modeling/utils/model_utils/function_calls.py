@@ -70,7 +70,7 @@ def regression_func_call(self):
         
         func_code = "M16"
         # Get the Lift Chart Values for the test data
-        lift_values = self.EvalMetricsObj.lift_chart(prediction_lst, n_bins=20)
+        lift_values = self.EvalMetricsObj.lift_chart(prediction_lst, self.target_features_list)
 
         # Mlflow Parameter
         self.MLFlowLogObj.store_model_params(self.dataset_split_dict)

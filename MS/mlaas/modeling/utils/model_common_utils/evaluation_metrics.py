@@ -281,7 +281,7 @@ class EvaluationMetrics:
         return model_summary
 
     
-    def lift_chart(self, y_pred, n_bins):
+    def lift_chart(self, y_pred, target_features, n_bins=20):
         """[summary]
 
         Args:
@@ -298,7 +298,7 @@ class EvaluationMetrics:
             num_data = int(np.ceil(size*x))
             data_here = y_pred_desc[:num_data]
             average = np.mean(data_here, axis=0)
-            average_list.append(average)
+            average_list.append(average[0].tolist())
         
-        return {'lift_values' :average_list}
+        return {'lift_values' :average_list, 'n_bins': n_bins, 'Target_Feature': target_features[0]}
 
