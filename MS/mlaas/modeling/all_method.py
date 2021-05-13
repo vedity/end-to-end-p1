@@ -300,14 +300,17 @@ class CommonMethodClass:
         actual_prediction_json = self.get_json(artifact_uri)# will get json data from particular artifact_uri location
         residuals_df= pd.DataFrame(actual_prediction_json)
         # Get Selected Columns
-        residuals = residuals_df['residuals']
+        residuals = residuals_df['residuals'].values.reshape(-1, 1)
         # Sort Residuals Values
         # residuals = residuals.sort_values(by='residuals',ascending=True)
         # residual_values = np.array(residuals['residuals']).reshape(-1, 1)
         # Convert dataframe into json
 
-        residuals['residuals'] = StandardScaler().fit_transform(residuals['residuals'].values.reshape(-1, 1))
-        residual_hist = np.histogram(residuals['residuals'].values, 10)
-        residuals_hist_dict = {'Frequency': residual_hist[0], 'Residuals': residual_hist[1]}
+        residuals_scaled = StandardScaler().fit_transform(residuals)
+        residual_hist = np.histogram(residuals_scaled, 10)
+        bins = residual_hist[1]
+        fbins = np.linspace(min(bins), max(bins), 10)
+        
+        residuals_hist_dict = {'Frequency': residual_hist[0], 'Residuals': fbins}
  
         return residuals_hist_dict
