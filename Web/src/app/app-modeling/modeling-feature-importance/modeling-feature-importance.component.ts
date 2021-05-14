@@ -153,10 +153,21 @@ export class ModelingFeatureImportanceComponent implements OnInit {
           align: "left"
         },
         xaxis: {
+         
           title:{
             text:feature
           },
-          categories: data.response.feature_values
+          categories: data.response.feature_values,
+          labels: {
+            show: true,
+            formatter: function(value){
+              console.log(value);
+              if(value)
+              return value.toFixed(2).toString();
+              else
+              return value
+            }
+          },
         },
         yaxis: {
           title:{

@@ -26,27 +26,15 @@ export class ModelingConfusionMatricsComponent implements OnInit {
   constructor(public router: Router, public apiservice: ModelingTypeApiService, public toaster: ToastrService) { }
 
   ngOnInit(): void {
-    this.setConfusionMatrix();
-   // this.getConfusionMatrics();
+    this.getConfusionMatrics();
   }
 
-  getConfusionMatrics() {
-    this.apiservice.getConfusionMatrix(this.experiment_id).subscribe(
-      logs => this.successHandler(logs),
-      error => this.errorHandler(error));
-  }
-
-  successHandler(data) {
-    if (data.status_code == "200") {
-      this.responsedata = data.response;
-      // console.log(this.responsedata);
-      // this.toaster.success(data.error_msg, 'Success');
-    }
-    else {
-      this.errorHandler(data);
-    }
-  }
-
+  getConfusionMatrics(){
+    this.apiservice.getConfusionMatrics(this.experiment_id).subscribe(
+     logs => this.confusionMatricsSuccessHandler(logs),
+     error => this.errorHandler(error));
+     }
+ 
   errorHandler(error) {
     if (error.error_msg)
       this.toaster.error(error.error_msg, 'Error');
@@ -55,101 +43,81 @@ export class ModelingConfusionMatricsComponent implements OnInit {
     }
   }
 
-  setConfusionMatrix(){
-    this.chartOptions = {
-
-      series: [
-        {
-          name: "Metric1",
-          data: this.generateData(5, {
-            min: 0,
-            max: 90
-          })
+  confusionMatricsSuccessHandler(data){
+    if(data.status_code=="200"){
+      var matricsdata=data.response;
+      this.chartOptions = {
+        series: this.geneateConfusionmatricsdata(matricsdata),
+        chart: {
+          height: 300,
+          type: "heatmap",
+          toolbar: {
+            show: false
+          }
         },
-        {
-          name: "Metric2",
-          data: this.generateData(5, {
-            min: 0,
-            max: 90
-          })
+        dataLabels: {
+          enabled: true
         },
-        {
-          name: "Metric3",
-          data: this.generateData(5, {
-            min: 0,
-            max: 90
-          })
+        xaxis:{
+          position: 'top',
+          title: {
+            text: 'Actual',
+            offsetY: -65,
+          },
+          labels: {
+            offsetY: 14,
+          }
         },
-        {
-          name: "Metric4",
-          data: this.generateData(5, {
-            min: 0,
-            max: 90
-          })
+        yaxis:{
+          title: {
+            text: 'Prediction'
+          }
         },
-        {
-          name: "Metric5",
-          data: this.generateData(5, {
-            min: 0,
-            max: 90
-          })
-        } 
-      ],
-      chart: {
-        height: 450,
-        width:450,
-        type: "heatmap",
-        toolbar: {
-          show: false
-        }
-      },
-      dataLabels: {
-        enabled: true
-      },
-      plotOptions: {
-        heatmap: {
-          shadeIntensity: 0.5,
-          colorScale: {
-            ranges: [
-              
-              {
-                from: 0,
-                to: 100,
-                color: "#128FD9"
-              },{
-                  from:101,
-                  to:1000,
-                  color:"#00A100"
-              }
-
-            ]
+        
+        legend: {
+          show: false}
+          ,
+        plotOptions: {
+          heatmap: {
+            shadeIntensity: 0.5,
+            colorScale: {
+              ranges: [
+                
+                {
+                  from: 0,
+                  to: 100,
+                  color: "#34c38f"
+                },{
+                    from:101,
+                    to:1000,
+                    color:"#00A100"
+                }
+  
+              ]
+            }
           }
         }
-      }
-      
-    };
-  
-
-  
-  }
-
-
-
-  public generateData(count, yrange) {
-    var i = 0;
-    var series = [];
-    while (i < count) {
-      var x = "Metric" + (i + 1).toString();
-      var y =
-        Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
-
-      series.push({
-        x: x,
-        y: y
-      });
-      i++;
+        
+      };
     }
-    console.log(series)
-    return series;
+    else{
+      this.errorHandler(data);
+    }
   }
+
+  geneateConfusionmatricsdata(data){
+    let serieslist=[];
+    data.key_val.forEach((element,index) => {
+      let series=[];
+      data.key.forEach((elem,i) => {
+        series.push({x:elem.toString(),y:element[i]})
+      });
+      serieslist.push({name: data.key[index],data: series});
+    });
+    console.log(serieslist);
+    let finalserislist=serieslist.reverse();
+    return finalserislist;
+    
+  }
+  
 }

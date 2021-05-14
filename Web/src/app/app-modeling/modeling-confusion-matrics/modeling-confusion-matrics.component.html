@@ -1,6 +1,8 @@
-<!-- <ngx-skeleton-loader *ngIf="!responsedata" count="7" [animation]="animation" [theme]="theme">
-</ngx-skeleton-loader> -->
+<ngx-skeleton-loader *ngIf="!chartOptions" count="7" [animation]="animation" [theme]="theme">
+</ngx-skeleton-loader>
 
-<div id="chart">
-    <apx-chart [series]="chartOptions.series" [plotOptions]="chartOptions.plotOptions" [chart]="chartOptions.chart" [dataLabels]="chartOptions.dataLabels" [title]="chartOptions.title"></apx-chart>
+<div id="chart ">
+    <apx-chart [series]="chartOptions.series " *ngIf="chartOptions" [yaxis]="chartOptions.yaxis" [xaxis]="chartOptions.xaxis" [legend]="chartOptions.legend" [plotOptions]="chartOptions.plotOptions " [chart]="chartOptions.chart " [dataLabels]="chartOptions.dataLabels "
+        [title]="chartOptions.title ">
+    </apx-chart>
 </div>

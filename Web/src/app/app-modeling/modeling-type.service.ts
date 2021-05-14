@@ -165,4 +165,15 @@ export class ModelingTypeApiService {
     .append("sclass", sclass);
     return this.httpClient.get(this.baseUrl + "modeling/pdpcurve/", { headers: this.headers, params });
   }
+
+  getLiftChart(experiment_id){
+    var params = new HttpParams().append("experiment_id", experiment_id);
+    return this.httpClient.get(this.baseUrl + "modeling/liftchart/", { headers: this.headers, params });
+  }
+
+  getResidualChart(experiment_id){
+    var params = new HttpParams().append("experiment_id", experiment_id);
+    return this.httpClient.get(this.baseUrl + "modeling/residuals/", { headers: this.headers, params });
+  }
+
 }

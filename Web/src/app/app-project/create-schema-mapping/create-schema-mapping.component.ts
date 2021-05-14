@@ -4,6 +4,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DataTableDirective } from 'angular-datatables';
 import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
+
 import { SchemaMappingApiService } from '../schema-mapping-api.service';
 @Component({
   selector: 'app-create-schema-mapping',
@@ -345,13 +346,16 @@ export class CreateSchemaMappingComponent implements OnInit {
       this.loaderdiv = true;
       this.datasetSchema.forEach((element, index) => {
         var txt_column_name = $("#columnname_" + index).val();
-        txt_column_name = txt_column_name == undefined ? '' : txt_column_name.toString();
         var txt_column_attribute = $("#selectattr_" + index + " :selected").val();
-        txt_column_attribute = txt_column_attribute == undefined ? '' : txt_column_attribute.toString();
         var txt_datatype = $("#selectdatatype_" + index + " :selected").val();
-        txt_datatype = txt_datatype == undefined ? '' : txt_datatype.toString();
-        var date_format = $("#datetimeformat_" + index).val();
-        date_format = date_format == undefined ? '' : date_format.toString();
+
+        if(txt_column_name!=undefined && txt_column_attribute!=undefined && txt_datatype!=undefined){
+          txt_column_name = txt_column_name == undefined ? '' : txt_column_name.toString();
+          txt_column_attribute = txt_column_attribute == undefined ? '' : txt_column_attribute.toString();
+          txt_datatype = txt_datatype == undefined ? '' : txt_datatype.toString();
+          var date_format = $("#datetimeformat_" + index).val();
+          date_format = date_format == undefined ? '' : date_format.toString();
+
         if (txt_column_name == this.Originaldata[index].change_column_name && txt_column_attribute == this.Originaldata[index].column_attribute && txt_datatype == this.Originaldata[index].data_type) {
         }
         else {
@@ -372,6 +376,7 @@ export class CreateSchemaMappingComponent implements OnInit {
             }
           }
         }
+      }
       });
       if (savedata.length > 0) {
         savedata.push(this.datasetSchema[0]);

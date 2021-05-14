@@ -23,25 +23,38 @@
         </tbody>
     </table>
     <div class="main " *ngIf="responsedata">
-        <div class="left-box " *ngIf="chartOptions">
-            <div *ngIf="model_type=='Classification'">
-                <h4>Confusion Matrix</h4> <a href="javascript:void(0); " class="left-expand " (click)="allowExpand( 'left') "><i class="bx bx-expand "></i></a>
-                <div id="chart ">
-                    <apx-chart [series]="chartOptions.series " [yaxis]="chartOptions.yaxis" [xaxis]="chartOptions.xaxis" [legend]="chartOptions.legend" [plotOptions]="chartOptions.plotOptions " [chart]="chartOptions.chart " [dataLabels]="chartOptions.dataLabels " [title]="chartOptions.title ">
-                    </apx-chart>
-                </div>
-            </div>
-        </div>
-        <div class="right-box " *ngIf="lineColumAreaChart">
-            <div *ngIf="model_type=='Classification'">
-                <h4>ROC curve</h4> <a href="javascript:void(0); " class="right-expand " (click)="allowExpand( 'right') "><i
-                        class="bx bx-expand "></i></a>
-                <apx-chart class="apex-charts " dir="ltr " [series]="lineColumAreaChart.series " [chart]="lineColumAreaChart.chart " [tooltip]="lineColumAreaChart.tooltip " [yaxis]="lineColumAreaChart.yaxis " [legend]="lineColumAreaChart.legend " [plotOptions]="lineColumAreaChart.plotOptions "
-                    [grid]="lineColumAreaChart.grid " [stroke]="lineColumAreaChart.stroke " [xaxis]="lineColumAreaChart.xaxis " [colors]="lineColumAreaChart.colors " [fill]="lineColumAreaChart.fill
-    " [labels]="lineColumAreaChart.labels " [markers]="lineColumAreaChart.markers ">
+        <div class="left-box " *ngIf="chartOptions && model_type=='Classification'">
+            <h4>Confusion Matrix</h4> <a href="javascript:void(0); " class="left-expand " (click)="allowExpand( 'left') "><i class="bx bx-expand "></i></a>
+            <div id="chart ">
+                <apx-chart [series]="chartOptions.series " [yaxis]="chartOptions.yaxis" [xaxis]="chartOptions.xaxis" [legend]="chartOptions.legend" [plotOptions]="chartOptions.plotOptions " [chart]="chartOptions.chart " [dataLabels]="chartOptions.dataLabels " [title]="chartOptions.title ">
                 </apx-chart>
             </div>
         </div>
-    </div>
+        <div class="right-box " *ngIf="lineColumAreaChart && model_type=='Classification'">
+            <h4>ROC curve</h4> <a href="javascript:void(0); " class="right-expand " (click)="allowExpand( 'right') "><i
+                    class="bx bx-expand "></i></a>
+            <apx-chart class="apex-charts " dir="ltr " [series]="lineColumAreaChart.series " [chart]="lineColumAreaChart.chart " [tooltip]="lineColumAreaChart.tooltip " [yaxis]="lineColumAreaChart.yaxis " [legend]="lineColumAreaChart.legend " [plotOptions]="lineColumAreaChart.plotOptions "
+                [grid]="lineColumAreaChart.grid " [stroke]="lineColumAreaChart.stroke " [xaxis]="lineColumAreaChart.xaxis " [colors]="lineColumAreaChart.colors " [fill]="lineColumAreaChart.fill
+    " [labels]="lineColumAreaChart.labels " [markers]="lineColumAreaChart.markers ">
+            </apx-chart>
+        </div>
 
+        <div class="left-box " *ngIf="liftchartOptions && model_type!='Classification'">
+            <h4>Lift Chart</h4> <a href="javascript:void(0); " class="left-expand " (click)="allowExpand( 'left') "><i
+                    class="bx bx-expand "></i></a>
+            <apx-chart [yaxis]="liftchartOptions.yaxis" class="apex-charts" dir="ltr" [series]="liftchartOptions.series" [chart]="liftchartOptions.chart" [plotOptions]="liftchartOptions.plotOptions" [dataLabels]="liftchartOptions.dataLabels" [xaxis]="liftchartOptions.xaxis"
+                [colors]="liftchartOptions.colors" [grid]="liftchartOptions.grid"></apx-chart>
+        </div>
+
+        <div class="right-box " *ngIf="residualChartOptions && model_type!='Classification'">
+            <h4>Residual Chart</h4> <a href="javascript:void(0); " class="right-expand " (click)="allowExpand( 'right') "><i class="bx bx-expand "></i></a>
+            <!-- <google-chart #chart [title]="residualChartOptions.title" [type]="residualChartOptions.type" [data]="residualChartOptions.data" [options]="residualChartOptions.options" [width]="residualChartOptions.width" [height]="residualChartOptions.height">
+            </google-chart> -->
+
+            <google-chart [title]="residualChartOptions.title" style="width: 100%; height: 350px !important;" [type]="residualChartOptions.type" [data]="residualChartOptions.data" [columns]="residualChartOptions.columnNames" [options]="residualChartOptions.options"
+                [dynamicResize]="true">
+            </google-chart>
+
+        </div>
+    </div>
 </div>

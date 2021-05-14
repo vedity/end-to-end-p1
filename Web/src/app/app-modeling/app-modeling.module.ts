@@ -37,6 +37,7 @@ import { ModelingComparisonGraphComponent } from './modeling-comparison-graph/mo
 import { ModelingComparisonGridComponent } from './modeling-comparison-grid/modeling-comparison-grid.component';
 import { ModelingComparisonDetailComponent } from './modeling-comparison-detail/modeling-comparison-detail.component';
 import { ModelingErrorDetailComponent } from './modeling-error-detail/modeling-error-detail.component';
+import { GoogleChartsModule,ScriptLoaderService } from 'angular-google-charts';
 
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
@@ -68,6 +69,7 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     ChartsModule,
     NgxChartistModule,
     NgxEchartsModule,
+    GoogleChartsModule,
     NgSelectModule,
     ReactiveFormsModule,
     DataTablesModule,
@@ -90,6 +92,7 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
       
     },  { provide: HIGHCHARTS_MODULES, useFactory: () => [ more, exporting ,theme] },
     LoaderService,
+    ScriptLoaderService,
     { provide: HTTP_INTERCEPTORS, useClass: LoaderInterceptorService, multi: true }
   ]
 })

@@ -9,6 +9,7 @@ import { NgApexchartsModule } from 'ng-apexcharts';
 import { NgxChartistModule } from 'ngx-chartist';
 import { ChartsModule } from 'ng2-charts';
 import { NgxEchartsModule } from 'ngx-echarts';
+import { GoogleChartsModule,ScriptLoaderService} from 'angular-google-charts';
 import { WidgetModule } from '../shared/widget/widget.module';
 import { UIModule } from '../shared/ui/ui.module';
 import { FullCalendarModule } from '@fullcalendar/angular';
@@ -75,7 +76,7 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     UIModule,
     WidgetModule,
     ChartModule,
-    
+    GoogleChartsModule,
     FullCalendarModule,
     NgbNavModule,
     NgbTooltipModule,
@@ -91,6 +92,7 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
       
     },  { provide: HIGHCHARTS_MODULES, useFactory: () => [ more, exporting ,theme] },
     LoaderService,
+    ScriptLoaderService,
     { provide: HTTP_INTERCEPTORS, useClass: LoaderInterceptorService, multi: true }
   ]
 })
