@@ -138,18 +138,18 @@ Creating Production Docker Images:
   only:
     - master
 
-Deploying Images:
-  stage: deployment
-  tags: 
-    - shell
-  script:
-    - git fetch
-    - git checkout UAT
-    - git pull origin UAT
-    - sudo docker-compose -f UAT-docker-compose.yml down
-    - sudo docker image prune -a -f
-    - sudo docker volume prune -f
-    - sudo docker system prune -f
-    - sudo docker-compose -f UAT-docker-compose.yml up
-  only:
-    - UAT
+# Deploying Images:
+#   stage: deployment
+#   tags: 
+#     - shell
+#   script:
+#     - git fetch
+#     - git checkout UAT
+#     - git pull origin UAT
+#     - sudo docker-compose -f UAT-docker-compose.yml down
+#     - sudo docker image prune -a -f
+#     - sudo docker volume prune -f
+#     - sudo docker system prune -f
+#     - sudo docker-compose -f UAT-docker-compose.yml up
+#   only:
+#     - UAT
