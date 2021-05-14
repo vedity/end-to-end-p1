@@ -301,16 +301,54 @@ class CommonMethodClass:
         residuals_df= pd.DataFrame(actual_prediction_json)
         # Get Selected Columns
         residuals = residuals_df['residuals'].values.reshape(-1, 1)
-        # Sort Residuals Values
-        # residuals = residuals.sort_values(by='residuals',ascending=True)
-        # residual_values = np.array(residuals['residuals']).reshape(-1, 1)
         # Convert dataframe into json
 
-        # residuals_scaled = StandardScaler().fit_transform(residuals)
-        residual_hist = np.histogram(residuals, 10)
-        bins = residual_hist[1]
-        fbins = np.linspace(min(bins), max(bins), 10)
+        # residual_hist = np.histogram(residuals, 10)
+        # fbins = residual_hist[1]
+
+        convert_dict = self.unit_conversion(residuals)
+        f_residuals = convert_dict['Output_arr']
+        unit = convert_dict['Unit']
         
-        residuals_hist_dict = {'Frequency': residual_hist[0], 'Residuals': fbins}
+        residuals_hist_dict = {'Residuals': f_residuals, 'Unit': unit}
  
         return residuals_hist_dict
+
+    def unit_conversion(self, org_arr, roundto=2):
+        """Determines the unit to show on screen for the org_arr
+
+        Args:
+            org_arr (array): array to convert
+        """
+        org_arr = np.array(org_arr)
+        flat_arr = org_arr.flatten()
+        amin = abs(min(flat_arr))
+        amax = abs(max(flat_arr))
+
+        if (amin > 10**11) and (amax > 10**11):
+            converted_arr = (flat_arr/(10**9)).round(1)
+            unit = 'Billions'
+        
+        elif (amin > 10**8) and (amax > 10**8):
+            converted_arr = (flat_arr/(10**6)).round(1)
+            unit = 'Millions'
+
+        elif (amin > 10**6) and (amax > 10**6):
+            converted_arr = (flat_arr/(10**5)).round(1)
+            unit = 'Lacs'
+
+        elif (amin > 10**5) and (amax > 10**5):
+            converted_arr = (flat_arr/(10**3)).round(1)
+            unit = 'Thousands'
+
+        elif (amin <= 10) and (amax <= 10):
+            converted_arr = flat_arr.round(3)
+            unit = 'Ones'
+
+        else:
+            converted_arr = flat_arr
+            unit = 'Ones'
+        
+        output_arr = converted_arr.reshape(org_arr.shape)
+
+        return {'Output_arr': output_arr, 'Unit': unit}
