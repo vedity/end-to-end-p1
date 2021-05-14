@@ -937,9 +937,10 @@ class PDPCurveClass(APIView):
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution start")
                         experiment_id = int(request.query_params.get('experiment_id')) #get experiment_id
                         project_id = int(request.query_params.get('project_id')) #get project_id
+                        dataset_id = int(request.query_params.get('project_id')) #get dataset_id
                         feature = request.query_params.get('feature') #get feature selected by the user
                         sclass = request.query_params.get('sclass') #get the class selected by the user.
-                        roc_curve_json = ModelStatObject.show_partial_dependence_plot(project_id, experiment_id, feature, sclass)# will call confusion matrix method
+                        roc_curve_json = ModelStatObject.show_partial_dependence_plot(project_id, experiment_id, feature, dataset_id, sclass)# will call confusion matrix method
                         logging.info(" modeling : ModelStatisticsClass : GET Method : execution stop : status_code :200")
                         if isinstance(roc_curve_json,str): #check the instance of dataset_df
                                 status_code,error_msg=json_obj.get_Status_code(roc_curve_json) # extract the status_code and error_msg from project_df

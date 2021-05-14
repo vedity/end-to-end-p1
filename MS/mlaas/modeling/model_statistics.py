@@ -66,7 +66,16 @@ class ModelStatisticsClass:
         str1 = '/learning_curve.json'
         artifact_uri = cmobj.get_artifact_uri(experiment_id,str1)#will get artifact_uri for particular experiment
         json_data = cmobj.get_json(artifact_uri)# will get json data from particular artifact_uri location
-        learning_curve_json = cmobj.set_json(json_data,3)#will round json data 
+        learning_curve_json = cmobj.set_json(json_data,3)#will round json data
+        
+        train_loss_convert = cmobj.unit_conversion(learning_curve_json['train_loss'])
+        learning_curve_json['train_loss'] = train_loss_convert['Output_arr']
+        learning_curve_json['train_loss_unit'] = train_loss_convert['Unit']
+
+        test_loss_convert = cmobj.unit_conversion(learning_curve_json['test_loss'])
+        learning_curve_json['test_loss'] = test_loss_convert['Output_arr']
+        learning_curve_json['test_loss_unit'] = test_loss_convert['Unit']
+
         logging.info("modeling : ModelStatisticsClass : learning_curve : Exception End" )
         return learning_curve_json
 
@@ -668,7 +677,7 @@ class ModelStatisticsClass:
             return exc.msg
         
 
-    def show_partial_dependence_plot(self, project_id, experiment_id, feature, sclass=None):
+    def show_partial_dependence_plot(self, project_id, experiment_id, feature, dataset_id=None, sclass=None):
         """Returns the neccesary output required to plot the partial dependency plot.
 
         Args:
@@ -679,24 +688,23 @@ class ModelStatisticsClass:
         str1 = '/pdp_scores.json'
         artifact_uri = cmobj.get_artifact_uri(experiment_id,str1)#will get artifact_uri for particular experiment
         pdp_dict = cmobj.get_json(artifact_uri)# will get json data from particular artifact_uri location
-        sql_command = "select dataset_id from mlaas.model_experiment_tbl where experiment_id="+str(experiment_id)
-        dataset_id_df = self.DBObject.select_records(self.connection, sql_command)
-        if dataset_id_df is None:
-            raise DatabaseConnectionFailed(500)
+        # sql_command = "select dataset_id from mlaas.model_experiment_tbl where experiment_id="+str(experiment_id)
+        # dataset_id_df = self.DBObject.select_records(self.connection, sql_command)
+        # if dataset_id_df is None:
+        #     raise DatabaseConnectionFailed(500)
 
-        if len(dataset_id_df) == 0 :
-            raise DataNotFound(500)
+        # if len(dataset_id_df) == 0 :
+        #     raise DataNotFound(500)
 
-        dataset_id = int(dataset_id_df['dataset_id'][0])
+        # dataset_id = int(dataset_id_df['dataset_id'][0])
         
         index = np.array(pdp_dict['index']).astype(np.int)
         unscaled_data = self.DBObject.get_dataset_df(self.connection, dataset_id=dataset_id).set_index('index')
         
         feature_data = np.array(unscaled_data.loc[index, feature])
-        logging.info("SCLASS VALUE;-"+str(len(sclass)))
-        feature_values = []
-        pdp_values = []
-
+        feature_values, pdp_values = [], []
+        pdp_unit, feature_unit = None, None
+        
         if isinstance(feature_data[0], str):
             uniques = np.unique(feature_data)
             if len(uniques) <= 10:
@@ -711,10 +719,11 @@ class ModelStatisticsClass:
                         cindex = class_list.index(sclass)
                         
                     pdp_values = pdp_dict['PDP_Scores'][feature][cindex]
+                    pdp_conv = cmobj.unit_conversion(pdp_values)
+                    pdp_unit, pdp_values = pdp_conv['Unit'], pdp_conv['Output_arr']
 
             else:
                 pass
-
 
         elif issubclass(feature_data[0].dtype.type, np.integer) or issubclass(feature_data[0].dtype.type, np.floating):       
             unique_values = np.unique(feature_data)
@@ -723,6 +732,9 @@ class ModelStatisticsClass:
             n_uniques = len(unique_values)
             logging.info("FMIN  "+str(fmin)+ "  FMAX  "+str(fmax)+"   N_UNIQUES  "+str(n_uniques))
             feature_values = np.linspace(fmin, fmax, min(10, n_uniques))
+            feature_conv = cmobj.unit_conversion(feature_values)
+            feature_unit, feature_values = feature_conv['Unit'], feature_conv['Output_arr']
+
             if (sclass == None) or (len(sclass) == 0):
                 pdp_values = pdp_dict['PDP_Scores'][feature][0]
             else:
@@ -733,15 +745,21 @@ class ModelStatisticsClass:
                     cindex = class_list.index(sclass)
                     
                 pdp_values = pdp_dict['PDP_Scores'][feature][cindex]
+            
+            pdp_conv = cmobj.unit_conversion(pdp_values)
+            logging.info("PDPPP CONVV:- "+str(pdp_conv))
+            pdp_unit, pdp_values = pdp_conv['Unit'], pdp_conv['Output_arr']
         
-
+    
         target_feature = pdp_dict['target_features']
 
-        return {'pdp_values':pdp_values, 'feature_values':feature_values, 'target_feature':target_feature, 'classes':pdp_dict['classes']}
-        
+        final_dict = {'pdp_values':pdp_values, 'feature_values':feature_values, 'target_feature':target_feature, 'classes':pdp_dict['classes'],
+                    'feature_unit': feature_unit, 'pdp_unit': pdp_unit}
         logging.info("modeling : ModelStatisticsClass : show_partial_dependence_plot : Exception End" )
-        
 
+        return final_dict
+        
+        
     def show_residuals(self,experiment_id):
         """Returns the neccesary output required to plot the residual plot.
  
@@ -767,14 +785,18 @@ class ModelStatisticsClass:
         target_feature = lift_dict['Target_Feature']
 
         step_size = int(n_bins/plot_size)
-        new_average_list=  []
+        new_average_list =  []
         for step in range(0, n_bins, step_size):
             data_here = np.mean(lift_values[step:step+step_size], axis=0).tolist()
             new_average_list.append(data_here)
+
+        avg_list_conv =cmobj.unit_conversion(new_average_list)
+        new_average_list = avg_list_conv['Output_arr']
+        lift_values_unit = avg_list_conv['Unit']
         
         data_ratio = np.linspace(0.1, 1, plot_size).round(2).tolist()
 
-        return {'Data_Ratio': data_ratio, 'Predictions': new_average_list, 'Target_Feature': target_feature}
+        return {'Data_Ratio': data_ratio, 'Predictions': new_average_list, 'Target_Feature': target_feature, 'Unit': lift_values_unit}
 
     
     def show_model_explanation(self,experiment_id,exp_type):
