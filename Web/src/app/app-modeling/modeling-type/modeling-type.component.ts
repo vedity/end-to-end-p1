@@ -462,9 +462,11 @@ export class ModelingTypeComponent implements OnInit {
     this.current_model_type = obj.model_type;
     this.itemstatus=obj.status;
     if(this.itemstatus=="success")
-    this.modalService.open(exlargeModal, { size: 'xl', windowClass: 'modal-holder', centered: true });
+    this.modalService.open(exlargeModal, { size: 'xl', windowClass: 'modal-holder', centered: true, backdrop : 'static',
+    keyboard : false });
     if(this.itemstatus=="failed")
-    this.modalService.open(exlargeModal, { size: 'sm', windowClass: 'modal-holder', centered: true });
+    this.modalService.open(exlargeModal, { size: 'sm', windowClass: 'modal-holder', centered: true, backdrop : 'static',
+    keyboard : false });
   };
 
   checkexperimentname(event) {
@@ -505,7 +507,8 @@ else{
   smallModal(modelingmodal: any) {
     this.params.experiment_name = ''
     this.params.experiment_desc = ''
-    this.modalService.open(modelingmodal, { size: 'md', windowClass: 'modal-holder', centered: true });
+    this.modalService.open(modelingmodal, { size: 'md', windowClass: 'modal-holder', centered: true, backdrop : 'static',
+    keyboard : false });
   }
 
   model_mode = 'Auto';
@@ -519,19 +522,22 @@ else{
       this.paramsList = undefined;
       this.contentid = 1;
       this.getAlgorithmList();
-      this.modalService.open(largeModal, { size: 'lg', windowClass: 'modal-holder', centered: true });
+      this.modalService.open(largeModal, { size: 'lg', windowClass: 'modal-holder', centered: true, backdrop : 'static',
+      keyboard : false });
     }
   };
 
   compareExperiment(compareModal: any) {
     console.log(this.compareIds);
-    this.modalService.open(compareModal, { size: 'xl', windowClass: 'modal-holder', centered: true });
+    this.modalService.open(compareModal, { size: 'xl', windowClass: 'modal-holder', centered: true, backdrop : 'static',
+    keyboard : false });
    
     
   };
 
   ProjectData(projectModal: any) {
-    this.modalService.open(projectModal, { size: 'lg', windowClass: 'modal-holder', centered: true });
+    this.modalService.open(projectModal, { size: 'lg', windowClass: 'modal-holder', centered: true , backdrop : 'static',
+    keyboard : false});
   }
 
   showContent(id) {

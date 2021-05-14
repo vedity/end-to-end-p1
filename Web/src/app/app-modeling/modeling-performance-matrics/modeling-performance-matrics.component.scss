@@ -383,3 +383,13 @@ ul {
         display: none;
     }
 }
+
+svg {
+    rect:first-child {
+        fill: #2a3042 !important
+    }
+}
+
+text {
+    fill: #aeb7d0;
+}

@@ -33,6 +33,8 @@ import * as exporting from 'highcharts/modules/exporting.src';
 import { ToastrModule } from 'ngx-toastr';
 import {DragDropModule} from '@angular/cdk/drag-drop';
 import { Ng5SliderModule } from 'ng5-slider';
+import { GoogleChartsModule,ScriptLoaderService} from 'angular-google-charts';
+
 
 if (environment.defaultauth === 'firebase') {
   initFirebaseBackend(environment.firebaseConfig);
@@ -81,8 +83,8 @@ export function createTranslateLoader(http: HttpClient): any {
     DataTablesModule,
     NgxSkeletonLoaderModule.forRoot(),
     DragDropModule,
-    Ng5SliderModule
-    
+    Ng5SliderModule,
+    GoogleChartsModule
 
   ],
   bootstrap: [AppComponent],
@@ -91,6 +93,7 @@ export function createTranslateLoader(http: HttpClient): any {
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: FakeBackendInterceptor, multi: true },
     { provide: HIGHCHARTS_MODULES, useFactory: () => [ more, exporting ] },
+    ScriptLoaderService
   ],
 })
 export class AppModule { }
