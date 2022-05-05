@@ -1,5 +1,6 @@
 **Data Preprocessing Class Diagram**
 
-[Data_Prepocessing_3__1__1_.xml](uploads/a3dc3925c017fee62e81293eaec4a80d/Data_Prepocessing_3__1__1_.xml)
 
-![Data_Prepocessing_3__1__1_-Data_Preprocessing](uploads/0a78a84cf0aa202d488e1f0f1ff5a05f/Data_Prepocessing_3__1__1_-Data_Preprocessing.png)
+![Data_Prepocessings](https://user-images.githubusercontent.com/94595637/166896169-7044d886-1396-47fb-85e4-cb7633ecdd4d.png)
+
+![Data_Prepocessing_3__1__1_-Data_Preprocessing](https://user-images.githubusercontent.com/94595637/166896348-25dfa40f-8a24-4d4e-837c-41799ef9183f.png)
