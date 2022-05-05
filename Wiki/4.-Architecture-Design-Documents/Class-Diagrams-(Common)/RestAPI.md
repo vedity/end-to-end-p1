@@ -1,2 +1,2 @@
-https://lucid.app/lucidchart/invitations/accept/842bdc34-afb2-43b1-8a44-cb0753d15855
-![CommonFunctionality_RestAPI_1_](uploads/1d1c5248a70e3cab087462368e74a795/CommonFunctionality_RestAPI_1_.jpeg)
+
+![CommonFunctionality_RestAPI_1_](https://user-images.githubusercontent.com/94595637/166890271-8cb5699f-3760-4f59-9d32-cc606f4ce3d2.jpeg)

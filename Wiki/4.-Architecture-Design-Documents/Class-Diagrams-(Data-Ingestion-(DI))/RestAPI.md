@@ -1,5 +1,5 @@
-**Ingest RestAPI**
-https://lucid.app/lucidchart/invitations/accept/87c26a44-532a-46ff-8691-28277ebada10
+**Ingest RestAPI**[rest_api_class_diagram_1_.pdf](https://github.com/vedity/vedity_fdap/files/8629951/rest_api_class_diagram_1_.pdf)
 
-[rest_api_class_diagram_1_.pdf](uploads/75bfcbc7d106058378282a76fedd01fd/rest_api_class_diagram_1_.pdf)
-![rest_api_class_diagram_1_](uploads/cfe42bbb48dbbc50a13c09483e3d5e0e/rest_api_class_diagram_1_.jpeg)
+
+![rest_api_class_diagram_1](https://user-images.githubusercontent.com/94595637/166894972-5aa013e1-d7a0-4e22-89a2-86a78a6ecc85.png)
+

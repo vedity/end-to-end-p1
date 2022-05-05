@@ -1,7 +1,12 @@
 # 1) Git Cheat Sheet
+[git-cheat-sheet.pdf](https://github.com/vedity/vedity_fdap/files/8630130/git-cheat-sheet.pdf)
+# 1) Spark Cheat Sheet
+[Spark_cheat_sheet.pdf](https://github.com/vedity/vedity_fdap/files/8630139/Spark_cheat_sheet.pdf)
 
 # 2) Python Cheat Sheet
 [Python_Cheat_Sheet.pdf](uploads/af01dac568748777dce614622014a07c/Python_Cheat_Sheet.pdf)
+[Python-Pandas-Cheat-Sheets-1-8-v1.0.2.pdf](https://github.com/vedity/vedity_fdap/files/8630147/Python-Pandas-Cheat-Sheets-1-8-v1.0.2.pdf)
+
 # 3) ML Cheat Sheet
 [MLCheatSheets_.pdf](uploads/0cb75e2b14cc40efd67dddbc7cd59e00/MLCheatSheets_.pdf)
 # 4) Unix Cheat Sheet
