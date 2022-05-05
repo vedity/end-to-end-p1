@@ -1,0 +1,63 @@
+version: '3.7'
+services:
+  web:
+    image: registry.gitlab.com/isgtest/end-to-end-p1:ms-production
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    links:
+      - postgresql
+    depends_on:
+      - mlflow
+
+  mlflow:
+    image: registry.gitlab.com/isgtest/end-to-end-p1:ms-production
+    command: mlflow server --backend-store-uri postgresql://airflow:airflow@postgresql:5432/airflow --default-artifact-root file:///mlaas/mlruns --host 0.0.0.0 --port 5400
+    ports:
+      - "5400:5400"
+    depends_on:
+      - postgresql
+
+  angular:
+    image: registry.gitlab.com/isgtest/end-to-end-p1:web-production
+    ports:
+      - "4200:4200"
+    depends_on:
+      - web
+     
+  postgresql:
+    image: registry.gitlab.com/isgtest/end-to-end-p1:db-production
+    hostname: postgresql
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+      
+  Airflow:
+    image: registry.gitlab.com/isgtest/end-to-end-p1:af-production
+    restart: always
+    depends_on:
+      - postgresql
+    environment:
+      - LOAD_EX=n
+      - EXECUTOR=Local
+    ports:
+      - "8080:8080"                               # expose port
+    command: webserver
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+
+volumes:
+  postgres_data:
+
+
+networks:
+  backend:
+    driver: "bridge"

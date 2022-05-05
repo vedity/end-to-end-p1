@@ -1,0 +1,34 @@
+version: '3'
+services:
+  web:
+    image: registry.gitlab.com/isgtest/end-to-end-p1:ms-production
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgresql
+
+  angular:
+    image: registry.gitlab.com/isgtest/end-to-end-p1:web-production
+    ports:
+      - "4200:4200"
+    depends_on:
+      - web
+     
+  postgresql:
+    image: registry.gitlab.com/isgtest/end-to-end-p1:db-production
+    hostname: postgresql
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+volumes:
+  postgres_data:
+
+
+networks:
+  backend:
+    driver: "bridge"
