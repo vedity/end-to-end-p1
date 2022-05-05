@@ -1,2 +1,1 @@
-https://lucid.app/lucidchart/invitations/accept/adb2525c-771e-450e-a872-a329ebb96770
-![modelling_RESTAPI_class_diagram](uploads/54520854738225b38cbf86bb148abe5c/modelling_RESTAPI_class_diagram.jpeg)
+![modelling_RESTAPI_class_diagram](https://user-images.githubusercontent.com/94595637/166894428-58ce9b24-221a-4672-8147-78320b25cb7b.jpeg)
